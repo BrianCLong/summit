@@ -1,0 +1,97 @@
+sources:
+  - name: demo-entities
+    type: s3csv
+    url: s3://topicality-demo/entities/entities.csv
+    schemaRef: repo://docs/schemas/entities.schema.yaml
+    retention: standard-365d
+    purpose: investigation
+    pii: false
+    expected_daily_rows: 150000
+    polling_interval: 1h
+    region: US
+
+  - name: threat-intel-http
+    type: http
+    url: https://feeds.topicality.co/sample-feed.json
+    schemaRef: repo://docs/schemas/indicators.schema.yaml
+    retention: short-30d
+    purpose: threat-intel
+    pii: true
+    expected_daily_rows: 25000
+    polling_interval: 15m
+    headers:
+      Authorization: secretref://kv/threat-intel/api-key
+      User-Agent: IntelGraph/1.24.0
+    rate_limiting:
+      requests_per_minute: 60
+      backoff_strategy: exponential
+      max_retries: 5
+    region: US
+
+  - name: topicality
+    type: http
+    url: https://api.topicality.co/v1/streams/insights
+    schemaRef: repo://docs/schemas/topicality.schema.yaml
+    retention: standard-365d
+    purpose: enrichment
+    pii: false
+    expected_daily_rows: 5000
+    polling_interval: 5m
+    headers:
+      Authorization: ${TOPICALITY_API_KEY}
+      Content-Type: application/json
+    params:
+      since: "{{checkpoint}}"
+      limit: 1000
+    checkpoint_field: timestamp
+    rate_limiting:
+      requests_per_minute: 20
+      backoff_strategy: exponential
+      max_retries: 8
+      circuit_break_duration: 2m
+    region: US
+
+transform_rules:
+  - source: demo-entities
+    entity_type_field: type
+    id_field: entity_id
+    name_field: entity_name
+    provenance:
+      source_system: demo-csv
+      collection_method: batch_import
+
+  - source: threat-intel-http
+    entity_type_field: indicator_type
+    id_field: ioc_id
+    value_field: ioc_value
+    confidence_field: confidence_score
+    provenance:
+      source_system: threat-intel-feed
+      collection_method: http_polling
+
+  - source: topicality
+    entity_type_field: insight_type
+    id_field: insight_id
+    score_field: relevance_score
+    entities_field: related_entities
+    topics_field: topic_tags
+    provenance:
+      source_system: topicality-insights
+      collection_method: streaming_api
+
+retention_policies:
+  short-30d:
+    ttl_days: 30
+    purge_method: soft_delete
+    audit_required: true
+
+  standard-365d:
+    ttl_days: 365
+    purge_method: archive
+    audit_required: true
+
+pii_detection:
+  enabled: true
+  fields_to_scan: [name, email, phone, address, ssn]
+  confidence_threshold: 0.8
+  automatic_redaction: true

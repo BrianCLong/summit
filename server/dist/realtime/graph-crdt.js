@@ -7,12 +7,12 @@ class GraphCRDT {
     apply(op) {
         const store = op.kind === 'node' ? this.nodes : this.edges;
         const existing = store.get(op.id);
-        if (!existing || op.js >= existing.js) {
+        if (!existing || op.ts >= existing.ts) {
             if (op.action === 'delete') {
                 store.delete(op.id);
             }
             else {
-                store.set(op.id, { ts: op.js, data: op.data });
+                store.set(op.id, { ts: op.ts, data: op.data });
             }
             return true;
         }
@@ -43,7 +43,7 @@ export function initGraphSync(ns) {
         const graphId = channel.split(':')[2];
         const op = JSON.parse(message);
         const entry = getGraph(graphId);
-        entry.clock = Math.max(entry.clock, op.js);
+        entry.clock = Math.max(entry.clock, op.ts);
         if (entry.crdt.apply(op)) {
             ioRef?.to(`graph:${graphId}`).emit('graph:op', { graphId, op });
         }
@@ -55,8 +55,8 @@ export function registerGraphHandlers(socket) {
         if (!graphId || !op)
             return;
         const entry = getGraph(graphId);
-        entry.clock = Math.max(entry.clock, op.js || 0) + 1;
-        op.js = entry.clock;
+        entry.clock = Math.max(entry.clock, op.ts || 0) + 1;
+        op.ts = entry.clock;
         if (entry.crdt.apply(op)) {
             socket.to(`graph:${graphId}`).emit('graph:op', { graphId, op });
             pub.publish(`graph:op:${graphId}`, JSON.stringify(op));

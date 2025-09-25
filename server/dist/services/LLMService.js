@@ -8,16 +8,52 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { applicationErrors } from '../monitoring/metrics.js';
 import { otelService } from '../monitoring/opentelemetry.js';
+import { routeLLM } from './providerRouter.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DEFAULT_MASTER_PROMPT_PATH = path.resolve(__dirname, '../prompts/master-orchestration-prompt.txt');
 class LLMService {
     constructor(config = {}) {
+        const provider = config.provider ?? process.env.LLM_PROVIDER ?? 'openai';
+        const providerTag = config.providerTag ?? process.env.LLM_PROVIDER_TAG ?? 'reason.dense';
+        const maxTokensEnv = process.env.LLM_MAX_TOKENS;
+        const timeoutEnv = process.env.LLM_TIMEOUT;
+        const maxRetriesEnv = process.env.LLM_MAX_RETRIES;
+        const latencyBudgetEnv = process.env.LLM_LATENCY_BUDGET_MS;
+        const hardCostEnv = process.env.LLM_HARD_COST_USD;
+        const softWarnEnv = process.env.LLM_SOFT_WARN_USD;
+        const envUseMasterPrompt = process.env.LLM_USE_MASTER_PROMPT;
+        const envRouterFallback = process.env.LLM_ROUTER_FALLBACK;
+        const routerFallbackEnabled = config.routerFallbackEnabled ?? envRouterFallback !== 'false';
+        const useMasterPrompt = config.useMasterPrompt ??
+            (envUseMasterPrompt !== undefined
+                ? envUseMasterPrompt === 'true'
+                : provider === 'router');
         this.config = {
-            provider: process.env.LLM_PROVIDER || 'openai',
-            apiKey: process.env.OPENAI_API_KEY || process.env.LLM_API_KEY,
-            model: process.env.LLM_MODEL || 'gpt-3.5-turbo',
-            maxTokens: parseInt(process.env.LLM_MAX_TOKENS) || 2000,
-            temperature: parseFloat(process.env.LLM_TEMPERATURE) || 0.3,
-            timeout: parseInt(process.env.LLM_TIMEOUT) || 60000,
-            maxRetries: parseInt(process.env.LLM_MAX_RETRIES) || 3,
+            provider,
+            providerTag,
+            apiKey: config.apiKey ?? process.env.OPENAI_API_KEY ?? process.env.LLM_API_KEY,
+            model: config.model ?? process.env.LLM_MODEL ?? 'gpt-3.5-turbo',
+            maxTokens: config.maxTokens ??
+                (maxTokensEnv !== undefined ? parseInt(maxTokensEnv, 10) : 2000),
+            temperature: config.temperature ??
+                (process.env.LLM_TEMPERATURE !== undefined
+                    ? parseFloat(process.env.LLM_TEMPERATURE)
+                    : 0.3),
+            timeout: config.timeout ?? (timeoutEnv !== undefined ? parseInt(timeoutEnv, 10) : 60000),
+            maxRetries: config.maxRetries ??
+                (maxRetriesEnv !== undefined ? parseInt(maxRetriesEnv, 10) : 3),
+            routerLatencyBudgetMs: config.routerLatencyBudgetMs ??
+                (latencyBudgetEnv !== undefined ? parseInt(latencyBudgetEnv, 10) : 1500),
+            routerHardCostUsd: config.routerHardCostUsd ?? (hardCostEnv !== undefined ? parseFloat(hardCostEnv) : 0),
+            routerSoftWarnUsd: config.routerSoftWarnUsd ??
+                (softWarnEnv !== undefined ? parseFloat(softWarnEnv) : 0.5),
+            routerAllowPaid: config.routerAllowPaid ?? process.env.LLM_ALLOW_PAID === 'true',
+            routerFallbackEnabled,
+            useMasterPrompt,
+            masterPromptPath: config.masterPromptPath ??
+                process.env.MASTER_ORCHESTRATION_PROMPT_PATH ??
+                DEFAULT_MASTER_PROMPT_PATH,
             ...config,
         };
         this.logger = logger;
@@ -28,21 +64,127 @@ class LLMService {
             totalTokensGenerated: 0,
             averageTokensPerCompletion: 0,
         };
+        this.masterPrompt = this.config.useMasterPrompt ? this.loadMasterPrompt() : null;
+    }
+    loadMasterPrompt() {
+        if (!this.config.useMasterPrompt) {
+            return null;
+        }
+        const promptPath = this.config.masterPromptPath || DEFAULT_MASTER_PROMPT_PATH;
+        try {
+            const content = fs.readFileSync(promptPath, 'utf8');
+            if (content && content.trim().length > 0) {
+                return content;
+            }
+        }
+        catch (error) {
+            logger.warn('Master orchestration prompt unavailable', {
+                path: promptPath,
+                error: error.message,
+            });
+        }
+        return null;
+    }
+    getDefaultSystemMessage() {
+        if (!this.config.useMasterPrompt) {
+            return null;
+        }
+        if (!this.masterPrompt) {
+            this.masterPrompt = this.loadMasterPrompt();
+        }
+        return this.masterPrompt;
+    }
+    estimateTokensFromMessages(messages) {
+        const text = messages.map((message) => message?.content || '').join(' ');
+        return Math.max(1, Math.ceil(text.length / 4));
+    }
+    buildRouterOptions(tag, inputTokens) {
+        return {
+            tag: tag || this.config.providerTag || 'reason.dense',
+            inputTokens,
+            latencyBudgetMs: this.config.routerLatencyBudgetMs,
+            hardCostUsd: this.config.routerHardCostUsd,
+            softWarnUsd: this.config.routerSoftWarnUsd,
+            allowPaid: this.config.routerAllowPaid,
+        };
+    }
+    async routerCompletion({ prompt, systemMessage, maxTokens, temperature, stream, providerTag, }) {
+        const messages = [];
+        if (systemMessage) {
+            messages.push({ role: 'system', content: systemMessage });
+        }
+        messages.push({ role: 'user', content: prompt });
+        const payload = {
+            messages,
+            temperature,
+            stream,
+        };
+        if (typeof maxTokens === 'number') {
+            payload.max_tokens = maxTokens;
+        }
+        const routerOptions = this.buildRouterOptions(providerTag, this.estimateTokensFromMessages(messages));
+        const result = await routeLLM(routerOptions, payload);
+        if (!result.ok || !result.text) {
+            throw new Error(result.error || 'No eligible provider within budgets. Add keys or relax caps.');
+        }
+        return {
+            content: result.text,
+            usage: result.usage || {},
+            provider: result.provider,
+            model: result.model,
+            usedModelTag: routerOptions.tag,
+        };
+    }
+    async routerChat(messages, options) {
+        const payload = {
+            messages,
+            temperature: options.temperature,
+            stream: false,
+        };
+        if (typeof options.maxTokens === 'number') {
+            payload.max_tokens = options.maxTokens;
+        }
+        const routerOptions = this.buildRouterOptions(options.providerTag, this.estimateTokensFromMessages(messages));
+        const result = await routeLLM(routerOptions, payload);
+        if (!result.ok || !result.text) {
+            throw new Error(result.error || 'No eligible provider within budgets. Add keys or relax caps.');
+        }
+        return {
+            content: result.text,
+            usage: result.usage || {},
+            provider: result.provider,
+            model: result.model,
+            usedModelTag: routerOptions.tag,
+        };
     }
     /**
      * Generate text completion
      */
     async complete(params) {
-        const { prompt, model = this.config.model, maxTokens = this.config.maxTokens, temperature = this.config.temperature, systemMessage, stream = false, } = params;
+        const { prompt, model = this.config.model, maxTokens = this.config.maxTokens, temperature = this.config.temperature, systemMessage: overrideSystemMessage, stream = false, providerTag, } = params;
+        const systemMessage = overrideSystemMessage ?? this.getDefaultSystemMessage();
         if (!prompt) {
             throw new Error('Prompt is required');
         }
         const startTime = Date.now();
         let attempt = 0;
+        let lastError = null;
+        const allowRouterFallback = this.config.routerFallbackEnabled && this.config.provider !== 'router';
+        let fallbackAttempted = false;
         while (attempt < this.config.maxRetries) {
             try {
                 let response;
                 switch (this.config.provider) {
+                    case 'router':
+                        response = await this.routerCompletion({
+                            prompt,
+                            systemMessage,
+                            maxTokens,
+                            temperature,
+                            stream,
+                            providerTag,
+                        });
+                        break;
                     case 'openai':
                         response = await this.openAICompletion({
                             prompt,
@@ -65,17 +207,54 @@ class LLMService {
                 const latency = Date.now() - startTime;
                 this.updateMetrics(latency, response.usage);
                 logger.debug('LLM completion successful', {
-                    provider: this.config.provider,
+                    provider: response.provider || this.config.provider,
                     model,
                     promptLength: prompt.length,
                     responseLength: response.content.length,
                     latency,
                     tokensUsed: response.usage,
+                    fallback: fallbackAttempted,
                 });
                 return response.content;
             }
             catch (error) {
+                lastError = error;
                 attempt++;
+                if (allowRouterFallback && !fallbackAttempted) {
+                    fallbackAttempted = true;
+                    try {
+                        const fallbackStart = Date.now();
+                        const fallbackResponse = await this.routerCompletion({
+                            prompt,
+                            systemMessage,
+                            maxTokens,
+                            temperature,
+                            stream,
+                            providerTag,
+                        });
+                        const fallbackLatency = Date.now() - fallbackStart;
+                        this.updateMetrics(fallbackLatency, fallbackResponse.usage);
+                        logger.warn('Primary LLM provider failed, routed via orchestrator', {
+                            provider: this.config.provider,
+                            fallbackProvider: fallbackResponse.provider,
+                            attempt,
+                            error: error.message,
+                        });
+                        logger.debug('LLM completion successful', {
+                            provider: fallbackResponse.provider || 'router',
+                            model,
+                            promptLength: prompt.length,
+                            responseLength: fallbackResponse.content.length,
+                            latency: fallbackLatency,
+                            tokensUsed: fallbackResponse.usage,
+                            fallback: true,
+                        });
+                        return fallbackResponse.content;
+                    }
+                    catch (routerError) {
+                        lastError = routerError;
+                    }
+                }
                 if (attempt >= this.config.maxRetries) {
                     this.metrics.errorCount++;
                     applicationErrors.labels('llm_service', 'CompletionError', 'error').inc();
@@ -83,34 +262,56 @@ class LLMService {
                         provider: this.config.provider,
                         model,
                         attempt,
-                        error: error.message,
+                        error: lastError?.message || String(lastError),
                     });
-                    throw error;
+                    if (lastError instanceof Error) {
+                        throw lastError;
+                    }
+                    throw new Error(String(lastError));
                 }
                 logger.warn('LLM completion failed, retrying', {
                     provider: this.config.provider,
                     attempt,
-                    error: error.message,
+                    error: lastError?.message || String(lastError),
                 });
                 // Exponential backoff
                 await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
             }
         }
+        if (lastError instanceof Error) {
+            throw lastError;
+        }
+        throw new Error('LLM completion failed');
     }
     /**
      * Generate chat completion (multi-turn conversation)
      */
     async chat(messages, options = {}) {
-        const { model = this.config.model, maxTokens = this.config.maxTokens, temperature = this.config.temperature, } = options;
+        const { model = this.config.model, maxTokens = this.config.maxTokens, temperature = this.config.temperature, providerTag, } = options;
         if (!Array.isArray(messages) || messages.length === 0) {
             throw new Error('Messages array is required');
         }
+        let chatMessages = [...messages];
+        const hasSystem = chatMessages[0]?.role === 'system';
+        const defaultSystem = this.getDefaultSystemMessage();
+        if (!hasSystem && defaultSystem) {
+            chatMessages = [{ role: 'system', content: defaultSystem }, ...chatMessages];
+        }
         const startTime = Date.now();
+        const allowRouterFallback = this.config.routerFallbackEnabled && this.config.provider !== 'router';
+        let fallbackAttempted = false;
         try {
             let response;
             switch (this.config.provider) {
+                case 'router':
+                    response = await this.routerChat(chatMessages, {
+                        maxTokens,
+                        temperature,
+                        providerTag,
+                    });
+                    break;
                 case 'openai':
-                    response = await this.openAIChat(messages, {
+                    response = await this.openAIChat(chatMessages, {
                         model,
                         maxTokens,
                         temperature,
@@ -124,14 +325,37 @@ class LLMService {
             return response.content;
         }
         catch (error) {
+            let finalError = error instanceof Error ? error : new Error(String(error));
+            if (allowRouterFallback && !fallbackAttempted) {
+                fallbackAttempted = true;
+                try {
+                    const fallbackStart = Date.now();
+                    const fallbackResponse = await this.routerChat(chatMessages, {
+                        maxTokens,
+                        temperature,
+                        providerTag,
+                    });
+                    const fallbackLatency = Date.now() - fallbackStart;
+                    this.updateMetrics(fallbackLatency, fallbackResponse.usage);
+                    logger.warn('Primary LLM chat provider failed, routed via orchestrator', {
+                        provider: this.config.provider,
+                        fallbackProvider: fallbackResponse.provider,
+                        error: finalError.message,
+                    });
+                    return fallbackResponse.content;
+                }
+                catch (routerError) {
+                    finalError = routerError instanceof Error ? routerError : new Error(String(routerError));
+                }
+            }
             this.metrics.errorCount++;
             applicationErrors.labels('llm_service', 'ChatError', 'error').inc();
             logger.error('LLM chat failed', {
                 provider: this.config.provider,
                 messageCount: messages.length,
-                error: error.message,
+                error: finalError.message,
             });
-            throw error;
+            throw finalError;
         }
     }
     /**
@@ -268,6 +492,7 @@ Summary:`;
             model,
             maxTokens: Math.min(maxLength * 2, 500), // Rough token estimation
             temperature: 0.3,
+            providerTag: 'fast.summarize',
         });
     }
     /**
@@ -287,6 +512,7 @@ Response:`;
             prompt,
             model,
             temperature: 0.1,
+            providerTag: 'reason.dense',
         });
         try {
             return JSON.parse(response);
@@ -315,6 +541,7 @@ Answer:`;
             prompt,
             model,
             temperature: 0.2,
+            providerTag: 'reason.dense',
         });
     }
     /**
@@ -362,6 +589,7 @@ Answer:`;
             const response = await this.complete({
                 prompt: 'What is 2+2?',
                 maxTokens: 50,
+                providerTag: 'reason.dense',
             });
             return {
                 success: true,

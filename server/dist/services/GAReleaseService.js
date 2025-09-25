@@ -95,7 +95,7 @@ export class GAReleaseService {
         const results = [];
         try {
             // Check if preflight script exists
-            const preflightPath = path.join(process.cwd(), 'scripts', 'migrate', 'preflight_cli.js');
+            const preflightPath = path.join(process.cwd(), 'scripts', 'migrate', 'preflight_cli.ts');
             if (fs.existsSync(preflightPath)) {
                 results.push({
                     component: 'preflight-script',

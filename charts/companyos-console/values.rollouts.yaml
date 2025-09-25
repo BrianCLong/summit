@@ -1,0 +1,9 @@
+rollouts:
+  enabled: true
+  stepsWeightStart: 10
+  stepsWeightMid: 25
+  stepsWeightLate: 50
+  pauseShort: 120
+  pauseLong: 300
+
+replicaCount: 2

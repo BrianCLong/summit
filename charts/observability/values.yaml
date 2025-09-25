@@ -1,0 +1,156 @@
+grafana:
+  enabled: true
+  adminPassword: prom-operator # Change this in production
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      external-dns.alpha.kubernetes.io/hostname: grafana.topicality.co
+    hosts:
+      - grafana.topicality.co
+    tls:
+      - secretName: grafana-tls
+        hosts:
+          - grafana.topicality.co
+  persistence:
+    enabled: true
+    type: pvc
+    size: 10Gi
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Loki
+          type: loki
+          access: proxy
+          url: http://loki:3100
+          isDefault: false
+        - name: Tempo
+          type: tempo
+          access: proxy
+          url: http://tempo:3200
+          isDefault: false
+        - name: Prometheus
+          type: prometheus
+          access: proxy
+          url: http://prometheus-kube-prometheus-stack-prometheus:9090 # Assuming Prometheus is deployed elsewhere
+          isDefault: true
+  dashboards:
+    default:
+      companyos-exec:
+        gnetId: null # Placeholder, will be provisioned via ConfigMap
+        path: /var/lib/grafana/dashboards/companyos-exec.json
+      companyos-ops:
+        gnetId: null # Placeholder
+        path: /var/lib/grafana/dashboards/companyos-ops.json
+      companyos-trust:
+        gnetId: null # Placeholder
+        path: /var/lib/grafana/dashboards/companyos-trust.json
+  dashboardProviders:
+    default:
+      apiVersion: 1
+      providers:
+        - name: 'default'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards
+
+loki:
+  enabled: true
+  fullnameOverride: loki
+  isDefault: false
+  service:
+    type: ClusterIP
+  persistence:
+    enabled: true
+    size: 50Gi
+  loki:
+    auth_enabled: false
+    common:
+      path_prefix: /var/loki
+      replication_factor: 1
+      ring:
+        kvstore:
+          store: memberlist
+    storage:
+      filesystem:
+        directory: /var/loki/wal
+    limits_config:
+      enforce_metric_name: false
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+  singleBinary:
+    replicas: 1
+
+tempo:
+  enabled: true
+  fullnameOverride: tempo
+  service:
+    type: ClusterIP
+  tempo:
+    distributor:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+            http:
+    ingester:
+      max_block_bytes: 10000000 # 10MB
+      max_block_duration: 5m
+    storage:
+      trace:
+        backend: local
+        local:
+          path: /var/tempo/traces
+    compactor:
+      compaction_interval: 5m
+      compaction_window: 1h
+  persistence:
+    enabled: true
+    size: 50Gi
+
+opentelemetry-collector:
+  enabled: true
+  mode: daemonset # Deploy as DaemonSet to collect from all nodes
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    processors:
+      batch:
+        send_batch_size: 1000
+        timeout: 10s
+      memory_limiter:
+        limit_mib: 256
+        spike_limit_mib: 64
+        check_interval: 5s
+    exporters:
+      loki:
+        endpoint: http://loki:3100/loki/api/v1/push
+      tempo:
+        endpoint: http://tempo:4317
+      prometheus:
+        endpoint: 0.0.0.0:8889
+        resource_to_telemetry_conversion:
+          enabled: true
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [tempo]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [prometheus]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [loki]

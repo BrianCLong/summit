@@ -1,6 +1,6 @@
 import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { typeDefs } from '../graphql/schema.js';
+import { typeDefs } from '../graphql/schema/index.js';
 import resolvers from '../graphql/resolvers/index.js';
 import { authDirective } from '../graphql/authDirective.js';
 import { getContext } from '../lib/auth.js';
