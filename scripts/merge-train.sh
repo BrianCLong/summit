@@ -529,6 +529,12 @@ main() {
     check_branches
     create_merge_branch
     merge_branches
+
+    # Ensure clean working directory
+    git reset --hard HEAD
+    git clean -fd
+    # Checkout the PR branch
+    gh pr checkout "$pr_number"
     
     if run_quality_gates; then
         generate_documentation
