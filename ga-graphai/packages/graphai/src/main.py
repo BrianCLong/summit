@@ -1,11 +1,15 @@
 from __future__ import annotations
+from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
+import os
+from typing import Any, List
 
 from fastapi import FastAPI, HTTPException
 from features import build_degree_features
 from pydantic import BaseModel
+
+from nlq_engine import NLQEngine, NLQEngineError, NLQSecurityError
 
 
 class FeatureBuildRequest(BaseModel):
@@ -19,6 +23,47 @@ class Feature(BaseModel):
 
 class FeatureBuildResponse(BaseModel):
     features: list[Feature]
+
+
+class NLQTranslateRequest(BaseModel):
+    question: str
+    dialect: str = "cypher"
+    max_depth: int | None = None
+
+
+class NLQTranslateResponse(BaseModel):
+    query: str
+    cost: int
+    warnings: list[str]
+    labels: list[str]
+    fields: list[str]
+
+
+class NLQRunRequest(BaseModel):
+    query: str
+    limit: int | None = None
+
+
+class NLQRunResponse(BaseModel):
+    rows: list[dict[str, Any]]
+    actual_count: int
+    warnings: list[str]
+    truncated: bool
+    cost: int
+    labels: list[str]
+    fields: list[str]
+
+
+class NLQExplainRequest(BaseModel):
+    query: str
+
+
+class NLQExplainResponse(BaseModel):
+    plan: dict[str, Any]
+    warnings: list[str]
+    cost: int
+    labels: list[str]
+    fields: list[str]
 
 
 @dataclass(frozen=True)
@@ -63,6 +108,13 @@ MODEL_REGISTRY: list[ModelProfile] = [
 ]
 
 
+nlq_engine = NLQEngine()
+
+
+def _is_nlq_enabled() -> bool:
+    return os.getenv("FEATURES_NLQ", "true").lower() == "true"
+
+
 class RouteRequest(BaseModel):
     action: str
     tenant_id: str
@@ -94,6 +146,65 @@ def feature_build(req: FeatureBuildRequest) -> FeatureBuildResponse:
     data = build_degree_features(req.edges)
     features = [Feature(node=n, degree=d) for n, d in data.items()]
     return FeatureBuildResponse(features=features)
+
+
+@app.post("/nlq/translate", response_model=NLQTranslateResponse)
+def nlq_translate(request: NLQTranslateRequest) -> NLQTranslateResponse:
+    if not _is_nlq_enabled():
+        raise HTTPException(status_code=404, detail="NLQ feature disabled")
+    try:
+        result = nlq_engine.translate(
+            request.question,
+            dialect=request.dialect,
+            max_depth=request.max_depth,
+        )
+    except NLQEngineError as exc:  # pragma: no cover - defensive
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return NLQTranslateResponse(
+        query=result.query,
+        cost=result.cost,
+        warnings=result.warnings,
+        labels=result.labels,
+        fields=result.fields,
+    )
+
+
+@app.post("/nlq/run-sandbox", response_model=NLQRunResponse)
+def nlq_run_sandbox(request: NLQRunRequest) -> NLQRunResponse:
+    if not _is_nlq_enabled():
+        raise HTTPException(status_code=404, detail="NLQ feature disabled")
+    try:
+        result = nlq_engine.run_sandbox(request.query, limit=request.limit)
+    except NLQSecurityError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except NLQEngineError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return NLQRunResponse(
+        rows=result.rows,
+        actual_count=result.actual_count,
+        warnings=result.warnings,
+        truncated=result.truncated,
+        cost=result.cost,
+        labels=result.labels,
+        fields=result.fields,
+    )
+
+
+@app.post("/nlq/explain", response_model=NLQExplainResponse)
+def nlq_explain(request: NLQExplainRequest) -> NLQExplainResponse:
+    if not _is_nlq_enabled():
+        raise HTTPException(status_code=404, detail="NLQ feature disabled")
+    try:
+        result = nlq_engine.explain(request.query)
+    except NLQEngineError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return NLQExplainResponse(
+        plan=result.plan,
+        warnings=result.warnings,
+        cost=result.cost,
+        labels=result.labels,
+        fields=result.fields,
+    )
 
 
 def _score_model(candidate: ModelProfile, request: RouteRequest) -> float:
