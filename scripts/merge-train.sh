@@ -532,7 +532,7 @@ main() {
 
     # Ensure clean working directory
     git reset --hard HEAD
-    git clean -fd
+    git clean -fxd
     # Checkout the PR branch
     gh pr checkout "$pr_number"
     
