@@ -531,6 +531,7 @@ main() {
     merge_branches
 
     rm -rf _salvage_deleted/
+    rm -rf ga-graphai/
     # Ensure clean working directory
     git reset --hard HEAD
     git clean -fxd
