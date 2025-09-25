@@ -1,0 +1,65 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: companyos-latency-error-slo
+  namespace: companyos
+spec:
+  args:
+    - name: job
+    - name: p95_threshold
+      value: "0.8"          # seconds
+    - name: err_threshold
+      value: "0.02"         # 2%
+    - name: window
+      value: "5m"
+  metrics:
+    - name: p95_latency
+      interval: 60s
+      successCondition: asFloat(result) < asFloat(args.p95_threshold)
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
+          query: >
+            histogram_quantile(
+              0.95,
+              sum(rate(http_request_duration_seconds_bucket{job="{{args.job}}"}[{{args.window}}])) by (le)
+            )
+    - name: error_rate
+      interval: 60s
+      successCondition: asFloat(result) < asFloat(args.err_threshold)
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
+          query: >
+            sum(rate(http_requests_total{job="{{args.job}}",status=~"5.."}[{{args.window}}]))
+            /
+            sum(rate(http_requests_total{job="{{args.job}}"}[{{args.window}}]))
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: companyos-availability
+  namespace: companyos
+spec:
+  args:
+    - name: job
+    - name: availability_threshold
+      value: "0.995"
+    - name: window
+      value: "5m"
+  metrics:
+    - name: availability
+      interval: 60s
+      successCondition: asFloat(result) > asFloat(args.availability_threshold)
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
+          query: >
+            1 - (
+              sum(rate(http_requests_total{job="{{args.job}}",status=~"5.."}[{{args.window}}]))
+              /
+              sum(rate(http_requests_total{job="{{args.job}}"}[{{args.window}}]))
+            )

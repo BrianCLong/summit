@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: companyos
+  namespace: argocd
+spec:
+  description: CompanyOS applications project
+  sourceRepos:
+    - https://github.com/BrianCLong/summit.git # Your Git repository
+    - https://kubernetes.github.io/ingress-nginx
+    - https://charts.jetstack.io
+    - https://grafana.github.io/helm-charts
+    - https://open-telemetry.github.io/opentelemetry-helm-charts
+    - https://kubernetes-sigs.github.io/external-dns/
+    - https://charts.bitnami.com/bitnami
+    - https://charts.helm.sh/stable # For Velero
+    - https://vmware-tanzu.github.io/helm-charts # For Velero
+  destinations:
+    - namespace: companyos
+      server: https://kubernetes.default.svc
+    - namespace: ingress-nginx
+      server: https://kubernetes.default.svc
+    - namespace: cert-manager
+      server: https://kubernetes.default.svc
+    - namespace: external-dns
+      server: https://kubernetes.default.svc
+    - namespace: kube-system # For SealedSecrets
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*
+      kind: '*
+  namespaceResourceWhitelist:
+    - group: '*
+      kind: '*

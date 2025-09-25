@@ -1,0 +1,39 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: drop-capabilities
+  annotations:
+    policies.kyverno.io/title: Drop Capabilities
+    policies.kyverno.io/category: Pod Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Containers should drop all capabilities by default and only add those that are
+      absolutely required. This policy ensures that `NET_RAW` and `SYS_ADMIN` capabilities
+      are dropped.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: drop-net-raw-sys-admin
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+      validate:
+        message: "Containers must drop NET_RAW and SYS_ADMIN capabilities."
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  capabilities:
+                    drop:
+                      - NET_RAW
+                      - SYS_ADMIN
+            initContainers:
+              - securityContext:
+                  capabilities:
+                    drop:
+                      - NET_RAW
+                      - SYS_ADMIN

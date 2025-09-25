@@ -1,0 +1,39 @@
+opencost:
+  exporter:
+    defaultClusterId: "companyos-eks"
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      external-dns.alpha.kubernetes.io/hostname: opencost.topicality.co
+    hosts:
+      - opencost.topicality.co
+    tls:
+      - secretName: opencost-tls
+        hosts:
+          - opencost.topicality.co
+  # Prometheus integration
+  # If Prometheus is deployed via kube-prometheus-stack, you might need to configure
+  # serviceMonitor or specify existing Prometheus service details.
+  # For simplicity, assuming Prometheus is accessible.
+  prometheus:
+    enabled: true
+    # external:
+    #   host: prometheus-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local
+    #   port: 9090
+    #   scheme: http
+
+# Persistent volume for OpenCost data
+persistentVolume:
+  enabled: true
+  size: 10Gi
+
+# Configure resources
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
