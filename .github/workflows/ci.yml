@@ -122,6 +122,8 @@ jobs:
             echo "ℹ️  No Helm charts found - skipping"
           fi
 
+      - uses: hashicorp/setup-terraform@v2
+
       - name: terraform:plan
         run: |
           if [ -d "terraform" ]; then
