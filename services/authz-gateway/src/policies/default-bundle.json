@@ -1,0 +1,175 @@
+{
+  "metadata": {
+    "name": "gateway-abac-bundle",
+    "version": "2024.11.15",
+    "description": "Reference ABAC policies for the Summit gateway"
+  },
+  "defaults": {
+    "policyId": "policy.default.deny",
+    "reason": "No matching policy. Access denied by default.",
+    "appealLink": "https://compliance.example.com/appeals/general",
+    "obligations": {
+      "redact": [],
+      "mask": {}
+    }
+  },
+  "rules": [
+    {
+      "id": "policy.require-purpose",
+      "effect": "deny",
+      "reason": "A documented purpose tag (X-Purpose) is required for access.",
+      "appealLink": "https://compliance.example.com/appeals/purpose",
+      "match": {
+        "purpose": {
+          "missing": true
+        }
+      }
+    },
+    {
+      "id": "policy.require-authority",
+      "effect": "deny",
+      "reason": "A legal authority (X-Authority) must be declared before access is granted.",
+      "appealLink": "https://compliance.example.com/appeals/authority",
+      "match": {
+        "authority": {
+          "missing": true
+        }
+      }
+    },
+    {
+      "id": "policy.require-clearance-claim",
+      "effect": "deny",
+      "reason": "Clearance claim is required for policy evaluation.",
+      "appealLink": "https://compliance.example.com/appeals/clearance",
+      "match": {
+        "claims": {
+          "clearance": {
+            "missing": true
+          }
+        }
+      }
+    },
+    {
+      "id": "policy.block-sandbox",
+      "effect": "deny",
+      "reason": "Sandbox tokens are not permitted on the production gateway.",
+      "appealLink": "https://compliance.example.com/appeals/environment",
+      "match": {
+        "claims": {
+          "environment": {
+            "equals": "sandbox"
+          }
+        }
+      }
+    },
+    {
+      "id": "policy.block-suspended",
+      "effect": "deny",
+      "reason": "Suspended identities are blocked from access.",
+      "appealLink": "https://compliance.example.com/appeals/status",
+      "match": {
+        "claims": {
+          "status": {
+            "notOneOf": ["active", "investigation", "remediation"]
+          }
+        }
+      }
+    },
+    {
+      "id": "policy.step-up-allow",
+      "effect": "allow",
+      "reason": "Step-up flow approved for active identities.",
+      "appealLink": "https://compliance.example.com/appeals/step-up",
+      "match": {
+        "actions": ["step-up"],
+        "claims": {
+          "status": {
+            "oneOf": ["active", "investigation"]
+          }
+        }
+      },
+      "obligations": {
+        "redact": [],
+        "mask": {}
+      }
+    },
+    {
+      "id": "policy.need-to-know",
+      "effect": "deny",
+      "reason": "Request lacks the required need-to-know clearance.",
+      "appealLink": "https://compliance.example.com/appeals/need-to-know",
+      "match": {
+        "needToKnow": "missing"
+      }
+    },
+    {
+      "id": "policy.compliance-override",
+      "effect": "allow",
+      "reason": "Compliance override approved for investigation workflow.",
+      "appealLink": "https://compliance.example.com/appeals/compliance",
+      "match": {
+        "actions": ["read", "query"],
+        "path": "^/protected",
+        "rolesAnyOf": ["compliance"],
+        "purpose": {
+          "oneOf": ["investigation"]
+        },
+        "authority": {
+          "oneOf": ["fraud-investigation"]
+        }
+      },
+      "obligations": {
+        "redact": ["subject.ssn"],
+        "mask": {
+          "subject.name": "INITIALS",
+          "subject.accountNumber": "LAST4",
+          "subject.region": "MASKED"
+        }
+      }
+    },
+    {
+      "id": "policy.tenant-allow",
+      "effect": "allow",
+      "reason": "Tenant-aligned access approved for covered treatment operations.",
+      "appealLink": "https://compliance.example.com/appeals/tenant",
+      "match": {
+        "actions": ["read", "query", "step-up"],
+        "path": "^/protected",
+        "claims": {
+          "tenantId": {
+            "equalsResource": "tenantId"
+          },
+          "clearance": {
+            "exists": true
+          }
+        },
+        "purpose": {
+          "oneOf": ["treatment", "payment", "operations"]
+        },
+        "authority": {
+          "oneOf": ["hipaa", "treatment-consent"]
+        }
+      },
+      "obligations": {
+        "redact": ["subject.financialAccount"],
+        "mask": {
+          "subject.name": "INITIALS",
+          "subject.birthDate": "YEAR"
+        }
+      }
+    },
+    {
+      "id": "policy.tenant-isolation",
+      "effect": "deny",
+      "reason": "Cross-tenant access is blocked without a compliance override.",
+      "appealLink": "https://compliance.example.com/appeals/tenant",
+      "match": {
+        "claims": {
+          "tenantId": {
+            "notEqualsResource": "tenantId"
+          }
+        }
+      }
+    }
+  ]
+}

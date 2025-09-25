@@ -1,6 +1,6 @@
 import { jwtVerify, type JWTPayload } from 'jose';
 import { getPublicKey } from './keys';
-import { authorize } from './policy';
+import { authorize, type PolicyInput } from './policy';
 import { log } from './audit';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -11,6 +11,36 @@ interface Options {
 
 export interface AuthenticatedRequest extends Request {
   user?: JWTPayload;
+}
+
+function buildPolicyInput(
+  req: AuthenticatedRequest,
+  user: JWTPayload,
+  action: string,
+): PolicyInput {
+  const purpose = String(req.headers['x-purpose'] || '');
+  const authority = String(req.headers['x-authority'] || '');
+  const tenantHeader = String(req.headers['x-tenant-id'] || '');
+  const needToKnow = String(req.headers['x-needtoknow'] || '');
+  return {
+    user: {
+      sub: String(user.sub || ''),
+      tenantId: String(user.tenantId || ''),
+      roles: (user.roles as string[]) || [],
+      ...user,
+    },
+    resource: {
+      path: req.originalUrl || req.path,
+      tenantId: tenantHeader,
+      attributes: {
+        needToKnow: needToKnow || undefined,
+      },
+      needToKnow,
+    },
+    action,
+    purpose,
+    authority,
+  };
 }
 
 export function requireAuth(options: Options) {
@@ -32,30 +62,30 @@ export function requireAuth(options: Options) {
           .set('WWW-Authenticate', `acr=${options.requiredAcr}`)
           .json({ error: 'step_up_required' });
       }
-      const resource = {
-        tenantId: String(req.headers['x-tenant-id'] || ''),
-        needToKnow: String(req.headers['x-needtoknow'] || ''),
-      };
-      const { allowed, reason } = await authorize(
-        {
-          tenantId: String(payload.tenantId),
-          roles: (payload.roles as string[]) || [],
-        },
-        resource,
-        options.action,
-      );
-      await log({
-        subject: String(payload.sub),
+      const policyInput = buildPolicyInput(req, payload, options.action);
+      const decision = await authorize(policyInput);
+      const auditRecord = log({
+        subject: String(payload.sub || 'anonymous'),
         action: options.action,
-        resource: JSON.stringify(resource),
-        tenantId: String(payload.tenantId),
-        allowed,
-        reason,
+        resource: JSON.stringify(policyInput.resource),
+        tenantId: String(payload.tenantId || ''),
+        decision,
+        purpose: policyInput.purpose,
+        authority: policyInput.authority,
       });
-      if (!allowed) {
-        return res.status(403).json({ error: 'forbidden' });
+      res.setHeader('X-Audit-Id', auditRecord.id);
+      if (!decision.allowed) {
+        return res.status(403).json({
+          error: 'forbidden',
+          reason: decision.reason,
+          policy: decision.policyId,
+          appealLink: decision.appealLink,
+          appealToken: decision.appealToken,
+        });
       }
       req.user = payload;
+      req.headers['x-purpose'] = policyInput.purpose;
+      req.headers['x-authority'] = policyInput.authority;
       return next();
     } catch {
       return res.status(401).json({ error: 'invalid_token' });
