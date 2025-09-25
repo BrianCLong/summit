@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set -x
 
 # Usage:
 #   scripts/merge-train.sh 1366 1358 1362 1365 1361 1364 1360 1359 1368 1367 1330 1363
