@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
-// import { expressMiddleware } from '@as-integrations/express4';
+import { expressMiddleware } from '@apollo/server/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -83,6 +83,8 @@ import stripeRouter from './routes/stripe.js';
 import githubAppRouter from './routes/github-app.js';
 import stripeConnectRouter from './routes/stripe-connect.js';
 import { replayGuard, webhookRatelimit } from './middleware/webhook-guard.js';
+import { createLoaders } from './graphql/dataloaders/index.js';
+import { apolloPromPlugin } from './metrics/apolloPromPlugin.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -464,6 +466,7 @@ export const createApp = async () => {
     // Security plugins - Order matters for execution lifecycle
     plugins: [
       otelApolloPlugin(),
+      apolloPromPlugin(),
       persistedQueriesPlugin as any,
       resolverMetricsPlugin as any,
       auditLoggerPlugin as any,
@@ -523,8 +526,35 @@ export const createApp = async () => {
   app.use(
     '/graphql',
     express.json(),
-    authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-// expressMiddleware(apollo, { context: getContext }),
+    authenticateToken,
+    expressMiddleware(apollo, {
+      context: async ({ req }) => {
+        const baseContext = await getContext({ req });
+        const loaders = createLoaders();
+        const headerTenant =
+          (req.headers['x-tenant-id'] as string | string[] | undefined) ||
+          (req.headers['x-tenant'] as string | string[] | undefined);
+        const normalizedHeaderTenant = Array.isArray(headerTenant)
+          ? headerTenant[0]
+          : headerTenant;
+
+        const inferredTenant =
+          (baseContext as any)?.tenantId ||
+          (baseContext as any)?.tenant ||
+          baseContext?.user?.tenantId ||
+          (baseContext as any)?.user?.tenant ||
+          normalizedHeaderTenant ||
+          (req as any)?.context?.tenantId ||
+          (req as any)?.context?.tenant;
+
+        return {
+          ...baseContext,
+          loaders,
+          tenantId: inferredTenant ?? baseContext?.tenantId,
+          tenant: inferredTenant ?? (baseContext as any)?.tenant,
+        };
+      },
+    }),
   );
 
   // Centralized error handler (Express 5-compatible)

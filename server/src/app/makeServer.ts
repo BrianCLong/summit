@@ -4,6 +4,7 @@ import { typeDefs } from '../graphql/schema/index.js';
 import resolvers from '../graphql/resolvers/index.js';
 import { authDirective } from '../graphql/authDirective.js';
 import { getContext } from '../lib/auth.js';
+import { createLoaders } from '../graphql/dataloaders/index.js';
 
 export interface MakeServerOptions {
   user?: any;
@@ -48,13 +49,19 @@ export async function makeGraphServer(opts: MakeServerOptions = {}) {
       const withUser = injectedUser
         ? { ...base, user: injectedUser, isAuthenticated: true, tenantId: injectedUser.tenant }
         : base;
+      const tenantContext =
+        (withUser as any)?.tenantId || (withUser as any)?.tenant || injectedUser?.tenant;
+      const enriched =
+        tenantContext != null
+          ? { ...withUser, tenantId: tenantContext, tenant: tenantContext }
+          : withUser;
       // Merge/override additional context
       if (opts.context) {
         const extra =
-          typeof opts.context === 'function' ? await opts.context(withUser) : opts.context;
-        return { ...withUser, ...extra };
+          typeof opts.context === 'function' ? await opts.context(enriched) : opts.context;
+        return { ...enriched, ...extra, loaders: createLoaders() };
       }
-      return withUser;
+      return { ...enriched, loaders: createLoaders() };
     },
     async stop() {
       await server.stop();
