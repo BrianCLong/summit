@@ -1,59 +1,49 @@
-# app.py
-# Modular microservice for analyzing social media text to identify emotional states,
-# map them to cognitive bias profiles, and recommend influence vectors.
-# Uses FastAPI for the API, transformers for NLP.
-# Pluggable inference backend via abstract class.
+"""FastAPI application for the cognitive targeting engine with MLflow logging."""
 
-import os
-import logging
-from fastapi import FastAPI, BackgroundTasks, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Optional
-from abc import ABC, abstractmethod
-from transformers import pipeline
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-app = FastAPI(
-    title="Cognitive Targeting Engine",
-    description="Microservice that ingests raw text from social media, identifies dominant emotional states using NLP, maps to cognitive bias profiles, and outputs recommended influence vectors.",
-    version="1.0.0"
-)
-
-# Define input model
-class TextInput(BaseModel):
-    text: str  # Raw text from social media feed (e.g., Twitter/X post, Telegram message, TikTok comment)
-
-import os
-import logging
 import json
+import logging
+import os
+import time
 import uuid
-from fastapi import FastAPI, BackgroundTasks, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Optional
 from abc import ABC, abstractmethod
+from typing import Dict, List
+
+from fastapi import BackgroundTasks, FastAPI, HTTPException
+from pydantic import BaseModel
 from transformers import pipeline
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+from mlflow_tracking import ensure_experiment, log_inference_run
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 logger = logging.getLogger(__name__)
+
+# Ensure the shared experiment is created at import time so cold starts are fast.
+try:  # pragma: no cover - best-effort initialisation
+    ensure_experiment()
+except Exception as exc:  # pragma: no cover - defensive logging
+    logger.warning("Unable to initialise MLflow experiment", exc_info=exc)
 
 app = FastAPI(
     title="Cognitive Targeting Engine",
-    description="Microservice that ingests raw text from social media, identifies dominant emotional states using NLP, maps to cognitive bias profiles, and outputs recommended influence vectors.",
-    version="1.0.0"
+    description=(
+        "Microservice that ingests raw text from social media, identifies dominant "
+        "emotional states using NLP, maps to cognitive bias profiles, and outputs "
+        "recommended influence vectors."
+    ),
+    version="1.0.0",
 )
 
-# Define input model
-class TextInput(BaseModel):
-    text: str  # Raw text from social media feed (e.g., Twitter/X post, Telegram message, TikTok comment)
 
-# Load mappings from config.json
+class TextInput(BaseModel):
+    text: str
+
+
 try:
-    with open("cognitive-targeting-engine/config.json", "r") as f:
-        config_data = json.load(f)
+    with open("cognitive-targeting-engine/config.json", "r", encoding="utf-8") as config_file:
+        config_data = json.load(config_file)
     emotion_to_bias = config_data.get("emotion_to_bias", {})
     bias_to_vectors = config_data.get("bias_to_vectors", {})
     logger.info("Successfully loaded mappings from config.json")
@@ -66,88 +56,132 @@ except json.JSONDecodeError:
     emotion_to_bias = {}
     bias_to_vectors = {}
 
-# In-memory cache for results
 results_cache: Dict[str, Dict] = {}
 
-# Pluggable inference backend interface
+
 class InferenceBackend(ABC):
     @abstractmethod
     def classify_emotions(self, text: str) -> List[Dict[str, float]]:
-        """
-        Classify emotions in the text.
-        Returns list of dicts with 'label' and 'score'.
-        """
-        pass
+        """Classify emotions in the text."""
 
-# HuggingFace Transformers backend (using state-of-the-art open-source model)
+    @property
+    @abstractmethod
+    def model_version(self) -> str:
+        """Return the model revision or version string."""
+
+    @property
+    @abstractmethod
+    def model_name(self) -> str:
+        """Return the hugging face model identifier."""
+
+    @property
+    @abstractmethod
+    def pipeline_task(self) -> str:
+        """Return the Hugging Face pipeline task name."""
+
+
 class HuggingFaceBackend(InferenceBackend):
-    def __init__(self):
-        self.model_name = os.getenv("MODEL_NAME", "j-hartmann/emotion-english-distilroberta-base")
-        logger.info(f"Initializing HuggingFaceBackend with model: {self.model_name}")
-        self.classifier = pipeline("text-classification", model=self.model_name, top_k=None)
+    def __init__(self) -> None:
+        self._model_name = os.getenv("MODEL_NAME", "j-hartmann/emotion-english-distilroberta-base")
+        self._model_revision = os.getenv("MODEL_REVISION")
+        logger.info("Initialising HuggingFaceBackend", extra={"model": self._model_name})
+        self.classifier = pipeline("text-classification", model=self._model_name, top_k=None)
+        config = getattr(getattr(self.classifier, "model", None), "config", None)
+        if not self._model_revision and config is not None:
+            self._model_revision = (
+                getattr(config, "revision", None)
+                or getattr(config, "_commit_hash", None)
+                or getattr(config, "_name_or_path", None)
+            )
+        if not self._model_revision:
+            self._model_revision = "unknown"
 
     def classify_emotions(self, text: str) -> List[Dict[str, float]]:
-        results = self.classifier(text)[0]
-        return results  # [{'label': 'fear', 'score': 0.8}, ...]
+        return self.classifier(text)[0]
 
-# Initialize the backend (pluggable: can swap with other implementations, e.g., custom or different provider)
+    @property
+    def model_version(self) -> str:
+        return self._model_revision or "unknown"
+
+    @property
+    def model_name(self) -> str:
+        return self._model_name
+
+    @property
+    def pipeline_task(self) -> str:
+        return getattr(self.classifier, "task", "text-classification")
+
+
 backend = HuggingFaceBackend()
 
-async def _process_text_in_background(task_id: str, text: str):
-    """
-    Asynchronously processes the text to classify emotions, map to biases, and generate influence vectors.
-    Stores the result in the results_cache.
-    """
+
+async def _process_text_in_background(task_id: str, text: str) -> None:
     try:
-        logger.info(f"Starting background processing for task_id: {task_id}, text: {text[:50]}...")
-        # Step 1: Classify emotions using pluggable backend
+        logger.info("Starting background processing", extra={"task_id": task_id})
+        start_time = time.perf_counter()
         emotions = backend.classify_emotions(text)
-        
-        # Step 2: Identify dominant emotional states (threshold: score > 0.3 for multi-label)
-        dominant_emotions = [emo['label'] for emo in emotions if emo['score'] > 0.3]
-        
-        # Step 3: Map dominant emotions to unique cognitive bias profiles
+        elapsed_ms = (time.perf_counter() - start_time) * 1000
+
+        dominant_emotions = [emo["label"] for emo in emotions if emo["score"] > 0.3]
+
         biases = set()
-        for emo in dominant_emotions:
-            bias = emotion_to_bias.get(emo)
+        for emotion in dominant_emotions:
+            bias = emotion_to_bias.get(emotion)
             if bias:
                 biases.add(bias)
-        
-        # Step 4: Generate recommended influence vectors per bias profile
-        output = {}
+
+        output: Dict[str, List[str]] = {}
         for bias in biases:
             output[bias] = bias_to_vectors.get(bias, [])
-        
-        results_cache[task_id] = {"status": "completed", "result": {"bias_profiles": output}}
-        logger.info(f"Finished background processing for task_id: {task_id}. Result stored.")
 
-    except Exception as e:
-        logger.error(f"Error during background text processing for task_id: {task_id}, text '{text[:50]}...': {e}", exc_info=True)
-        results_cache[task_id] = {"status": "failed", "error": str(e)}
+        run_id = log_inference_run(
+            model_name=backend.model_name,
+            model_version=backend.model_version,
+            params={
+                "task_id": task_id,
+                "pipeline_task": backend.pipeline_task,
+                "dominant_emotions": dominant_emotions,
+            },
+            metrics={
+                "inference_time_ms": elapsed_ms,
+                "emotion_candidates": len(emotions),
+                "dominant_emotion_count": len(dominant_emotions),
+            },
+            tags={
+                "deployment": os.getenv("DEPLOY_ENV", "local"),
+            },
+            run_name=f"inference-{task_id}",
+        )
+
+        results_cache[task_id] = {
+            "status": "completed",
+            "result": {"bias_profiles": output},
+            "model_version": backend.model_version,
+            "mlflow_run_id": run_id,
+        }
+        logger.info("Finished processing", extra={"task_id": task_id, "run_id": run_id})
+    except Exception as exc:
+        logger.error(
+            "Error during background text processing",
+            extra={"task_id": task_id, "error": str(exc)},
+            exc_info=exc,
+        )
+        results_cache[task_id] = {"status": "failed", "error": str(exc)}
+
 
 @app.post("/analyze", response_model=Dict[str, str])
-async def analyze_text(input: TextInput, background_tasks: BackgroundTasks):
-    """
-    API Endpoint: Ingest raw text, process with NLP in the background, and return a task ID.
-    """
+async def analyze_text(input: TextInput, background_tasks: BackgroundTasks) -> Dict[str, str]:
     task_id = str(uuid.uuid4())
-    logger.info(f"Received request to analyze text: {input.text[:50]}... Assigning task_id: {task_id}")
-    results_cache[task_id] = {"status": "processing"} # Initial status
+    logger.info("Received request to analyse text", extra={"task_id": task_id})
+    results_cache[task_id] = {"status": "processing"}
     background_tasks.add_task(_process_text_in_background, task_id, input.text)
     return {"status": "Processing started in background", "task_id": task_id}
 
+
 @app.get("/results/{task_id}", response_model=Dict)
-async def get_results(task_id: str):
-    """
-    API Endpoint: Retrieve results for a given task ID.
-    """
-    logger.info(f"Received request for results for task_id: {task_id}")
+async def get_results(task_id: str) -> Dict:
+    logger.info("Received request for results", extra={"task_id": task_id})
     result = results_cache.get(task_id)
     if result:
         return result
     raise HTTPException(status_code=404, detail="Task ID not found or processing not started.")
-
-# To run: uvicorn app:app --reload
-# Dependencies: pip install fastapi uvicorn transformers torch
-# Note: Model is state-of-the-art open-source for emotion classification (7 classes: anger, disgust, fear, joy, neutral, sadness, surprise).
-# For pluggability, extend InferenceBackend (e.g., for ONNX, TensorFlow, or API-based inference).
