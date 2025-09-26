@@ -14,6 +14,9 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { trace } from '@opentelemetry/api';
 import logger from '../config/logger.js';
+import { apolloPromPlugin } from '../metrics/apolloPromPlugin.js';
+import { initializeGraphCacheInvalidation } from '../cache/redis.js';
+import { makePubSub } from '../subscriptions/pubsub.js';
 
 // Import schemas and resolvers
 import { typeDefs } from './schema/index.js';
@@ -31,11 +34,16 @@ export interface GraphQLContext {
     ip: string;
     headers: Record<string, string>;
     userAgent?: string;
+    body?: any;
+    query?: string;
+    variables?: Record<string, unknown>;
   };
   telemetry: {
     traceId: string;
     spanId: string;
   };
+  tenant?: string;
+  pubsub: any;
 }
 
 // GraphQL Shield Security Rules
@@ -69,9 +77,16 @@ function createSecureSchema() {
 }
 
 // Context function for Apollo v5
+const sharedPubSub = makePubSub();
+
 async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
   const tracer = trace.getActiveTracer();
   const span = tracer.getActiveSpan();
+
+  const headers = req.headers || {};
+  const tenantHeader = headers['x-tenant-id'] || headers['x-tenant'] || headers['x-tenantid'];
+  const tenant = req.user?.tenantId || (typeof tenantHeader === 'string' ? tenantHeader : undefined);
+  const body = req.body || {};
 
   return {
     dataSources: {
@@ -80,25 +95,34 @@ async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
     user: req.user, // Populated by auth middleware
     request: {
       ip: req.ip || req.connection.remoteAddress,
-      headers: req.headers,
-      userAgent: req.get('User-Agent')
+      headers,
+      userAgent: req.get('User-Agent'),
+      body,
+      query: body?.query,
+      variables: body?.variables,
     },
     telemetry: {
       traceId: span?.spanContext().traceId || 'unknown',
       spanId: span?.spanContext().spanId || 'unknown'
-    }
+    },
+    tenant,
+    pubsub: sharedPubSub
   };
 }
 
 // Apollo Server v5 factory
 export function createApolloV5Server(httpServer: any): ApolloServer<GraphQLContext> {
   const schema = createSecureSchema();
+  void initializeGraphCacheInvalidation();
 
   const server = new ApolloServer<GraphQLContext>({
     schema,
     plugins: [
       // Graceful shutdown
       ApolloServerPluginDrainHttpServer({ httpServer }),
+
+      // Prometheus metrics integration
+      apolloPromPlugin(),
 
       // Enhanced landing page for development
       ...(process.env.NODE_ENV === 'development'

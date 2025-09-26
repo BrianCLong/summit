@@ -9,6 +9,7 @@ global:
 
 rule_files:
   - 'alerts.yml'
+  - 'cache-rules.yml'
 
 alerting:
   alertmanagers:
