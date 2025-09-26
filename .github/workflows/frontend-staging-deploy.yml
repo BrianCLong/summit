@@ -1,0 +1,173 @@
+name: Frontend Staging Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'client/**'
+      - '.github/workflows/frontend-staging-deploy.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PNPM_VERSION: 9.12.0
+  NODE_VERSION: 20.11.0
+
+jobs:
+  build:
+    name: Build Frontend Artifact
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --filter intelgraph-client... --config.shared-workspace-lockfile=false --no-frozen-lockfile
+
+      - name: Run ESLint
+        run: pnpm --filter intelgraph-client lint
+
+      - name: Run Jest
+        env:
+          JEST_JUNIT_OUTPUT_DIR: client/test-results/junit
+          JEST_JUNIT_OUTPUT_NAME: junit.xml
+        run: pnpm --filter intelgraph-client test:ci
+
+      - name: Build Frontend
+        run: pnpm --filter intelgraph-client build
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-junit
+          path: client/test-results/junit
+          if-no-files-found: ignore
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-coverage
+          path: client/coverage
+          if-no-files-found: ignore
+
+  sonarqube:
+    name: SonarQube Scan
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --filter intelgraph-client... --config.shared-workspace-lockfile=false --no-frozen-lockfile
+
+      - name: Download Coverage Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: client-coverage
+          path: client/coverage
+
+      - name: Run SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          projectBaseDir: client
+
+  upload-s3:
+    name: Publish Artifact to S3
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_STAGING_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Sync Artifact to S3
+        run: |
+          aws s3 sync client/dist s3://${{ secrets.S3_STAGING_BUCKET }}/frontend/${{ github.sha }} --delete
+          aws s3 cp client/dist/index.html s3://${{ secrets.S3_STAGING_BUCKET }}/frontend/${{ github.sha }}/index.html --cache-control "no-cache"
+
+  argocd-sync:
+    name: Trigger ArgoCD Sync
+    runs-on: ubuntu-latest
+    needs:
+      - upload-s3
+      - sonarqube
+    steps:
+      - name: Sync Staging Application
+        uses: argoproj/argocd-action@v2
+        with:
+          version: v2.11.0
+          address: ${{ secrets.ARGOCD_SERVER }}
+          token: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+          command: app sync ${{ secrets.ARGOCD_STAGING_APP }}
+          options: |
+            --revision ${{ github.sha }}
+            --async
+
+      - name: Wait for Sync
+        uses: argoproj/argocd-action@v2
+        with:
+          version: v2.11.0
+          address: ${{ secrets.ARGOCD_SERVER }}
+          token: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+          command: app wait ${{ secrets.ARGOCD_STAGING_APP }}
+          options: |
+            --timeout 600
+            --health
+            --sync
