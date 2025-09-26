@@ -6,7 +6,11 @@
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "bundler",
-    "strict": true
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@packages/*": ["../packages/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "build"]

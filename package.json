@@ -20,7 +20,11 @@
     "dep:audit": "pnpm audit --prod || true",
     "sbom": "cyclonedx-npm --output-file sbom.json",
     "sast": "trivy fs --exit-code 1 .",
-    "e2e": "playwright test",
+    "e2e": "playwright test --config=playwright.config.ts",
+    "e2e:docker:up": "docker compose -f e2e/docker-compose.yml up -d --wait",
+    "e2e:docker:down": "docker compose -f e2e/docker-compose.yml down -v",
+    "e2e:ci": "playwright test --config=playwright.config.ts --reporter=junit,line",
+    "e2e:coverage": "playwright test --config=playwright.config.ts --coverage",
     "otel:smoke": "node scripts/otel-smoke.js",
     "prepare": "husky",
     "build": "pnpm run -r build",
@@ -135,6 +139,7 @@
     "component-emitter": "^1.3.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
     "@commitlint/config-conventional": "^19.8.1",
     "@eslint/js": "^9.36.0",
     "@opentelemetry/api": "^1.9.0",
