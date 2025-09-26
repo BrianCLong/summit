@@ -92,6 +92,41 @@ export const coreTypeDefs = gql`
     relationshipCount: Int!
   }
 
+  type ThemeVariant {
+    primary: String!
+    primaryContrast: String!
+    secondary: String!
+    accent: String!
+    background: String!
+    surface: String!
+    surfaceMuted: String!
+    border: String!
+    text: String!
+    textMuted: String!
+    success: String!
+    warning: String!
+    danger: String!
+    focus: String!
+    fontBody: String!
+    fontHeading: String!
+    fontMono: String!
+    shadowSm: String!
+    shadowMd: String!
+    shadowLg: String!
+    radiusSm: String!
+    radiusMd: String!
+    radiusLg: String!
+    radiusPill: String!
+  }
+
+  type TenantTheme {
+    tenantId: String!
+    name: String!
+    light: ThemeVariant!
+    dark: ThemeVariant!
+    updatedAt: DateTime!
+  }
+
   # Input types for mutations
   input EntityInput {
     tenantId: String!
@@ -130,6 +165,40 @@ export const coreTypeDefs = gql`
     description: String
     status: InvestigationStatus
     props: JSON
+  }
+
+  input ThemeVariantInput {
+    primary: String!
+    primaryContrast: String!
+    secondary: String!
+    accent: String!
+    background: String!
+    surface: String!
+    surfaceMuted: String!
+    border: String!
+    text: String!
+    textMuted: String!
+    success: String!
+    warning: String!
+    danger: String!
+    focus: String!
+    fontBody: String!
+    fontHeading: String!
+    fontMono: String!
+    shadowSm: String!
+    shadowMd: String!
+    shadowLg: String!
+    radiusSm: String!
+    radiusMd: String!
+    radiusLg: String!
+    radiusPill: String!
+  }
+
+  input TenantThemeInput {
+    tenantId: String
+    name: String!
+    light: ThemeVariantInput!
+    dark: ThemeVariantInput!
   }
 
   # Search and filter inputs
@@ -188,6 +257,9 @@ export const coreTypeDefs = gql`
       offset: Int = 0
     ): [Investigation!]!
 
+    # Tenant theme configuration
+    tenantTheme(tenantId: String): TenantTheme!
+
     # Graph operations
     graphNeighborhood(input: GraphTraversalInput!): GraphNeighborhood!
 
@@ -210,6 +282,9 @@ export const coreTypeDefs = gql`
     createInvestigation(input: InvestigationInput!): Investigation!
     updateInvestigation(input: InvestigationUpdateInput!): Investigation
     deleteInvestigation(id: ID!, tenantId: String!): Boolean!
+
+    # Theme management
+    upsertTenantTheme(input: TenantThemeInput!): TenantTheme!
 
     # Bulk operations
     createEntitiesBatch(inputs: [EntityInput!]!, tenantId: String!): [Entity!]!

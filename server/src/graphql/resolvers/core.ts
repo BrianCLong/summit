@@ -11,6 +11,7 @@ import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../config/logger.js';
 import { z } from 'zod';
+import { ThemeRepo, defaultTheme } from '../../repos/ThemeRepo.js';
 
 const resolverLogger = logger.child({ name: 'CoreResolvers' });
 
@@ -38,12 +39,47 @@ const RelationshipInputZ = z.object({
   investigationId: z.string().uuid().optional(),
 });
 
+const ThemeVariantZ = z.object({
+  primary: z.string().min(1),
+  primaryContrast: z.string().min(1),
+  secondary: z.string().min(1),
+  accent: z.string().min(1),
+  background: z.string().min(1),
+  surface: z.string().min(1),
+  surfaceMuted: z.string().min(1),
+  border: z.string().min(1),
+  text: z.string().min(1),
+  textMuted: z.string().min(1),
+  success: z.string().min(1),
+  warning: z.string().min(1),
+  danger: z.string().min(1),
+  focus: z.string().min(1),
+  fontBody: z.string().min(1),
+  fontHeading: z.string().min(1),
+  fontMono: z.string().min(1),
+  shadowSm: z.string().min(1),
+  shadowMd: z.string().min(1),
+  shadowLg: z.string().min(1),
+  radiusSm: z.string().min(1),
+  radiusMd: z.string().min(1),
+  radiusLg: z.string().min(1),
+  radiusPill: z.string().min(1),
+});
+
+const ThemeInputZ = z.object({
+  tenantId: z.string().min(1),
+  name: z.string().min(1),
+  light: ThemeVariantZ,
+  dark: ThemeVariantZ,
+});
+
 // Initialize repositories
 const pg = getPostgresPool();
 const neo4j = getNeo4jDriver();
 const entityRepo = new EntityRepo(pg, neo4j);
 const relationshipRepo = new RelationshipRepo(pg, neo4j);
 const investigationRepo = new InvestigationRepo(pg);
+const themeRepo = new ThemeRepo(pg);
 
 // Custom scalars
 const DateTimeScalar = new GraphQLScalarType({
@@ -147,6 +183,12 @@ export const coreResolvers = {
         limit,
         offset,
       });
+    },
+
+    tenantTheme: async (_: any, { tenantId }: any, context: any) => {
+      const effectiveTenantId = tenantId || context.tenantId || context?.user?.tenantId || 'default';
+      const theme = await themeRepo.getTheme(effectiveTenantId);
+      return theme ?? defaultTheme(effectiveTenantId);
     },
 
     // Graph traversal (temporarily disabled due to schema mismatch)
@@ -356,6 +398,25 @@ export const coreResolvers = {
       }
 
       return await investigationRepo.delete(id);
+    },
+
+    upsertTenantTheme: async (_: any, { input }: any, context: any) => {
+      const tenantId = input.tenantId || context.tenantId || context?.user?.tenantId;
+      if (!tenantId) {
+        throw new Error('Tenant ID is required');
+      }
+
+      const parsed = ThemeInputZ.parse({ ...input, tenantId });
+
+      const stored = await themeRepo.upsertTheme({
+        tenantId: parsed.tenantId,
+        name: parsed.name,
+        light: parsed.light,
+        dark: parsed.dark,
+        updatedAt: new Date(),
+      });
+
+      return stored ?? defaultTheme(parsed.tenantId);
     },
   },
 

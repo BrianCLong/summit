@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -10,8 +10,6 @@ import {
 import { Provider } from 'react-redux';
 import { ApolloProvider } from '@apollo/client';
 import {
-  ThemeProvider,
-  CssBaseline,
   Container,
   Box,
   Card,
@@ -41,10 +39,9 @@ import {
   Assessment,
   Settings,
 } from '@mui/icons-material';
-import { getIntelGraphTheme } from './theme/intelgraphTheme';
+import TenantThemeProvider from './theme/ThemeProvider.jsx';
 import { store } from './store';
 import { apolloClient } from './services/apollo';
-import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
@@ -681,34 +678,33 @@ function MainLayout() {
 // Themed App Shell with Beautiful Background
 
 function ThemedAppShell({ children }) {
-  const mode = useSelector((state) => state.ui?.theme || 'light');
-  const theme = useMemo(() => getIntelGraphTheme(mode), [mode]);
+  const { user } = useAuth();
+  const tenantId = user?.tenantId || 'default';
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <TenantThemeProvider tenantId={tenantId}>
       <Box
         sx={{
-          background:
-            'linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 25%, #eceff1 50%, #e8eaf6 75%, #e1f5fe 100%)',
           minHeight: '100vh',
           position: 'relative',
+          backgroundColor: 'var(--color-background)',
+          color: 'var(--color-text)',
+          transition: 'background-color 120ms ease, color 120ms ease',
           '&::before': {
             content: '""',
             position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            inset: 0,
             background:
-              'radial-gradient(circle at 20% 50%, rgba(33, 150, 243, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(63, 81, 181, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(3, 169, 244, 0.1) 0%, transparent 50%)',
+              'radial-gradient(circle at 20% 30%, rgba(20, 89, 255, 0.12) 0%, transparent 55%), radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.16) 0%, transparent 60%), radial-gradient(circle at 30% 80%, rgba(192, 38, 211, 0.12) 0%, transparent 60%)',
             pointerEvents: 'none',
+            opacity: 0.4,
+            mixBlendMode: 'screen',
           },
         }}
       >
         <Box sx={{ position: 'relative', zIndex: 1 }}>{children}</Box>
       </Box>
-    </ThemeProvider>
+    </TenantThemeProvider>
   );
 }
 
