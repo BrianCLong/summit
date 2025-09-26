@@ -1,4 +1,5 @@
 import { aiAnalysisService } from '../../services/aiAnalysis.js';
+import { explainabilityService } from '../../services/ExplainabilityService.js';
 import { requireAuth } from '../../lib/auth.js';
 import baseLogger from '../../config/logger';
 
@@ -245,6 +246,73 @@ export const aiAnalysisResolvers = {
       ].filter((link) => link.confidence >= confidenceThreshold);
 
       return predictedLinks;
+    },
+
+    explainEntityRecognition: async (
+      _: any,
+      { text, method = 'auto', topK = 5 }: { text: string; method?: string; topK?: number },
+      context: any,
+    ) => {
+      requireAuth(context);
+
+      if (!text?.trim()) {
+        return {
+          text,
+          entities: [],
+          relationships: [],
+          explanations: [],
+          usedMethod: 'none',
+          generatedAt: new Date().toISOString(),
+        };
+      }
+
+      try {
+        const extraction = await aiAnalysisService.extractEntities(text, {
+          extractEntities: true,
+          extractRelationships: true,
+          confidenceThreshold: 0.5,
+        });
+
+        const entities = extraction.entities.map((entity) => ({
+          text: entity.text,
+          label: entity.label,
+          confidence: entity.confidence,
+          start: entity.start,
+          end: entity.end,
+        }));
+
+        const relationships = extraction.relationships.map((rel) => ({
+          source: rel.source,
+          target: rel.target,
+          type: rel.type,
+          confidence: rel.confidence,
+        }));
+
+        const explanationResult = await explainabilityService.explainEntityRecognition(text, entities, {
+          method: method.toLowerCase() === 'auto' ? undefined : method,
+          topK,
+          framework: 'pytorch',
+        });
+
+        return {
+          text,
+          entities,
+          relationships,
+          explanations: explanationResult.explanations,
+          usedMethod: explanationResult.usedMethod,
+          generatedAt: explanationResult.generatedAt,
+        };
+      } catch (error) {
+        logger.error('Explain entity recognition failed: %s', error);
+        return {
+          text,
+          entities: [],
+          relationships: [],
+          explanations: [],
+          usedMethod: 'error',
+          generatedAt: new Date().toISOString(),
+        };
+      }
     },
   },
 
