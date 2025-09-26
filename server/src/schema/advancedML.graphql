@@ -324,6 +324,34 @@ type DeleteMLModelResponse {
   error: String
 }
 
+type ForecastTimeSeriesPoint {
+  timestamp: String!
+  value: Float!
+}
+
+type ForecastMetrics {
+  rmse: Float
+  mae: Float
+  r2: Float
+}
+
+type ForecastHyperParameter {
+  name: String!
+  value: Float!
+}
+
+type NodeAttributeForecast {
+  nodeId: ID!
+  attribute: String!
+  horizon: Int!
+  model: String!
+  metrics: ForecastMetrics
+  history: [ForecastTimeSeriesPoint!]!
+  predictions: [ForecastTimeSeriesPoint!]!
+  tunedParameters: [ForecastHyperParameter!]
+  lastUpdated: String
+}
+
 # Root Types
 extend type Query {
   # System Information
@@ -334,6 +362,16 @@ extend type Query {
 
   # Metrics and Monitoring
   mlMetrics: MLMetrics!
+
+  # Predictive analytics
+  mlNodeAttributeForecast(
+    nodeId: ID!
+    attribute: String!
+    horizon: Int
+    lags: Int
+    lookbackHours: Int
+    optunaTrials: Int
+  ): NodeAttributeForecast!
 }
 
 extend type Mutation {
