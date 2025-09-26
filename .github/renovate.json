@@ -23,6 +23,15 @@
   "branchConcurrentLimit": 5,
   "packageRules": [
     {
+      "description": "Auto-merge safe patch updates across JavaScript, Python, and Helm",
+      "matchUpdateTypes": ["patch"],
+      "matchManagers": ["npm", "pnpm", "yarn", "pip_requirements", "pip_setup", "pipenv", "poetry", "pip-compile", "helmv3"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true,
+      "addLabels": ["automerge:patch"]
+    },
+    {
       "description": "Auto-merge patch and minor updates for known safe packages",
       "matchUpdateTypes": ["patch", "minor"],
       "matchPackageNames": [

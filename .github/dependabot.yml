@@ -4,8 +4,50 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    labels:
+      - dependencies
+      - npm
+  - package-ecosystem: "npm"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+    labels:
+      - dependencies
+      - npm
   - package-ecosystem: "npm"
     directory: "/client"
     schedule:
       interval: "weekly"
+    labels:
+      - dependencies
+      - npm
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    insecure-external-code-execution: allow
+    labels:
+      - dependencies
+      - python
+  - package-ecosystem: "helm"
+    directory: "/helm/summit"
+    schedule:
+      interval: "weekly"
+    labels:
+      - dependencies
+      - helm
+  - package-ecosystem: "helm"
+    directory: "/helm/server"
+    schedule:
+      interval: "weekly"
+    labels:
+      - dependencies
+      - helm
+  - package-ecosystem: "helm"
+    directory: "/helm/client"
+    schedule:
+      interval: "weekly"
+    labels:
+      - dependencies
+      - helm
 
