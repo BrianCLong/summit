@@ -10,7 +10,18 @@ try:  # pragma: no cover - best effort if deps are missing
 except Exception:  # noqa: BLE001 - allow graceful degradation
     Entity = Relationship = None  # type: ignore
 
+try:  # pragma: no cover - offline helpers are optional
+    from .offline_ingestion import OfflineIngestionBuffer, DrainResult
+except Exception:  # noqa: BLE001 - allow graceful degradation
+    OfflineIngestionBuffer = DrainResult = None  # type: ignore
+
 from .copilot import CopilotMemory
 
-__all__ = ["Entity", "Relationship", "CopilotMemory"]
+__all__ = [
+    "Entity",
+    "Relationship",
+    "CopilotMemory",
+    "OfflineIngestionBuffer",
+    "DrainResult"
+]
 
