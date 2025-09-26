@@ -23,7 +23,7 @@ export const statsResolvers = {
           total += v;
         }
         return { byStatus, total };
-      });
+      }, { op: 'caseCounts', ctx, tags: [`tenant:${tenant}`] });
       return result;
     },
 
@@ -50,7 +50,7 @@ export const statsResolvers = {
           relationships: r2.rows?.[0]?.relationships || 0,
           investigations: r3.rows?.[0]?.investigations || 0,
         };
-      });
+      }, { op: 'summaryStats', ctx, tags: [`tenant:${tenant}`] });
     },
   },
 };

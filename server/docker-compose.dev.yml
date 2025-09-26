@@ -57,7 +57,16 @@ services:
     container_name: intelgraph-redis-dev
     ports:
       - '6379:6379'
-    command: redis-server --requirepass devpassword
+    command:
+      - redis-server
+      - '--requirepass'
+      - 'devpassword'
+      - '--maxmemory'
+      - '256mb'
+      - '--maxmemory-policy'
+      - 'allkeys-lru'
+      - '--notify-keyspace-events'
+      - 'Ex'
     volumes:
       - redis_data_dev:/data
     restart: unless-stopped
