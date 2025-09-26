@@ -402,15 +402,41 @@ export const crudTypeDefs = gql`
     unassignUserFromInvestigation(investigationId: ID!, userId: ID!): Investigation!
 
     # Authentication mutations (placeholder - handled separately)
+    register(input: RegisterInput!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
     logout: Boolean!
     refreshToken: AuthPayload!
+    revokeSession(sessionId: ID!): SessionRevocationResult!
+    revokeAllSessions(exceptSessionId: ID): SessionRevocationResult!
+  }
+
+  type ActiveSession {
+    id: ID!
+    createdAt: DateTime!
+    lastActivityAt: DateTime!
+    expiresAt: DateTime!
+    ipAddress: String
+    userAgent: String
   }
 
   type AuthPayload {
     token: String!
     refreshToken: String!
     user: User!
+    session: ActiveSession!
+  }
+
+  input RegisterInput {
+    email: String!
+    password: String!
+    firstName: String
+    lastName: String
+  }
+
+  type SessionRevocationResult {
+    success: Boolean!
+    revokedCount: Int!
+    message: String
   }
 
   # Subscriptions for real-time updates
