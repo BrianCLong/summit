@@ -1,0 +1,2808 @@
+[
+  {
+    "operation_id": "0ac3c5f1-5558-452d-a69a-e87015652255",
+    "tenant": "TENANT_003",
+    "operation_type": "index_update",
+    "timestamp": "2025-09-26T05:53:14.571259Z",
+    "execution_time_ms": 391,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:14.571162Z",
+      "contains_pii": true
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "b7e118d0-7826-4b05-a0c2-ecfcd07931c9",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:14.963075Z",
+    "execution_time_ms": 102,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:14.962955Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "4157c7c1-11fe-4dcf-a4bb-781ddf195bca",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:15.071618Z",
+    "execution_time_ms": 229,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:15.071514Z",
+      "complexity": "high",
+      "data_size": "large",
+      "write_type": "insert"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "b7cd66ce-f861-4273-b699-11e9377ee33d",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:15.308947Z",
+    "execution_time_ms": 321,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:15.307561Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "fe4d1a0f-dcb5-4228-9b90-10cd222ca509",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:15.632459Z",
+    "execution_time_ms": 436,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:15.631459Z",
+      "complexity": "high",
+      "data_size": "medium",
+      "write_type": "insert"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "f1458c61-8228-4f4d-833c-a4b8807c0882",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:16.077261Z",
+    "execution_time_ms": 164,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:16.077181Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "ffde7eb4-d72a-4715-8c09-72abfd0acd84",
+    "tenant": "TENANT_003",
+    "operation_type": "index_update",
+    "timestamp": "2025-09-26T05:53:16.241730Z",
+    "execution_time_ms": 323,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:16.241620Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "7a7f0160-5ae6-4873-b4cb-e586eee957eb",
+    "tenant": "TENANT_003",
+    "operation_type": "derived_calculation",
+    "timestamp": "2025-09-26T05:53:16.570054Z",
+    "execution_time_ms": 429,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:16.569936Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "c7ab7cc6-a362-4571-86aa-9cb584dd6770",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:17.010307Z",
+    "execution_time_ms": 73,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:17.010178Z",
+      "aggregation_type": "sum",
+      "data_points": 1386,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "b81229a7-fa80-4e16-9635-65c84cd51625",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:17.088922Z",
+    "execution_time_ms": 321,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:17.088569Z",
+      "complexity": "medium",
+      "data_size": "small",
+      "write_type": "insert"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "843053a2-0b4c-4de2-adf8-76a345c333c0",
+    "tenant": "TENANT_003",
+    "operation_type": "cache_refresh",
+    "timestamp": "2025-09-26T05:53:17.417106Z",
+    "execution_time_ms": 299,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:17.417027Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "6e6550a8-c341-4531-916e-f628b4d37937",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:17.721309Z",
+    "execution_time_ms": 294,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:17.721244Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "bd86f16f-c2d4-4a72-bb15-788c848b4b3c",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:18.021231Z",
+    "execution_time_ms": 113,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:18.021147Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "7f324aa4-58e4-4fcf-b785-f02882ed18da",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:18.137941Z",
+    "execution_time_ms": 132,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:18.137819Z",
+      "complexity": "medium",
+      "data_size": "medium",
+      "write_type": "update"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "ed28f669-3f45-4c62-8fae-49e411282684",
+    "tenant": "TENANT_003",
+    "operation_type": "index_update",
+    "timestamp": "2025-09-26T05:53:18.274684Z",
+    "execution_time_ms": 387,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:18.274600Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "640a73cc-f64f-4962-b821-663fcb71acae",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:18.664819Z",
+    "execution_time_ms": 369,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:18.664753Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "46e66d24-dd4a-42f4-be77-32e7e758842a",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:19.038143Z",
+    "execution_time_ms": 463,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:19.038080Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "049bb8b2-ae31-4d55-a014-4bcea784c96a",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:19.506570Z",
+    "execution_time_ms": 176,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:19.506399Z",
+      "aggregation_type": "group_by",
+      "data_points": 6927,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "6deefbf2-f325-4283-bfd7-d650df8c5473",
+    "tenant": "TENANT_003",
+    "operation_type": "cache_refresh",
+    "timestamp": "2025-09-26T05:53:19.684049Z",
+    "execution_time_ms": 291,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:19.683991Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "741d886b-b05a-4bc3-93a3-d7333abcee77",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:19.982461Z",
+    "execution_time_ms": 299,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:19.982350Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "1c83c468-a6bb-40a7-972a-5e99a2c7fdac",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:20.286146Z",
+    "execution_time_ms": 143,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:20.285886Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "3e914029-750f-4cc0-a1b7-b1625318f810",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:20.433756Z",
+    "execution_time_ms": 482,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:20.433676Z",
+      "aggregation_type": "count",
+      "data_points": 3168,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "1de63dae-dfdd-45b8-97c6-73e9868b6422",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:20.929680Z",
+    "execution_time_ms": 119,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:20.929608Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "2ed008dc-3cfc-4936-b8ae-4858c9f99a23",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:21.053879Z",
+    "execution_time_ms": 218,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:21.053593Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "a78cc873-e3d4-4222-809d-f6933cb9d06f",
+    "tenant": "TENANT_003",
+    "operation_type": "cache_refresh",
+    "timestamp": "2025-09-26T05:53:21.283282Z",
+    "execution_time_ms": 133,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:21.283203Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "07e3c0cc-178f-43fa-9d4f-a7ed29430d82",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:21.424844Z",
+    "execution_time_ms": 314,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:21.424718Z",
+      "aggregation_type": "group_by",
+      "data_points": 8444,
+      "complexity": "high"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "621d8581-7f28-4c24-8fb4-80a35ad1c9d7",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:21.783429Z",
+    "execution_time_ms": 80,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:21.783253Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "80555509-fac0-4d38-bee8-21ba62bbbdd4",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:21.865317Z",
+    "execution_time_ms": 408,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:21.865219Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "5eebb37f-9d54-473c-ba1b-d8579ac46e2b",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:22.278574Z",
+    "execution_time_ms": 189,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:22.278475Z",
+      "complexity": "high",
+      "data_size": "medium",
+      "write_type": "upsert"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "36e65522-5c88-40de-9836-ef6bc5d4fa4e",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:22.470082Z",
+    "execution_time_ms": 264,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:22.469980Z",
+      "complexity": "medium",
+      "data_size": "large",
+      "write_type": "update"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "b5320af0-feb9-46d8-a8f2-8d3904124741",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:22.747702Z",
+    "execution_time_ms": 80,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:22.746102Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "5c968c04-68b2-4939-b8ef-583e8057a3b8",
+    "tenant": "TENANT_003",
+    "operation_type": "derived_calculation",
+    "timestamp": "2025-09-26T05:53:22.838047Z",
+    "execution_time_ms": 445,
+    "success": false,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:22.837307Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": true,
+      "reason": "operation_failed"
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "def35334-0093-454a-a99b-8e817bcbed18",
+    "tenant": "TENANT_003",
+    "operation_type": "cache_refresh",
+    "timestamp": "2025-09-26T05:53:23.287625Z",
+    "execution_time_ms": 444,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:23.287549Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "a0d1eda6-a249-4444-9be0-7b85bb55010d",
+    "tenant": "TENANT_003",
+    "operation_type": "cache_refresh",
+    "timestamp": "2025-09-26T05:53:23.734072Z",
+    "execution_time_ms": 398,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:23.733788Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "7b9c233d-4ba9-444d-b667-75d2f462ca03",
+    "tenant": "TENANT_003",
+    "operation_type": "index_update",
+    "timestamp": "2025-09-26T05:53:24.137731Z",
+    "execution_time_ms": 387,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:24.137650Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "326ec38a-0580-4b72-8c68-b7ced9769710",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:24.531001Z",
+    "execution_time_ms": 335,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:24.530860Z",
+      "complexity": "medium",
+      "data_size": "small",
+      "write_type": "insert"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "e271c6d0-646e-428a-91d8-bac25c019021",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:24.870730Z",
+    "execution_time_ms": 228,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:24.870488Z",
+      "aggregation_type": "sum",
+      "data_points": 6589,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "9920afbd-7095-411c-a69b-7529d65426cc",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:25.106024Z",
+    "execution_time_ms": 88,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:25.105939Z",
+      "complexity": "high",
+      "data_size": "medium",
+      "write_type": "update"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "89cd0e0b-9563-4024-920b-425c38f39dc9",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:25.219540Z",
+    "execution_time_ms": 223,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:25.219384Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "4246131d-59df-4af9-ac5d-f11a297f529a",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:25.454262Z",
+    "execution_time_ms": 388,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:25.454200Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "6ab6a42b-9fb8-472f-9466-aab163ff2c33",
+    "tenant": "TENANT_003",
+    "operation_type": "cache_refresh",
+    "timestamp": "2025-09-26T05:53:25.851439Z",
+    "execution_time_ms": 180,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:25.851218Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "930aed2a-ff2a-4276-a77a-06e2007d8ca4",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:26.037541Z",
+    "execution_time_ms": 276,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:26.036957Z",
+      "complexity": "high",
+      "data_size": "small",
+      "write_type": "insert"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "ba5abf5a-a22b-40c5-a18c-7d966c634b75",
+    "tenant": "TENANT_003",
+    "operation_type": "derived_calculation",
+    "timestamp": "2025-09-26T05:53:26.330000Z",
+    "execution_time_ms": 174,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:26.329901Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "7d305cdb-7c38-4b06-9fae-3a36bc7efbbf",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:26.601524Z",
+    "execution_time_ms": 185,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:26.515773Z",
+      "complexity": "high",
+      "data_size": "small",
+      "write_type": "upsert"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "8c5c47ab-494e-4d5d-b77b-ebee8888d29f",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:26.791799Z",
+    "execution_time_ms": 449,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:26.791648Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "55b35e9c-010c-4ce3-a46f-5b59ae30d411",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:27.246574Z",
+    "execution_time_ms": 293,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:27.245558Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "7029c71e-99ee-432e-8173-e1f589635dbb",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:27.545692Z",
+    "execution_time_ms": 226,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:27.545541Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "6980479c-6e69-4c98-a572-7a6c27ef0712",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:27.776010Z",
+    "execution_time_ms": 89,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:27.775914Z",
+      "complexity": "medium",
+      "data_size": "large",
+      "write_type": "upsert"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "7f036c9c-e576-43a9-959e-aac6e0a73e5c",
+    "tenant": "TENANT_003",
+    "operation_type": "index_update",
+    "timestamp": "2025-09-26T05:53:27.885152Z",
+    "execution_time_ms": 303,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:27.885083Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "4f3b1b59-aa1b-4022-88a2-8b602f349d21",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:28.196299Z",
+    "execution_time_ms": 302,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:28.188398Z",
+      "aggregation_type": "sum",
+      "data_points": 9556,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "360f1aac-33e6-4c6a-92cf-27b8d3a6fda7",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:28.508358Z",
+    "execution_time_ms": 473,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:28.508216Z",
+      "complexity": "medium",
+      "data_size": "medium",
+      "write_type": "insert"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "0d85d98b-a8bc-4b28-b428-404c62b9baf2",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:28.987985Z",
+    "execution_time_ms": 193,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:28.986605Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "e997197d-cd48-4988-b8eb-50c7df27a464",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:29.184610Z",
+    "execution_time_ms": 294,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:29.184472Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "4480764f-3cb4-4e62-8011-5893586869ad",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:29.482265Z",
+    "execution_time_ms": 53,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:29.482116Z",
+      "aggregation_type": "count",
+      "data_points": 2490,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "fef14dd0-172e-4e8f-8272-dce1cc74818d",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:29.540710Z",
+    "execution_time_ms": 188,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:29.540624Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "7a893407-d9b5-4bef-8001-1fba911981e5",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:29.733791Z",
+    "execution_time_ms": 86,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:29.733568Z",
+      "aggregation_type": "count",
+      "data_points": 8847,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "b8cc10a8-c4e2-46b5-9838-bf26c37d084a",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:29.821983Z",
+    "execution_time_ms": 326,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:29.821845Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "152adc8d-0faf-40a7-b770-d72f6949c401",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:30.153369Z",
+    "execution_time_ms": 361,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:30.153237Z",
+      "complexity": "medium",
+      "data_size": "medium",
+      "write_type": "update"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "036e7234-b29a-47ab-bab2-4bb5f4fc0e5f",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:30.519611Z",
+    "execution_time_ms": 149,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:30.519476Z",
+      "aggregation_type": "count",
+      "data_points": 368,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "03fc24a3-de3c-4aaa-8fd4-2d7daca08d0a",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:30.676350Z",
+    "execution_time_ms": 50,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:30.675879Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "60a6b1dd-0799-4f8d-be26-d06cebeb82fa",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:30.733483Z",
+    "execution_time_ms": 288,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:30.732419Z",
+      "complexity": "low",
+      "data_size": "medium",
+      "write_type": "update"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "71680da0-4a3c-4a14-a418-e3b7a4ba21cb",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:31.026497Z",
+    "execution_time_ms": 185,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:31.026432Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "8865bf07-bd6b-475b-b4c0-45b8f168b335",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:31.221790Z",
+    "execution_time_ms": 52,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:31.221707Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "2824bdcc-3f9d-40ce-a5da-289d4cbb3391",
+    "tenant": "TENANT_003",
+    "operation_type": "cache_refresh",
+    "timestamp": "2025-09-26T05:53:31.279133Z",
+    "execution_time_ms": 261,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:31.279041Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "bf69718b-fa24-4216-aa0a-ebe2b2348c55",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:31.544351Z",
+    "execution_time_ms": 178,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:31.544208Z",
+      "complexity": "medium",
+      "data_size": "small",
+      "write_type": "update"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "59a0a1ce-0a0a-4877-8124-ddc823bfa81f",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:31.732866Z",
+    "execution_time_ms": 392,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:31.732606Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "becdb0a8-e633-4e9e-9502-ae0747071de0",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:32.129355Z",
+    "execution_time_ms": 447,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:32.129248Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "37f35992-be5e-4730-85b6-3f4950f100de",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:32.579340Z",
+    "execution_time_ms": 288,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:32.579064Z",
+      "complexity": "medium",
+      "data_size": "medium",
+      "write_type": "insert"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "fd6427af-c84d-4acd-ab69-14a942135e62",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:32.870336Z",
+    "execution_time_ms": 217,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:32.870257Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "f8e3662f-5902-40c6-82d8-24a20b2734c2",
+    "tenant": "TENANT_003",
+    "operation_type": "index_update",
+    "timestamp": "2025-09-26T05:53:33.097432Z",
+    "execution_time_ms": 102,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:33.097343Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "ae7b1ad5-21e0-4ab9-b074-9d1ed95ab47e",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:33.207487Z",
+    "execution_time_ms": 105,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:33.205733Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "3b59db00-92f6-410b-b763-f926f9b27539",
+    "tenant": "TENANT_003",
+    "operation_type": "index_update",
+    "timestamp": "2025-09-26T05:53:33.316097Z",
+    "execution_time_ms": 500,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:33.315999Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "2b47783a-bdd3-42a2-894a-5280526f4622",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:33.819281Z",
+    "execution_time_ms": 218,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:33.819142Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "4ae20e2b-f5b5-41fc-a0e3-eb385b10a864",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:34.041501Z",
+    "execution_time_ms": 467,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:34.041123Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "aff169dd-5cf4-471a-aeb4-1962ac1f05ea",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:34.510521Z",
+    "execution_time_ms": 216,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:34.510431Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "97940184-c9a7-4be4-9018-456134696a49",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:34.735933Z",
+    "execution_time_ms": 274,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:34.735854Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "d54775b5-c072-4d2f-a3dc-82a46a5de23a",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:35.095898Z",
+    "execution_time_ms": 258,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:35.095706Z",
+      "complexity": "low",
+      "data_size": "large",
+      "write_type": "update"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "9dd50b26-7db8-42bb-9b7e-292c9d922ae3",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:35.364292Z",
+    "execution_time_ms": 339,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:35.364171Z",
+      "complexity": "high",
+      "data_size": "small",
+      "write_type": "insert"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "d3088afa-f5ff-4391-9a81-744f69ae3ad7",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:35.704704Z",
+    "execution_time_ms": 259,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:35.704569Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "a500223b-d668-4862-984a-609ced4f2b49",
+    "tenant": "TENANT_003",
+    "operation_type": "index_update",
+    "timestamp": "2025-09-26T05:53:35.967697Z",
+    "execution_time_ms": 237,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:35.967598Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "ab811b9a-594a-4d96-9564-013f853cae47",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:36.208945Z",
+    "execution_time_ms": 244,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:36.208848Z",
+      "complexity": "low",
+      "data_size": "medium",
+      "write_type": "update"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "e8986070-6fed-4094-aabc-baff402482d9",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:36.455750Z",
+    "execution_time_ms": 207,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:36.455660Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "f03cd9f0-a2ad-4fd1-b4e4-6b72b87ef1a6",
+    "tenant": "TENANT_003",
+    "operation_type": "derived_calculation",
+    "timestamp": "2025-09-26T05:53:36.670853Z",
+    "execution_time_ms": 304,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:36.670751Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "b4c2929e-9e4f-4617-b357-c2c2b7fefad1",
+    "tenant": "TENANT_003",
+    "operation_type": "index_update",
+    "timestamp": "2025-09-26T05:53:36.975271Z",
+    "execution_time_ms": 346,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:36.975205Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "bbd958ff-2b85-4913-807d-8c13aafde95d",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:37.326898Z",
+    "execution_time_ms": 341,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:37.326186Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "d837c0d0-d6a4-4840-8580-f657d73a06fa",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:37.670160Z",
+    "execution_time_ms": 293,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:37.669981Z",
+      "aggregation_type": "sum",
+      "data_points": 7534,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "e4c1aebd-b989-4355-a104-6265a5437df2",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:38.008271Z",
+    "execution_time_ms": 57,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:38.008185Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "4450ab08-6907-46e4-9e1c-978036c45418",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:38.087388Z",
+    "execution_time_ms": 360,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:38.087280Z",
+      "aggregation_type": "group_by",
+      "data_points": 471,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "dd8b6504-aae5-4b20-8c69-bda5f57b2ac2",
+    "tenant": "TENANT_003",
+    "operation_type": "index_update",
+    "timestamp": "2025-09-26T05:53:38.450756Z",
+    "execution_time_ms": 298,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:38.450674Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "9068cf12-ff77-47c7-a5b8-57d22cdf0e13",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:38.756787Z",
+    "execution_time_ms": 357,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:38.756713Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "bc5ae28d-4f1a-4976-8775-c360087ac852",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:39.115501Z",
+    "execution_time_ms": 424,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:39.115340Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "0252026b-7e3f-4ddf-b363-71cf9cfc64b8",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:39.564034Z",
+    "execution_time_ms": 469,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:39.563426Z",
+      "aggregation_type": "avg",
+      "data_points": 5933,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "be193482-9f1e-4a63-8fd9-7b87aa1d1fb8",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:40.055464Z",
+    "execution_time_ms": 269,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:40.055362Z",
+      "aggregation_type": "count",
+      "data_points": 9118,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "130a30cd-628a-4263-9069-017680b048ec",
+    "tenant": "TENANT_003",
+    "operation_type": "index_update",
+    "timestamp": "2025-09-26T05:53:40.509064Z",
+    "execution_time_ms": 381,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:40.505093Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "27399884-c518-46b6-85c6-410c7a24df57",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:40.892012Z",
+    "execution_time_ms": 415,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:40.891874Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "ff675dc5-fb69-4fa2-8ff9-503a6313c059",
+    "tenant": "TENANT_003",
+    "operation_type": "computed_write",
+    "timestamp": "2025-09-26T05:53:41.308847Z",
+    "execution_time_ms": 194,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:41.308704Z",
+      "complexity": "high",
+      "data_size": "small",
+      "write_type": "upsert"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "d771b869-7d91-4ff6-854d-cc340e09ca8f",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:41.510228Z",
+    "execution_time_ms": 493,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:41.508899Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "dbb352ef-903f-4153-a6fe-f835354af5fa",
+    "tenant": "TENANT_003",
+    "operation_type": "data_query",
+    "timestamp": "2025-09-26T05:53:42.036291Z",
+    "execution_time_ms": 52,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:42.036112Z"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "a8239c3f-b5d0-4ca1-9e68-870266bc7e5c",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:42.092395Z",
+    "execution_time_ms": 309,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:42.092302Z",
+      "aggregation_type": "count",
+      "data_points": 3092,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  },
+  {
+    "operation_id": "43aa7310-465f-4237-883e-eb12cdda52fc",
+    "tenant": "TENANT_003",
+    "operation_type": "data_aggregation",
+    "timestamp": "2025-09-26T05:53:42.406735Z",
+    "execution_time_ms": 273,
+    "success": true,
+    "context": {
+      "tenant": "TENANT_003",
+      "data_region": "us-east-1",
+      "processing_region": "us-east-1",
+      "timestamp": "2025-09-26T05:53:42.406606Z",
+      "aggregation_type": "count",
+      "data_points": 6050,
+      "complexity": "medium"
+    },
+    "violations": {
+      "policy": false,
+      "residency": false
+    },
+    "compensation": {
+      "required": false,
+      "reason": null
+    },
+    "metadata": {
+      "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+      "tier": "T3_COMPUTED",
+      "safety_validated": true
+    }
+  }
+]
