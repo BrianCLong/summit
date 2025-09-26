@@ -318,6 +318,38 @@ const aiResolvers = {
       }
       return { entityId, anomalyScore, reason: reason || 'Anomaly detected' };
     },
+    async exportOptimizedModel(_, { modelId, input }, { user }) {
+      if (!user) throw new Error('Not authenticated');
+      if (!input?.formats || input.formats.length === 0) {
+        throw new Error('At least one export format must be provided');
+      }
+
+      try {
+        const result = await gnnService.exportOptimizedModel(modelId, {
+          formats: input.formats,
+          quantization: input.quantization,
+          sampleSize: input.sampleSize ?? 32,
+          exportName: input.exportName,
+        });
+
+        const artifacts = (result.artifacts || []).map((artifact) => ({
+          format: artifact.format,
+          path: artifact.path,
+          sizeBytes: artifact.size_bytes ?? artifact.sizeBytes ?? 0,
+          createdAt: artifact.created_at ?? artifact.createdAt ?? new Date().toISOString(),
+          metadata: artifact.metadata || {},
+        }));
+
+        return {
+          modelId: result.model_id || result.modelId || modelId,
+          status: result.status || 'exported',
+          artifacts,
+        };
+      } catch (err) {
+        logger.error('exportOptimizedModel failed', { modelId, err: err.message });
+        throw err;
+      }
+    },
   },
   Subscription: {
     aiSuggestions: {
