@@ -6,11 +6,13 @@ import aiModule from '../schema.ai.js';
 import annotationsModule from '../schema.annotations.js';
 import graphragTypesModule from '../types/graphragTypes.js';
 import { crystalTypeDefs } from '../schema.crystal.js';
+import auditLogModule from '../schema.audit-logs.js';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
 const { graphTypeDefs } = graphModule as { graphTypeDefs: any };
 const { aiTypeDefs } = aiModule as { aiTypeDefs: any };
 const { annotationsTypeDefs } = annotationsModule as { annotationsTypeDefs: any };
+const { auditLogTypeDefs } = auditLogModule as { auditLogTypeDefs: any };
 const graphragTypes = (graphragTypesModule as any).default || graphragTypesModule;
 
 const base = gql`
@@ -38,6 +40,7 @@ export const typeDefs = [
   graphragTypes,
   aiTypeDefs,
   annotationsTypeDefs,
+  auditLogTypeDefs,
   crystalTypeDefs,
 ];
 
