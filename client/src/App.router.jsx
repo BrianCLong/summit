@@ -40,6 +40,7 @@ import {
   Map,
   Assessment,
   Settings,
+  FilterAlt,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -77,12 +78,14 @@ import ClaimsViewer from './features/conductor/ClaimsViewer';
 import RetractionQueue from './features/conductor/RetractionQueue';
 import CostAdvisor from './features/conductor/CostAdvisor';
 import RunSearch from './features/conductor/RunSearch';
+import GraphQueryBuilderPage from './pages/GraphQueryBuilder';
 
 // Navigation items
 const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/investigations', label: 'Timeline', icon: <Search /> },
   { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
+  { path: '/graph/query-builder', label: 'Query Builder', icon: <FilterAlt /> },
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
   { path: '/conductor', label: 'Conductor Studio', icon: <Engineering /> },
   { path: '/conductor/approvals', label: 'Approvals', icon: <Engineering /> },
@@ -637,6 +640,7 @@ function MainLayout() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/investigations" element={<InvestigationsPage />} />
             <Route path="/graph" element={<GraphExplorerPage />} />
+            <Route path="/graph/query-builder" element={<GraphQueryBuilderPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/conductor" element={<ConductorStudio />} />
             <Route path="/conductor/approvals" element={<ApprovalsPanel />} />

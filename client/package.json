@@ -19,7 +19,9 @@
     "lint:fix": "eslint src --ext js,jsx,ts,tsx --fix",
     "format": "prettier --write .",
     "persist:queries": "pnpm exec graphql-codegen --config codegen.js",
-    "generate:persisted": "node scripts/generate-persisted-operations.js"
+    "generate:persisted": "node scripts/generate-persisted-operations.js",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@apollo/client": "^3.13.9",
@@ -87,6 +89,11 @@
     "@types/jest": "^30.0.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
+    "@storybook/addon-essentials": "^8.2.9",
+    "@storybook/addon-interactions": "^8.2.9",
+    "@storybook/react": "^8.2.9",
+    "@storybook/react-vite": "^8.2.9",
+    "@storybook/test": "^8.2.9",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.42.0",
     "@vitejs/plugin-react": "^5.0.3",
@@ -101,6 +108,7 @@
     "jest": "^30.0.5",
     "jest-junit": "^16.0.0",
     "prettier": "^3.3.3",
+    "storybook": "^8.2.9",
     "ts-jest": "^29.4.4",
     "typescript": "^5.6.2",
     "typescript-eslint": "^8.0.0",

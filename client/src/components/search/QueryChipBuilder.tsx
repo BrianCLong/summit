@@ -1,31 +1,43 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Alert,
   Box,
-  Chip,
-  TextField,
-  Autocomplete,
-  Paper,
-  Typography,
-  IconButton,
-  Tooltip,
   Button,
+  Divider,
+  IconButton,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
 } from '@mui/material';
-import { Add, Clear, FilterList, Save, Share } from '@mui/icons-material';
-
-export interface QueryChip {
-  id: string;
-  field: string;
-  operator: string;
-  value: string;
-  type: 'filter' | 'term' | 'range' | 'exists';
-}
-
-interface QueryChipBuilderProps {
-  chips: QueryChip[];
-  onChipsChange: (chips: QueryChip[]) => void;
-  onSave?: (name: string) => void;
-  onShare?: () => void;
-}
+import { Add, Clear, Delete, FilterList, Save, Share } from '@mui/icons-material';
+import {
+  Background,
+  Connection,
+  Controls,
+  Edge,
+  Handle,
+  MiniMap,
+  Node,
+  NodeProps,
+  Position,
+  ReactFlow,
+  ReactFlowProvider,
+  addEdge,
+  useEdgesState,
+  useNodesState,
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import { gql, useMutation } from '@apollo/client';
+import {
+  GraphQuery,
+  GraphQueryEdge,
+  GraphQueryNode,
+  GraphQueryValidationResult,
+  QueryChip,
+} from '@/types/graphQuery';
 
 const FIELDS = [
   { label: 'Title', value: 'title' },
@@ -37,168 +49,680 @@ const FIELDS = [
   { label: 'Status', value: 'status' },
 ];
 
-const OPERATORS = {
-  text: ['contains', 'equals', 'starts with', 'ends with'],
-  date: ['after', 'before', 'between'],
-  number: ['equals', 'greater than', 'less than', 'between'],
-  select: ['equals', 'in', 'not in'],
-};
+const OPERATORS = ['contains', 'equals', 'starts with', 'ends with'];
 
-export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: QueryChipBuilderProps) {
-  const [newChip, setNewChip] = useState<Partial<QueryChip>>({});
-  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+const LOGICAL_OPERATORS: Array<'AND' | 'OR'> = ['AND', 'OR'];
 
-  const addChip = useCallback(() => {
-    if (!newChip.field || !newChip.operator || !newChip.value) return;
+export const VALIDATE_GRAPH_QUERY = gql`
+  mutation ValidateGraphQuery($query: GraphQueryInput!) {
+    validateGraphQuery(query: $query) {
+      valid
+      message
+      errors
+      suggestions
+      normalized
+    }
+  }
+`;
 
-    const chip: QueryChip = {
-      id: `chip-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      field: newChip.field!,
-      operator: newChip.operator!,
-      value: newChip.value!,
-      type: 'filter',
-    };
+interface ValidateGraphQueryResponse {
+  validateGraphQuery: GraphQueryValidationResult;
+}
 
-    onChipsChange([...chips, chip]);
-    setNewChip({});
-  }, [chips, newChip, onChipsChange]);
+interface ValidateGraphQueryVariables {
+  query: GraphQuery;
+}
 
-  const removeChip = useCallback(
-    (chipId: string) => {
-      onChipsChange(chips.filter((chip) => chip.id !== chipId));
+interface GraphQueryBuilderProps {
+  initialQuery?: GraphQuery;
+  query?: GraphQuery;
+  onQueryChange?: (query: GraphQuery) => void;
+  onChipsChange?: (chips: QueryChip[]) => void;
+  onSave?: (name: string, query: GraphQuery) => void;
+  onShare?: (query: GraphQuery) => void;
+  readOnly?: boolean;
+}
+
+export interface QueryChipBuilderProps {
+  chips: QueryChip[];
+  onChipsChange: (chips: QueryChip[]) => void;
+  onSave?: (name: string) => void;
+  onShare?: () => void;
+}
+
+type FlowNodeData = GraphQueryNode & { label: string };
+
+type FlowNode = Node<FlowNodeData>;
+
+type FlowEdge = Edge<{ logicalOperator: 'AND' | 'OR' }>;
+
+function formatLabel(data: GraphQueryNode) {
+  const { field, operator, value } = data;
+  return `${field || 'field'} ${operator || 'operator'} ${value || 'value'}`;
+}
+
+function toFlowNodes(query: GraphQuery): FlowNode[] {
+  if (!query.nodes.length) {
+    return [];
+  }
+
+  return query.nodes.map((node, index) => ({
+    id: node.id,
+    type: 'conditionNode',
+    position: {
+      x: (index % 3) * 240,
+      y: Math.floor(index / 3) * 160,
     },
-    [chips, onChipsChange],
+    data: {
+      ...node,
+      label: formatLabel(node),
+    },
+  }));
+}
+
+function toFlowEdges(query: GraphQuery): FlowEdge[] {
+  if (!query.edges.length) {
+    return [];
+  }
+
+  return query.edges.map((edge) => ({
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    type: 'smoothstep',
+    animated: false,
+    label: edge.logicalOperator,
+    data: { logicalOperator: edge.logicalOperator },
+  }));
+}
+
+function toGraphQuery(nodes: FlowNode[], edges: FlowEdge[]): GraphQuery {
+  const graphNodes: GraphQueryNode[] = nodes.map((node) => ({
+    id: node.id,
+    field: node.data.field,
+    operator: node.data.operator,
+    value: node.data.value,
+    type: node.data.type,
+    description: node.data.description,
+  }));
+
+  const graphEdges: GraphQueryEdge[] = edges.map((edge) => ({
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    logicalOperator: edge.data?.logicalOperator || 'AND',
+  }));
+
+  const incomingByNode = new Map<string, number>();
+  graphNodes.forEach((node) => incomingByNode.set(node.id, 0));
+  graphEdges.forEach((edge) => {
+    incomingByNode.set(edge.target, (incomingByNode.get(edge.target) || 0) + 1);
+  });
+
+  const rootId = graphNodes.find((node) => (incomingByNode.get(node.id) || 0) === 0)?.id;
+
+  return {
+    nodes: graphNodes,
+    edges: graphEdges,
+    rootId,
+  };
+}
+
+function toChips(query: GraphQuery): QueryChip[] {
+  return query.nodes.map((node) => ({
+    id: node.id,
+    field: node.field,
+    operator: node.operator,
+    value: node.value,
+    type: 'filter',
+  }));
+}
+
+const ConditionNode = ({ data, selected }: NodeProps<FlowNodeData>) => (
+  <Box
+    data-testid="graph-query-node"
+    sx={{
+      p: 1.5,
+      borderRadius: 2,
+      bgcolor: selected ? 'primary.light' : 'background.paper',
+      border: '1px solid',
+      borderColor: selected ? 'primary.main' : 'divider',
+      minWidth: 180,
+      boxShadow: selected ? 3 : 1,
+      transition: 'box-shadow 0.2s ease',
+    }}
+  >
+    <Handle type="target" position={Position.Top} />
+    <Typography variant="subtitle2" gutterBottom>
+      {data.field || 'Select field'}
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      {`${data.operator || 'operator'} ${data.value || ''}`}
+    </Typography>
+    <Handle type="source" position={Position.Bottom} />
+  </Box>
+);
+
+ConditionNode.displayName = 'ConditionNode';
+
+const nodeTypes = { conditionNode: ConditionNode };
+
+function GraphQueryBuilderInner(props: GraphQueryBuilderProps) {
+  const {
+    initialQuery,
+    query,
+    onQueryChange,
+    onChipsChange,
+    onSave,
+    onShare,
+    readOnly,
+  } = props;
+
+  const initialState = useMemo(() => {
+    const seed = query || initialQuery || { nodes: [], edges: [] };
+    return {
+      nodes: toFlowNodes(seed),
+      edges: toFlowEdges(seed),
+    };
+  }, [initialQuery, query]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialState.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialState.edges);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+  const [newNode, setNewNode] = useState<Partial<GraphQueryNode>>({
+    field: '',
+    operator: 'contains',
+    value: '',
+    type: 'condition',
+  });
+  const [validationState, setValidationState] = useState<
+    | { status: 'idle' }
+    | { status: 'loading' }
+    | { status: 'valid'; result: GraphQueryValidationResult }
+    | { status: 'invalid'; result: GraphQueryValidationResult }
+    | { status: 'error'; message: string }
+  >({ status: 'idle' });
+
+  const [validateGraphQuery] = useMutation<
+    ValidateGraphQueryResponse,
+    ValidateGraphQueryVariables
+  >(VALIDATE_GRAPH_QUERY);
+
+  const flowNodeById = useMemo(() => {
+    const map = new Map<string, FlowNode>();
+    nodes.forEach((node) => map.set(node.id, node));
+    return map;
+  }, [nodes]);
+
+  const selectedNode = selectedNodeId ? flowNodeById.get(selectedNodeId) || null : null;
+  const selectedEdge = useMemo(
+    () => (selectedEdgeId ? edges.find((edge) => edge.id === selectedEdgeId) || null : null),
+    [edges, selectedEdgeId],
   );
 
-  const parseKeyboardDSL = useCallback(
-    (input: string) => {
-      // Simple DSL parser: field:value OR field>value OR field<value
-      const dslPattern = /(\w+)([:\<\>])([^\s]+)/g;
-      const matches = Array.from(input.matchAll(dslPattern));
+  const graphQuery = useMemo(() => toGraphQuery(nodes, edges), [nodes, edges]);
+  const serializedGraphQuery = useMemo(() => JSON.stringify(graphQuery), [graphQuery]);
 
-      const newChips = matches.map((match) => ({
-        id: `dsl-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        field: match[1],
-        operator: match[2] === ':' ? 'equals' : match[2] === '>' ? 'greater than' : 'less than',
-        value: match[3],
-        type: 'filter' as const,
-      }));
+  useEffect(() => {
+    if (!query) {
+      return;
+    }
 
-      if (newChips.length > 0) {
-        onChipsChange([...chips, ...newChips]);
+    const normalizedIncoming = JSON.stringify(query);
+    if (normalizedIncoming === serializedGraphQuery) {
+      return;
+    }
+
+    setNodes(toFlowNodes(query));
+    setEdges(toFlowEdges(query));
+  }, [query, serializedGraphQuery, setEdges, setNodes]);
+
+  useEffect(() => {
+    onQueryChange?.(graphQuery);
+    onChipsChange?.(toChips(graphQuery));
+  }, [graphQuery, onChipsChange, onQueryChange]);
+
+  useEffect(() => {
+    if (!graphQuery.nodes.length) {
+      setValidationState({ status: 'idle' });
+      return;
+    }
+
+    let isCancelled = false;
+    const timeout = window.setTimeout(() => {
+      setValidationState({ status: 'loading' });
+      validateGraphQuery({ variables: { query: graphQuery } })
+        .then((response) => {
+          if (isCancelled) return;
+          const result = response.data?.validateGraphQuery;
+          if (result?.valid) {
+            setValidationState({ status: 'valid', result });
+          } else if (result) {
+            setValidationState({ status: 'invalid', result });
+          } else {
+            setValidationState({
+              status: 'error',
+              message: 'No validation response received from server.',
+            });
+          }
+        })
+        .catch((error) => {
+          if (isCancelled) return;
+          setValidationState({ status: 'error', message: error.message });
+        });
+    }, 450);
+
+    return () => {
+      isCancelled = true;
+      window.clearTimeout(timeout);
+    };
+  }, [graphQuery, validateGraphQuery]);
+
+  const handleAddNode = useCallback(() => {
+    if (!newNode.field || !newNode.operator || !newNode.value) {
+      return;
+    }
+
+    const id = `node-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const nodeData: FlowNodeData = {
+      id,
+      field: newNode.field,
+      operator: newNode.operator,
+      value: newNode.value,
+      type: newNode.type || 'condition',
+      label: formatLabel({
+        id,
+        field: newNode.field,
+        operator: newNode.operator,
+        value: newNode.value,
+        type: newNode.type || 'condition',
+      }),
+    };
+
+    setNodes((current) => [
+      ...current,
+      {
+        id,
+        type: 'conditionNode',
+        position: {
+          x: (current.length % 3) * 240,
+          y: Math.floor(current.length / 3) * 160,
+        },
+        data: nodeData,
+      },
+    ]);
+    setNewNode({ field: '', operator: 'contains', value: '', type: 'condition' });
+    setSelectedNodeId(id);
+  }, [newNode, setNodes]);
+
+  const handleConnect = useCallback(
+    (connection: Connection) => {
+      if (!connection.source || !connection.target) {
+        return;
       }
+
+      const id = `edge-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      setEdges((eds) =>
+        addEdge(
+          {
+            ...connection,
+            id,
+            label: 'AND',
+            data: { logicalOperator: 'AND' },
+            type: 'smoothstep',
+          },
+          eds,
+        ),
+      );
+      setSelectedEdgeId(id);
     },
-    [chips, onChipsChange],
+    [setEdges],
+  );
+
+  const updateNodeData = useCallback(
+    (field: keyof GraphQueryNode, value: string) => {
+      if (!selectedNodeId) {
+        return;
+      }
+
+      setNodes((current) =>
+        current.map((node) => {
+          if (node.id !== selectedNodeId) {
+            return node;
+          }
+
+          const updatedData: FlowNodeData = {
+            ...node.data,
+            [field]: value,
+          } as FlowNodeData;
+          return {
+            ...node,
+            data: {
+              ...updatedData,
+              label: formatLabel(updatedData),
+            },
+          };
+        }),
+      );
+    },
+    [selectedNodeId, setNodes],
+  );
+
+  const handleRemoveNode = useCallback(() => {
+    if (!selectedNodeId) {
+      return;
+    }
+
+    setNodes((current) => current.filter((node) => node.id !== selectedNodeId));
+    setEdges((current) =>
+      current.filter((edge) => edge.source !== selectedNodeId && edge.target !== selectedNodeId),
+    );
+    setSelectedNodeId(null);
+  }, [selectedNodeId, setEdges, setNodes]);
+
+  const handleEdgeOperatorChange = useCallback(
+    (operator: 'AND' | 'OR') => {
+      if (!selectedEdgeId) {
+        return;
+      }
+
+      setEdges((current) =>
+        current.map((edge) =>
+          edge.id === selectedEdgeId
+            ? { ...edge, label: operator, data: { logicalOperator: operator } }
+            : edge,
+        ),
+      );
+    },
+    [selectedEdgeId, setEdges],
+  );
+
+  const handleClear = useCallback(() => {
+    setNodes([]);
+    setEdges([]);
+    setSelectedNodeId(null);
+    setSelectedEdgeId(null);
+    setValidationState({ status: 'idle' });
+  }, [setEdges, setNodes]);
+
+  const handleSave = useCallback(() => {
+    if (!onSave) {
+      return;
+    }
+
+    const name = window.prompt('Name this graph query', 'My graph query');
+    if (name) {
+      onSave(name, graphQuery);
+    }
+  }, [graphQuery, onSave]);
+
+  const handleShare = useCallback(() => {
+    onShare?.(graphQuery);
+  }, [graphQuery, onShare]);
+
+  return (
+    <Paper data-testid="graph-query-builder" elevation={1} sx={{ p: 2, borderRadius: 3 }}>
+      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+        <FilterList color="primary" />
+        <Typography variant="h6">Graph Query Builder</Typography>
+        <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
+          {onSave && (
+            <Tooltip title="Save query">
+              <span>
+                <IconButton size="small" onClick={handleSave} disabled={readOnly}>
+                  <Save />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
+          {onShare && (
+            <Tooltip title="Share query">
+              <span>
+                <IconButton size="small" onClick={handleShare}>
+                  <Share />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
+          <Tooltip title="Clear canvas">
+            <span>
+              <IconButton size="small" onClick={handleClear} disabled={readOnly}>
+                <Clear />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </Box>
+      </Stack>
+
+      <Divider sx={{ mb: 2 }} />
+
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+        <Box sx={{ flex: 1, height: 420, minHeight: 360 }}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            nodeTypes={nodeTypes}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={handleConnect}
+            onSelectionChange={(selection) => {
+              const node = selection?.nodes?.[0];
+              const edge = selection?.edges?.[0];
+              setSelectedNodeId(node?.id ?? null);
+              setSelectedEdgeId(edge?.id ?? null);
+            }}
+            fitView
+            fitViewOptions={{ padding: 0.2 }}
+            proOptions={{ hideAttribution: true }}
+          >
+            <Controls showInteractive={!readOnly} />
+            <MiniMap pannable zoomable />
+            <Background gap={16} />
+          </ReactFlow>
+        </Box>
+
+        <Box sx={{ width: { xs: '100%', md: 320 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box>
+            <Typography variant="subtitle2" gutterBottom>
+              Add condition
+            </Typography>
+            <Stack spacing={1.5}>
+              <TextField
+                select
+                label="New node field"
+                value={newNode.field}
+                onChange={(event) =>
+                  setNewNode((previous) => ({ ...previous, field: event.target.value }))
+                }
+                disabled={readOnly}
+              >
+                {FIELDS.map((field) => (
+                  <MenuItem key={field.value} value={field.value}>
+                    {field.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                label="New node operator"
+                value={newNode.operator}
+                onChange={(event) =>
+                  setNewNode((previous) => ({ ...previous, operator: event.target.value }))
+                }
+                disabled={readOnly}
+              >
+                {OPERATORS.map((operator) => (
+                  <MenuItem key={operator} value={operator}>
+                    {operator}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                label="New node value"
+                value={newNode.value}
+                onChange={(event) =>
+                  setNewNode((previous) => ({ ...previous, value: event.target.value }))
+                }
+                disabled={readOnly}
+              />
+              <Button
+                data-testid="add-condition"
+                variant="contained"
+                startIcon={<Add />}
+                disabled={
+                  readOnly || !newNode.field || !newNode.operator || !newNode.value
+                }
+                onClick={handleAddNode}
+              >
+                Add condition node
+              </Button>
+            </Stack>
+          </Box>
+
+          {selectedNode && (
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                Selected node
+              </Typography>
+              <Stack spacing={1.5}>
+                <TextField
+                  select
+                  label="Field"
+                  value={selectedNode.data.field}
+                  onChange={(event) => updateNodeData('field', event.target.value)}
+                  disabled={readOnly}
+                >
+                  {FIELDS.map((field) => (
+                    <MenuItem key={field.value} value={field.value}>
+                      {field.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  select
+                  label="Operator"
+                  value={selectedNode.data.operator}
+                  onChange={(event) => updateNodeData('operator', event.target.value)}
+                  disabled={readOnly}
+                >
+                  {OPERATORS.map((operator) => (
+                    <MenuItem key={operator} value={operator}>
+                      {operator}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  label="Value"
+                  value={selectedNode.data.value}
+                  onChange={(event) => updateNodeData('value', event.target.value)}
+                  disabled={readOnly}
+                />
+                <Button
+                  color="error"
+                  startIcon={<Delete />}
+                  onClick={handleRemoveNode}
+                  disabled={readOnly}
+                >
+                  Delete node
+                </Button>
+              </Stack>
+            </Box>
+          )}
+
+          {selectedEdge && (
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                Selected edge
+              </Typography>
+              <TextField
+                select
+                label="Logical operator"
+                value={selectedEdge.data?.logicalOperator || 'AND'}
+                onChange={(event) =>
+                  handleEdgeOperatorChange(event.target.value as 'AND' | 'OR')
+                }
+                disabled={readOnly}
+              >
+                {LOGICAL_OPERATORS.map((operator) => (
+                  <MenuItem key={operator} value={operator}>
+                    {operator}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
+          )}
+
+          <Box>
+            <Typography variant="subtitle2" gutterBottom>
+              Validation
+            </Typography>
+            {validationState.status === 'idle' && (
+              <Alert severity="info">Add nodes to validate your query.</Alert>
+            )}
+            {validationState.status === 'loading' && (
+              <Alert severity="info">Validating query…</Alert>
+            )}
+            {validationState.status === 'valid' && (
+              <Alert severity="success">
+                {validationState.result.message || 'Query is valid.'}
+              </Alert>
+            )}
+            {validationState.status === 'invalid' && (
+              <Alert severity="warning">
+                {validationState.result.message || 'Query needs attention.'}
+                {validationState.result.errors && validationState.result.errors.length > 0 && (
+                  <ul style={{ marginTop: 8, paddingLeft: 16 }}>
+                    {validationState.result.errors.map((error) => (
+                      <li key={error}>{error}</li>
+                    ))}
+                  </ul>
+                )}
+              </Alert>
+            )}
+            {validationState.status === 'error' && (
+              <Alert severity="error">{validationState.message}</Alert>
+            )}
+          </Box>
+        </Box>
+      </Stack>
+    </Paper>
+  );
+}
+
+export function GraphQueryBuilder(props: GraphQueryBuilderProps) {
+  return (
+    <ReactFlowProvider>
+      <GraphQueryBuilderInner {...props} />
+    </ReactFlowProvider>
+  );
+}
+
+export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: QueryChipBuilderProps) {
+  const initialQuery = useMemo<GraphQuery>(() => ({
+    nodes: chips.map((chip, index) => ({
+      id: chip.id || `chip-${index}`,
+      field: chip.field,
+      operator: chip.operator,
+      value: chip.value,
+      type: 'condition',
+    })),
+    edges: [],
+  }), [chips]);
+
+  const handleQueryChange = useCallback(
+    (nextQuery: GraphQuery) => {
+      onChipsChange(toChips(nextQuery));
+    },
+    [onChipsChange],
   );
 
   return (
-    <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <FilterList color="primary" />
-        <Typography variant="subtitle2">Query Builder</Typography>
-
-        <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
-          {onSave && (
-            <Tooltip title="Save search">
-              <IconButton size="small" onClick={() => setSaveDialogOpen(true)}>
-                <Save />
-              </IconButton>
-            </Tooltip>
-          )}
-
-          {onShare && (
-            <Tooltip title="Share search">
-              <IconButton size="small" onClick={onShare}>
-                <Share />
-              </IconButton>
-            </Tooltip>
-          )}
-
-          <Tooltip title="Clear all filters">
-            <IconButton size="small" onClick={() => onChipsChange([])}>
-              <Clear />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
-
-      {/* Active filter chips */}
-      {chips.length > 0 && (
-        <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {chips.map((chip) => (
-            <Chip
-              key={chip.id}
-              label={`${chip.field} ${chip.operator} ${chip.value}`}
-              onDelete={() => removeChip(chip.id)}
-              color="primary"
-              variant="outlined"
-              size="small"
-            />
-          ))}
-        </Box>
-      )}
-
-      {/* Quick DSL input */}
-      <Box sx={{ mb: 2 }}>
-        <TextField
-          placeholder="Quick search: type:document status:active author:john (or use builder below)"
-          fullWidth
-          size="small"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              parseKeyboardDSL(e.currentTarget.value);
-              e.currentTarget.value = '';
-            }
-          }}
-          helperText="Press Enter to parse. Format: field:value, field>value, field<value"
-        />
-      </Box>
-
-      {/* Manual chip builder */}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
-        <Autocomplete
-          size="small"
-          sx={{ minWidth: 120 }}
-          options={FIELDS}
-          value={FIELDS.find((f) => f.value === newChip.field) || null}
-          onChange={(_, option) => setNewChip((prev) => ({ ...prev, field: option?.value }))}
-          renderInput={(params) => <TextField {...params} label="Field" />}
-        />
-
-        <Autocomplete
-          size="small"
-          sx={{ minWidth: 100 }}
-          options={OPERATORS.text} // Simplified - would be dynamic based on field type
-          value={newChip.operator || null}
-          onChange={(_, value) => setNewChip((prev) => ({ ...prev, operator: value || '' }))}
-          renderInput={(params) => <TextField {...params} label="Operator" />}
-        />
-
-        <TextField
-          size="small"
-          label="Value"
-          value={newChip.value || ''}
-          onChange={(e) => setNewChip((prev) => ({ ...prev, value: e.target.value }))}
-          onKeyDown={(e) => e.key === 'Enter' && addChip()}
-          sx={{ minWidth: 120 }}
-        />
-
-        <Tooltip title="Add filter">
-          <IconButton
-            color="primary"
-            onClick={addChip}
-            disabled={!newChip.field || !newChip.operator || !newChip.value}
-          >
-            <Add />
-          </IconButton>
-        </Tooltip>
-      </Box>
-
-      {chips.length > 0 && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-          {chips.length} active filter{chips.length !== 1 ? 's' : ''}
-        </Typography>
-      )}
-    </Paper>
+    <GraphQueryBuilder
+      initialQuery={initialQuery}
+      onQueryChange={handleQueryChange}
+      onSave={onSave ? (name, _query) => onSave(name) : undefined}
+      onShare={onShare ? (_query) => onShare() : undefined}
+    />
   );
 }
