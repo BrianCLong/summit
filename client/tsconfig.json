@@ -6,7 +6,8 @@
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "bundler",
-    "strict": true
+    "strict": true,
+    "types": ["react", "react-dom", "vite/client", "jest", "@testing-library/jest-dom"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "build"]
