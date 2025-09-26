@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSubscription, gql } from '@apollo/client';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { gql, useMutation, useQuery, useSubscription } from '@apollo/client';
 
 const NOTIFICATION_SUBSCRIPTION = gql`
   subscription NotificationUpdates {
@@ -14,27 +14,91 @@ const NOTIFICATION_SUBSCRIPTION = gql`
       investigationId
       metadata
       expiresAt
+      readAt
+      status
     }
   }
 `;
 
-interface Notification {
+const NOTIFICATION_CENTER_QUERY = gql`
+  query NotificationCenter($limit: Int, $onlyUnread: Boolean) {
+    notifications(limit: $limit, onlyUnread: $onlyUnread) {
+      id
+      type
+      title
+      message
+      severity
+      timestamp
+      actionId
+      investigationId
+      metadata
+      expiresAt
+      readAt
+      status
+    }
+    notificationPreferences {
+      id
+      eventType
+      channels {
+        inApp
+        email
+        sms
+      }
+      email
+      phoneNumber
+    }
+    unreadNotificationCount
+  }
+`;
+
+const UPDATE_NOTIFICATION_PREFERENCE = gql`
+  mutation UpdateNotificationPreference($input: NotificationPreferenceInput!) {
+    updateNotificationPreference(input: $input) {
+      id
+      eventType
+      channels {
+        inApp
+        email
+        sms
+      }
+      email
+      phoneNumber
+    }
+  }
+`;
+
+const MARK_NOTIFICATION_READ = gql`
+  mutation MarkNotificationRead($id: ID!) {
+    markNotificationRead(id: $id) {
+      id
+      status
+      readAt
+    }
+  }
+`;
+
+type Notification = {
   id: string;
-  type:
-    | 'action_safety'
-    | 'investigation_update'
-    | 'system_alert'
-    | 'user_mention'
-    | 'data_ingestion';
+  type: 'INGESTION_COMPLETE' | 'ML_JOB_STATUS' | 'CUSTOM';
   title: string;
   message: string;
   severity: 'info' | 'warning' | 'error' | 'success';
   timestamp: string;
-  actionId?: string;
-  investigationId?: string;
+  actionId?: string | null;
+  investigationId?: string | null;
   metadata?: any;
-  expiresAt?: string;
-}
+  expiresAt?: string | null;
+  readAt?: string | null;
+  status: string;
+};
+
+type Preference = {
+  id: string;
+  eventType: string;
+  channels: { inApp: boolean; email: boolean; sms: boolean };
+  email?: string | null;
+  phoneNumber?: string | null;
+};
 
 interface NotificationSystemProps {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
@@ -44,60 +108,94 @@ interface NotificationSystemProps {
 
 function NotificationSystem({
   position = 'top-right',
-  maxNotifications = 5,
+  maxNotifications = 10,
   autoHideDuration = 5000,
 }: NotificationSystemProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [preferences, setPreferences] = useState<Preference[]>([]);
   const [showPanel, setShowPanel] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Subscribe to real-time notifications
-  const { data: subscriptionData } = useSubscription(NOTIFICATION_SUBSCRIPTION, {
+  const { data, refetch } = useQuery(NOTIFICATION_CENTER_QUERY, {
+    variables: { limit: maxNotifications },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const [updatePreferenceMutation, { loading: preferenceUpdating }] = useMutation(UPDATE_NOTIFICATION_PREFERENCE);
+  const [markNotificationReadMutation] = useMutation(MARK_NOTIFICATION_READ);
+
+  useEffect(() => {
+    if (data?.notifications) {
+      setNotifications((prev) => {
+        const existingIds = new Set(prev.map((n) => n.id));
+        const incoming = data.notifications.filter((n: Notification) => !existingIds.has(n.id));
+        const merged = [...incoming, ...prev];
+        return merged.slice(0, maxNotifications);
+      });
+    }
+    if (data?.notificationPreferences) {
+      setPreferences(data.notificationPreferences);
+    }
+  }, [data, maxNotifications]);
+
+  useSubscription(NOTIFICATION_SUBSCRIPTION, {
+    onData: ({ data: subscriptionData }) => {
+      const payload = subscriptionData?.data?.notificationUpdates;
+      if (!payload) return;
+      addNotification(payload as Notification);
+    },
     errorPolicy: 'all',
   });
 
-  // Handle new notifications from subscription
-  useEffect(() => {
-    if (subscriptionData?.notificationUpdates) {
-      const newNotification = subscriptionData.notificationUpdates;
-      addNotification(newNotification);
+  const unreadCount = useMemo(() => {
+    if (data?.unreadNotificationCount !== undefined) {
+      return data.unreadNotificationCount;
     }
-  }, [subscriptionData]);
+    return notifications.filter((n) => n.status !== 'read').length;
+  }, [data?.unreadNotificationCount, notifications]);
 
   const addNotification = (notification: Notification) => {
     setNotifications((prev) => {
-      // Remove expired notifications
-      const now = new Date();
-      const active = prev.filter((n) => !n.expiresAt || new Date(n.expiresAt) > now);
+      const deduped = prev.filter((n) => n.id !== notification.id);
+      const updated = [notification, ...deduped].slice(0, maxNotifications);
 
-      // Add new notification at the beginning
-      const updated = [notification, ...active].slice(0, maxNotifications);
-
-      // Play sound for important notifications
       if (notification.severity === 'error' || notification.severity === 'warning') {
         playNotificationSound();
       }
 
-      // Auto-hide notification
-      if (autoHideDuration > 0) {
-        setTimeout(() => removeNotification(notification.id), autoHideDuration);
+      if (autoHideDuration > 0 && (!notification.readAt || notification.status !== 'read')) {
+        setTimeout(() => removeNotification(notification.id, false), autoHideDuration);
       }
 
       return updated;
     });
   };
 
-  const removeNotification = (id: string) => {
+  const removeNotification = (id: string, markRead: boolean = true) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
+    if (markRead) {
+      markNotificationReadMutation({ variables: { id } }).catch(() => {
+        /* swallow read errors for UX */
+      });
+      refetch().catch(() => {});
+    }
   };
 
   const clearAllNotifications = () => {
+    const ids = notifications.map((n) => n.id);
     setNotifications([]);
+    Promise.all(ids.map((id) => markNotificationReadMutation({ variables: { id } }))).finally(() => refetch());
   };
 
   const playNotificationSound = () => {
-    // Create a subtle notification sound using Web Audio API
     try {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+        return;
+      }
+
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gain = audioContext.createGain();
@@ -112,7 +210,7 @@ function NotificationSystem({
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.3);
     } catch (error) {
-      // Fallback: silent
+      // intentionally silent
     }
   };
 
@@ -122,16 +220,10 @@ function NotificationSystem({
     if (severity === 'success') return '✅';
 
     switch (type) {
-      case 'action_safety':
-        return '🛡️';
-      case 'investigation_update':
-        return '🔍';
-      case 'system_alert':
-        return '⚙️';
-      case 'user_mention':
-        return '👤';
-      case 'data_ingestion':
-        return '📊';
+      case 'INGESTION_COMPLETE':
+        return '📦';
+      case 'ML_JOB_STATUS':
+        return '🧠';
       default:
         return 'ℹ️';
     }
@@ -156,42 +248,54 @@ function NotificationSystem({
     'top-left': { top: '20px', left: '20px' },
     'bottom-right': { bottom: '20px', right: '20px' },
     'bottom-left': { bottom: '20px', left: '20px' },
+  } as const;
+
+  const handlePreferenceToggle = async (
+    preference: Preference,
+    channel: 'inApp' | 'email' | 'sms',
+    value: boolean,
+  ) => {
+    const nextChannels = { ...preference.channels, [channel]: value };
+    const result = await updatePreferenceMutation({
+      variables: {
+        input: {
+          eventType: preference.eventType,
+          channels: nextChannels,
+          email: preference.email,
+          phoneNumber: preference.phoneNumber,
+        },
+      },
+    });
+
+    if (result.data?.updateNotificationPreference) {
+      setPreferences((prev) =>
+        prev.map((p) => (p.id === preference.id ? result.data.updateNotificationPreference : p)),
+      );
+    }
   };
 
-  // Mock notifications for demo (remove in production)
-  useEffect(() => {
-    const mockNotifications = [
-      {
-        id: 'demo-1',
-        type: 'action_safety' as const,
-        title: 'Action Blocked',
-        message: 'Action test-action-123 was blocked due to safety concerns',
-        severity: 'warning' as const,
-        timestamp: new Date().toISOString(),
-        actionId: 'test-action-123',
+  const handleContactBlur = async (preference: Preference, field: 'email' | 'phoneNumber', value: string) => {
+    const result = await updatePreferenceMutation({
+      variables: {
+        input: {
+          eventType: preference.eventType,
+          channels: preference.channels,
+          email: field === 'email' ? value : preference.email,
+          phoneNumber: field === 'phoneNumber' ? value : preference.phoneNumber,
+        },
       },
-      {
-        id: 'demo-2',
-        type: 'investigation_update' as const,
-        title: 'Investigation Updated',
-        message: 'New entities discovered in investigation sample-investigation',
-        severity: 'info' as const,
-        timestamp: new Date().toISOString(),
-        investigationId: 'sample-investigation',
-      },
-    ];
+    });
 
-    // Add demo notifications after 2 seconds
-    setTimeout(() => {
-      mockNotifications.forEach((notification, index) => {
-        setTimeout(() => addNotification(notification), index * 1000);
-      });
-    }, 2000);
-  }, []);
+    if (result.data?.updateNotificationPreference) {
+      setPreferences((prev) =>
+        prev.map((p) => (p.id === preference.id ? result.data.updateNotificationPreference : p)),
+      );
+    }
+  };
 
   return (
     <>
-      {/* Notification Bell Icon */}
+      <audio ref={audioRef} style={{ display: 'none' }} />
       <div style={{ position: 'relative' }}>
         <button
           onClick={() => setShowPanel(!showPanel)}
@@ -204,9 +308,10 @@ function NotificationSystem({
             fontSize: '16px',
             position: 'relative',
           }}
+          aria-label="Notifications"
         >
           🔔
-          {notifications.length > 0 && (
+          {unreadCount > 0 && (
             <span
               style={{
                 position: 'absolute',
@@ -215,21 +320,21 @@ function NotificationSystem({
                 backgroundColor: '#ef4444',
                 color: 'white',
                 borderRadius: '50%',
-                width: '16px',
+                minWidth: '16px',
                 height: '16px',
                 fontSize: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 'bold',
+                padding: '0 4px',
               }}
             >
-              {notifications.length > 9 ? '9+' : notifications.length}
+              {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </button>
 
-        {/* Notification Panel */}
         {showPanel && (
           <div
             className="panel"
@@ -238,8 +343,8 @@ function NotificationSystem({
               top: '100%',
               right: '0',
               zIndex: 1000,
-              width: '350px',
-              maxHeight: '500px',
+              width: '360px',
+              maxHeight: '520px',
               overflowY: 'auto',
               marginTop: '8px',
             }}
@@ -251,128 +356,252 @@ function NotificationSystem({
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                gap: '12px',
               }}
             >
-              <h3 style={{ fontSize: '1rem', fontWeight: '600', margin: 0 }}>
-                Notifications ({notifications.length})
-              </h3>
-              {notifications.length > 0 && (
+              <div>
+                <h3 style={{ fontSize: '1rem', fontWeight: '600', margin: 0 }}>Notifications</h3>
+                <span style={{ fontSize: '12px', color: '#666' }}>{unreadCount} unread</span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
                 <button
-                  onClick={clearAllNotifications}
+                  onClick={() => setShowPreferences((prev) => !prev)}
                   style={{
-                    color: '#666',
+                    color: '#1a73e8',
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
                     fontSize: '12px',
                   }}
                 >
-                  Clear All
+                  {showPreferences ? 'Hide Preferences' : 'Preferences'}
                 </button>
-              )}
+                {notifications.length > 0 && (
+                  <button
+                    onClick={clearAllNotifications}
+                    style={{
+                      color: '#666',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                    }}
+                  >
+                    Mark all read
+                  </button>
+                )}
+              </div>
             </div>
 
-            {notifications.length === 0 ? (
-              <div style={{ padding: '40px 20px', textAlign: 'center', color: '#666' }}>
-                <div style={{ fontSize: '32px', marginBottom: '8px' }}>🔔</div>
-                <div>No notifications</div>
-                <div style={{ fontSize: '12px', marginTop: '4px' }}>
-                  You'll see real-time updates here
-                </div>
-              </div>
-            ) : (
-              notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  style={{
-                    padding: '16px',
-                    borderBottom: '1px solid var(--hairline)',
-                    position: 'relative',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                    <div style={{ fontSize: '18px', marginTop: '2px' }}>
-                      {getNotificationIcon(notification.type, notification.severity)}
-                    </div>
-
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'flex-start',
-                          marginBottom: '4px',
-                        }}
-                      >
-                        <h4
-                          style={{
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            margin: 0,
-                            color: getSeverityColor(notification.severity),
-                          }}
-                        >
-                          {notification.title}
-                        </h4>
-                        <button
-                          onClick={() => removeNotification(notification.id)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: '#999',
-                            fontSize: '12px',
-                            padding: '2px',
-                          }}
-                        >
-                          ✕
-                        </button>
-                      </div>
-
-                      <p
-                        style={{
-                          fontSize: '13px',
-                          color: '#666',
-                          margin: '0 0 8px 0',
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        {notification.message}
-                      </p>
-
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '11px',
-                          color: '#999',
-                        }}
-                      >
-                        <span>{new Date(notification.timestamp).toLocaleTimeString()}</span>
-                        {(notification.actionId || notification.investigationId) && (
-                          <span
-                            style={{
-                              backgroundColor: '#f3f4f6',
-                              padding: '2px 6px',
-                              borderRadius: '3px',
-                              fontSize: '10px',
-                            }}
-                          >
-                            {notification.actionId || notification.investigationId}
-                          </span>
-                        )}
-                      </div>
+            {!showPreferences && (
+              <>
+                {notifications.length === 0 ? (
+                  <div style={{ padding: '40px 20px', textAlign: 'center', color: '#666' }}>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>🔔</div>
+                    <div>No notifications yet</div>
+                    <div style={{ fontSize: '12px', marginTop: '4px' }}>
+                      Real-time alerts about ingestion and ML jobs appear here.
                     </div>
                   </div>
-                </div>
-              ))
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      style={{
+                        padding: '16px',
+                        borderBottom: '1px solid var(--hairline)',
+                        position: 'relative',
+                        backgroundColor: notification.status === 'read' ? '#f9fafb' : 'white',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                        <div style={{ fontSize: '18px', marginTop: '2px' }}>
+                          {getNotificationIcon(notification.type, notification.severity)}
+                        </div>
+
+                        <div style={{ flex: 1 }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'flex-start',
+                              marginBottom: '4px',
+                              gap: '8px',
+                            }}
+                          >
+                            <h4
+                              style={{
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                margin: 0,
+                                color: getSeverityColor(notification.severity),
+                              }}
+                            >
+                              {notification.title}
+                            </h4>
+                            <div style={{ display: 'flex', gap: '4px' }}>
+                              {notification.status !== 'read' && (
+                                <button
+                                  onClick={() => removeNotification(notification.id)}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#2563eb',
+                                    fontSize: '12px',
+                                  }}
+                                >
+                                  Mark read
+                                </button>
+                              )}
+                              <button
+                                onClick={() => removeNotification(notification.id, false)}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  color: '#999',
+                                  fontSize: '12px',
+                                }}
+                                aria-label="Dismiss notification"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+
+                          <p
+                            style={{
+                              fontSize: '13px',
+                              color: '#444',
+                              margin: '0 0 8px 0',
+                              lineHeight: 1.4,
+                            }}
+                          >
+                            {notification.message}
+                          </p>
+
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              fontSize: '11px',
+                              color: '#999',
+                              flexWrap: 'wrap',
+                              gap: '4px',
+                            }}
+                          >
+                            <span>{new Date(notification.timestamp).toLocaleString()}</span>
+                            {(notification.actionId || notification.investigationId) && (
+                              <span
+                                style={{
+                                  backgroundColor: '#f3f4f6',
+                                  padding: '2px 6px',
+                                  borderRadius: '3px',
+                                  fontSize: '10px',
+                                }}
+                              >
+                                {notification.actionId || notification.investigationId}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </>
+            )}
+
+            {showPreferences && (
+              <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>Delivery Preferences</h4>
+                {preferences.map((preference) => (
+                  <div
+                    key={preference.id}
+                    style={{
+                      border: '1px solid var(--hairline)',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                    }}
+                  >
+                    <div style={{ fontWeight: 600, fontSize: '13px' }}>{preference.eventType}</div>
+                    <div style={{ display: 'flex', gap: '12px', fontSize: '12px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <input
+                          type="checkbox"
+                          checked={preference.channels.inApp}
+                          onChange={(event) => handlePreferenceToggle(preference, 'inApp', event.target.checked)}
+                          disabled={preferenceUpdating}
+                        />
+                        In-app
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <input
+                          type="checkbox"
+                          checked={preference.channels.email}
+                          onChange={(event) => handlePreferenceToggle(preference, 'email', event.target.checked)}
+                          disabled={preferenceUpdating}
+                        />
+                        Email
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <input
+                          type="checkbox"
+                          checked={preference.channels.sms}
+                          onChange={(event) => handlePreferenceToggle(preference, 'sms', event.target.checked)}
+                          disabled={preferenceUpdating}
+                        />
+                        SMS
+                      </label>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
+                      <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span>Email address</span>
+                        <input
+                          key={`email-${preference.id}-${preference.email ?? ''}`}
+                          type="email"
+                          defaultValue={preference.email ?? ''}
+                          placeholder="alerts@example.com"
+                          onBlur={(event) => handleContactBlur(preference, 'email', event.target.value)}
+                          style={{
+                            padding: '6px 8px',
+                            borderRadius: '4px',
+                            border: '1px solid var(--hairline)',
+                          }}
+                        />
+                      </label>
+                      <label style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span>SMS number</span>
+                        <input
+                          key={`phone-${preference.id}-${preference.phoneNumber ?? ''}`}
+                          type="tel"
+                          defaultValue={preference.phoneNumber ?? ''}
+                          placeholder="+1 555 0100"
+                          onBlur={(event) => handleContactBlur(preference, 'phoneNumber', event.target.value)}
+                          style={{
+                            padding: '6px 8px',
+                            borderRadius: '4px',
+                            border: '1px solid var(--hairline)',
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ))}
+                {preferences.length === 0 && (
+                  <div style={{ fontSize: '12px', color: '#666' }}>Preferences will appear once created for this user.</div>
+                )}
+              </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Toast Notifications */}
       <div
         style={{
           position: 'fixed',
@@ -392,81 +621,48 @@ function NotificationSystem({
               boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
               pointerEvents: 'auto',
               animation: 'slideIn 0.3s ease-out',
+              backgroundColor: 'white',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-              <div style={{ fontSize: '16px' }}>
-                {getNotificationIcon(notification.type, notification.severity)}
-              </div>
+              <div style={{ fontSize: '16px' }}>{getNotificationIcon(notification.type, notification.severity)}</div>
               <div style={{ flex: 1 }}>
-                <h4
-                  style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    margin: '0 0 4px 0',
-                    color: getSeverityColor(notification.severity),
-                  }}
-                >
-                  {notification.title}
-                </h4>
-                <p
-                  style={{
-                    fontSize: '13px',
-                    color: '#666',
-                    margin: 0,
-                    lineHeight: 1.4,
-                  }}
-                >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <h4
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      margin: 0,
+                      color: getSeverityColor(notification.severity),
+                    }}
+                  >
+                    {notification.title}
+                  </h4>
+                  <button
+                    onClick={() => removeNotification(notification.id)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: '#999',
+                      fontSize: '12px',
+                    }}
+                    aria-label="Dismiss toast"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <p style={{ fontSize: '13px', color: '#444', margin: '4px 0 8px 0', lineHeight: 1.4 }}>
                   {notification.message}
                 </p>
+                <div style={{ fontSize: '11px', color: '#999' }}>
+                  {new Date(notification.timestamp).toLocaleTimeString()}
+                </div>
               </div>
-              <button
-                onClick={() => removeNotification(notification.id)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: '#999',
-                  fontSize: '12px',
-                }}
-              >
-                ✕
-              </button>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Click outside to close panel */}
-      {showPanel && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 999,
-          }}
-          onClick={() => setShowPanel(false)}
-        />
-      )}
-
-      {/* CSS Animation */}
-      <style>
-        {`
-          @keyframes slideIn {
-            from {
-              transform: translateX(${position.includes('right') ? '100%' : '-100%'});
-              opacity: 0;
-            }
-            to {
-              transform: translateX(0);
-              opacity: 1;
-            }
-          }
-        `}
-      </style>
     </>
   );
 }
