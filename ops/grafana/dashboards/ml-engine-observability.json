@@ -1,0 +1,332 @@
+{
+  "title": "ML Engine \u2014 Inference Health",
+  "uid": "ml-engine-observability",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "tags": [
+    "ml",
+    "python",
+    "otel"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "env",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(ml_engine_inference_requests_total, env)",
+        "refresh": 2,
+        "current": {
+          "text": "prod",
+          "value": "prod"
+        }
+      },
+      {
+        "name": "model",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(ml_engine_inference_requests_total{env=\"$env\"}, model)",
+        "refresh": 2,
+        "current": {
+          "text": "all",
+          "value": ".*"
+        },
+        "regex": ".*"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Inference Latency Quantiles (ms)",
+      "id": 1,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(ml_engine_inference_latency_seconds_bucket{env=\"$env\", model=~\"$model\"}[5m])) by (le)) * 1000",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(ml_engine_inference_latency_seconds_bucket{env=\"$env\", model=~\"$model\"}[5m])) by (le)) * 1000",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(ml_engine_inference_latency_seconds_bucket{env=\"$env\", model=~\"$model\"}[5m])) by (le)) * 1000",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Success Rate (5m)",
+      "id": 2,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 0.995
+              },
+              {
+                "color": "green",
+                "value": 0.999
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        }
+      },
+      "targets": [
+        {
+          "expr": "(1 - (sum(rate(ml_engine_inference_errors_total{env=\"$env\", model=~\"$model\"}[5m])) / sum(rate(ml_engine_inference_requests_total{env=\"$env\", model=~\"$model\"}[5m]))))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Retry Rate (5m)",
+      "id": 3,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ml_engine_inference_retries_total{env=\"$env\", model=~\"$model\"}[5m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Throughput (req/s)",
+      "id": 4,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ml_engine_inference_requests_total{env=\"$env\", model=~\"$model\"}[1m])) by (model)",
+          "legendFormat": "{{model}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Resource Utilization",
+      "id": 5,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg(ml_engine_gpu_utilization_percent{env=\"$env\"})",
+          "legendFormat": "GPU",
+          "refId": "A"
+        },
+        {
+          "expr": "avg(ml_engine_cpu_utilization_percent{env=\"$env\"})",
+          "legendFormat": "CPU",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Top Error Codes (5m)",
+      "id": 6,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 8
+      },
+      "targets": [
+        {
+          "expr": "topk(5, sum(rate(ml_engine_inference_errors_total{env=\"$env\", model=~\"$model\"}[5m])) by (error_code))",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "OTel Exported Spans (5m)",
+      "id": 7,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(otelcol_exporter_sent_spans{service_name=\"ml-engine\", env=\"$env\"}[5m])) by (exporter)",
+          "legendFormat": "{{exporter}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Cold Start Duration (p95, ms)",
+      "id": 8,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 16
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(ml_engine_cold_start_latency_seconds_bucket{env=\"$env\"}[5m])) by (le)) * 1000",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "jaeger-trace",
+      "title": "Recent Traces (Jaeger)",
+      "id": 9,
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 18,
+        "y": 16
+      },
+      "datasource": {
+        "type": "jaeger",
+        "uid": "Jaeger"
+      },
+      "options": {
+        "query": {
+          "service": "ml-engine"
+        }
+      }
+    }
+  ]
+}

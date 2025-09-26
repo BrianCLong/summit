@@ -4,3 +4,45 @@ scrape_configs:
   - job_name: otel-collector
     static_configs:
       - targets: ['otel-collector:9464']
+  - job_name: ml-engine
+    metrics_path: /metrics
+    scrape_interval: 15s
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ['ml-services']
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        action: keep
+        regex: ml-engine
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_pod_label_environment]
+        target_label: env
+      - source_labels: [__meta_kubernetes_pod_label_model]
+        target_label: model
+      - source_labels: [__meta_kubernetes_pod_label_version]
+        target_label: version
+  - job_name: disclosure-packager
+    metrics_path: /metrics
+    scrape_interval: 30s
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ['compliance-services']
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        action: keep
+        regex: disclosure-packager
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      - source_labels: [__meta_kubernetes_pod_label_environment]
+        target_label: env
+      - source_labels: [__meta_kubernetes_pod_label_pipeline]
+        target_label: pipeline
+      - source_labels: [__meta_kubernetes_pod_label_version]
+        target_label: version
