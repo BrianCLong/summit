@@ -1,0 +1,42 @@
+{
+  "nodeService": [
+    {
+      "environment": "dev",
+      "requestLatencyMs": 120,
+      "featureFlags": ["beta-insights", "synthetic-metrics"],
+      "schemaVersion": 1
+    },
+    {
+      "environment": "staging",
+      "requestLatencyMs": 95,
+      "featureFlags": ["synthetic-metrics"],
+      "schemaVersion": 1
+    },
+    {
+      "environment": "prod",
+      "requestLatencyMs": 80,
+      "featureFlags": [],
+      "schemaVersion": 1
+    }
+  ],
+  "pythonService": [
+    {
+      "environment": "dev",
+      "anomaliesDetected": 2,
+      "confidence": 0.68,
+      "syntheticEvents": 25
+    },
+    {
+      "environment": "staging",
+      "anomaliesDetected": 1,
+      "confidence": 0.82,
+      "syntheticEvents": 18
+    },
+    {
+      "environment": "prod",
+      "anomaliesDetected": 0,
+      "confidence": 0.94,
+      "syntheticEvents": 15
+    }
+  ]
+}
