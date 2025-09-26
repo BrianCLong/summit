@@ -7,6 +7,13 @@ FastAPI microservice for ingesting CSV/JSON/S3 data, mapping to canonical fields
 - `POST /ingest/jobs` – Start an ingestion job.
 - `GET /ingest/jobs/{id}` – Retrieve status for a job.
 
+### Postgres + ML Preprocessing (Workstream 69)
+
+- `sourceType: "postgres"` enables the Dask/OpenTelemetry-enhanced pipeline from the
+  Summit ML engine (see PR #1368 notes). Provide `postgresOptions` with the table or
+  query metadata and the ingest wizard surfaces the returned `qualityInsights`
+  metrics for analysts.
+
 ## Sample
 
 ```bash
