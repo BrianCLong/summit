@@ -4,7 +4,16 @@ import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { createLogger, format, transports } from 'winston';
+import http from 'http';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import { Pool } from 'pg';
+import neo4j from 'neo4j-driver';
 import searchRoutes from './routes/searchRoutes';
+import { ElasticsearchService } from './services/ElasticsearchService';
+import { typeDefs } from './graphql/schema';
+import { resolvers, type SearchContext, type AuthContext } from './graphql/resolvers';
+import { searchPolicyClient } from './policy/searchPolicyClient';
 
 const app = express();
 const port = process.env.PORT || 4006;
@@ -24,6 +33,74 @@ const logger = createLogger({
       filename: 'logs/search-engine.log',
     }),
   ],
+});
+
+const postgresPool = new Pool({
+  host: process.env.POSTGRES_HOST || 'localhost',
+  port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
+  database: process.env.POSTGRES_DB || 'intelgraph',
+  user: process.env.POSTGRES_USER || 'intelgraph',
+  password: process.env.POSTGRES_PASSWORD || 'password',
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
+
+const neo4jDriver = neo4j.driver(
+  process.env.NEO4J_URI || 'bolt://localhost:7687',
+  neo4j.auth.basic(process.env.NEO4J_USER || 'neo4j', process.env.NEO4J_PASSWORD || 'password'),
+  {
+    encrypted: process.env.NODE_ENV === 'production' ? 'ENCRYPTION_ON' : 'ENCRYPTION_OFF',
+    maxConnectionPoolSize: 20,
+  },
+);
+
+const elasticsearchService = new ElasticsearchService();
+
+const apolloServer = new ApolloServer({
+  typeDefs,
+  resolvers,
+});
+
+let httpServer: http.Server | null = null;
+
+function parseHeaderList(value: string | string[] | undefined): string[] {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value
+      .join(',')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function buildAuthContext(req: express.Request): AuthContext {
+  const tenantHeader = (req.headers['x-tenant-id'] as string | undefined) || undefined;
+  const bodyTenant = (req.body?.variables?.input?.tenantId as string | undefined) || undefined;
+  const tenantId = tenantHeader || bodyTenant;
+
+  return {
+    tenantId,
+    userId: (req.headers['x-user-id'] as string | undefined) || undefined,
+    roles: parseHeaderList(req.headers['x-user-roles'] as string | string[] | undefined),
+    allowedNodeTypes: parseHeaderList(
+      req.headers['x-allowed-node-types'] as string | string[] | undefined,
+    ),
+  };
+}
+
+const buildContext = async ({ req }: { req: express.Request }): Promise<SearchContext> => ({
+  postgres: postgresPool,
+  neo4j: neo4jDriver,
+  elastic: elasticsearchService,
+  opa: searchPolicyClient,
+  logger,
+  auth: buildAuthContext(req),
 });
 
 app.use(
@@ -121,16 +198,6 @@ search_engine_uptime_seconds ${process.uptime()}
   );
 });
 
-app.use('/api/search', searchRoutes);
-
-app.use('*', (req, res) => {
-  res.status(404).json({
-    error: 'Route not found',
-    path: req.originalUrl,
-    method: req.method,
-  });
-});
-
 app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.error('Unhandled error', {
     error: error.message,
@@ -158,33 +225,75 @@ process.on('uncaughtException', (error) => {
   process.exit(1);
 });
 
-const gracefulShutdown = (signal: string) => {
+async function startServer() {
+  await apolloServer.start();
+
+  app.use(
+    '/graphql',
+    expressMiddleware(apolloServer, {
+      context: buildContext,
+    }),
+  );
+
+  app.use('/api/search', searchRoutes);
+
+  app.use('*', (req, res) => {
+    res.status(404).json({
+      error: 'Route not found',
+      path: req.originalUrl,
+      method: req.method,
+    });
+  });
+
+  httpServer = app.listen(port, () => {
+    logger.info(`🔍 Search Engine service started`, {
+      port,
+      environment: process.env.NODE_ENV || 'development',
+      elasticsearch: process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
+    });
+  });
+}
+
+startServer().catch((error) => {
+  logger.error('Failed to start search engine service', {
+    error: error.message,
+    stack: error.stack,
+  });
+  process.exit(1);
+});
+
+const gracefulShutdown = async (signal: string) => {
   logger.info(`Received ${signal}, shutting down gracefully`);
 
-  const server = app.listen(port, () => {
-    logger.info(`Search Engine service running on port ${port}`);
-  });
+  try {
+    await apolloServer.stop();
 
-  server.close(() => {
-    logger.info('HTTP server closed');
+    if (httpServer) {
+      await new Promise<void>((resolve, reject) => {
+        httpServer?.close((err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    }
+
+    await postgresPool.end();
+    await neo4jDriver.close();
+
+    logger.info('Shutdown complete');
     process.exit(0);
-  });
-
-  setTimeout(() => {
-    logger.error('Could not close connections in time, forcefully shutting down');
+  } catch (error) {
+    logger.error('Error during shutdown', { error: (error as Error).message });
     process.exit(1);
-  }, 30000);
+  }
 };
 
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => {
+  void gracefulShutdown('SIGTERM');
+});
 
-const server = app.listen(port, () => {
-  logger.info(`🔍 Search Engine service started`, {
-    port,
-    environment: process.env.NODE_ENV || 'development',
-    elasticsearch: process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
-  });
+process.on('SIGINT', () => {
+  void gracefulShutdown('SIGINT');
 });
 
 export default app;
