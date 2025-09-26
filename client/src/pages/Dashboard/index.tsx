@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
@@ -15,9 +15,24 @@ export default function Dashboard() {
   // Prefetch critical dashboard data to eliminate panel pop-in
   useDashboardPrefetch();
   useIntelligentPrefetch();
+  const headingId = useId();
 
   return (
-    <Box p={2} aria-live="polite">
+    <Box
+      component="main"
+      p={2}
+      aria-live="polite"
+      aria-labelledby={headingId}
+      data-testid="dashboard-main"
+    >
+      <Box component="header" sx={{ mb: 3 }}>
+        <Typography id={headingId} variant="h4" component="h1" gutterBottom>
+          Operations Dashboard Overview
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Monitor key service metrics, live activity, and quick links to observability tools.
+        </Typography>
+      </Box>
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
           <Paper elevation={1} sx={{ p: 2, borderRadius: 3 }}>
