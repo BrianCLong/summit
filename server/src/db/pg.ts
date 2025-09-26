@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, register } from 'prom-client';
+import { withTenantConnection } from './tenants/postgresTenancy.js';
 
 const tracer = trace.getTracer('maestro-postgres', '24.3.0');
 
@@ -70,14 +71,17 @@ export const pg = {
   oneOrNone: async (query: string, params: any[] = [], options?: { region?: string; routerHint?: string; tenantId?: string; forceWrite?: boolean }) => {
     return tracer.startActiveSpan('postgres.query', async (span: Span) => {
       const operation = query.split(' ')[0].toLowerCase();
-      const { pool: selectedPool, poolType } = getPoolForQuery(query, options?.forceWrite);
+      const tenantScoped = Boolean(options?.tenantId);
+      const { pool: basePool, poolType } = getPoolForQuery(query, options?.forceWrite);
+      const selectedPool = tenantScoped ? writePool : basePool;
+      const poolTypeLabel = tenantScoped ? 'tenant' : poolType;
       const currentRegion = process.env.CURRENT_REGION || 'unknown';
       
       span.setAttributes({
         'db.system': 'postgresql',
         'db.statement': query,
         'db.operation': operation,
-        'db.pool_type': poolType,
+        'db.pool_type': poolTypeLabel,
         'db.region': currentRegion,
         'tenant_id': options?.tenantId || 'unknown'
       });
@@ -86,19 +90,31 @@ export const pg = {
       const scopedQuery = validateAndScopeQuery(query, params, options?.tenantId);
       const startTime = Date.now();
 
+      const runner = async () => {
+        if (tenantScoped && options?.tenantId) {
+          return await withTenantConnection(
+            options.tenantId,
+            async (client) => client.query(scopedQuery.query, scopedQuery.params),
+            { pool: selectedPool }
+          );
+        }
+
+        return await selectedPool.query(scopedQuery.query, scopedQuery.params);
+      };
+
       try {
         dbConnectionsActive.inc({
           region: currentRegion,
-          pool_type: poolType,
+          pool_type: poolTypeLabel,
           tenant_id: options?.tenantId || 'unknown'
         });
 
-        const result = await selectedPool.query(scopedQuery.query, scopedQuery.params);
-        
+        const result = await runner();
+
         const duration = (Date.now() - startTime) / 1000;
         dbQueryDuration.observe({
           region: currentRegion,
-          pool_type: poolType,
+          pool_type: poolTypeLabel,
           operation,
           tenant_id: options?.tenantId || 'unknown'
         }, duration);
@@ -108,7 +124,7 @@ export const pg = {
           'db.tenant_scoped': scopedQuery.wasScoped,
           'db.query_duration': duration
         });
-        
+
         return result.rows[0] || null;
       } catch (error) {
         span.recordException(error as Error);
@@ -125,7 +141,9 @@ export const pg = {
     return tracer.startActiveSpan('postgres.read', async (span: Span) => {
       const operation = query.split(' ')[0].toLowerCase();
       const currentRegion = process.env.CURRENT_REGION || 'unknown';
-      
+      const tenantScoped = Boolean(options?.tenantId);
+      const poolTypeLabel = tenantScoped ? 'tenant' : 'read';
+
       // Ensure this is a read operation
       if (!['select', 'with'].includes(operation)) {
         throw new Error(`Read method called with write operation: ${operation}`);
@@ -135,7 +153,7 @@ export const pg = {
         'db.system': 'postgresql',
         'db.statement': query,
         'db.operation': operation,
-        'db.pool_type': 'read',
+        'db.pool_type': poolTypeLabel,
         'db.region': currentRegion,
         'tenant_id': options?.tenantId || 'unknown'
       });
@@ -146,16 +164,22 @@ export const pg = {
       try {
         dbConnectionsActive.inc({
           region: currentRegion,
-          pool_type: 'read',
+          pool_type: poolTypeLabel,
           tenant_id: options?.tenantId || 'unknown'
         });
 
-        const result = await readPool.query(scopedQuery.query, scopedQuery.params);
-        
+        const result = tenantScoped && options?.tenantId
+          ? await withTenantConnection(
+              options.tenantId,
+              async (client) => client.query(scopedQuery.query, scopedQuery.params),
+              { pool: writePool }
+            )
+          : await readPool.query(scopedQuery.query, scopedQuery.params);
+
         const duration = (Date.now() - startTime) / 1000;
         dbQueryDuration.observe({
           region: currentRegion,
-          pool_type: 'read',
+          pool_type: poolTypeLabel,
           operation,
           tenant_id: options?.tenantId || 'unknown'
         }, duration);
@@ -182,6 +206,8 @@ export const pg = {
     return tracer.startActiveSpan('postgres.write', async (span: Span) => {
       const operation = query.split(' ')[0].toLowerCase();
       const currentRegion = process.env.CURRENT_REGION || 'unknown';
+      const tenantScoped = Boolean(options?.tenantId);
+      const poolTypeLabel = tenantScoped ? 'tenant' : 'write';
       
       // Block writes in read-only regions unless this is a failover scenario
       if (process.env.READ_ONLY_REGION === 'true' && !process.env.FAILOVER_MODE) {
@@ -192,7 +218,7 @@ export const pg = {
         'db.system': 'postgresql',
         'db.statement': query,
         'db.operation': operation,
-        'db.pool_type': 'write',
+        'db.pool_type': poolTypeLabel,
         'db.region': currentRegion,
         'tenant_id': options?.tenantId || 'unknown'
       });
@@ -203,16 +229,22 @@ export const pg = {
       try {
         dbConnectionsActive.inc({
           region: currentRegion,
-          pool_type: 'write',
+          pool_type: poolTypeLabel,
           tenant_id: options?.tenantId || 'unknown'
         });
 
-        const result = await writePool.query(scopedQuery.query, scopedQuery.params);
-        
+        const result = tenantScoped && options?.tenantId
+          ? await withTenantConnection(
+              options.tenantId,
+              async (client) => client.query(scopedQuery.query, scopedQuery.params),
+              { pool: writePool }
+            )
+          : await writePool.query(scopedQuery.query, scopedQuery.params);
+
         const duration = (Date.now() - startTime) / 1000;
         dbQueryDuration.observe({
           region: currentRegion,
-          pool_type: 'write',
+          pool_type: poolTypeLabel,
           operation,
           tenant_id: options?.tenantId || 'unknown'
         }, duration);
@@ -239,7 +271,9 @@ export const pg = {
     return tracer.startActiveSpan('postgres.read_many', async (span: Span) => {
       const operation = query.split(' ')[0].toLowerCase();
       const currentRegion = process.env.CURRENT_REGION || 'unknown';
-      
+      const tenantScoped = Boolean(options?.tenantId);
+      const poolTypeLabel = tenantScoped ? 'tenant' : 'read';
+
       if (!['select', 'with'].includes(operation)) {
         throw new Error(`ReadMany method called with write operation: ${operation}`);
       }
@@ -248,7 +282,7 @@ export const pg = {
         'db.system': 'postgresql',
         'db.statement': query,
         'db.operation': operation,
-        'db.pool_type': 'read',
+        'db.pool_type': poolTypeLabel,
         'db.region': currentRegion,
         'tenant_id': options?.tenantId || 'unknown'
       });
@@ -257,12 +291,18 @@ export const pg = {
       const startTime = Date.now();
 
       try {
-        const result = await readPool.query(scopedQuery.query, scopedQuery.params);
-        
+        const result = tenantScoped && options?.tenantId
+          ? await withTenantConnection(
+              options.tenantId,
+              async (client) => client.query(scopedQuery.query, scopedQuery.params),
+              { pool: writePool }
+            )
+          : await readPool.query(scopedQuery.query, scopedQuery.params);
+
         const duration = (Date.now() - startTime) / 1000;
         dbQueryDuration.observe({
           region: currentRegion,
-          pool_type: 'read',
+          pool_type: poolTypeLabel,
           operation,
           tenant_id: options?.tenantId || 'unknown'
         }, duration);
@@ -286,6 +326,7 @@ export const pg = {
 
   many: async (query: string, params: any[] = [], options?: { region?: string; routerHint?: string; tenantId?: string }) => {
     return tracer.startActiveSpan('postgres.query.many', async (span: Span) => {
+      const tenantScoped = Boolean(options?.tenantId);
       span.setAttributes({
         'db.system': 'postgresql',
         'db.statement': query,
@@ -297,7 +338,13 @@ export const pg = {
       const scopedQuery = validateAndScopeQuery(query, params, options?.tenantId);
 
       try {
-        const result = await pool.query(scopedQuery.query, scopedQuery.params);
+        const result = tenantScoped && options?.tenantId
+          ? await withTenantConnection(
+              options.tenantId,
+              async (client) => client.query(scopedQuery.query, scopedQuery.params),
+              { pool: writePool }
+            )
+          : await pool.query(scopedQuery.query, scopedQuery.params);
         span.setAttributes({
           'db.rows_affected': result.rowCount || 0,
           'db.tenant_scoped': scopedQuery.wasScoped
