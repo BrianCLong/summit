@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import cytoscape from 'cytoscape';
 import coseBilkent from 'cytoscape-cose-bilkent';
@@ -27,6 +27,7 @@ import {
 import $ from 'jquery'; // Import jQuery
 import { debounce } from 'lodash'; // Import debounce
 import RbacSidePanel from './RbacSidePanel';
+import GraphStylePanel from './GraphStylePanel';
 
 import {
   setSelectedNode,
@@ -40,6 +41,10 @@ import {
   deleteNode, // New import for editing
   deleteEdge, // New import for editing
   setNodeTypeColor, // New import for customizable styling
+  setNodeSize,
+  setEdgeColor,
+  setEdgeWidth,
+  resetStyleSettings,
   undo, // New import for undo/redo
   redo, // New import for undo/redo
   setPathSourceNode, // New import for pathfinding
@@ -49,6 +54,8 @@ import {
   setErrorMessage, // New import for error messages
   setNodeTypeFilter, // New import for node type filter
   setMinConfidenceFilter, // New import for min confidence filter
+  fetchGraphStyleSettings,
+  saveGraphStyleSettings,
 } from '../../store/slices/graphSlice';
 
 // Register Cytoscape.js extensions
@@ -64,6 +71,29 @@ const GraphVisualization = () => {
   const prevEdgesRef = useRef([]);
   const graphData = useSelector((state) => state.graph);
   const dispatch = useDispatch();
+  const [showSettingsSaved, setShowSettingsSaved] = useState(false);
+  const lastSavedRef = useRef(graphData.lastSettingsSavedAt);
+
+  useEffect(() => {
+    if (graphData.styleSettingsStatus === 'idle') {
+      dispatch(fetchGraphStyleSettings());
+    }
+  }, [dispatch, graphData.styleSettingsStatus]);
+
+  useEffect(() => {
+    if (
+      graphData.lastSettingsSavedAt &&
+      lastSavedRef.current &&
+      graphData.lastSettingsSavedAt !== lastSavedRef.current &&
+      graphData.styleSettingsStatus === 'succeeded'
+    ) {
+      setShowSettingsSaved(true);
+    }
+
+    if (graphData.lastSettingsSavedAt) {
+      lastSavedRef.current = graphData.lastSettingsSavedAt;
+    }
+  }, [graphData.lastSettingsSavedAt, graphData.styleSettingsStatus]);
 
   useEffect(() => {
     if (!cyRef.current) {
@@ -79,14 +109,18 @@ const GraphVisualization = () => {
               color: 'white',
               'text-outline-width': 2,
               'text-outline-color': '#333',
+              width: graphData.nodeSize,
+              height: graphData.nodeSize,
+              'font-size': Math.max(12, Math.round(graphData.nodeSize / 2)),
             },
           },
           {
             selector: 'edge',
             style: {
-              width: 3,
-              'line-color': '#ccc',
-              'target-arrow-color': '#ccc',
+              width: graphData.edgeWidth,
+              'line-color': graphData.edgeColor,
+              'target-arrow-color': graphData.edgeColor,
+              'source-arrow-color': graphData.edgeColor,
               'target-arrow-shape': 'triangle',
               'curve-style': 'bezier',
               opacity: 'data(confidence)', // Opacity based on confidence
@@ -313,6 +347,20 @@ const GraphVisualization = () => {
     const cy = cyRef.current;
     if (!cy) return;
 
+    const style = cy.style();
+    style
+      .selector('node')
+      .style('width', graphData.nodeSize)
+      .style('height', graphData.nodeSize)
+      .style('font-size', Math.max(12, Math.round(graphData.nodeSize / 2)));
+    style
+      .selector('edge')
+      .style('line-color', graphData.edgeColor)
+      .style('target-arrow-color', graphData.edgeColor)
+      .style('source-arrow-color', graphData.edgeColor)
+      .style('width', graphData.edgeWidth);
+    style.update();
+
     // --- Incremental Update Logic ---
     const currentNodes = graphData.nodes.filter(
       (node) =>
@@ -525,6 +573,9 @@ const GraphVisualization = () => {
     graphData.featureToggles.incrementalLayout,
     graphData.clusters,
     graphData.nodeTypeColors,
+    graphData.nodeSize,
+    graphData.edgeColor,
+    graphData.edgeWidth,
     graphData.foundPath,
     graphData.searchTerm,
     graphData.nodeTypeFilter,
@@ -540,9 +591,44 @@ const GraphVisualization = () => {
     dispatch(toggleFeature({ featureName, enabled: event.target.checked }));
   };
 
+  const handleCloseSettingsSaved = () => {
+    setShowSettingsSaved(false);
+  };
+
   // jQuery example: Animate a simple message box
   const animateMessageBox = () => {
     $('#message-box').slideToggle('slow');
+  };
+
+  const handleNodeColorChange = (type, color) => {
+    dispatch(setNodeTypeColor({ type, color }));
+  };
+
+  const handleNodeSizeChange = (value) => {
+    dispatch(setNodeSize(value));
+  };
+
+  const handleEdgeColorChange = (color) => {
+    dispatch(setEdgeColor(color));
+  };
+
+  const handleEdgeWidthChange = (value) => {
+    dispatch(setEdgeWidth(value));
+  };
+
+  const handleSaveStyleSettings = () => {
+    dispatch(
+      saveGraphStyleSettings({
+        nodeTypeColors: graphData.nodeTypeColors,
+        nodeSize: graphData.nodeSize,
+        edgeColor: graphData.edgeColor,
+        edgeWidth: graphData.edgeWidth,
+      }),
+    );
+  };
+
+  const handleResetStyleSettings = () => {
+    dispatch(resetStyleSettings());
   };
 
   const handleAddNode = () => {
@@ -749,18 +835,23 @@ const GraphVisualization = () => {
           />
         ))}
       </Box>
-      <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
-        <Typography variant="subtitle1">Node Type Colors:</Typography>
-        {Object.entries(graphData.nodeTypeColors).map(([type, color]) => (
-          <Box key={type} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <Typography sx={{ mr: 1 }}>{type}:</Typography>
-            <input
-              type="color"
-              value={color}
-              onChange={(e) => dispatch(setNodeTypeColor({ type, color: e.target.value }))}
-            />
-          </Box>
-        ))}
+      <Box sx={{ borderBottom: '1px solid #eee' }}>
+        <GraphStylePanel
+          nodeTypeColors={graphData.nodeTypeColors}
+          nodeSize={graphData.nodeSize}
+          edgeColor={graphData.edgeColor}
+          edgeWidth={graphData.edgeWidth}
+          onNodeColorChange={handleNodeColorChange}
+          onNodeSizeChange={handleNodeSizeChange}
+          onEdgeColorChange={handleEdgeColorChange}
+          onEdgeWidthChange={handleEdgeWidthChange}
+          onSave={handleSaveStyleSettings}
+          onReset={handleResetStyleSettings}
+          isSaving={graphData.styleSettingsStatus === 'saving'}
+          isDirty={graphData.styleDirty}
+          lastSavedAt={graphData.lastSettingsSavedAt}
+          status={graphData.styleSettingsStatus}
+        />
       </Box>
       <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
         <Typography variant="subtitle1">Graph Statistics:</Typography>
@@ -914,6 +1005,20 @@ const GraphVisualization = () => {
           <CircularProgress />
         </Box>
       )}
+      <Snackbar
+        open={showSettingsSaved}
+        autoHideDuration={4000}
+        onClose={handleCloseSettingsSaved}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={handleCloseSettingsSaved}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          Graph style preferences saved.
+        </Alert>
+      </Snackbar>
       <Snackbar
         open={!!graphData.errorMessage}
         autoHideDuration={6000}

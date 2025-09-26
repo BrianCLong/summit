@@ -29,11 +29,25 @@ function TestApp() {
     localStorage.setItem('graphLayoutOptions', JSON.stringify(graphState.layoutOptions));
     localStorage.setItem('graphFeatureToggles', JSON.stringify(graphState.featureToggles));
     localStorage.setItem('graphNodeTypeColors', JSON.stringify(graphState.nodeTypeColors));
+    localStorage.setItem(
+      'graphStyleSettings',
+      JSON.stringify({
+        nodeTypeColors: graphState.nodeTypeColors,
+        nodeSize: graphState.nodeSize,
+        edgeColor: graphState.edgeColor,
+        edgeWidth: graphState.edgeWidth,
+        updatedAt: graphState.lastSettingsSavedAt,
+      }),
+    );
   }, [
     graphState.layout,
     graphState.layoutOptions,
     graphState.featureToggles,
     graphState.nodeTypeColors,
+    graphState.nodeSize,
+    graphState.edgeColor,
+    graphState.edgeWidth,
+    graphState.lastSettingsSavedAt,
   ]);
 
   return (
