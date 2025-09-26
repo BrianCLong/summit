@@ -1,3 +1,5 @@
+@import 'intro.js/minified/introjs.min.css';
+
 * {
   margin: 0;
   padding: 0;
@@ -80,4 +82,31 @@ body {
   border: 1px solid var(--hairline);
   border-radius: 6px;
   background: #fff;
+}
+
+.intelgraph-tutorial-tooltip .introjs-tooltip-title {
+  font-weight: 600;
+  color: #0c0d0e;
+}
+
+.intelgraph-tutorial-tooltip .introjs-tooltiptext {
+  color: #1f2933;
+  line-height: 1.5;
+}
+
+.intelgraph-tutorial-tooltip .introjs-button {
+  background-color: #1976d2;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+}
+
+.intelgraph-tutorial-tooltip .introjs-button.introjs-prevbutton {
+  background-color: transparent;
+  color: #1976d2;
+  border: 1px solid rgba(25, 118, 210, 0.4);
+}
+
+.intelgraph-tutorial-tooltip .introjs-skipbutton {
+  color: #546e7a;
 }

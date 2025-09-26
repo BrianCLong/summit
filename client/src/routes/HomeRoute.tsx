@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import ServerStatus from '../components/ServerStatus';
@@ -28,6 +28,8 @@ import BehavioralAnalytics from '../components/behavioral/BehavioralAnalytics';
 import ReportingCaseManagement from '../components/reporting/ReportingCaseManagement';
 import ThreatHuntingDarkWeb from '../components/threat/ThreatHuntingDarkWeb';
 import IntelligenceFeedsEnrichment from '../components/intelligence/IntelligenceFeedsEnrichment';
+import GoldenPathWizard from '../components/onboarding/GoldenPathWizard.jsx';
+import { useTutorials } from '../context/TutorialContext';
 
 function HomeRouteInner() {
   const navigate = useNavigate();
@@ -60,6 +62,47 @@ function HomeRouteInner() {
   const graphStats = useSelector((state: any) => state.graph?.graphStats);
   const { showHelp, HelpComponent } = useHelpSystem();
   const toast = useToast();
+  const { progress: tutorialProgress, loading: tutorialsLoading, pendingRequest, clearPendingRequest } =
+    useTutorials();
+  const ingestProgress = tutorialProgress['ingest-wizard'];
+  const [ingestWizardOpen, setIngestWizardOpen] = useState(false);
+  const [wizardPrompted, setWizardPrompted] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return window.sessionStorage.getItem('ingest-wizard-prompted') === 'true';
+  });
+
+  useEffect(() => {
+    if (tutorialsLoading) return;
+    if (ingestProgress?.completed) return;
+    if (wizardPrompted) return;
+    setIngestWizardOpen(true);
+    setWizardPrompted(true);
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem('ingest-wizard-prompted', 'true');
+    }
+  }, [tutorialsLoading, ingestProgress, wizardPrompted]);
+
+  useEffect(() => {
+    if (pendingRequest?.tutorialId === 'ingest-wizard') {
+      setIngestWizardOpen(true);
+    }
+  }, [pendingRequest]);
+
+  const handleWizardClose = () => {
+    setIngestWizardOpen(false);
+    if (pendingRequest?.tutorialId === 'ingest-wizard') {
+      clearPendingRequest();
+    }
+  };
+
+  const handleWizardComplete = () => {
+    setIngestWizardOpen(false);
+    if (pendingRequest?.tutorialId === 'ingest-wizard') {
+      clearPendingRequest();
+    }
+  };
 
   const handleNavigateToAction = () => {
     if (actionId.trim()) {
@@ -1318,6 +1361,12 @@ function HomeRouteInner() {
           </div>
         </div>
       )}
+
+      <GoldenPathWizard
+        open={ingestWizardOpen}
+        onClose={handleWizardClose}
+        onComplete={handleWizardComplete}
+      />
     </div>
   );
 }

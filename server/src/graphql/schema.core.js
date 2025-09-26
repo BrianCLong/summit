@@ -92,6 +92,12 @@ export const coreTypeDefs = gql`
     relationshipCount: Int!
   }
 
+  type TutorialProgress {
+    tutorialId: String!
+    completed: Boolean!
+    completedAt: DateTime
+  }
+
   # Input types for mutations
   input EntityInput {
     tenantId: String!
@@ -193,6 +199,10 @@ export const coreTypeDefs = gql`
 
     # Search across all entity types
     searchEntities(tenantId: String!, query: String!, kinds: [String!], limit: Int = 50): [Entity!]!
+
+    # Interactive tutorials
+    tutorialProgress(tutorialId: String!): TutorialProgress!
+    tutorialChecklist: [TutorialProgress!]!
   }
 
   # Extended Mutation operations
@@ -214,6 +224,10 @@ export const coreTypeDefs = gql`
     # Bulk operations
     createEntitiesBatch(inputs: [EntityInput!]!, tenantId: String!): [Entity!]!
     createRelationshipsBatch(inputs: [RelationshipInput!]!, tenantId: String!): [Relationship!]!
+
+    # Interactive tutorials
+    completeTutorial(tutorialId: String!): TutorialProgress!
+    resetTutorial(tutorialId: String!): TutorialProgress!
   }
 
   # Real-time subscriptions for graph changes

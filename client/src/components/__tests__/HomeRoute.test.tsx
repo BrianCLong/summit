@@ -4,6 +4,9 @@ import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { createStore } from '@reduxjs/toolkit';
 import HomeRoute from '../../routes/HomeRoute';
+import { MockedProvider } from '@apollo/client/testing';
+import { TutorialProvider } from '../../context/TutorialContext';
+import { GET_TUTORIAL_CHECKLIST } from '../../graphql/tutorials.gql.js';
 
 // Mock components to avoid complex dependencies
 jest.mock('../../components/ServerStatus', () => {
@@ -79,16 +82,34 @@ const renderWithProviders = (component: React.ReactElement, initialState = {}) =
   });
 
   return render(
-    <Provider store={store}>
-      <BrowserRouter>{component}</BrowserRouter>
-    </Provider>,
+    <MockedProvider mocks={tutorialMocks} addTypename={false}>
+      <TutorialProvider>
+        <Provider store={store}>
+          <BrowserRouter>{component}</BrowserRouter>
+        </Provider>
+      </TutorialProvider>
+    </MockedProvider>,
   );
 };
+
+const tutorialMocks = [
+  {
+    request: {
+      query: GET_TUTORIAL_CHECKLIST,
+    },
+    result: {
+      data: { tutorialChecklist: [] },
+    },
+  },
+];
 
 describe('HomeRoute', () => {
   beforeEach(() => {
     // Clear any previous DOM state
     document.body.innerHTML = '';
+    sessionStorage.clear();
+    sessionStorage.setItem('ingest-wizard-prompted', 'true');
+    sessionStorage.setItem('graph-query-tutorial-shown', 'true');
   });
 
   test('renders the main platform title', () => {

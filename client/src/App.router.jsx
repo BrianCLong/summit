@@ -46,6 +46,7 @@ import { store } from './store';
 import { apolloClient } from './services/apollo';
 import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { TutorialProvider } from './context/TutorialContext';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 import InteractiveGraphExplorer from './components/graph/InteractiveGraphExplorer';
@@ -725,11 +726,13 @@ function App() {
     <Provider store={store}>
       <ApolloProvider client={apolloClient}>
         <AuthProvider>
-          <ThemedAppShell>
-            <Router>
-              <MainLayout />
-            </Router>
-          </ThemedAppShell>
+          <TutorialProvider>
+            <ThemedAppShell>
+              <Router>
+                <MainLayout />
+              </Router>
+            </ThemedAppShell>
+          </TutorialProvider>
         </AuthProvider>
       </ApolloProvider>
     </Provider>
