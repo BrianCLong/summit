@@ -187,6 +187,32 @@ async function createPostgresTables(): Promise<void> {
       )
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS graph_versions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id VARCHAR(128) NOT NULL,
+        scope VARCHAR(255) NOT NULL DEFAULT '__global__',
+        tag VARCHAR(100) NOT NULL,
+        description TEXT,
+        snapshot_bucket TEXT NOT NULL,
+        snapshot_key TEXT NOT NULL,
+        graph_hash CHAR(64) NOT NULL,
+        node_count INTEGER NOT NULL DEFAULT 0,
+        relationship_count INTEGER NOT NULL DEFAULT 0,
+        diff_summary JSONB,
+        metadata JSONB,
+        created_by UUID REFERENCES users(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_applied_at TIMESTAMP,
+        last_applied_by UUID REFERENCES users(id),
+        UNIQUE (tenant_id, scope, tag)
+      )
+    `);
+
+    await client.query(
+      `CREATE INDEX IF NOT EXISTS graph_versions_scope_created_idx ON graph_versions(tenant_id, scope, created_at DESC)`,
+    );
+
     await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id)');
     await client.query(
       'CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)',
@@ -194,6 +220,10 @@ async function createPostgresTables(): Promise<void> {
     await client.query('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id)');
     await client.query(
       'CREATE INDEX IF NOT EXISTS idx_analysis_investigation ON analysis_results(investigation_id)',
+    );
+
+    await client.query(
+      `CREATE INDEX IF NOT EXISTS graph_versions_hash_idx ON graph_versions(tenant_id, scope, graph_hash)`,
     );
 
     logger.info('PostgreSQL tables created');

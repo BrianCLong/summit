@@ -4,6 +4,7 @@ const { getRedisClient } = require('../config/database');
 const GraphOpsService = require('../services/GraphOpsService');
 const TagService = require('../services/TagService');
 const { enqueueAIRequest } = require('../services/AIQueueService');
+const GraphVersionService = require('../services/GraphVersionService');
 const { metrics } = require('../monitoring/metrics');
 const { NeighborhoodCache } = require('../services/neighborhood-cache.js');
 
@@ -30,6 +31,41 @@ const tagSchema = Joi.object({
 const aiSchema = Joi.object({
   entityId: Joi.string().trim().min(1).required(),
 });
+
+const graphVersionSchema = Joi.object({
+  action: Joi.string().valid('TAG', 'REVERT').required(),
+  tag: Joi.string()
+    .trim()
+    .pattern(/^[A-Za-z0-9._-]{1,64}$/)
+    .when('action', { is: 'TAG', then: Joi.required(), otherwise: Joi.optional() }),
+  description: Joi.string().trim().max(500).allow(null, ''),
+  metadata: Joi.any().optional(),
+  versionId: Joi.string()
+    .trim()
+    .guid({ version: ['uuidv4', 'uuidv5'] })
+    .optional(),
+  investigationId: Joi.string().trim().max(128).allow(null, '').optional(),
+})
+  .custom((value, helpers) => {
+    if (value.action === 'REVERT' && !value.versionId && !value.tag) {
+      return helpers.error('any.custom', {
+        message: 'Either versionId or tag is required for revert operations',
+      });
+    }
+    return value;
+  }, 'Graph version validation')
+  .messages({ 'any.custom': '{{#message}}' });
+
+function formatDiffSummary(diff = {}) {
+  return {
+    nodesAdded: diff.nodesAdded || 0,
+    nodesUpdated: diff.nodesUpdated || 0,
+    nodesRemoved: diff.nodesRemoved || 0,
+    relationshipsAdded: diff.relationshipsAdded || 0,
+    relationshipsUpdated: diff.relationshipsUpdated || 0,
+    relationshipsRemoved: diff.relationshipsRemoved || 0,
+  };
+}
 
 function ensureRole(user, allowedRoles = []) {
   if (!user) throw new Error('Not authenticated');
@@ -290,6 +326,67 @@ const resolvers = {
         const err = new Error('AI_REQUEST_FAILED');
         err.code = 'AI_REQUEST_FAILED';
         err.details = e.message;
+        err.traceId = tId;
+        throw err;
+      }
+    },
+
+    manageGraphVersion: async (_, args, { user, logger }) => {
+      const tId = traceId();
+      const { value, error } = graphVersionSchema.validate(args.input || {});
+      if (error) {
+        const detail = error.details?.[0];
+        const message = detail?.context?.message || detail?.message || error.message;
+        const err = new Error(`Invalid input: ${message}`);
+        err.code = 'BAD_USER_INPUT';
+        err.traceId = tId;
+        throw err;
+      }
+
+      ensureRole(user, ['ANALYST', 'ADMIN']);
+      if (!user?.tenantId) {
+        const err = new Error('Tenant context required');
+        err.code = 'GRAPH_VERSION_TENANT_REQUIRED';
+        err.traceId = tId;
+        throw err;
+      }
+
+      try {
+        if (value.action === 'TAG') {
+          const result = await GraphVersionService.createVersion({
+            tag: value.tag,
+            description: value.description,
+            metadata: value.metadata ?? null,
+            scope: value.investigationId || null,
+            tenantId: user.tenantId,
+            userId: user.id,
+          });
+          return {
+            ok: true,
+            action: 'TAG',
+            version: result.version,
+            diff: formatDiffSummary(result.diff),
+          };
+        }
+
+        const result = await GraphVersionService.revertToVersion({
+          tag: value.tag,
+          versionId: value.versionId || null,
+          scope: value.investigationId || null,
+          tenantId: user.tenantId,
+          userId: user.id,
+        });
+        return {
+          ok: true,
+          action: 'REVERT',
+          version: result.version,
+          diff: formatDiffSummary(result.diff),
+        };
+      } catch (e) {
+        logger.error('manageGraphVersion error', { err: e, traceId: tId });
+        const err = new Error(e.message || 'GRAPH_VERSION_FAILED');
+        err.code = e.code || 'GRAPH_VERSION_FAILED';
+        err.details = e.details;
         err.traceId = tId;
         throw err;
       }
