@@ -25,8 +25,10 @@ spec:
       annotations:
         {{- include "intelgraph.configChecksum" . | nindent 8 }}
         {{- include "intelgraph.podAnnotations" (dict "service" $service "root" .) | nindent 8 }}
+        {{- include "intelgraph.vaultAnnotations" (dict "service" $service "root" .) | nindent 8 }}
     spec:
-      automountServiceAccountToken: false
+      serviceAccountName: {{ include "intelgraph.serviceAccountName" . }}
+      automountServiceAccountToken: {{ include "intelgraph.automountServiceAccountToken" (dict "service" $service "root" .) }}
       securityContext:
         {{- include "intelgraph.podSecurityContext" . | nindent 8 }}
       containers:

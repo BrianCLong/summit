@@ -12,6 +12,7 @@ npm-debug.log*
 .env.backup
 *.env
 k8s/maestro-production-secrets.yaml
+ops/secrets/
 
 # Build artifacts
 /dist

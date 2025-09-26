@@ -197,6 +197,104 @@ Volumes
 {{- end }}
 
 {{/*
+Compute whether a pod should automount the service account token.
+*/}}
+{{- define "intelgraph.automountServiceAccountToken" -}}
+{{- $root := .root -}}
+{{- $service := .service -}}
+{{- $automount := default false $root.Values.common.automountServiceAccountToken -}}
+{{- if hasKey $service "automountServiceAccountToken" }}
+{{- $automount = $service.automountServiceAccountToken -}}
+{{- end }}
+{{- $vault := default dict $root.Values.global.vault -}}
+{{- if $vault.enabled -}}
+{{- $serviceVault := default dict $service.vault -}}
+{{- $vaultEnabled := $vault.enabled -}}
+{{- if hasKey $serviceVault "enabled" }}
+{{- $vaultEnabled = $serviceVault.enabled -}}
+{{- end }}
+{{- if $vaultEnabled -}}
+true
+{{- else -}}
+{{ ternary "true" "false" $automount }}
+{{- end -}}
+{{- else -}}
+{{ ternary "true" "false" $automount }}
+{{- end }}
+{{- end }}
+
+{{/*
+Vault agent injector annotations
+*/}}
+{{- define "intelgraph.vaultAnnotations" -}}
+{{- $root := .root -}}
+{{- $service := .service -}}
+{{- $vault := default dict $root.Values.global.vault -}}
+{{- $serviceVault := default dict $service.vault -}}
+{{- $enabled := false -}}
+{{- if $vault.enabled -}}
+{{- $enabled = true -}}
+{{- end -}}
+{{- if hasKey $serviceVault "enabled" }}
+{{- $enabled = $serviceVault.enabled -}}
+{{- end }}
+{{- if $enabled }}
+{{- $role := default $vault.role $serviceVault.role -}}
+vault.hashicorp.com/agent-inject: "true"
+{{- if $role }}
+vault.hashicorp.com/role: {{ $role | quote }}
+{{- end }}
+{{- $address := default $vault.address $serviceVault.address -}}
+{{- if $address }}
+vault.hashicorp.com/agent-inject-vault-address: {{ tpl $address $root | quote }}
+{{- end }}
+{{- $prepopulate := true -}}
+{{- if hasKey $vault "prePopulateOnly" }}
+{{- $prepopulate = $vault.prePopulateOnly -}}
+{{- end }}
+{{- if hasKey $serviceVault "prePopulateOnly" }}
+{{- $prepopulate = $serviceVault.prePopulateOnly -}}
+{{- end }}
+vault.hashicorp.com/agent-pre-populate-only: {{ ternary "true" "false" $prepopulate | quote }}
+{{- $configMap := default $vault.agentConfigMap $serviceVault.agentConfigMap -}}
+{{- if $configMap }}
+vault.hashicorp.com/agent-configmap: {{ $configMap | quote }}
+{{- end }}
+{{- $secrets := $vault.secrets | default (list) -}}
+{{- if $serviceVault.secrets }}
+{{- $secrets = $serviceVault.secrets -}}
+{{- end }}
+{{- range $secret := $secrets }}
+{{- $name := default $secret.name $secret.file -}}
+{{- if $name }}
+vault.hashicorp.com/agent-inject-secret-{{ $name }}: {{ tpl $secret.path $root | quote }}
+{{- if $secret.destination }}
+vault.hashicorp.com/agent-inject-file-{{ $name }}: {{ $secret.destination | quote }}
+{{- end }}
+{{- if $secret.template }}
+vault.hashicorp.com/agent-inject-template-{{ $name }}: |
+{{ tpl $secret.template $root | nindent 2 }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- $command := default $vault.command $serviceVault.command -}}
+{{- if $command }}
+vault.hashicorp.com/agent-inject-command: {{ tpl $command $root | quote }}
+{{- end }}
+{{- $combined := dict -}}
+{{- if $vault.extraAnnotations }}
+{{- $combined = merge $combined $vault.extraAnnotations }}
+{{- end }}
+{{- if $serviceVault.extraAnnotations }}
+{{- $combined = merge $combined $serviceVault.extraAnnotations }}
+{{- end }}
+{{- range $key, $value := $combined }}
+{{ $key }}: {{ tpl $value $root | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
 Pod annotations
 */}}
 {{- define "intelgraph.podAnnotations" -}}
