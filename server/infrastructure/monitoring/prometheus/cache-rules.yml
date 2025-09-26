@@ -1,0 +1,22 @@
+# Recording rules for GraphQL cache performance
+---
+groups:
+  - name: graph-cache
+    interval: 30s
+    rules:
+      - record: graph_cache_hit_ratio_5m
+        expr: sum(rate(apollo_cache_events_total{status="hit"}[5m])) by (operation, tenant)
+          /
+          sum(rate(apollo_cache_events_total[5m])) by (operation, tenant)
+        labels:
+          component: graphql
+      - record: graph_cache_miss_ratio_5m
+        expr: sum(rate(apollo_cache_events_total{status="miss"}[5m])) by (operation, tenant)
+          /
+          sum(rate(apollo_cache_events_total[5m])) by (operation, tenant)
+        labels:
+          component: graphql
+      - record: graph_cache_requests_total_5m
+        expr: sum(rate(apollo_cache_events_total[5m])) by (operation, tenant)
+        labels:
+          component: graphql
