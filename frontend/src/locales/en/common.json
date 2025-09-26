@@ -1,0 +1,62 @@
+{
+  "app": {
+    "title": "IntelGraph",
+    "tagline": "Operational intelligence at a glance",
+    "neighborhoodMode": "Neighborhood Mode",
+    "showFullGraph": "Show Full Graph",
+    "loading": "Loading interface…"
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "spanish": "Spanish",
+    "arabic": "Arabic"
+  },
+  "login": {
+    "title": "Operations Login",
+    "subtitle": "Sign in to orchestrate data ingestion and monitor agent performance.",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "••••••••",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot your password?",
+    "signIn": "Sign In"
+  },
+  "ingest": {
+    "title": "Ingest Wizard",
+    "subtitle": "Guide analysts through structured data onboarding.",
+    "progress": "Step {{step}} of {{total}}: {{stepName}}",
+    "actions": {
+      "back": "Back",
+      "next": "Next",
+      "finish": "Start ingest"
+    },
+    "steps": {
+      "source": {
+        "title": "Select sources",
+        "description": "Choose repositories or upload files to bring in new intelligence."
+      },
+      "mapping": {
+        "title": "Map fields",
+        "description": "Align incoming data with IntelGraph schemas to ensure accuracy."
+      },
+      "validation": {
+        "title": "Validate quality",
+        "description": "Run automated checks to detect gaps, duplicates, or anomalies."
+      },
+      "review": {
+        "title": "Review and launch",
+        "description": "Preview the ingest plan, confirm owners, and launch the pipeline."
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Intelligence dashboard",
+    "description": "Monitor relationships and agent actions in real time.",
+    "timeline": {
+      "title": "Agent Timeline",
+      "empty": "No agent actions recorded yet."
+    }
+  }
+}

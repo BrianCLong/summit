@@ -1,56 +1,33 @@
-import { useState, useEffect } from 'react';
-import Graph from './Graph';
-import TimelinePanel from './TimelinePanel';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import './i18n';
+import Dashboard from './components/Dashboard';
+import IngestWizard from './components/IngestWizard';
+import LanguageSwitcher from './components/LanguageSwitcher';
+import LoginPage from './components/LoginPage';
+import { EventItem, GraphData } from './types';
 import './App.css';
 
-interface EventItem {
-  id: string;
-  action: string;
-  confidence: number;
-  result: string;
-}
-
-interface NodeElement {
-  data: {
-    id: string;
-    label: string;
-    type: string;
-    deception_score: number;
-  };
-}
-
-interface EdgeElement {
-  data: {
-    source: string;
-    target: string;
-    label: string;
-  };
-}
-
-interface GraphData {
-  nodes: NodeElement[];
-  edges: EdgeElement[];
-}
-
 function App() {
+  const { t, ready } = useTranslation('common');
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], edges: [] });
-  const [neighborhoodMode, setNeighborhoodMode] = useState<boolean>(false);
+  const [neighborhoodMode, setNeighborhoodMode] = useState(false);
   const [events, setEvents] = useState<EventItem[]>([]);
 
   useEffect(() => {
     fetch('/api/graph')
       .then((res) => res.json())
       .then((data) => {
-        const formattedNodes = data.nodes.map((n: any) => ({
+        const formattedNodes = data.nodes.map((node: any) => ({
           data: {
-            id: n.id,
-            label: n.properties.text || n.properties.name,
-            type: n.label,
-            deception_score: n.properties.deception_score || 0,
+            id: node.id,
+            label: node.properties.text || node.properties.name,
+            type: node.label,
+            deception_score: node.properties.deception_score || 0,
           },
         }));
-        const formattedEdges = data.edges.map((e: any) => ({
-          data: { source: e.source, target: e.target, label: e.type },
+        const formattedEdges = data.edges.map((edge: any) => ({
+          data: { source: edge.source, target: edge.target, label: edge.type },
         }));
         setGraphData({ nodes: formattedNodes, edges: formattedEdges });
       })
@@ -64,17 +41,39 @@ function App() {
       .catch((err) => console.error('Failed to fetch agent actions:', err));
   }, []);
 
+  const toggleLabel = useMemo(
+    () => (neighborhoodMode ? t('app.showFullGraph') : t('app.neighborhoodMode')),
+    [neighborhoodMode, t],
+  );
+
+  if (!ready) {
+    return (
+      <div className="App">
+        <main className="loading-screen">{t('app.loading')}</main>
+      </div>
+    );
+  }
+
   return (
     <div className="App">
       <header className="App-header">
-        <h1>IntelGraph</h1>
-        <button onClick={() => setNeighborhoodMode((m) => !m)}>
-          {neighborhoodMode ? 'Show Full Graph' : 'Neighborhood Mode'}
-        </button>
+        <div>
+          <h1>{t('app.title')}</h1>
+          <p className="header-tagline">{t('app.tagline')}</p>
+        </div>
+        <div className="header-actions">
+          <button className="secondary-button" onClick={() => setNeighborhoodMode((mode) => !mode)} type="button">
+            {toggleLabel}
+          </button>
+          <LanguageSwitcher />
+        </div>
       </header>
       <main>
-        <Graph elements={graphData} neighborhoodMode={neighborhoodMode} />
-        <TimelinePanel events={events} />
+        <div className="intro-grid">
+          <LoginPage />
+          <IngestWizard />
+        </div>
+        <Dashboard events={events} graphData={graphData} neighborhoodMode={neighborhoodMode} />
       </main>
     </div>
   );
