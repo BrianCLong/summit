@@ -48,6 +48,30 @@ export const coreTypeDefs = gql`
     destination: Entity!
   }
 
+  type PageRankNode {
+    nodeId: ID!
+    label: String
+    score: Float!
+    pageRank: Float!
+  }
+
+  type GraphCommunityNode {
+    nodeId: ID!
+    label: String
+  }
+
+  type GraphCommunity {
+    communityId: Int!
+    size: Int!
+    algorithm: CommunityDetectionAlgorithm!
+    nodes: [GraphCommunityNode!]!
+  }
+
+  enum CommunityDetectionAlgorithm {
+    LOUVAIN
+    LABEL_PROPAGATION
+  }
+
   type Investigation {
     id: ID!
     tenantId: String!
@@ -190,6 +214,25 @@ export const coreTypeDefs = gql`
 
     # Graph operations
     graphNeighborhood(input: GraphTraversalInput!): GraphNeighborhood!
+
+    graphPageRank(
+      investigationId: ID
+      limit: Int = 100
+      maxIterations: Int = 20
+      dampingFactor: Float = 0.85
+      concurrency: Int
+      forceRefresh: Boolean = false
+    ): [PageRankNode!]!
+
+    graphCommunities(
+      investigationId: ID
+      limit: Int = 25
+      algorithm: CommunityDetectionAlgorithm = LOUVAIN
+      maxIterations: Int = 20
+      tolerance: Float = 0.0001
+      concurrency: Int
+      forceRefresh: Boolean = false
+    ): [GraphCommunity!]!
 
     # Search across all entity types
     searchEntities(tenantId: String!, query: String!, kinds: [String!], limit: Int = 50): [Entity!]!

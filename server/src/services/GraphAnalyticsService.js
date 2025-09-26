@@ -1,16 +1,210 @@
-const { getNeo4jDriver } = require('../config/database');
+const crypto = require('crypto');
+const neo4j = require('neo4j-driver');
+
+const { getNeo4jDriver, getRedisClient } = require('../config/database');
 const logger = require('../utils/logger');
 
+const DEFAULT_PAGE_RANK_LIMIT = 100;
+const DEFAULT_COMMUNITY_LIMIT = 25;
+const NODE_PROJECTION_QUERY = `
+  MATCH (n:Entity)
+  WHERE $investigationId IS NULL OR n.investigation_id = $investigationId
+  RETURN id(n) AS id, labels(n) AS labels, { id: n.id, label: n.label } AS properties
+`;
+
+const RELATIONSHIP_PROJECTION_QUERY = `
+  MATCH (source:Entity)-[r]->(target:Entity)
+  WHERE $investigationId IS NULL OR (source.investigation_id = $investigationId AND target.investigation_id = $investigationId)
+  RETURN id(source) AS source, id(target) AS target, type(r) AS type
+`;
+
+const toNumber = (value) => (neo4j.isInt(value) ? value.toNumber() : value);
+
 class GraphAnalyticsService {
-  constructor() {
+  constructor({ driver, redis, cacheTtl, graphNamespace } = {}) {
     this.logger = logger;
+    this.driver = driver || null;
+    this.redis = typeof redis === 'undefined' ? null : redis;
+    this.cacheTtl = cacheTtl ?? Number(process.env.GRAPH_ANALYTICS_CACHE_TTL || 300);
+    this.graphNamespace = graphNamespace || process.env.GRAPH_ANALYTICS_GRAPH_NAMESPACE || 'summit_analytics';
+    this.maxConcurrency = Number(process.env.GRAPH_ANALYTICS_MAX_CONCURRENCY || 8);
+    this.projectionBatchSize = Number(process.env.GRAPH_ANALYTICS_PROJECT_BATCH_SIZE || 100000);
+
+    if (!this.driver) {
+      try {
+        this.driver = getNeo4jDriver();
+      } catch (error) {
+        this.logger.error('Neo4j driver unavailable during GraphAnalyticsService construction', error);
+      }
+    }
+
+    if (typeof redis === 'undefined') {
+      try {
+        this.redis = getRedisClient();
+      } catch (error) {
+        this.logger.warn('Redis client unavailable for GraphAnalyticsService cache usage', error);
+        this.redis = null;
+      }
+    }
+  }
+
+  getDriver() {
+    if (!this.driver) {
+      this.driver = getNeo4jDriver();
+    }
+    return this.driver;
+  }
+
+  getRedis() {
+    if (typeof this.redis === 'undefined' || this.redis === null) {
+      try {
+        this.redis = getRedisClient();
+      } catch (error) {
+        this.logger.warn('Unable to acquire Redis client for Graph Analytics caching', error);
+        this.redis = null;
+      }
+    }
+    return this.redis;
+  }
+
+  async withSession(accessMode, work) {
+    const driver = this.getDriver();
+    const session = driver.session({ defaultAccessMode: accessMode });
+    try {
+      return await work(session);
+    } finally {
+      await session.close();
+    }
+  }
+
+  getGraphName(investigationId) {
+    if (!investigationId) {
+      return `${this.graphNamespace}_global`;
+    }
+
+    const hash = crypto.createHash('sha1').update(String(investigationId)).digest('hex');
+    return `${this.graphNamespace}_${hash}`;
+  }
+
+  normalizeForCache(value) {
+    if (Array.isArray(value)) {
+      return value.map((entry) => this.normalizeForCache(entry));
+    }
+
+    if (value && typeof value === 'object') {
+      return Object.keys(value)
+        .filter((key) => value[key] !== undefined)
+        .sort()
+        .reduce((acc, key) => {
+          acc[key] = this.normalizeForCache(value[key]);
+          return acc;
+        }, {});
+    }
+
+    return value;
+  }
+
+  createCacheKey(prefix, options) {
+    const normalized = this.normalizeForCache(options);
+    const hash = crypto.createHash('sha1').update(JSON.stringify(normalized)).digest('hex');
+    return `${this.graphNamespace}:${prefix}:${hash}`;
+  }
+
+  async runWithCache(prefix, options, computeFn, { forceRefresh = false, ttl } = {}) {
+    const redis = this.getRedis();
+    const cacheKey = this.createCacheKey(prefix, options);
+    const effectiveTtl = typeof ttl === 'number' ? ttl : this.cacheTtl;
+
+    if (redis && forceRefresh) {
+      try {
+        await redis.del(cacheKey);
+      } catch (error) {
+        this.logger.warn('Failed to evict Graph Analytics cache key', { cacheKey, error });
+      }
+    }
+
+    if (redis && !forceRefresh) {
+      try {
+        const cached = await redis.get(cacheKey);
+        if (cached) {
+          return JSON.parse(cached);
+        }
+      } catch (error) {
+        this.logger.warn('Failed to read Graph Analytics cache key', { cacheKey, error });
+      }
+    }
+
+    const result = await computeFn();
+
+    if (redis && effectiveTtl > 0) {
+      try {
+        await redis.set(cacheKey, JSON.stringify(result), 'EX', effectiveTtl);
+      } catch (error) {
+        this.logger.warn('Failed to store Graph Analytics cache entry', { cacheKey, error });
+      }
+    }
+
+    return result;
+  }
+
+  async dropGraphProjection(graphName) {
+    return this.withSession(neo4j.session.WRITE, async (session) => {
+      try {
+        await session.run(
+          `CALL gds.graph.drop($graphName, false) YIELD graphName RETURN graphName`,
+          { graphName },
+        );
+      } catch (error) {
+        if (!String(error?.message || '').includes('does not exist')) {
+          this.logger.warn('Failed to drop GDS graph projection', { graphName, error });
+        }
+      }
+    });
+  }
+
+  async graphExists(session, graphName) {
+    const result = await session.run(
+      `CALL gds.graph.exists($graphName) YIELD exists RETURN exists`,
+      { graphName },
+    );
+    const record = result.records[0];
+    return record ? Boolean(record.get('exists')) : false;
+  }
+
+  async ensureGraphProjection(graphName, { investigationId }) {
+    return this.withSession(neo4j.session.WRITE, async (session) => {
+      const exists = await this.graphExists(session, graphName);
+      if (exists) {
+        return;
+      }
+
+      await session.run(
+        `CALL gds.graph.project.cypher(
+          $graphName,
+          $nodeQuery,
+          $relationshipQuery,
+          {
+            parameters: $parameters,
+            validateRelationships: false,
+            batchSize: $batchSize
+          }
+        ) YIELD graphName RETURN graphName`,
+        {
+          graphName,
+          nodeQuery: NODE_PROJECTION_QUERY,
+          relationshipQuery: RELATIONSHIP_PROJECTION_QUERY,
+          parameters: { investigationId: investigationId || null },
+          batchSize: this.projectionBatchSize,
+        },
+      );
+    });
   }
 
   /**
    * Calculate basic graph metrics
    */
   async calculateBasicMetrics(investigationId = null) {
-    const session = this.driver.session();
+    const session = this.getDriver().session();
 
     try {
       const constraints = investigationId
@@ -85,7 +279,7 @@ class GraphAnalyticsService {
    * Calculate centrality measures
    */
   async calculateCentralityMeasures(investigationId = null, limit = 50) {
-    const session = this.driver.session();
+    const session = this.getDriver().session();
 
     try {
       const constraints = investigationId ? 'WHERE n.investigation_id = $investigationId' : '';
@@ -165,75 +359,122 @@ class GraphAnalyticsService {
   }
 
   /**
-   * Find communities using label propagation algorithm
+   * Detect graph communities using the Neo4j GDS library with optional algorithm selection
    */
-  async detectCommunities(investigationId = null) {
-    const session = this.driver.session();
+  async detectCommunities(...args) {
+    const options = this.normalizeCommunityOptions(args);
+    const graphName = this.getGraphName(options.investigationId);
 
-    try {
-      const constraints = investigationId
-        ? 'WHERE n.investigation_id = $investigationId AND m.investigation_id = $investigationId'
-        : '';
-
-      const params = investigationId ? { investigationId } : {};
-
-      // Simplified community detection using connected components
-      const query = `
-        MATCH (n)
-        ${constraints.replace('AND m.investigation_id', 'AND n.investigation_id')}
-        WITH n
-        MATCH path = (n)-[*]-(m)
-        ${constraints}
-        WITH n, collect(DISTINCT m.id) as connectedNodes
-        WITH n, connectedNodes, size(connectedNodes) as componentSize
-        RETURN n.id as nodeId, n.label as label, connectedNodes, componentSize
-        ORDER BY componentSize DESC
-      `;
-
-      const result = await session.run(query, params);
-
-      // Group nodes by their connected components
-      const communities = new Map();
-
-      result.records.forEach((record) => {
-        const nodeId = record.get('nodeId');
-        const label = record.get('label');
-        const connectedNodes = record.get('connectedNodes');
-        const componentSize = record.get('componentSize').toNumber();
-
-        // Create a unique key for the component
-        const componentKey = connectedNodes.sort().join(',');
-
-        if (!communities.has(componentKey)) {
-          communities.set(componentKey, {
-            id: communities.size + 1,
-            size: componentSize,
-            nodes: [],
-          });
-        }
-
-        communities.get(componentKey).nodes.push({
-          nodeId,
-          label,
-        });
-      });
-
-      return Array.from(communities.values())
-        .sort((a, b) => b.size - a.size)
-        .slice(0, 20); // Return top 20 communities
-    } catch (error) {
-      this.logger.error('Error detecting communities:', error);
-      throw error;
-    } finally {
-      await session.close();
+    if (options.forceRefresh) {
+      await this.dropGraphProjection(graphName);
     }
+
+    const cacheOptions = {
+      investigationId: options.investigationId || null,
+      limit: options.limit,
+      algorithm: options.algorithm,
+      maxIterations: options.maxIterations,
+      tolerance: options.tolerance,
+      concurrency: options.concurrency,
+    };
+
+    return this.runWithCache(
+      'communities',
+      cacheOptions,
+      async () => {
+        await this.ensureGraphProjection(graphName, { investigationId: options.investigationId });
+        return this.executeCommunityDetection({ ...options, graphName });
+      },
+      { forceRefresh: options.forceRefresh, ttl: options.cacheTtl },
+    );
+  }
+
+  normalizeCommunityOptions(args) {
+    let options = {};
+
+    if (args.length === 0 || (args.length === 1 && typeof args[0] === 'undefined')) {
+      options = {};
+    } else if (typeof args[0] === 'object' && args[0] !== null) {
+      options = args[0];
+    } else {
+      options = {
+        investigationId: args[0] ?? null,
+      };
+    }
+
+    const limit = Number(options.limit ?? DEFAULT_COMMUNITY_LIMIT);
+    const algorithm = String(options.algorithm || 'LOUVAIN').toUpperCase();
+    const normalized = {
+      investigationId: options.investigationId ?? null,
+      algorithm: ['LABEL_PROPAGATION', 'LOUVAIN'].includes(algorithm) ? algorithm : 'LOUVAIN',
+      maxIterations: Number(options.maxIterations ?? 20),
+      tolerance: Number(options.tolerance ?? 1e-4),
+      limit: Number.isFinite(limit) ? Math.min(Math.max(limit, 1), 200) : DEFAULT_COMMUNITY_LIMIT,
+      cacheTtl: options.cacheTtl ?? undefined,
+      concurrency: Number(options.concurrency ?? this.maxConcurrency),
+      forceRefresh: Boolean(options.forceRefresh),
+    };
+
+    return normalized;
+  }
+
+  async executeCommunityDetection(options) {
+    const params = {
+      graphName: options.graphName,
+      limit: options.limit,
+      maxIterations: options.maxIterations,
+      tolerance: options.tolerance,
+      concurrency: Math.max(1, Math.min(options.concurrency, 64)),
+    };
+
+    const algorithmQuery = options.algorithm === 'LABEL_PROPAGATION'
+      ? `CALL gds.labelPropagation.stream($graphName, {
+          maxIterations: $maxIterations,
+          tolerance: $tolerance,
+          concurrency: $concurrency
+        })`
+      : `CALL gds.louvain.stream($graphName, {
+          maxIterations: $maxIterations,
+          tolerance: $tolerance,
+          concurrency: $concurrency,
+          includeIntermediateCommunities: false
+        })`;
+
+    const query = `
+      ${algorithmQuery}
+      YIELD nodeId, communityId
+      WITH communityId, collect(gds.util.asNode(nodeId)) AS communityNodes
+      WITH communityId,
+           communityNodes,
+           size(communityNodes) AS communitySize,
+           [node IN communityNodes | { nodeId: node.id, label: coalesce(node.label, node.id) }] AS members
+      RETURN communityId, communitySize, members
+      ORDER BY communitySize DESC
+      LIMIT $limit
+    `;
+
+    return this.withSession(neo4j.session.READ, async (session) => {
+      const result = await session.run(query, params);
+      return result.records.map((record) => {
+        const communityId = toNumber(record.get('communityId'));
+        const size = toNumber(record.get('communitySize'));
+        const nodes = record.get('members') || [];
+        return {
+          id: communityId,
+          communityId,
+          size,
+          algorithm: options.algorithm,
+          nodes,
+        };
+      });
+    });
   }
 
   /**
    * Find shortest paths between nodes
    */
   async findShortestPaths(sourceId, targetId, maxLength = 6) {
-    const session = this.driver.session();
+    const session = this.getDriver().session();
 
     try {
       const query = `
@@ -280,136 +521,107 @@ class GraphAnalyticsService {
   }
 
   /**
-   * Analyze node importance using PageRank algorithm
+   * Analyze node importance using the Neo4j GDS PageRank implementation with Redis caching
    */
-  async calculatePageRank(investigationId = null, iterations = 20, dampingFactor = 0.85) {
-    const session = this.driver.session();
+  async calculatePageRank(...args) {
+    const options = this.normalizePageRankOptions(args);
+    const graphName = this.getGraphName(options.investigationId);
 
-    try {
-      const constraints = investigationId
-        ? 'WHERE n.investigation_id = $investigationId AND m.investigation_id = $investigationId'
-        : '';
-
-      const params = investigationId ? { investigationId } : {};
-
-      // Get all nodes and their connections
-      const graphQuery = `
-        MATCH (n)-[r]->(m)
-        ${constraints}
-        RETURN n.id as sourceId, m.id as targetId, n.label as sourceLabel, m.label as targetLabel
-      `;
-
-      const graphResult = await session.run(graphQuery, params);
-
-      if (graphResult.records.length === 0) {
-        return [];
-      }
-
-      // Build adjacency structure
-      const nodes = new Set();
-      const edges = [];
-
-      graphResult.records.forEach((record) => {
-        const sourceId = record.get('sourceId');
-        const targetId = record.get('targetId');
-        const sourceLabel = record.get('sourceLabel');
-        const targetLabel = record.get('targetLabel');
-
-        nodes.add(sourceId);
-        nodes.add(targetId);
-        edges.push({ source: sourceId, target: targetId });
-      });
-
-      const nodeArray = Array.from(nodes);
-      const nodeCount = nodeArray.length;
-
-      if (nodeCount === 0) return [];
-
-      // Initialize PageRank values
-      let pageRank = {};
-      const newPageRank = {};
-
-      nodeArray.forEach((nodeId) => {
-        pageRank[nodeId] = 1.0 / nodeCount;
-      });
-
-      // Build outbound links map
-      const outboundLinks = {};
-      nodeArray.forEach((nodeId) => {
-        outboundLinks[nodeId] = [];
-      });
-
-      edges.forEach((edge) => {
-        outboundLinks[edge.source].push(edge.target);
-      });
-
-      // Build inbound links map
-      const inboundLinks = {};
-      nodeArray.forEach((nodeId) => {
-        inboundLinks[nodeId] = [];
-      });
-
-      edges.forEach((edge) => {
-        inboundLinks[edge.target].push(edge.source);
-      });
-
-      // Iterate PageRank algorithm
-      for (let iter = 0; iter < iterations; iter++) {
-        nodeArray.forEach((nodeId) => {
-          let sum = 0;
-
-          inboundLinks[nodeId].forEach((inboundNodeId) => {
-            const outboundCount = outboundLinks[inboundNodeId].length;
-            if (outboundCount > 0) {
-              sum += pageRank[inboundNodeId] / outboundCount;
-            }
-          });
-
-          newPageRank[nodeId] = (1 - dampingFactor) / nodeCount + dampingFactor * sum;
-        });
-
-        pageRank = { ...newPageRank };
-      }
-
-      // Get node labels
-      const labelQuery = `
-        MATCH (n)
-        WHERE n.id IN $nodeIds ${investigationId ? 'AND n.investigation_id = $investigationId' : ''}
-        RETURN n.id as nodeId, n.label as label
-      `;
-
-      const labelResult = await session.run(labelQuery, {
-        nodeIds: nodeArray,
-        ...(investigationId && { investigationId }),
-      });
-
-      const nodeLabels = {};
-      labelResult.records.forEach((record) => {
-        nodeLabels[record.get('nodeId')] = record.get('label');
-      });
-
-      // Return sorted results
-      return nodeArray
-        .map((nodeId) => ({
-          nodeId,
-          label: nodeLabels[nodeId] || nodeId,
-          pageRank: pageRank[nodeId],
-        }))
-        .sort((a, b) => b.pageRank - a.pageRank)
-        .slice(0, 50);
-    } catch (error) {
-      this.logger.error('Error calculating PageRank:', error);
-      throw error;
-    } finally {
-      await session.close();
+    if (options.forceRefresh) {
+      await this.dropGraphProjection(graphName);
     }
+
+    const cacheOptions = {
+      investigationId: options.investigationId || null,
+      limit: options.limit,
+      dampingFactor: options.dampingFactor,
+      maxIterations: options.maxIterations,
+      concurrency: options.concurrency,
+    };
+
+    return this.runWithCache(
+      'pagerank',
+      cacheOptions,
+      async () => {
+        await this.ensureGraphProjection(graphName, { investigationId: options.investigationId });
+        return this.executePageRank({ ...options, graphName });
+      },
+      { forceRefresh: options.forceRefresh, ttl: options.cacheTtl },
+    );
+  }
+
+  normalizePageRankOptions(args) {
+    let options = {};
+
+    if (args.length === 0 || (args.length === 1 && typeof args[0] === 'undefined')) {
+      options = {};
+    } else if (typeof args[0] === 'object' && args[0] !== null) {
+      options = args[0];
+    } else {
+      options = {
+        investigationId: args[0] ?? null,
+        maxIterations: args[1] ?? args[0]?.maxIterations ?? 20,
+        dampingFactor: args[2] ?? args[0]?.dampingFactor ?? 0.85,
+      };
+    }
+
+    const limit = Number(options.limit ?? DEFAULT_PAGE_RANK_LIMIT);
+    const normalized = {
+      investigationId: options.investigationId ?? null,
+      maxIterations: Number(options.maxIterations ?? 20),
+      dampingFactor: Number(options.dampingFactor ?? 0.85),
+      limit: Number.isFinite(limit) ? Math.min(Math.max(limit, 1), 1000) : DEFAULT_PAGE_RANK_LIMIT,
+      concurrency: Number(options.concurrency ?? this.maxConcurrency),
+      cacheTtl: options.cacheTtl ?? undefined,
+      forceRefresh: Boolean(options.forceRefresh),
+    };
+
+    return normalized;
+  }
+
+  async executePageRank(options) {
+    const params = {
+      graphName: options.graphName,
+      maxIterations: options.maxIterations,
+      dampingFactor: options.dampingFactor,
+      limit: options.limit,
+      concurrency: Math.max(1, Math.min(options.concurrency, 64)),
+    };
+
+    const query = `
+      CALL gds.pageRank.stream($graphName, {
+        maxIterations: $maxIterations,
+        dampingFactor: $dampingFactor,
+        concurrency: $concurrency
+      })
+      YIELD nodeId, score
+      WITH nodeId, score, gds.util.asNode(nodeId) AS node
+      RETURN node.id AS nodeId, coalesce(node.label, node.id) AS label, score
+      ORDER BY score DESC
+      LIMIT $limit
+    `;
+
+    return this.withSession(neo4j.session.READ, async (session) => {
+      const result = await session.run(query, params);
+      return result.records.map((record) => {
+        const score = record.get('score');
+        const numericScore = typeof score === 'number' ? score : toNumber(score);
+        const nodeId = record.get('nodeId');
+        return {
+          nodeId,
+          label: record.get('label'),
+          score: numericScore,
+          pageRank: numericScore,
+        };
+      });
+    });
   }
 
   /**
    * Analyze relationship patterns
    */
   async analyzeRelationshipPatterns(investigationId = null) {
-    const session = this.driver.session();
+    const session = this.getDriver().session();
 
     try {
       const constraints = investigationId ? 'WHERE r.investigation_id = $investigationId' : '';
@@ -453,7 +665,7 @@ class GraphAnalyticsService {
    * Find anomalous nodes or relationships
    */
   async detectAnomalies(investigationId = null) {
-    const session = this.driver.session();
+    const session = this.getDriver().session();
 
     try {
       const constraints = investigationId
@@ -672,7 +884,7 @@ class GraphAnalyticsService {
    * Calculate graph clustering coefficient
    */
   async calculateClusteringCoefficient(investigationId = null) {
-    const session = this.driver.session();
+    const session = this.getDriver().session();
 
     try {
       const constraints = investigationId ? 'WHERE n.investigation_id = $investigationId' : '';

@@ -1,6 +1,7 @@
 // src/graphql/resolvers.js
 const copilotResolvers = require('./resolvers.copilot');
 const graphOpsResolvers = require('./resolvers.graphops');
+const graphAnalyticsResolvers = require('./resolvers.graphAnalytics');
 const aiResolvers = require('./resolvers.ai');
 const annotationsResolvers = require('./resolvers.annotations'); // My new resolvers
 
@@ -9,6 +10,7 @@ const resolvers = {
   Query: {
     ...(copilotResolvers.Query || {}),
     ...(graphOpsResolvers.Query || {}),
+    ...(graphAnalyticsResolvers.Query || {}),
     ...(aiResolvers.Query || {}),
     ...(annotationsResolvers.Query || {}), // Add annotations queries if any
   },
