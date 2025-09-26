@@ -152,6 +152,27 @@ export const coreTypeDefs = gql`
     offset: Int = 0
   }
 
+  input VectorSimilarityFilter {
+    nodeIds: [ID!]
+    embeddingModel: String
+  }
+
+  input VectorSimilarityInput {
+    tenantId: String!
+    vector: [Float!]!
+    topK: Int = 10
+    filter: VectorSimilarityFilter
+  }
+
+  type VectorSimilarityMatch {
+    nodeId: ID
+    tenantId: String!
+    score: Float!
+    embeddingModel: String
+    entity: Entity
+    metadata: JSON
+  }
+
   # Graph traversal types
   type GraphNeighborhood {
     center: Entity!
@@ -193,6 +214,9 @@ export const coreTypeDefs = gql`
 
     # Search across all entity types
     searchEntities(tenantId: String!, query: String!, kinds: [String!], limit: Int = 50): [Entity!]!
+
+    # Vector similarity search bridging Milvus and Neo4j
+    vectorSimilaritySearch(input: VectorSimilarityInput!): [VectorSimilarityMatch!]!
   }
 
   # Extended Mutation operations

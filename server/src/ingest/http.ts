@@ -7,6 +7,9 @@ import { neo } from '../db/neo4j';
 import { deduplicationService } from './dedupe';
 import crypto from 'crypto';
 import { ingestDedupeRate, ingestBacklog } from '../metrics';
+import { vectorSearchBridge } from '../services/vectorSearchBridge';
+import type { VectorRecord } from '../services/vectorSearchBridge';
+import logger from '../utils/logger';
 
 const tracer = trace.getTracer('http-ingest', '24.2.0');
 
@@ -45,6 +48,10 @@ interface CoherenceSignal {
   ts: string;
   purpose?: string;
   metadata?: Record<string, any>;
+  embedding?: number[];
+  embeddingModel?: string;
+  nodeId?: string;
+  embeddingId?: string;
 }
 
 interface IngestRequest {
@@ -116,10 +123,21 @@ class IngestQueue {
       try {
         // Store in PostgreSQL (CoherenceScore aggregation)
         await this.updateCoherenceScores(tenantId, signals);
-        
+
         // Store in Neo4j (Signal nodes)
-        await this.storeSignals(tenantId, signals);
-        
+        const vectorRecords = await this.storeSignals(tenantId, signals);
+
+        if (vectorRecords.length > 0 && vectorSearchBridge.isEnabled()) {
+          try {
+            await vectorSearchBridge.upsertEmbeddings(vectorRecords);
+          } catch (error) {
+            logger.error('Failed to upsert embeddings to vector store', {
+              tenantId,
+              error,
+            });
+          }
+        }
+
         // Update metrics
         for (const signal of signals) {
           ingestThroughput.inc({ tenant_id: tenantId, type: signal.type });
@@ -155,42 +173,95 @@ class IngestQueue {
     );
   }
 
-  private async storeSignals(tenantId: string, signals: CoherenceSignal[]) {
-    const queries = signals.map(signal => ({
-      query: `
+  private async storeSignals(tenantId: string, signals: CoherenceSignal[]): Promise<VectorRecord[]> {
+    const vectorRecords: VectorRecord[] = [];
+
+    const queries = signals.map(signal => {
+      const signalId = crypto.createHash('sha256').update(`${tenantId}:${signal.type}:${signal.ts}`).digest('hex');
+      const baseMetadata = typeof signal.metadata === 'object' && signal.metadata !== null ? { ...signal.metadata } : {};
+      const nodeId = typeof signal.nodeId === 'string'
+        ? signal.nodeId
+        : typeof baseMetadata.nodeId === 'string'
+          ? baseMetadata.nodeId
+          : undefined;
+      const embeddingModel = typeof signal.embeddingModel === 'string'
+        ? signal.embeddingModel
+        : typeof baseMetadata.embeddingModel === 'string'
+          ? baseMetadata.embeddingModel
+          : undefined;
+      const providedEmbeddingId = typeof signal.embeddingId === 'string'
+        ? signal.embeddingId
+        : typeof baseMetadata.embeddingId === 'string'
+          ? baseMetadata.embeddingId
+          : undefined;
+
+      const embeddingId = signal.embedding && signal.embedding.length > 0
+        ? providedEmbeddingId || `${signalId}-embedding`
+        : providedEmbeddingId;
+
+      if (signal.embedding && signal.embedding.length > 0) {
+        vectorRecords.push({
+          id: embeddingId || `${signalId}-embedding`,
+          vector: signal.embedding,
+          tenantId,
+          nodeId,
+          embeddingModel,
+          metadata: {
+            ...baseMetadata,
+            signalId,
+            type: signal.type,
+            source: signal.source,
+            ts: signal.ts,
+          },
+        });
+      }
+
+      return {
+        query: `
         MERGE (s:Signal {id: $id, tenant_id: $tenantId})
         SET s.type = $type,
-            s.value = $value, 
+            s.value = $value,
             s.weight = $weight,
             s.source = $source,
             s.timestamp = datetime($ts),
             s.purpose = $purpose,
+            s.metadata = $metadata,
+            s.node_id = $nodeId,
+            s.embedding_id = $embeddingId,
+            s.embedding_model = $embeddingModel,
             s.updated_at = datetime()
         RETURN s.id as id`,
-      params: {
-        id: crypto.createHash('sha256').update(`${tenantId}:${signal.type}:${signal.ts}`).digest('hex'),
-        tenantId,
-        type: signal.type,
-        value: signal.value,
-        weight: signal.weight || 1.0,
-        source: signal.source,
-        ts: signal.ts,
-        purpose: signal.purpose || 'investigation'
-      }
-    }));
+        params: {
+          id: signalId,
+          tenantId,
+          type: signal.type,
+          value: signal.value,
+          weight: signal.weight || 1.0,
+          source: signal.source,
+          ts: signal.ts,
+          purpose: signal.purpose || 'investigation',
+          metadata: baseMetadata,
+          nodeId: nodeId || null,
+          embeddingId: embeddingId || null,
+          embeddingModel: embeddingModel || null,
+        },
+      };
+    });
 
     // Execute in batches to avoid transaction timeouts
     const batchSize = 100;
     for (let i = 0; i < queries.length; i += batchSize) {
       const batch = queries.slice(i, i + batchSize);
-      
-      const session = await neo.run(`
+
+      await neo.run(`
         UNWIND $batch as row
         MERGE (s:Signal {id: row.id, tenant_id: row.tenantId})
         SET s += row
         RETURN count(s) as created
       `, { batch: batch.map(q => q.params) });
     }
+
+    return vectorRecords;
   }
 
   getQueueStatus() {
@@ -334,12 +405,50 @@ async function validateAndEnrichSignal(signal: any, defaultTenantId: string): Pr
   if (typeof signal.type !== 'string' || !signal.type) {
     throw new Error('Signal type is required');
   }
-  
+
   if (typeof signal.value !== 'number' || isNaN(signal.value)) {
     throw new Error('Signal value must be a valid number');
   }
 
   // Enrich with defaults
+  const metadata = typeof signal.metadata === 'object' && signal.metadata !== null ? { ...signal.metadata } : {};
+
+  let embedding: number[] | undefined;
+  if (signal.embedding !== undefined) {
+    if (!Array.isArray(signal.embedding)) {
+      throw new Error('Signal embedding must be an array');
+    }
+    embedding = signal.embedding.map((value: any, index: number) => {
+      const numeric = typeof value === 'number' ? value : Number(value);
+      if (!Number.isFinite(numeric)) {
+        throw new Error(`Signal embedding index ${index} must be numeric`);
+      }
+      return numeric;
+    });
+  }
+
+  const nodeId = typeof signal.nodeId === 'string'
+    ? signal.nodeId
+    : typeof metadata.nodeId === 'string'
+      ? metadata.nodeId
+      : undefined;
+
+  const embeddingModel = typeof signal.embeddingModel === 'string'
+    ? signal.embeddingModel
+    : typeof metadata.embeddingModel === 'string'
+      ? metadata.embeddingModel
+      : undefined;
+
+  const embeddingId = typeof signal.embeddingId === 'string'
+    ? signal.embeddingId
+    : typeof metadata.embeddingId === 'string'
+      ? metadata.embeddingId
+      : undefined;
+
+  if ('embedding' in metadata) {
+    delete metadata.embedding;
+  }
+
   const enriched: CoherenceSignal = {
     tenantId: signal.tenantId || defaultTenantId,
     type: signal.type,
@@ -348,7 +457,11 @@ async function validateAndEnrichSignal(signal: any, defaultTenantId: string): Pr
     source: signal.source || 'http-ingest',
     ts: signal.ts || new Date().toISOString(),
     purpose: signal.purpose || 'investigation',
-    metadata: signal.metadata
+    metadata,
+    embedding,
+    embeddingModel,
+    nodeId,
+    embeddingId
   };
 
   // Additional validation
