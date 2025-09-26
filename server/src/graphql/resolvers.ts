@@ -1,4 +1,5 @@
 import { neo } from '../db/neo4j';
+import neo4j, { Integer } from 'neo4j-driver';
 import { pg } from '../db/pg';
 import { getUser } from '../auth/context';
 import { opa } from '../policy/opa';
@@ -7,6 +8,8 @@ import { redactionService } from '../redaction/redact';
 import { gqlDuration, subscriptionFanoutLatency } from '../metrics';
 import { makePubSub } from '../subscriptions/pubsub';
 import Redis from 'ioredis';
+import logger from '../utils/logger';
+import { vectorSearchBridge } from '../services/vectorSearchBridge';
 
 const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
 
@@ -14,7 +17,76 @@ const redisClient = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : n
 
 export const resolvers = {
   DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),
-  Query: { 
+  Query: {
+    async vectorSimilaritySearch(_: any, { input }: any) {
+      const { tenantId, vector, topK, filter } = input;
+
+      if (!tenantId) {
+        throw new Error('tenantId is required');
+      }
+
+      if (!Array.isArray(vector) || vector.length === 0) {
+        throw new Error('vector must be a non-empty array');
+      }
+
+      if (!vectorSearchBridge.isEnabled()) {
+        throw new Error('Vector database is not configured');
+      }
+
+      const numericVector = vector.map((value: any, index: number) => {
+        const numeric = typeof value === 'number' ? value : Number(value);
+        if (!Number.isFinite(numeric)) {
+          throw new Error(`vector[${index}] must be numeric`);
+        }
+        return numeric;
+      });
+
+      const results = await vectorSearchBridge.searchSimilar(
+        numericVector,
+        tenantId,
+        topK ?? 10,
+        filter,
+      );
+
+      if (results.length === 0) {
+        return [];
+      }
+
+      const nodeIds = Array.from(
+        new Set(results.map((result) => result.nodeId).filter((id): id is string => Boolean(id))),
+      );
+
+      const entityMap = new Map<string, any>();
+
+      if (nodeIds.length > 0) {
+        try {
+          const neoResult = await neo.run(
+            `MATCH (n:Entity {tenantId: $tenantId})
+             WHERE n.id IN $ids
+             RETURN n.id as id, n`,
+            { tenantId, ids: nodeIds },
+            { tenantId },
+          );
+
+          for (const record of neoResult.records) {
+            const id = record.get('id');
+            const node = record.get('n');
+            entityMap.set(id, mapNeoNodeToEntity(node));
+          }
+        } catch (error) {
+          logger.error('Failed to hydrate Neo4j nodes for vector search', { error, tenantId });
+        }
+      }
+
+      return results.map((result) => ({
+        nodeId: result.nodeId ?? null,
+        tenantId: result.tenantId ?? tenantId,
+        score: result.score,
+        embeddingModel: result.embeddingModel ?? null,
+        metadata: result.metadata ?? null,
+        entity: result.nodeId ? entityMap.get(result.nodeId) ?? null : null,
+      }));
+    },
     async tenantCoherence(_: any, { tenantId }: any, ctx: any) {
       const end = gqlDuration.startTimer({ op: 'tenantCoherence' });
       try {
@@ -136,3 +208,62 @@ export const resolvers = {
     },
   },
 };
+
+function mapNeoNodeToEntity(node: any) {
+  if (!node) {
+    return null;
+  }
+
+  const labels: string[] = node.labels || [];
+  const properties = toPlainObject(node.properties || {});
+
+  const {
+    id,
+    tenant_id,
+    tenantId,
+    kind,
+    labels: storedLabels,
+    props,
+    created_at,
+    createdAt,
+    updated_at,
+    updatedAt,
+    created_by,
+    createdBy,
+    ...rest
+  } = properties;
+
+  const entityProps = typeof props === 'object' && props !== null ? props : rest;
+
+  return {
+    id,
+    tenantId: tenant_id || tenantId,
+    kind: kind || labels[0] || 'Entity',
+    labels: storedLabels || labels,
+    props: entityProps,
+    createdAt: created_at || createdAt || new Date().toISOString(),
+    updatedAt: updated_at || updatedAt || created_at || new Date().toISOString(),
+    createdBy: created_by || createdBy || 'system',
+  };
+}
+
+function toPlainObject(value: any): any {
+  if (neo4j.isInt(value)) {
+    return (value as Integer).toNumber();
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => toPlainObject(item));
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (value && typeof value === 'object') {
+    const entries = Object.entries(value).map(([key, val]) => [key, toPlainObject(val)]);
+    return Object.fromEntries(entries);
+  }
+
+  return value;
+}
