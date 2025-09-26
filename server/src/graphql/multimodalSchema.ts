@@ -71,12 +71,31 @@ const multimodalTypeDefs = gql`
     uploadedBy: User!
     uploadedAt: DateTime!
     metadata: JSON!
+    detections: [ImageDetection!]!
   }
 
   type MediaDimensions {
     width: Int!
     height: Int!
     aspectRatio: Float!
+  }
+
+  type ImageDetectionBoundingBox {
+    x: Float!
+    y: Float!
+    width: Float!
+    height: Float!
+    area: Float!
+    confidence: Float!
+  }
+
+  type ImageDetection {
+    id: ID!
+    mediaSourceId: ID!
+    className: String!
+    confidence: Float!
+    boundingBox: ImageDetectionBoundingBox!
+    processedAt: DateTime!
   }
 
   # Enhanced Entity with Multimodal Support
@@ -465,6 +484,7 @@ const multimodalTypeDefs = gql`
       similarity: Float = 0.9
       limit: Int = 50
     ): [[MultimodalEntity!]!]!
+    imageDetections(mediaSourceId: ID!): [ImageDetection!]!
   }
 
   # Extended Mutation Types

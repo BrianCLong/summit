@@ -33,6 +33,7 @@ export interface MediaMetadata {
   mediaType: MediaType;
   dimensions?: MediaDimensions;
   duration?: number;
+  storedPath: string;
   metadata: Record<string, any>;
 }
 
@@ -131,6 +132,7 @@ export class MediaUploadService {
         mediaType,
         dimensions,
         duration,
+        storedPath: finalFilePath,
         metadata: {
           uploadedBy: userId,
           uploadedAt: new Date().toISOString(),

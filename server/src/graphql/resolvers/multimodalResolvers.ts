@@ -1,13 +1,15 @@
 import { Upload } from 'graphql-upload-ts';
 import { withAuthAndPolicy } from '../../middleware/withAuthAndPolicy.js';
 import MultimodalDataService from '../../services/MultimodalDataService.js';
-import { MediaUploadService } from '../../services/MediaUploadService.js';
+import { MediaUploadService, MediaType } from '../../services/MediaUploadService.js';
 import ExtractionJobService from '../../services/ExtractionJobService.js';
 import { PubSub } from 'graphql-subscriptions';
 import baseLogger from '../../config/logger';
+import ImageProcessingService from '../../services/ImageProcessingService.js';
 
 const logger = baseLogger.child({ name: 'MultimodalResolvers' });
 const pubsub = new PubSub();
+const imageProcessingService = new ImageProcessingService();
 
 export interface MultimodalContext {
   user: any;
@@ -86,6 +88,13 @@ export const multimodalResolvers = {
       });
     }),
 
+    imageDetections: withAuthAndPolicy('read', (args) => ({
+      type: 'media_source',
+      id: args.mediaSourceId,
+    }))(async (_, { mediaSourceId }, context: MultimodalContext) => {
+      return await imageProcessingService.getDetections(mediaSourceId, context.user?.tenantId);
+    }),
+
     similarEntities: withAuthAndPolicy('read', (args) => ({
       type: 'multimodal_entity',
       id: args.entityId,
@@ -132,6 +141,7 @@ export const multimodalResolvers = {
               filesize: 0,
               checksum: `uri:${input.uri}`,
               mediaType: input.mediaType,
+              storedPath: input.uri,
               metadata: input.metadata || {},
             };
           } else {
@@ -143,6 +153,21 @@ export const multimodalResolvers = {
             context.user.id,
             input.geospatialContext,
           );
+
+          if (mediaMetadata.mediaType === MediaType.IMAGE && mediaMetadata.storedPath) {
+            try {
+              await imageProcessingService.processAndStore(
+                mediaSource.id,
+                mediaMetadata.storedPath,
+                context.user?.tenantId,
+              );
+            } catch (processingError) {
+              logger.warn('Image processing failed', {
+                mediaSourceId: mediaSource.id,
+                error: (processingError as Error).message,
+              });
+            }
+          }
 
           logger.info(`Uploaded media source: ${mediaSource.id}, type: ${mediaSource.mediaType}`);
           return mediaSource;
@@ -404,6 +429,12 @@ export const multimodalResolvers = {
         // This would fetch entities related to this media source
         // Implementation depends on your query requirements
         return [];
+      },
+    ),
+
+    detections: withAuthAndPolicy('read', () => ({ type: 'media_source', id: 'related' }))(
+      async (parent, _, context: MultimodalContext) => {
+        return await imageProcessingService.getDetections(parent.id, context.user?.tenantId);
       },
     ),
   },
