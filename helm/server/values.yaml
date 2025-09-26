@@ -62,6 +62,12 @@ env:
   - name: RATE_LIMIT_MAX
     value: '500'
 
+graphql:
+  enabledVersions:
+    - v1
+    - v2
+  defaultVersion: v1
+
 resources:
   requests:
     cpu: 200m
