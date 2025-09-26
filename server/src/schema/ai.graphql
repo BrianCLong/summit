@@ -42,9 +42,38 @@ type Community {
   members: [ID!]!
 }
 
+type ModelVersionInfo {
+  name: String!
+  version: String!
+  status: String!
+  createdAt: String
+  updatedAt: String
+  source: String
+  runId: String
+  description: String
+  params: JSON
+  metrics: JSON
+  tags: JSON
+}
+
+input DeployModelVersionInput {
+  modelName: String!
+  version: String!
+  namespace: String
+  image: String
+}
+
+type DeployModelVersionPayload {
+  jobName: String!
+  namespace: String!
+  status: String!
+  submittedAt: String!
+}
+
 extend type Query {
   aiJob(id: ID!): AIJob
   insights(status: String, kind: String): [Insight!]!
+  mlModelVersions(modelName: String!): [ModelVersionInfo!]!
 }
 
 extend type Mutation {
@@ -55,6 +84,7 @@ extend type Mutation {
 
   approveInsight(id: ID!): Insight!
   rejectInsight(id: ID!, reason: String): Insight!
+  deployModelVersion(input: DeployModelVersionInput!): DeployModelVersionPayload!
 }
 
 type Subscription {
