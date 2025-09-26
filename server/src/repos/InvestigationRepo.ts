@@ -3,11 +3,9 @@
  * Handles investigation/case management with PostgreSQL
  */
 
-import { Pool, PoolClient } from 'pg';
+import { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
-import logger from '../config/logger.js';
-
-const repoLogger = logger.child({ name: 'InvestigationRepo' });
+import { withTenantConnection } from '../db/tenants/postgresTenancy.js';
 
 export interface Investigation {
   id: string;
@@ -31,6 +29,7 @@ export interface InvestigationInput {
 
 export interface InvestigationUpdateInput {
   id: string;
+  tenantId: string;
   name?: string;
   description?: string;
   status?: 'active' | 'archived' | 'completed';
@@ -58,109 +57,123 @@ export class InvestigationRepo {
   async create(input: InvestigationInput, userId: string): Promise<Investigation> {
     const id = uuidv4();
 
-    const { rows } = await this.pg.query<InvestigationRow>(
-      `INSERT INTO investigations (id, tenant_id, name, description, status, props, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
-      [
-        id,
-        input.tenantId,
-        input.name,
-        input.description || null,
-        input.status || 'active',
-        JSON.stringify(input.props || {}),
-        userId,
-      ],
+    const row = await withTenantConnection(
+      input.tenantId,
+      async (client) => {
+        const { rows } = await client.query<InvestigationRow>(
+          `INSERT INTO investigations (id, tenant_id, name, description, status, props, created_by)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
+           RETURNING *`,
+          [
+            id,
+            input.tenantId,
+            input.name,
+            input.description || null,
+            input.status || 'active',
+            JSON.stringify(input.props || {}),
+            userId,
+          ],
+        );
+
+        return rows[0];
+      },
+      { pool: this.pg }
     );
 
-    return this.mapRow(rows[0]);
+    return this.mapRow(row);
   }
 
   /**
    * Update investigation
    */
   async update(input: InvestigationUpdateInput): Promise<Investigation | null> {
-    const updateFields: string[] = [];
-    const params: any[] = [input.id];
-    let paramIndex = 2;
+    const row = await withTenantConnection(
+      input.tenantId,
+      async (client) => {
+        const updateFields: string[] = [];
+        const params: any[] = [input.id];
+        let paramIndex = 2;
 
-    if (input.name !== undefined) {
-      updateFields.push(`name = $${paramIndex}`);
-      params.push(input.name);
-      paramIndex++;
-    }
+        if (input.name !== undefined) {
+          updateFields.push(`name = $${paramIndex}`);
+          params.push(input.name);
+          paramIndex++;
+        }
 
-    if (input.description !== undefined) {
-      updateFields.push(`description = $${paramIndex}`);
-      params.push(input.description);
-      paramIndex++;
-    }
+        if (input.description !== undefined) {
+          updateFields.push(`description = $${paramIndex}`);
+          params.push(input.description);
+          paramIndex++;
+        }
 
-    if (input.status !== undefined) {
-      updateFields.push(`status = $${paramIndex}`);
-      params.push(input.status);
-      paramIndex++;
-    }
+        if (input.status !== undefined) {
+          updateFields.push(`status = $${paramIndex}`);
+          params.push(input.status);
+          paramIndex++;
+        }
 
-    if (input.props !== undefined) {
-      updateFields.push(`props = $${paramIndex}`);
-      params.push(JSON.stringify(input.props));
-      paramIndex++;
-    }
+        if (input.props !== undefined) {
+          updateFields.push(`props = $${paramIndex}`);
+          params.push(JSON.stringify(input.props));
+          paramIndex++;
+        }
 
-    if (updateFields.length === 0) {
-      return await this.findById(input.id);
-    }
+        if (updateFields.length === 0) {
+          const { rows } = await client.query<InvestigationRow>(
+            `SELECT * FROM investigations WHERE id = $1`,
+            [input.id],
+          );
+          return rows[0] ?? null;
+        }
 
-    updateFields.push(`updated_at = now()`);
+        updateFields.push(`updated_at = now()`);
 
-    const { rows } = await this.pg.query<InvestigationRow>(
-      `UPDATE investigations SET ${updateFields.join(', ')}
-       WHERE id = $1
-       RETURNING *`,
-      params,
+        const { rows } = await client.query<InvestigationRow>(
+          `UPDATE investigations SET ${updateFields.join(', ')}
+           WHERE id = $1
+           RETURNING *`,
+          params,
+        );
+
+        return rows[0] ?? null;
+      },
+      { pool: this.pg }
     );
 
-    return rows[0] ? this.mapRow(rows[0]) : null;
+    return row ? this.mapRow(row) : null;
   }
 
   /**
    * Delete investigation (cascade to related entities)
    */
-  async delete(id: string): Promise<boolean> {
-    const client = await this.pg.connect();
-
-    try {
-      await client.query('BEGIN');
-
-      // Note: In a full implementation, you might want to soft-delete
-      // or handle related entities/relationships more carefully
-      const { rowCount } = await client.query(`DELETE FROM investigations WHERE id = $1`, [id]);
-
-      await client.query('COMMIT');
-      return rowCount !== null && rowCount > 0;
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
-    }
+  async delete(id: string, tenantId: string): Promise<boolean> {
+    return await withTenantConnection(
+      tenantId,
+      async (client) => {
+        const { rowCount } = await client.query(`DELETE FROM investigations WHERE id = $1`, [id]);
+        return rowCount !== null && rowCount > 0;
+      },
+      { pool: this.pg }
+    );
   }
 
   /**
    * Find investigation by ID
    */
-  async findById(id: string, tenantId?: string): Promise<Investigation | null> {
-    const params = [id];
-    let query = `SELECT * FROM investigations WHERE id = $1`;
+  async findById(id: string, tenantId: string): Promise<Investigation | null> {
+    const row = await withTenantConnection(
+      tenantId,
+      async (client) => {
+        const { rows } = await client.query<InvestigationRow>(
+          `SELECT * FROM investigations WHERE id = $1`,
+          [id],
+        );
+        return rows[0] ?? null;
+      },
+      { pool: this.pg }
+    );
 
-    if (tenantId) {
-      query += ` AND tenant_id = $2`;
-      params.push(tenantId);
-    }
-
-    const { rows } = await this.pg.query<InvestigationRow>(query, params);
-    return rows[0] ? this.mapRow(rows[0]) : null;
+    return row ? this.mapRow(row) : null;
   }
 
   /**
@@ -177,20 +190,29 @@ export class InvestigationRepo {
     limit?: number;
     offset?: number;
   }): Promise<Investigation[]> {
-    const params: any[] = [tenantId];
-    let query = `SELECT * FROM investigations WHERE tenant_id = $1`;
-    let paramIndex = 2;
+    const rows = await withTenantConnection(
+      tenantId,
+      async (client) => {
+        const params: any[] = [];
+        let query = `SELECT * FROM investigations`;
+        const conditions: string[] = ['TRUE'];
 
-    if (status) {
-      query += ` AND status = $${paramIndex}`;
-      params.push(status);
-      paramIndex++;
-    }
+        if (status) {
+          params.push(status);
+          conditions.push(`status = $${params.length}`);
+        }
 
-    query += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
-    params.push(Math.min(limit, 1000), offset);
+        query += ` WHERE ${conditions.join(' AND ')}`;
+        params.push(Math.min(limit, 1000));
+        params.push(offset);
+        query += ` ORDER BY created_at DESC LIMIT $${params.length - 1} OFFSET $${params.length}`;
 
-    const { rows } = await this.pg.query<InvestigationRow>(query, params);
+        const { rows } = await client.query<InvestigationRow>(query, params);
+        return rows;
+      },
+      { pool: this.pg }
+    );
+
     return rows.map(this.mapRow);
   }
 
@@ -206,44 +228,58 @@ export class InvestigationRepo {
   }> {
     // This assumes you'll add investigation_id to entities/relationships tables
     // or implement a different association mechanism
-    const entityQuery = `
-      SELECT COUNT(*) as count 
-      FROM entities 
-      WHERE tenant_id = $1 AND props->>'investigationId' = $2
-    `;
+    const results = await withTenantConnection(
+      tenantId,
+      async (client) => {
+        const entityQuery = `
+          SELECT COUNT(*) as count
+          FROM entities
+          WHERE props->>'investigationId' = $1
+        `;
 
-    const relationshipQuery = `
-      SELECT COUNT(*) as count 
-      FROM relationships 
-      WHERE tenant_id = $1 AND props->>'investigationId' = $2
-    `;
+        const relationshipQuery = `
+          SELECT COUNT(*) as count
+          FROM relationships
+          WHERE props->>'investigationId' = $1
+        `;
 
-    const [entityResult, relationshipResult] = await Promise.all([
-      this.pg.query(entityQuery, [tenantId, investigationId]),
-      this.pg.query(relationshipQuery, [tenantId, investigationId]),
-    ]);
+        const [entityResult, relationshipResult] = await Promise.all([
+          client.query(entityQuery, [investigationId]),
+          client.query(relationshipQuery, [investigationId]),
+        ]);
+
+        return {
+          entity: entityResult.rows[0]?.count || '0',
+          relationships: relationshipResult.rows[0]?.count || '0',
+        };
+      },
+      { pool: this.pg }
+    );
 
     return {
-      entityCount: parseInt(entityResult.rows[0]?.count || '0'),
-      relationshipCount: parseInt(relationshipResult.rows[0]?.count || '0'),
+      entityCount: parseInt(results.entity || '0'),
+      relationshipCount: parseInt(results.relationships || '0'),
     };
   }
 
   /**
    * Batch load investigations by IDs (for DataLoader)
    */
-  async batchByIds(ids: readonly string[], tenantId?: string): Promise<(Investigation | null)[]> {
+  async batchByIds(ids: readonly string[], tenantId: string): Promise<(Investigation | null)[]> {
     if (ids.length === 0) return [];
 
-    const params = [ids];
-    let query = `SELECT * FROM investigations WHERE id = ANY($1)`;
+    const rows = await withTenantConnection(
+      tenantId,
+      async (client) => {
+        const { rows } = await client.query<InvestigationRow>(
+          `SELECT * FROM investigations WHERE id = ANY($1)`,
+          [ids],
+        );
+        return rows;
+      },
+      { pool: this.pg }
+    );
 
-    if (tenantId) {
-      query += ` AND tenant_id = $2`;
-      params.push(tenantId);
-    }
-
-    const { rows } = await this.pg.query<InvestigationRow>(query, params);
     const investigationsMap = new Map(rows.map((row) => [row.id, this.mapRow(row)]));
 
     return ids.map((id) => investigationsMap.get(id) || null);

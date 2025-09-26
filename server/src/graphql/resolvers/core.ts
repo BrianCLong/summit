@@ -11,6 +11,7 @@ import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../config/logger.js';
 import { z } from 'zod';
+import { resolveTenantId } from '../utils/tenantGuard.js';
 
 const resolverLogger = logger.child({ name: 'CoreResolvers' });
 
@@ -25,6 +26,7 @@ const EntityInputZ = z.object({
 
 const EntityUpdateZ = z.object({
   id: z.string().uuid(),
+  tenantId: z.string().min(1),
   labels: z.array(z.string()).optional(),
   props: z.record(z.any()).optional(),
 });
@@ -79,18 +81,12 @@ export const coreResolvers = {
   Query: {
     // Entity queries
     entity: async (_: any, { id, tenantId }: any, context: any) => {
-      const effectiveTenantId = tenantId || context.tenantId;
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(context, tenantId);
       return await entityRepo.findById(id, effectiveTenantId);
     },
 
     entities: async (_: any, { input }: any, context: any) => {
-      const effectiveTenantId = input.tenantId || context.tenantId;
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(context, input.tenantId);
 
       return await entityRepo.search({
         tenantId: effectiveTenantId,
@@ -103,18 +99,12 @@ export const coreResolvers = {
 
     // Relationship queries
     relationship: async (_: any, { id, tenantId }: any, context: any) => {
-      const effectiveTenantId = tenantId || context.tenantId;
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(context, tenantId);
       return await relationshipRepo.findById(id, effectiveTenantId);
     },
 
     relationships: async (_: any, { input }: any, context: any) => {
-      const effectiveTenantId = input.tenantId || context.tenantId;
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(context, input.tenantId);
 
       return await relationshipRepo.search({
         tenantId: effectiveTenantId,
@@ -128,18 +118,12 @@ export const coreResolvers = {
 
     // Investigation queries
     investigation: async (_: any, { id, tenantId }: any, context: any) => {
-      const effectiveTenantId = tenantId || context.tenantId;
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(context, tenantId);
       return await investigationRepo.findById(id, effectiveTenantId);
     },
 
     investigations: async (_: any, { tenantId, status, limit, offset }: any, context: any) => {
-      const effectiveTenantId = tenantId || context.tenantId;
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(context, tenantId);
 
       return await investigationRepo.list({
         tenantId: effectiveTenantId,
@@ -275,6 +259,8 @@ export const coreResolvers = {
     // Entity mutations
     createEntity: async (_: any, { input }: any, context: any) => {
       const parsed = EntityInputZ.parse(input);
+      const tenantId = resolveTenantId(context, parsed.tenantId);
+      parsed.tenantId = tenantId;
       const userId = context.user?.sub || context.user?.id || 'system';
 
       // Add investigation context to props if provided
@@ -286,15 +272,12 @@ export const coreResolvers = {
     },
 
     updateEntity: async (_: any, { input }: any, context: any) => {
-      const parsed = EntityUpdateZ.parse(input);
+      const parsed = EntityUpdateZ.parse({ ...input, tenantId: resolveTenantId(context, input.tenantId) });
       return await entityRepo.update(parsed);
     },
 
     deleteEntity: async (_: any, { id, tenantId }: any, context: any) => {
-      const effectiveTenantId = tenantId || context.tenantId;
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(context, tenantId);
 
       // Verify entity belongs to tenant before deletion
       const entity = await entityRepo.findById(id, effectiveTenantId);
@@ -302,12 +285,14 @@ export const coreResolvers = {
         return false;
       }
 
-      return await entityRepo.delete(id);
+      return await entityRepo.delete(id, effectiveTenantId);
     },
 
     // Relationship mutations
     createRelationship: async (_: any, { input }: any, context: any) => {
       const parsed = RelationshipInputZ.parse(input);
+      const tenantId = resolveTenantId(context, parsed.tenantId);
+      parsed.tenantId = tenantId;
       const userId = context.user?.sub || context.user?.id || 'system';
 
       // Add investigation context to props if provided
@@ -319,10 +304,7 @@ export const coreResolvers = {
     },
 
     deleteRelationship: async (_: any, { id, tenantId }: any, context: any) => {
-      const effectiveTenantId = tenantId || context.tenantId;
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(context, tenantId);
 
       // Verify relationship belongs to tenant before deletion
       const relationship = await relationshipRepo.findById(id, effectiveTenantId);
@@ -330,24 +312,23 @@ export const coreResolvers = {
         return false;
       }
 
-      return await relationshipRepo.delete(id);
+      return await relationshipRepo.delete(id, effectiveTenantId);
     },
 
     // Investigation mutations
     createInvestigation: async (_: any, { input }: any, context: any) => {
       const userId = context.user?.sub || context.user?.id || 'system';
-      return await investigationRepo.create(input, userId);
+      const tenantId = resolveTenantId(context, input.tenantId);
+      return await investigationRepo.create({ ...input, tenantId }, userId);
     },
 
     updateInvestigation: async (_: any, { input }: any, context: any) => {
-      return await investigationRepo.update(input);
+      const tenantId = resolveTenantId(context, input.tenantId);
+      return await investigationRepo.update({ ...input, tenantId });
     },
 
     deleteInvestigation: async (_: any, { id, tenantId }: any, context: any) => {
-      const effectiveTenantId = tenantId || context.tenantId;
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(context, tenantId);
 
       // Verify investigation belongs to tenant before deletion
       const investigation = await investigationRepo.findById(id, effectiveTenantId);
@@ -355,7 +336,7 @@ export const coreResolvers = {
         return false;
       }
 
-      return await investigationRepo.delete(id);
+      return await investigationRepo.delete(id, effectiveTenantId);
     },
   },
 
