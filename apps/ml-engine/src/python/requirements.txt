@@ -9,6 +9,11 @@ torch==2.0.1
 sentence-transformers==2.2.2
 transformers==4.53.0
 
+# Streaming inference runtime
+kafka-python==2.0.2
+redis==5.0.1
+prometheus-client==0.20.0
+
 # Text processing
 nltk==3.8.1
 spacy==3.6.0
