@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
-import { verify, JwtPayload } from 'jsonwebtoken';
 import axios from 'axios';
 import { trace, context } from '@opentelemetry/api';
 import { logger } from '../utils/logger';
 import type { User, OPAClient } from '../graphql/intelgraph/types';
+import { getExternalAuthManager } from '../security/externalAuth.js';
+import AuthService from '../services/AuthService.js';
 
 const tracer = trace.getTracer('intelgraph-opa-abac');
 
@@ -96,11 +97,20 @@ export class OPAClient implements OPAClient {
 /**
  * OIDC JWT token validation middleware
  */
-export function validateOIDCToken(
+let cachedAuthService: AuthService | null = null;
+
+function resolveAuthService(): AuthService {
+  if (!cachedAuthService) {
+    cachedAuthService = new AuthService();
+  }
+  return cachedAuthService;
+}
+
+export async function validateOIDCToken(
   req: Request,
   res: Response,
   next: NextFunction
-): void {
+): Promise<void> {
   const span = tracer.startSpan('validate-oidc-token');
 
   try {
@@ -128,10 +138,7 @@ export function validateOIDCToken(
     }
 
     const token = authHeader.split(' ')[1];
-    const issuer = process.env.OIDC_ISSUER || 'https://auth.topicality.co/';
 
-    // In production, implement proper OIDC validation
-    // For development/demo, decode without verification
     if (process.env.NODE_ENV === 'development') {
       const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
       (req as any).user = {
@@ -153,11 +160,59 @@ export function validateOIDCToken(
       return next();
     }
 
-    // TODO: Implement proper OIDC validation with issuer verification
-    // const publicKey = await getOIDCPublicKey(issuer);
-    // const decoded = verify(token, publicKey, { issuer }) as JwtPayload;
+    const externalManager = getExternalAuthManager();
+    const externalUser = await externalManager.verify(token);
 
-    throw new Error('Production OIDC validation not yet implemented');
+    if (externalUser) {
+      const scopes = externalUser.scopes.length > 0
+        ? externalUser.scopes
+        : externalUser.roles.map((role) => `role:${role.toLowerCase()}`);
+
+      (req as any).user = {
+        id: externalUser.id,
+        tenant: externalUser.tenant,
+        roles: externalUser.roles,
+        scopes,
+        residency: externalUser.residency,
+        email: externalUser.email,
+      };
+
+      span.setAttributes({
+        'auth.mode': 'external',
+        'auth.provider': externalUser.providerId,
+        'user.id': externalUser.id,
+        'user.tenant': externalUser.tenant,
+      });
+
+      span.end();
+      return next();
+    }
+
+    const internalUser = await resolveAuthService().verifyToken(token);
+
+    if (internalUser) {
+      const role = internalUser.role?.toUpperCase?.() || 'VIEWER';
+      const scopes = [`role:${role.toLowerCase()}`];
+
+      (req as any).user = {
+        id: internalUser.id,
+        tenant: 'internal',
+        roles: [role],
+        scopes,
+        residency: 'internal',
+        email: internalUser.email,
+      };
+
+      span.setAttributes({
+        'auth.mode': 'internal-jwt',
+        'user.id': internalUser.id,
+      });
+
+      span.end();
+      return next();
+    }
+
+    throw new AuthenticationError('Invalid or expired token');
 
   } catch (error) {
     span.recordException(error as Error);
