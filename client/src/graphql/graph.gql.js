@@ -36,3 +36,20 @@ export const REQUEST_AI_ANALYSIS = gql`
     }
   }
 `;
+
+export const BULK_DELETE_GRAPH_ELEMENTS = gql`
+  mutation BulkDeleteGraphElements(
+    $investigationId: ID!
+    $nodeIds: [ID!]
+    $edgeIds: [ID!]
+  ) {
+    bulkDeleteGraphElements(
+      investigationId: $investigationId
+      nodeIds: $nodeIds
+      edgeIds: $edgeIds
+    ) {
+      deletedNodeIds
+      deletedEdgeIds
+    }
+  }
+`;

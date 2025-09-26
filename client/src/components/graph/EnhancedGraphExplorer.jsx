@@ -8,6 +8,7 @@ import {
   Fab,
   Button,
   Alert,
+  Snackbar,
   Menu,
   MenuItem,
   Chip,
@@ -79,6 +80,8 @@ import {
   addEdge,
   setSelectedNodes,
   setSelectedEdges,
+  setSelectedNode,
+  setSelectedEdge,
   updateNode,
   deleteNode,
   deleteEdge,
@@ -107,8 +110,10 @@ import { apolloClient } from '../../services/apollo';
 import EnrichmentPanel from '../osint/EnrichmentPanel';
 import RelationshipModal from './RelationshipModal';
 import EntityDrawer from '../../../../ui/components/EntityDrawer';
+import BulkSelectionToolbar from './BulkSelectionToolbar';
 // (TextField, Slider already imported above in the bulk MUI import)
 import ConflictResolutionModal from '../collaboration/ConflictResolutionModal';
+import { BULK_DELETE_GRAPH_ELEMENTS } from '../../graphql/graph.gql';
 
 const ENRICH_WIKI = gql`
   mutation Enrich($entityId: ID, $title: String!) {
@@ -195,7 +200,14 @@ function EnhancedGraphExplorer() {
   const containerRef = useRef(null);
   const [cy, setCy] = useState(null);
   const socket = useSocket();
-  const { nodes, edges, selectedNode, selectedEdge } = useSelector((state) => state.graph);
+  const {
+    nodes,
+    edges,
+    selectedNode,
+    selectedEdge,
+    selectedNodes: selectedNodesState,
+    selectedEdges: selectedEdgesState,
+  } = useSelector((state) => state.graph);
   const [loading, setLoading] = useState(false);
   const [layoutMenuAnchor, setLayoutMenuAnchor] = useState(null);
   const [currentLayout, setCurrentLayout] = useState('fcose');
@@ -214,6 +226,9 @@ function EnhancedGraphExplorer() {
   const [updateRel] = useMutation(UPDATE_REL);
   const [createRel] = useMutation(CREATE_REL);
   const [deleteRelMutation] = useMutation(DELETE_REL);
+  const [bulkDeleteElements, { loading: bulkDeleting }] = useMutation(
+    BULK_DELETE_GRAPH_ELEMENTS,
+  );
   const [edgeEditor, setEdgeEditor] = useState({
     open: false,
     id: '',
@@ -244,6 +259,10 @@ function EnhancedGraphExplorer() {
   const [suggestions, setSuggestions] = useState([]);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [runSuggest, { loading: suggesting }] = useMutation(SUGGEST_LINKS);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [bulkFeedback, setBulkFeedback] = useState(null);
+  const selectedNodeCount = selectedNodesState ? selectedNodesState.length : 0;
+  const selectedEdgeCount = selectedEdgesState ? selectedEdgesState.length : 0;
 
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -736,6 +755,7 @@ function EnhancedGraphExplorer() {
     }
   }, [cy, nodes, edges, timeFrom, timeTo]);
 
+
   // Auto-fit time domain from edges
   useEffect(() => {
     let min = new Date('2100-01-01');
@@ -979,24 +999,18 @@ function EnhancedGraphExplorer() {
   };
 
   const setupEventHandlers = (cy) => {
-    // Selection events
-    cy.on('tap', 'node', (evt) => {
-      const node = evt.target;
-      dispatch(setSelectedNodes([node.data()]));
-      highlightConnectedElements(node);
-    });
+    const handleSelectionChange = () => {
+      syncSelectionState();
+    };
 
-    cy.on('tap', 'edge', (evt) => {
-      const edge = evt.target;
-      dispatch(setSelectedEdges([edge.data()]));
-      highlightEdge(edge);
-    });
+    cy.on('select', 'node', handleSelectionChange);
+    cy.on('unselect', 'node', handleSelectionChange);
+    cy.on('select', 'edge', handleSelectionChange);
+    cy.on('unselect', 'edge', handleSelectionChange);
 
     cy.on('tap', (evt) => {
       if (evt.target === cy) {
-        dispatch(setSelectedNodes([]));
-        dispatch(setSelectedEdges([]));
-        clearHighlights();
+        clearSelection();
       }
     });
 
@@ -1210,6 +1224,104 @@ function EnhancedGraphExplorer() {
     cy.elements().removeClass('highlighted dimmed');
   }, [cy]);
 
+  const highlightBulkSelection = useCallback(() => {
+    if (!cy) return;
+
+    const selectedNodesCy = cy.$('node:selected');
+    const selectedEdgesCy = cy.$('edge:selected');
+    const selection = selectedNodesCy.union(selectedEdgesCy);
+
+    cy.elements().removeClass('highlighted dimmed');
+
+    if (!selection.length) {
+      return;
+    }
+
+    const connectedNodes = selectedNodesCy
+      .connectedNodes()
+      .union(selectedEdgesCy.connectedNodes());
+    const connectedEdges = selectedNodesCy.connectedEdges();
+    const highlighted = selection.union(connectedNodes).union(connectedEdges);
+    highlighted.addClass('highlighted');
+    cy.elements().difference(highlighted).addClass('dimmed');
+  }, [cy]);
+
+  const syncSelectionState = useCallback(() => {
+    const instance = cyRef.current;
+    if (!instance) return;
+
+    const selectedCyNodes = instance.$('node:selected');
+    const selectedCyEdges = instance.$('edge:selected');
+
+    const nodePayload = selectedCyNodes.map((node) => node.data());
+    const edgePayload = selectedCyEdges.map((edge) => edge.data());
+
+    dispatch(setSelectedNodes(nodePayload));
+    dispatch(setSelectedEdges(edgePayload));
+
+    if (nodePayload.length === 1 && edgePayload.length === 0) {
+      dispatch(setSelectedNode(nodePayload[0]));
+    } else {
+      dispatch(setSelectedNode(null));
+    }
+
+    if (edgePayload.length === 1 && nodePayload.length === 0) {
+      dispatch(setSelectedEdge(edgePayload[0]));
+    } else {
+      dispatch(setSelectedEdge(null));
+    }
+
+    if (nodePayload.length + edgePayload.length === 0) {
+      clearHighlights();
+      return;
+    }
+
+    if (nodePayload.length === 1 && edgePayload.length === 0) {
+      highlightConnectedElements(selectedCyNodes[0]);
+      return;
+    }
+
+    if (edgePayload.length === 1 && nodePayload.length === 0) {
+      highlightEdge(selectedCyEdges[0]);
+      return;
+    }
+
+    highlightBulkSelection();
+  }, [
+    clearHighlights,
+    dispatch,
+    highlightBulkSelection,
+    highlightConnectedElements,
+    highlightEdge,
+    setSelectedEdge,
+    setSelectedNode,
+    setSelectedNodes,
+    setSelectedEdges,
+  ]);
+
+  const clearSelection = useCallback(() => {
+    if (!cyRef.current) return;
+
+    cyRef.current.$(':selected').unselect();
+    dispatch(setSelectedNodes([]));
+    dispatch(setSelectedEdges([]));
+    dispatch(setSelectedNode(null));
+    dispatch(setSelectedEdge(null));
+    clearHighlights();
+  }, [clearHighlights, dispatch]);
+
+  useEffect(() => {
+    if (!cy) return;
+
+    cy.boxSelectionEnabled(selectionMode);
+    if (selectionMode) {
+      cy.selectionType('additive');
+    } else {
+      cy.selectionType('single');
+      clearSelection();
+    }
+  }, [cy, selectionMode, clearSelection]);
+
   const handleEditElement = (element) => {
     setEditingElement(element.data());
     setEditDialogOpen(true);
@@ -1220,6 +1332,55 @@ function EnhancedGraphExplorer() {
       dispatch(deleteNode(element.id()));
     } else if (element.isEdge && element.isEdge()) {
       dispatch(deleteEdge(element.id()));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const nodeIds = (selectedNodesState || []).map((node) => node.id || node.data?.id);
+    const edgeIds = (selectedEdgesState || []).map((edge) => edge.id || edge.data?.id);
+
+    if (nodeIds.length === 0 && edgeIds.length === 0) {
+      setBulkFeedback({
+        severity: 'info',
+        message: 'Select nodes or edges to delete.',
+      });
+      return;
+    }
+
+    if (!id) {
+      setBulkFeedback({
+        severity: 'error',
+        message: 'Investigation context is required for bulk deletion.',
+      });
+      return;
+    }
+
+    try {
+      const { data } = await bulkDeleteElements({
+        variables: {
+          investigationId: id,
+          nodeIds,
+          edgeIds,
+        },
+      });
+
+      const deletedNodeIds = data?.bulkDeleteGraphElements?.deletedNodeIds || nodeIds;
+      const deletedEdgeIds = data?.bulkDeleteGraphElements?.deletedEdgeIds || edgeIds;
+
+      deletedNodeIds.forEach((nodeId) => dispatch(deleteNode(nodeId)));
+      deletedEdgeIds.forEach((edgeId) => dispatch(deleteEdge(edgeId)));
+
+      setBulkFeedback({
+        severity: 'success',
+        message: `Deleted ${deletedNodeIds.length} nodes and ${deletedEdgeIds.length} edges.`,
+      });
+
+      clearSelection();
+    } catch (error) {
+      setBulkFeedback({
+        severity: 'error',
+        message: error.message || 'Failed to delete selection.',
+      });
     }
   };
 
@@ -1879,6 +2040,19 @@ function EnhancedGraphExplorer() {
         <GeoMapPanel nodes={nodes} />
       </Box>
 
+      <Box sx={{ position: 'fixed', bottom: 16, left: 16, zIndex: 12 }}>
+        <BulkSelectionToolbar
+          nodeCount={selectedNodeCount}
+          edgeCount={selectedEdgeCount}
+          selectionMode={selectionMode}
+          onToggleSelectionMode={() => setSelectionMode((prev) => !prev)}
+          onClear={clearSelection}
+          onDelete={handleBulkDelete}
+          disabled={bulkDeleting}
+          loading={bulkDeleting}
+        />
+      </Box>
+
       {/* Search Panel */}
       <Box sx={{ position: 'fixed', top: 96, right: 16, zIndex: 9 }}>
         <Paper elevation={4}>
@@ -2338,6 +2512,22 @@ function EnhancedGraphExplorer() {
           </pre>
         </Paper>
       )}
+      <Snackbar
+        open={Boolean(bulkFeedback)}
+        autoHideDuration={6000}
+        onClose={() => setBulkFeedback(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        {bulkFeedback ? (
+          <Alert
+            severity={bulkFeedback.severity}
+            onClose={() => setBulkFeedback(null)}
+            sx={{ width: '100%' }}
+          >
+            {bulkFeedback.message}
+          </Alert>
+        ) : null}
+      </Snackbar>
     </Box>
   );
 }

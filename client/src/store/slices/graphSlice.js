@@ -341,6 +341,8 @@ export const {
   setGraphData,
   addNode,
   addEdge,
+  setSelectedNodes,
+  setSelectedEdges,
   setSelectedNode,
   setSelectedEdge,
   setLoading,
