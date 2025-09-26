@@ -13,4 +13,7 @@ requests
 feedparser
 sqlalchemy
 scikit-learn
+jsonschema
+opentelemetry-api
+opentelemetry-sdk
 # Existing libraries like statsmodels, PuLP, rdkit are assumed to be available in the environment.
