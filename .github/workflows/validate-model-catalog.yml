@@ -1,0 +1,42 @@
+name: Validate Model Catalog
+
+on: [pull_request, push]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install validators
+        run: npm i -g ajv-cli@5 && npm i yaml@2
+      - name: Validate schema
+        run: |
+          ajv validate -s model-catalog/schemas/model.schema.json -d model-catalog/cataloga?.yaml --errors=text || \
+          ajv validate -s model-catalog/schemas/model.schema.json -d model-catalog/catalog.yaml
+      - name: Render Markdown
+        run: |
+          node -e '
+          const fs=require("fs");
+          const YAML=require("yaml");
+          const cat=YAML.parse(fs.readFileSync("model-catalog/catalog.yaml","utf8"));
+          let out="# IntelGraph Model Catalog\n\n";
+          for (const m of cat.models||[]) {
+            out+=`## ${m.id}\n**Vendor:** ${m.vendor} · **Family:** ${m.family} · **Last verified:** ${m.last_verified}\n\n`;
+            if (Array.isArray(m.capability_highlights) && m.capability_highlights.length) {
+              out += m.capability_highlights.map(x=>`- ${x}`).join("\n")+"\n\n";
+            }
+            if (m.defaults) {
+              out += `**Defaults:** ${JSON.stringify(m.defaults)}\n\n`;
+            }
+          }
+          fs.mkdirSync("model-catalog/generated",{recursive:true});
+          fs.writeFileSync("model-catalog/generated/catalog.md",out);
+          '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: catalog-md
+          path: model-catalog/generated/catalog.md
+
