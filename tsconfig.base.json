@@ -15,7 +15,7 @@
     "composite": false,
 
     
-    "types": ["node", "jest"]
+    "types": ["node", "jest", "react", "react-dom"]
   },
   "exclude": ["**/dist", "**/build", "**/.turbo", "**/.next"]
 }

@@ -7,7 +7,7 @@
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "bundler",
     "strict": true,
-    "types": ["jest", "react", "react-dom", "@testing-library/jest-dom"]
+    "types": ["jest"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "build"]
