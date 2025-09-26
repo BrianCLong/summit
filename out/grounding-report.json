@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-09-26T04:47:45.028992Z",
+  "total_cases": 2,
+  "passed_cases": 0,
+  "failed_cases": 2,
+  "pass_rate": 0.0,
+  "average_score": 0.49047619047619045,
+  "threshold": 0.95,
+  "overall_passed": false,
+  "results": [
+    {
+      "response_id": "unknown",
+      "tenant": "TENANT_001",
+      "timestamp": "2025-09-26T04:47:45.028651Z",
+      "response": "The company revenue for 2023 was $150 million, representing a 25% increase from the previous year.",
+      "sources": [
+        "Financial Report 2023: Revenue reached $150 million in 2023.",
+        "Growth metrics showed 25% year-over-year increase in revenue."
+      ],
+      "grounding_score": 0.5666666666666667,
+      "passed": false,
+      "metadata": {
+        "response_length": 98,
+        "source_count": 2,
+        "verification_method": "semantic_overlap"
+      }
+    },
+    {
+      "response_id": "unknown",
+      "tenant": "TENANT_002",
+      "timestamp": "2025-09-26T04:47:45.028928Z",
+      "response": "The current CEO is Sarah Johnson, who has been in this role since 2020.",
+      "sources": [
+        "Leadership team: CEO Sarah Johnson (appointed 2020)",
+        "Executive profile: Sarah Johnson leads the company as Chief Executive Officer."
+      ],
+      "grounding_score": 0.41428571428571426,
+      "passed": false,
+      "metadata": {
+        "response_length": 71,
+        "source_count": 2,
+        "verification_method": "semantic_overlap"
+      }
+    }
+  ]
+}

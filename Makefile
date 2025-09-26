@@ -1,7 +1,7 @@
 # IntelGraph Development Makefile
 # Production-ready targets for monorepo development, testing, and deployment
 
-.PHONY: help dev test lint typecheck security docs clean install build deploy release-ga
+.PHONY: help dev test lint typecheck security docs clean install build deploy release-ga ops-delta-nightly
 
 # Default target
 .DEFAULT_GOAL := help
@@ -246,6 +246,21 @@ validate-prod: ## Validate production readiness before deployment
 test-alerts: ## Test alert system functionality
 	@echo "$(GREEN)Testing alert system...$(RESET)"
 	./scripts/observability/test-alert-system.sh
+
+##@ MC Platform Operations
+
+ops-delta-nightly: ## Generate nightly operations delta with evidence bundle
+	@echo "$(GREEN)Generating nightly operations delta...$(RESET)"
+	@PROM_URL=$${PROM_URL:-http://localhost:9090} \
+	 NAMESPACE=$${NAMESPACE:-default} \
+	 SERVICE=$${SERVICE:-agent-workbench} \
+	 TENANTS_CSV=$${TENANTS_CSV:-TENANT_001,TENANT_002,TENANT_003} \
+	 SLACK_WEBHOOK_URL=$${SLACK_WEBHOOK_URL} \
+	 GRAFANA_URL=$${GRAFANA_URL} \
+	 bash scripts/generate-operations-delta.sh
+	@echo "$(BLUE)Generating evidence bundle...$(RESET)"
+	@python3 scripts/generate-evidence-bundle.py
+	@echo "$(GREEN)✅ Nightly operations delta and evidence bundle generated$(RESET)"
 
 ##@ Utilities
 
