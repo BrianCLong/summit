@@ -1,0 +1,48 @@
+global:
+  domain:
+    api: api.dev.topicality.co
+    console: console.dev.topicality.co
+
+intelgraph-api:
+  image:
+    tag: dev-latest
+  ingress:
+    hosts:
+      - host: api.dev.topicality.co
+        paths: [ { path: /, pathType: Prefix } ]
+    tls:
+      - secretName: intelgraph-api-dev-tls
+        hosts: [ api.dev.topicality.co ]
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: api.dev.topicality.co
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+      nginx.ingress.kubernetes.io/service-upstream: "true"
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/session-cookie-name: intelgraph-api-route
+  rollout:
+    blueGreen:
+      autoPromotionEnabled: false
+      autoPromotionSeconds: 0
+      previewReplicaCount: 1
+
+companyos-console:
+  image:
+    tag: dev-latest
+  ingress:
+    hosts:
+      - host: console.dev.topicality.co
+        paths: [ { path: /, pathType: Prefix } ]
+    tls:
+      - secretName: companyos-console-dev-tls
+        hosts: [ console.dev.topicality.co ]
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: console.dev.topicality.co
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+      nginx.ingress.kubernetes.io/service-upstream: "true"
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/session-cookie-name: companyos-console-route
+  rollout:
+    blueGreen:
+      autoPromotionEnabled: false
+      autoPromotionSeconds: 0
+      previewReplicaCount: 1

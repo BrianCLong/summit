@@ -1,0 +1,48 @@
+global:
+  domain:
+    api: api.topicality.co
+    console: console.topicality.co
+
+intelgraph-api:
+  image:
+    tag: prod-stable
+  ingress:
+    hosts:
+      - host: api.topicality.co
+        paths: [ { path: /, pathType: Prefix } ]
+    tls:
+      - secretName: intelgraph-api-tls
+        hosts: [ api.topicality.co ]
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: api.topicality.co
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/service-upstream: "true"
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/session-cookie-name: intelgraph-api-route
+  rollout:
+    blueGreen:
+      autoPromotionEnabled: true
+      autoPromotionSeconds: 300
+      previewReplicaCount: 2
+
+companyos-console:
+  image:
+    tag: prod-stable
+  ingress:
+    hosts:
+      - host: console.topicality.co
+        paths: [ { path: /, pathType: Prefix } ]
+    tls:
+      - secretName: companyos-console-tls
+        hosts: [ console.topicality.co ]
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: console.topicality.co
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/service-upstream: "true"
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/session-cookie-name: companyos-console-route
+  rollout:
+    blueGreen:
+      autoPromotionEnabled: true
+      autoPromotionSeconds: 300
+      previewReplicaCount: 2

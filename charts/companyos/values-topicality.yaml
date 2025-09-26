@@ -11,8 +11,6 @@ intelgraph-api:
     repository: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/summit-company/core-intelgraph-api
     tag: latest
   ingress:
-    enabled: true
-    className: nginx
     hosts:
       - host: api.topicality.co
         paths: [ { path: /, pathType: Prefix } ]
@@ -22,18 +20,32 @@ intelgraph-api:
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
       external-dns.alpha.kubernetes.io/hostname: api.topicality.co
+      nginx.ingress.kubernetes.io/service-upstream: "true"
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/session-cookie-name: intelgraph-api-route
   serviceAccount:
     create: true
     annotations:
       eks.amazonaws.com/role-arn: arn:aws:iam::${AWS_ACCOUNT_ID}:role/companyos-intelgraph-irsa   # <-- set to actual IRSA role ARN
+  rollout:
+    blueGreen:
+      autoPromotionEnabled: true
+      autoPromotionSeconds: 90
+      scaleDownDelaySeconds: 60
+      postPromotionAnalysis:
+        templates:
+          - templateName: slo-analysis-template
+        args:
+          - name: service-name
+            value: intelgraph-api
+          - name: namespace
+            value: "{{ .Release.Namespace }}"
 
 companyos-console:
   image:
     repository: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/summit-company/core-console
     tag: latest
   ingress:
-    enabled: true
-    className: nginx
     hosts:
       - host: console.topicality.co
         paths: [ { path: /, pathType: Prefix } ]
@@ -43,9 +55,25 @@ companyos-console:
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
       external-dns.alpha.kubernetes.io/hostname: console.topicality.co
+      nginx.ingress.kubernetes.io/service-upstream: "true"
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/session-cookie-name: companyos-console-route
   serviceAccount:
     create: true
     annotations: {}
+  rollout:
+    blueGreen:
+      autoPromotionEnabled: true
+      autoPromotionSeconds: 90
+      scaleDownDelaySeconds: 60
+      postPromotionAnalysis:
+        templates:
+          - templateName: slo-analysis-template
+        args:
+          - name: service-name
+            value: companyos-console
+          - name: namespace
+            value: "{{ .Release.Namespace }}"
 
 mc-runner:
   image:

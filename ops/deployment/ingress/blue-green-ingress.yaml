@@ -1,0 +1,118 @@
+# Ingress resources for blue-green traffic management. Active ingress routes user traffic
+# to the rollout-managed service while the preview ingress exposes the green environment
+# for validation prior to promotion.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: intelgraph-api-active
+  namespace: companyos
+  annotations:
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: intelgraph-api-route
+    external-dns.alpha.kubernetes.io/hostname: api.topicality.co
+spec:
+  ingressClassName: nginx
+  tls:
+    - secretName: intelgraph-api-tls
+      hosts:
+        - api.topicality.co
+  rules:
+    - host: api.topicality.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: intelgraph-api
+                port:
+                  number: 4000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: intelgraph-api-preview
+  namespace: companyos
+  annotations:
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "0"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: intelgraph-api-preview-route
+    external-dns.alpha.kubernetes.io/hostname: preview.api.topicality.co
+spec:
+  ingressClassName: nginx
+  tls:
+    - secretName: intelgraph-api-preview-tls
+      hosts:
+        - preview.api.topicality.co
+  rules:
+    - host: preview.api.topicality.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: intelgraph-api-preview
+                port:
+                  number: 4000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: companyos-console-active
+  namespace: companyos
+  annotations:
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: companyos-console-route
+    external-dns.alpha.kubernetes.io/hostname: console.topicality.co
+spec:
+  ingressClassName: nginx
+  tls:
+    - secretName: companyos-console-tls
+      hosts:
+        - console.topicality.co
+  rules:
+    - host: console.topicality.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: companyos-console
+                port:
+                  number: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: companyos-console-preview
+  namespace: companyos
+  annotations:
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "0"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: companyos-console-preview-route
+    external-dns.alpha.kubernetes.io/hostname: preview.console.topicality.co
+spec:
+  ingressClassName: nginx
+  tls:
+    - secretName: companyos-console-preview-tls
+      hosts:
+        - preview.console.topicality.co
+  rules:
+    - host: preview.console.topicality.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: companyos-console-preview
+                port:
+                  number: 3000

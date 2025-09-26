@@ -27,13 +27,14 @@ spec:
     spec:
       project: companyos
       source:
-        repoURL: https://github.com/BrianCLong/summit.git # Your Git repository
+        repoURL: https://github.com/BrianCLong/summit.git
         targetRevision: HEAD
         path: charts/companyos
         helm:
           valueFiles:
             - values.yaml
-            - values-{{name}}.yaml # Environment-specific values (e.g., values-dev.yaml, values-stage.yaml, values-prod.yaml)
+            - values-bluegreen.yaml
+            - values-{{name}}.yaml
           parameters:
             - name: global.domain.api
               value: api.{{domain_suffix}}
@@ -48,3 +49,11 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+          - PruneLast=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 10s
+            maxDuration: 3m
+            factor: 2
