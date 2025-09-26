@@ -11,6 +11,7 @@ import {
   Badge,
   IconButton,
   Collapse,
+  ButtonBase,
 } from '@mui/material';
 import {
   Timeline as TimelineIcon,
@@ -67,7 +68,23 @@ const getActivityColor = (type: string) => {
   }
 };
 
-export default function LiveActivityFeed() {
+interface LiveActivityFeedProps {
+  headingId?: string;
+}
+
+const srOnly = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)',
+  whiteSpace: 'nowrap',
+  border: 0,
+} as const;
+
+export default function LiveActivityFeed({ headingId = 'live-activity-heading' }: LiveActivityFeedProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Mock activities for development
@@ -148,73 +165,117 @@ export default function LiveActivityFeed() {
     return eventTime.toLocaleDateString();
   };
 
+  const handleKeyToggle = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleToggleExpand();
+    }
+  };
+
   return (
-    <Paper elevation={1} sx={{ borderRadius: 3 }}>
-      <Box
+    <Paper elevation={1} sx={{ borderRadius: 3 }} component="section" aria-labelledby={headingId}>
+      <ButtonBase
+        component="header"
+        onClick={handleToggleExpand}
+        onKeyDown={handleKeyToggle}
+        aria-expanded={isExpanded}
+        aria-controls={`${headingId}-panel`}
         sx={{
           p: 2,
+          width: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          cursor: 'pointer',
+          textAlign: 'left',
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
         }}
-        onClick={handleToggleExpand}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Badge badgeContent={newActivityCount} color="error" invisible={newActivityCount === 0}>
             <TimelineIcon />
           </Badge>
-          <Typography variant="h6">Live Activity</Typography>
+          <Typography id={headingId} variant="h6" component="h2">
+            Live Activity
+          </Typography>
           {loading && (
             <Chip label="Connecting..." size="small" color="warning" variant="outlined" />
           )}
           {error && <Chip label="Offline" size="small" color="error" variant="outlined" />}
         </Box>
-        <IconButton size="small">{isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-      </Box>
+        <IconButton
+          size="small"
+          aria-label={isExpanded ? 'Collapse live activity feed' : 'Expand live activity feed'}
+          onClick={(event) => {
+            event.stopPropagation();
+            handleToggleExpand();
+          }}
+        >
+          {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        </IconButton>
+      </ButtonBase>
 
-      <Collapse in={isExpanded}>
+      <Collapse in={isExpanded} id={`${headingId}-panel`}>
         <Box sx={{ pb: 2 }}>
           {activities.length === 0 ? (
             <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
               No recent activity
             </Typography>
           ) : (
-            <List dense>
-              {activities.map((activity) => (
-                <ListItem key={activity.id} sx={{ py: 0.5 }}>
-                  <ListItemIcon sx={{ minWidth: 32 }}>
-                    {getActivityIcon(activity.type)}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                        <Typography variant="body2">{activity.message}</Typography>
-                        <Chip
-                          label={activity.type.toLowerCase().replace('_', ' ')}
-                          size="small"
-                          color={getActivityColor(activity.type)}
-                          variant="outlined"
-                        />
-                      </Box>
-                    }
-                    secondary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          {activity.actor.name}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          • {formatTimestamp(activity.timestamp)}
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                </ListItem>
-              ))}
-            </List>
+            <>
+              <Typography component="p" variant="caption" sx={{ px: 2, py: 1, color: 'text.secondary' }}>
+                Most recent events appear first. Notifications are announced in the order received.
+              </Typography>
+              <List dense aria-live="polite" aria-busy={loading} aria-labelledby={headingId}>
+                {activities.map((activity) => {
+                  const chipTone = getActivityColor(activity.type);
+                  return (
+                    <ListItem key={activity.id} sx={{ py: 0.5 }}>
+                      <ListItemIcon sx={{ minWidth: 32 }}>
+                        {getActivityIcon(activity.type)}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                            <Typography variant="body2" component="span">
+                              {activity.message}
+                            </Typography>
+                            <Chip
+                              label={activity.type.toLowerCase().replace('_', ' ')}
+                              size="small"
+                              color={chipTone === 'default' ? undefined : chipTone}
+                              variant="filled"
+                              sx={{
+                                textTransform: 'capitalize',
+                                color: 'common.white',
+                                bgcolor: chipTone === 'default' ? 'grey.700' : undefined,
+                              }}
+                            />
+                          </Box>
+                        }
+                        secondary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                            <Typography variant="caption" color="text.secondary">
+                              {activity.actor.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              • {formatTimestamp(activity.timestamp)}
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                  );
+                })}
+              </List>
+            </>
           )}
         </Box>
       </Collapse>
+      <Box component="p" sx={srOnly} aria-live="polite">
+        {newActivityCount > 0
+          ? `${newActivityCount} new activities available.`
+          : 'Live activity feed is up to date.'}
+      </Box>
     </Paper>
   );
 }

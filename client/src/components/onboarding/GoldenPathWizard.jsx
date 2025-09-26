@@ -117,30 +117,35 @@ const START_COPILOT_RUN = `
 
 const steps = [
   {
+    id: 'create-investigation-step',
     label: 'Create Investigation',
     description: 'Set up a new investigation to organize your analysis',
     icon: <AddIcon />,
     estimatedTime: '1 min',
   },
   {
+    id: 'add-entities-step',
     label: 'Add Entities & Links',
     description: 'Add some entities and relationships to build your graph',
     icon: <DataIcon />,
     estimatedTime: '2-3 min',
   },
   {
+    id: 'import-data-step',
     label: 'Import Data',
     description: 'Upload CSV files or connect STIX/TAXII feeds',
     icon: <UploadIcon />,
     estimatedTime: '2-5 min',
   },
   {
+    id: 'run-copilot-step',
     label: 'Run Copilot',
     description: 'Let AI analyze your data and generate insights',
     icon: <AutoAwesomeIcon />,
     estimatedTime: '1-3 min',
   },
   {
+    id: 'view-results-step',
     label: 'View Results',
     description: 'Explore the analysis results and graph annotations',
     icon: <ViewIcon />,
@@ -623,27 +628,39 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
     }
   };
 
+  const progressValue = (activeStep / (steps.length - 1)) * 100;
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      aria-labelledby="golden-path-title"
+      aria-describedby="golden-path-intro"
+    >
+      <DialogTitle id="golden-path-title">
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">IntelGraph Quick Start</Typography>
+          <Typography variant="h6" component="h1">
+            IntelGraph Quick Start
+          </Typography>
           <Box display="flex" gap={1}>
             <Tooltip title="Use demo data">
               <Button
                 size="small"
                 variant={useDemo ? 'contained' : 'outlined'}
                 onClick={() => setUseDemo(!useDemo)}
+                aria-pressed={useDemo}
               >
                 Demo Mode
               </Button>
             </Tooltip>
             <Tooltip title="Skip tutorial">
-              <IconButton onClick={handleSkip} size="small">
+              <IconButton onClick={handleSkip} size="small" aria-label="Skip onboarding wizard">
                 <SkipIcon />
               </IconButton>
             </Tooltip>
-            <IconButton onClick={onClose} size="small">
+            <IconButton onClick={onClose} size="small" aria-label="Close onboarding wizard">
               <CloseIcon />
             </IconButton>
           </Box>
@@ -652,63 +669,77 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
 
       <DialogContent>
         <Box mb={3}>
-          <Typography variant="body2" color="textSecondary" paragraph>
+          <Typography id="golden-path-intro" variant="body2" color="text.secondary" paragraph>
             Welcome to IntelGraph! This 5-step wizard will guide you through creating your first
             investigation, adding data, and running AI analysis. Estimated time: 5-15 minutes.
           </Typography>
 
           <LinearProgress
             variant="determinate"
-            value={(activeStep / (steps.length - 1)) * 100}
+            value={progressValue}
             sx={{ mb: 2 }}
+            aria-label="Wizard progress"
+            aria-valuenow={Math.round(progressValue)}
+            aria-valuemin={0}
+            aria-valuemax={100}
           />
         </Box>
 
-        <Stepper activeStep={activeStep} orientation="vertical">
-          {steps.map((step, index) => (
-            <Step key={step.label}>
-              <StepLabel
-                optional={<Typography variant="caption">{step.estimatedTime}</Typography>}
-                StepIconComponent={() =>
-                  isStepCompleted(index) ? (
-                    <CheckIcon color="success" />
-                  ) : index === activeStep ? (
-                    step.icon
-                  ) : (
-                    <UncheckedIcon color="disabled" />
-                  )
-                }
-              >
-                {step.label}
-              </StepLabel>
-              <StepContent>
-                <Typography variant="body2" color="textSecondary" paragraph>
-                  {step.description}
-                </Typography>
-                {getStepContent(index)}
+        <Stepper
+          activeStep={activeStep}
+          orientation="vertical"
+          aria-labelledby="golden-path-title"
+          aria-describedby="golden-path-intro"
+        >
+          {steps.map((step, index) => {
+            const stepHeaderId = `${step.id}-label`;
+            const isCurrent = index === activeStep;
+            return (
+              <Step key={step.id} expanded>
+                <StepLabel
+                  id={stepHeaderId}
+                  aria-current={isCurrent ? 'step' : undefined}
+                  optional={<Typography variant="caption">{step.estimatedTime}</Typography>}
+                  StepIconComponent={() =>
+                    isStepCompleted(index) ? (
+                      <CheckIcon color="success" />
+                    ) : isCurrent ? (
+                      step.icon
+                    ) : (
+                      <UncheckedIcon color="disabled" />
+                    )
+                  }
+                >
+                  {step.label}
+                </StepLabel>
+                <StepContent role="region" aria-labelledby={stepHeaderId}>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    {step.description}
+                  </Typography>
+                  {getStepContent(index)}
 
-                <Box sx={{ mb: 2, mt: 2 }}>
-                  <Button disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>
-                    Back
-                  </Button>
-                  {activeStep < steps.length - 1 && (
-                    <Button
-                      variant="contained"
-                      onClick={handleNext}
-                      disabled={!isStepCompleted(activeStep)}
-                    >
-                      Next
+                  <Box sx={{ mb: 2, mt: 2 }}>
+                    <Button disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>
+                      Back
                     </Button>
-                  )}
-                </Box>
-              </StepContent>
-            </Step>
-          ))}
+                    {activeStep < steps.length - 1 && (
+                      <Button
+                        variant="contained"
+                        onClick={handleNext}
+                        disabled={!isStepCompleted(activeStep)}
+                      >
+                        Next
+                      </Button>
+                    )}
+                  </Box>
+                </StepContent>
+              </Step>
+            );
+          })}
         </Stepper>
 
-        {/* Help Section */}
         <Collapse in={showHelp}>
-          <Paper sx={{ p: 2, mt: 2, bgcolor: 'background.default' }}>
+          <Paper id="golden-path-help" sx={{ p: 2, mt: 2, bgcolor: 'background.default' }}>
             <Typography variant="subtitle2" gutterBottom>
               Need Help?
             </Typography>
@@ -728,7 +759,12 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={() => setShowHelp(!showHelp)} startIcon={<HelpIcon />}>
+        <Button
+          onClick={() => setShowHelp(!showHelp)}
+          startIcon={<HelpIcon />}
+          aria-expanded={showHelp}
+          aria-controls="golden-path-help"
+        >
           {showHelp ? 'Hide Help' : 'Show Help'}
         </Button>
         <Button onClick={onClose}>Close</Button>

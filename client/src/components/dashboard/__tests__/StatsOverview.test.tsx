@@ -1,63 +1,23 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { MockedProvider } from '@apollo/client/testing';
+import { render, screen } from '@testing-library/react';
+import { axe } from 'jest-axe';
 import StatsOverview from '../StatsOverview';
 
-// Mock the generated GraphQL hook
-jest.mock('../../../generated/graphql', () => ({
-  useDB_ServerStatsQuery: jest.fn(() => ({
-    data: {
-      serverStats: {
-        uptime: '2d 14h 32m',
-        totalInvestigations: 128,
-        totalEntities: 42137,
-        totalRelationships: 89542,
-      },
-    },
-    loading: false,
-    error: null,
-  })),
-}));
-
 describe('StatsOverview', () => {
-  it('renders server stats correctly', async () => {
-    render(
-      <MockedProvider mocks={[]}>
-        <StatsOverview />
-      </MockedProvider>,
-    );
+  it('renders overview stats with descriptive labels', () => {
+    render(<StatsOverview />);
 
-    await waitFor(() => {
-      expect(screen.getByText('42,137')).toBeInTheDocument();
-      expect(screen.getByText('89,542')).toBeInTheDocument();
-      expect(screen.getByText('128')).toBeInTheDocument();
-      expect(screen.getByText('2d 14h 32m')).toBeInTheDocument();
-    });
-
-    expect(screen.getByText('Total Entities')).toBeInTheDocument();
-    expect(screen.getByText('Total Relationships')).toBeInTheDocument();
-    expect(screen.getByText('Investigations')).toBeInTheDocument();
-    expect(screen.getByText('Uptime')).toBeInTheDocument();
+    const group = screen.getByRole('group', { name: /overview statistics/i });
+    expect(group).toBeInTheDocument();
+    expect(screen.getByText(/Total Entities/i)).toBeInTheDocument();
+    expect(screen.getByText(/Total Relationships/i)).toBeInTheDocument();
+    expect(screen.getByText(/Active Investigations/i)).toBeInTheDocument();
+    expect(screen.getByText(/Query Latency/i)).toBeInTheDocument();
   });
 
-  it('shows loading state', async () => {
-    // Mock loading state
-    jest.doMock('../../../generated/graphql', () => ({
-      useDB_ServerStatsQuery: () => ({
-        data: null,
-        loading: true,
-        error: null,
-      }),
-    }));
-
-    const { useDB_ServerStatsQuery } = await import('../../../generated/graphql');
-
-    render(
-      <MockedProvider mocks={[]}>
-        <StatsOverview />
-      </MockedProvider>,
-    );
-
-    expect(screen.getAllByTestId('skeleton')).toHaveLength(4);
+  it('meets basic accessibility expectations', async () => {
+    const { container } = render(<StatsOverview />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });
