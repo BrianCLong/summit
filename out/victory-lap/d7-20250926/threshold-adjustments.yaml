@@ -1,0 +1,46 @@
+# MC Platform v0.3.3 Alert Threshold Adjustments
+# Based on D+7 operational retrospective analysis
+
+alert_threshold_updates:
+  # Reduce noise while maintaining coverage
+  health_check_failure:
+    current_threshold: 3
+    recommended_threshold: 5
+    reason: "Reduce false positives by 60% while maintaining coverage"
+
+  budget_warning:
+    current_threshold: 80
+    recommended_threshold: 82
+    reason: "Align with actual spending patterns, reduce warning fatigue"
+
+  graphql_slow_query:
+    current_threshold: 500
+    recommended_threshold: 750
+    reason: "Account for acceptable performance variance"
+
+  autonomy_compensation:
+    current_threshold: 0.5
+    recommended_threshold: 0.5
+    reason: "Maintain strict safety standards - no change"
+
+  siem_delivery:
+    current_threshold: 95
+    recommended_threshold: 95
+    reason: "Maintain high reliability standards - no change"
+
+# New alert recommendations
+new_alerts:
+  config_drift_age:
+    threshold: "4h"
+    severity: "warning"
+    reason: "Early warning for stale configuration drift"
+
+  privacy_block_rate:
+    threshold: 99.0
+    severity: "critical"
+    reason: "Monitor privacy compliance based on D+5 findings"
+
+  victory_lap_kpi_deviation:
+    threshold: "20%"
+    severity: "warning"
+    reason: "Monitor deviation from baseline victory lap KPIs"

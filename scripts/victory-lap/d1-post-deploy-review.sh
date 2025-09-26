@@ -163,7 +163,7 @@ echo ""
 echo "📋 GENERATING TENANT BUDGET UTILIZATION REPORT"
 echo "=============================================="
 
-python3 scripts/generate-tenant-budget-report.py --format=victory-lap > "$OUTPUT_DIR/tenant-budget-report.txt"
+python3 scripts/generate-tenant-budget-report.py --format=summary > "$OUTPUT_DIR/tenant-budget-report.txt"
 echo "✅ Tenant budget report: $OUTPUT_DIR/tenant-budget-report.txt"
 
 # Generate autonomy operation summary
