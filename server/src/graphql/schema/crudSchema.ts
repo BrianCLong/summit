@@ -360,6 +360,9 @@ export const crudTypeDefs = gql`
 
     # Current user
     me: User
+
+    # MFA policy configuration
+    roleMfaPolicies: [MfaPolicy!]!
   }
 
   type RelatedEntity {
@@ -403,14 +406,30 @@ export const crudTypeDefs = gql`
 
     # Authentication mutations (placeholder - handled separately)
     login(email: String!, password: String!): AuthPayload!
+    verifyMfa(challengeId: ID!, code: String!): AuthPayload!
     logout: Boolean!
     refreshToken: AuthPayload!
+    updateRoleMfaPolicy(role: String!, requireMfa: Boolean!): MfaPolicy!
   }
 
   type AuthPayload {
-    token: String!
-    refreshToken: String!
-    user: User!
+    token: String
+    refreshToken: String
+    user: User
+    requiresMfa: Boolean!
+    challengeId: ID
+    mfaSetup: MfaSetup
+  }
+
+  type MfaSetup {
+    secret: String!
+    otpauthUrl: String!
+  }
+
+  type MfaPolicy {
+    role: String!
+    requireMfa: Boolean!
+    updatedAt: DateTime!
   }
 
   # Subscriptions for real-time updates

@@ -52,6 +52,12 @@ export async function ensureAuthenticated(
     const user = await getAuthService().verifyToken(token);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
     req.user = user;
+    if (user.mfaEnabled !== undefined) {
+      res.setHeader('X-Auth-MFA', user.mfaEnabled ? 'enforced' : 'optional');
+    }
+    if (user.mfaVerified !== undefined) {
+      res.setHeader('X-MFA-Verified', user.mfaVerified ? 'true' : 'false');
+    }
     next();
   } catch (e) {
     return res.status(401).json({ error: 'Unauthorized' });

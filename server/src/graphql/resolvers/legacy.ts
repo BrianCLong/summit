@@ -80,6 +80,17 @@ const goals: Array<{
 let seq = 1;
 
 export const legacyResolvers = {
+  Query: {
+    roleMfaPolicies: async (_: any, __: any, { user }: Context) => {
+      if (!user) {
+        throw new Error('Not authenticated');
+      }
+      if (!authService.hasPermission(user, 'security:mfa:manage')) {
+        throw new Error('Forbidden');
+      }
+      return authService.listRoleMfaPolicies();
+    },
+  },
   Mutation: {
     login: async (_: any, { input }: { input: LoginInput }, { req }: Context) => {
       const { email, password } = input;
@@ -87,6 +98,27 @@ export const legacyResolvers = {
       const userAgent = req?.get('User-Agent');
 
       return await authService.login(email, password, ipAddress, userAgent);
+    },
+
+    verifyMfa: async (
+      _: any,
+      { challengeId, code }: { challengeId: string; code: string },
+    ) => {
+      return await authService.verifyMfaChallenge(challengeId, code);
+    },
+
+    updateRoleMfaPolicy: async (
+      _: any,
+      { role, requireMfa }: { role: string; requireMfa: boolean },
+      { user }: Context,
+    ) => {
+      if (!user) {
+        throw new Error('Not authenticated');
+      }
+      if (!authService.hasPermission(user, 'security:mfa:manage')) {
+        throw new Error('Forbidden');
+      }
+      return authService.updateRoleMfaPolicy(role, requireMfa);
     },
 
     register: async (_: any, { input }: { input: RegisterInput }) => {
