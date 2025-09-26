@@ -7,6 +7,7 @@ import { neo } from '../db/neo4j';
 import { deduplicationService } from './dedupe';
 import crypto from 'crypto';
 import { ingestDedupeRate, ingestBacklog } from '../metrics';
+import vectorStoreService, { VectorEmbeddingRecord } from '../services/VectorStoreService';
 
 const tracer = trace.getTracer('http-ingest', '24.2.0');
 
@@ -45,6 +46,8 @@ interface CoherenceSignal {
   ts: string;
   purpose?: string;
   metadata?: Record<string, any>;
+  embedding?: number[];
+  graphNodeId?: string;
 }
 
 interface IngestRequest {
@@ -118,7 +121,9 @@ class IngestQueue {
         await this.updateCoherenceScores(tenantId, signals);
         
         // Store in Neo4j (Signal nodes)
-        await this.storeSignals(tenantId, signals);
+        const signalIds = await this.storeSignals(tenantId, signals);
+
+        await this.upsertEmbeddings(tenantId, signals, signalIds);
         
         // Update metrics
         for (const signal of signals) {
@@ -155,41 +160,100 @@ class IngestQueue {
     );
   }
 
-  private async storeSignals(tenantId: string, signals: CoherenceSignal[]) {
-    const queries = signals.map(signal => ({
-      query: `
+  private async storeSignals(tenantId: string, signals: CoherenceSignal[]): Promise<string[]> {
+    const queries = signals.map((signal) => {
+      const id = crypto.createHash('sha256').update(`${tenantId}:${signal.type}:${signal.ts}`).digest('hex');
+      return {
+        id,
+        query: `
         MERGE (s:Signal {id: $id, tenant_id: $tenantId})
         SET s.type = $type,
-            s.value = $value, 
+            s.value = $value,
             s.weight = $weight,
             s.source = $source,
             s.timestamp = datetime($ts),
             s.purpose = $purpose,
             s.updated_at = datetime()
         RETURN s.id as id`,
-      params: {
-        id: crypto.createHash('sha256').update(`${tenantId}:${signal.type}:${signal.ts}`).digest('hex'),
-        tenantId,
-        type: signal.type,
-        value: signal.value,
-        weight: signal.weight || 1.0,
-        source: signal.source,
-        ts: signal.ts,
-        purpose: signal.purpose || 'investigation'
-      }
-    }));
+        params: {
+          id,
+          tenantId,
+          type: signal.type,
+          value: signal.value,
+          weight: signal.weight || 1.0,
+          source: signal.source,
+          ts: signal.ts,
+          purpose: signal.purpose || 'investigation',
+        },
+      };
+    });
 
     // Execute in batches to avoid transaction timeouts
     const batchSize = 100;
     for (let i = 0; i < queries.length; i += batchSize) {
       const batch = queries.slice(i, i + batchSize);
-      
-      const session = await neo.run(`
+
+      await neo.run(
+        `
         UNWIND $batch as row
         MERGE (s:Signal {id: row.id, tenant_id: row.tenantId})
         SET s += row
         RETURN count(s) as created
-      `, { batch: batch.map(q => q.params) });
+      `,
+        { batch: batch.map((q) => q.params) },
+      );
+    }
+
+    return queries.map((q) => q.id);
+  }
+
+  private async upsertEmbeddings(
+    tenantId: string,
+    signals: CoherenceSignal[],
+    signalIds: string[],
+  ): Promise<void> {
+    if (!vectorStoreService.isEnabled()) {
+      return;
+    }
+
+    const records = signals.reduce<VectorEmbeddingRecord[]>((acc, signal, index) => {
+      const embedding = signal.embedding || signal.metadata?.embedding;
+      if (!Array.isArray(embedding) || embedding.length === 0) {
+        return acc;
+      }
+
+      const nodeId =
+        signal.graphNodeId ||
+        signal.metadata?.graphNodeId ||
+        signal.metadata?.entityId ||
+        signalIds[index];
+
+      if (!nodeId) {
+        return acc;
+      }
+
+      const metadata = signal.metadata ? { ...signal.metadata } : undefined;
+      if (metadata?.embedding) {
+        delete metadata.embedding;
+      }
+
+      acc.push({
+        tenantId,
+        nodeId,
+        embedding: embedding.map((value) => Number(value)),
+        metadata,
+      });
+      return acc;
+    }, []);
+
+    if (!records.length) {
+      return;
+    }
+
+    try {
+      await vectorStoreService.upsertEmbeddings(records);
+    } catch (error) {
+      console.error('Failed to upsert embeddings from ingest wizard payload', error);
     }
   }
 
