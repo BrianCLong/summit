@@ -4,6 +4,12 @@ import { RedisClientType } from 'redis';
 import { EventEmitter } from 'events';
 import { logger } from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
+import { ArgoWorkflowEngine, ArgoWorkflowStatus } from './ArgoWorkflowEngine';
+import {
+  MaestroPersonaProfile,
+  buildDefaultMaestroPersona,
+  mergePersonaProfile,
+} from './maestroPersona';
 
 export interface WorkflowDefinition {
   id: string;
@@ -61,6 +67,7 @@ export interface StepConfig {
   // Action step configs
   actionType?: string; // 'email', 'slack', 'jira', 'api', 'database', 'ml'
   actionConfig?: Record<string, any>;
+  description?: string;
 
   // Condition step configs
   condition?: ConditionExpression;
@@ -125,6 +132,9 @@ export interface WorkflowExecution {
     stepId?: string;
     timestamp: Date;
   };
+  argoWorkflowName?: string;
+  argoStatus?: ArgoWorkflowStatus | null;
+  maestroPersona?: MaestroPersonaProfile;
 }
 
 export interface StepExecution {
@@ -162,13 +172,15 @@ export class WorkflowService extends EventEmitter {
     private pgPool: Pool,
     private neo4jDriver: Driver,
     private redisClient: RedisClientType,
+    private argoEngine: ArgoWorkflowEngine = new ArgoWorkflowEngine(),
+    private maestroPersonaDefaults: MaestroPersonaProfile = buildDefaultMaestroPersona(),
   ) {
     super();
     this.initializeScheduledTriggers();
   }
 
   async createWorkflow(
-    workflow: Omit<WorkflowDefinition, 'id' | 'createdAt' | 'updatedAt'>,
+    workflow: Omit<WorkflowDefinition, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>,
     userId: string,
   ): Promise<WorkflowDefinition> {
     const client = await this.pgPool.connect();
@@ -235,6 +247,7 @@ export class WorkflowService extends EventEmitter {
     triggerType: string,
     triggerData?: Record<string, any>,
     userId?: string,
+    personaOverrides?: Partial<MaestroPersonaProfile>,
   ): Promise<WorkflowExecution> {
     try {
       // Get workflow definition
@@ -246,6 +259,8 @@ export class WorkflowService extends EventEmitter {
       if (!workflow.isActive) {
         throw new Error('Workflow is not active');
       }
+
+      const personaProfile = mergePersonaProfile(this.maestroPersonaDefaults, personaOverrides);
 
       // Create execution record
       const executionId = uuidv4();
@@ -261,12 +276,14 @@ export class WorkflowService extends EventEmitter {
         context: {
           ...workflow.settings.variables,
           ...triggerData,
+          maestroPersona: personaProfile,
         },
         steps: workflow.steps.map((step) => ({
           stepId: step.id,
           status: 'pending',
           retryCount: 0,
         })),
+        maestroPersona: personaProfile,
       };
 
       // Save execution to database
@@ -275,11 +292,45 @@ export class WorkflowService extends EventEmitter {
       // Add to execution queue
       this.executionQueue.set(executionId, execution);
 
-      // Start execution asynchronously
-      this.runWorkflowExecution(execution, workflow).catch((error) => {
-        logger.error(`Workflow execution failed: ${executionId}`, error);
-        this.handleExecutionError(execution, error);
-      });
+      const shouldUseArgo = this.argoEngine?.isEnabled();
+
+      if (shouldUseArgo) {
+        try {
+          const submission = await this.argoEngine.submitWorkflow(
+            workflow,
+            execution,
+            personaProfile,
+          );
+
+          execution.argoWorkflowName = submission.name;
+          execution.argoStatus = submission.raw?.status ?? null;
+          execution.context = {
+            ...execution.context,
+            argoWorkflowName: submission.name,
+            argoNamespace: submission.namespace,
+            argoManifest: submission.manifest,
+          };
+
+          await this.saveExecution(execution);
+        } catch (submissionError) {
+          logger.error('Failed to submit workflow to Argo, falling back to local execution', {
+            workflowId,
+            executionId,
+            error: submissionError instanceof Error ? submissionError.message : submissionError,
+          });
+
+          this.runWorkflowExecution(execution, workflow).catch((error) => {
+            logger.error(`Workflow execution failed: ${executionId}`, error);
+            this.handleExecutionError(execution, error);
+          });
+        }
+      } else {
+        // Start execution asynchronously when Argo is not available
+        this.runWorkflowExecution(execution, workflow).catch((error) => {
+          logger.error(`Workflow execution failed: ${executionId}`, error);
+          this.handleExecutionError(execution, error);
+        });
+      }
 
       logger.info(`Workflow execution started: ${executionId} for workflow ${workflowId}`);
       this.emit('workflow.execution.started', execution);
@@ -478,6 +529,22 @@ export class WorkflowService extends EventEmitter {
     }
 
     return { loopResults: results, iterations: actualIterations };
+  }
+
+  private async executeParallelStep(
+    execution: WorkflowExecution,
+    workflow: WorkflowDefinition,
+    step: WorkflowStep,
+  ): Promise<any> {
+    logger.info('Parallel step orchestrated via Argo', {
+      executionId: execution.id,
+      workflowId: workflow.id,
+      stepId: step.id,
+    });
+
+    return {
+      parallelTargets: step.connections.map((connection) => connection.targetStepId),
+    };
   }
 
   private async executeDelayStep(execution: WorkflowExecution, step: WorkflowStep): Promise<any> {
@@ -831,9 +898,11 @@ export class WorkflowService extends EventEmitter {
       description: row.description,
       version: row.version,
       isActive: row.is_active,
-      triggers: row.triggers || [],
-      steps: row.steps || [],
-      settings: row.settings || {},
+      triggers: this.parseOptionalJsonColumn<WorkflowTrigger[]>(row.triggers) || [],
+      steps: this.parseOptionalJsonColumn<WorkflowStep[]>(row.steps) || [],
+      settings: this.resolveSettings(
+        this.parseOptionalJsonColumn<WorkflowSettings>(row.settings),
+      ),
       createdBy: row.created_by,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
@@ -849,7 +918,12 @@ export class WorkflowService extends EventEmitter {
     }
 
     const row = result.rows[0];
-    return {
+    const triggerData = this.parseOptionalJsonColumn<Record<string, any>>(row.trigger_data) || {};
+    const context = this.parseOptionalJsonColumn<Record<string, any>>(row.context) || {};
+    const steps = this.parseOptionalJsonColumn<StepExecution[]>(row.steps) || [];
+    const error = this.parseOptionalJsonColumn<WorkflowExecution['error']>(row.error);
+
+    const execution: WorkflowExecution = {
       id: row.id,
       workflowId: row.workflow_id,
       workflowVersion: row.workflow_version,
@@ -858,11 +932,194 @@ export class WorkflowService extends EventEmitter {
       completedAt: row.completed_at,
       startedBy: row.started_by,
       triggerType: row.trigger_type,
-      triggerData: row.trigger_data || {},
-      context: row.context || {},
+      triggerData,
+      context,
       currentStep: row.current_step,
-      steps: row.steps || [],
-      error: row.error,
+      steps,
+      error,
+      argoWorkflowName: context?.argoWorkflowName,
+      maestroPersona: context?.maestroPersona,
+    };
+
+    return this.enrichExecutionFromArgo(execution);
+  }
+
+  async retryExecution(
+    executionId: string,
+    options: {
+      nodeId?: string;
+      restartSuccessful?: boolean;
+      personaOverrides?: Partial<MaestroPersonaProfile>;
+      requestedBy?: string;
+    } = {},
+  ): Promise<WorkflowExecution> {
+    const execution = await this.getExecution(executionId);
+    if (!execution) {
+      throw new Error('Execution not found');
+    }
+
+    const workflow = await this.getWorkflow(execution.workflowId);
+    if (!workflow) {
+      throw new Error('Workflow not found for execution retry');
+    }
+
+    const personaProfile = mergePersonaProfile(
+      execution.maestroPersona || this.maestroPersonaDefaults,
+      options.personaOverrides,
+    );
+
+    execution.maestroPersona = personaProfile;
+    execution.context = {
+      ...execution.context,
+      maestroPersona: personaProfile,
+    };
+
+    if (this.argoEngine?.isEnabled() && execution.argoWorkflowName) {
+      await this.argoEngine.retryWorkflow(execution.argoWorkflowName, {
+        nodeId: options.nodeId,
+        restartSuccessful: options.restartSuccessful,
+      });
+
+      const updatedExecution = await this.enrichExecutionFromArgo(execution);
+      this.emit('workflow.execution.retried', updatedExecution, {
+        requestedBy: options.requestedBy,
+      });
+
+      return updatedExecution;
+    }
+
+    execution.status = 'running';
+    execution.completedAt = undefined;
+    execution.steps = execution.steps.map((step) => {
+      if (step.status === 'failed' || step.status === 'skipped') {
+        return {
+          ...step,
+          status: 'pending',
+          error: undefined,
+          retryCount: step.retryCount + 1,
+          startedAt: undefined,
+          completedAt: undefined,
+        };
+      }
+
+      return step;
+    });
+
+    await this.saveExecution(execution);
+
+    this.runWorkflowExecution(execution, workflow).catch((error) => {
+      logger.error(`Workflow retry failed: ${execution.id}`, error);
+      this.handleExecutionError(execution, error);
+    });
+
+    this.emit('workflow.execution.retried', execution, {
+      requestedBy: options.requestedBy,
+    });
+
+    return execution;
+  }
+
+  private async enrichExecutionFromArgo(
+    execution: WorkflowExecution,
+  ): Promise<WorkflowExecution> {
+    if (!this.argoEngine?.isEnabled()) {
+      return execution;
+    }
+
+    const argoWorkflowName =
+      execution.argoWorkflowName || execution.context?.argoWorkflowName;
+    if (!argoWorkflowName) {
+      return execution;
+    }
+
+    try {
+      const status = await this.argoEngine.getWorkflowStatus(argoWorkflowName);
+      if (!status) {
+        return execution;
+      }
+
+      execution.argoWorkflowName = argoWorkflowName;
+      execution.argoStatus = status;
+
+      const mappedStatus = this.mapArgoPhase(status.phase, execution.status);
+      const statusChanged = mappedStatus !== execution.status;
+      execution.status = mappedStatus;
+
+      if (status.finishedAt) {
+        execution.completedAt = new Date(status.finishedAt);
+      }
+
+      execution.context = {
+        ...execution.context,
+        argo: status,
+        argoWorkflowName,
+      };
+
+      if (statusChanged || status.finishedAt) {
+        await this.saveExecution(execution);
+      }
+
+      return execution;
+    } catch (error) {
+      logger.warn('Failed to sync execution from Argo', {
+        executionId: execution.id,
+        error: error instanceof Error ? error.message : error,
+      });
+
+      return execution;
+    }
+  }
+
+  private mapArgoPhase(
+    phase: string | undefined,
+    fallback: WorkflowExecution['status'],
+  ): WorkflowExecution['status'] {
+    switch (phase) {
+      case 'Succeeded':
+        return 'completed';
+      case 'Failed':
+      case 'Error':
+        return 'failed';
+      case 'Terminated':
+        return 'cancelled';
+      case 'Running':
+      case 'Pending':
+        return 'running';
+      case 'Paused':
+        return 'paused';
+      default:
+        return fallback;
+    }
+  }
+
+  private parseOptionalJsonColumn<T>(value: any): T | undefined {
+    if (value === null || value === undefined) {
+      return undefined;
+    }
+
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value) as T;
+      } catch (error) {
+        logger.warn('Failed to parse JSON column', {
+          preview: value.slice ? value.slice(0, 200) : value,
+          error: error instanceof Error ? error.message : error,
+        });
+        return undefined;
+      }
+    }
+
+    return value as T;
+  }
+
+  private resolveSettings(settings?: WorkflowSettings | null): WorkflowSettings {
+    return {
+      errorHandling: settings?.errorHandling || 'stop',
+      logging: settings?.logging || 'minimal',
+      timeout: settings?.timeout,
+      concurrency: settings?.concurrency,
+      variables: settings?.variables || {},
+      notifications: settings?.notifications,
     };
   }
 
@@ -931,9 +1188,11 @@ export class WorkflowService extends EventEmitter {
         description: row.description,
         version: row.version,
         isActive: row.is_active,
-        triggers: row.triggers || [],
-        steps: row.steps || [],
-        settings: row.settings || {},
+        triggers: this.parseOptionalJsonColumn<WorkflowTrigger[]>(row.triggers) || [],
+        steps: this.parseOptionalJsonColumn<WorkflowStep[]>(row.steps) || [],
+        settings: this.resolveSettings(
+          this.parseOptionalJsonColumn<WorkflowSettings>(row.settings),
+        ),
         createdBy: row.created_by,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
