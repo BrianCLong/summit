@@ -1,11 +1,14 @@
+"""Validation logic for evaluating payloads against data quality rules."""
+
 from __future__ import annotations
 
 import re
 
-from models import EvaluationRequest, Finding
+from .models import EvaluationRequest, Finding
 
 
 def evaluate(request: EvaluationRequest) -> list[Finding]:
+    """Evaluate the payload against all rules and return any violations."""
     findings: list[Finding] = []
     payload = request.payload
     for rule in request.rules:
@@ -24,8 +27,10 @@ def evaluate(request: EvaluationRequest) -> list[Finding]:
         elif rule.type == "range":
             min_v = rule.params.get("min")
             max_v = rule.params.get("max")
-            if field_value is None or not (min_v <= field_value <= max_v):
-                findings.append(Finding(rule_id=rule.id, field=rule.field, message="out of range"))
+            if field_value is None or not min_v <= field_value <= max_v:
+                findings.append(
+                    Finding(rule_id=rule.id, field=rule.field, message="out of range")
+                )
         elif rule.type == "ref":
             allowed = set(rule.params.get("allowed", []))
             if field_value not in allowed:
