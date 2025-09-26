@@ -1,9 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import ui from './slices/ui';
+import dashboard from './slices/dashboard';
 
 const store = configureStore({
-  reducer: { ui },
+  reducer: { ui, dashboard },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
