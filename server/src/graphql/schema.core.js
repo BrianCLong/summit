@@ -103,6 +103,7 @@ export const coreTypeDefs = gql`
 
   input EntityUpdateInput {
     id: ID!
+    tenantId: String!
     labels: [String!]
     props: JSON
   }
@@ -126,6 +127,7 @@ export const coreTypeDefs = gql`
 
   input InvestigationUpdateInput {
     id: ID!
+    tenantId: String!
     name: String
     description: String
     status: InvestigationStatus

@@ -234,6 +234,7 @@ export const crudTypeDefs = gql`
     confidence: Float
     source: String
     canonicalId: ID
+    tenantId: String!
   }
 
   input RelationshipInput {
@@ -281,6 +282,7 @@ export const crudTypeDefs = gql`
     tags: [String!]
     metadata: JSON
     customSchema: JSON
+    tenantId: String!
   }
 
   # Filter inputs
