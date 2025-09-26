@@ -40,6 +40,7 @@ import {
   Map,
   Assessment,
   Settings,
+  Policy,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -77,6 +78,7 @@ import ClaimsViewer from './features/conductor/ClaimsViewer';
 import RetractionQueue from './features/conductor/RetractionQueue';
 import CostAdvisor from './features/conductor/CostAdvisor';
 import RunSearch from './features/conductor/RunSearch';
+import ComplianceDashboard from './features/compliance/ComplianceDashboard.tsx';
 
 // Navigation items
 const navigationItems = [
@@ -96,6 +98,7 @@ const navigationItems = [
   { path: '/pipelines', label: 'Pipelines', icon: <Engineering /> },
   { path: '/executors', label: 'Executors', icon: <Engineering /> },
   { path: '/observability', label: 'Observability', icon: <Assessment /> },
+  { path: '/compliance', label: 'Compliance', icon: <Policy /> },
   { path: '/admin/studio', label: 'Admin Studio', icon: <Settings />, roles: ['ADMIN'] },
   // Feature-flagged entries
   ...(import.meta.env.VITE_FEATURE_WORK === 'true'
@@ -650,6 +653,7 @@ function MainLayout() {
             <Route path="/pipelines" element={<VisualPipelines />} />
             <Route path="/executors" element={<ExecutorsPage />} />
             <Route path="/observability" element={<ObservabilityPanel />} />
+            <Route path="/compliance" element={<ComplianceDashboard />} />
               <Route path="/admin/studio" element={<AdminStudio />} />
           {import.meta.env.VITE_FEATURE_WORK === 'true' && (
             <Route path="/work" element={<WorkBoard />} />
