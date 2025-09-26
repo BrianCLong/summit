@@ -1,38 +1,42 @@
 # syntax=docker/dockerfile:1.7
 ARG NODE_VERSION=20.14.0
 
-# Dependencies stage
+# Stage 1: fetch workspace dependencies without installing them
 FROM node:${NODE_VERSION}-alpine AS deps
-RUN corepack enable && apk add --no-cache libc6-compat
-WORKDIR /app
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PNPM_STORE_PATH=${PNPM_HOME}/store
+ENV PATH=$PNPM_HOME:$PATH
+RUN apk add --no-cache libc6-compat && corepack enable
+WORKDIR /workspace
 
-# Copy package management files
-COPY package.json pnpm-lock.yaml ./
-COPY server/package.json ./server/
-COPY client/package.json ./client/
+# Copy only the files required to resolve the dependency graph
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY server/package.json server/package.json
 
-# Install dependencies with cache mount
-RUN --mount=type=cache,target=/root/.local/share/pnpm \
-    corepack prepare pnpm@9.0.0 --activate && \
-    pnpm install --frozen-lockfile --prefer-offline
+# Pre-fetch the packages needed for the server workspace only
+RUN --mount=type=cache,target=${PNPM_STORE_PATH} \
+    pnpm fetch --filter server...
 
-# Build stage
+# Stage 2: build and prune the application code
 FROM node:${NODE_VERSION}-alpine AS build
-WORKDIR /app
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PNPM_STORE_PATH=${PNPM_HOME}/store
+ENV PATH=$PNPM_HOME:$PATH
+RUN apk add --no-cache libc6-compat && corepack enable
+WORKDIR /workspace
 
-# Copy dependency cache
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/server/node_modules ./server/node_modules
+# Reuse the fetched store to perform an offline install for the server package only
+COPY --from=deps ${PNPM_HOME} ${PNPM_HOME}
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY server server
+RUN --mount=type=cache,target=${PNPM_STORE_PATH} \
+    pnpm install --filter server... --frozen-lockfile --offline
 
-# Copy source code
-COPY . .
+# Build the server and stage only production dependencies
+RUN pnpm --filter server... build
+RUN pnpm --filter server... deploy --prod /opt/server
 
-# Build application with cache mount
-RUN --mount=type=cache,target=/root/.local/share/pnpm \
-    pnpm run build && \
-    pnpm prune --production
-
-# Production stage
+# Stage 3: minimal runtime image
 FROM gcr.io/distroless/nodejs20-debian12:nonroot AS final
 
 # Set labels for OCI compliance
@@ -51,10 +55,8 @@ WORKDIR /home/node/app
 ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-# Copy built application
-COPY --from=build --chown=65532:65532 /app/server/dist ./dist
-COPY --from=build --chown=65532:65532 /app/server/package.json ./
-COPY --from=build --chown=65532:65532 /app/server/node_modules ./node_modules
+# Copy only the optimized server payload produced by pnpm deploy
+COPY --from=build --chown=65532:65532 /opt/server ./
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
