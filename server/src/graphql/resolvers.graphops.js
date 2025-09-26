@@ -31,6 +31,59 @@ const aiSchema = Joi.object({
   entityId: Joi.string().trim().min(1).required(),
 });
 
+const propertyValueSchema = Joi.alternatives().try(
+  Joi.string(),
+  Joi.number(),
+  Joi.boolean(),
+  Joi.date(),
+  Joi.array().items(Joi.any()).max(100),
+  Joi.object().pattern(/.*/, Joi.any()).max(50),
+  Joi.valid(null),
+);
+
+const propertiesSchema = Joi.object()
+  .pattern(/^[A-Za-z0-9:_-]+$/, propertyValueSchema)
+  .max(200)
+  .default({});
+
+const batchNodeSchema = Joi.object({
+  id: Joi.string().trim().min(1).required(),
+  tenantId: Joi.string().trim().min(1).required(),
+  type: Joi.string().trim().min(1).required(),
+  label: Joi.string().trim().min(1).required(),
+  investigationId: Joi.string().trim().optional(),
+  tags: Joi.array().items(Joi.string().trim().min(1)).max(200).optional(),
+  properties: propertiesSchema.optional(),
+});
+
+const batchEdgeSchema = Joi.object({
+  id: Joi.string().trim().min(1).optional(),
+  tenantId: Joi.string().trim().min(1).required(),
+  type: Joi.string().trim().min(1).required(),
+  label: Joi.string().trim().allow('', null).optional(),
+  sourceId: Joi.string().trim().min(1).required(),
+  targetId: Joi.string().trim().min(1).required(),
+  investigationId: Joi.string().trim().optional(),
+  properties: propertiesSchema.optional(),
+});
+
+const deleteNodeSchema = Joi.object({
+  id: Joi.string().trim().min(1).required(),
+  tenantId: Joi.string().trim().min(1).required(),
+});
+
+const deleteEdgeSchema = Joi.object({
+  id: Joi.string().trim().min(1).required(),
+  tenantId: Joi.string().trim().min(1).required(),
+});
+
+const batchInputSchema = Joi.object({
+  createNodes: Joi.array().items(batchNodeSchema).max(10000).default([]),
+  createEdges: Joi.array().items(batchEdgeSchema).max(10000).default([]),
+  deleteNodes: Joi.array().items(deleteNodeSchema).max(10000).default([]),
+  deleteEdges: Joi.array().items(deleteEdgeSchema).max(10000).default([]),
+});
+
 function ensureRole(user, allowedRoles = []) {
   if (!user) throw new Error('Not authenticated');
   if (allowedRoles.length === 0) return true;
@@ -289,6 +342,53 @@ const resolvers = {
         logger.error('requestAIAnalysis error', { err: e, traceId: tId });
         const err = new Error('AI_REQUEST_FAILED');
         err.code = 'AI_REQUEST_FAILED';
+        err.details = e.message;
+        err.traceId = tId;
+        throw err;
+      }
+    },
+
+    batchGraphUpdate: async (_, args, { user, logger }) => {
+      const start = Date.now();
+      const tId = traceId();
+      ensureRole(user, ['ANALYST', 'ADMIN']);
+
+      const { value, error } = batchInputSchema.validate(args.input, {
+        abortEarly: false,
+        stripUnknown: true,
+      });
+
+      if (error) {
+        const err = new Error(`Invalid input: ${error.message}`);
+        err.code = 'BAD_USER_INPUT';
+        err.traceId = tId;
+        throw err;
+      }
+
+      const totalOps =
+        value.createNodes.length +
+        value.createEdges.length +
+        value.deleteNodes.length +
+        value.deleteEdges.length;
+
+      if (totalOps === 0) {
+        const err = new Error('At least one batch operation must be provided');
+        err.code = 'BAD_USER_INPUT';
+        err.traceId = tId;
+        throw err;
+      }
+
+      try {
+        const result = await GraphOpsService.applyBatchOperations(value, {
+          user,
+          traceId: tId,
+        });
+        metrics.resolverLatencyMs.labels('batchGraphUpdate').observe(Date.now() - start);
+        return result;
+      } catch (e) {
+        logger.error('batchGraphUpdate error', { err: e, traceId: tId });
+        const err = new Error('BATCH_GRAPH_UPDATE_FAILED');
+        err.code = 'BATCH_GRAPH_UPDATE_FAILED';
         err.details = e.message;
         err.traceId = tId;
         throw err;
