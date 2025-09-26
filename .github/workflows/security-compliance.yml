@@ -1,0 +1,131 @@
+name: Security Compliance Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: security-compliance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  conftest:
+    name: OPA policy evaluation
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Install Conftest
+        run: |
+          set -euo pipefail
+          curl -L -o conftest.tar.gz https://github.com/open-policy-agent/conftest/releases/download/v0.46.0/conftest_0.46.0_Linux_x86_64.tar.gz
+          tar xzf conftest.tar.gz
+          sudo mv conftest /usr/local/bin/
+
+      - name: Evaluate policies against Helm charts
+        run: |
+          set -euo pipefail
+          if [ ! -d infra/helm ]; then
+            echo "infra/helm directory not found; skipping policy evaluation."
+            exit 0
+          fi
+
+          mapfile -t charts < <(find infra/helm -name Chart.yaml -print)
+          if [ ${#charts[@]} -eq 0 ]; then
+            echo "No Helm charts discovered under infra/helm; skipping policy evaluation."
+            exit 0
+          fi
+
+          for chart_file in "${charts[@]}"; do
+            chart_dir="$(dirname "${chart_file}")"
+            release_name="$(basename "${chart_dir}")"
+            echo "::group::Conftest ${release_name}"
+            helm dependency build "${chart_dir}" >/dev/null 2>&1 || true
+            manifest="$(mktemp)"
+            if helm template "${release_name}" "${chart_dir}" >"${manifest}"; then
+              conftest test "${manifest}" --policy policies/opa/kubernetes
+            else
+              echo "Failed to render Helm chart at ${chart_dir}" >&2
+              rm -f "${manifest}"
+              exit 1
+            fi
+            rm -f "${manifest}"
+            echo "::endgroup::"
+          done
+
+  trivy:
+    name: Trivy vulnerability scans
+    runs-on: ubuntu-22.04
+    needs: conftest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Install Trivy
+        run: |
+          set -euo pipefail
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin v0.50.4
+
+      - name: Scan Helm charts with Trivy config
+        run: |
+          set -euo pipefail
+          if [ ! -d infra/helm ]; then
+            echo "infra/helm directory not found; skipping Helm config scan."
+          else
+            mapfile -t charts < <(find infra/helm -name Chart.yaml -print)
+            if [ ${#charts[@]} -eq 0 ]; then
+              echo "No Helm charts discovered under infra/helm; skipping Helm config scan."
+            else
+              for chart_file in "${charts[@]}"; do
+                chart_dir="$(dirname "${chart_file}")"
+                chart_name="$(basename "${chart_dir}")"
+                echo "::group::Trivy config ${chart_name}"
+                trivy config --exit-code 1 --severity HIGH,CRITICAL --helm-chart "${chart_dir}"
+                echo "::endgroup::"
+              done
+            fi
+          fi
+
+      - name: Build & scan Docker images with Trivy
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          declare -A targets=(
+            ["platform-app"]="."
+            ["api-server"]="server"
+          )
+
+          for name in "${!targets[@]}"; do
+            context="${targets[$name]}"
+            dockerfile_path="${context}/Dockerfile"
+            if [ ! -f "${dockerfile_path}" ]; then
+              echo "Skipping ${name}; no Dockerfile at ${dockerfile_path}."
+              continue
+            fi
+
+            image_ref="ghcr.io/summit/${name}:ci-${IMAGE_TAG:0:12}"
+            echo "::group::Build ${image_ref}"
+            docker build --file "${dockerfile_path}" --tag "${image_ref}" "${context}"
+            echo "::endgroup::"
+
+            echo "::group::Trivy image ${image_ref}"
+            trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed "${image_ref}"
+            echo "::endgroup::"
+
+            docker image rm "${image_ref}" >/dev/null 2>&1 || true
+          done

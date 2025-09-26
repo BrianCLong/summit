@@ -38,6 +38,8 @@ tmp-sidecar-audit/
 # OPA binary downloads
 opa
 opa.exe
+!policies/opa/
+!policies/opa/**
 
 # Temporary files
 tmp/
