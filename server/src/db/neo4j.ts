@@ -1,6 +1,7 @@
 import neo4j from 'neo4j-driver';
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, Gauge } from 'prom-client';
+import { ensureTenantNamespace } from './tenants/neo4jTenancy.js';
 
 const tracer = trace.getTracer('maestro-neo4j', '24.3.0');
 
@@ -69,8 +70,13 @@ export const neo = {
         'tenant_id': options?.tenantId || 'unknown'
       });
 
+      const database = options?.tenantId
+        ? await ensureTenantNamespace(driver, options.tenantId)
+        : process.env.NEO4J_DATABASE || 'neo4j';
+
       const session = driver.session({
-        defaultAccessMode: neo4j.session.WRITE
+        defaultAccessMode: neo4j.session.WRITE,
+        database
       });
 
       // Enhanced tenant scoping for Neo4j queries
@@ -104,8 +110,13 @@ export const neo = {
         'tenant_id': options?.tenantId || 'unknown'
       });
 
+      const database = options?.tenantId
+        ? await ensureTenantNamespace(driver, options.tenantId)
+        : process.env.NEO4J_DATABASE || 'neo4j';
+
       const session = driver.session({
-        defaultAccessMode: neo4j.session.WRITE
+        defaultAccessMode: neo4j.session.WRITE,
+        database
       });
 
       const scopedQuery = validateAndScopeNeo4jQuery(query, params, options?.tenantId);

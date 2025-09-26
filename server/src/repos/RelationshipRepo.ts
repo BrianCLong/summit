@@ -3,10 +3,12 @@
  * Handles relationships between entities with PostgreSQL + Neo4j dual-write
  */
 
-import { Pool, PoolClient } from 'pg';
-import { Driver, Session } from 'neo4j-driver';
+import { Pool } from 'pg';
+import { Driver } from 'neo4j-driver';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
+import { withTenantConnection } from '../db/tenants/postgresTenancy.js';
+import { ensureTenantNamespace } from '../db/tenants/neo4jTenancy.js';
 
 const repoLogger = logger.child({ name: 'RelationshipRepo' });
 
@@ -53,145 +55,133 @@ export class RelationshipRepo {
    */
   async create(input: RelationshipInput, userId: string): Promise<Relationship> {
     const id = uuidv4();
-    const client = await this.pg.connect();
+
+    const relationship = await withTenantConnection(
+      input.tenantId,
+      async (client) => {
+        const { rows: srcCheck } = await client.query(
+          `SELECT id FROM entities WHERE id = $1 AND tenant_id = $2`,
+          [input.srcId, input.tenantId],
+        );
+
+        const { rows: dstCheck } = await client.query(
+          `SELECT id FROM entities WHERE id = $1 AND tenant_id = $2`,
+          [input.dstId, input.tenantId],
+        );
+
+        if (srcCheck.length === 0) {
+          throw new Error(`Source entity ${input.srcId} not found`);
+        }
+
+        if (dstCheck.length === 0) {
+          throw new Error(`Destination entity ${input.dstId} not found`);
+        }
+
+        const { rows } = await client.query<RelationshipRow>(
+          `INSERT INTO relationships (id, tenant_id, src_id, dst_id, type, props, created_by)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
+           RETURNING *`,
+          [
+            id,
+            input.tenantId,
+            input.srcId,
+            input.dstId,
+            input.type,
+            JSON.stringify(input.props || {}),
+            userId,
+          ],
+        );
+
+        await client.query(
+          `INSERT INTO outbox_events (id, topic, payload)
+           VALUES ($1, $2, $3)`,
+          [
+            uuidv4(),
+            'relationship.upsert',
+            JSON.stringify({ id: rows[0].id, tenantId: rows[0].tenant_id }),
+          ],
+        );
+
+        return rows[0];
+      },
+      { pool: this.pg }
+    );
 
     try {
-      await client.query('BEGIN');
-
-      // 1. Verify both entities exist in PostgreSQL
-      const { rows: srcCheck } = await client.query(
-        `SELECT id FROM entities WHERE id = $1 AND tenant_id = $2`,
-        [input.srcId, input.tenantId],
+      await this.upsertNeo4jRelationship({
+        id: relationship.id,
+        tenantId: relationship.tenant_id,
+        srcId: relationship.src_id,
+        dstId: relationship.dst_id,
+        type: relationship.type,
+        props: relationship.props,
+      });
+    } catch (neo4jError) {
+      repoLogger.warn(
+        { relationshipId: id, error: neo4jError },
+        'Neo4j relationship write failed, will retry via outbox',
       );
-
-      const { rows: dstCheck } = await client.query(
-        `SELECT id FROM entities WHERE id = $1 AND tenant_id = $2`,
-        [input.dstId, input.tenantId],
-      );
-
-      if (srcCheck.length === 0) {
-        throw new Error(`Source entity ${input.srcId} not found`);
-      }
-
-      if (dstCheck.length === 0) {
-        throw new Error(`Destination entity ${input.dstId} not found`);
-      }
-
-      // 2. Insert relationship
-      const { rows } = await client.query<RelationshipRow>(
-        `INSERT INTO relationships (id, tenant_id, src_id, dst_id, type, props, created_by)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
-         RETURNING *`,
-        [
-          id,
-          input.tenantId,
-          input.srcId,
-          input.dstId,
-          input.type,
-          JSON.stringify(input.props || {}),
-          userId,
-        ],
-      );
-
-      const relationship = rows[0];
-
-      // 3. Outbox event for Neo4j sync
-      await client.query(
-        `INSERT INTO outbox_events (id, topic, payload)
-         VALUES ($1, $2, $3)`,
-        [
-          uuidv4(),
-          'relationship.upsert',
-          JSON.stringify({ id: relationship.id, tenantId: relationship.tenant_id }),
-        ],
-      );
-
-      await client.query('COMMIT');
-
-      // 4. Best effort Neo4j write
-      try {
-        await this.upsertNeo4jRelationship({
-          id: relationship.id,
-          tenantId: relationship.tenant_id,
-          srcId: relationship.src_id,
-          dstId: relationship.dst_id,
-          type: relationship.type,
-          props: relationship.props,
-        });
-      } catch (neo4jError) {
-        repoLogger.warn(
-          { relationshipId: id, error: neo4jError },
-          'Neo4j relationship write failed, will retry via outbox',
-        );
-      }
-
-      return this.mapRow(relationship);
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
     }
+
+    return this.mapRow(relationship);
   }
 
   /**
    * Delete relationship with dual-write
    */
-  async delete(id: string): Promise<boolean> {
-    const client = await this.pg.connect();
+  async delete(id: string, tenantId: string): Promise<boolean> {
+    const deleted = await withTenantConnection(
+      tenantId,
+      async (client) => {
+        const { rowCount } = await client.query(`DELETE FROM relationships WHERE id = $1`, [id]);
 
-    try {
-      await client.query('BEGIN');
-
-      const { rowCount } = await client.query(`DELETE FROM relationships WHERE id = $1`, [id]);
-
-      if (rowCount && rowCount > 0) {
-        // Outbox event for Neo4j cleanup
-        await client.query(
-          `INSERT INTO outbox_events (id, topic, payload)
-           VALUES ($1, $2, $3)`,
-          [uuidv4(), 'relationship.delete', JSON.stringify({ id })],
-        );
-
-        await client.query('COMMIT');
-
-        // Best effort Neo4j delete
-        try {
-          await this.deleteNeo4jRelationship(id);
-        } catch (neo4jError) {
-          repoLogger.warn(
-            { relationshipId: id, error: neo4jError },
-            'Neo4j relationship delete failed, will retry via outbox',
+        if (rowCount && rowCount > 0) {
+          await client.query(
+            `INSERT INTO outbox_events (id, topic, payload)
+             VALUES ($1, $2, $3)`,
+            [uuidv4(), 'relationship.delete', JSON.stringify({ id, tenantId })],
           );
+          return true;
         }
 
-        return true;
-      } else {
-        await client.query('ROLLBACK');
         return false;
-      }
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
+      },
+      { pool: this.pg }
+    );
+
+    if (!deleted) {
+      return false;
     }
+
+    try {
+      await this.deleteNeo4jRelationship(id, tenantId);
+    } catch (neo4jError) {
+      repoLogger.warn(
+        { relationshipId: id, error: neo4jError },
+        'Neo4j relationship delete failed, will retry via outbox',
+      );
+    }
+
+    return true;
   }
 
   /**
    * Find relationship by ID
    */
-  async findById(id: string, tenantId?: string): Promise<Relationship | null> {
-    const params = [id];
-    let query = `SELECT * FROM relationships WHERE id = $1`;
+  async findById(id: string, tenantId: string): Promise<Relationship | null> {
+    const row = await withTenantConnection(
+      tenantId,
+      async (client) => {
+        const { rows } = await client.query<RelationshipRow>(
+          `SELECT * FROM relationships WHERE id = $1`,
+          [id],
+        );
+        return rows[0] ?? null;
+      },
+      { pool: this.pg }
+    );
 
-    if (tenantId) {
-      query += ` AND tenant_id = $2`;
-      params.push(tenantId);
-    }
-
-    const { rows } = await this.pg.query<RelationshipRow>(query, params);
-    return rows[0] ? this.mapRow(rows[0]) : null;
+    return row ? this.mapRow(row) : null;
   }
 
   /**
@@ -202,20 +192,28 @@ export class RelationshipRepo {
     tenantId: string,
     direction: 'incoming' | 'outgoing' | 'both' = 'both',
   ): Promise<Relationship[]> {
-    let query = `SELECT * FROM relationships WHERE tenant_id = $1 AND `;
-    const params = [tenantId, entityId];
+    const rows = await withTenantConnection(
+      tenantId,
+      async (client) => {
+        let query = `SELECT * FROM relationships WHERE `;
+        const params = [entityId];
 
-    if (direction === 'incoming') {
-      query += `dst_id = $2`;
-    } else if (direction === 'outgoing') {
-      query += `src_id = $2`;
-    } else {
-      query += `(src_id = $2 OR dst_id = $2)`;
-    }
+        if (direction === 'incoming') {
+          query += `dst_id = $1`;
+        } else if (direction === 'outgoing') {
+          query += `src_id = $1`;
+        } else {
+          query += `(src_id = $1 OR dst_id = $1)`;
+        }
 
-    query += ` ORDER BY created_at DESC`;
+        query += ` ORDER BY created_at DESC`;
 
-    const { rows } = await this.pg.query<RelationshipRow>(query, params);
+        const { rows } = await client.query<RelationshipRow>(query, params);
+        return rows;
+      },
+      { pool: this.pg }
+    );
+
     return rows.map(this.mapRow);
   }
 
@@ -237,32 +235,39 @@ export class RelationshipRepo {
     limit?: number;
     offset?: number;
   }): Promise<Relationship[]> {
-    const params: any[] = [tenantId];
-    let query = `SELECT * FROM relationships WHERE tenant_id = $1`;
-    let paramIndex = 2;
+    const rows = await withTenantConnection(
+      tenantId,
+      async (client) => {
+        const params: any[] = [];
+        let query = `SELECT * FROM relationships`;
+        const conditions: string[] = ['TRUE'];
 
-    if (type) {
-      query += ` AND type = $${paramIndex}`;
-      params.push(type);
-      paramIndex++;
-    }
+        if (type) {
+          params.push(type);
+          conditions.push(`type = $${params.length}`);
+        }
 
-    if (srcId) {
-      query += ` AND src_id = $${paramIndex}`;
-      params.push(srcId);
-      paramIndex++;
-    }
+        if (srcId) {
+          params.push(srcId);
+          conditions.push(`src_id = $${params.length}`);
+        }
 
-    if (dstId) {
-      query += ` AND dst_id = $${paramIndex}`;
-      params.push(dstId);
-      paramIndex++;
-    }
+        if (dstId) {
+          params.push(dstId);
+          conditions.push(`dst_id = $${params.length}`);
+        }
 
-    query += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
-    params.push(Math.min(limit, 1000), offset);
+        query += ` WHERE ${conditions.join(' AND ')}`;
+        params.push(Math.min(limit, 1000));
+        params.push(offset);
+        query += ` ORDER BY created_at DESC LIMIT $${params.length - 1} OFFSET $${params.length}`;
 
-    const { rows } = await this.pg.query<RelationshipRow>(query, params);
+        const { rows } = await client.query<RelationshipRow>(query, params);
+        return rows;
+      },
+      { pool: this.pg }
+    );
+
     return rows.map(this.mapRow);
   }
 
@@ -273,18 +278,25 @@ export class RelationshipRepo {
     entityId: string,
     tenantId: string,
   ): Promise<{ incoming: number; outgoing: number }> {
-    const { rows } = await this.pg.query(
-      `SELECT 
-         COUNT(*) FILTER (WHERE src_id = $2) as outgoing,
-         COUNT(*) FILTER (WHERE dst_id = $2) as incoming
-       FROM relationships 
-       WHERE tenant_id = $1 AND (src_id = $2 OR dst_id = $2)`,
-      [tenantId, entityId],
+    const counts = await withTenantConnection(
+      tenantId,
+      async (client) => {
+        const { rows } = await client.query(
+          `SELECT
+             COUNT(*) FILTER (WHERE src_id = $1) as outgoing,
+             COUNT(*) FILTER (WHERE dst_id = $1) as incoming
+           FROM relationships
+           WHERE src_id = $1 OR dst_id = $1`,
+          [entityId],
+        );
+        return rows[0] || { incoming: 0, outgoing: 0 };
+      },
+      { pool: this.pg }
     );
 
     return {
-      incoming: parseInt(rows[0]?.incoming || '0'),
-      outgoing: parseInt(rows[0]?.outgoing || '0'),
+      incoming: parseInt(counts?.incoming || '0'),
+      outgoing: parseInt(counts?.outgoing || '0'),
     };
   }
 
@@ -306,7 +318,8 @@ export class RelationshipRepo {
     type: string;
     props: any;
   }): Promise<void> {
-    const session = this.neo4j.session();
+    const database = await ensureTenantNamespace(this.neo4j, tenantId);
+    const session = this.neo4j.session({ database });
 
     try {
       await session.executeWrite(async (tx) => {
@@ -329,8 +342,9 @@ export class RelationshipRepo {
   /**
    * Delete relationship from Neo4j
    */
-  private async deleteNeo4jRelationship(id: string): Promise<void> {
-    const session = this.neo4j.session();
+  private async deleteNeo4jRelationship(id: string, tenantId: string): Promise<void> {
+    const database = await ensureTenantNamespace(this.neo4j, tenantId);
+    const session = this.neo4j.session({ database });
 
     try {
       await session.executeWrite(async (tx) => {
