@@ -1,6 +1,53 @@
 const gql = require('graphql-tag');
 
 const typeDefs = gql`
+  input GraphBatchNodeInput {
+    id: ID!
+    tenantId: String!
+    type: String!
+    label: String!
+    investigationId: ID
+    tags: [String!]
+    properties: JSON
+  }
+
+  input GraphBatchEdgeInput {
+    id: ID
+    tenantId: String!
+    type: String!
+    label: String
+    sourceId: ID!
+    targetId: ID!
+    investigationId: ID
+    properties: JSON
+  }
+
+  input GraphBatchNodeDeleteInput {
+    id: ID!
+    tenantId: String!
+  }
+
+  input GraphBatchEdgeDeleteInput {
+    id: ID!
+    tenantId: String!
+  }
+
+  input GraphBatchInput {
+    createNodes: [GraphBatchNodeInput!]
+    createEdges: [GraphBatchEdgeInput!]
+    deleteNodes: [GraphBatchNodeDeleteInput!]
+    deleteEdges: [GraphBatchEdgeDeleteInput!]
+  }
+
+  type GraphBatchResult {
+    nodesCreated: Int!
+    nodesUpdated: Int!
+    edgesCreated: Int!
+    edgesUpdated: Int!
+    nodesDeleted: Int!
+    edgesDeleted: Int!
+  }
+
   extend type Entity {
     id: ID!
     label: String!
@@ -23,6 +70,9 @@ const typeDefs = gql`
 
     # Enqueues a request for AI to analyze an entity
     requestAIAnalysis(entityId: ID!): AIRequestResult!
+
+    # Applies a batch of graph mutations (create/delete) in a single transaction
+    batchGraphUpdate(input: GraphBatchInput!): GraphBatchResult!
   }
 
   type AIRequestResult {
