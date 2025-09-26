@@ -44,7 +44,31 @@ export default gql`
     properties: JSON
   }
 
+  enum AnonymizationTarget {
+    POSTGRES
+    NEO4J
+  }
+
+  input TriggerAnonymizationInput {
+    targets: [AnonymizationTarget!]
+    dryRun: Boolean
+    requestedBy: ID
+  }
+
+  type AnonymizationRun {
+    runId: ID!
+    status: String!
+    dryRun: Boolean!
+    scope: [AnonymizationTarget!]!
+    startedAt: String!
+    completedAt: String
+    maskedPostgres: Int!
+    maskedNeo4j: Int!
+    notes: String
+  }
+
   type Mutation {
     upsertEntity(input: UpsertEntityInput!): Entity!
+    triggerAnonymization(input: TriggerAnonymizationInput!): AnonymizationRun!
   }
 `;
