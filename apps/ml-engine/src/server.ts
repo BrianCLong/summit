@@ -3,10 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import compression from 'compression';
-import { createProxyMiddleware } from 'http-proxy-middleware';
+import { performance } from 'node:perf_hooks';
 import { EntityResolutionService } from './services/EntityResolutionService';
 import { logger } from './utils/logger';
 import { config } from './config';
+import { observeHttpRequest, startMetricsServer } from './monitoring/metrics';
 
 const app: Express = express();
 const PORT = config.server.port || 4003;
@@ -46,6 +47,27 @@ app.get('/health', (req, res) => {
 // Initialize ML service
 let entityResolutionService: EntityResolutionService;
 
+type AsyncHandler = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) => Promise<void> | void;
+
+function withMetrics(route: string, handler: AsyncHandler): express.RequestHandler {
+  return async (req, res, next) => {
+    const start = performance.now();
+    try {
+      await handler(req, res, next);
+    } catch (error) {
+      next(error);
+    } finally {
+      const statusCode = res.headersSent ? res.statusCode : 500;
+      const durationSeconds = (performance.now() - start) / 1000;
+      observeHttpRequest(route, statusCode, durationSeconds);
+    }
+  };
+}
+
 async function initializeServices() {
   try {
     entityResolutionService = new EntityResolutionService();
@@ -58,276 +80,312 @@ async function initializeServices() {
 }
 
 // Entity Resolution API Routes
-app.post('/api/entity-resolution/find-duplicates', async (req, res) => {
-  try {
-    const { entityId, limit = 10, threshold = 0.8 } = req.body;
+app.post(
+  '/api/entity-resolution/find-duplicates',
+  withMetrics('entity_resolution_find_duplicates', async (req, res) => {
+    try {
+      const { entityId, limit = 10, threshold = 0.8 } = req.body;
 
-    if (!entityId) {
-      return res.status(400).json({ error: 'entityId is required' });
-    }
+      if (!entityId) {
+        return res.status(400).json({ error: 'entityId is required' });
+      }
 
-    const matches = await entityResolutionService.findDuplicates(entityId, limit, threshold);
+      const matches = await entityResolutionService.findDuplicates(entityId, limit, threshold);
 
-    res.json({
-      entityId,
-      matches,
-      total: matches.length,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('Error finding duplicates:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.post('/api/entity-resolution/bulk-resolve', async (req, res) => {
-  try {
-    const { entityIds, threshold = 0.8, maxClusters = 100 } = req.body;
-
-    if (!Array.isArray(entityIds) || entityIds.length === 0) {
-      return res.status(400).json({ error: 'entityIds array is required' });
-    }
-
-    const clusters = await entityResolutionService.bulkResolution(
-      entityIds,
-      threshold,
-      maxClusters,
-    );
-
-    res.json({
-      clusters,
-      totalEntities: entityIds.length,
-      totalClusters: clusters.length,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('Error in bulk resolution:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.post('/api/entity-resolution/train', async (req, res) => {
-  try {
-    const { positiveExamples, negativeExamples } = req.body;
-
-    if (!Array.isArray(positiveExamples) || !Array.isArray(negativeExamples)) {
-      return res.status(400).json({
-        error: 'positiveExamples and negativeExamples arrays are required',
+      res.json({
+        entityId,
+        matches,
+        total: matches.length,
+        timestamp: new Date().toISOString(),
       });
+    } catch (error) {
+      logger.error('Error finding duplicates:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
+  }),
+);
 
-    const result = await entityResolutionService.trainFromFeedback(
-      positiveExamples,
-      negativeExamples,
-    );
+app.post(
+  '/api/entity-resolution/bulk-resolve',
+  withMetrics('entity_resolution_bulk_resolve', async (req, res) => {
+    try {
+      const { entityIds, threshold = 0.8, maxClusters = 100 } = req.body;
 
-    res.json({
-      success: true,
-      trainingResult: result,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('Error training model:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+      if (!Array.isArray(entityIds) || entityIds.length === 0) {
+        return res.status(400).json({ error: 'entityIds array is required' });
+      }
 
-app.post('/api/entity-resolution/similarity', async (req, res) => {
-  try {
-    const { entity1Id, entity2Id } = req.body;
+      const clusters = await entityResolutionService.bulkResolution(
+        entityIds,
+        threshold,
+        maxClusters,
+      );
 
-    if (!entity1Id || !entity2Id) {
-      return res.status(400).json({
-        error: 'entity1Id and entity2Id are required',
+      res.json({
+        clusters,
+        totalEntities: entityIds.length,
+        totalClusters: clusters.length,
+        timestamp: new Date().toISOString(),
       });
+    } catch (error) {
+      logger.error('Error in bulk resolution:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
+  }),
+);
 
-    const similarity = await entityResolutionService.calculateSimilarity(entity1Id, entity2Id);
+app.post(
+  '/api/entity-resolution/train',
+  withMetrics('entity_resolution_train', async (req, res) => {
+    try {
+      const { positiveExamples, negativeExamples } = req.body;
 
-    res.json({
-      entity1Id,
-      entity2Id,
-      similarity,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('Error calculating similarity:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+      if (!Array.isArray(positiveExamples) || !Array.isArray(negativeExamples)) {
+        return res.status(400).json({
+          error: 'positiveExamples and negativeExamples arrays are required',
+        });
+      }
 
-app.get('/api/entity-resolution/metrics', async (req, res) => {
-  try {
-    const metrics = await entityResolutionService.getPerformanceMetrics();
+      const result = await entityResolutionService.trainFromFeedback(
+        positiveExamples,
+        negativeExamples,
+      );
 
-    res.json({
-      metrics,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('Error getting metrics:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.post('/api/entity-resolution/feedback', async (req, res) => {
-  try {
-    const { entity1Id, entity2Id, isMatch, confidence, userId } = req.body;
-
-    if (!entity1Id || !entity2Id || typeof isMatch !== 'boolean') {
-      return res.status(400).json({
-        error: 'entity1Id, entity2Id, and isMatch are required',
+      res.json({
+        success: true,
+        trainingResult: result,
+        timestamp: new Date().toISOString(),
       });
+    } catch (error) {
+      logger.error('Error training model:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
+  }),
+);
 
-    await entityResolutionService.recordFeedback({
-      entity1Id,
-      entity2Id,
-      isMatch,
-      confidence: confidence || 1.0,
-      userId,
-      timestamp: new Date(),
-    });
+app.post(
+  '/api/entity-resolution/similarity',
+  withMetrics('entity_resolution_similarity', async (req, res) => {
+    try {
+      const { entity1Id, entity2Id } = req.body;
 
-    res.json({
-      success: true,
-      message: 'Feedback recorded successfully',
+      if (!entity1Id || !entity2Id) {
+        return res.status(400).json({
+          error: 'entity1Id and entity2Id are required',
+        });
+      }
+
+      const similarity = await entityResolutionService.calculateSimilarity(entity1Id, entity2Id);
+
+      res.json({
+        entity1Id,
+        entity2Id,
+        similarity,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error('Error calculating similarity:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }),
+);
+
+app.get(
+  '/api/entity-resolution/metrics',
+  withMetrics('entity_resolution_metrics', async (req, res) => {
+    try {
+      const metrics = await entityResolutionService.getPerformanceMetrics();
+
+      res.json({
+        metrics,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
-    logger.error('Error recording feedback:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+    } catch (error) {
+      logger.error('Error getting metrics:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }),
+);
+
+app.post(
+  '/api/entity-resolution/feedback',
+  withMetrics('entity_resolution_feedback', async (req, res) => {
+    try {
+      const { entity1Id, entity2Id, isMatch, confidence, userId } = req.body;
+
+      if (!entity1Id || !entity2Id || typeof isMatch !== 'boolean') {
+        return res.status(400).json({
+          error: 'entity1Id, entity2Id, and isMatch are required',
+        });
+      }
+
+      await entityResolutionService.recordFeedback({
+        entity1Id,
+        entity2Id,
+        isMatch,
+        confidence: confidence || 1.0,
+        userId,
+        timestamp: new Date(),
+      });
+
+      res.json({
+        success: true,
+        message: 'Feedback recorded successfully',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error('Error recording feedback:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }),
+);
 
 // Sentence encoding endpoints
-app.post('/api/embeddings/encode', async (req, res) => {
-  try {
-    const { texts, modelName = 'all-MiniLM-L6-v2' } = req.body;
+app.post(
+  '/api/embeddings/encode',
+  withMetrics('embeddings_encode', async (req, res) => {
+    try {
+      const { texts, modelName = 'all-MiniLM-L6-v2' } = req.body;
 
-    if (!Array.isArray(texts) || texts.length === 0) {
-      return res.status(400).json({ error: 'texts array is required' });
+      if (!Array.isArray(texts) || texts.length === 0) {
+        return res.status(400).json({ error: 'texts array is required' });
+      }
+
+      // Call Python service for embedding
+      const embeddings = await entityResolutionService.getSemanticEmbeddings(texts, modelName);
+
+      res.json({
+        embeddings,
+        count: texts.length,
+        modelName,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error('Error encoding texts:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
+  }),
+);
 
-    // Call Python service for embedding
-    const embeddings = await entityResolutionService.getSemanticEmbeddings(texts, modelName);
+app.post(
+  '/api/embeddings/similarity',
+  withMetrics('embeddings_similarity', async (req, res) => {
+    try {
+      const { text1, text2, modelName = 'all-MiniLM-L6-v2' } = req.body;
 
-    res.json({
-      embeddings,
-      count: texts.length,
-      modelName,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('Error encoding texts:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+      if (!text1 || !text2) {
+        return res.status(400).json({ error: 'text1 and text2 are required' });
+      }
 
-app.post('/api/embeddings/similarity', async (req, res) => {
-  try {
-    const { text1, text2, modelName = 'all-MiniLM-L6-v2' } = req.body;
+      const similarity = await entityResolutionService.calculateSemanticSimilarity(
+        text1,
+        text2,
+        modelName,
+      );
 
-    if (!text1 || !text2) {
-      return res.status(400).json({ error: 'text1 and text2 are required' });
+      res.json({
+        text1,
+        text2,
+        similarity,
+        modelName,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error('Error calculating text similarity:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-
-    const similarity = await entityResolutionService.calculateSemanticSimilarity(
-      text1,
-      text2,
-      modelName,
-    );
-
-    res.json({
-      text1,
-      text2,
-      similarity,
-      modelName,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('Error calculating text similarity:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+  }),
+);
 
 // Batch processing endpoints
-app.post('/api/batch/entity-resolution', async (req, res) => {
-  try {
-    const { batchId, entities, config: batchConfig } = req.body;
+app.post(
+  '/api/batch/entity-resolution',
+  withMetrics('batch_entity_resolution', async (req, res) => {
+    try {
+      const { batchId, entities, config: batchConfig } = req.body;
 
-    if (!batchId || !Array.isArray(entities)) {
-      return res.status(400).json({
-        error: 'batchId and entities array are required',
+      if (!batchId || !Array.isArray(entities)) {
+        return res.status(400).json({
+          error: 'batchId and entities array are required',
+        });
+      }
+
+      // Start batch processing (async)
+      entityResolutionService
+        .processBatch(batchId, entities, batchConfig)
+        .catch((error) => logger.error(`Batch ${batchId} failed:`, error));
+
+      res.json({
+        batchId,
+        status: 'started',
+        entityCount: entities.length,
+        timestamp: new Date().toISOString(),
       });
+    } catch (error) {
+      logger.error('Error starting batch processing:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
+  }),
+);
 
-    // Start batch processing (async)
-    entityResolutionService
-      .processBatch(batchId, entities, batchConfig)
-      .catch((error) => logger.error(`Batch ${batchId} failed:`, error));
+app.get(
+  '/api/batch/:batchId/status',
+  withMetrics('batch_status', async (req, res) => {
+    try {
+      const { batchId } = req.params;
 
-    res.json({
-      batchId,
-      status: 'started',
-      entityCount: entities.length,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('Error starting batch processing:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+      const status = await entityResolutionService.getBatchStatus(batchId);
 
-app.get('/api/batch/:batchId/status', async (req, res) => {
-  try {
-    const { batchId } = req.params;
-
-    const status = await entityResolutionService.getBatchStatus(batchId);
-
-    res.json({
-      batchId,
-      ...status,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('Error getting batch status:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+      res.json({
+        batchId,
+        ...status,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error('Error getting batch status:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }),
+);
 
 // Model management endpoints
-app.get('/api/models', async (req, res) => {
-  try {
-    const models = await entityResolutionService.getAvailableModels();
+app.get(
+  '/api/models',
+  withMetrics('models_list', async (req, res) => {
+    try {
+      const models = await entityResolutionService.getAvailableModels();
 
-    res.json({
-      models,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('Error getting available models:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+      res.json({
+        models,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error('Error getting available models:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }),
+);
 
-app.post('/api/models/:modelName/load', async (req, res) => {
-  try {
-    const { modelName } = req.params;
+app.post(
+  '/api/models/:modelName/load',
+  withMetrics('models_load', async (req, res) => {
+    try {
+      const { modelName } = req.params;
 
-    await entityResolutionService.loadModel(modelName);
+      await entityResolutionService.loadModel(modelName);
 
-    res.json({
-      success: true,
-      modelName,
-      message: 'Model loaded successfully',
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('Error loading model:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+      res.json({
+        success: true,
+        modelName,
+        message: 'Model loaded successfully',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error('Error loading model:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }),
+);
 
 // Error handling middleware
 app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -350,6 +408,7 @@ app.use('*', (req, res) => {
 async function startServer() {
   try {
     await initializeServices();
+    await startMetricsServer();
 
     const server = app.listen(PORT, () => {
       logger.info(`ML Engine API server running on port ${PORT}`);

@@ -1,0 +1,5 @@
+IntelGraph accelerates intelligence fusion across domains.
+Entity resolution requires high-quality semantic embeddings.
+GPU acceleration dramatically reduces inference latency.
+Operational teams rely on rapid similarity scoring.
+Benchmarks validate that CUDA-enabled deployments deliver results faster.

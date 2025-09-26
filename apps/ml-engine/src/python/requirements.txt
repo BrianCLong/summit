@@ -8,6 +8,7 @@ scipy==1.11.1
 torch==2.0.1
 sentence-transformers==2.2.2
 transformers==4.53.0
+pynvml==11.5.0
 
 # Text processing
 nltk==3.8.1

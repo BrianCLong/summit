@@ -256,6 +256,11 @@ services:
     port: 8082
     replicaCount: 2
 
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 8082
+
     resources:
       limits:
         cpu: '4'
@@ -263,6 +268,10 @@ services:
       requests:
         cpu: '1'
         memory: '1Gi'
+
+    nodeSelector: {}
+    tolerations: []
+    podAnnotations: {}
 
     env:
       - name: PORT
@@ -276,6 +285,20 @@ services:
         value: '{{ .Values.external.redis.host }}'
       - name: MODEL_CACHE_DIR
         value: '/app/.cache/models'
+      - name: METRICS_ENABLED
+        value: 'true'
+      - name: METRICS_PORT
+        value: '{{ .Values.global.prometheus.port }}'
+      - name: METRICS_PATH
+        value: '{{ .Values.global.prometheus.path }}'
+      - name: GPU_ENABLED
+        value: 'auto'
+      - name: GPU_DEVICE_ORDINAL
+        value: '0'
+      - name: GPU_POLL_INTERVAL_MS
+        value: '15000'
+      - name: GPU_HALF_PRECISION
+        value: 'true'
 
   graphAnalytics:
     enabled: true
@@ -393,6 +416,23 @@ autoscaling:
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
+
+# NVIDIA device plugin (deployed as a DaemonSet when enabled)
+gpuDevicePlugin:
+  enabled: false
+  image:
+    repository: nvidia/k8s-device-plugin
+    tag: v0.14.5
+    pullPolicy: IfNotPresent
+  args:
+    - --mig-strategy=none
+  resources: {}
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+  nodeSelector: {}
+  serviceAccountName: nvidia-device-plugin
 
 # Pod Disruption Budget
 podDisruptionBudget:

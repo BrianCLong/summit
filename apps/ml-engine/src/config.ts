@@ -52,8 +52,17 @@ export const config = {
   },
 
   monitoring: {
-    metricsEnabled: process.env.METRICS_ENABLED === 'true',
-    metricsPort: parseInt(process.env.METRICS_PORT || '9093'),
+    metricsEnabled: (process.env.METRICS_ENABLED || 'true').toLowerCase() === 'true',
+    metricsPort: parseInt(process.env.METRICS_PORT || '9090'),
+    metricsPath: process.env.METRICS_PATH || '/metrics',
+    gpuPollIntervalMs: parseInt(process.env.GPU_POLL_INTERVAL_MS || '15000'),
     logLevel: process.env.LOG_LEVEL || 'info',
+  },
+
+  gpu: {
+    enabled: (process.env.GPU_ENABLED || 'auto').toLowerCase(),
+    devicePreference: process.env.GPU_DEVICE_PREFERENCE,
+    deviceOrdinal: process.env.GPU_DEVICE_ORDINAL,
+    useHalfPrecision: (process.env.GPU_HALF_PRECISION || 'true').toLowerCase() === 'true',
   },
 };

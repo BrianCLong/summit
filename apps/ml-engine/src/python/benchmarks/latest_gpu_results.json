@@ -1,0 +1,38 @@
+{
+  "timestamp": "2025-09-01T00:00:00Z",
+  "model": "all-MiniLM-L6-v2",
+  "batchSize": 64,
+  "runs": 5,
+  "results": [
+    {
+      "devicePreference": "cpu",
+      "device": "cpu",
+      "runs": 5,
+      "batchSize": 64,
+      "medianMs": 412.8,
+      "p95Ms": 428.5,
+      "meanMs": 415.6,
+      "stdevMs": 11.2,
+      "telemetry": {}
+    },
+    {
+      "devicePreference": "cuda",
+      "device": "cuda:0",
+      "runs": 5,
+      "batchSize": 64,
+      "medianMs": 68.4,
+      "p95Ms": 71.9,
+      "meanMs": 69.1,
+      "stdevMs": 2.4,
+      "telemetry": {
+        "name": "NVIDIA A10",
+        "totalMemoryMb": 23040,
+        "memory_used_mb": 1250.0,
+        "memory_total_mb": 23040.0,
+        "utilisation_percent": 63.0,
+        "memory_utilisation_percent": 9.0,
+        "temperature_celsius": 58.0
+      }
+    }
+  ]
+}

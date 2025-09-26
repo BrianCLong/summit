@@ -1,0 +1,49 @@
+{{- if .Values.gpuDevicePlugin.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-nvidia-device-plugin
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: gpu-device-plugin
+    {{- include "intelgraph.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: gpu-device-plugin
+      app.kubernetes.io/name: {{ include "intelgraph.fullname" . }}-nvidia-device-plugin
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: gpu-device-plugin
+        app.kubernetes.io/name: {{ include "intelgraph.fullname" . }}-nvidia-device-plugin
+        app.kubernetes.io/part-of: intelgraph
+    spec:
+      priorityClassName: system-node-critical
+      tolerations:
+        - operator: Exists
+      {{- with .Values.gpuDevicePlugin.tolerations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gpuDevicePlugin.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: nvidia-device-plugin
+          image: "{{ .Values.gpuDevicePlugin.image.repository }}:{{ .Values.gpuDevicePlugin.image.tag }}"
+          imagePullPolicy: {{ .Values.gpuDevicePlugin.image.pullPolicy }}
+          args:
+            {{- toYaml .Values.gpuDevicePlugin.args | nindent 12 }}
+          {{- with .Values.gpuDevicePlugin.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      serviceAccountName: {{ .Values.gpuDevicePlugin.serviceAccountName | default "default" }}
+{{- end }}
