@@ -1,0 +1,62 @@
+{
+  "app": {
+    "title": "IntelGraph",
+    "tagline": "Inteligencia operativa de un vistazo",
+    "neighborhoodMode": "Modo de vecindario",
+    "showFullGraph": "Mostrar grafo completo",
+    "loading": "Cargando la interfaz…"
+  },
+  "language": {
+    "label": "Idioma",
+    "english": "Inglés",
+    "spanish": "Español",
+    "arabic": "Árabe"
+  },
+  "login": {
+    "title": "Inicio de sesión de operaciones",
+    "subtitle": "Inicia sesión para orquestar la ingesta de datos y supervisar el rendimiento de los agentes.",
+    "emailLabel": "Correo electrónico",
+    "passwordLabel": "Contraseña",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "passwordPlaceholder": "••••••••",
+    "rememberMe": "Recuérdame",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "signIn": "Iniciar sesión"
+  },
+  "ingest": {
+    "title": "Asistente de ingesta",
+    "subtitle": "Guía a los analistas en la incorporación estructurada de datos.",
+    "progress": "Paso {{step}} de {{total}}: {{stepName}}",
+    "actions": {
+      "back": "Atrás",
+      "next": "Siguiente",
+      "finish": "Iniciar ingesta"
+    },
+    "steps": {
+      "source": {
+        "title": "Seleccionar fuentes",
+        "description": "Elige repositorios o carga archivos para incorporar nueva inteligencia."
+      },
+      "mapping": {
+        "title": "Mapear campos",
+        "description": "Alinea los datos entrantes con los esquemas de IntelGraph para garantizar la precisión."
+      },
+      "validation": {
+        "title": "Validar calidad",
+        "description": "Ejecuta verificaciones automáticas para detectar vacíos, duplicados o anomalías."
+      },
+      "review": {
+        "title": "Revisar y lanzar",
+        "description": "Previsualiza el plan de ingesta, confirma responsables y lanza la canalización."
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Tablero de inteligencia",
+    "description": "Supervisa las relaciones y las acciones de los agentes en tiempo real.",
+    "timeline": {
+      "title": "Línea de tiempo de agentes",
+      "empty": "Aún no hay acciones de agentes registradas."
+    }
+  }
+}

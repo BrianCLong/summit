@@ -15,6 +15,9 @@ describe('Graph', () => {
       zoom: vi.fn().mockReturnValue(1),
       nodes: vi.fn().mockReturnValue({ style: vi.fn() }),
       edges: vi.fn().mockReturnValue({ style: vi.fn() }),
+      elements: vi.fn().mockReturnValue({ addClass: vi.fn(), removeClass: vi.fn() }),
+      json: vi.fn().mockReturnValue({ elements: { nodes: [], edges: [] } }),
+      removeListener: vi.fn(),
       destroy: vi.fn(),
     });
 
