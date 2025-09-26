@@ -62,3 +62,11 @@ npm i
 E2E_WS_URL=http://localhost:4000 E2E_REDIS_URL=redis://localhost:6379/1 \
   npm run test:e2e -- tests/e2e/analytics-bridge.spec.ts
 ```
+
+## Graph Query Builder
+
+- Navigate to `/graph/query-builder` to open the new visual query workspace. Drag nodes on the canvas to shape the pattern and connect them with AND/OR relationships.
+- Every edit is validated in real time via the `ValidateGraphQuery` GraphQL mutation; warnings and suggestions surface in the sidebar as you build.
+- Use the **Save** action to persist queries (client-side for now) and the **Share** action to copy the structured payload to your clipboard.
+- Storybook: `npm run storybook` serves an isolated playground (`Search/GraphQueryBuilder`) with mocked GraphQL responses for rapid UI iteration.
+- Playwright smoke: `npm run test:e2e -- tests/e2e/graph-query-builder.spec.ts` exercises the drag-and-drop builder and asserts live validation feedback.
