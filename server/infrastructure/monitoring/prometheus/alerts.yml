@@ -209,3 +209,33 @@ groups:
         annotations:
           summary: 'Suspicious activity detected'
           description: 'High severity security events detected: {{ $value }} events in 10 minutes.'
+
+  - name: collaboration.rules
+    rules:
+      # Real-time collaboration metrics
+      - alert: CollaborationLatencyHigh
+        expr: histogram_quantile(0.95, rate(maestro_collaboration_edit_latency_seconds_bucket[5m])) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Real-time collaboration latency degrading'
+          description: '95th percentile edit resolution latency is {{ $value }}s (target < 3s).'
+
+      - alert: CollaborationConflictSpike
+        expr: sum(rate(maestro_collaboration_edit_conflicts_total[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Collaboration conflicts elevated'
+          description: 'Conflict rate is {{ $value }} per second across collaboration sessions.'
+
+      - alert: CollaborationSessionSaturation
+        expr: sum(maestro_collaboration_active_users) > 60
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Collaboration sessions saturated'
+          description: 'Active collaboration users exceeded 60 for 10 minutes. Consider scaling collaboration services.'

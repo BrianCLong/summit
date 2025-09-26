@@ -25,6 +25,14 @@ export class IntelGraphMetrics {
   private activeConnections: any;
   private activeSessions: any;
 
+  // Real-time Collaboration Metrics
+  private collaborationSessions: any;
+  private collaborationUsers: any;
+  private collaborationConcurrency: any;
+  private collaborationLatency: any;
+  private collaborationConflicts: any;
+  private collaborationEvents: any;
+
   // AI Model Metrics
   private aiModelRequests: any;
   private aiModelDuration: any;
@@ -117,6 +125,51 @@ export class IntelGraphMetrics {
     this.activeSessions = this.meter.createUpDownCounter('maestro_active_sessions_total', {
       description: 'Number of active user sessions',
     });
+
+    // Collaboration Metrics
+    this.collaborationSessions = this.meter.createUpDownCounter(
+      'maestro_collaboration_active_sessions',
+      {
+        description: 'Active real-time collaboration sessions',
+      },
+    );
+
+    this.collaborationUsers = this.meter.createUpDownCounter(
+      'maestro_collaboration_active_users',
+      {
+        description: 'Active users participating in collaboration sessions',
+      },
+    );
+
+    this.collaborationConcurrency = this.meter.createHistogram(
+      'maestro_collaboration_concurrent_users',
+      {
+        description: 'Concurrent editors observed per collaboration session',
+        boundaries: [1, 2, 3, 5, 8, 13, 21, 34],
+      },
+    );
+
+    this.collaborationLatency = this.meter.createHistogram(
+      'maestro_collaboration_edit_latency_seconds',
+      {
+        description: 'Latency between edit submission and resolution',
+        boundaries: [0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10, 20],
+      },
+    );
+
+    this.collaborationConflicts = this.meter.createCounter(
+      'maestro_collaboration_edit_conflicts_total',
+      {
+        description: 'Conflicts detected during collaborative editing',
+      },
+    );
+
+    this.collaborationEvents = this.meter.createCounter(
+      'maestro_collaboration_events_total',
+      {
+        description: 'Real-time collaboration lifecycle events',
+      },
+    );
 
     // AI Model Metrics
     this.aiModelRequests = this.meter.createCounter('maestro_ai_model_requests_total', {
@@ -369,6 +422,85 @@ export class IntelGraphMetrics {
 
   public updateActiveSessions(delta: number, sessionType: string = 'user'): void {
     this.activeSessions.add(delta, { type: sessionType });
+  }
+
+  public updateCollaborationSessions(
+    delta: number,
+    investigationId: string,
+    reason: string,
+  ): void {
+    this.collaborationSessions.add(delta, {
+      investigation_id: investigationId,
+      reason,
+    });
+  }
+
+  public updateCollaborationUsers(
+    delta: number,
+    investigationId: string,
+    reason: string,
+  ): void {
+    this.collaborationUsers.add(delta, {
+      investigation_id: investigationId,
+      reason,
+    });
+  }
+
+  public recordCollaborationConcurrency(
+    investigationId: string,
+    concurrentUsers: number,
+  ): void {
+    if (concurrentUsers <= 0) {
+      return;
+    }
+
+    this.collaborationConcurrency.record(concurrentUsers, {
+      investigation_id: investigationId,
+    });
+  }
+
+  public recordCollaborationEditLatency(
+    investigationId: string,
+    latencySeconds: number,
+    status: string,
+    entityId?: string,
+  ): void {
+    if (latencySeconds < 0) {
+      return;
+    }
+
+    this.collaborationLatency.record(latencySeconds, {
+      investigation_id: investigationId,
+      status,
+      entity_id: entityId || 'unknown',
+    });
+  }
+
+  public recordCollaborationConflict(
+    investigationId: string,
+    conflictCount: number,
+    entityId?: string,
+  ): void {
+    if (conflictCount <= 0) {
+      return;
+    }
+
+    this.collaborationConflicts.add(conflictCount, {
+      investigation_id: investigationId,
+      entity_id: entityId || 'unknown',
+    });
+  }
+
+  public recordCollaborationEvent(
+    eventType: string,
+    investigationId: string,
+    userId?: string,
+  ): void {
+    this.collaborationEvents.add(1, {
+      event_type: eventType,
+      investigation_id: investigationId,
+      user_id: userId || 'anonymous',
+    });
   }
 
   public async shutdown(): Promise<void> {
