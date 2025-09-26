@@ -3,7 +3,11 @@ import { useSafeQuery } from '../../hooks/useSafeQuery';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Link from '@mui/material/Link';
 
-export default function ResolverTop5() {
+interface ResolverTop5Props {
+  ariaDescribedBy?: string;
+}
+
+export default function ResolverTop5({ ariaDescribedBy }: ResolverTop5Props) {
   const { data } = useSafeQuery<{ parent: string; field: string; avgMs: number }[]>({
     queryKey: 'resolver_top5',
     mock: [
@@ -46,6 +50,8 @@ export default function ResolverTop5() {
   return (
     <div style={{ height: 320 }}>
       <DataGrid
+        aria-label="Top GraphQL resolvers sorted by latency"
+        aria-describedby={ariaDescribedBy}
         rows={(data || []).map((r, i) => ({ id: i, ...r }))}
         columns={cols}
         density="compact"

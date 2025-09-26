@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import cytoscape from 'cytoscape';
 import coseBilkent from 'cytoscape-cose-bilkent';
@@ -58,12 +58,99 @@ cytoscape.use(cola); // Register cola
 cytoscape.use(qtip); // Register qtip
 cytoscape.use(contextMenus); // Register context menus
 
+const srOnlyStyles = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)',
+  whiteSpace: 'nowrap',
+  border: 0,
+};
+
 const GraphVisualization = () => {
   const cyRef = useRef(null);
   const prevNodesRef = useRef([]);
   const prevEdgesRef = useRef([]);
   const graphData = useSelector((state) => state.graph);
   const dispatch = useDispatch();
+  const [focusedNodeId, setFocusedNodeId] = useState(null);
+  const [a11yStatus, setA11yStatus] = useState('Graph ready. Use arrow keys to move between nodes.');
+  const keyboardFocusIndexRef = useRef(0);
+
+  const updateFocusState = (node) => {
+    const cy = cyRef.current;
+    if (!cy || !node) return;
+    const nodesArray = cy.nodes().toArray();
+    const idx = nodesArray.findIndex((n) => n.id() === node.id());
+    keyboardFocusIndexRef.current = idx >= 0 ? idx : 0;
+    setFocusedNodeId(node.id());
+    const label = node.data('label') || node.id();
+    setA11yStatus(`Focused node ${label}.`);
+  };
+
+  const focusNode = (node) => {
+    const cy = cyRef.current;
+    if (!cy || !node) return;
+    cy.$('node:selected').unselect();
+    node.select();
+    cy.elements().removeClass('highlighted');
+    if (graphData.featureToggles.edgeHighlighting) {
+      node.connectedEdges().addClass('highlighted');
+    }
+    updateFocusState(node);
+    dispatch(setSelectedNode(node.id()));
+    cy.center(node);
+  };
+
+  const clearFocus = () => {
+    const cy = cyRef.current;
+    if (!cy) return;
+    cy.$('node:selected').unselect();
+    cy.elements().removeClass('highlighted');
+    setFocusedNodeId(null);
+    setA11yStatus('Selection cleared.');
+    dispatch(setSelectedNode(null));
+    dispatch(setSelectedEdge(null));
+  };
+
+  const handleGraphKeyDown = (event) => {
+    const cy = cyRef.current;
+    if (!cy) return;
+    const nodes = cy.nodes();
+    if (!nodes.length) return;
+
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      const nextIndex = (keyboardFocusIndexRef.current + 1) % nodes.length;
+      const nextNode = nodes[nextIndex];
+      focusNode(nextNode);
+      return;
+    }
+
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const prevIndex =
+        (keyboardFocusIndexRef.current - 1 + nodes.length) % nodes.length;
+      const prevNode = nodes[prevIndex];
+      focusNode(prevNode);
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      const currentNode = nodes[keyboardFocusIndexRef.current];
+      focusNode(currentNode);
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      clearFocus();
+    }
+  };
 
   useEffect(() => {
     if (!cyRef.current) {
@@ -85,8 +172,8 @@ const GraphVisualization = () => {
             selector: 'edge',
             style: {
               width: 3,
-              'line-color': '#ccc',
-              'target-arrow-color': '#ccc',
+              'line-color': '#6b7280',
+              'target-arrow-color': '#6b7280',
               'target-arrow-shape': 'triangle',
               'curve-style': 'bezier',
               opacity: 'data(confidence)', // Opacity based on confidence
@@ -95,12 +182,12 @@ const GraphVisualization = () => {
           {
             selector: 'node.selected',
             style: {
-              'background-color': '#FFD700', // Gold for selected node
-              'line-color': '#FFD700',
-              'target-arrow-color': '#FFD700',
-              'source-arrow-color': '#FFD700',
+              'background-color': '#c08500', // Gold for selected node with higher contrast
+              'line-color': '#c08500',
+              'target-arrow-color': '#c08500',
+              'source-arrow-color': '#c08500',
               'border-width': 2,
-              'border-color': '#FFD700',
+              'border-color': '#5b3a00',
             },
           },
           {
@@ -163,6 +250,7 @@ const GraphVisualization = () => {
       cy.on('tap', 'node', (evt) => {
         const node = evt.target;
         dispatch(setSelectedNode(node.id()));
+        updateFocusState(node);
 
         // Highlight connected edges
         cy.elements().removeClass('highlighted');
@@ -175,14 +263,17 @@ const GraphVisualization = () => {
         const edge = evt.target;
         dispatch(setSelectedEdge(edge.id()));
         cy.elements().removeClass('highlighted');
+        const label = edge.data('label') || edge.id();
+        setA11yStatus(`Selected edge ${label}.`);
       });
 
       cy.on('tap', (evt) => {
         if (evt.target === cy) {
           // Tapped on background
-          dispatch(setSelectedNode(null));
+          clearFocus();
           dispatch(setSelectedEdge(null));
           cy.elements().removeClass('highlighted');
+          setA11yStatus('Graph background focused.');
         }
       });
 
@@ -531,6 +622,40 @@ const GraphVisualization = () => {
     graphData.minConfidenceFilter,
     dispatch,
   ]);
+
+  useEffect(() => {
+    const cy = cyRef.current;
+    if (!cy) return;
+    const nodes = cy.nodes();
+    if (!nodes.length) {
+      setFocusedNodeId(null);
+      setA11yStatus('Graph contains no nodes.');
+      return;
+    }
+    if (!focusedNodeId) {
+      keyboardFocusIndexRef.current = 0;
+      setFocusedNodeId(nodes[0].id());
+    }
+  }, [graphData.nodes.length, focusedNodeId]);
+
+  useEffect(() => {
+    const cy = cyRef.current;
+    if (!cy || !graphData.selectedNode) return;
+    const node = cy.getElementById(graphData.selectedNode);
+    if (node && node.length) {
+      updateFocusState(node);
+    }
+  }, [graphData.selectedNode]);
+
+  useEffect(() => {
+    const cy = cyRef.current;
+    if (!cy || !graphData.selectedEdge) return;
+    const edge = cy.getElementById(graphData.selectedEdge);
+    if (edge && edge.length) {
+      const label = edge.data('label') || edge.id();
+      setA11yStatus(`Selected edge ${label}.`);
+    }
+  }, [graphData.selectedEdge]);
 
   const handleLayoutChange = (layoutName, options = {}) => {
     dispatch(setLayout({ name: layoutName, options }));
@@ -894,12 +1019,33 @@ const GraphVisualization = () => {
         <Typography>This is a message box animated with jQuery!</Typography>
       </Box>
       <Box sx={{ display: 'flex', flexGrow: 1 }}>
-        <Box id="cy" sx={{ flexGrow: 1, border: '1px solid #ddd' }}></Box>
+        <Box
+          id="cy"
+          sx={{ flexGrow: 1, border: '1px solid #ddd' }}
+          role="application"
+          tabIndex={0}
+          aria-label="Graph visualization canvas"
+          aria-describedby="graph-a11y-instructions graph-a11y-status"
+          aria-activedescendant={focusedNodeId ? `graph-node-${focusedNodeId}` : undefined}
+          onKeyDown={handleGraphKeyDown}
+        ></Box>
         <RbacSidePanel />
       </Box>
-      <Box sx={{ p: 2, borderTop: '1px solid #eee' }}>
-        <Typography>Selected Node: {graphData.selectedNode || 'None'}</Typography>
-        <Typography>Selected Edge: {graphData.selectedEdge || 'None'}</Typography>
+      <Box component="p" id="graph-a11y-instructions" sx={srOnlyStyles}>
+        Use arrow keys to navigate between graph nodes. Press Enter to focus a node and Escape to
+        clear the current selection.
+      </Box>
+      <Box component="ul" sx={srOnlyStyles}>
+        {graphData.nodes.map((node) => (
+          <li key={node.data.id} id={`graph-node-${node.data.id}`}>
+            {node.data.label || node.data.id}
+          </li>
+        ))}
+      </Box>
+      <Box sx={{ p: 2, borderTop: '1px solid #eee' }} id="graph-a11y-status" aria-live="polite">
+        <Typography variant="body2">{a11yStatus}</Typography>
+        <Typography variant="body2">Selected Node: {graphData.selectedNode || 'None'}</Typography>
+        <Typography variant="body2">Selected Edge: {graphData.selectedEdge || 'None'}</Typography>
       </Box>
       {graphData.isLoading && (
         <Box
