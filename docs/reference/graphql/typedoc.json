@@ -1,0 +1,964 @@
+{
+	"schemaVersion": "2.0",
+	"id": 0,
+	"name": "v24-coherence-server",
+	"variant": "project",
+	"kind": 1,
+	"flags": {},
+	"children": [
+		{
+			"id": 1,
+			"name": "index",
+			"variant": "declaration",
+			"kind": 2,
+			"flags": {},
+			"children": [
+				{
+					"id": 2,
+					"name": "mountGraphQL",
+					"variant": "declaration",
+					"kind": 64,
+					"flags": {},
+					"sources": [
+						{
+							"fileName": "index.ts",
+							"line": 16,
+							"character": 22
+						}
+					],
+					"signatures": [
+						{
+							"id": 3,
+							"name": "mountGraphQL",
+							"variant": "signature",
+							"kind": 4096,
+							"flags": {},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "Mount the primary GraphQL server on the provided Express application.\n\nThe Apollo instance is configured with schema extensions that expose\nauthorization-aware resolvers and contextual user metadata.  The\nresulting server is used both by production clients and internal\nautomation, so we centralise the setup here to make it visible to\nTypeDoc and the generated API reference."
+									}
+								]
+							},
+							"sources": [
+								{
+									"fileName": "index.ts",
+									"line": 16,
+									"character": 22
+								}
+							],
+							"parameters": [
+								{
+									"id": 4,
+									"name": "app",
+									"variant": "param",
+									"kind": 32768,
+									"flags": {},
+									"comment": {
+										"summary": [
+											{
+												"kind": "text",
+												"text": "Express application that should receive the "
+											},
+											{
+												"kind": "code",
+												"text": "`/graphql`"
+											},
+											{
+												"kind": "text",
+												"text": " route."
+											}
+										]
+									},
+									"type": {
+										"type": "intrinsic",
+										"name": "any"
+									}
+								}
+							],
+							"type": {
+								"type": "reference",
+								"target": {
+									"packageName": "typescript",
+									"packagePath": "lib/lib.es5.d.ts",
+									"qualifiedName": "Promise"
+								},
+								"typeArguments": [
+									{
+										"type": "intrinsic",
+										"name": "void"
+									}
+								],
+								"name": "Promise",
+								"package": "typescript"
+							}
+						}
+					]
+				}
+			],
+			"groups": [
+				{
+					"title": "Functions",
+					"children": [
+						2
+					]
+				}
+			],
+			"sources": [
+				{
+					"fileName": "index.ts",
+					"line": 1,
+					"character": 0
+				}
+			]
+		},
+		{
+			"id": 5,
+			"name": "resolvers",
+			"variant": "declaration",
+			"kind": 2,
+			"flags": {},
+			"children": [
+				{
+					"id": 6,
+					"name": "resolvers",
+					"variant": "declaration",
+					"kind": 32,
+					"flags": {
+						"isConst": true
+					},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "Root GraphQL resolvers for the Summit intelligence graph.\n\nThe resolver map exposes read, write and subscription capabilities for\ncoherence telemetry.  Each handler participates in policy enforcement and\nobservability so that API consumers receive consistent governance."
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "resolvers.ts",
+							"line": 22,
+							"character": 13
+						}
+					],
+					"type": {
+						"type": "reflection",
+						"declaration": {
+							"id": 7,
+							"name": "__type",
+							"variant": "declaration",
+							"kind": 65536,
+							"flags": {},
+							"children": [
+								{
+									"id": 8,
+									"name": "DateTime",
+									"variant": "declaration",
+									"kind": 1024,
+									"flags": {},
+									"sources": [
+										{
+											"fileName": "resolvers.ts",
+											"line": 23,
+											"character": 2
+										}
+									],
+									"type": {
+										"type": "intrinsic",
+										"name": "any"
+									},
+									"defaultValue": "..."
+								},
+								{
+									"id": 16,
+									"name": "Mutation",
+									"variant": "declaration",
+									"kind": 1024,
+									"flags": {},
+									"sources": [
+										{
+											"fileName": "resolvers.ts",
+											"line": 109,
+											"character": 2
+										}
+									],
+									"type": {
+										"type": "reflection",
+										"declaration": {
+											"id": 17,
+											"name": "__type",
+											"variant": "declaration",
+											"kind": 65536,
+											"flags": {},
+											"children": [
+												{
+													"id": 18,
+													"name": "publishCoherenceSignal",
+													"variant": "declaration",
+													"kind": 2048,
+													"flags": {},
+													"sources": [
+														{
+															"fileName": "resolvers.ts",
+															"line": 118,
+															"character": 10
+														}
+													],
+													"signatures": [
+														{
+															"id": 19,
+															"name": "publishCoherenceSignal",
+															"variant": "signature",
+															"kind": 4096,
+															"flags": {},
+															"comment": {
+																"summary": [
+																	{
+																		"kind": "text",
+																		"text": "Publish an updated coherence signal and notify subscribed clients."
+																	}
+																],
+																"blockTags": [
+																	{
+																		"tag": "@returns",
+																		"content": [
+																			{
+																				"kind": "code",
+																				"text": "`true`"
+																			},
+																			{
+																				"kind": "text",
+																				"text": " when the signal is accepted and emitted."
+																			}
+																		]
+																	}
+																]
+															},
+															"sources": [
+																{
+																	"fileName": "resolvers.ts",
+																	"line": 118,
+																	"character": 10
+																}
+															],
+															"parameters": [
+																{
+																	"id": 20,
+																	"name": "_",
+																	"variant": "param",
+																	"kind": 32768,
+																	"flags": {},
+																	"comment": {
+																		"summary": [
+																			{
+																				"kind": "text",
+																				"text": "Unused parent resolver value."
+																			}
+																		]
+																	},
+																	"type": {
+																		"type": "intrinsic",
+																		"name": "any"
+																	}
+																},
+																{
+																	"id": 21,
+																	"name": "args",
+																	"variant": "param",
+																	"kind": 32768,
+																	"flags": {},
+																	"comment": {
+																		"summary": [
+																			{
+																				"kind": "text",
+																				"text": "GraphQL arguments containing the signal payload."
+																			}
+																		]
+																	},
+																	"type": {
+																		"type": "intrinsic",
+																		"name": "any"
+																	}
+																},
+																{
+																	"id": 22,
+																	"name": "ctx",
+																	"variant": "param",
+																	"kind": 32768,
+																	"flags": {},
+																	"comment": {
+																		"summary": [
+																			{
+																				"kind": "text",
+																				"text": "Request context with the authenticated user and pubsub bus."
+																			}
+																		]
+																	},
+																	"type": {
+																		"type": "intrinsic",
+																		"name": "any"
+																	}
+																}
+															],
+															"type": {
+																"type": "reference",
+																"target": {
+																	"packageName": "typescript",
+																	"packagePath": "lib/lib.es5.d.ts",
+																	"qualifiedName": "Promise"
+																},
+																"typeArguments": [
+																	{
+																		"type": "intrinsic",
+																		"name": "boolean"
+																	}
+																],
+																"name": "Promise",
+																"package": "typescript"
+															}
+														}
+													]
+												}
+											],
+											"groups": [
+												{
+													"title": "Methods",
+													"children": [
+														18
+													]
+												}
+											],
+											"sources": [
+												{
+													"fileName": "resolvers.ts",
+													"line": 109,
+													"character": 12
+												}
+											]
+										}
+									},
+									"defaultValue": "..."
+								},
+								{
+									"id": 9,
+									"name": "Query",
+									"variant": "declaration",
+									"kind": 1024,
+									"flags": {},
+									"sources": [
+										{
+											"fileName": "resolvers.ts",
+											"line": 24,
+											"character": 2
+										}
+									],
+									"type": {
+										"type": "reflection",
+										"declaration": {
+											"id": 10,
+											"name": "__type",
+											"variant": "declaration",
+											"kind": 65536,
+											"flags": {},
+											"children": [
+												{
+													"id": 11,
+													"name": "tenantCoherence",
+													"variant": "declaration",
+													"kind": 2048,
+													"flags": {},
+													"sources": [
+														{
+															"fileName": "resolvers.ts",
+															"line": 35,
+															"character": 10
+														}
+													],
+													"signatures": [
+														{
+															"id": 12,
+															"name": "tenantCoherence",
+															"variant": "signature",
+															"kind": 4096,
+															"flags": {},
+															"comment": {
+																"summary": [
+																	{
+																		"kind": "text",
+																		"text": "Retrieve the coherence score for a tenant with policy-aware safeguards."
+																	}
+																],
+																"blockTags": [
+																	{
+																		"tag": "@returns",
+																		"content": [
+																			{
+																				"kind": "text",
+																				"text": "Redacted tenant coherence details when the caller is allowed\n  to access them."
+																			}
+																		]
+																	}
+																]
+															},
+															"sources": [
+																{
+																	"fileName": "resolvers.ts",
+																	"line": 35,
+																	"character": 10
+																}
+															],
+															"parameters": [
+																{
+																	"id": 13,
+																	"name": "_",
+																	"variant": "param",
+																	"kind": 32768,
+																	"flags": {},
+																	"comment": {
+																		"summary": [
+																			{
+																				"kind": "text",
+																				"text": "Unused parent resolver value."
+																			}
+																		]
+																	},
+																	"type": {
+																		"type": "intrinsic",
+																		"name": "any"
+																	}
+																},
+																{
+																	"id": 14,
+																	"name": "args",
+																	"variant": "param",
+																	"kind": 32768,
+																	"flags": {},
+																	"comment": {
+																		"summary": [
+																			{
+																				"kind": "text",
+																				"text": "GraphQL arguments, including the "
+																			},
+																			{
+																				"kind": "code",
+																				"text": "`tenantId`"
+																			},
+																			{
+																				"kind": "text",
+																				"text": " to inspect."
+																			}
+																		]
+																	},
+																	"type": {
+																		"type": "intrinsic",
+																		"name": "any"
+																	}
+																},
+																{
+																	"id": 15,
+																	"name": "ctx",
+																	"variant": "param",
+																	"kind": 32768,
+																	"flags": {},
+																	"comment": {
+																		"summary": [
+																			{
+																				"kind": "text",
+																				"text": "Request context that supplies the authenticated user and\n  policy purpose metadata."
+																			}
+																		]
+																	},
+																	"type": {
+																		"type": "intrinsic",
+																		"name": "any"
+																	}
+																}
+															],
+															"type": {
+																"type": "reference",
+																"target": {
+																	"packageName": "typescript",
+																	"packagePath": "lib/lib.es5.d.ts",
+																	"qualifiedName": "Promise"
+																},
+																"typeArguments": [
+																	{
+																		"type": "intrinsic",
+																		"name": "any"
+																	}
+																],
+																"name": "Promise",
+																"package": "typescript"
+															}
+														}
+													]
+												}
+											],
+											"groups": [
+												{
+													"title": "Methods",
+													"children": [
+														11
+													]
+												}
+											],
+											"sources": [
+												{
+													"fileName": "resolvers.ts",
+													"line": 24,
+													"character": 9
+												}
+											]
+										}
+									},
+									"defaultValue": "..."
+								},
+								{
+									"id": 23,
+									"name": "Subscription",
+									"variant": "declaration",
+									"kind": 1024,
+									"flags": {},
+									"sources": [
+										{
+											"fileName": "resolvers.ts",
+											"line": 146,
+											"character": 2
+										}
+									],
+									"type": {
+										"type": "reflection",
+										"declaration": {
+											"id": 24,
+											"name": "__type",
+											"variant": "declaration",
+											"kind": 65536,
+											"flags": {},
+											"children": [
+												{
+													"id": 25,
+													"name": "coherenceEvents",
+													"variant": "declaration",
+													"kind": 1024,
+													"flags": {},
+													"sources": [
+														{
+															"fileName": "resolvers.ts",
+															"line": 147,
+															"character": 4
+														}
+													],
+													"type": {
+														"type": "reflection",
+														"declaration": {
+															"id": 26,
+															"name": "__type",
+															"variant": "declaration",
+															"kind": 65536,
+															"flags": {},
+															"children": [
+																{
+																	"id": 27,
+																	"name": "subscribe",
+																	"variant": "declaration",
+																	"kind": 1024,
+																	"flags": {},
+																	"comment": {
+																		"summary": [
+																			{
+																				"kind": "text",
+																				"text": "Subscribe to new coherence events and record fan-out latency metrics."
+																			}
+																		]
+																	},
+																	"sources": [
+																		{
+																			"fileName": "resolvers.ts",
+																			"line": 155,
+																			"character": 6
+																		}
+																	],
+																	"type": {
+																		"type": "reflection",
+																		"declaration": {
+																			"id": 28,
+																			"name": "__type",
+																			"variant": "declaration",
+																			"kind": 65536,
+																			"flags": {},
+																			"sources": [
+																				{
+																					"fileName": "resolvers.ts",
+																					"line": 155,
+																					"character": 17
+																				}
+																			],
+																			"signatures": [
+																				{
+																					"id": 29,
+																					"name": "__type",
+																					"variant": "signature",
+																					"kind": 4096,
+																					"flags": {},
+																					"sources": [
+																						{
+																							"fileName": "resolvers.ts",
+																							"line": 155,
+																							"character": 17
+																						}
+																					],
+																					"parameters": [
+																						{
+																							"id": 30,
+																							"name": "_",
+																							"variant": "param",
+																							"kind": 32768,
+																							"flags": {},
+																							"comment": {
+																								"summary": [
+																									{
+																										"kind": "text",
+																										"text": "Unused parent resolver value."
+																									}
+																								]
+																							},
+																							"type": {
+																								"type": "intrinsic",
+																								"name": "any"
+																							}
+																						},
+																						{
+																							"id": 31,
+																							"name": "__",
+																							"variant": "param",
+																							"kind": 32768,
+																							"flags": {},
+																							"comment": {
+																								"summary": [
+																									{
+																										"kind": "text",
+																										"text": "Unused subscription arguments."
+																									}
+																								]
+																							},
+																							"type": {
+																								"type": "intrinsic",
+																								"name": "any"
+																							}
+																						},
+																						{
+																							"id": 32,
+																							"name": "ctx",
+																							"variant": "param",
+																							"kind": 32768,
+																							"flags": {},
+																							"comment": {
+																								"summary": [
+																									{
+																										"kind": "text",
+																										"text": "Request context containing the shared pubsub instance."
+																									}
+																								]
+																							},
+																							"type": {
+																								"type": "intrinsic",
+																								"name": "any"
+																							}
+																						}
+																					],
+																					"type": {
+																						"type": "reference",
+																						"target": {
+																							"packageName": "typescript",
+																							"packagePath": "lib/lib.es2018.asyncgenerator.d.ts",
+																							"qualifiedName": "AsyncGenerator"
+																						},
+																						"typeArguments": [
+																							{
+																								"type": "intrinsic",
+																								"name": "any"
+																							},
+																							{
+																								"type": "intrinsic",
+																								"name": "void"
+																							},
+																							{
+																								"type": "intrinsic",
+																								"name": "unknown"
+																							}
+																						],
+																						"name": "AsyncGenerator",
+																						"package": "typescript"
+																					}
+																				}
+																			]
+																		}
+																	},
+																	"defaultValue": "..."
+																}
+															],
+															"groups": [
+																{
+																	"title": "Properties",
+																	"children": [
+																		27
+																	]
+																}
+															],
+															"sources": [
+																{
+																	"fileName": "resolvers.ts",
+																	"line": 147,
+																	"character": 21
+																}
+															]
+														}
+													},
+													"defaultValue": "..."
+												}
+											],
+											"groups": [
+												{
+													"title": "Properties",
+													"children": [
+														25
+													]
+												}
+											],
+											"sources": [
+												{
+													"fileName": "resolvers.ts",
+													"line": 146,
+													"character": 16
+												}
+											]
+										}
+									},
+									"defaultValue": "..."
+								}
+							],
+							"groups": [
+								{
+									"title": "Properties",
+									"children": [
+										8,
+										16,
+										9,
+										23
+									]
+								}
+							],
+							"sources": [
+								{
+									"fileName": "resolvers.ts",
+									"line": 22,
+									"character": 25
+								}
+							]
+						}
+					},
+					"defaultValue": "..."
+				}
+			],
+			"groups": [
+				{
+					"title": "Variables",
+					"children": [
+						6
+					]
+				}
+			],
+			"sources": [
+				{
+					"fileName": "resolvers.ts",
+					"line": 1,
+					"character": 0
+				}
+			]
+		}
+	],
+	"groups": [
+		{
+			"title": "Modules",
+			"children": [
+				1,
+				5
+			]
+		}
+	],
+	"packageName": "v24-coherence-server",
+	"symbolIdMap": {
+		"1": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/index.ts",
+			"qualifiedName": ""
+		},
+		"2": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/index.ts",
+			"qualifiedName": "mountGraphQL"
+		},
+		"3": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/index.ts",
+			"qualifiedName": "mountGraphQL"
+		},
+		"4": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/index.ts",
+			"qualifiedName": "app"
+		},
+		"5": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": ""
+		},
+		"6": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "resolvers"
+		},
+		"7": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object"
+		},
+		"8": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object.DateTime"
+		},
+		"9": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object.Query"
+		},
+		"10": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object"
+		},
+		"11": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object.tenantCoherence"
+		},
+		"12": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object.tenantCoherence"
+		},
+		"13": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "_"
+		},
+		"14": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__1"
+		},
+		"15": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "ctx"
+		},
+		"16": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object.Mutation"
+		},
+		"17": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object"
+		},
+		"18": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object.publishCoherenceSignal"
+		},
+		"19": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object.publishCoherenceSignal"
+		},
+		"20": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "_"
+		},
+		"21": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__1"
+		},
+		"22": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "ctx"
+		},
+		"23": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object.Subscription"
+		},
+		"24": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object"
+		},
+		"25": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object.coherenceEvents"
+		},
+		"26": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object"
+		},
+		"27": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__object.subscribe"
+		},
+		"28": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__function"
+		},
+		"29": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__function"
+		},
+		"30": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "_"
+		},
+		"31": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "__"
+		},
+		"32": {
+			"packageName": "v24-coherence-server",
+			"packagePath": "src/graphql/resolvers.ts",
+			"qualifiedName": "ctx"
+		}
+	},
+	"files": {
+		"entries": {
+			"1": "server/src/graphql/index.ts",
+			"2": "server/src/graphql/resolvers.ts"
+		},
+		"reflections": {
+			"1": 1,
+			"2": 5
+		}
+	}
+}

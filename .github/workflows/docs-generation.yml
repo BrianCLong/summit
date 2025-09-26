@@ -1,0 +1,55 @@
+name: docs-generation
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate GraphQL docs with TypeDoc
+        run: pnpm dlx typedoc --options typedoc.graphql.json
+
+      - name: Render Markdown reference
+        run: node scripts/docs/render-graphql-reference.mjs
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Sphinx dependencies
+        run: pip install -r docs/python/requirements.txt
+
+      - name: Build Python ML docs
+        run: python -m sphinx -b markdown docs/python docs/reference/python
+
+      - name: Commit updated docs
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'docs: update generated API documentation'
+          file_pattern: docs/reference/**/*

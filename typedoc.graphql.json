@@ -1,0 +1,16 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "tsconfig": "server/tsconfig.json",
+  "entryPoints": [
+    "server/src/graphql/index.ts",
+    "server/src/graphql/resolvers.ts"
+  ],
+  "out": "docs/reference/graphql/.html",
+  "json": "docs/reference/graphql/typedoc.json",
+  "categorizeByGroup": false,
+  "hideGenerator": true,
+  "excludePrivate": true,
+  "cleanOutputDir": true,
+  "skipErrorChecking": true,
+  "readme": "none"
+}
