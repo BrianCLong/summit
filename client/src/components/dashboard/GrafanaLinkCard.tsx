@@ -1,7 +1,15 @@
 import React from 'react';
 import { Card, CardContent, Typography, Button, Stack } from '@mui/material';
 
-export default function GrafanaLinkCard() {
+export type GrafanaLinkCardProps = {
+  onGrafanaClick?: () => void;
+  onJaegerClick?: () => void;
+};
+
+export default function GrafanaLinkCard({
+  onGrafanaClick,
+  onJaegerClick,
+}: GrafanaLinkCardProps = {}) {
   const isDev = import.meta.env.DEV;
   if (!isDev) return null;
   const grafana = import.meta.env.VITE_GRAFANA_URL || 'http://localhost:3000';
@@ -14,10 +22,22 @@ export default function GrafanaLinkCard() {
           Quick links to Grafana and Jaeger for live metrics and traces.
         </Typography>
         <Stack direction="row" spacing={2}>
-          <Button href={grafana} target="_blank" rel="noreferrer" variant="contained">
+          <Button
+            href={grafana}
+            target="_blank"
+            rel="noreferrer"
+            variant="contained"
+            onClick={() => onGrafanaClick?.()}
+          >
             Open Grafana
           </Button>
-          <Button href={jaeger} target="_blank" rel="noreferrer" variant="outlined">
+          <Button
+            href={jaeger}
+            target="_blank"
+            rel="noreferrer"
+            variant="outlined"
+            onClick={() => onJaegerClick?.()}
+          >
             Open Jaeger
           </Button>
         </Stack>
