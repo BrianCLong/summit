@@ -1,0 +1,208 @@
+# MC Platform v0.3.3 - Egress Gateway Configuration
+# Routes all LLM traffic via NAT gateway with CIDR restrictions
+
+# Egress Gateway Configuration
+egressGateway:
+  enabled: true
+
+  # Primary gateway configuration
+  primary:
+    host: "egress-gateway-primary.internal.example.com"
+    port: 8080
+    cidr: "10.100.0.0/24"
+
+  # Secondary gateway for failover
+  secondary:
+    host: "egress-gateway-secondary.internal.example.com"
+    port: 8080
+    cidr: "10.100.1.0/24"
+
+  # Health check configuration
+  healthCheck:
+    enabled: true
+    interval: 30s
+    timeout: 10s
+    failureThreshold: 3
+    successThreshold: 2
+    path: "/health"
+
+  # Failover settings
+  failover:
+    enabled: true
+    detectionWindow: "2m"
+    switchThreshold: 3
+    backoffDuration: "5m"
+
+# NetworkPolicy egress rules (gateway-only)
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Egress
+
+  # Custom egress rules for gateway mode
+  customEgressRules:
+    # Allow egress to primary gateway
+    - to:
+        - ipBlock:
+            cidr: "10.100.0.0/24"
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 443
+
+    # Allow egress to secondary gateway
+    - to:
+        - ipBlock:
+            cidr: "10.100.1.0/24"
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 443
+
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    # Allow internal service mesh
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15001
+
+    # BLOCK: Direct LLM provider access (commented for reference)
+    # - to:
+    #     - ipBlock:
+    #         cidr: "20.0.0.0/8"        # OpenAI
+    #   ports:
+    #     - protocol: TCP
+    #       port: 443
+    # - to:
+    #     - ipBlock:
+    #         cidr: "54.230.0.0/15"     # Anthropic
+    #   ports:
+    #     - protocol: TCP
+    #       port: 443
+
+# Environment variables for gateway routing
+env:
+  # Gateway routing configuration
+  EGRESS_GATEWAY_MODE: "enabled"
+  EGRESS_GATEWAY_PRIMARY_URL: "http://egress-gateway-primary.internal.example.com:8080"
+  EGRESS_GATEWAY_SECONDARY_URL: "http://egress-gateway-secondary.internal.example.com:8080"
+
+  # Health check settings
+  EGRESS_GATEWAY_HEALTH_CHECK_INTERVAL: "30s"
+  EGRESS_GATEWAY_HEALTH_CHECK_TIMEOUT: "10s"
+  EGRESS_GATEWAY_FAILOVER_THRESHOLD: "3"
+
+  # LLM provider routing (via gateway)
+  OPENAI_BASE_URL: "http://egress-gateway-primary.internal.example.com:8080/openai"
+  ANTHROPIC_BASE_URL: "http://egress-gateway-primary.internal.example.com:8080/anthropic"
+  GOOGLE_AI_BASE_URL: "http://egress-gateway-primary.internal.example.com:8080/google"
+
+  # Fallback URLs (secondary gateway)
+  OPENAI_FALLBACK_URL: "http://egress-gateway-secondary.internal.example.com:8080/openai"
+  ANTHROPIC_FALLBACK_URL: "http://egress-gateway-secondary.internal.example.com:8080/anthropic"
+  GOOGLE_AI_FALLBACK_URL: "http://egress-gateway-secondary.internal.example.com:8080/google"
+
+# Service configuration
+service:
+  type: ClusterIP
+  annotations:
+    # Add service mesh annotations for egress gateway
+    sidecar.istio.io/inject: "true"
+    traffic.sidecar.istio.io/includeOutboundIPRanges: "10.100.0.0/23"
+
+# Deployment configuration
+deployment:
+  annotations:
+    # Force pod restart on config changes
+    configmap.reloader.stakater.com/reload: "agent-workbench-config"
+
+  # Add readiness probe for gateway connectivity
+  readinessProbe:
+    httpGet:
+      path: /health/egress
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 3
+
+# ConfigMap for gateway configuration
+configMap:
+  data:
+    egress-gateway-config.yaml: |
+      egress:
+        mode: gateway
+        primary_gateway: "egress-gateway-primary.internal.example.com:8080"
+        secondary_gateway: "egress-gateway-secondary.internal.example.com:8080"
+        health_check_interval: 30
+        failover_threshold: 3
+        providers:
+          openai:
+            gateway_path: "/openai"
+            original_host: "api.openai.com"
+            backup_enabled: true
+          anthropic:
+            gateway_path: "/anthropic"
+            original_host: "api.anthropic.com"
+            backup_enabled: true
+          google:
+            gateway_path: "/google"
+            original_host: "generativelanguage.googleapis.com"
+            backup_enabled: true
+
+# Monitoring configuration
+monitoring:
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      app.kubernetes.io/component: egress-gateway
+
+    # Add egress gateway specific metrics
+    endpoints:
+      - port: http
+        interval: 30s
+        path: /metrics
+        metricRelabelings:
+          - sourceLabels: [__name__]
+            regex: 'egress_gateway_.*'
+            targetLabel: 'metric_type'
+            replacement: 'egress_gateway'
+
+# Additional resources for egress gateway mode
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Security context (unchanged)
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 65534
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
