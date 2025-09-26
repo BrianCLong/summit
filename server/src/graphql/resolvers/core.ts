@@ -4,13 +4,13 @@
  */
 
 import { GraphQLScalarType, Kind } from 'graphql';
-import { EntityRepo } from '../../repos/EntityRepo.js';
-import { RelationshipRepo } from '../../repos/RelationshipRepo.js';
-import { InvestigationRepo } from '../../repos/InvestigationRepo.js';
-import { getNeo4jDriver } from '../../db/neo4j.js';
-import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../config/logger.js';
 import { z } from 'zod';
+import {
+  entityRepo,
+  relationshipRepo,
+  investigationRepo,
+} from '../context/repositories.js';
 
 const resolverLogger = logger.child({ name: 'CoreResolvers' });
 
@@ -19,14 +19,14 @@ const EntityInputZ = z.object({
   tenantId: z.string().min(1),
   kind: z.string().min(1),
   labels: z.array(z.string()).default([]),
-  props: z.record(z.any()).default({}),
+  props: z.record(z.string(), z.any()).default({}),
   investigationId: z.string().uuid().optional(),
 });
 
 const EntityUpdateZ = z.object({
   id: z.string().uuid(),
   labels: z.array(z.string()).optional(),
-  props: z.record(z.any()).optional(),
+  props: z.record(z.string(), z.any()).optional(),
 });
 
 const RelationshipInputZ = z.object({
@@ -34,16 +34,9 @@ const RelationshipInputZ = z.object({
   srcId: z.string().uuid(),
   dstId: z.string().uuid(),
   type: z.string().min(1),
-  props: z.record(z.any()).default({}),
+  props: z.record(z.string(), z.any()).default({}),
   investigationId: z.string().uuid().optional(),
 });
-
-// Initialize repositories
-const pg = getPostgresPool();
-const neo4j = getNeo4jDriver();
-const entityRepo = new EntityRepo(pg, neo4j);
-const relationshipRepo = new RelationshipRepo(pg, neo4j);
-const investigationRepo = new InvestigationRepo(pg);
 
 // Custom scalars
 const DateTimeScalar = new GraphQLScalarType({
@@ -384,20 +377,35 @@ export const coreResolvers = {
       };
     },
 
-    investigation: async (parent: any) => {
+    investigation: async (parent: any, _args: unknown, context: any) => {
       const investigationId = parent.props?.investigationId;
       if (!investigationId) return null;
+
+      const loader = context?.loaders?.investigationById;
+      if (loader) {
+        return loader.load({ id: investigationId, tenantId: parent.tenantId });
+      }
 
       return await investigationRepo.findById(investigationId, parent.tenantId);
     },
   },
 
   Relationship: {
-    source: async (parent: any) => {
+    source: async (parent: any, _args: unknown, context: any) => {
+      const loader = context?.loaders?.entityById;
+      if (loader) {
+        return loader.load({ id: parent.srcId, tenantId: parent.tenantId });
+      }
+
       return await entityRepo.findById(parent.srcId, parent.tenantId);
     },
 
-    destination: async (parent: any) => {
+    destination: async (parent: any, _args: unknown, context: any) => {
+      const loader = context?.loaders?.entityById;
+      if (loader) {
+        return loader.load({ id: parent.dstId, tenantId: parent.tenantId });
+      }
+
       return await entityRepo.findById(parent.dstId, parent.tenantId);
     },
   },
