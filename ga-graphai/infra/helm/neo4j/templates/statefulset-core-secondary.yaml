@@ -1,0 +1,119 @@
+{{- $root := . }}
+{{- range $index, $region := .Values.regions.secondary }}
+{{- if gt (int $region.coreReplicas) 0 }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "neo4j.fullname" $root }}-core-{{ $region.name | lower | replace "_" "-" }}
+  labels:
+    {{- include "neo4j.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: core
+    summit.slo/region: {{ $region.name | quote }}
+  annotations:
+    replication.summit.sh/role: core-secondary
+    replication.summit.sh/region: {{ $region.name | quote }}
+spec:
+  serviceName: {{ include "neo4j.fullname" $root }}-discovery
+  replicas: {{ $region.coreReplicas }}
+  selector:
+    matchLabels:
+      {{- include "neo4j.matchLabels" (dict "root" $root "component" "core") | nindent 6 }}
+      summit.slo/region: {{ $region.name | quote }}
+  template:
+    metadata:
+      labels:
+        {{- include "neo4j.matchLabels" (dict "root" $root "component" "core") | nindent 8 }}
+        summit.slo/region: {{ $region.name | quote }}
+      annotations:
+        replication.summit.sh/region: {{ $region.name | quote }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - {{ $region.name }}
+        {{- with $root.Values.extraAffinity }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- if $root.Values.tolerations }}
+      tolerations:
+        {{- range $root.Values.tolerations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: neo4j
+          image: {{ $root.Values.image.repository }}:{{ $root.Values.image.tag }}
+          imagePullPolicy: {{ $root.Values.image.pullPolicy }}
+          ports:
+            - name: bolt
+              containerPort: {{ $root.Values.service.bolt.port }}
+            - name: http
+              containerPort: {{ $root.Values.service.http.port }}
+            - name: discovery
+              containerPort: {{ $root.Values.service.discovery.port }}
+          env:
+            - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
+              value: "yes"
+            - name: NEO4J_CONF
+              value: /conf/neo4j.conf
+            - name: NEO4J_dbms_mode
+              value: CORE
+            - name: NEO4J_causal__clustering_expected__core__cluster__size
+              value: {{ include "neo4j.totalCores" $root | quote }}
+            - name: NEO4J_causal__clustering_kubernetes_service__name
+              value: {{ include "neo4j.fullname" $root }}-discovery
+            - name: NEO4J_causal__clustering_kubernetes_service__namespace
+              value: {{ $root.Release.Namespace }}
+            - name: NEO4J_causal__clustering_kubernetes_label__selector
+              value: app.kubernetes.io/component=core,app.kubernetes.io/instance={{ $root.Release.Name }}
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: NEO4J_causal__clustering_discovery__advertised__address
+              value: $(POD_NAME).{{ include "neo4j.fullname" $root }}-discovery:{{ $root.Values.service.discovery.port }}
+            - name: NEO4J_causal__clustering_transaction__advertised__address
+              value: $(POD_IP):{{ $root.Values.service.bolt.port }}
+            - name: NEO4J_dbms_default__advertised__address
+              value: $(POD_IP)
+          {{- if $root.Values.auth.enabled }}
+          envFrom:
+            - secretRef:
+                name: {{ if $root.Values.auth.existingSecret }}{{ $root.Values.auth.existingSecret }}{{ else }}{{ include "neo4j.fullname" $root }}-auth{{ end }}
+          {{- end }}
+          resources:
+            {{- toYaml $root.Values.coreResources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "neo4j.fullname" $root }}-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        annotations:
+          replication.summit.sh/tier: core
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: {{ $root.Values.storage.className | quote }}
+        resources:
+          requests:
+            storage: {{ $root.Values.storage.size | quote }}
+---
+{{- end }}
+{{- end }}
