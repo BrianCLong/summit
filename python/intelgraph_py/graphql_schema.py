@@ -1,12 +1,18 @@
 import strawberry
+from dataclasses import asdict
 from typing import List, Dict, Any, Optional
 from intelgraph_py.analytics.explainability_engine import (
     ExplanationOutput,
     generate_explanation,
 )
 from intelgraph_py.analytics.link_suggestions import generate_link_suggestions
-from intelgraph_py.tasks import generate_explanation_task
-from intelgraph_py.models import ExplanationTaskResult
+from intelgraph_py.tasks import generate_explanation_task, run_federated_training_job
+from intelgraph_py.models import (
+    ExplanationTaskResult,
+    ExplanationFeedback,
+    LLMSettings,
+    FederatedTrainingJob,
+)
 from intelgraph_py.database import get_db
 from sqlalchemy.orm import Session
 
@@ -70,6 +76,59 @@ class LLMSettingsInput:
     max_tokens: int = 500
     is_active: bool = False
 
+
+@strawberry.type
+class FederatedTrainingJobType:
+    id: int
+    job_name: str = strawberry.field(name="jobName")
+    status: str
+    config: strawberry.scalars.JSON
+    metrics: Optional[strawberry.scalars.JSON] = None
+    privacy_budget: Optional[strawberry.scalars.JSON] = strawberry.field(
+        default=None, name="privacyBudget"
+    )
+    error: Optional[str] = None
+    rounds_completed: Optional[int] = strawberry.field(
+        default=None, name="roundsCompleted"
+    )
+    created_at: Optional[str] = strawberry.field(default=None, name="createdAt")
+    updated_at: Optional[str] = strawberry.field(default=None, name="updatedAt")
+
+
+@strawberry.input
+class FederatedTrainingConfigInput:
+    rounds: int = 5
+    clients_per_round: int = strawberry.field(default=2, name="clientsPerRound")
+    batch_size: int = strawberry.field(default=16, name="batchSize")
+    client_learning_rate: float = strawberry.field(default=0.05, name="clientLearningRate")
+    server_learning_rate: float = strawberry.field(default=1.0, name="serverLearningRate")
+    noise_multiplier: float = strawberry.field(default=1.1, name="noiseMultiplier")
+    clipping_norm: float = strawberry.field(default=1.0, name="clippingNorm")
+    delta: float = 1e-5
+    target_accuracy: Optional[float] = strawberry.field(default=None, name="targetAccuracy")
+
+
+@strawberry.input
+class FederatedClientInput:
+    client_id: str = strawberry.field(name="clientId")
+    path: Optional[str] = None
+    records: List[strawberry.scalars.JSON] = strawberry.field(default_factory=list)
+
+
+def _to_graphql_job(job: FederatedTrainingJob) -> FederatedTrainingJobType:
+    return FederatedTrainingJobType(
+        id=job.id,
+        job_name=job.job_name,
+        status=job.status,
+        config=job.config,
+        metrics=job.metrics,
+        privacy_budget=job.privacy_budget,
+        error=job.error,
+        rounds_completed=job.rounds_completed,
+        created_at=job.created_at.isoformat() if getattr(job, "created_at", None) else None,
+        updated_at=job.updated_at.isoformat() if getattr(job, "updated_at", None) else None,
+    )
+
 @strawberry.type
 class Query:
     @strawberry.field
@@ -98,6 +157,15 @@ class Query:
             settings = db.query(LLMSettings).all()
         db.close()
         return settings
+
+    @strawberry.field
+    async def get_federated_training_job(self, job_id: int) -> FederatedTrainingJobType:
+        db: Session = next(get_db())
+        job = db.query(FederatedTrainingJob).filter(FederatedTrainingJob.id == job_id).first()
+        db.close()
+        if not job:
+            raise Exception("Job not found")
+        return _to_graphql_job(job)
 
     @strawberry.field
     async def link_suggestions(
@@ -151,6 +219,43 @@ class Mutation:
         except Exception as e:
             print(f"Error submitting feedback: {e}")
             return False
+        finally:
+            db.close()
+
+    @strawberry.mutation
+    async def start_federated_training_job(
+        self,
+        job_name: str,
+        config: FederatedTrainingConfigInput,
+        clients: List[FederatedClientInput],
+    ) -> FederatedTrainingJobType:
+        if not clients:
+            raise Exception("At least one federated client must be provided")
+
+        client_entries: List[Dict[str, Any]] = []
+        for client in clients:
+            entry: Dict[str, Any] = {"client_id": client.client_id}
+            if client.path:
+                entry["path"] = client.path
+            if client.records:
+                entry["records"] = client.records
+            if "path" not in entry and "records" not in entry:
+                raise Exception("Each federated client requires a path or inline records")
+            client_entries.append(entry)
+
+        db: Session = next(get_db())
+        try:
+            job = FederatedTrainingJob(
+                job_name=job_name,
+                status="PENDING",
+                config={"training": asdict(config), "clients": client_entries},
+            )
+            db.add(job)
+            db.commit()
+            db.refresh(job)
+
+            run_federated_training_job.delay(job.id)
+            return _to_graphql_job(job)
         finally:
             db.close()
 
