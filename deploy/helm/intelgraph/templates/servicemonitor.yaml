@@ -133,4 +133,35 @@ spec:
           annotations:
             summary: "IntelGraph container CPU throttling"
             description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is being CPU throttled"
+
+        # GPU telemetry alerts
+        - alert: IntelGraphGpuTelemetryMissing
+          expr: |
+            avg_over_time(ml_engine_gpu_telemetry_available{job=~".*ml-engine.*"}[5m]) < 0.5
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "ML Engine GPU telemetry is unavailable"
+            description: "Prometheus has not received GPU metrics for job {{ $labels.job }}"
+
+        - alert: IntelGraphGpuUtilizationHigh
+          expr: |
+            max_over_time(ml_engine_gpu_utilisation_percent{job=~".*ml-engine.*"}[5m]) > 90
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "ML Engine GPU utilisation is saturated"
+            description: "GPU utilisation exceeded 90% for job {{ $labels.job }}"
+
+        - alert: IntelGraphGpuMemoryPressure
+          expr: |
+            max_over_time(ml_engine_gpu_memory_utilisation_percent{job=~".*ml-engine.*"}[5m]) > 90
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "ML Engine GPU memory usage is high"
+            description: "GPU memory utilisation exceeded 90% for job {{ $labels.job }}"
 {{- end }}

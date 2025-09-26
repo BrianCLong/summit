@@ -4,13 +4,24 @@ Sentence Transformer Encoder for Entity Resolution
 Provides semantic embeddings for entity matching using pre-trained models
 """
 
-import numpy as np
-from sentence_transformers import SentenceTransformer
 import json
-import sys
 import logging
-from typing import List, Optional
+import os
+import statistics
+import sys
+import time
+from typing import Dict, List, Optional
+
+import numpy as np
 import torch
+from sentence_transformers import SentenceTransformer
+
+from gpu_utils import (
+    GPUDeviceInfo,
+    collect_gpu_telemetry,
+    log_available_gpus,
+    resolve_device,
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,7 +32,12 @@ class SentenceEncoder:
     Wrapper for sentence transformer models optimized for entity resolution
     """
     
-    def __init__(self, model_name: str = 'all-MiniLM-L6-v2'):
+    def __init__(
+        self,
+        model_name: str = 'all-MiniLM-L6-v2',
+        device_preference: Optional[str] = None,
+        use_half_precision: Optional[bool] = None,
+    ):
         """
         Initialize the sentence encoder with a pre-trained model
         
@@ -30,7 +46,17 @@ class SentenceEncoder:
         """
         self.model_name = model_name
         self.model: Optional[SentenceTransformer] = None
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.device_info: Optional[GPUDeviceInfo]
+        self.device, self.device_info = resolve_device(device_preference)
+        if use_half_precision is not None:
+            self.use_half_precision = use_half_precision
+        else:
+            half_precision_env = os.getenv('GPU_HALF_PRECISION', 'true').lower()
+            self.use_half_precision = (
+                half_precision_env in {'true', '1', 'yes'} and self.device.startswith('cuda')
+            )
+
+        log_available_gpus()
         
         try:
             self._load_model()
@@ -41,12 +67,28 @@ class SentenceEncoder:
     
     def _load_model(self) -> None:
         """Load the sentence transformer model"""
-        self.model = SentenceTransformer(self.model_name, device=self.device)
-        
-        # Optimize for inference
+        logger.info(
+            "Loading sentence transformer model %s on device %s",
+            self.model_name,
+            self.device,
+        )
+
+        self.model = SentenceTransformer(
+            self.model_name,
+            device=self.device,
+            cache_folder=os.getenv('MODEL_CACHE_DIR'),
+        )
+
+        # Optimisations for inference workloads
         self.model.eval()
-        if self.device == 'cuda':
-            self.model.half()  # Use half precision on GPU for speed
+        if self.device.startswith('cuda'):
+            torch.backends.cudnn.benchmark = True
+            if self.use_half_precision:
+                self.model.half()
+            torch.cuda.empty_cache()
+
+        # Run a short warm-up to avoid measuring lazy initialisation
+        self._warmup()
     
     def encode(self, texts: List[str], batch_size: int = 32) -> np.ndarray:
         """
@@ -63,24 +105,49 @@ class SentenceEncoder:
             raise RuntimeError("Model not initialized")
         
         try:
-            # Clean and preprocess texts
             cleaned_texts = [self._preprocess_text(text) for text in texts]
-            
-            # Generate embeddings
-            embeddings = self.model.encode(
-                cleaned_texts,
-                batch_size=batch_size,
-                show_progress_bar=len(texts) > 100,
-                convert_to_numpy=True,
-                normalize_embeddings=True  # L2 normalization for cosine similarity
+
+            start = time.perf_counter()
+            with torch.inference_mode():
+                if self.device.startswith('cuda') and self.use_half_precision:
+                    with torch.autocast(device_type='cuda', dtype=torch.float16):
+                        embeddings = self.model.encode(
+                            cleaned_texts,
+                            batch_size=batch_size,
+                            show_progress_bar=len(texts) > 100,
+                            convert_to_numpy=True,
+                            normalize_embeddings=True,
+                        )
+                else:
+                    embeddings = self.model.encode(
+                        cleaned_texts,
+                        batch_size=batch_size,
+                        show_progress_bar=len(texts) > 100,
+                        convert_to_numpy=True,
+                        normalize_embeddings=True,
+                    )
+            duration_ms = (time.perf_counter() - start) * 1000
+
+            logger.info(
+                "Generated embeddings for %s texts (shape=%s) in %.2f ms on %s",
+                len(texts),
+                embeddings.shape,
+                duration_ms,
+                self.device,
             )
-            
-            logger.info(f"Generated embeddings for {len(texts)} texts, shape: {embeddings.shape}")
+
+            telemetry = self.gpu_telemetry()
+            if telemetry:
+                logger.debug("GPU telemetry after encode: %s", telemetry)
+
             return embeddings
-            
+
         except Exception as e:
             logger.error(f"Error encoding texts: {e}")
             raise
+        finally:
+            if self.device.startswith('cuda'):
+                torch.cuda.synchronize()
     
     def encode_single(self, text: str) -> np.ndarray:
         """
@@ -138,6 +205,65 @@ class SentenceEncoder:
         results = [(idx, float(similarities[idx])) for idx in top_indices]
         
         return results
+
+    def benchmark(
+        self,
+        texts: List[str],
+        runs: int = 5,
+        warmup_runs: int = 2,
+        batch_size: int = 32,
+    ) -> Dict[str, float]:
+        """Benchmark inference throughput for the provided texts."""
+
+        durations: List[float] = []
+
+        for _ in range(warmup_runs):
+            self.encode(texts, batch_size=batch_size)
+
+        for _ in range(runs):
+            start = time.perf_counter()
+            self.encode(texts, batch_size=batch_size)
+            durations.append((time.perf_counter() - start) * 1000)
+
+        telemetry = self.gpu_telemetry() or {}
+
+        return {
+            'device': self.device,
+            'runs': runs,
+            'batchSize': batch_size,
+            'medianMs': statistics.median(durations),
+            'p95Ms': float(np.percentile(durations, 95)),
+            'meanMs': statistics.fmean(durations),
+            'stdevMs': statistics.pstdev(durations),
+            'telemetry': telemetry,
+        }
+
+    def gpu_telemetry(self) -> Optional[Dict[str, float]]:
+        """Return telemetry for the active GPU, if applicable."""
+
+        if not self.device.startswith('cuda') or self.device_info is None:
+            return None
+
+        telemetry = collect_gpu_telemetry(self.device_info.index) or {}
+        telemetry.update(
+            {
+                'name': self.device_info.name,
+                'totalMemoryMb': self.device_info.total_memory_mb,
+            }
+        )
+        return telemetry
+
+    def _warmup(self) -> None:
+        """Execute a light-weight warm-up pass to prime the runtime."""
+
+        try:
+            sample_texts = [
+                "IntelGraph accelerates intelligence fusion.",
+                "Entity resolution benefits from semantic embeddings.",
+            ]
+            self.encode(sample_texts, batch_size=2)
+        except Exception as exc:
+            logger.debug("Warm-up failed (non-fatal): %s", exc)
     
     def _preprocess_text(self, text: str) -> str:
         """
