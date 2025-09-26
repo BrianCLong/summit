@@ -79,6 +79,12 @@ make check-tools      # Verify tool installation
 make status           # Show environment status
 ```
 
+## 📚 API Documentation
+
+- Generate the latest GraphQL documentation bundle with `pnpm docs:api`.
+- Open `docs/api/index.html` in a browser to explore the interactive Swagger UI snapshot.
+- The command also writes reusable artifacts (`docs/api/swagger.json`, `docs/api/swagger.yaml`, and `docs/api/schema.graphql`) for downstream tooling or platform integrations.
+
 ## 🧪 Testing
 
 The platform includes comprehensive testing:

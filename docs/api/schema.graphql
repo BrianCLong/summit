@@ -1,0 +1,918 @@
+scalar JSON
+  scalar DateTime
+
+  type Query {
+    _empty: String
+  }
+
+  type Mutation {
+    _empty: String
+  }
+
+  type Subscription {
+    _empty: String
+  }
+
+scalar DateTime
+  scalar JSON
+
+  type HealthStatus {
+    status: String!
+    timestamp: DateTime!
+    version: String!
+    environment: String!
+    services: [ServiceHealth!]!
+  }
+
+  type ServiceHealth {
+    name: String!
+    status: String!
+    details: JSON
+  }
+
+  extend type Query {
+    health: HealthStatus!
+  }
+
+scalar DateTime
+  scalar JSON
+
+  # Core entity types
+  type Entity {
+    id: ID!
+    tenantId: String!
+    kind: String!
+    labels: [String!]!
+    props: JSON!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    createdBy: String!
+
+    # Graph relationships
+    relationships(
+      direction: RelationshipDirection = BOTH
+      type: String
+      limit: Int = 100
+    ): [Relationship!]!
+    relationshipCount: RelationshipCount!
+
+    # Investigation context (if entity belongs to an investigation)
+    investigation: Investigation
+  }
+
+  type Relationship {
+    id: ID!
+    tenantId: String!
+    srcId: ID!
+    dstId: ID!
+    type: String!
+    props: JSON!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    createdBy: String!
+
+    # Resolved entities
+    source: Entity!
+    destination: Entity!
+  }
+
+  type Investigation {
+    id: ID!
+    tenantId: String!
+    name: String!
+    description: String
+    status: InvestigationStatus!
+    props: JSON!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    createdBy: String!
+
+    # Statistics
+    stats: InvestigationStats!
+
+    # Related entities and relationships
+    entities(kind: String, limit: Int = 100, offset: Int = 0): [Entity!]!
+    relationships(type: String, limit: Int = 100, offset: Int = 0): [Relationship!]!
+  }
+
+  # Enums
+  enum RelationshipDirection {
+    INCOMING
+    OUTGOING
+    BOTH
+  }
+
+  enum InvestigationStatus {
+    ACTIVE
+    ARCHIVED
+    COMPLETED
+  }
+
+  # Helper types
+  type RelationshipCount {
+    incoming: Int!
+    outgoing: Int!
+    total: Int!
+  }
+
+  type InvestigationStats {
+    entityCount: Int!
+    relationshipCount: Int!
+  }
+
+  # Input types for mutations
+  input EntityInput {
+    tenantId: String!
+    kind: String!
+    labels: [String!] = []
+    props: JSON = {}
+    investigationId: ID
+  }
+
+  input EntityUpdateInput {
+    id: ID!
+    labels: [String!]
+    props: JSON
+  }
+
+  input RelationshipInput {
+    tenantId: String!
+    srcId: ID!
+    dstId: ID!
+    type: String!
+    props: JSON = {}
+    investigationId: ID
+  }
+
+  input InvestigationInput {
+    tenantId: String!
+    name: String!
+    description: String
+    status: InvestigationStatus = ACTIVE
+    props: JSON = {}
+  }
+
+  input InvestigationUpdateInput {
+    id: ID!
+    name: String
+    description: String
+    status: InvestigationStatus
+    props: JSON
+  }
+
+  # Search and filter inputs
+  input EntitySearchInput {
+    tenantId: String!
+    kind: String
+    props: JSON
+    investigationId: ID
+    limit: Int = 100
+    offset: Int = 0
+  }
+
+  input RelationshipSearchInput {
+    tenantId: String!
+    type: String
+    srcId: ID
+    dstId: ID
+    investigationId: ID
+    limit: Int = 100
+    offset: Int = 0
+  }
+
+  # Graph traversal types
+  type GraphNeighborhood {
+    center: Entity!
+    entities: [Entity!]!
+    relationships: [Relationship!]!
+    depth: Int!
+  }
+
+  input GraphTraversalInput {
+    startEntityId: ID!
+    tenantId: String!
+    maxDepth: Int = 2
+    relationshipTypes: [String!]
+    entityKinds: [String!]
+    limit: Int = 100
+  }
+
+  # Extended Query operations
+  extend type Query {
+    # Entity queries
+    entity(id: ID!, tenantId: String): Entity
+    entities(input: EntitySearchInput!): [Entity!]!
+
+    # Relationship queries
+    relationship(id: ID!, tenantId: String): Relationship
+    relationships(input: RelationshipSearchInput!): [Relationship!]!
+
+    # Investigation queries
+    investigation(id: ID!, tenantId: String): Investigation
+    investigations(
+      tenantId: String!
+      status: InvestigationStatus
+      limit: Int = 50
+      offset: Int = 0
+    ): [Investigation!]!
+
+    # Graph operations
+    graphNeighborhood(input: GraphTraversalInput!): GraphNeighborhood!
+
+    # Search across all entity types
+    searchEntities(tenantId: String!, query: String!, kinds: [String!], limit: Int = 50): [Entity!]!
+  }
+
+  # Extended Mutation operations
+  extend type Mutation {
+    # Entity mutations
+    createEntity(input: EntityInput!): Entity!
+    updateEntity(input: EntityUpdateInput!): Entity
+    deleteEntity(id: ID!, tenantId: String!): Boolean!
+
+    # Relationship mutations
+    createRelationship(input: RelationshipInput!): Relationship!
+    deleteRelationship(id: ID!, tenantId: String!): Boolean!
+
+    # Investigation mutations
+    createInvestigation(input: InvestigationInput!): Investigation!
+    updateInvestigation(input: InvestigationUpdateInput!): Investigation
+    deleteInvestigation(id: ID!, tenantId: String!): Boolean!
+
+    # Bulk operations
+    createEntitiesBatch(inputs: [EntityInput!]!, tenantId: String!): [Entity!]!
+    createRelationshipsBatch(inputs: [RelationshipInput!]!, tenantId: String!): [Relationship!]!
+  }
+
+  # Real-time subscriptions for graph changes
+  extend type Subscription {
+    entityCreated(tenantId: String!): Entity!
+    entityUpdated(tenantId: String!): Entity!
+    entityDeleted(tenantId: String!): ID!
+
+    relationshipCreated(tenantId: String!): Relationship!
+    relationshipDeleted(tenantId: String!): ID!
+
+    investigationUpdated(tenantId: String!): Investigation!
+  }
+
+enum CopilotRunStatus {
+    pending
+    running
+    succeeded
+    failed
+    paused
+  }
+  enum CopilotTaskStatus {
+    pending
+    running
+    succeeded
+    failed
+    skipped
+  }
+  enum CopilotEventLevel {
+    info
+    warning
+    error
+    debug
+    progress
+  }
+
+  type CopilotTask {
+    id: ID!
+    runId: ID!
+    sequenceNumber: Int!
+    taskType: String! # e.g. "NEO4J_QUERY", "ENRICH_ENTITY", "SUMMARIZE"
+    kind: String! # backwards compatibility alias for taskType
+    inputParams: JSON! # JSON input parameters
+    input: String! # backwards compatibility - JSON stringified
+    outputData: JSON # JSON result data
+    output: String # backwards compatibility - JSON stringified
+    status: CopilotTaskStatus!
+    errorMessage: String
+    error: String # backwards compatibility alias
+    createdAt: String!
+    startedAt: String
+    finishedAt: String
+  }
+
+  type CopilotPlan {
+    id: ID!
+    goalId: ID
+    steps: [CopilotTask!]!
+    createdAt: String!
+  }
+
+  type CopilotRun {
+    id: ID!
+    goalId: ID
+    goalText: String!
+    goal: String! # backwards compatibility alias
+    investigationId: ID
+    status: CopilotRunStatus!
+    plan: CopilotPlan
+    metadata: JSON
+    tasks: [CopilotTask!]!
+    events(limit: Int = 50): [CopilotEvent!]!
+    isActive: Boolean!
+    createdAt: String!
+    updatedAt: String!
+    startedAt: String
+    finishedAt: String
+  }
+
+  type CopilotEvent {
+    id: ID!
+    runId: ID!
+    taskId: ID
+    level: CopilotEventLevel!
+    message: String!
+    payload: JSON
+    ts: String!
+    createdAt: String!
+  }
+
+  type CopilotStats {
+    status: String!
+    count: Int!
+    avgDurationSeconds: Float
+  }
+
+  input StartCopilotRunInput {
+    goalId: ID
+    goalText: String
+    investigationId: ID
+    resume: Boolean = false
+  }
+
+  extend type Query {
+    # Get a specific run with full details
+    copilotRun(id: ID!): CopilotRun
+
+    # Get multiple runs with filtering
+    copilotRuns(investigationId: ID, status: CopilotRunStatus, limit: Int = 20): [CopilotRun!]!
+
+    # Get events for a run with pagination
+    copilotEvents(runId: ID!, afterId: ID, limit: Int = 50): [CopilotEvent!]!
+
+    # Get statistics for monitoring
+    copilotStats(timeRange: String = "24 hours"): [CopilotStats!]!
+  }
+
+  extend type Mutation {
+    # Start a new run or resume existing
+    startCopilotRun(
+      goalId: ID
+      goalText: String
+      investigationId: ID
+      resume: Boolean = false
+    ): CopilotRun!
+
+    # Control run execution
+    pauseCopilotRun(runId: ID!): CopilotRun!
+    resumeCopilotRun(runId: ID!): CopilotRun!
+  }
+
+  extend type Subscription {
+    # Real-time events for a specific run
+    copilotEvents(runId: ID!): CopilotEvent!
+  }
+
+  # JSON scalar for complex data
+  scalar JSON
+
+extend type Entity {
+    id: ID!
+    label: String!
+    type: String!
+    tags: [String!]!
+  }
+
+  extend type Mutation {
+    # Expands neighbors around a given entity with role-based limits
+    expandNeighbors(entityId: ID!, limit: Int): Graph
+
+    # Expands neighborhood for an entity within an investigation
+    expandNeighborhood(entityId: ID!, investigationId: ID!, radius: Int!): Graph
+
+    # Tags an entity with a given string
+    tagEntity(entityId: ID!, tag: String!): Entity!
+
+    # Deletes a tag from an entity
+    deleteTag(entityId: ID!, tag: String!): Entity!
+
+    # Enqueues a request for AI to analyze an entity
+    requestAIAnalysis(entityId: ID!): AIRequestResult!
+  }
+
+  type AIRequestResult {
+    ok: Boolean!
+    requestId: ID
+  }
+
+type AIRecommendation {
+    from: ID!
+    to: ID!
+    score: Float!
+    reason: String
+  }
+  type AIAnomaly {
+    entityId: ID!
+    anomalyScore: Float!
+    reason: String
+  }
+
+  extend type Query {
+    suggestLinks(entityId: ID!, limit: Int = 5): [AIRecommendation!]!
+    detectAnomalies(investigationId: ID, limit: Int = 10): [AIAnomaly!]!
+    searchEntities(q: String!, filters: JSON, limit: Int = 25): [Entity!]!
+    searchEntitiesHybrid(q: String!, filters: JSON, limit: Int = 25): [Entity!]!
+  }
+
+  extend type Subscription {
+    aiSuggestions(entityId: ID!): [AIRecommendation!]!
+  }
+
+  extend type Mutation {
+    recordAnomaly(entityId: ID!, anomalyScore: Float!, reason: String): AIAnomaly!
+  }
+
+enum Enclave {
+    US_ONLY
+    FIVE_EYES
+    NATO
+    NGO
+    UNCLASSIFIED
+  }
+
+  enum Confidence {
+    HIGH
+    MEDIUM
+    LOW
+    UNKNOWN
+  }
+
+  type Annotation {
+    id: ID!
+    content: String!
+    confidence: Confidence
+    createdAt: String!
+    updatedAt: String!
+    createdBy: String!
+    enclave: Enclave!
+    # history: [AnnotationHistory!] # To be implemented later if needed for detailed history
+  }
+
+  input AnnotationInput {
+    content: String!
+    confidence: Confidence
+    enclave: Enclave!
+  }
+
+  input UpdateAnnotationInput {
+    content: String
+    confidence: Confidence
+    enclave: Enclave
+  }
+
+  type Edge { # Define the Edge type here
+    id: ID!
+    source: ID!
+    target: ID!
+    type: String!
+    label: String
+    annotations: [Annotation!] # Add annotations field to Edge
+  }
+
+  extend type Entity {
+    annotations: [Annotation!]
+  }
+
+  extend type Mutation {
+    createEntityAnnotation(entityId: ID!, input: AnnotationInput!): Annotation!
+    createEdgeAnnotation(edgeId: ID!, input: AnnotationInput!): Annotation!
+    updateAnnotation(id: ID!, input: UpdateAnnotationInput!): Annotation!
+    deleteAnnotation(id: ID!): Boolean!
+  }
+
+# GraphRAG Query Input
+  input GraphRAGQueryInput {
+    query: String!
+    investigationId: String!
+    context: JSON
+    maxResults: Int
+    depth: Int
+    expansionLimit: Int
+    model: String
+    temperature: Float
+    maxTokens: Int
+    useCase: String
+  }
+
+  # GraphRAG Query Response
+  type GraphRAGResponse {
+    success: Boolean!
+    queryId: String
+    response: String
+    metadata: GraphRAGMetadata
+    error: String
+  }
+
+  # GraphRAG Metadata
+  type GraphRAGMetadata {
+    contextSize: Int!
+    relevanceScore: Float!
+    sources: [GraphRAGSource!]!
+    responseTime: Int!
+  }
+
+  # GraphRAG Source
+  type GraphRAGSource {
+    type: String!
+    id: String!
+    score: Float!
+  }
+
+  # Health Check Response
+  type GraphRAGHealthResponse {
+    status: String!
+    services: GraphRAGServices
+    error: String
+    timestamp: String!
+  }
+
+  # Service Health Status
+  type GraphRAGServices {
+    graphRAG: ServiceHealth!
+    embedding: ServiceHealth!
+    llm: ServiceHealth!
+  }
+
+  type ServiceHealth {
+    status: String!
+    provider: String
+    model: String
+    metrics: ServiceMetrics
+    config: JSON
+  }
+
+  type ServiceMetrics {
+    totalQueries: Int
+    totalCompletions: Int
+    totalEmbeddings: Int
+    averageLatency: Int
+    averageResponseTime: Int
+    errorCount: Int
+    successRate: String
+    cacheHitRate: Float
+    averageRelevance: Float
+    averageContextSize: Int
+    totalTokensGenerated: Int
+    averageTokensPerCompletion: Int
+    batchCount: Int
+  }
+
+  # Find Similar Entities Input
+  input FindSimilarEntitiesInput {
+    entityId: String!
+    investigationId: String!
+    limit: Int
+    threshold: Float
+  }
+
+  # Similar Entities Response
+  type SimilarEntitiesResponse {
+    success: Boolean!
+    results: [SimilarEntityResult!]!
+    queryEntity: EntityInfo
+    error: String
+  }
+
+  type SimilarEntityResult {
+    entity: EntityInfo!
+    similarity: Float!
+  }
+
+  type EntityInfo {
+    id: String!
+    label: String
+    description: String
+    properties: JSON
+  }
+
+  # Generate Embeddings Input
+  input GenerateEmbeddingsInput {
+    investigationId: String!
+    batchSize: Int
+    model: String
+  }
+
+  # Generate Embeddings Response
+  type GenerateEmbeddingsResponse {
+    success: Boolean!
+    message: String!
+    processedCount: Int!
+    totalEntities: Int!
+  }
+
+  # Test Services Response
+  type TestServicesResponse {
+    success: Boolean!
+    embedding: TestResult!
+    llm: TestResult!
+    error: String
+    timestamp: String!
+  }
+
+  type TestResult {
+    success: Boolean!
+    response: String
+    dimension: Int
+    sampleValues: [Float]
+    error: String
+  }
+
+  # Extend root Query type
+  extend type Query {
+    """
+    Query the knowledge graph using GraphRAG for intelligent responses
+    """
+    graphRAGQuery(input: GraphRAGQueryInput!): GraphRAGResponse!
+
+    """
+    Get health status and metrics for GraphRAG services
+    """
+    graphRAGHealth: GraphRAGHealthResponse!
+
+    """
+    Find entities similar to a given entity using semantic embeddings
+    """
+    findSimilarEntities(input: FindSimilarEntitiesInput!): SimilarEntitiesResponse!
+  }
+
+  # Extend root Mutation type
+  extend type Mutation {
+    """
+    Generate embeddings for entities in an investigation
+    """
+    generateEntityEmbeddings(input: GenerateEmbeddingsInput!): GenerateEmbeddingsResponse!
+
+    """
+    Test GraphRAG services (embedding and LLM)
+    """
+    testGraphRAGServices: TestServicesResponse!
+  }
+
+  # Subscription for real-time GraphRAG updates
+  extend type Subscription {
+    """
+    Subscribe to GraphRAG query results
+    """
+    graphRAGQueryProgress(queryId: String!): GraphRAGResponse!
+
+    """
+    Subscribe to embedding generation progress
+    """
+    embeddingGenerationProgress(investigationId: String!): GenerateEmbeddingsResponse!
+  }
+
+enum CrystalPanelType {
+    AGENT
+    TERMINAL
+    DIFF
+    EDITOR
+    LOGS
+    TOOLS
+  }
+
+  enum CrystalAttachmentType {
+    TEXT
+    IMAGE
+    FILE
+  }
+
+  type CrystalPanelLayout {
+    x: Int!
+    y: Int!
+    w: Int!
+    h: Int!
+    preset: String
+  }
+
+  type CrystalPanel {
+    id: ID!
+    type: CrystalPanelType!
+    name: String!
+    layout: CrystalPanelLayout!
+    state: JSON
+  }
+
+  type CrystalAttachment {
+    id: ID!
+    type: CrystalAttachmentType!
+    name: String!
+    size: Int!
+    contentType: String!
+    purpose: String!
+    retention: String!
+    uri: String
+    createdAt: DateTime!
+  }
+
+  type CrystalWorktree {
+    id: ID!
+    branch: String!
+    repoPath: String!
+    worktreePath: String!
+    status: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    lastRebasedAt: DateTime
+    lastSquashedAt: DateTime
+  }
+
+  type CrystalRunLogEntry {
+    id: ID!
+    timestamp: DateTime!
+    stream: String!
+    message: String!
+  }
+
+  type CrystalRun {
+    id: ID!
+    definitionId: ID!
+    status: String!
+    startedAt: DateTime!
+    completedAt: DateTime
+    exitCode: Int
+    provenanceId: ID!
+    logs: [CrystalRunLogEntry!]!
+  }
+
+  type CrystalRunDefinition {
+    id: ID!
+    name: String!
+    command: String!
+    timeoutMs: Int
+    environment: JSON
+  }
+
+  type CrystalAgent {
+    id: ID!
+    adapterKey: String!
+    status: String!
+    capabilities: [String!]!
+    createdAt: DateTime!
+  }
+
+  type CrystalMessage {
+    id: ID!
+    agentId: ID!
+    role: String!
+    content: String!
+    createdAt: DateTime!
+    attachmentIds: [ID!]
+    richOutput: JSON
+  }
+
+  type CrystalSLOSnapshot {
+    gatewayReadP95: Float!
+    gatewayReadP99: Float!
+    gatewayWriteP95: Float!
+    gatewayWriteP99: Float!
+    subscriptionP95: Float!
+    graphHopP95: Float!
+    graphHopP99: Float!
+  }
+
+  type CrystalBudgetSnapshot {
+    environment: String!
+    monthlyLimitUsd: Float!
+    monthlySpendUsd: Float!
+    alertThresholdHit: Boolean!
+  }
+
+  type CrystalCostSnapshot {
+    budgets: [CrystalBudgetSnapshot!]!
+  }
+
+  type CrystalSession {
+    id: ID!
+    name: String!
+    description: String
+    status: String!
+    theme: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    purposeTags: [String!]!
+    retention: String!
+    worktree: CrystalWorktree!
+    panels: [CrystalPanel!]!
+    attachments: [CrystalAttachment!]!
+    runScripts: [CrystalRunDefinition!]!
+    runs: [CrystalRun!]!
+    agents: [CrystalAgent!]!
+    messages: [CrystalMessage!]!
+    provenanceId: ID!
+    slo: CrystalSLOSnapshot!
+    cost: CrystalCostSnapshot!
+  }
+
+  type CrystalAdapter {
+    key: ID!
+    name: String!
+    description: String!
+    capabilities: [String!]!
+  }
+
+  input CrystalAttachmentInput {
+    type: CrystalAttachmentType!
+    name: String!
+    size: Int!
+    contentType: String!
+    purpose: String!
+    retention: String
+    uri: String
+  }
+
+  input CrystalRunDefinitionInput {
+    name: String!
+    command: String!
+    timeoutMs: Int
+    environment: JSON
+  }
+
+  input CrystalPanelPresetInput {
+    type: CrystalPanelType!
+    name: String
+    preset: String
+  }
+
+  input CreateCrystalSessionInput {
+    name: String!
+    description: String
+    projectPath: String!
+    mainBranch: String
+    theme: String
+    purposeTags: [String!]
+    retention: String
+    adapters: [String!]
+    panelPresets: [CrystalPanelPresetInput!]
+    runScripts: [CrystalRunDefinitionInput!]
+    attachments: [CrystalAttachmentInput!]
+  }
+
+  input StartCrystalRunInput {
+    sessionId: ID!
+    runDefinitionId: ID!
+    commandOverride: String
+    timeoutMs: Int
+    environment: JSON
+  }
+
+  input RecordCrystalMessageInput {
+    sessionId: ID!
+    agentId: ID!
+    role: String!
+    content: String!
+    attachmentIds: [ID!]
+  }
+
+  input CrystalPanelLayoutInput {
+    panelId: ID!
+    x: Int!
+    y: Int!
+    w: Int!
+    h: Int!
+    preset: String
+  }
+
+  input UpdateCrystalPanelsInput {
+    sessionId: ID!
+    panels: [CrystalPanelLayoutInput!]!
+  }
+
+  extend type Query {
+    crystalSessions: [CrystalSession!]!
+    crystalSession(id: ID!): CrystalSession
+    crystalAdapters: [CrystalAdapter!]!
+    crystalBudgets: [CrystalBudgetSnapshot!]!
+  }
+
+  extend type Mutation {
+    createCrystalSession(input: CreateCrystalSessionInput!): CrystalSession!
+    startCrystalRun(input: StartCrystalRunInput!): CrystalRun!
+    recordCrystalMessage(input: RecordCrystalMessageInput!): CrystalMessage!
+    updateCrystalPanels(input: UpdateCrystalPanelsInput!): CrystalSession!
+    closeCrystalSession(sessionId: ID!): CrystalSession!
+  }
+
+  type CrystalRunLogEvent {
+    sessionId: ID!
+    runId: ID!
+    entry: CrystalRunLogEntry!
+  }
+
+  extend type Subscription {
+    crystalRunLogs(sessionId: ID!, runId: ID!): CrystalRunLogEvent!
+  }
