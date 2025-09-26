@@ -1,36 +1,53 @@
-# AI Insights MVP-0 Service Dockerfile
-FROM python:3.11-slim
+# syntax=docker/dockerfile:1.7
 
-# Set working directory
+FROM python:3.11-slim AS builder
+
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
+# Install system build dependencies and clean up afterwards
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements.txt .
+COPY requirements.txt ./
 
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Install dependencies into an isolated virtual environment
+RUN python -m venv ${VIRTUAL_ENV} \
+    && . ${VIRTUAL_ENV}/bin/activate \
+    && pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && pip uninstall -y pytest pytest-asyncio black flake8 \
+    && rm -rf /root/.cache/pip
 
-# Copy application code
-COPY app.py .
+# Copy the service source files
+COPY app.py ./
+COPY middleware ./middleware
 
-# Create non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /app
-USER appuser
+# Remove bytecode to keep the runtime layer lean
+RUN find ${VIRTUAL_ENV} -name "__pycache__" -type d -prune -exec rm -rf {} +
 
-# Health check
+FROM gcr.io/distroless/python3-debian12 AS runtime
+
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# Distroless already runs as non-root uid/gid 65532
+USER 65532:65532
+
+COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /app/app.py ./
+COPY --from=builder /app/middleware ./middleware
+
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health')"
+    CMD ["/opt/venv/bin/python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
 
-# Expose port
 EXPOSE 8000
 
-# Run the application
-CMD ["python", "app.py"]
+CMD ["/opt/venv/bin/python", "app.py"]
