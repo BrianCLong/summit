@@ -1,0 +1,69 @@
+# IntelGraph Custom Alerting Rules
+# Includes graph query latency, ML inference health, and SLO burn alerts routed to PagerDuty.
+groups:
+  - name: intelgraph-custom-alerts
+    interval: 30s
+    rules:
+      - record: job:graph_query_latency_p99:rate5m
+        expr: histogram_quantile(0.99, sum(rate(graph_query_latency_seconds_bucket{job="graph-api"}[5m])) by (le))
+      - alert: GraphQueryLatencyCritical
+        expr: job:graph_query_latency_p99:rate5m > 2
+        for: 5m
+        labels:
+          severity: page
+          service: graph-api
+          pagerduty_service: intelgraph-graph
+          tier: critical
+        annotations:
+          summary: 'Graph query latency p99 > 2s for 5m'
+          description: 'Investigate slow Cypher queries, Neo4j cluster health, and long-running transactions.'
+          runbook: 'https://summit.docs/runbooks/alert-management-guide'
+
+      - record: job:ml_inference_error_rate:ratio5m
+        expr: |
+          sum(rate(ml_inference_errors_total{deployment="realtime"}[5m]))
+            /
+          sum(rate(ml_inference_requests_total{deployment="realtime"}[5m]))
+      - alert: MLInferenceErrorBudgetBurn
+        expr: job:ml_inference_error_rate:ratio5m > 0.05
+        for: 10m
+        labels:
+          severity: page
+          service: ml-inference
+          pagerduty_service: intelgraph-ml
+          tier: critical
+        annotations:
+          summary: 'ML inference error rate above 5%'
+          description: 'Model service returning high error rates; check model rollout, GPU saturation, and upstream features.'
+          runbook: 'https://summit.docs/runbooks/alert-management-guide'
+
+      - record: slo:graph_api_availability:error_budget_burn_rate_5m
+        expr: |
+          (sum(rate(http_requests_total{job="graph-api",status=~"5.."}[5m]))
+            /
+          sum(rate(http_requests_total{job="graph-api"}[5m])))
+            /
+          0.005
+      - record: slo:graph_api_availability:error_budget_burn_rate_1h
+        expr: |
+          (sum(rate(http_requests_total{job="graph-api",status=~"5.."}[1h]))
+            /
+          sum(rate(http_requests_total{job="graph-api"}[1h])))
+            /
+          0.005
+      - alert: GraphAPIAvailabilitySLOBreach
+        expr: |
+          slo:graph_api_availability:error_budget_burn_rate_5m > 14.4
+            and
+          slo:graph_api_availability:error_budget_burn_rate_1h > 1
+        for: 2m
+        labels:
+          severity: page
+          service: graph-api
+          pagerduty_service: intelgraph-graph
+          component: error_budget
+          slo: availability
+        annotations:
+          summary: 'Graph API availability burn rate breaching multi-window SLO'
+          description: '5m burn >14.4x and 1h burn >1x. Immediate action required to protect the 99.5% availability SLO.'
+          runbook: 'https://summit.docs/runbooks/alert-management-guide'
