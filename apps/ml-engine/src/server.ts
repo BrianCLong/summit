@@ -5,8 +5,10 @@ import { rateLimit } from 'express-rate-limit';
 import compression from 'compression';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { EntityResolutionService } from './services/EntityResolutionService';
+import { federatedLearningService } from './services/FederatedLearningService';
 import { logger } from './utils/logger';
 import { config } from './config';
+import metrics from './utils/metrics';
 
 const app: Express = express();
 const PORT = config.server.port || 4003;
@@ -50,6 +52,7 @@ async function initializeServices() {
   try {
     entityResolutionService = new EntityResolutionService();
     await entityResolutionService.initialize();
+    await federatedLearningService.initialize();
     logger.info('ML services initialized successfully');
   } catch (error) {
     logger.error('Failed to initialize ML services:', error);
@@ -169,6 +172,46 @@ app.get('/api/entity-resolution/metrics', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+app.post('/api/federated/train', async (req, res) => {
+  try {
+    const job = await federatedLearningService.trainFederatedModel({
+      clients: req.body.clients,
+      rounds: req.body.rounds,
+      batchSize: req.body.batchSize,
+      learningRate: req.body.learningRate,
+      modelType: req.body.modelType,
+    });
+
+    res.status(202).json({ job });
+  } catch (error) {
+    logger.error('Error starting federated training job:', error);
+    res.status(400).json({
+      error: error instanceof Error ? error.message : 'Failed to start federated training job',
+    });
+  }
+});
+
+app.get('/api/federated/jobs/:jobId', async (req, res) => {
+  try {
+    const job = federatedLearningService.getJob(req.params.jobId);
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+
+    res.json({ job });
+  } catch (error) {
+    logger.error('Error retrieving federated training job:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+if (config.monitoring.metricsEnabled) {
+  app.get('/metrics', async (_req, res) => {
+    res.set('Content-Type', metrics.register.contentType);
+    res.send(await metrics.register.metrics());
+  });
+}
 
 app.post('/api/entity-resolution/feedback', async (req, res) => {
   try {

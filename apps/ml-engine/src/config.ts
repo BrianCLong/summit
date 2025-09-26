@@ -52,8 +52,16 @@ export const config = {
   },
 
   monitoring: {
-    metricsEnabled: process.env.METRICS_ENABLED === 'true',
+    metricsEnabled: process.env.METRICS_ENABLED !== 'false',
     metricsPort: parseInt(process.env.METRICS_PORT || '9093'),
     logLevel: process.env.LOG_LEVEL || 'info',
+  },
+
+  federatedLearning: {
+    defaultRounds: parseInt(process.env.FEDERATED_ROUNDS || '5'),
+    defaultBatchSize: parseInt(process.env.FEDERATED_BATCH_SIZE || '16'),
+    defaultLearningRate: parseFloat(process.env.FEDERATED_LEARNING_RATE || '0.01'),
+    modelType: process.env.FEDERATED_MODEL_TYPE || 'dense_binary_classifier',
+    workspace: process.env.FEDERATED_WORKSPACE || './models/federated',
   },
 };
