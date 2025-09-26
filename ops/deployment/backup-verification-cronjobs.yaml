@@ -1,0 +1,328 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backup-verifier
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-verification-env
+  labels:
+    app.kubernetes.io/name: backup-verification
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: summit-backup
+  annotations:
+    backup.summit.io/description: Static configuration for backup verification jobs
+data:
+  AWS_REGION: us-east-1
+  POSTGRES_S3_BUCKET: summit-prod-backups
+  POSTGRES_BACKUP_PREFIX: postgres/
+  POSTGRES_LATEST_KEY: ""
+  NEO4J_S3_BUCKET: summit-prod-backups
+  NEO4J_BACKUP_PREFIX: neo4j/
+  NEO4J_DATABASE: graph
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backup-verifier-aws
+  labels:
+    app.kubernetes.io/name: backup-verification
+    app.kubernetes.io/component: credentials
+    app.kubernetes.io/part-of: summit-backup
+stringData:
+  aws_access_key_id: "REPLACE_ME"
+  aws_secret_access_key: "REPLACE_ME"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-verification-scripts
+  labels:
+    app.kubernetes.io/name: backup-verification
+    app.kubernetes.io/component: scripts
+    app.kubernetes.io/part-of: summit-backup
+binaryData: {}
+data:
+  postgres-backup-verify.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    required_vars=("AWS_REGION" "POSTGRES_S3_BUCKET" "POSTGRES_BACKUP_PREFIX")
+    for var in "${required_vars[@]}"; do
+      if [[ -z "${!var:-}" ]]; then
+        echo "[postgres] Missing required environment variable: ${var}" >&2
+        exit 1
+      fi
+    done
+    
+    LATEST_KEY=${POSTGRES_LATEST_KEY:-}
+    WORKDIR=$(mktemp -d)
+    LOG_DIR="${WORKDIR}/logs"
+    mkdir -p "${LOG_DIR}"
+    
+    cleanup() {
+      if [[ -d "${WORKDIR}/pgdata" ]]; then
+        if pg_ctl status -D "${WORKDIR}/pgdata" &>/dev/null; then
+          pg_ctl -D "${WORKDIR}/pgdata" -m fast stop >/dev/null 2>&1 || true
+        fi
+      fi
+      rm -rf "${WORKDIR}"
+    }
+    trap cleanup EXIT
+    
+    if command -v apk >/dev/null 2>&1; then
+      apk --no-cache add aws-cli coreutils >/dev/null 2>&1 || true
+    elif command -v apt-get >/dev/null 2>&1; then
+      apt-get update >/dev/null 2>&1
+      apt-get install -y awscli >/dev/null 2>&1
+    fi
+    
+    S3_PATH="s3://${POSTGRES_S3_BUCKET}/${POSTGRES_BACKUP_PREFIX}"
+    if [[ -z "${LATEST_KEY}" ]]; then
+      echo "[postgres] Discovering latest backup under ${S3_PATH}" | tee -a "${LOG_DIR}/verify.log"
+      LATEST_KEY=$(aws s3 ls "${S3_PATH}/" --recursive | sort | tail -n1 | awk '{print $4}') || true
+      if [[ -z "${LATEST_KEY}" ]]; then
+        echo "[postgres] No backups found under ${S3_PATH}" | tee -a "${LOG_DIR}/verify.log"
+        exit 2
+      fi
+    else
+      echo "[postgres] Using provided backup key ${LATEST_KEY}" | tee -a "${LOG_DIR}/verify.log"
+    fi
+    
+    BACKUP_FILE="${WORKDIR}/backup.dump"
+    echo "[postgres] Downloading s3://${POSTGRES_S3_BUCKET}/${LATEST_KEY}" | tee -a "${LOG_DIR}/verify.log"
+    aws s3 cp "s3://${POSTGRES_S3_BUCKET}/${LATEST_KEY}" "${BACKUP_FILE}" --region "${AWS_REGION}" | tee -a "${LOG_DIR}/aws.log"
+    
+    if ! pg_restore --list "${BACKUP_FILE}" >/dev/null; then
+      echo "[postgres] Backup archive is corrupt" | tee -a "${LOG_DIR}/verify.log"
+      exit 3
+    fi
+    
+    echo "[postgres] Initializing ephemeral PostgreSQL cluster" | tee -a "${LOG_DIR}/verify.log"
+    initdb -D "${WORKDIR}/pgdata" >/dev/null
+    pg_ctl -D "${WORKDIR}/pgdata" -o "-k ${WORKDIR} -p 55432" -w start >/dev/null
+    
+    createdb -h localhost -p 55432 verification >/dev/null
+    pg_restore --clean --if-exists --no-owner --no-privileges --dbname "postgresql://localhost:55432/verification" "${BACKUP_FILE}" >/dev/null
+    
+    psql -h localhost -p 55432 -d verification -c "SELECT 1;" >/dev/null
+    COUNT=$(psql -h localhost -p 55432 -d verification -At -c "SELECT count(*) FROM information_schema.tables WHERE table_schema NOT IN ('pg_catalog','information_schema');")
+    echo "[postgres] Restored database has ${COUNT} user tables" | tee -a "${LOG_DIR}/verify.log"
+    
+    if [[ "${COUNT}" -eq 0 ]]; then
+      echo "[postgres] Verification failed: restored backup contains no user tables" | tee -a "${LOG_DIR}/verify.log"
+      exit 4
+    fi
+    
+    echo "[postgres] Backup verification succeeded" | tee -a "${LOG_DIR}/verify.log"
+  neo4j-backup-verify.sh: |
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    required_vars=("AWS_REGION" "NEO4J_S3_BUCKET" "NEO4J_BACKUP_PREFIX")
+    for var in "${required_vars[@]}"; do
+      if [[ -z "${!var:-}" ]]; then
+        echo "[neo4j] Missing required environment variable: ${var}" >&2
+        exit 1
+      fi
+    done
+    
+    LATEST_KEY=${NEO4J_LATEST_KEY:-}
+    WORKDIR=$(mktemp -d)
+    LOG_DIR="${WORKDIR}/logs"
+    mkdir -p "${LOG_DIR}"
+    NEO4J_PID=0
+    
+    cleanup() {
+      if [[ ${NEO4J_PID} -ne 0 ]]; then
+        kill "${NEO4J_PID}" >/dev/null 2>&1 || true
+        wait "${NEO4J_PID}" >/dev/null 2>&1 || true
+      fi
+      rm -rf "${WORKDIR}"
+    }
+    trap cleanup EXIT
+    
+    if command -v apk >/dev/null 2>&1; then
+      apk --no-cache add aws-cli coreutils >/dev/null 2>&1 || true
+    elif command -v apt-get >/dev/null 2>&1; then
+      apt-get update >/dev/null 2>&1
+      apt-get install -y awscli >/dev/null 2>&1
+    fi
+    
+    export NEO4J_HOME=${NEO4J_HOME:-/var/lib/neo4j}
+    export NEO4J_CONF=${NEO4J_CONF:-/var/lib/neo4j/conf}
+    export NEO4J_PLUGINS=${NEO4J_PLUGINS:-/var/lib/neo4j/plugins}
+    export JAVA_HOME=${JAVA_HOME:-/usr/lib/jvm/java-17-openjdk}
+    export NEO4J_ACCEPT_LICENSE_AGREEMENT=${NEO4J_ACCEPT_LICENSE_AGREEMENT:-yes}
+    export NEO4J_AUTH=${NEO4J_AUTH:-none}
+    
+    S3_PATH="s3://${NEO4J_S3_BUCKET}/${NEO4J_BACKUP_PREFIX}"
+    if [[ -z "${LATEST_KEY}" ]]; then
+      echo "[neo4j] Discovering latest backup under ${S3_PATH}" | tee -a "${LOG_DIR}/verify.log"
+      LATEST_KEY=$(aws s3 ls "${S3_PATH}/" --recursive | sort | tail -n1 | awk '{print $4}') || true
+      if [[ -z "${LATEST_KEY}" ]]; then
+        echo "[neo4j] No backups found under ${S3_PATH}" | tee -a "${LOG_DIR}/verify.log"
+        exit 2
+      fi
+    else
+      echo "[neo4j] Using provided backup key ${LATEST_KEY}" | tee -a "${LOG_DIR}/verify.log"
+    fi
+    
+    BACKUP_LOCAL="${WORKDIR}/backup.tar.gz"
+    echo "[neo4j] Downloading s3://${NEO4J_S3_BUCKET}/${LATEST_KEY}" | tee -a "${LOG_DIR}/verify.log"
+    aws s3 cp "s3://${NEO4J_S3_BUCKET}/${LATEST_KEY}" "${BACKUP_LOCAL}" --region "${AWS_REGION}" | tee -a "${LOG_DIR}/aws.log"
+    
+    BACKUP_DIR="${WORKDIR}/backup"
+    mkdir -p "${BACKUP_DIR}"
+    tar -xzf "${BACKUP_LOCAL}" -C "${BACKUP_DIR}"
+    
+    echo "[neo4j] Restoring backup into scratch database" | tee -a "${LOG_DIR}/verify.log"
+    RESTORE_DB=${NEO4J_DATABASE:-neo4j}
+    SCRATCH_DB="verify-${RESTORE_DB}"
+    neo4j-admin database restore "${SCRATCH_DB}" --from-path="${BACKUP_DIR}" --force --overwrite-destination=true | tee -a "${LOG_DIR}/verify.log"
+    
+    echo "[neo4j] Running offline consistency check" | tee -a "${LOG_DIR}/verify.log"
+    neo4j-admin database check "${SCRATCH_DB}" --verbose | tee -a "${LOG_DIR}/check.log"
+    
+    if grep -q "ERROR" "${LOG_DIR}/check.log"; then
+      echo "[neo4j] Consistency check reported errors" | tee -a "${LOG_DIR}/verify.log"
+      exit 3
+    fi
+    
+    echo "[neo4j] Performing synthetic cypher workload" | tee -a "${LOG_DIR}/verify.log"
+    export NEO4J_dbms_default__database="${SCRATCH_DB}"
+    neo4j console >/dev/null 2>&1 &
+    NEO4J_PID=$!
+    sleep 25
+    
+    if ! cypher-shell -a bolt://localhost:7687 -d "${SCRATCH_DB}" --format plain "MATCH (n) RETURN count(n) LIMIT 1;" >/dev/null 2>&1; then
+      echo "[neo4j] Synthetic query failed" | tee -a "${LOG_DIR}/verify.log"
+      exit 4
+    fi
+    
+    echo "[neo4j] Backup verification succeeded" | tee -a "${LOG_DIR}/verify.log"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup-verification
+  labels:
+    app.kubernetes.io/name: backup-verification
+    app.kubernetes.io/component: postgres
+    app.kubernetes.io/part-of: summit-backup
+spec:
+  schedule: "30 2 * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 900
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 3600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: backup-verification
+            app.kubernetes.io/component: postgres
+        spec:
+          serviceAccountName: backup-verifier
+          restartPolicy: Never
+          containers:
+            - name: postgres-backup-verifier
+              image: postgres:16
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - /opt/verify/postgres-backup-verify.sh
+              envFrom:
+                - configMapRef:
+                    name: backup-verification-env
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-verifier-aws
+                      key: aws_access_key_id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-verifier-aws
+                      key: aws_secret_access_key
+              volumeMounts:
+                - name: verification-scripts
+                  mountPath: /opt/verify
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 1Gi
+                limits:
+                  cpu: "1"
+                  memory: 2Gi
+          volumes:
+            - name: verification-scripts
+              configMap:
+                name: backup-verification-scripts
+                defaultMode: 0555
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: neo4j-backup-verification
+  labels:
+    app.kubernetes.io/name: backup-verification
+    app.kubernetes.io/component: neo4j
+    app.kubernetes.io/part-of: summit-backup
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 900
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 3600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: backup-verification
+            app.kubernetes.io/component: neo4j
+        spec:
+          serviceAccountName: backup-verifier
+          restartPolicy: Never
+          containers:
+            - name: neo4j-backup-verifier
+              image: neo4j:5.20
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - /opt/verify/neo4j-backup-verify.sh
+              envFrom:
+                - configMapRef:
+                    name: backup-verification-env
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-verifier-aws
+                      key: aws_access_key_id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-verifier-aws
+                      key: aws_secret_access_key
+              volumeMounts:
+                - name: verification-scripts
+                  mountPath: /opt/verify
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 4Gi
+                limits:
+                  cpu: "2"
+                  memory: 6Gi
+          volumes:
+            - name: verification-scripts
+              configMap:
+                name: backup-verification-scripts
+                defaultMode: 0555
