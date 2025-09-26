@@ -8,6 +8,7 @@ import aiInsightsReducer from './slices/aiInsightsSlice'; // Import the new aiIn
 import timelineReducer from './slices/timelineSlice';
 import graphData from './graphSlice';
 import socket from './socketSlice';
+import onboarding from './slices/onboardingSlice.ts';
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     aiInsights: aiInsightsReducer, // Add the new aiInsightsReducer
     graphData,
     socket,
+    onboarding,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
