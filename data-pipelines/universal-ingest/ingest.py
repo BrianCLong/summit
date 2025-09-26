@@ -15,12 +15,13 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import tempfile
 import time
 import uuid
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from typing import Callable, Dict, Iterable, List, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
 from rapidfuzz import fuzz
 try:
@@ -30,6 +31,8 @@ except Exception:  # pragma: no cover - model is optional
     NLP = None
 
 from neo4j import GraphDatabase, Driver
+
+from tools.testing.mock_data import MockDataGenerator
 
 
 @dataclass
@@ -359,6 +362,46 @@ def build_pipeline(uri: str, user: str, password: str) -> IngestionPipeline:
     return pipeline
 
 
+def generate_mock_ingest_csv(
+    output_path: Path, record_count: int = 40, seed: Optional[int] = None
+) -> Path:
+    """Generate a mock ingest CSV using the shared mock data generator."""
+
+    generator = MockDataGenerator(seed=seed)
+    generator.write_ingest_csv(output_path, record_count=record_count)
+    return output_path
+
+
+def seed_mock_data(
+    *,
+    record_count: int = 40,
+    source: str = "MOCK-SEED",
+    neo4j_uri: str,
+    neo4j_user: str,
+    neo4j_password: str,
+    seed: Optional[int] = None,
+    output_path: Optional[Path] = None,
+) -> Dict[str, float]:
+    """Generate and ingest mock data via the wizard."""
+
+    generator = MockDataGenerator(seed=seed)
+    temp_dir: Optional[tempfile.TemporaryDirectory[str]] = None
+    csv_path = output_path
+    if csv_path is None:
+        temp_dir = tempfile.TemporaryDirectory(prefix="ingest-mock-")
+        csv_path = Path(temp_dir.name) / "mock_ingest.csv"
+
+    generator.write_ingest_csv(csv_path, record_count=record_count)
+    pipeline = build_pipeline(neo4j_uri, neo4j_user, neo4j_password)
+    try:
+        metrics = pipeline.ingest(csv_path, source)
+    finally:
+        pipeline.loader.close()
+        if temp_dir is not None:
+            temp_dir.cleanup()
+    return metrics
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -370,12 +413,39 @@ if __name__ == "__main__":
     parser.add_argument("--neo4j-password", default="password")
     parser.add_argument("--replay-dlq", type=Path, help="Replay records from DLQ directory")
     parser.add_argument("--rate-limit", type=float, default=0.0, help="Seconds to wait between DLQ records")
+    parser.add_argument("--generate-mock-csv", type=Path, help="Write generated mock ingest data to CSV")
+    parser.add_argument("--seed-mock", action="store_true", help="Generate and ingest mock data")
+    parser.add_argument("--mock-records", type=int, default=40, help="Number of mock entities to produce")
+    parser.add_argument("--mock-seed", type=int, help="Seed used when generating mock data")
     args = parser.parse_args()
 
+    if args.generate_mock_csv or args.seed_mock:
+        csv_path = args.generate_mock_csv
+        if csv_path:
+            generate_mock_ingest_csv(csv_path, record_count=args.mock_records, seed=args.mock_seed)
+            print(f"Generated mock ingest CSV at {csv_path}")
+        if args.seed_mock:
+            metrics = seed_mock_data(
+                record_count=args.mock_records,
+                source=args.source or "MOCK-SEED",
+                neo4j_uri=args.neo4j_uri,
+                neo4j_user=args.neo4j_user,
+                neo4j_password=args.neo4j_password,
+                seed=args.mock_seed,
+                output_path=csv_path,
+            )
+            print(
+                "Seeded mock data via ingest wizard: "
+                + ", ".join(f"{k}={v}" for k, v in sorted(metrics.items()))
+            )
+        raise SystemExit(0)
+
     pipeline = build_pipeline(args.neo4j_uri, args.neo4j_user, args.neo4j_password)
-    if args.replay_dlq:
-        replay_dlq(pipeline, args.replay_dlq, args.rate_limit)
-    else:
-        for file_path in args.files:
-            pipeline.ingest(file_path, args.source)
-    pipeline.loader.close()
+    try:
+        if args.replay_dlq:
+            replay_dlq(pipeline, args.replay_dlq, args.rate_limit)
+        else:
+            for file_path in args.files:
+                pipeline.ingest(file_path, args.source)
+    finally:
+        pipeline.loader.close()
