@@ -23,10 +23,12 @@ interface User {
   lastName?: string;
   fullName?: string;
   role: string;
+  roles?: string[];
   isActive: boolean;
   lastLogin?: Date;
   createdAt: Date;
   updatedAt?: Date;
+  identityProvider?: string;
 }
 
 interface DatabaseUser {
@@ -325,20 +327,31 @@ export class AuthService {
       return false;
     }
 
-    const userPermissions = ROLE_PERMISSIONS[user.role.toUpperCase()] || [];
+    const effectiveRoles = new Set<string>();
+    effectiveRoles.add(user.role.toUpperCase());
+    for (const extraRole of user.roles || []) {
+      effectiveRoles.add(extraRole.toUpperCase());
+    }
+
+    const userPermissions = new Set<string>();
+    for (const role of effectiveRoles) {
+      for (const perm of ROLE_PERMISSIONS[role] || []) {
+        userPermissions.add(perm);
+      }
+    }
 
     // Admin has wildcard permission
-    if (userPermissions.includes('*')) {
+    if (userPermissions.has('*')) {
       return true;
     }
 
     // Check exact permission match
-    if (userPermissions.includes(permission)) {
+    if (userPermissions.has(permission)) {
       return true;
     }
 
     // Check wildcard permissions (e.g., 'investigation:*' matches 'investigation:create')
-    const wildcardPermissions = userPermissions.filter((p) => p.endsWith(':*'));
+    const wildcardPermissions = Array.from(userPermissions).filter((p) => p.endsWith(':*'));
     const permissionPrefix = permission.split(':')[0];
 
     for (const wildcardPerm of wildcardPermissions) {
@@ -373,7 +386,20 @@ export class AuthService {
       return [];
     }
 
-    return ROLE_PERMISSIONS[user.role.toUpperCase()] || [];
+    const effectiveRoles = new Set<string>();
+    effectiveRoles.add(user.role.toUpperCase());
+    for (const extraRole of user.roles || []) {
+      effectiveRoles.add(extraRole.toUpperCase());
+    }
+
+    const permissions = new Set<string>();
+    for (const role of effectiveRoles) {
+      for (const perm of ROLE_PERMISSIONS[role] || []) {
+        permissions.add(perm);
+      }
+    }
+
+    return Array.from(permissions);
   }
 
   private formatUser(user: DatabaseUser): User {
@@ -384,11 +410,13 @@ export class AuthService {
       firstName: user.first_name,
       lastName: user.last_name,
       fullName: `${user.first_name} ${user.last_name}`,
-      role: user.role,
+      role: user.role.toUpperCase(),
+      roles: [user.role.toUpperCase()],
       isActive: user.is_active,
       lastLogin: user.last_login,
       createdAt: user.created_at,
       updatedAt: user.updated_at,
+      identityProvider: 'oidc',
     };
   }
 }

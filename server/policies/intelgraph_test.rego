@@ -13,8 +13,9 @@ import future.keywords.if
 
 admin_user := {
     "id": "admin-1",
-    "email": "admin@intelgraph.com", 
+    "email": "admin@intelgraph.com",
     "role": "admin",
+    "identityProvider": "oidc",
     "tenantId": "tenant-1",
     "permissions": ["*"]
 }
@@ -22,7 +23,8 @@ admin_user := {
 analyst_user := {
     "id": "analyst-1",
     "email": "analyst@intelgraph.com",
-    "role": "analyst", 
+    "role": "analyst",
+    "identityProvider": "oidc",
     "tenantId": "tenant-1",
     "permissions": ["read", "write:investigation"]
 }
@@ -31,7 +33,8 @@ senior_analyst_user := {
     "id": "senior-analyst-1",
     "email": "senior@intelgraph.com",
     "role": "senior_analyst",
-    "tenantId": "tenant-1", 
+    "identityProvider": "oidc",
+    "tenantId": "tenant-1",
     "permissions": ["read", "write", "copilot"]
 }
 
@@ -39,16 +42,28 @@ viewer_user := {
     "id": "viewer-1",
     "email": "viewer@intelgraph.com",
     "role": "viewer",
+    "identityProvider": "oidc",
     "tenantId": "tenant-1",
     "permissions": ["read"]
 }
 
 other_tenant_user := {
-    "id": "other-1", 
+    "id": "other-1",
     "email": "other@intelgraph.com",
     "role": "analyst",
+    "identityProvider": "oidc",
     "tenantId": "tenant-2",
     "permissions": ["read", "write"]
+}
+
+federated_saml_user := {
+    "id": "saml-analyst-1",
+    "email": "federated@intelgraph.com",
+    "role": "analyst",
+    "identityProvider": "saml",
+    "tenantId": "tenant-1",
+    "permissions": ["read", "write:investigation"],
+    "roles": ["analyst", "senior_analyst"]
 }
 
 #------------------------------------------------------------------------------
@@ -194,6 +209,37 @@ test_user_other_profile_denied if {
         "action": "query.user",
         "resource": {"type": "User", "args": {"id": "other-user"}},
         "context": {"tenantId": "tenant-1"}
+    }
+}
+
+#------------------------------------------------------------------------------
+# FEDERATED IDENTITY TESTS
+#------------------------------------------------------------------------------
+
+test_saml_identity_allowed_by_default if {
+    allow with input as {
+        "user": federated_saml_user,
+        "action": "query.investigations",
+        "resource": {"type": "Query", "field": "investigations"},
+        "context": {"tenantId": "tenant-1"}
+    }
+}
+
+test_saml_identity_requires_matching_provider if {
+    not allow with input as {
+        "user": federated_saml_user,
+        "action": "query.investigations",
+        "resource": {"type": "Query", "field": "investigations"},
+        "context": {"tenantId": "tenant-1", "requiredIdentityProviders": ["oidc"]}
+    }
+}
+
+test_saml_identity_allowed_when_required if {
+    allow with input as {
+        "user": federated_saml_user,
+        "action": "query.investigations",
+        "resource": {"type": "Query", "field": "investigations"},
+        "context": {"tenantId": "tenant-1", "requiredIdentityProviders": ["saml"]}
     }
 }
 

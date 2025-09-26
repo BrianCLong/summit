@@ -21,6 +21,7 @@ allow = {
 
 # Collect all allowed operations with reasons
 allowed_operations := reasons if {
+    identity_provider_allowed
     reasons := [reason |
         some rule
         rule_allows[rule]
@@ -37,8 +38,33 @@ allowed_operations := reasons if {
       "user_own_profile": user_own_profile,
       "public_health_check": public_health_check,
       "tenant_isolation": tenant_isolation_check,
-      "compartment_isolation": compartment_isolation_check
+      "compartment_isolation": compartment_isolation_check,
+      "identity_provider": identity_provider_allowed
   }
+
+#------------------------------------------------------------------------------
+# FEDERATED IDENTITY ENFORCEMENT
+#------------------------------------------------------------------------------
+
+allowed_identity_providers := {"oidc", "saml", "api-key", "service"}
+
+identity_provider_allowed if {
+    some provider
+    provider := lower(input.user.identityProvider)
+    not input.context.requiredIdentityProviders
+    provider in allowed_identity_providers
+}
+
+identity_provider_allowed if {
+    providers := {lower(p) | p := input.context.requiredIdentityProviders[_]}
+    provider := lower(input.user.identityProvider)
+    provider in providers
+}
+
+identity_provider_allowed if {
+    not input.user.identityProvider
+    input.user.role == "system"
+}
 
 #------------------------------------------------------------------------------
 # ROLE-BASED ACCESS CONTROL (RBAC)
