@@ -1,10 +1,24 @@
+replicaCount: 4
+
 image:
-  repository: ghcr.io/brianclong/intelgraph/gateway
-  tag: sha-PLACEHOLDER
+  repository: registry.staging/intelgraph-gateway
+  tag: v1.4.0-rc1
 
-oidc:
-  secretName: oidc
+canary:
+  enabled: true
+  steps:
+    - setWeight: 20
+    - pause: { duration: 2m }
+    - setWeight: 60
+    - pause: { duration: 5m }
 
-scim:
-  secretName: scim
-
+federation:
+  useLocal: false
+  pollIntervalMs: 20000
+  subgraphs:
+    - name: intelgraph
+      url: https://intelgraph-core.staging.svc.cluster.local/graphql
+    - name: mlEngine
+      url: https://ml-engine.staging.svc.cluster.local/graphql
+    - name: ingest
+      url: https://ingest-service.staging.svc.cluster.local/graphql
