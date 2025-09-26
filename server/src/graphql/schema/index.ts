@@ -6,12 +6,14 @@ import aiModule from '../schema.ai.js';
 import annotationsModule from '../schema.annotations.js';
 import graphragTypesModule from '../types/graphragTypes.js';
 import { crystalTypeDefs } from '../schema.crystal.js';
+import lineageModule from '../schema.lineage.ts';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
 const { graphTypeDefs } = graphModule as { graphTypeDefs: any };
 const { aiTypeDefs } = aiModule as { aiTypeDefs: any };
 const { annotationsTypeDefs } = annotationsModule as { annotationsTypeDefs: any };
 const graphragTypes = (graphragTypesModule as any).default || graphragTypesModule;
+const { lineageTypeDefs } = lineageModule as { lineageTypeDefs: any };
 
 const base = gql`
   scalar JSON
@@ -39,6 +41,7 @@ export const typeDefs = [
   aiTypeDefs,
   annotationsTypeDefs,
   crystalTypeDefs,
+  lineageTypeDefs,
 ];
 
 export default typeDefs;
