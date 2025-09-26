@@ -14,6 +14,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { trace } from '@opentelemetry/api';
 import logger from '../config/logger.js';
+import { formatGraphQLError } from './formatGraphQLError.js';
 
 // Import schemas and resolvers
 import { typeDefs } from './schema/index.js';
@@ -139,27 +140,7 @@ export function createApolloV5Server(httpServer: any): ApolloServer<GraphQLConte
     ],
 
     // Enhanced error formatting
-    formatError: (formattedError, error) => {
-      // Log internal errors
-      logger.error({
-        error: formattedError,
-        originalError: error
-      }, 'GraphQL error occurred');
-
-      // Don't expose internal errors in production
-      if (process.env.NODE_ENV === 'production') {
-        return {
-          message: formattedError.message,
-          locations: formattedError.locations,
-          path: formattedError.path,
-          extensions: {
-            code: formattedError.extensions?.code
-          }
-        };
-      }
-
-      return formattedError;
-    },
+    formatError: (_formattedError, error) => formatGraphQLError(error),
 
     // Disable introspection and playground in production
     introspection: process.env.NODE_ENV !== 'production',
