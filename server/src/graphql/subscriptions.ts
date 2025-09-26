@@ -17,8 +17,37 @@ export const ENTITY_DELETED = 'ENTITY_DELETED';
 export const RELATIONSHIP_CREATED = 'RELATIONSHIP_CREATED';
 export const RELATIONSHIP_UPDATED = 'RELATIONSHIP_UPDATED';
 export const RELATIONSHIP_DELETED = 'RELATIONSHIP_DELETED';
+export const GRAPH_QUERY_RESULTS = 'GRAPH_QUERY_RESULTS';
 
 export const tenantEvent = (base: string, tenantId: string): string => `${base}_${tenantId}`;
+
+const filterAsyncIterator = <T>(
+  iterator: AsyncIterator<T>,
+  predicate: (value: T) => boolean | Promise<boolean>,
+): AsyncIterator<T> => {
+  return {
+    async next() {
+      while (true) {
+        const result = await iterator.next();
+        if (result.done) {
+          return result;
+        }
+        if (await predicate(result.value)) {
+          return result;
+        }
+      }
+    },
+    return() {
+      return iterator.return ? iterator.return() : Promise.resolve({ value: undefined, done: true } as any);
+    },
+    throw(error: any) {
+      return iterator.throw ? iterator.throw(error) : Promise.reject(error);
+    },
+    [Symbol.asyncIterator]() {
+      return this;
+    },
+  };
+};
 
 const subscriptionResolvers = {
   Subscription: {
@@ -85,6 +114,25 @@ const subscriptionResolvers = {
       resolve: (event: any) => {
         const { payload } = event;
         logger.info({ payload }, 'Resolving relationshipDeleted subscription');
+        return payload;
+      },
+    },
+    graphQueryResults: {
+      subscribe: (_: any, args: { requestId: string }, context: any) => {
+        const tenantId = requireTenant(context);
+        const iterator = pubsub.asyncIterator([tenantEvent(GRAPH_QUERY_RESULTS, tenantId)]);
+        return filterAsyncIterator(iterator, async (event: any) => {
+          try {
+            return event?.payload?.requestId === args.requestId;
+          } catch (error) {
+            logger.warn({ error }, 'Failed to evaluate graphQueryResults filter predicate');
+            return false;
+          }
+        });
+      },
+      resolve: (event: any) => {
+        const { payload } = event;
+        logger.info({ payload }, 'Resolving graphQueryResults subscription');
         return payload;
       },
     },

@@ -30,6 +30,21 @@ const base = gql`
   }
 `;
 
+const subscriptionEnhancements = gql`
+  extend type Subscription {
+    graphQueryResults(requestId: ID!): GraphQueryResult!
+  }
+
+  type GraphQueryResult {
+    requestId: ID!
+    tenantId: String!
+    completedAt: DateTime!
+    durationMs: Float!
+    records: [JSON!]!
+    summary: JSON
+  }
+`;
+
 export const typeDefs = [
   base,
   coreTypeDefs,
@@ -39,6 +54,7 @@ export const typeDefs = [
   aiTypeDefs,
   annotationsTypeDefs,
   crystalTypeDefs,
+  subscriptionEnhancements,
 ];
 
 export default typeDefs;

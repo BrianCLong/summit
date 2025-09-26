@@ -11,11 +11,12 @@ function sign(body: any) {
 }
 
 describe('AI webhook', () => {
-  let app;
+let app;
 
-  beforeAll(async () => {
-    app = await createApp();
-  });
+beforeAll(async () => {
+  const result = await createApp();
+  app = result.app;
+});
 
   it('accepts signed webhook and creates insights', async () => {
     const body = {
