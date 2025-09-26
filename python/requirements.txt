@@ -13,4 +13,5 @@ requests
 feedparser
 sqlalchemy
 scikit-learn
+faker
 # Existing libraries like statsmodels, PuLP, rdkit are assumed to be available in the environment.

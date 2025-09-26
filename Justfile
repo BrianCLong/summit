@@ -56,6 +56,42 @@ fi
  @echo "REDIS_URL=${REDIS_URL}"
  @echo "CONDUCTOR_ENABLED=${CONDUCTOR_ENABLED}, TIMEOUT_MS=${CONDUCTOR_TIMEOUT_MS}, MAX_CONCURRENT=${CONDUCTOR_MAX_CONCURRENT}"
 
+# --- Mock data utilities ---
+mock-data-postgres records=40 seed?="":
+    seed_flag=""
+    if [ -n "{{seed}}" ]; then
+      seed_flag="--seed {{seed}}"
+    fi
+    python -m tools.testing.mock_data.cli postgres --records {{records}} $seed_flag
+
+mock-data-neo4j records=40 seed?="":
+    seed_flag=""
+    if [ -n "{{seed}}" ]; then
+      seed_flag="--seed {{seed}}"
+    fi
+    python -m tools.testing.mock_data.cli neo4j --records {{records}} $seed_flag
+
+mock-data-ingest records=40 seed?="":
+    seed_flag=""
+    if [ -n "{{seed}}" ]; then
+      seed_flag="--seed {{seed}}"
+    fi
+    python -m tools.testing.mock_data.cli ingest --records {{records}} $seed_flag
+
+mock-data-all records=40 seed?="":
+    seed_flag=""
+    if [ -n "{{seed}}" ]; then
+      seed_flag="--seed {{seed}}"
+    fi
+    python -m tools.testing.mock_data.cli all --records {{records}} $seed_flag
+
+mock-data-seed records=40 source="MOCK-SEED" seed?="":
+    seed_flag=""
+    if [ -n "{{seed}}" ]; then
+      seed_flag="--seed {{seed}}"
+    fi
+    python -m tools.testing.mock_data.cli seed --records {{records}} --source "{{source}}" $seed_flag --neo4j-uri "${NEO4J_URI}" --neo4j-user "${NEO4J_USERNAME}" --neo4j-password "${NEO4J_PASSWORD}"
+
 # Bring up core infra via Compose (services are named examples; adjust to your compose file)
 infra-up:
  @if [ -f .env ]; then set -a; source .env; set +a; fi
