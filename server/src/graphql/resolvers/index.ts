@@ -12,6 +12,7 @@ import { triggerN8nFlow } from '../../integrations/n8n.js';
 import { checkN8nTriggerAllowed } from '../../integrations/n8n-policy.js';
 import { isEnabled as flagEnabled } from '../../featureFlags/flagsmith.js';
 import { doclingResolvers } from './docling.ts';
+import graphValidationResolvers from './graphValidation.ts';
 
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
@@ -69,6 +70,7 @@ const resolvers = {
     ...relationshipResolvers.Mutation,
     ...userResolvers.Mutation,
     ...investigationResolvers.Mutation,
+    ...graphValidationResolvers.Mutation,
 
     // Safe orchestration mutations (idempotent/dry-run aware)
     ...SafeMutationsResolvers.Mutation,
