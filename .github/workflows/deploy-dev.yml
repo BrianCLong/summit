@@ -13,6 +13,9 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+      DEV_HOST: dev.topicality.co
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -37,7 +40,12 @@ jobs:
       - name: Install kubectl/helm
         uses: azure/setup-helm@v4
       - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name intelgraph-dev --region ${{ secrets.AWS_REGION }}
+        run: aws eks update-kubeconfig --name intelgraph-dev --region $AWS_REGION
+
+      - name: Ensure intelgraph-dev namespace + labels
+        run: |
+          kubectl create namespace intelgraph-dev --dry-run=client -o yaml | kubectl apply -f -
+          kubectl label ns intelgraph-dev istio-injection=disabled --overwrite
       - name: Secrets
         run: |
           kubectl -n intelgraph-dev create secret generic neo4j-auth --from-literal=password="${NEO4J_PASSWORD}" --dry-run=client -o yaml | kubectl apply -f -
@@ -54,10 +62,13 @@ jobs:
             --set image.app.repository=${{ steps.ecr.outputs.registry }}/intelgraph/app \
             --set image.web.repository=${{ steps.ecr.outputs.registry }}/intelgraph/web \
             --set image.app.tag=latest --set image.web.tag=latest
+
+      - name: Show ALB hostname
+        run: |
+          kubectl get ingress -n intelgraph-dev -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}'; echo || true
       - name: Smoke test
         run: |
           kubectl -n intelgraph-dev rollout status deploy/api --timeout=180s
           kubectl -n intelgraph-dev rollout status deploy/web --timeout=180s
           kubectl -n intelgraph-dev run curl --image=curlimages/curl:8.10.1 -i --rm -q --restart=Never -- \
             sh -c "curl -sS http://api.intelgraph-dev.svc.cluster.local/healthz && curl -sS http://web.intelgraph-dev.svc.cluster.local/"
-

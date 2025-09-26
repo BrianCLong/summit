@@ -2,17 +2,23 @@ namespace: intelgraph-dev
 
 image:
   app:
-    repository: <AWS_ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com/intelgraph/app
-    tag: latest
+    repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/app
+    tag: "latest"
   web:
-    repository: <AWS_ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com/intelgraph/web
-    tag: latest
+    repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/web
+    tag: "latest"
 
 ingress:
   enabled: true
   className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:<ACCOUNT_ID>:certificate/<CERT_ID>
+    alb.ingress.kubernetes.io/group.name: intelgraph-dev
   hosts:
-    - host: dev.intelgraph.example.com
+    - host: dev.topicality.co
       paths:
         - path: /
           pathType: Prefix
@@ -29,8 +35,7 @@ env:
 neo4j:
   acceptLicenseAgreement: "yes"
   neo4j:
-    password: "please-reset-in-secret"
+    password: "please-reset-in-secret"  # overridden by secret
   resources:
     cpu: "1"
     memory: "2Gi"
-
