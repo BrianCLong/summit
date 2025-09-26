@@ -458,12 +458,14 @@ export const createApp = async () => {
   const { default: dlpPlugin } = await import('./graphql/plugins/dlpPlugin.js');
   const { depthLimit } = await import('./graphql/validation/depthLimit.js');
   const { otelApolloPlugin } = await import('./graphql/middleware/otelPlugin.js');
+  const { graphqlOtelMetricsPlugin } = await import('./graphql/plugins/otelMetricsPlugin.js');
 
   const apollo = new ApolloServer({
     schema,
     // Security plugins - Order matters for execution lifecycle
     plugins: [
       otelApolloPlugin(),
+      graphqlOtelMetricsPlugin(),
       persistedQueriesPlugin as any,
       resolverMetricsPlugin as any,
       auditLoggerPlugin as any,

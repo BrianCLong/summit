@@ -1,0 +1,37 @@
+groups:
+  - name: graphql-otel
+    interval: 30s
+    rules:
+      - record: job:graphql_error_rate:ratio5m
+        expr: sum(rate(graphql_request_errors_total[5m])) / clamp_min(sum(rate(graphql_requests_total[5m])), 1)
+      - record: job:graphql_complexity_p95:5m
+        expr: histogram_quantile(0.95, sum(rate(graphql_query_complexity_bucket[5m])) by (le))
+      - alert: GraphQLAvailabilitySLOViolation
+        expr: job:graphql_error_rate:ratio5m > 0.001
+        for: 5m
+        labels:
+          severity: page
+          service: graphql-api
+          slo: availability-99.9
+        annotations:
+          summary: 'GraphQL availability below 99.9%'
+          description: 'Error rate {{ $value | printf "%.4f" }} over the last 5m breaches the 99.9% availability SLO.'
+      - alert: GraphQLComplexitySpike
+        expr: job:graphql_complexity_p95:5m > 750
+        for: 10m
+        labels:
+          severity: warning
+          service: graphql-api
+        annotations:
+          summary: 'GraphQL complexity p95 elevated'
+          description: 'p95 GraphQL query complexity has exceeded 750 cost units for 10m; investigate abusive or inefficient queries.'
+      - alert: GraphQLErrorBudgetBurnFast
+        expr: job:graphql_error_rate:ratio5m > 0.005
+        for: 2m
+        labels:
+          severity: critical
+          service: graphql-api
+          slo: availability-99.9
+        annotations:
+          summary: 'GraphQL error budget burn rate >5x'
+          description: 'GraphQL error rate {{ $value | printf "%.4f" }} for 2m exceeds 5x the allowed burn rate for the 99.9% SLO.'
