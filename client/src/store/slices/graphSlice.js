@@ -1,6 +1,87 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { GET_GRAPH_DATA } from '../graphql/graphData.gql.js';
+import {
+  GET_GRAPH_STYLE_SETTINGS,
+  UPDATE_GRAPH_STYLE_SETTINGS,
+} from '../../graphql/graphStyleSettings.gql.js';
 import client from '../services/apollo.js'; // Import the Apollo Client instance
+
+const DEFAULT_NODE_TYPE_COLORS = {
+  person: '#FF5733',
+  organization: '#33FF57',
+  location: '#3357FF',
+  event: '#FF33FF',
+  generic: '#888888',
+};
+
+const DEFAULT_NODE_SIZE = 48;
+const DEFAULT_EDGE_COLOR = '#cccccc';
+const DEFAULT_EDGE_WIDTH = 2;
+
+const readStoredStyleSettings = () => {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return null;
+  }
+
+  try {
+    const raw = window.localStorage.getItem('graphStyleSettings');
+    if (raw) {
+      return JSON.parse(raw);
+    }
+
+    const legacyColors = window.localStorage.getItem('graphNodeTypeColors');
+    if (legacyColors) {
+      return {
+        nodeTypeColors: JSON.parse(legacyColors),
+      };
+    }
+  } catch (error) {
+    console.warn('Failed to parse stored graph style settings', error);
+  }
+
+  return null;
+};
+
+const storedStyleSettings = readStoredStyleSettings();
+
+const sanitizeNodeTypeColors = (colors = {}) => {
+  return Object.entries(colors).reduce((acc, [type, color]) => {
+    if (typeof color === 'string' && color.trim()) {
+      acc[type] = color;
+    }
+    return acc;
+  }, {});
+};
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+const initialNodeTypeColors = {
+  ...DEFAULT_NODE_TYPE_COLORS,
+  ...(storedStyleSettings?.nodeTypeColors
+    ? sanitizeNodeTypeColors(storedStyleSettings.nodeTypeColors)
+    : {}),
+};
+
+const initialNodeSize = clamp(
+  typeof storedStyleSettings?.nodeSize === 'number'
+    ? storedStyleSettings.nodeSize
+    : DEFAULT_NODE_SIZE,
+  16,
+  160,
+);
+
+const initialEdgeColor =
+  typeof storedStyleSettings?.edgeColor === 'string' && storedStyleSettings.edgeColor.trim()
+    ? storedStyleSettings.edgeColor
+    : DEFAULT_EDGE_COLOR;
+
+const initialEdgeWidth = clamp(
+  typeof storedStyleSettings?.edgeWidth === 'number'
+    ? storedStyleSettings.edgeWidth
+    : DEFAULT_EDGE_WIDTH,
+  1,
+  16,
+);
 
 // Async thunk for fetching graph data
 export const fetchGraphData = createAsyncThunk(
@@ -19,6 +100,37 @@ export const fetchGraphData = createAsyncThunk(
       throw error;
     } finally {
       dispatch(graphSlice.actions.setLoading(false));
+    }
+  }
+);
+
+export const fetchGraphStyleSettings = createAsyncThunk(
+  'graph/fetchGraphStyleSettings',
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await client.query({
+        query: GET_GRAPH_STYLE_SETTINGS,
+        fetchPolicy: 'network-only',
+      });
+      return data.graphStyleSettings;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const saveGraphStyleSettings = createAsyncThunk(
+  'graph/saveGraphStyleSettings',
+  async (settings, { rejectWithValue }) => {
+    try {
+      const { data } = await client.mutate({
+        mutation: UPDATE_GRAPH_STYLE_SETTINGS,
+        variables: { input: settings },
+        fetchPolicy: 'no-cache',
+      });
+      return data.updateGraphStyleSettings;
+    } catch (error) {
+      return rejectWithValue(error.message);
     }
   }
 );
@@ -42,13 +154,10 @@ const graphSlice = createSlice({
     },
     clusters: [], // New state for managing clusters
     searchTerm: '', // New state for search term
-    nodeTypeColors: JSON.parse(localStorage.getItem('graphNodeTypeColors')) || { // New state for customizable node colors
-      person: '#FF5733',
-      organization: '#33FF57',
-      location: '#3357FF',
-      event: '#FF33FF',
-      generic: '#888888',
-    },
+    nodeTypeColors: initialNodeTypeColors, // New state for customizable node colors
+    nodeSize: initialNodeSize,
+    edgeColor: initialEdgeColor,
+    edgeWidth: initialEdgeWidth,
     graphStats: { // New state for graph statistics
       numNodes: 0,
       numEdges: 0,
@@ -65,6 +174,10 @@ const graphSlice = createSlice({
     minConfidenceFilter: 0, // New state for minimum confidence filter
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
+    styleDirty: false,
+    styleSettingsStatus: 'idle',
+    settingsError: null,
+    lastSettingsSavedAt: storedStyleSettings?.updatedAt || null,
   },
   reducers: {
     setGraphData: (state, action) => {
@@ -140,6 +253,26 @@ const graphSlice = createSlice({
     setNodeTypeColor: (state, action) => {
       const { type, color } = action.payload;
       state.nodeTypeColors[type] = color;
+      state.styleDirty = true;
+    },
+    setNodeSize: (state, action) => {
+      state.nodeSize = clamp(action.payload, 16, 160);
+      state.styleDirty = true;
+    },
+    setEdgeColor: (state, action) => {
+      state.edgeColor = action.payload || DEFAULT_EDGE_COLOR;
+      state.styleDirty = true;
+    },
+    setEdgeWidth: (state, action) => {
+      state.edgeWidth = clamp(action.payload, 1, 16);
+      state.styleDirty = true;
+    },
+    resetStyleSettings: (state) => {
+      state.nodeTypeColors = { ...DEFAULT_NODE_TYPE_COLORS };
+      state.nodeSize = DEFAULT_NODE_SIZE;
+      state.edgeColor = DEFAULT_EDGE_COLOR;
+      state.edgeWidth = DEFAULT_EDGE_WIDTH;
+      state.styleDirty = true;
     },
     addNode: (state, action) => {
       state.nodes.push(action.payload);
@@ -334,17 +467,89 @@ const graphSlice = createSlice({
     setMinConfidenceFilter: (state, action) => {
       state.minConfidenceFilter = action.payload;
     },
-  }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchGraphStyleSettings.pending, (state) => {
+        state.styleSettingsStatus = 'loading';
+        state.settingsError = null;
+      })
+      .addCase(fetchGraphStyleSettings.fulfilled, (state, action) => {
+        state.nodeTypeColors = {
+          ...DEFAULT_NODE_TYPE_COLORS,
+          ...sanitizeNodeTypeColors(action.payload.nodeTypeColors || {}),
+        };
+        state.nodeSize = clamp(action.payload.nodeSize ?? DEFAULT_NODE_SIZE, 16, 160);
+        state.edgeColor = action.payload.edgeColor || DEFAULT_EDGE_COLOR;
+        state.edgeWidth = clamp(action.payload.edgeWidth ?? DEFAULT_EDGE_WIDTH, 1, 16);
+        state.styleSettingsStatus = 'succeeded';
+        state.styleDirty = false;
+        state.settingsError = null;
+        state.lastSettingsSavedAt = action.payload.updatedAt || new Date().toISOString();
+      })
+      .addCase(fetchGraphStyleSettings.rejected, (state, action) => {
+        state.styleSettingsStatus = 'failed';
+        state.settingsError = action.payload || action.error?.message || 'Failed to load style settings';
+        state.errorMessage = state.settingsError;
+      })
+      .addCase(saveGraphStyleSettings.pending, (state) => {
+        state.styleSettingsStatus = 'saving';
+        state.settingsError = null;
+      })
+      .addCase(saveGraphStyleSettings.fulfilled, (state, action) => {
+        state.nodeTypeColors = {
+          ...DEFAULT_NODE_TYPE_COLORS,
+          ...sanitizeNodeTypeColors(action.payload.nodeTypeColors || {}),
+        };
+        state.nodeSize = clamp(action.payload.nodeSize ?? state.nodeSize, 16, 160);
+        state.edgeColor = action.payload.edgeColor || DEFAULT_EDGE_COLOR;
+        state.edgeWidth = clamp(action.payload.edgeWidth ?? state.edgeWidth, 1, 16);
+        state.styleSettingsStatus = 'succeeded';
+        state.styleDirty = false;
+        state.settingsError = null;
+        state.lastSettingsSavedAt = action.payload.updatedAt || new Date().toISOString();
+      })
+      .addCase(saveGraphStyleSettings.rejected, (state, action) => {
+        state.styleSettingsStatus = 'failed';
+        state.settingsError = action.payload || action.error?.message || 'Failed to save style settings';
+        state.errorMessage = state.settingsError;
+      });
+  },
 });
 
 export const {
   setGraphData,
+  addCluster,
+  removeCluster,
+  toggleClusterExpansion,
+  setSearchTerm,
+  setNodeTypeColor,
+  setNodeSize,
+  setEdgeColor,
+  setEdgeWidth,
+  resetStyleSettings,
   addNode,
   addEdge,
+  updateNode,
+  deleteNode,
+  deleteEdge,
+  setSelectedNodes,
+  setSelectedEdges,
   setSelectedNode,
   setSelectedEdge,
+  setLayout,
+  toggleFeature,
+  undo,
+  redo,
+  removeNode,
+  removeEdge,
+  setPathSourceNode,
+  setPathTargetNode,
+  setFoundPath,
   setLoading,
-  setErrorMessage
+  setErrorMessage,
+  setNodeTypeFilter,
+  setMinConfidenceFilter,
 } = graphSlice.actions;
 
 export default graphSlice.reducer;
