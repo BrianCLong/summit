@@ -10,6 +10,7 @@ import ResolverTop5 from '../../components/dashboard/ResolverTop5';
 import GrafanaLinkCard from '../../components/dashboard/GrafanaLinkCard';
 import LiveActivityFeed from '../../components/dashboard/LiveActivityFeed';
 import { useDashboardPrefetch, useIntelligentPrefetch } from '../../hooks/usePrefetch';
+import LineageOverview from '../../components/dashboard/LineageOverview';
 
 export default function Dashboard() {
   // Prefetch critical dashboard data to eliminate panel pop-in
@@ -29,6 +30,11 @@ export default function Dashboard() {
         </Grid>
         <Grid item xs={12} md={6}>
           <LiveActivityFeed />
+        </Grid>
+        <Grid item xs={12}>
+          <Paper elevation={1} sx={{ p: 2, borderRadius: 3 }}>
+            <LineageOverview />
+          </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
           <GrafanaLinkCard />

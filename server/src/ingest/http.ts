@@ -7,6 +7,11 @@ import { neo } from '../db/neo4j';
 import { deduplicationService } from './dedupe';
 import crypto from 'crypto';
 import { ingestDedupeRate, ingestBacklog } from '../metrics';
+import {
+  startLineageRun,
+  recordLineageEvent,
+  completeLineageRun,
+} from '../services/lineage/client';
 
 const tracer = trace.getTracer('http-ingest', '24.2.0');
 
@@ -113,23 +118,106 @@ class IngestQueue {
         'batch_size': signals.length
       });
 
+      const sourceDataset = `${tenantId}.ingest.signals`;
+      const postgresDataset = `${tenantId}.postgres.coherence_scores`;
+      const neoDataset = `${tenantId}.neo4j.signals`;
+      let lineageRunId: string | null = null;
+
       try {
+        lineageRunId = await startLineageRun({
+          jobName: 'http_ingest_batch',
+          jobType: 'ingestion',
+          tenantId,
+          metadata: {
+            batchSize: signals.length,
+            source: 'http-ingest',
+          },
+          inputs: [
+            {
+              namespace: 'ingest',
+              name: sourceDataset,
+              columns: ['type', 'value', 'weight', 'source', 'timestamp'],
+              metadata: {
+                stage: 'deduplicated',
+                sourceSystem: 'http-ingest',
+              },
+            },
+          ],
+          outputs: [
+            {
+              namespace: 'postgres',
+              name: postgresDataset,
+              columns: ['tenant_id', 'score', 'status', 'sample_count'],
+              metadata: {
+                storage: 'postgres',
+                table: 'coherence_scores',
+              },
+            },
+            {
+              namespace: 'neo4j',
+              name: neoDataset,
+              columns: ['type', 'value', 'weight', 'source', 'timestamp'],
+              metadata: {
+                storage: 'neo4j',
+                label: 'Signal',
+              },
+            },
+          ],
+        });
+
         // Store in PostgreSQL (CoherenceScore aggregation)
         await this.updateCoherenceScores(tenantId, signals);
-        
+
+        await recordLineageEvent(lineageRunId, {
+          eventType: 'LOAD',
+          stepId: `postgres-${Date.now()}`,
+          sourceDataset,
+          targetDataset: postgresDataset,
+          transformation: 'aggregate_coherence_score',
+          targetSystem: 'postgres',
+          tenantId,
+          columns: ['score', 'status', 'sample_count'],
+          metadata: {
+            rowCount: signals.length,
+          },
+        });
+
         // Store in Neo4j (Signal nodes)
         await this.storeSignals(tenantId, signals);
-        
+
+        await recordLineageEvent(lineageRunId, {
+          eventType: 'LOAD',
+          stepId: `neo4j-${Date.now()}`,
+          sourceDataset,
+          targetDataset: neoDataset,
+          transformation: 'materialize_signal_nodes',
+          targetSystem: 'neo4j',
+          tenantId,
+          columns: ['type', 'value', 'weight', 'source', 'timestamp'],
+          metadata: {
+            rowCount: signals.length,
+          },
+        });
+
         // Update metrics
         for (const signal of signals) {
           ingestThroughput.inc({ tenant_id: tenantId, type: signal.type });
         }
-        
+
         span.setAttributes({ 'signals_processed': signals.length });
-        
+
+        await completeLineageRun(lineageRunId, 'COMPLETED', {
+          tenantId,
+          signalsProcessed: signals.length,
+        });
+
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
+        await completeLineageRun(lineageRunId, 'FAILED', {
+          tenantId,
+          error: (error as Error).message,
+        });
         throw error;
       } finally {
         span.end();
