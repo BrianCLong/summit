@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
-// import { expressMiddleware } from '@as-integrations/express4';
+import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -66,6 +67,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be installed
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
+import { createServer } from 'http';
+import { WebSocketServer } from 'ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 import logger from './config/logger';
 import { env } from './config/env.js';
 import { randomUUID } from 'crypto';
@@ -83,12 +87,25 @@ import stripeRouter from './routes/stripe.js';
 import githubAppRouter from './routes/github-app.js';
 import stripeConnectRouter from './routes/stripe-connect.js';
 import { replayGuard, webhookRatelimit } from './middleware/webhook-guard.js';
+import { pubsub } from './graphql/subscriptions.js';
 
-export const createApp = async () => {
+type ExpressApp = ReturnType<typeof express>;
+type SummitHttpServer = ReturnType<typeof createServer>;
+
+export interface SummitGraphQLApp {
+  app: ExpressApp;
+  httpServer: SummitHttpServer;
+  apolloServer: ApolloServer<any>;
+  wsServer: WebSocketServer;
+  cleanup: () => Promise<void>;
+}
+
+export const createApp = async (): Promise<SummitGraphQLApp> => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 
   const app = express();
+  const httpServer = createServer(app);
   const appLogger = logger.child({ name: 'app' });
   // Raw-body mounting for selected webhook routes, then generic parsers
   mountRawBody(app);
@@ -443,12 +460,121 @@ export const createApp = async () => {
     }
   });
 
+  const extractTenantId = (source?: Record<string, unknown>): string | undefined => {
+    if (!source) return undefined;
+    const raw =
+      source['x-tenant-id'] ??
+      source['X-Tenant-Id'] ??
+      source['xTenantId'] ??
+      source['tenantId'] ??
+      source['tenant_id'] ??
+      source['tenant'];
+    if (Array.isArray(raw)) {
+      return raw.find((value) => typeof value === 'string' && value.length > 0) as string | undefined;
+    }
+    return typeof raw === 'string' && raw.length > 0 ? raw : undefined;
+  };
+
+  const normalizeAuthHeader = (value?: unknown): string | undefined => {
+    if (typeof value !== 'string' || value.length === 0) {
+      return undefined;
+    }
+    return value.toLowerCase().startsWith('bearer ') ? value : `Bearer ${value}`;
+  };
+
+  const buildHttpContext = async ({ req }: { req: Request }) => {
+    const baseContext = await getContext({ req });
+    const headerTenant = extractTenantId(req.headers as unknown as Record<string, unknown>);
+    const effectiveTenant =
+      (baseContext.user?.tenantId as string | undefined) ?? baseContext.tenantId ?? headerTenant;
+    if (baseContext.user && effectiveTenant && !baseContext.user.tenantId) {
+      baseContext.user.tenantId = effectiveTenant;
+    }
+    return {
+      ...baseContext,
+      tenantId: effectiveTenant,
+      pubsub,
+      neo4jDriver: getNeo4jDriver(),
+      req,
+    };
+  };
+
   let schema = makeExecutableSchema({ typeDefs, resolvers });
   if (process.env.REQUIRE_BUDGET_PLUGIN === 'true') {
     const { budgetDirectiveTypeDefs, budgetDirectiveTransformer } = budgetDirective();
     schema = makeExecutableSchema({ typeDefs: [budgetDirectiveTypeDefs, ...typeDefs], resolvers });
     schema = budgetDirectiveTransformer(schema as any) as any;
   }
+
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/graphql',
+  });
+
+  const serverCleanup = useServer(
+    {
+      schema,
+      onConnect: async (ctx) => {
+        const params = ctx.connectionParams as Record<string, unknown> | undefined;
+        const authHeader = normalizeAuthHeader(
+          params?.Authorization ?? params?.authorization ?? params?.authToken ?? params?.token,
+        );
+        if (!authHeader) {
+          throw new Error('Authorization token required');
+        }
+        const tenantId = extractTenantId(params);
+        const context = await getContext({
+          req: {
+            headers: {
+              authorization: authHeader,
+              'x-tenant-id': tenantId,
+            },
+          } as any,
+        });
+        if (!context.isAuthenticated || !context.user) {
+          throw new Error('Authentication failed');
+        }
+        if (!(context.user.tenantId || context.tenantId || tenantId)) {
+          throw new Error('Tenant context required');
+        }
+      },
+      context: async (ctx) => {
+        const params = ctx.connectionParams as Record<string, unknown> | undefined;
+        const authHeader = normalizeAuthHeader(
+          params?.Authorization ?? params?.authorization ?? params?.authToken ?? params?.token,
+        );
+        if (!authHeader) {
+          throw new Error('Authorization token required');
+        }
+        const tenantId = extractTenantId(params);
+        const requestLike = {
+          headers: {
+            authorization: authHeader,
+            'x-tenant-id': tenantId,
+          },
+        } as any;
+        const baseContext = await getContext({ req: requestLike });
+        if (!baseContext.isAuthenticated || !baseContext.user) {
+          throw new Error('Authentication required');
+        }
+        const effectiveTenant =
+          baseContext.user.tenantId || baseContext.tenantId || tenantId;
+        if (!effectiveTenant) {
+          throw new Error('Tenant context required');
+        }
+        if (!baseContext.user.tenantId) {
+          baseContext.user.tenantId = effectiveTenant;
+        }
+        return {
+          ...baseContext,
+          tenantId: effectiveTenant,
+          pubsub,
+          neo4jDriver: getNeo4jDriver(),
+        };
+      },
+    },
+    wsServer,
+  );
 
   // GraphQL over HTTP
   const { persistedQueriesPlugin } = await import('./graphql/plugins/persistedQueries.js');
@@ -463,6 +589,16 @@ export const createApp = async () => {
     schema,
     // Security plugins - Order matters for execution lifecycle
     plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              await serverCleanup.dispose();
+            },
+          };
+        },
+      },
       otelApolloPlugin(),
       persistedQueriesPlugin as any,
       resolverMetricsPlugin as any,
@@ -515,7 +651,14 @@ export const createApp = async () => {
 
           if (!token) {
             console.warn('Development: No token provided, allowing request');
-            (req as any).user = { sub: 'dev-user', email: 'dev@intelgraph.local', role: 'admin' };
+            const fallbackTenant =
+              extractTenantId(req.headers as unknown as Record<string, unknown>) || 'dev-tenant';
+            (req as any).user = {
+              sub: 'dev-user',
+              email: 'dev@intelgraph.local',
+              role: 'admin',
+              tenantId: fallbackTenant,
+            };
           }
           next();
         };
@@ -523,8 +666,8 @@ export const createApp = async () => {
   app.use(
     '/graphql',
     express.json(),
-    authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-// expressMiddleware(apollo, { context: getContext }),
+    authenticateToken,
+    expressMiddleware(apollo, { context: buildHttpContext }),
   );
 
   // Centralized error handler (Express 5-compatible)
@@ -545,5 +688,14 @@ export const createApp = async () => {
     app.use('/api/maestro/v1', otelRoute('dashboard'), dashboardRouter);
   }
 
-  return app;
+  const cleanup = async () => {
+    await apollo.stop();
+    await serverCleanup.dispose();
+    wsServer.close();
+    if (httpServer.listening) {
+      await new Promise<void>((resolve) => httpServer.close(() => resolve()));
+    }
+  };
+
+  return { app, httpServer, apolloServer: apollo, wsServer, cleanup };
 };

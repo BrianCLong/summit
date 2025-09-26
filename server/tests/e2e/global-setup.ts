@@ -12,6 +12,7 @@ async function globalSetup(config: FullConfig) {
     // Set up environment variables for E2E tests
     process.env.NODE_ENV = 'test';
     process.env.E2E_TEST = 'true';
+    process.env.NEO4J_MOCK_MODE = 'true';
 
     // Wait for services to be ready
     await waitForServices();

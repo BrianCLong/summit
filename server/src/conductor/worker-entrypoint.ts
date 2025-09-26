@@ -29,10 +29,10 @@ async function startWorker() {
   if (role === 'api') {
     // Start the main API server
     const { createApp } = await import('../app');
-    const app = await createApp();
+    const { app, httpServer } = await createApp();
     const port = process.env.PORT || 3000;
 
-    app.listen(port, () => {
+    httpServer.listen(port, () => {
       console.log(`Conductor API server listening on port ${port}`);
     });
     return;

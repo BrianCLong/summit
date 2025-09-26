@@ -12,9 +12,47 @@ import { triggerN8nFlow } from '../../integrations/n8n.js';
 import { checkN8nTriggerAllowed } from '../../integrations/n8n-policy.js';
 import { isEnabled as flagEnabled } from '../../featureFlags/flagsmith.js';
 import { doclingResolvers } from './docling.ts';
+import subscriptionResolvers, { pubsub, tenantEvent, GRAPH_QUERY_RESULTS } from '../subscriptions.js';
+import { validateTenantAccess } from '../../middleware/tenantValidator.js';
+import { getNeo4jDriver } from '../../db/neo4j.js';
 
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+
+const normalizeNeo4jValue = (value: any): any => {
+  if (Array.isArray(value)) {
+    return value.map(normalizeNeo4jValue);
+  }
+  if (value && typeof value === 'object') {
+    if (typeof value.toNumber === 'function' && 'low' in value && 'high' in value) {
+      try {
+        return value.toNumber();
+      } catch {
+        return value;
+      }
+    }
+    if ('identity' in value && 'labels' in value && 'properties' in value) {
+      return {
+        id: value.identity?.toString?.() ?? `${value.identity}`,
+        labels: Array.isArray(value.labels) ? value.labels : [],
+        properties: normalizeNeo4jValue(value.properties),
+      };
+    }
+    if ('identity' in value && 'start' in value && 'end' in value && 'type' in value) {
+      return {
+        id: value.identity?.toString?.() ?? `${value.identity}`,
+        start: value.start?.toString?.() ?? `${value.start}`,
+        end: value.end?.toString?.() ?? `${value.end}`,
+        type: value.type,
+        properties: normalizeNeo4jValue(value.properties),
+      };
+    }
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nested]) => [key, normalizeNeo4jValue(nested)]),
+    );
+  }
+  return value;
+};
 
 const resolvers = {
   // Core scalars from production resolvers
@@ -63,6 +101,77 @@ const resolvers = {
     // Production core resolvers
     ...coreResolvers.Mutation,
     ...doclingResolvers.Mutation,
+
+    async executeGraphQuery(
+      _parent: unknown,
+      args: { requestId: string; cypher: string; parameters?: Record<string, unknown> },
+      context: any,
+    ) {
+      const { requestId, cypher, parameters = {} } = args;
+      if (!requestId) {
+        throw new Error('requestId is required');
+      }
+      if (!cypher || typeof cypher !== 'string') {
+        throw new Error('Cypher query is required');
+      }
+
+      const tenantContext = validateTenantAccess(context);
+      const scopedParameters: Record<string, unknown> = { ...parameters };
+      if (!('tenantId' in scopedParameters)) {
+        scopedParameters.tenantId = tenantContext.tenantId;
+      }
+
+      const basePayload = {
+        requestId,
+        tenantId: tenantContext.tenantId,
+      };
+
+      if (process.env.NEO4J_MOCK_MODE === 'true') {
+        const payload = {
+          ...basePayload,
+          completedAt: new Date().toISOString(),
+          durationMs: 0,
+          records: [
+            {
+              mock: true,
+              cypher,
+              parameters: scopedParameters,
+            },
+          ],
+          summary: { mocked: true },
+        };
+        pubsub.publish(tenantEvent(GRAPH_QUERY_RESULTS, tenantContext.tenantId), { payload });
+        return payload;
+      }
+
+      const driver = getNeo4jDriver();
+      const session = driver.session();
+      const started = Date.now();
+      try {
+        const result = await session.run(cypher, scopedParameters);
+        const durationMs = Date.now() - started;
+        const records = result.records.map((record: any) => {
+          const obj = record.toObject();
+          return Object.fromEntries(
+            Object.entries(obj).map(([key, value]) => [key, normalizeNeo4jValue(value)]),
+          );
+        });
+        const summaryCounters = result.summary?.counters?.toObject?.();
+        const payload = {
+          ...basePayload,
+          completedAt: new Date().toISOString(),
+          durationMs,
+          records,
+          summary: summaryCounters ? normalizeNeo4jValue(summaryCounters) : undefined,
+        };
+        pubsub.publish(tenantEvent(GRAPH_QUERY_RESULTS, tenantContext.tenantId), { payload });
+        return payload;
+      } catch (error) {
+        throw new Error(`Failed to execute graph query: ${(error as Error).message}`);
+      } finally {
+        await session.close();
+      }
+    },
 
     // Legacy resolvers (will be phased out)
     ...entityResolvers.Mutation,
@@ -192,6 +301,10 @@ const resolvers = {
         inputs
       };
     },
+  },
+
+  Subscription: {
+    ...subscriptionResolvers.Subscription,
   },
 
   // Field resolvers from production core (temporarily disabled due to schema mismatch)
