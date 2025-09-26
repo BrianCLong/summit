@@ -5,7 +5,7 @@ const graphResolvers = require('./resolvers.graphops.js');
 const aiResolvers = require('./resolvers.ai.js');
 const annotationsResolvers = require('./resolvers.annotations.js');
 import crystalResolvers from './resolvers.crystal.js';
-import { randomUUID as uuidv4 } from 'crypto';
+import ioResilienceResolvers from './resolvers.ioResilience';
 
 interface User {
   id: string;
@@ -51,11 +51,12 @@ const goals: Array<{
   text: string;
   investigationId: string | null;
   createdAt: string;
-}> = []; // replace with DB later
+}> = [];
 let seq = 1;
 
 export const resolvers = {
   Query: {
+    ...(ioResilienceResolvers.Query || {}),
     ...(crystalResolvers.Query || {}),
     ...(copilotResolvers.Query || {}),
     ...(aiResolvers.Query || {}),
@@ -68,10 +69,11 @@ export const resolvers = {
       return investigationId
         ? goals.filter((g) => g.investigationId === String(investigationId))
         : goals;
-    },
+    }
   },
 
   Mutation: {
+    ...(ioResilienceResolvers.Mutation || {}),
     ...(crystalResolvers.Mutation || {}),
     ...(copilotResolvers.Mutation || {}),
     ...(graphResolvers.Mutation || {}),
@@ -97,7 +99,7 @@ export const resolvers = {
         id: String(seq++),
         text: text.trim(),
         investigationId: investigationId ? String(investigationId) : null,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date().toISOString()
       };
       goals.unshift(goal);
       return goal;
@@ -105,7 +107,7 @@ export const resolvers = {
 
     logout: async () => {
       return true;
-    },
+    }
   },
 
   Subscription: {
@@ -114,27 +116,30 @@ export const resolvers = {
     ...(aiResolvers.Subscription || {}),
     ...(annotationsResolvers.Subscription || {}),
     investigationUpdated: {
-      subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED']),
+      subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED'])
     },
 
     entityAdded: {
-      subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED']),
-    },
+      subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED'])
+    }
   },
 
   User: {
-    fullName: (user: User) => `${user.firstName} ${user.lastName}`,
+    fullName: (user: User) => `${user.firstName} ${user.lastName}`
   },
 
   Entity: {
-    ...(annotationsResolvers.Entity || {}),
+    ...(annotationsResolvers.Entity || {})
   },
   Investigation: {
-    ...(annotationsResolvers.Investigation || {}),
+    ...(annotationsResolvers.Investigation || {})
   },
   Relationship: {
-    ...(annotationsResolvers.Relationship || {}),
+    ...(annotationsResolvers.Relationship || {})
   },
+  IOEvent: {
+    ...(ioResilienceResolvers.IOEvent || {})
+  }
 };
 
 export default resolvers;

@@ -40,6 +40,7 @@ import {
   Map,
   Assessment,
   Settings,
+  Verified,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -62,6 +63,7 @@ import VisualPipelines from './pages/VisualPipelines.tsx';
 import ExecutorsPage from './pages/Executors.tsx';
 import MCPRegistry from './pages/MCPRegistry.tsx';
 import { Security, Engineering, Description } from '@mui/icons-material';
+import VerifyUs from './pages/VerifyUs';
 import ObservabilityPanel from './features/observability/ObservabilityPanel';
 import AdminStudio from './features/admin/AdminStudio';
 import WorkBoard from './features/work/Board';
@@ -108,6 +110,7 @@ const navigationItems = [
   { path: '/mcp/registry', label: 'MCP Registry', icon: <Engineering /> },
   { path: '/threats', label: 'Threat Assessment', icon: <Assessment /> },
   { path: '/access-intel', label: 'Access Intel', icon: <Security /> },
+  { path: '/verify', label: 'Verify Us', icon: <Verified /> },
   { path: '/geoint', label: 'GeoInt Map', icon: <Map /> },
   { path: '/reports', label: 'Reports', icon: <Assessment /> },
   { path: '/system', label: 'System', icon: <Settings />, roles: ['ADMIN'] },
@@ -662,6 +665,7 @@ function MainLayout() {
             <Route path="/mcp/registry" element={<MCPRegistry />} />
             <Route path="/threats" element={<ThreatsPage />} />
             <Route path="/access-intel" element={<AccessIntelPage />} />
+            <Route path="/verify" element={<VerifyUs />} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
             <Route element={<ProtectedRoute roles={['ADMIN']} />}>

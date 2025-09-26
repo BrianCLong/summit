@@ -6,6 +6,7 @@ import aiModule from '../schema.ai.js';
 import annotationsModule from '../schema.annotations.js';
 import graphragTypesModule from '../types/graphragTypes.js';
 import { crystalTypeDefs } from '../schema.crystal.js';
+import ioResilienceTypeDefs from './ioResilience';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
 const { graphTypeDefs } = graphModule as { graphTypeDefs: any };
@@ -39,6 +40,7 @@ export const typeDefs = [
   aiTypeDefs,
   annotationsTypeDefs,
   crystalTypeDefs,
+  ioResilienceTypeDefs,
 ];
 
 export default typeDefs;

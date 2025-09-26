@@ -1,0 +1,40 @@
+version: 1
+rules:
+  - name: Auto-create takedown tasks for high severity
+    event: issue_created
+    if:
+      all:
+        - issue.issueType = "IO Case"
+        - issue.customfield_severity >= 4
+    then:
+      - create_issues:
+          - project: ${PROJECT_KEY}
+            type: Task
+            summary: "Takedown: ${issue.summary}"
+            fields:
+              parent: ${issue.key}
+              customfield_story_id: ${issue.customfield_story_id}
+      - add_comment: "Auto-created takedown task due to severity >=4"
+
+  - name: Escalate if TTD exceeds 30 minutes
+    event: schedule
+    schedule: "*/5 * * * *"
+    jql: "project = ${PROJECT_KEY} AND issuetype = 'IO Case' AND status = 'Triage'"
+    actions:
+      - if:
+          any:
+            - smartvalue: "{{now.diff(issue.created).minutes}} > 30"
+        then:
+          - assign: "@oncall-intel"
+          - send_slack: "#io-warroom" "TTD breach on {{issue.key}} — triage now"
+
+  - name: Close parent when takedown completes
+    event: issue_updated
+    if:
+      all:
+        - issue.issueType = "Takedown"
+        - issue.status CHANGED TO Done
+    then:
+      - for: parent
+        actions:
+          - transition: Monitoring

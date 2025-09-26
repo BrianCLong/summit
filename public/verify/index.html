@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Verify IntelGraph Communications</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <style>
+      body { background: #f7f9fc; }
+      main { padding: 2rem 0; }
+      .card { border-radius: 18px; padding: 1.5rem; background: #fff; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08); margin-bottom: 1.5rem; }
+      .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; border: 1px solid #d1d5db; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+      .sig { font-family: 'Fira Code', monospace; word-break: break-all; font-size: 0.85rem; color: #334155; }
+      header h1 { margin-bottom: 0.25rem; }
+      header p { color: #475569; }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Verify IntelGraph Communications</h1>
+        <p>Use this page to confirm official alerts, signed media, and hotline workflows before taking action.</p>
+      </header>
+
+      <section class="card">
+        <h2>Signing Keys</h2>
+        <p class="muted">Rotate quarterly. Fingerprints are mirrored in DNS TXT records.</p>
+        <ul>
+          <li><strong>PGP Fingerprint:</strong> <span class="sig">3F23 8C8E 9B77 1A2C 0D11 7A2E 1F9A 44E1 DC55 9AAB</span></li>
+          <li><strong>X.509 Key ID:</strong> <span class="sig">4C:F2:89:BA:1A:77:2C:11</span></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Official Channels</h2>
+        <ul>
+          <li>Website: <strong>https://intelgraph.example</strong></li>
+          <li>X / Twitter: <strong>@intelgraph</strong></li>
+          <li>Facebook: <strong>/intelgraph</strong></li>
+          <li>Hotline: <strong>+1-800-555-0199</strong> (voice callback verification enforced)</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Debunk Cards</h2>
+        <article class="card">
+          <span class="badge">Election</span>
+          <h3>Bogus robocall changing voting hours</h3>
+          <p><strong>Verdict:</strong> False. IntelGraph never issues robocalls to change polling times. Check with your local election office or call the hotline above.</p>
+          <p><strong>Evidence:</strong> Audio hash <span class="sig">f1c27b5a1d3b4f8ef7c2d81bc1f5e8a9d1f4c3b2a7d6e5f4c3b2a1f0e9d8c7b6</span> • Case IO-CASE-1001 • Updated 2025-09-25</p>
+        </article>
+        <article class="card">
+          <span class="badge">Disaster</span>
+          <h3>False alert: shelters closed due to contamination</h3>
+          <p><strong>Verdict:</strong> False. Confirm shelter status at <a href="https://intelgraph.example/shelters">intelgraph.example/shelters</a>.</p>
+          <p><strong>Evidence:</strong> Verified with Emergency Operations Center bulletin 2025-09-25-07. Case IO-CASE-1002.</p>
+        </article>
+        <article class="card">
+          <span class="badge">Finance</span>
+          <h3>Deepfake CEO announces surprise merger</h3>
+          <p><strong>Verdict:</strong> False. Official investor communications are posted with C2PA manifests at <a href="https://intelgraph.example/investors">intelgraph.example/investors</a>.</p>
+          <p><strong>Evidence:</strong> Video hash <span class="sig">1a2b3c4d5e6f708192a3b4c5d6e7f8019a8b7c6d5e4f30291827364554637281</span> • Case IO-CASE-1003.</p>
+        </article>
+      </section>
+
+      <section class="card">
+        <h2>Predictive Risk Advisories</h2>
+        <p class="muted">Foresight service updates every 15 minutes. Risk ≥ 0.85 triggers immediate escalation.</p>
+        <ul>
+          <li><strong>Election voice-clone suppression</strong> — Risk 0.89, Confidence 0.92, Horizon 4h. Legal + Trust &amp; Safety on-call engaged; callback protocol enforced.</li>
+          <li><strong>Finance pump with deepfake executive</strong> — Risk 0.92, Confidence 0.95, Horizon 2h. Investor relations notice drafted; exchange partners briefed.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Provenance Ledger Snapshot</h2>
+        <p class="muted">PHI (Provenance Health Index) below 0.40 requires provenance ops escalation.</p>
+        <ul>
+          <li><strong>Election robocall audio</strong> — Verified 3 · Pending 1 · PHI 0.67. Synthetic voiceprint matched; hotline script published.</li>
+          <li><strong>Spoofed multilingual news site</strong> — Verified 1 · Pending 2 · PHI 0.41. Registrar validation pending; signage update within 60 minutes.</li>
+        </ul>
+      </section>
+
+      <footer class="card">
+        <p>Report suspicious communications to <a href="mailto:trust@intelgraph.example">trust@intelgraph.example</a>. Include screenshots or audio files when possible.</p>
+      </footer>
+    </main>
+  </body>
+</html>
