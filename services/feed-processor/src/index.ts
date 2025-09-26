@@ -10,6 +10,8 @@ import { Pool } from 'pg';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import pino from 'pino';
+import { spawn } from 'child_process';
+import path from 'path';
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -75,6 +77,108 @@ const LineageEventSchema = z.object({
 
 type IngestionJob = z.infer<typeof IngestionJobSchema>;
 type LineageEvent = z.infer<typeof LineageEventSchema>;
+
+type PythonValidationResult = {
+  success: boolean;
+  violations: Array<{
+    schema: string;
+    message: string;
+    instance_index: number;
+    path: string;
+    schema_path: string;
+    instance: unknown;
+  }>;
+  error?: string;
+};
+
+async function validateIngestionPayload(
+  jobData: IngestionJob,
+  entities: any[],
+  relationships: any[]
+): Promise<void> {
+  const pythonExecutable = process.env.FEED_VALIDATOR_PYTHON || 'python3';
+  const scriptPath = path.resolve(__dirname, '../validation/validate.py');
+  const timestamp = new Date().toISOString();
+
+  const postgresRecords = entities.map(entity => ({
+    job_id: jobData.job_id,
+    record_id: String(entity?.id ?? ''),
+    source_type: jobData.source_type,
+    target_graph: jobData.target_graph,
+    authority_id: jobData.authority_id,
+    data_source_id: jobData.data_source_id,
+    payload: entity,
+    ingested_at: timestamp
+  }));
+
+  const payload = JSON.stringify({
+    job: {
+      job_id: jobData.job_id,
+      source_type: jobData.source_type,
+      target_graph: jobData.target_graph,
+      authority_id: jobData.authority_id,
+      data_source_id: jobData.data_source_id
+    },
+    entities,
+    relationships,
+    postgres_records: postgresRecords
+  });
+
+  const result = await new Promise<PythonValidationResult>((resolve, reject) => {
+    const child = spawn(pythonExecutable, [scriptPath], { stdio: ['pipe', 'pipe', 'pipe'] });
+
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', data => {
+      stdout += data.toString();
+    });
+
+    child.stderr.on('data', data => {
+      stderr += data.toString();
+    });
+
+    child.on('error', error => {
+      reject(error);
+    });
+
+    child.on('close', code => {
+      if (code === 0) {
+        try {
+          resolve(JSON.parse(stdout) as PythonValidationResult);
+        } catch (error) {
+          reject(new Error(`Failed to parse schema validator response: ${(error as Error).message}`));
+        }
+      } else {
+        let details = stderr.trim();
+        try {
+          const parsed = JSON.parse(stdout || '{}') as PythonValidationResult;
+          if (parsed.error) {
+            details = parsed.error;
+          } else if (parsed.violations) {
+            details = JSON.stringify(parsed.violations, null, 2);
+          }
+        } catch (error) {
+          // Ignore JSON parsing errors so stderr is preserved
+        }
+        reject(new Error(`Schema validation failed (exit code ${code}): ${details || 'no details'}`));
+      }
+    });
+
+    child.stdin.write(payload);
+    child.stdin.end();
+  });
+
+  if (!result.success) {
+    throw new Error(`Schema validation failed: ${JSON.stringify(result.violations, null, 2)}`);
+  }
+
+  logger.debug('Schema validation succeeded', {
+    jobId: jobData.job_id,
+    validator: scriptPath,
+    violations: result.violations.length
+  });
+}
 
 // OpenLineage client
 class OpenLineageClient {
@@ -359,10 +463,17 @@ ingestionQueue.process('ingest-data', 5, async (job) => {
         job_id: jobData.job_id,
         raw_data: rawData,
         transform_rules: jobData.transform_rules,
-        run_id: runId
+        run_id: runId,
+        source_type: jobData.source_type,
+        target_graph: jobData.target_graph,
+        authority_id: jobData.authority_id,
+        data_source_id: jobData.data_source_id,
+        reason_for_access: jobData.reason_for_access,
+        source_config: jobData.source_config
       });
     } else {
-      // Store directly
+      // Validate and store directly
+      await validateIngestionPayload(jobData, transformedData, []);
       await graphStorage.storeEntities(transformedData, jobData.job_id);
     }
 
@@ -411,7 +522,29 @@ ingestionQueue.process('ingest-data', 5, async (job) => {
 });
 
 transformQueue.process('transform-data', 3, async (job) => {
-  const { job_id, raw_data, transform_rules, run_id } = job.data;
+  const {
+    job_id,
+    raw_data,
+    transform_rules,
+    run_id,
+    source_type,
+    target_graph,
+    authority_id,
+    data_source_id,
+    reason_for_access,
+    source_config
+  } = job.data;
+
+  const jobContext: IngestionJob = {
+    job_id,
+    source_type: source_type || 'csv',
+    source_config: source_config || {},
+    data_source_id: data_source_id || 'unknown-source',
+    target_graph: target_graph || 'main',
+    transform_rules: transform_rules || [],
+    authority_id: authority_id || 'unknown-authority',
+    reason_for_access: reason_for_access || 'transformation'
+  };
 
   try {
     logger.info('Starting data transformation', { jobId: job_id, runId: run_id });
@@ -450,11 +583,13 @@ transformQueue.process('transform-data', 3, async (job) => {
       }
     }
 
+    // Validate before storing transformed data
+    const relationships = extractRelationships(transformedData);
+    await validateIngestionPayload(jobContext, transformedData, relationships);
+
     // Store transformed data
     await graphStorage.storeEntities(transformedData, job_id);
 
-    // Extract relationships if configured
-    const relationships = extractRelationships(transformedData);
     if (relationships.length > 0) {
       await graphStorage.createRelationships(relationships, job_id);
     }
