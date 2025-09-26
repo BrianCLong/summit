@@ -11,6 +11,12 @@ import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../config/logger.js';
 import { z } from 'zod';
+import {
+  compressGraphSnapshot,
+  decompressGraphSnapshot,
+  getGraphSnapshotS3Client,
+  GraphCompressionAlgorithm,
+} from '../../graph/compression.js';
 
 const resolverLogger = logger.child({ name: 'CoreResolvers' });
 
@@ -37,6 +43,18 @@ const RelationshipInputZ = z.object({
   props: z.record(z.any()).default({}),
   investigationId: z.string().uuid().optional(),
 });
+
+const GraphCompressionInputZ = z.object({
+  bucket: z.string().min(1),
+  sourceKey: z.string().min(1),
+  targetKey: z.string().min(1).optional(),
+  algorithm: z.nativeEnum(GraphCompressionAlgorithm),
+  level: z.number().int().min(1).max(22).optional(),
+  metadata: z.record(z.any()).optional(),
+  deleteSourceAfter: z.boolean().optional(),
+});
+
+const GraphDecompressionInputZ = GraphCompressionInputZ.omit({ level: true });
 
 // Initialize repositories
 const pg = getPostgresPool();
@@ -357,6 +375,33 @@ export const coreResolvers = {
 
       return await investigationRepo.delete(id);
     },
+
+    compressGraphSnapshot: async (_: any, { input }: any) => {
+      const parsed = GraphCompressionInputZ.parse(input);
+      const client = getGraphSnapshotS3Client();
+      return await compressGraphSnapshot(client, {
+        bucket: parsed.bucket,
+        sourceKey: parsed.sourceKey,
+        targetKey: parsed.targetKey ?? undefined,
+        algorithm: parsed.algorithm,
+        level: parsed.level,
+        metadata: toMetadataRecord(parsed.metadata),
+        deleteSourceAfter: parsed.deleteSourceAfter,
+      });
+    },
+
+    decompressGraphSnapshot: async (_: any, { input }: any) => {
+      const parsed = GraphDecompressionInputZ.parse(input);
+      const client = getGraphSnapshotS3Client();
+      return await decompressGraphSnapshot(client, {
+        bucket: parsed.bucket,
+        sourceKey: parsed.sourceKey,
+        targetKey: parsed.targetKey ?? undefined,
+        algorithm: parsed.algorithm,
+        metadata: toMetadataRecord(parsed.metadata),
+        deleteSourceAfter: parsed.deleteSourceAfter,
+      });
+    },
   },
 
   // Field resolvers
@@ -427,3 +472,25 @@ export const coreResolvers = {
     },
   },
 };
+
+function toMetadataRecord(metadata?: Record<string, unknown>): Record<string, string> | undefined {
+  if (!metadata) {
+    return undefined;
+  }
+  const entries = Object.entries(metadata).map(([key, value]) => [key, serializeMetadataValue(value)]);
+  return Object.fromEntries(entries);
+}
+
+function serializeMetadataValue(value: unknown): string {
+  if (value === null || typeof value === 'undefined') {
+    return '';
+  }
+  if (typeof value === 'object') {
+    try {
+      return JSON.stringify(value);
+    } catch (err) {
+      return String(value);
+    }
+  }
+  return String(value);
+}
