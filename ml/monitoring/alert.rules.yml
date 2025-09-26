@@ -1,0 +1,43 @@
+groups:
+  - name: ml-model-drift
+    interval: 1m
+    rules:
+      - alert: MLModelDataDriftWarning
+        expr: model_data_drift_share{service="ml-engine"} > 0.3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Model data drift rising for {{ $labels.model_name }}"
+          description: |
+            Evidently detected share_of_drifted_columns={{ $value | printf "%.2f" }}
+            which exceeds the configured threshold of 0.30.
+
+      - alert: MLModelDataDriftCritical
+        expr: model_data_drift_detected{service="ml-engine"} == 1
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Model {{ $labels.model_name }} triggered data drift"
+          description: "Review Grafana dashboard for drifted features and retrain if necessary."
+
+      - alert: MLModelPerformanceRegression
+        expr: model_performance_drop_ratio{service="ml-engine", metric="f1"} > 0.2
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Model performance degradation detected for {{ $labels.model_name }}"
+          description: |
+            Evidently observed a relative drop of {{ $value | printf "%.2f" }} for the f1 metric
+            compared to the reference baseline.
+
+      - alert: MLModelRepeatedAlerts
+        expr: increase(model_drift_alerts_total{service="ml-engine"}[30m]) > 3
+        for: 0m
+        labels:
+          severity: info
+        annotations:
+          summary: "Multiple drift alerts emitted for {{ $labels.model_name }}"
+          description: "Investigate upstream data pipelines and feature stores for instability."

@@ -1,7 +1,4 @@
-"""
-Advanced monitoring and observability module for IntelGraph ML service
-Supports GPU acceleration, quantum computing, and distributed training metrics
-"""
+"""Monitoring package exports for the IntelGraph ML service."""
 
 from .metrics import (
     track_http_request,
@@ -14,31 +11,14 @@ from .metrics import (
     track_model_loading,
     get_metrics,
     get_content_type,
-    # New advanced metrics
-    MLMetrics,
-    MetricsCollector,
-    SystemMetrics,
-    GPUMetrics,
-    ModelMetrics,
-    QuantumMetrics
+    record_drift_metrics,
 )
-
-from .health import (
-    health_checker,
-    # New advanced health checks
-    HealthCheck,
-    HealthStatus,
-    HealthCheckResult,
-    SystemHealthChecker,
-    GPUHealthChecker,
-    PyTorchHealthChecker,
-    ServiceHealthChecker
-)
+from .drift import EvidentlyDriftMonitor, DriftResult
+from .health import health_checker
 
 __all__ = [
-    # Legacy metrics
     'track_http_request',
-    'track_ml_prediction', 
+    'track_ml_prediction',
     'track_task_processing',
     'track_entity_extraction',
     'track_graph_operation',
@@ -47,20 +27,8 @@ __all__ = [
     'track_model_loading',
     'get_metrics',
     'get_content_type',
+    'record_drift_metrics',
+    'EvidentlyDriftMonitor',
+    'DriftResult',
     'health_checker',
-    # Advanced metrics
-    'MLMetrics',
-    'MetricsCollector',
-    'SystemMetrics',
-    'GPUMetrics', 
-    'ModelMetrics',
-    'QuantumMetrics',
-    # Advanced health
-    'HealthCheck',
-    'HealthStatus',
-    'HealthCheckResult',
-    'SystemHealthChecker',
-    'GPUHealthChecker',
-    'PyTorchHealthChecker',
-    'ServiceHealthChecker'
 ]

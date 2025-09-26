@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - alert.rules.yml
+
+scrape_configs:
+  - job_name: ml-engine
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['ml-engine:8000']
+        labels:
+          service: ml-engine
+          env: production
