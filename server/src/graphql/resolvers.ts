@@ -14,11 +14,73 @@ const redisClient = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : n
 
 export const resolvers = {
   DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),
-  Query: { 
+  Query: {
+    async uiExperiments(_: any, args: { featureKeys?: string[]; onlyActive?: boolean }, ctx: any) {
+      const end = gqlDuration.startTimer({ op: 'uiExperiments' });
+      try {
+        const user = getUser(ctx);
+        const tenantId = user?.tenant || 'default_tenant';
+        const featureKeys = Array.isArray(args?.featureKeys)
+          ? args.featureKeys.filter((key) => typeof key === 'string' && key.trim().length > 0)
+          : [];
+
+        const params: any[] = [tenantId];
+        let paramIndex = 2;
+        let query =
+          'SELECT id, tenant_id, feature_key, description, is_active, variations, updated_at FROM ui_experiments WHERE tenant_id = $1';
+
+        if (featureKeys.length > 0) {
+          query += ` AND feature_key = ANY($${paramIndex})`;
+          params.push(featureKeys);
+          paramIndex += 1;
+        }
+
+        if (args?.onlyActive !== false) {
+          query += ' AND is_active = TRUE';
+        }
+
+        query += ' ORDER BY feature_key';
+
+        const rows = await pg.readMany(query, params, { tenantId });
+
+        return rows.map((row: any) => {
+          const variationsRaw = row.variations;
+          let variations: any[] = [];
+          if (Array.isArray(variationsRaw)) {
+            variations = variationsRaw;
+          } else if (typeof variationsRaw === 'string') {
+            try {
+              const parsed = JSON.parse(variationsRaw);
+              if (Array.isArray(parsed)) {
+                variations = parsed;
+              }
+            } catch (error) {
+              console.warn('Failed to parse variations JSON for experiment', row.feature_key, error);
+            }
+          }
+
+          return {
+            id: row.id,
+            tenantId: row.tenant_id,
+            featureKey: row.feature_key,
+            description: row.description,
+            isActive: row.is_active,
+            variations: variations.map((variation: any) => ({
+              name: variation.name,
+              weight: typeof variation.weight === 'number' ? variation.weight : 0,
+              config: variation.config ?? {},
+            })),
+            updatedAt: row.updated_at,
+          };
+        });
+      } finally {
+        end();
+      }
+    },
     async tenantCoherence(_: any, { tenantId }: any, ctx: any) {
       const end = gqlDuration.startTimer({ op: 'tenantCoherence' });
       try {
-        const user = getUser(ctx); 
+        const user = getUser(ctx);
         
         // Enhanced ABAC enforcement with purpose checking
         const policyDecision = await policyEnforcer.requirePurpose('investigation', {

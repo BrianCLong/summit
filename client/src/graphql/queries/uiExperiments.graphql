@@ -1,0 +1,15 @@
+query UIExperiments($featureKeys: [String!]) {
+  uiExperiments(featureKeys: $featureKeys) {
+    id
+    tenantId
+    featureKey
+    description
+    isActive
+    updatedAt
+    variations {
+      name
+      weight
+      config
+    }
+  }
+}
