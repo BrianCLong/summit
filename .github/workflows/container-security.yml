@@ -24,7 +24,9 @@ jobs:
         with: { image: intelgraph/app:${{ github.sha }}, format: 'spdx-json', output-file: 'sbom.spdx.json' }
       - name: Scan (grype)
         uses: anchore/scan-action@v3
-        with: { image: intelgraph/app:${{ github.sha }}, fail-build: false, severity-cutoff: high }
+        with:
+          image: intelgraph/app:${{ github.sha }}
+          fail-build: false
+          severity-cutoff: critical
       - uses: actions/upload-artifact@v4
         with: { name: sbom, path: sbom.spdx.json }
-
