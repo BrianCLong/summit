@@ -41,6 +41,29 @@ const EnvSchema = z.object({
   OIDC_CLIENT_ID: z.string().optional(),
   OIDC_CLIENT_SECRET: z.string().optional(),
   OIDC_REDIRECT_URI: z.string().url().optional(),
+  OIDC_AUDIENCE: z.string().optional(),
+  OIDC_JWKS_URI: z.string().url().optional(),
+  OIDC_GROUPS_CLAIM: z.string().optional(),
+
+  // External Identity Providers
+  AUTH_PROVIDERS: z.string().optional(),
+  AUTH_DEFAULT_TENANT: z.string().optional(),
+  AUTH_ROLE_MAPPINGS: z.string().optional(),
+
+  OKTA_ISSUER: z.string().url().optional(),
+  OKTA_CLIENT_ID: z.string().optional(),
+  OKTA_CLIENT_SECRET: z.string().optional(),
+  OKTA_AUDIENCE: z.string().optional(),
+  OKTA_JWKS_URI: z.string().url().optional(),
+  OKTA_GROUPS_CLAIM: z.string().optional(),
+
+  AZURE_AD_ISSUER: z.string().url().optional(),
+  AZURE_AD_TENANT_ID: z.string().optional(),
+  AZURE_AD_CLIENT_ID: z.string().optional(),
+  AZURE_AD_CLIENT_SECRET: z.string().optional(),
+  AZURE_AD_AUDIENCE: z.string().optional(),
+  AZURE_AD_JWKS_URI: z.string().url().optional(),
+  AZURE_AD_GROUPS_CLAIM: z.string().optional(),
 
   // CORS
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
@@ -205,6 +228,27 @@ ENCRYPTION_KEY=${secrets.ENCRYPTION_KEY}
 # OIDC_CLIENT_ID=your-client-id
 # OIDC_CLIENT_SECRET=your-client-secret
 # OIDC_REDIRECT_URI=http://localhost:8080/auth/callback
+# OIDC_AUDIENCE=api://intelgraph-dev
+# OIDC_JWKS_URI=https://your-oidc-provider.com/.well-known/jwks.json
+# OIDC_GROUPS_CLAIM=groups
+
+# External Auth Providers (configure as needed)
+# AUTH_PROVIDERS=oidc,okta,azure
+AUTH_DEFAULT_TENANT=default
+# AUTH_ROLE_MAPPINGS={"Okta-SOC-Admins":["ADMIN"],"azure-intelgraph-analyst":["ANALYST"]}
+# OKTA_ISSUER=https://your-okta-domain.okta.com/oauth2/default
+# OKTA_CLIENT_ID=your-okta-client-id
+# OKTA_CLIENT_SECRET=your-okta-client-secret
+# OKTA_AUDIENCE=api://default
+# OKTA_JWKS_URI=https://your-okta-domain.okta.com/oauth2/v1/keys
+# OKTA_GROUPS_CLAIM=groups
+# AZURE_AD_TENANT_ID=00000000-0000-0000-0000-000000000000
+# AZURE_AD_CLIENT_ID=00000000-0000-0000-0000-000000000000
+# AZURE_AD_CLIENT_SECRET=your-azure-secret
+# AZURE_AD_AUDIENCE=api://intelgraph-dev
+# AZURE_AD_ISSUER=https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000/v2.0
+# AZURE_AD_JWKS_URI=https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000/discovery/v2.0/keys
+# AZURE_AD_GROUPS_CLAIM=groups
 
 # CORS
 CORS_ORIGIN=http://localhost:3000

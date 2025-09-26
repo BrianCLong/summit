@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import AuthService from '../services/AuthService.js';
 import logger from '../utils/logger.js';
+import { getExternalAuthManager, ExternalAuthUser } from '../security/externalAuth.js';
 
 interface AuthenticatedRequest extends Request {
   user?: any;
@@ -49,6 +50,15 @@ export async function ensureAuthenticated(
       ? auth.slice('Bearer '.length)
       : (req.headers['x-access-token'] as string) || null;
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+    const externalManager = getExternalAuthManager();
+    const externalUser = await externalManager.verify(token);
+    if (externalUser) {
+      req.user = mapExternalUser(externalUser);
+      res.setHeader('X-Auth-Method', `external-${externalUser.providerId}`);
+      return next();
+    }
+
     const user = await getAuthService().verifyToken(token);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
     req.user = user;
@@ -56,6 +66,25 @@ export async function ensureAuthenticated(
   } catch (e) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
+}
+
+function mapExternalUser(externalUser: ExternalAuthUser) {
+  const primaryRole = (externalUser.roles[0] || 'VIEWER').toUpperCase();
+
+  return {
+    id: externalUser.id,
+    email: externalUser.email || '',
+    username: externalUser.email,
+    firstName: externalUser.firstName,
+    lastName: externalUser.lastName,
+    fullName: externalUser.name,
+    role: primaryRole,
+    isActive: true,
+    lastLogin: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    provider: externalUser.providerId,
+  };
 }
 
 export function requirePermission(permission: string) {
