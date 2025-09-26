@@ -1,0 +1,150 @@
+# LLM Provider CIDR NetworkPolicy - MC v0.3.2-mc
+# Override networkPolicy egress rules for specific LLM provider access
+
+networkPolicy:
+  enabled: true
+  # Enhanced egress rules with LLM provider CIDR ranges
+  customEgressRules:
+    # OpenAI API endpoints
+    - to:
+        - ipBlock:
+            cidr: "20.0.0.0/8"  # Microsoft Azure (OpenAI)
+      ports:
+        - protocol: TCP
+          port: 443
+    - to:
+        - ipBlock:
+            cidr: "52.84.0.0/15"  # CloudFlare CDN (OpenAI)
+      ports:
+        - protocol: TCP
+          port: 443
+
+    # Anthropic Claude API endpoints
+    - to:
+        - ipBlock:
+            cidr: "54.230.0.0/15"  # AWS CloudFront (Anthropic)
+      ports:
+        - protocol: TCP
+          port: 443
+    - to:
+        - ipBlock:
+            cidr: "13.32.0.0/15"  # AWS CloudFront Global
+      ports:
+        - protocol: TCP
+          port: 443
+
+    # Google Vertex AI / PaLM API
+    - to:
+        - ipBlock:
+            cidr: "34.64.0.0/10"  # Google Cloud Platform
+      ports:
+        - protocol: TCP
+          port: 443
+    - to:
+        - ipBlock:
+            cidr: "35.186.0.0/16"  # Google Cloud Platform
+      ports:
+        - protocol: TCP
+          port: 443
+
+    # Cohere API endpoints
+    - to:
+        - ipBlock:
+            cidr: "52.84.0.0/15"  # CloudFlare CDN
+      ports:
+        - protocol: TCP
+          port: 443
+
+    # Hugging Face Inference API
+    - to:
+        - ipBlock:
+            cidr: "185.199.108.0/22"  # GitHub/Hugging Face CDN
+      ports:
+        - protocol: TCP
+          port: 443
+
+    # Azure OpenAI Service (if using dedicated instance)
+    - to:
+        - ipBlock:
+            cidr: "20.190.128.0/18"  # Azure OpenAI East US
+      ports:
+        - protocol: TCP
+          port: 443
+    - to:
+        - ipBlock:
+            cidr: "20.42.65.0/24"  # Azure OpenAI West Europe
+      ports:
+        - protocol: TCP
+          port: 443
+
+    # AWS Bedrock (if using)
+    - to:
+        - ipBlock:
+            cidr: "54.239.0.0/16"  # AWS Global
+      ports:
+        - protocol: TCP
+          port: 443
+
+    # Your Enterprise Egress Gateway (replace with actual CIDR)
+    # Uncomment and configure if using a centralized egress gateway
+    # - to:
+    #     - ipBlock:
+    #         cidr: "10.0.100.0/24"  # Your egress gateway CIDR
+    #   ports:
+    #     - protocol: TCP
+    #       port: 443
+    #     - protocol: TCP
+    #       port: 8443
+
+# Environment variables for LLM provider configuration
+env:
+  # OpenAI Configuration
+  OPENAI_API_BASE: "https://api.openai.com/v1"
+  OPENAI_API_VERSION: "2023-12-01-preview"
+
+  # Anthropic Configuration
+  ANTHROPIC_API_BASE: "https://api.anthropic.com"
+  ANTHROPIC_API_VERSION: "2023-06-01"
+
+  # Azure OpenAI Configuration (if using)
+  # AZURE_OPENAI_ENDPOINT: "https://your-instance.openai.azure.com"
+  # AZURE_OPENAI_API_VERSION: "2023-12-01-preview"
+
+  # Google Vertex AI Configuration (if using)
+  # GOOGLE_CLOUD_PROJECT: "your-project-id"
+  # GOOGLE_CLOUD_REGION: "us-central1"
+
+# Additional security context for LLM provider access
+securityContext:
+  # Ensure no privilege escalation for LLM API calls
+  allowPrivilegeEscalation: false
+  # Read-only filesystem prevents credential exfiltration
+  readOnlyRootFilesystem: true
+  # Drop all capabilities
+  capabilities:
+    drop:
+      - ALL
+  # Run as non-root user
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+
+# Resource limits for LLM provider integrations
+resources:
+  limits:
+    # Increased CPU for LLM processing
+    cpu: 4000m
+    memory: 8Gi
+    ephemeral-storage: 20Gi
+  requests:
+    cpu: 2000m
+    memory: 4Gi
+    ephemeral-storage: 10Gi
+
+# HPA scaling based on LLM API usage
+autoscaling:
+  # Scale based on LLM API request rate
+  customMetrics:
+    llm_api_requests_per_second: 50  # Scale up when > 50 req/s
+    llm_api_queue_depth: 100        # Scale up when queue > 100
+    llm_api_error_rate: 0.05        # Scale up when error rate > 5%

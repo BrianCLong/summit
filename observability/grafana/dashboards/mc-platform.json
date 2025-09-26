@@ -1,0 +1,281 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "MC Platform - Autonomy, A/A, Privacy & SLO Dashboard",
+    "tags": ["mc-platform", "autonomy", "privacy", "slo"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Autonomy Success Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(mc_autonomy_operations_total{status=\"success\"}[5m]) / rate(mc_autonomy_operations_total[5m]) * 100",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Tier-3 Autonomy Operations",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(mc_autonomy_operations_total{tier=\"T3\"}[5m])",
+            "legendFormat": "{{status}}"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "A2A Gateway Health",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(mc_a2a_requests_total{status=\"success\"}[5m]) / rate(mc_a2a_requests_total[5m]) * 100",
+            "legendFormat": "A2A Success Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Active Tenants",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "mc_active_tenants",
+            "legendFormat": "Active Tenants"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 4}
+      },
+      {
+        "id": 5,
+        "title": "Privacy Risk Score Distribution",
+        "type": "histogram",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(mc_privacy_risk_score_bucket[5m]))",
+            "legendFormat": "P50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(mc_privacy_risk_score_bucket[5m]))",
+            "legendFormat": "P95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(mc_privacy_risk_score_bucket[5m]))",
+            "legendFormat": "P99"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 6, "y": 6}
+      },
+      {
+        "id": 6,
+        "title": "Policy Compliance Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(mc_policy_decisions_total{decision=\"allow\"}[5m]) / rate(mc_policy_decisions_total[5m]) * 100",
+            "legendFormat": "Allow Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 90},
+                {"color": "green", "value": 95}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 4}
+      },
+      {
+        "id": 7,
+        "title": "SLO Dashboard - P95 Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(mc_request_duration_seconds_bucket[5m])) * 1000",
+            "legendFormat": "P95 Latency"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Latency (ms)",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 200,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 12}
+      },
+      {
+        "id": 8,
+        "title": "Error Budget Remaining",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "(1 - rate(mc_requests_total{status=~\"5..\"}[5m]) / rate(mc_requests_total[5m])) * 100",
+            "legendFormat": "Error Budget"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 90},
+                {"color": "green", "value": 99}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 12}
+      },
+      {
+        "id": 9,
+        "title": "Cost Utilization",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "mc_cost_utilization_percentage",
+            "legendFormat": "Cost %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 70},
+                {"color": "red", "value": 90}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "gridPos": {"h": 6, "w": 6, "x": 18, "y": 8}
+      },
+      {
+        "id": 10,
+        "title": "MCP/A2A Interop Activity",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(mc_mcp_requests_total[5m])",
+            "legendFormat": "MCP Requests/sec"
+          },
+          {
+            "expr": "rate(mc_a2a_requests_total[5m])",
+            "legendFormat": "A2A Requests/sec"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 18}
+      },
+      {
+        "id": 11,
+        "title": "SIEM Audit Events",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(mc_siem_events_total[5m]) * 60",
+            "legendFormat": "Events/min"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 18}
+      },
+      {
+        "id": 12,
+        "title": "Persisted Query Compliance",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(mc_graphql_requests_total{type=\"persisted\"}[5m]) / rate(mc_graphql_requests_total[5m]) * 100",
+            "legendFormat": "Persisted %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 90},
+                {"color": "green", "value": 99}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 14}
+      }
+    ],
+    "time": {
+      "from": "now-15m",
+      "to": "now"
+    },
+    "refresh": "10s",
+    "schemaVersion": 27,
+    "version": 1
+  }
+}
