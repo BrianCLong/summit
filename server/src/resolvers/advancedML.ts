@@ -73,6 +73,78 @@ const resolvers = {
         throw new Error(`Failed to get ML metrics: ${error.message}`);
       }
     },
+
+    /**
+     * Forecast node attribute trends using predictive analytics
+     */
+    mlNodeAttributeForecast: async (
+      _,
+      { nodeId, attribute, horizon, lags, lookbackHours, optunaTrials },
+    ) => {
+      try {
+        const forecast = await advancedMLService.getNodeAttributeForecast({
+          nodeId,
+          attribute,
+          horizon,
+          lags,
+          lookbackHours,
+          optunaTrials,
+        });
+
+        const metrics = forecast.metrics || {};
+        const tunedParameters = forecast.parameters
+          ? Object.entries(forecast.parameters).map(([name, value]) => ({
+              name,
+              value: typeof value === 'number' ? value : Number(value),
+            }))
+          : [];
+
+        const normalizePoint = (point: any) => {
+          if (!point) {
+            return {
+              timestamp: new Date().toISOString(),
+              value: 0,
+            };
+          }
+
+          const timestampValue = point.timestamp ? new Date(point.timestamp) : new Date();
+          const numericValue =
+            typeof point.value === 'number'
+              ? point.value
+              : Number(point.value ?? 0);
+
+          return {
+            timestamp: timestampValue.toISOString(),
+            value: Number.isFinite(numericValue) ? numericValue : 0,
+          };
+        };
+
+        return {
+          nodeId: forecast.node_id,
+          attribute: forecast.attribute,
+          horizon: forecast.horizon,
+          model: forecast.model,
+          metrics: {
+            rmse: metrics.rmse ?? null,
+            mae: metrics.mae ?? null,
+            r2: metrics.r2 ?? null,
+          },
+          history: (forecast.history || []).map(normalizePoint),
+          predictions: (forecast.predictions || []).map(normalizePoint),
+          tunedParameters,
+          lastUpdated: forecast.last_updated
+            ? new Date(forecast.last_updated).toISOString()
+            : null,
+        };
+      } catch (error) {
+        logger.error('Failed to forecast node attribute', {
+          error: error.message,
+          nodeId,
+          attribute,
+        });
+        throw new Error(`Failed to forecast node attribute: ${error.message}`);
+      }
+    },
   },
 
   Mutation: {

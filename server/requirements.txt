@@ -44,6 +44,7 @@ polyglot==16.7.4
 
 # Text Analysis and NLP Models
 scikit-learn==1.6.1
+optuna==3.6.1
 gensim==4.3.3
 wordcloud==1.9.4
 rake-nltk==1.0.6
@@ -90,6 +91,7 @@ requests==2.32.5
 python-dotenv==1.1.1
 pyyaml==6.0.2
 psutil==7.0.0
+neo4j==5.26.0
 
 # Language Detection
 langdetect==1.0.9

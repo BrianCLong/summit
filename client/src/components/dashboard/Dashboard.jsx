@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import OnboardingTour from '../onboarding/OnboardingTour';
 import ActivityWidget from '../activity/ActivityWidget';
 import ServiceHealthCard from './ServiceHealthCard';
+import NodeForecastWidget from './NodeForecastWidget';
 import TemplateModal from '../templates/TemplateModal';
 
 function Dashboard() {
@@ -149,6 +150,9 @@ function Dashboard() {
         </Grid>
         <Grid item xs={12} md={6}>
           <ServiceHealthCard />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <NodeForecastWidget />
         </Grid>
       </Grid>
 

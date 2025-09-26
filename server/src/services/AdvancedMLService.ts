@@ -225,6 +225,39 @@ export class AdvancedMLService {
     }
   }
 
+  async getNodeAttributeForecast(params: {
+    nodeId: string;
+    attribute: string;
+    horizon?: number;
+    lags?: number;
+    lookbackHours?: number;
+    optunaTrials?: number;
+  }): Promise<any> {
+    try {
+      const payload = {
+        node_id: params.nodeId,
+        attribute: params.attribute,
+        horizon: params.horizon ?? 6,
+        lags: params.lags,
+        lookback_hours: params.lookbackHours,
+        optuna_trials: params.optunaTrials,
+      };
+
+      const response = await axios.post(`${this.mlServiceUrl}/analytics/forecast`, payload, {
+        timeout: this.defaultTimeout,
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to retrieve predictive forecast', {
+        error: error.message,
+        params,
+      });
+      throw new Error(`Failed to retrieve predictive forecast: ${error.message}`);
+    }
+  }
+
   /**
    * Optimize a model for deployment
    */

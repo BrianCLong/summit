@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Dict, List, Optional, Any, Union
+from typing import Any, Dict, List, Optional, Union
 import torch
 import numpy as np
 from datetime import datetime
@@ -21,6 +21,7 @@ from .quantum.quantum_ml import (
 from .training.distributed_trainer import DistributedTrainingManager, TrainingConfig
 from .monitoring.metrics import MLMetrics
 from .monitoring.health import HealthCheck
+from .predictive_analytics import Neo4jGraphDataClient, PredictiveAnalyticsService
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,51 @@ class InferenceResponse(BaseModel):
     confidence_scores: Optional[List[float]] = None
     device: str
 
+
+class ForecastMetrics(BaseModel):
+    """Performance metrics for the forecasting model."""
+
+    rmse: Optional[float] = None
+    mae: Optional[float] = None
+    r2: Optional[float] = None
+
+
+class TimeSeriesPoint(BaseModel):
+    """Single time series observation."""
+
+    timestamp: datetime
+    value: float
+
+
+class ForecastRequest(BaseModel):
+    """Request payload for predictive time-series forecasting."""
+
+    node_id: str = Field(..., description="Graph node identifier")
+    attribute: str = Field(..., description="Node attribute to forecast")
+    horizon: int = Field(6, ge=1, le=96, description="Number of future timesteps to forecast")
+    lags: Optional[int] = Field(None, ge=1, le=24, description="Number of lagged observations to use as features")
+    lookback_hours: Optional[int] = Field(None, ge=1, description="Restrict historical window to trailing hours")
+    optuna_trials: Optional[int] = Field(
+        None,
+        ge=1,
+        le=50,
+        description="Number of Optuna trials for hyperparameter tuning",
+    )
+
+
+class ForecastResponse(BaseModel):
+    """Response payload for predictive analytics forecasts."""
+
+    node_id: str
+    attribute: str
+    horizon: int
+    model: str
+    metrics: ForecastMetrics
+    parameters: Dict[str, float]
+    history: List[TimeSeriesPoint]
+    predictions: List[TimeSeriesPoint]
+    last_updated: datetime
+
 # Global state management
 class MLServiceState:
     def __init__(self):
@@ -99,6 +145,18 @@ class MLServiceState:
 
 # Global state instance
 ml_state = MLServiceState()
+
+# Predictive analytics dependencies
+neo4j_client = Neo4jGraphDataClient(
+    os.getenv("NEO4J_URI", "bolt://localhost:7687"),
+    os.getenv("NEO4J_USER", "neo4j"),
+    os.getenv("NEO4J_PASSWORD", "neo4j"),
+)
+predictive_service = PredictiveAnalyticsService(neo4j_client)
+
+
+def get_predictive_service() -> PredictiveAnalyticsService:
+    return predictive_service
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -125,6 +183,9 @@ async def lifespan(app: FastAPI):
     # Clear CUDA cache
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
+
+    # Close shared Neo4j driver
+    neo4j_client.close()
 
 # Create FastAPI app
 app = FastAPI(
@@ -159,6 +220,36 @@ async def detailed_health_check():
 async def system_info():
     """Get system information"""
     return ml_state.health_check.get_system_info()
+
+@app.post("/analytics/forecast", response_model=ForecastResponse)
+async def forecast_attribute(
+    request: ForecastRequest,
+    service: PredictiveAnalyticsService = Depends(get_predictive_service),
+):
+    """Predict future node attribute values using tuned time-series models."""
+
+    try:
+        result = service.forecast_node_attribute(
+            node_id=request.node_id,
+            attribute=request.attribute,
+            horizon=request.horizon,
+            lags=request.lags,
+            lookback_hours=request.lookback_hours,
+            optuna_trials=request.optuna_trials,
+        )
+        return ForecastResponse(**result)
+    except ValueError as exc:
+        logger.warning(
+            "Predictive analytics validation failed",
+            extra={"nodeId": request.node_id, "attribute": request.attribute, "error": str(exc)},
+        )
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception(
+            "Predictive analytics forecast failed",
+            extra={"nodeId": request.node_id, "attribute": request.attribute},
+        )
+        raise HTTPException(status_code=500, detail="Unable to generate forecast") from exc
 
 # Model management endpoints
 @app.post("/models", response_model=ModelResponse)
