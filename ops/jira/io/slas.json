@@ -1,0 +1,22 @@
+{
+  "slas": [
+    {
+      "name": "TTD",
+      "start": "issue.created",
+      "stop": "status CHANGED TO Triage",
+      "goal": {
+        "sev>=4": "30m",
+        "default": "60m"
+      }
+    },
+    {
+      "name": "TTM",
+      "start": "status CHANGED TO Triage",
+      "stop": "status CHANGED TO Mitigating",
+      "goal": {
+        "sev>=4": "120m",
+        "default": "240m"
+      }
+    }
+  ]
+}
