@@ -38,6 +38,7 @@ import mcpInvokeRouter from './maestro/mcp/invoke-api.js';
 import { otelRoute } from './middleware/otel-route.js';
 import pipelinesRouter from './maestro/pipelines/pipelines-api.js';
 import executorsRouter from './maestro/executors/executors-api.js';
+import { formatGraphQLError } from './graphql/formatGraphQLError.js';
 import runsRouter from './maestro/runs/runs-api.js';
 import conductorApi from './conductor/api.js';
 import slackRouter from './routes/slack.js';
@@ -484,14 +485,7 @@ export const createApp = async () => {
       depthLimit(process.env.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
     ],
     // Security context
-    formatError: (err) => {
-      // Don't expose internal errors in production
-      if (process.env.NODE_ENV === 'production') {
-        appLogger.error(`GraphQL Error: ${err.message}`, { stack: err.stack });
-        return new Error('Internal server error');
-      }
-      return err;
-    },
+    formatError: (err) => formatGraphQLError(err),
   });
   await apollo.start();
 

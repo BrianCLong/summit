@@ -6,14 +6,14 @@ MIT License
 Copyright (c) 2025 IntelGraph
 """
 
-from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional, Union
 import numpy as np
 import pandas as pd
 from datetime import datetime
-import logging
 import asyncio
 import redis.asyncio as redis
 import asyncpg
@@ -29,9 +29,10 @@ from contextlib import asynccontextmanager
 import hashlib
 import uuid
 
+from logging_config import configure_logging, shutdown_logging
+
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = configure_logging()
 
 # Global models and connections
 embedding_model = None
@@ -45,9 +46,9 @@ openai_client = None
 async def lifespan(app: FastAPI):
     """Startup and shutdown events"""
     global embedding_model, redis_client, postgres_pool, chroma_client, collection, openai_client
-    
+
     # Startup
-    logger.info("Starting RAG Service...")
+    logger.info("Starting RAG Service...", extra={"event": "startup"})
     
     # Initialize OpenAI
     openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -62,7 +63,7 @@ async def lifespan(app: FastAPI):
         embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
         logger.info("Loaded sentence transformer model")
     except Exception as e:
-        logger.error(f"Failed to load sentence transformer: {e}")
+        logger.exception("Failed to load sentence transformer", extra={"event": "startup"})
     
     # Initialize ChromaDB
     try:
@@ -82,7 +83,7 @@ async def lifespan(app: FastAPI):
         logger.info(f"Initialized ChromaDB with {collection.count()} documents")
         
     except Exception as e:
-        logger.error(f"Failed to initialize ChromaDB: {e}")
+        logger.exception("Failed to initialize ChromaDB", extra={"event": "startup"})
     
     # Initialize Redis
     try:
@@ -93,7 +94,7 @@ async def lifespan(app: FastAPI):
         await redis_client.ping()
         logger.info("Connected to Redis")
     except Exception as e:
-        logger.error(f"Failed to connect to Redis: {e}")
+        logger.exception("Failed to connect to Redis", extra={"event": "startup"})
     
     # Initialize PostgreSQL
     try:
@@ -104,16 +105,17 @@ async def lifespan(app: FastAPI):
         )
         logger.info("Connected to PostgreSQL")
     except Exception as e:
-        logger.error(f"Failed to connect to PostgreSQL: {e}")
-    
+        logger.exception("Failed to connect to PostgreSQL", extra={"event": "startup"})
+
     yield
-    
+
     # Shutdown
-    logger.info("Shutting down RAG Service...")
+    logger.info("Shutting down RAG Service...", extra={"event": "shutdown"})
     if redis_client:
         await redis_client.close()
     if postgres_pool:
         await postgres_pool.close()
+    shutdown_logging()
 
 app = FastAPI(
     title="IntelGraph RAG Service",
@@ -130,6 +132,50 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _resolve_request_id(request: Request) -> str:
+    header_value = request.headers.get("x-request-id")
+    return header_value or str(uuid.uuid4())
+
+
+@app.exception_handler(HTTPException)
+async def handle_http_exception(request: Request, exc: HTTPException) -> JSONResponse:
+    request_id = _resolve_request_id(request)
+    logger.warning(
+        "Request resulted in an HTTP error",
+        extra={
+            "event": "http_exception",
+            "request_id": request_id,
+            "status_code": exc.status_code,
+            "path": request.url.path,
+        },
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail, "request_id": request_id},
+    )
+
+
+@app.exception_handler(Exception)
+async def handle_unexpected_exception(request: Request, exc: Exception) -> JSONResponse:
+    request_id = _resolve_request_id(request)
+    logger.exception(
+        "Unhandled server error",
+        extra={
+            "event": "unhandled_exception",
+            "request_id": request_id,
+            "path": request.url.path,
+            "method": request.method,
+        },
+    )
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "We hit an unexpected error while processing your request. Please try again.",
+            "request_id": request_id,
+        },
+    )
 
 # Pydantic models
 class Document(BaseModel):
