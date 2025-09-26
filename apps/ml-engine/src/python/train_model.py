@@ -30,8 +30,9 @@ class ModelTrainer:
     """
     Model training pipeline for entity resolution
     """
-    
+
     def __init__(self):
+        """Define supported estimators and their default hyperparameters."""
         self.models = {
             'random_forest': RandomForestClassifier,
             'gradient_boosting': GradientBoostingClassifier,

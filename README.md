@@ -169,10 +169,28 @@ make deploy-prod
 ## 📚 Documentation
 
 - **API Docs**: `/docs/api` - GraphQL schema + REST endpoints
+- **Generated GraphQL Reference**: `/docs/reference/graphql` (TypeDoc)
+- **Generated Python ML Reference**: `/docs/reference/python` (Sphinx)
 - **Architecture**: `/docs/architecture` - System design + patterns
 - **Deployment**: `/docs/deployment` - Kubernetes + Helm guides
 - **Security**: `/docs/security` - Policies + compliance
 - **Runbooks**: `/docs/runbooks` - Operations + troubleshooting
+
+### Automated API Documentation
+
+Generated references live under `docs/reference`.  To rebuild them locally:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm dlx typedoc --options typedoc.graphql.json
+node scripts/docs/render-graphql-reference.mjs
+python -m venv .venv && source .venv/bin/activate
+pip install -r docs/python/requirements.txt
+python -m sphinx -b markdown docs/python docs/reference/python
+```
+
+The `docs-generation` GitHub Action runs the same commands on every
+push to `main` and commits the updated Markdown references back to the branch.
 
 ## 🏷️ Releases
 

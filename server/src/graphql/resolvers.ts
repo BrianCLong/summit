@@ -12,13 +12,30 @@ const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
 
 const redisClient = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : null;
 
+/**
+ * Root GraphQL resolvers for the Summit intelligence graph.
+ *
+ * The resolver map exposes read, write and subscription capabilities for
+ * coherence telemetry.  Each handler participates in policy enforcement and
+ * observability so that API consumers receive consistent governance.
+ */
 export const resolvers = {
   DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),
-  Query: { 
+  Query: {
+    /**
+     * Retrieve the coherence score for a tenant with policy-aware safeguards.
+     *
+     * @param _ - Unused parent resolver value.
+     * @param args - GraphQL arguments, including the `tenantId` to inspect.
+     * @param ctx - Request context that supplies the authenticated user and
+     *   policy purpose metadata.
+     * @returns Redacted tenant coherence details when the caller is allowed
+     *   to access them.
+     */
     async tenantCoherence(_: any, { tenantId }: any, ctx: any) {
       const end = gqlDuration.startTimer({ op: 'tenantCoherence' });
       try {
-        const user = getUser(ctx); 
+        const user = getUser(ctx);
         
         // Enhanced ABAC enforcement with purpose checking
         const policyDecision = await policyEnforcer.requirePurpose('investigation', {
@@ -89,7 +106,15 @@ export const resolvers = {
       }
     }
   },
-  Mutation: { 
+  Mutation: {
+    /**
+     * Publish an updated coherence signal and notify subscribed clients.
+     *
+     * @param _ - Unused parent resolver value.
+     * @param args - GraphQL arguments containing the signal payload.
+     * @param ctx - Request context with the authenticated user and pubsub bus.
+     * @returns `true` when the signal is accepted and emitted.
+     */
     async publishCoherenceSignal(_: any, { input }: any, ctx: any) {
       const end = gqlDuration.startTimer({ op: 'publishCoherenceSignal' });
       try {
@@ -120,6 +145,13 @@ export const resolvers = {
   },
   Subscription: {
     coherenceEvents: {
+      /**
+       * Subscribe to new coherence events and record fan-out latency metrics.
+       *
+       * @param _ - Unused parent resolver value.
+       * @param __ - Unused subscription arguments.
+       * @param ctx - Request context containing the shared pubsub instance.
+       */
       subscribe: (_: any, __: any, ctx: any) => {
         const iterator = ctx.pubsub.asyncIterator([COHERENCE_EVENTS]);
         const start = process.hrtime.bigint();

@@ -24,8 +24,9 @@ class FeatureExtractor:
     """
     Feature extraction for entity resolution
     """
-    
+
     def __init__(self):
+        """Initialise internal feature tracking collections."""
         self.feature_names = []
     
     def extract_features(self, entity1: Dict[str, Any], entity2: Dict[str, Any]) -> Dict[str, float]:
