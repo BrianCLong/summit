@@ -22,11 +22,32 @@ spec:
             - containerPort: {{ .Values.service.targetPort | default 4000 }}
           env:
             - name: OIDC_ISSUER
-              valueFrom: { secretKeyRef: { name: {{ .Values.oidc.secretName | default "oidc" | quote }}, key: issuer } }
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.oidc.secretName | default "oidc" | quote }}
+                  key: issuer
             - name: OIDC_CLIENT_ID
-              valueFrom: { secretKeyRef: { name: {{ .Values.oidc.secretName | default "oidc" | quote }}, key: clientId } }
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.oidc.secretName | default "oidc" | quote }}
+                  key: clientId
             - name: OIDC_CLIENT_SECRET
-              valueFrom: { secretKeyRef: { name: {{ .Values.oidc.secretName | default "oidc" | quote }}, key: clientSecret } }
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.oidc.secretName | default "oidc" | quote }}
+                  key: clientSecret
             - name: SCIM_TOKEN
-              valueFrom: { secretKeyRef: { name: {{ .Values.scim.secretName | default "scim" | quote }}, key: token } }
-
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.scim.secretName | default "scim" | quote }}
+                  key: token
+            {{- if .Values.federation }}
+            - name: FEDERATION_USE_LOCAL
+              value: "{{ if .Values.federation.useLocal }}true{{ else }}false{{ end }}"
+            - name: FEDERATION_SUBGRAPHS
+              value: {{ .Values.federation.subgraphs | toJson | quote }}
+            {{- if .Values.federation.pollIntervalMs }}
+            - name: FEDERATION_POLL_INTERVAL_MS
+              value: "{{ .Values.federation.pollIntervalMs }}"
+            {{- end }}
+            {{- end }}

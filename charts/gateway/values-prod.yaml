@@ -1,10 +1,19 @@
+replicaCount: 6
+
 image:
-  repository: ghcr.io/brianclong/intelgraph/gateway
-  tag: stable
+  repository: registry.prod/intelgraph-gateway
+  tag: v1.4.0
 
-oidc:
-  secretName: oidc
+canary:
+  enabled: false
 
-scim:
-  secretName: scim
-
+federation:
+  useLocal: false
+  pollIntervalMs: 15000
+  subgraphs:
+    - name: intelgraph
+      url: https://intelgraph-core.prod.svc.cluster.local/graphql
+    - name: mlEngine
+      url: https://ml-engine.prod.svc.cluster.local/graphql
+    - name: ingest
+      url: https://ingest-service.prod.svc.cluster.local/graphql

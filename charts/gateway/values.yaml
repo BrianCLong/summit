@@ -23,3 +23,14 @@ canary:
       - name: latency-p95
         threshold: 400
         interval: 1m
+
+federation:
+  useLocal: false
+  pollIntervalMs: 30000
+  subgraphs:
+    - name: intelgraph
+      url: http://intelgraph-core:4001/graphql
+    - name: mlEngine
+      url: http://ml-engine:4002/graphql
+    - name: ingest
+      url: http://ingest-service:4003/graphql
