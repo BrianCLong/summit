@@ -1,6 +1,7 @@
 import React from 'react';
 import OverridesPanel from './OverridesPanel';
 import CostExplorer from './CostExplorer';
+import FeedbackReview from './FeedbackReview';
 
 interface Config {
   MODEL_PROVIDER: string;
@@ -46,7 +47,9 @@ export default function AdminStudio() {
   const [bundleStatus, setBundleStatus] = React.useState<BundleStatus | null>(null);
   const [bundleSource, setBundleSource] = React.useState<BundleSource | null>(null);
   const [opaSince, setOpaSince] = React.useState<string | null>(null);
-  const [activeTab, setActiveTab] = React.useState<'config' | 'overrides' | 'cost-explorer' | 'help'>('config');
+  const [activeTab, setActiveTab] = React.useState<
+    'config' | 'overrides' | 'cost-explorer' | 'feedback' | 'help'
+  >('config');
   const [saveMessage, setSaveMessage] = React.useState<string>('');
   const [errors, setErrors] = React.useState<string[]>([]);
   const load = React.useCallback(async () => {
@@ -216,6 +219,8 @@ export default function AdminStudio() {
         return <OverridesPanel />;
       case 'cost-explorer':
         return <CostExplorer />;
+      case 'feedback':
+        return <FeedbackReview />;
       case 'help':
         return (
           <div style={{ padding: 24, maxWidth: 800 }}>
@@ -415,11 +420,14 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
           { key: 'config', label: 'Configuration' },
           { key: 'overrides', label: 'Overrides' },
           { key: 'cost-explorer', label: 'Cost Explorer' },
+          { key: 'feedback', label: 'Feedback' },
           { key: 'help', label: 'Help' }
         ].map(tab => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key as 'config' | 'overrides' | 'cost-explorer' | 'help')}
+            onClick={() =>
+              setActiveTab(tab.key as 'config' | 'overrides' | 'cost-explorer' | 'feedback' | 'help')
+            }
             style={{
               padding: '12px 24px',
               border: 'none',
