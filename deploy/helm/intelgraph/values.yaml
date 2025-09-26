@@ -36,6 +36,19 @@ global:
     port: 9090
     path: /metrics
 
+  # Vault integration (disabled by default)
+  vault:
+    enabled: false
+    address: 'https://vault.vault.svc.cluster.local:8200'
+    role: intelgraph-app
+    agentConfigMap: intelgraph-vault-agent-config
+    prePopulateOnly: true
+    command: ''
+    secrets: []
+    extraAnnotations:
+      vault.hashicorp.com/agent-run-as-user: '10001'
+      vault.hashicorp.com/agent-run-as-group: '10001'
+
   # Security context
   podSecurityContext:
     fsGroup: 10001
@@ -90,9 +103,17 @@ external:
     clientIdSecretRef: oidc-client
     scope: 'openid profile email groups'
 
+# Service account configuration
+serviceAccount:
+  create: true
+  name: ''
+  annotations: {}
+
 # Common configuration for all services
 common:
   replicaCount: 2
+
+  automountServiceAccountToken: false
 
   resources:
     limits:
@@ -159,6 +180,7 @@ common:
     prometheus.io/scrape: 'true'
     prometheus.io/port: '{{ .Values.global.prometheus.port }}'
     prometheus.io/path: '{{ .Values.global.prometheus.path }}'
+    vault.hashicorp.com/agent-inject-status: 'update'
 
 # Service-specific configurations
 services:
@@ -230,6 +252,22 @@ services:
           secretKeyRef:
             name: jwt-secret
             key: secret
+
+    # Example Vault override to materialize database credentials as an env file
+    vault:
+      secrets: []
+      # - name: app-env
+      #   path: secret/data/intelgraph/api-gateway
+      #   destination: app.env
+      #   template: |
+      #     {{- with secret "secret/data/intelgraph/api-gateway" -}}
+      #     POSTGRES_URI={{ .Data.data.postgres_uri }}
+      #     POSTGRES_USER={{ .Data.data.postgres_user }}
+      #     POSTGRES_PASSWORD={{ .Data.data.postgres_password }}
+      #     NEO4J_URI={{ .Data.data.neo4j_uri }}
+      #     NEO4J_USER={{ .Data.data.neo4j_user }}
+      #     NEO4J_PASSWORD={{ .Data.data.neo4j_password }}
+      #     {{- end }}
 
   analytics:
     enabled: true
