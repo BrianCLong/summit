@@ -7,22 +7,42 @@ export const useSocket = (namespace = '/', options = {}) => {
   const [error, setError] = useState(null);
   const socketRef = useRef(null);
   const heartbeatIntervalRef = useRef(null); // Add this ref
+  const { enabled = true, baseUrl, ...socketOptions } = options;
+  const optionsKey = JSON.stringify({ baseUrl: baseUrl ?? null, socketOptions });
 
   useEffect(() => {
+    if (!enabled) {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+      setSocket(null);
+      setConnected(false);
+      return;
+    }
     // Clean up existing connection
     if (socketRef.current) {
       socketRef.current.disconnect();
     }
 
+    const resolvedNamespace = namespace.startsWith('/') ? namespace : `/${namespace}`;
+    const defaultOrigin =
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : process.env.VITE_SOCKET_BASE_URL || 'http://localhost:4000';
+    const origin = (baseUrl || defaultOrigin || '').replace(/\/$/, '');
+    const connectionUrl =
+      resolvedNamespace === '/' ? origin || 'http://localhost:4000' : `${origin}${resolvedNamespace}`;
+
     // Create new socket connection
-    const newSocket = io(`http://localhost:4000${namespace}`, {
+    const newSocket = io(connectionUrl, {
       autoConnect: true,
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 5,
       timeout: 20000,
       forceNew: true,
-      ...options,
+      ...socketOptions,
     });
 
     // Connection event handlers
@@ -81,11 +101,11 @@ export const useSocket = (namespace = '/', options = {}) => {
         socketRef.current = null;
       }
     };
-  }, [namespace]);
+  }, [namespace, enabled, optionsKey]);
 
   // Send heartbeat periodically
   useEffect(() => {
-    if (socket && connected) {
+    if (enabled && socket && connected) {
       const interval = setInterval(() => {
         socket.emit('presence:heartbeat');
       }, 30000); // Send heartbeat every 30 seconds
@@ -94,7 +114,7 @@ export const useSocket = (namespace = '/', options = {}) => {
       clearInterval(heartbeatIntervalRef.current);
       heartbeatIntervalRef.current = null;
     }
-  }, [socket, connected]);
+  }, [socket, connected, enabled]);
 
   // Helper functions
   const emit = (event, data) => {

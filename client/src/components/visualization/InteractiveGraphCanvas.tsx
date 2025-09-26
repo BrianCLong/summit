@@ -1,10 +1,14 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useToast } from '../ToastContainer';
+import useGraphCollaboration, {
+  type GraphCollaborationOptions,
+} from '../../hooks/useGraphCollaboration';
+import GraphCollaborationControls from '../collaboration/GraphCollaborationControls';
 
 interface Node {
   id: string;
   label: string;
-  type: 'person' | 'organization' | 'ip' | 'email' | 'document' | 'event' | 'location';
+  type: 'person' | 'organization' | 'ip' | 'email' | 'document' | 'event' | 'location' | 'entity';
   x: number;
   y: number;
   vx?: number;
@@ -24,7 +28,7 @@ interface Edge {
   id: string;
   source: string;
   target: string;
-  type: 'communication' | 'financial' | 'location' | 'association' | 'temporal';
+  type: 'communication' | 'financial' | 'location' | 'association' | 'temporal' | 'relationship';
   weight: number;
   label?: string;
   color: string;
@@ -39,12 +43,13 @@ interface GraphData {
 }
 
 interface InteractiveGraphCanvasProps {
-  data: GraphData;
+  data?: GraphData;
   width?: number;
   height?: number;
   onNodeClick?: (node: Node) => void;
   onNodeHover?: (node: Node | null) => void;
   onSelectionChange?: (selectedNodes: Node[]) => void;
+  onEdgeSelect?: (selectedEdges: Edge[]) => void;
   physics?: boolean;
   layoutAlgorithm?: 'force' | 'circular' | 'hierarchical' | 'grid';
   filters?: {
@@ -54,7 +59,88 @@ interface InteractiveGraphCanvasProps {
     minConfidence?: number;
   };
   className?: string;
+  investigationId?: string;
+  enableCollaboration?: boolean;
+  collaborationOptions?: Partial<GraphCollaborationOptions>;
 }
+
+const DEFAULT_GRAPH: GraphData = {
+  nodes: [
+    {
+      id: 'analyst-a',
+      label: 'Analyst A',
+      type: 'person',
+      x: 160,
+      y: 180,
+      size: 18,
+      color: '#2563eb',
+      risk: 3,
+      confidence: 0.92,
+    },
+    {
+      id: 'analyst-b',
+      label: 'Analyst B',
+      type: 'person',
+      x: 340,
+      y: 120,
+      size: 16,
+      color: '#1e88e5',
+      risk: 2,
+      confidence: 0.87,
+    },
+    {
+      id: 'entity-alpha',
+      label: 'Entity Alpha',
+      type: 'organization',
+      x: 260,
+      y: 300,
+      size: 20,
+      color: '#10b981',
+      risk: 4,
+      confidence: 0.9,
+    },
+    {
+      id: 'event-1',
+      label: 'Briefing Event',
+      type: 'event',
+      x: 420,
+      y: 260,
+      size: 15,
+      color: '#f59e0b',
+      risk: 1,
+      confidence: 0.8,
+    },
+  ],
+  edges: [
+    {
+      id: 'edge-1',
+      source: 'analyst-a',
+      target: 'entity-alpha',
+      type: 'association',
+      weight: 1,
+      label: 'investigates',
+      color: '#64748b',
+    },
+    {
+      id: 'edge-2',
+      source: 'analyst-b',
+      target: 'entity-alpha',
+      type: 'association',
+      weight: 0.8,
+      label: 'collaborates',
+      color: '#6366f1',
+    },
+    {
+      id: 'edge-3',
+      source: 'analyst-b',
+      target: 'event-1',
+      type: 'relationship',
+      weight: 0.9,
+      label: 'briefed',
+      color: '#f97316',
+    },
+  ],
+};
 
 const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
   data,
@@ -63,11 +149,16 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
   onNodeClick,
   onNodeHover,
   onSelectionChange,
+  onEdgeSelect,
   physics = true,
   layoutAlgorithm = 'force',
   filters,
   className = '',
+  investigationId,
+  enableCollaboration = true,
+  collaborationOptions,
 }) => {
+  const resolvedData = data ?? DEFAULT_GRAPH;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -76,15 +167,39 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
   const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragNode, setDragNode] = useState<Node | null>(null);
+  const dragStartRef = useRef<{ id: string; x: number; y: number } | null>(null);
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
   const [fps, setFps] = useState(60);
 
   const toast = useToast();
 
+  const collaborationConfig = useMemo<GraphCollaborationOptions>(
+    () => ({
+      graphId:
+        collaborationOptions?.graphId ?? investigationId ?? 'home-graph',
+      investigationId:
+        collaborationOptions?.investigationId ?? investigationId ?? collaborationOptions?.graphId,
+      tenantId: collaborationOptions?.tenantId ?? 'demo-tenant',
+      userId: collaborationOptions?.userId ?? 'demo-user',
+      enabled: enableCollaboration,
+      initialState: {
+        nodes: resolvedData.nodes,
+        edges: resolvedData.edges,
+      },
+    }),
+    [collaborationOptions, enableCollaboration, investigationId, resolvedData],
+  );
+
+  const collaboration = useGraphCollaboration(collaborationConfig);
+  const collabEnabled = enableCollaboration && Boolean(collaborationConfig.graphId);
+
+  const collabState = collaboration.state;
+
   // Initialize and filter data
   useEffect(() => {
-    let filteredNodes = data.nodes;
-    let filteredEdges = data.edges;
+    const source = collabEnabled ? collabState : resolvedData;
+    let filteredNodes = source.nodes ?? [];
+    let filteredEdges = source.edges ?? [];
 
     if (filters) {
       if (filters.nodeTypes && filters.nodeTypes.length > 0) {
@@ -111,16 +226,38 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
     }
 
     // Apply layout algorithm
-    const layoutedNodes = applyLayout(filteredNodes, filteredEdges, layoutAlgorithm, width, height);
+    const layoutedNodes = applyLayout(
+      filteredNodes.map((node) => ({ ...node })),
+      filteredEdges,
+      layoutAlgorithm,
+      width,
+      height,
+    ).map((node) => ({
+      ...node,
+      type: (node.type as Node['type']) ?? 'entity',
+    })) as Node[];
+
+    const normalizedEdges = filteredEdges.map((edge) => ({
+      ...edge,
+      type: (edge.type as Edge['type']) ?? 'relationship',
+    })) as Edge[];
 
     setNodes(layoutedNodes);
-    setEdges(filteredEdges);
-  }, [data, filters, layoutAlgorithm, width, height]);
+    setEdges(normalizedEdges);
+  }, [
+    collabEnabled,
+    collabState,
+    resolvedData,
+    filters,
+    layoutAlgorithm,
+    width,
+    height,
+  ]);
 
   // Apply layout algorithms
   const applyLayout = useCallback(
     (nodes: Node[], edges: Edge[], algorithm: string, width: number, height: number): Node[] => {
-      const layoutedNodes = [...nodes];
+      const layoutedNodes = nodes.map((node) => ({ ...node }));
 
       switch (algorithm) {
         case 'circular':
@@ -334,6 +471,7 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
     if (node) {
       setDragNode(node);
       setIsDragging(true);
+      dragStartRef.current = { id: node.id, x: node.x, y: node.y };
 
       if (event.ctrlKey || event.metaKey) {
         // Multi-select
@@ -356,6 +494,7 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
       // Clear selection if clicking on empty space
       setSelectedNodes(new Set());
       onSelectionChange?.([]);
+      dragStartRef.current = null;
     }
   };
 
@@ -377,11 +516,29 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
         onNodeHover?.(node);
       }
     }
+
+    if (collabEnabled) {
+      collaboration.sendCursor({ x: pos.x, y: pos.y });
+    }
   };
 
   const handleMouseUp = () => {
+    if (isDragging && dragNode && collabEnabled) {
+      const movedNode = nodes.find((node) => node.id === dragNode.id);
+      const start = dragStartRef.current;
+      if (movedNode && start && (start.x !== movedNode.x || start.y !== movedNode.y)) {
+        collaboration.applyOperations([
+          {
+            type: 'node:update',
+            node: { id: movedNode.id, x: movedNode.x, y: movedNode.y },
+          },
+        ]);
+      }
+    }
+
     setIsDragging(false);
     setDragNode(null);
+    dragStartRef.current = null;
   };
 
   const handleWheel = (event: React.WheelEvent<HTMLCanvasElement>) => {
@@ -603,12 +760,32 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onWheel={handleWheel}
+        data-testid="graph-canvas"
         style={{
           cursor: isDragging ? 'grabbing' : hoveredNode ? 'pointer' : 'grab',
           border: '1px solid #ddd',
           borderRadius: '8px',
         }}
       />
+
+      {collabEnabled && (
+        <GraphCollaborationControls
+          connected={collaboration.connected}
+          participants={collaboration.participants}
+          lockedByMe={collaboration.isGraphLockedByMe}
+          lockedByOther={Boolean(
+            collaboration.lockOwner && collaboration.lockOwner !== collaboration.currentUserId,
+          )}
+          lockOwner={collaboration.lockOwner}
+          pendingChanges={collaboration.pendingChanges}
+          lastSavedAt={collaboration.lastSavedAt}
+          onCommit={collaboration.commit}
+          onToggleLock={collaboration.toggleGraphLock}
+          isCommitting={collaboration.isCommitting}
+          currentUserId={collaboration.currentUserId}
+          error={collaboration.connectionError}
+        />
+      )}
 
       {/* Graph Controls */}
       <div className="absolute top-2 right-2 bg-white rounded-lg shadow-lg p-2 space-x-2">
