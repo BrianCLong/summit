@@ -11,14 +11,17 @@ spec:
             name: dev
             namespace: companyos-dev
             domain_suffix: dev.topicality.co
+            revision: develop
           - cluster: in-cluster
             name: stage
             namespace: companyos-stage
             domain_suffix: stage.topicality.co
+            revision: develop
           - cluster: in-cluster
             name: prod
             namespace: companyos
             domain_suffix: topicality.co
+            revision: main
   template:
     metadata:
       name: 'companyos-{{name}}'
@@ -27,13 +30,13 @@ spec:
     spec:
       project: companyos
       source:
-        repoURL: https://github.com/BrianCLong/summit.git # Your Git repository
-        targetRevision: HEAD
+        repoURL: https://github.com/BrianCLong/summit.git
+        targetRevision: '{{revision}}'
         path: charts/companyos
         helm:
           valueFiles:
             - values.yaml
-            - values-{{name}}.yaml # Environment-specific values (e.g., values-dev.yaml, values-stage.yaml, values-prod.yaml)
+            - values-{{name}}.yaml
           parameters:
             - name: global.domain.api
               value: api.{{domain_suffix}}
@@ -46,5 +49,12 @@ spec:
         automated:
           prune: true
           selfHeal: true
+        retry:
+          limit: 3
+          backoff:
+            duration: 15s
+            factor: 2
+            maxDuration: 2m
         syncOptions:
           - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
