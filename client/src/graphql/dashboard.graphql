@@ -25,3 +25,53 @@ query DB_Investigations {
     edgeCount
   }
 }
+
+query MaestroDashboardConfiguration($id: ID) {
+  dashboardConfiguration(id: $id) {
+    id
+    name
+    description
+    layout
+    settings
+    updatedAt
+    widgets {
+      id
+      type
+      title
+      position {
+        x
+        y
+        w
+        h
+      }
+      config
+      dataSource
+      refreshInterval
+    }
+  }
+}
+
+mutation SaveDashboardConfiguration($input: SaveDashboardConfigurationInput!) {
+  saveDashboardConfiguration(input: $input) {
+    id
+    name
+    description
+    layout
+    settings
+    updatedAt
+    widgets {
+      id
+      type
+      title
+      position {
+        x
+        y
+        w
+        h
+      }
+      config
+      dataSource
+      refreshInterval
+    }
+  }
+}
