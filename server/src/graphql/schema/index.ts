@@ -6,6 +6,7 @@ import aiModule from '../schema.ai.js';
 import annotationsModule from '../schema.annotations.js';
 import graphragTypesModule from '../types/graphragTypes.js';
 import { crystalTypeDefs } from '../schema.crystal.js';
+import { graphValidationTypeDefs } from '../schema.graph-validation.js';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
 const { graphTypeDefs } = graphModule as { graphTypeDefs: any };
@@ -35,6 +36,7 @@ export const typeDefs = [
   coreTypeDefs,
   copilotTypeDefs,
   graphTypeDefs,
+  graphValidationTypeDefs,
   graphragTypes,
   aiTypeDefs,
   annotationsTypeDefs,
