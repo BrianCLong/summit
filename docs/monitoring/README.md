@@ -31,3 +31,7 @@ Grafana Dashboards
 - A starter dashboard JSON is included at `docs/monitoring/neo4j-grafana-dashboard.json`.
 - Import it in Grafana, and point the panels to your Prometheus data source.
 - Grafana: add Prometheus as a data source and import standard Node.js/Express and Neo4j dashboards.
+- Distributed tracing dashboards are available under `monitoring/dashboards/`,
+  including `workflow-traces.json` for correlating Argo Workflow spans across
+  Jaeger and Grafana. Refer to `docs/monitoring/workflow-tracing-guide.md` for
+  setup instructions.
