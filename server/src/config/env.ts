@@ -17,7 +17,12 @@ const EnvSchema = z.object({
   DOCLING_SVC_TIMEOUT_MS: z.string().default('15000'),
   DOCLING_PURPOSE_POLICY: z.string().default('docling/purpose_enforcement'),
   DOCLING_RETENTION_POLICY: z.string().default('docling/retention_enforcement'),
-  DOCLING_LICENSE_POLICY: z.string().default('docling/license_enforcement')
+  DOCLING_LICENSE_POLICY: z.string().default('docling/license_enforcement'),
+  GRAPHQL_RATE_LIMIT_WINDOW_SECONDS: z.string().default('3600'),
+  GRAPHQL_RATE_LIMIT_FREE_LIMIT: z.string().default('1000'),
+  GRAPHQL_RATE_LIMIT_SUPERGROK_LIMIT: z.string().default('5000'),
+  GRAPHQL_RATE_LIMIT_SUPERGROK_WINDOW_SECONDS: z.string().optional(),
+  GRAPHQL_RATE_LIMIT_REDIS_URL: z.string().optional()
 });
 
 export type Env = z.infer<typeof EnvSchema>;

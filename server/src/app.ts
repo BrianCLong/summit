@@ -452,6 +452,7 @@ export const createApp = async () => {
 
   // GraphQL over HTTP
   const { persistedQueriesPlugin } = await import('./graphql/plugins/persistedQueries.js');
+  const { rateLimitPlugin } = await import('./graphql/plugins/rateLimitPlugin.js');
   const { default: pbacPlugin } = await import('./graphql/plugins/pbac.js');
   const { default: resolverMetricsPlugin } = await import('./graphql/plugins/resolverMetrics.js');
   const { default: auditLoggerPlugin } = await import('./graphql/plugins/auditLogger.js');
@@ -464,6 +465,7 @@ export const createApp = async () => {
     // Security plugins - Order matters for execution lifecycle
     plugins: [
       otelApolloPlugin(),
+      rateLimitPlugin(),
       persistedQueriesPlugin as any,
       resolverMetricsPlugin as any,
       auditLoggerPlugin as any,

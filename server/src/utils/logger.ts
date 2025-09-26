@@ -1,4 +1,4 @@
-import winston from 'winston';
+import * as winston from 'winston';
 
 const logger: winston.Logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
