@@ -1,0 +1,30 @@
+{{- if .Values.vpa.enabled }}
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{ include "worker-python.fullname" . }}
+  labels:
+    {{- include "worker-python.labels" . | nindent 4 }}
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "worker-python.fullname" . }}
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updatePolicy | default "Auto" | quote }}
+  resourcePolicy:
+    containerPolicies:
+      - containerName: "*"
+        {{- if .Values.vpa.minAllowed }}
+        minAllowed:
+          {{- toYaml .Values.vpa.minAllowed | nindent 10 }}
+        {{- end }}
+        {{- if .Values.vpa.maxAllowed }}
+        maxAllowed:
+          {{- toYaml .Values.vpa.maxAllowed | nindent 10 }}
+        {{- end }}
+        {{- if .Values.vpa.controlledResources }}
+        controlledResources:
+          {{- toYaml .Values.vpa.controlledResources | nindent 10 }}
+        {{- end }}
+{{- end }}

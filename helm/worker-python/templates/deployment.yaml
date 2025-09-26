@@ -17,10 +17,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env: {{- toYaml .Values.env | nindent 12 }}
+          {{- if .Values.resources }}
           resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 1
-              memory: 512Mi
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}

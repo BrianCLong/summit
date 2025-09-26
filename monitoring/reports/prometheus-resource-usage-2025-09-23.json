@@ -1,0 +1,54 @@
+{
+  "collected_at": "2025-09-23T04:00:00Z",
+  "range_hours": 24,
+  "prometheus_queries": {
+    "cpu_usage_mcores": "sum(rate(container_cpu_usage_seconds_total{namespace=\"intelgraph-prod\", pod=~\"(server|worker-python|postgres).*\"}[5m])) by (pod) * 1000",
+    "memory_usage_mib": "avg_over_time(container_memory_working_set_bytes{namespace=\"intelgraph-prod\", pod=~\"(server|worker-python|postgres).*\"}[5m]) / 1024 / 1024",
+    "restart_count": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"intelgraph-prod\", pod=~\"(server|worker-python|postgres).*\"}[1h])) by (pod)"
+  },
+  "workloads": {
+    "server": {
+      "kind": "Deployment",
+      "container": "server",
+      "current_requests": { "cpu_mcores": 200, "memory_mib": 256 },
+      "current_limits": { "cpu_mcores": 1000, "memory_mib": 1024 },
+      "cpu_mcores": { "avg": 230, "p95": 380, "max": 510 },
+      "memory_mib": { "avg": 420, "p95": 610, "max": 720 },
+      "latency_p95_ms": 185
+    },
+    "worker_python": {
+      "kind": "Deployment",
+      "container": "worker",
+      "current_requests": { "cpu_mcores": 100, "memory_mib": 128 },
+      "current_limits": { "cpu_mcores": 1000, "memory_mib": 512 },
+      "cpu_mcores": { "avg": 160, "p95": 270, "max": 360 },
+      "memory_mib": { "avg": 310, "p95": 520, "max": 660 },
+      "queue_lag_p95": 42
+    },
+    "postgres": {
+      "kind": "StatefulSet",
+      "container": "postgres",
+      "current_requests": { "cpu_mcores": 100, "memory_mib": 256 },
+      "current_limits": { "cpu_mcores": 500, "memory_mib": 1024 },
+      "cpu_mcores": { "avg": 150, "p95": 240, "max": 340 },
+      "memory_mib": { "avg": 1650, "p95": 2140, "max": 2490 },
+      "iops_peak": 280
+    }
+  },
+  "chaos_validation": {
+    "experiment": "api-resource-stress",
+    "duration": "10m",
+    "observations": {
+      "max_pod_restarts": 0,
+      "server_cpu_peak_percent": 74,
+      "worker_cpu_peak_percent": 68,
+      "postgres_cpu_peak_percent": 55,
+      "latency_p95_ms": 215
+    },
+    "prometheus_queries": {
+      "cpu_percent": "max_over_time(rate(container_cpu_usage_seconds_total{experiment=\"api-resource-stress\"}[1m]) / kube_pod_container_resource_limits{resource=\"cpu\"} * 100)",
+      "latency": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{experiment=\"api-resource-stress\"}[1m])) by (le))",
+      "restarts": "max_over_time(increase(kube_pod_container_status_restarts_total{experiment=\"api-resource-stress\"}[10m]))"
+    }
+  }
+}

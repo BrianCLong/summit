@@ -9,11 +9,11 @@ service:
 
 resources:
   requests:
-    cpu: 100m
-    memory: 256Mi
+    cpu: 250m
+    memory: 2Gi
   limits:
-    cpu: 500m
-    memory: 1Gi
+    cpu: 600m
+    memory: 3Gi
 
 persistence:
   enabled: true
@@ -42,3 +42,16 @@ initdb:
 
 serviceMonitor:
   enabled: false
+
+vpa:
+  enabled: true
+  updatePolicy: Auto
+  minAllowed:
+    cpu: 200m
+    memory: 1.5Gi
+  maxAllowed:
+    cpu: 2
+    memory: 6Gi
+  controlledResources:
+    - cpu
+    - memory
