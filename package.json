@@ -95,7 +95,10 @@
     "policy:bundle": "opa build -b policies/opa -o composer-policy-bundle.tar.gz",
     "codegen": "echo skip-graphql-codegen",
     "docs:build": "echo docs build skipped",
-    "docusaurus": "echo docusaurus not configured"
+    "docusaurus": "echo docusaurus not configured",
+    "cli:install": "cd cli && npm install",
+    "cli:link": "cd cli && npm link",
+    "cli:run": "node cli/bin/summit.js"
   },
   "keywords": [
     "intelgraph",
