@@ -2,7 +2,7 @@
  * Simple rule-engine style ABAC scaffolding.
  * Rules are evaluated against user attributes and resource attributes.
  */
-import { pbacRoles, jwtIssuer } from '../config/security.js';
+import { jwtIssuer } from '../config/security.js';
 import { pbacDecisionsTotal } from '../monitoring/metrics.js';
 
 const issuerRule = (ctx) => {
@@ -15,17 +15,30 @@ const issuerRule = (ctx) => {
 
 const roleRule = (ctx) => {
   const { action, user } = ctx;
-  const roles = user?.roles || [];
-  for (const role of roles) {
-    const perms = pbacRoles[role];
-    if (perms && (perms.includes(action) || perms.includes('*'))) {
-      return { allow: true };
-    }
+  const permissions = (user?.permissions || []).map((perm) => perm.toLowerCase());
+
+  if (!permissions.length) {
+    return null;
   }
-  if (roles.length > 0) {
-    return { allow: false, reason: 'PBAC role denied' };
+
+  if (permissions.includes('*')) {
+    return { allow: true };
   }
-  return null;
+
+  const normalizedAction = action.toLowerCase();
+  if (permissions.includes(normalizedAction)) {
+    return { allow: true };
+  }
+
+  const wildcardMatch = permissions.some(
+    (perm) => perm.endsWith('.*') && normalizedAction.startsWith(perm.substring(0, perm.length - 2)),
+  );
+
+  if (wildcardMatch) {
+    return { allow: true };
+  }
+
+  return { allow: false, reason: 'RBAC permission denied' };
 };
 
 const defaultRules = [
