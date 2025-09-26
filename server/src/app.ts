@@ -70,7 +70,7 @@ import logger from './config/logger';
 import { env } from './config/env.js';
 import { randomUUID } from 'crypto';
 import morgan from 'morgan';
-import { mountRawBody } from '../bootstrap/raw-body.js';
+import { mountRawBody } from './bootstrap/raw-body.js';
 import twilioRouter from './routes/twilio.js';
 import shopifyRouter from './routes/shopify.js';
 import plaidRouter from './routes/plaid.js';

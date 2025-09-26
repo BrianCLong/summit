@@ -7,7 +7,7 @@
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "bundler",
     "strict": true,
-    "types": ["vite/client", "jest"]
+    "types": ["jest"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "build"]
