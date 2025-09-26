@@ -40,6 +40,7 @@ import {
   Map,
   Assessment,
   Settings,
+  School,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -58,6 +59,7 @@ import ExecutiveDashboard from './features/wargame/ExecutiveDashboard'; // WAR-G
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import AccessIntelPage from './features/rbac/AccessIntelPage.jsx';
 import ConductorStudio from './features/conductor/ConductorStudio.tsx';
+import OnboardingWizard from './features/onboarding/OnboardingWizard';
 import VisualPipelines from './pages/VisualPipelines.tsx';
 import ExecutorsPage from './pages/Executors.tsx';
 import MCPRegistry from './pages/MCPRegistry.tsx';
@@ -81,6 +83,7 @@ import RunSearch from './features/conductor/RunSearch';
 // Navigation items
 const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+  { path: '/onboarding', label: 'Onboarding', icon: <School /> },
   { path: '/investigations', label: 'Timeline', icon: <Search /> },
   { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
@@ -199,17 +202,29 @@ function NavigationDrawer({ open, onClose }) {
     <Drawer anchor="left" open={open} onClose={onClose}>
       <Box sx={{ width: 250, mt: 8 }}>
         <List>
-          {items.map((item) => (
-            <ListItem
-              key={item.path}
-              button
-              selected={location.pathname === item.path}
-              onClick={() => handleNavigation(item)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItem>
-          ))}
+          {items.map((item) => {
+            const sanitized = (item.path || item.label || 'nav')
+              .toString()
+              .replace(/^https?:\/\//, '')
+              .replace(/^\//, '')
+              .replace(/[^a-z0-9]+/gi, '-')
+              .replace(/^-+|-+$/g, '')
+              .toLowerCase();
+            const testId = `${sanitized || 'nav-item'}-nav`;
+
+            return (
+              <ListItem
+                key={item.path}
+                button
+                selected={location.pathname === item.path}
+                onClick={() => handleNavigation(item)}
+                data-testid={testId}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.label} />
+              </ListItem>
+            );
+          })}
         </List>
       </Box>
     </Drawer>
@@ -635,6 +650,7 @@ function MainLayout() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/onboarding" element={<OnboardingWizard />} />
             <Route path="/investigations" element={<InvestigationsPage />} />
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
