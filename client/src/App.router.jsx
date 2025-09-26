@@ -40,6 +40,7 @@ import {
   Map,
   Assessment,
   Settings,
+  CloudUpload,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -77,12 +78,17 @@ import ClaimsViewer from './features/conductor/ClaimsViewer';
 import RetractionQueue from './features/conductor/RetractionQueue';
 import CostAdvisor from './features/conductor/CostAdvisor';
 import RunSearch from './features/conductor/RunSearch';
+import OfflineBanner from './components/offline/OfflineBanner';
+import { OfflineProvider, useOffline } from './context/OfflineContext';
+import { getCachedResource, setCachedResource } from './services/offline/indexedDb';
+import GoldenPathWizard from './components/onboarding/GoldenPathWizard.jsx';
 
 // Navigation items
 const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/investigations', label: 'Timeline', icon: <Search /> },
   { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
+  { path: '/ingest/wizard', label: 'Ingest Wizard', icon: <CloudUpload /> },
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
   { path: '/conductor', label: 'Conductor Studio', icon: <Engineering /> },
   { path: '/conductor/approvals', label: 'Approvals', icon: <Engineering /> },
@@ -238,6 +244,8 @@ function AppHeader({ onMenuClick }) {
 // Enhanced Dashboard with Live Metrics
 function DashboardPage() {
   const navigate = useNavigate();
+  const { isOffline } = useOffline();
+  const cacheKey = 'dashboard:metrics';
   const [metrics, setMetrics] = React.useState({
     investigations: 3,
     graphNodes: 247,
@@ -246,9 +254,39 @@ function DashboardPage() {
     activeUsers: 8,
     alertsCount: 2,
   });
+  const [lastUpdated, setLastUpdated] = React.useState<number | null>(null);
+  const hasHydratedCacheRef = React.useRef(false);
+
+  React.useEffect(() => {
+    let active = true;
+
+    const hydrateFromCache = async () => {
+      const cached = await getCachedResource<{ metrics: typeof metrics }>(cacheKey);
+      if (cached && active) {
+        setMetrics(cached.data.metrics);
+        setLastUpdated(cached.updatedAt);
+      }
+      hasHydratedCacheRef.current = true;
+      if (!cached) {
+        await setCachedResource(cacheKey, { metrics });
+        if (active) {
+          setLastUpdated(Date.now());
+        }
+      }
+    };
+
+    void hydrateFromCache();
+
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Simulate real-time updates
   React.useEffect(() => {
+    if (isOffline) return undefined;
+
     const interval = setInterval(() => {
       setMetrics((prev) => ({
         ...prev,
@@ -262,11 +300,41 @@ function DashboardPage() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isOffline]);
+
+  React.useEffect(() => {
+    if (!hasHydratedCacheRef.current) return;
+
+    let cancelled = false;
+    const persist = async () => {
+      await setCachedResource(cacheKey, { metrics });
+      if (!cancelled) {
+        setLastUpdated(Date.now());
+      }
+    };
+
+    void persist();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [metrics]);
 
   return (
     <Container maxWidth="lg">
       <ConnectionStatus />
+
+      {isOffline && (
+        <Alert
+          severity="info"
+          variant="outlined"
+          sx={{ mb: 2 }}
+          data-testid="dashboard-offline-indicator"
+        >
+          Showing cached dashboard metrics
+          {lastUpdated ? ` from ${new Date(lastUpdated).toLocaleString()}` : ''}.
+        </Alert>
+      )}
 
       <Grid container spacing={3}>
         {/* Header */}
@@ -574,6 +642,52 @@ function InvestigationsPage() {
   );
 }
 
+function IngestWizardPage() {
+  const { isOffline, pendingMutations } = useOffline();
+  const [open, setOpen] = React.useState(true);
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid item xs={12} md={8}>
+          <Typography variant="h4" component="h1">
+            Data Ingest Wizard
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Guided ingest setup with offline progress persistence.
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={4} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <Button
+            variant="outlined"
+            onClick={() => setOpen(true)}
+            disabled={open}
+            data-testid="wizard-open-button"
+          >
+            {open ? 'Wizard Active' : 'Resume Wizard'}
+          </Button>
+        </Grid>
+        {isOffline && (
+          <Grid item xs={12} data-testid="wizard-offline-indicator">
+            <Alert severity="info" variant="outlined">
+              Offline mode enabled — your ingest progress is saved locally.
+            </Alert>
+          </Grid>
+        )}
+        {!isOffline && pendingMutations > 0 && (
+          <Grid item xs={12} data-testid="wizard-sync-indicator">
+            <Alert severity="success" variant="outlined">
+              {pendingMutations} queued change{pendingMutations === 1 ? ' is' : 's are'} waiting to sync with the platform.
+            </Alert>
+          </Grid>
+        )}
+      </Grid>
+
+      <GoldenPathWizard open={open} onClose={() => setOpen(false)} onComplete={() => setOpen(false)} />
+    </Container>
+  );
+}
+
 function GraphExplorerPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
@@ -630,6 +744,7 @@ function MainLayout() {
       <NavigationDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+        <OfflineBanner />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedRoute />}>
@@ -637,6 +752,7 @@ function MainLayout() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/investigations" element={<InvestigationsPage />} />
             <Route path="/graph" element={<GraphExplorerPage />} />
+            <Route path="/ingest/wizard" element={<IngestWizardPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/conductor" element={<ConductorStudio />} />
             <Route path="/conductor/approvals" element={<ApprovalsPanel />} />
@@ -725,11 +841,13 @@ function App() {
     <Provider store={store}>
       <ApolloProvider client={apolloClient}>
         <AuthProvider>
-          <ThemedAppShell>
-            <Router>
-              <MainLayout />
-            </Router>
-          </ThemedAppShell>
+          <OfflineProvider>
+            <ThemedAppShell>
+              <Router>
+                <MainLayout />
+              </Router>
+            </ThemedAppShell>
+          </OfflineProvider>
         </AuthProvider>
       </ApolloProvider>
     </Provider>

@@ -69,6 +69,8 @@ import {
 } from '@mui/icons-material';
 import { useMutation, useQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
+import { useOffline } from '../../context/OfflineContext';
+import { getCachedResource, setCachedResource, clearCachedResource } from '../../services/offline/indexedDb';
 
 // GraphQL operations (would be imported from actual files)
 const CREATE_INVESTIGATION = `
@@ -149,6 +151,8 @@ const steps = [
 ];
 
 const GoldenPathWizard = ({ open, onClose, onComplete }) => {
+  const { isOffline, pendingMutations } = useOffline();
+  const cacheKey = 'ingest:wizard-state';
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState({});
   const [wizardData, setWizardData] = useState({
@@ -160,8 +164,15 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
   });
   const [useDemo, setUseDemo] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
+  const [restoring, setRestoring] = useState(true);
 
   const navigate = useNavigate();
+
+  const clearWizardState = () => {
+    void clearCachedResource(cacheKey);
+    setLastSaved(null);
+  };
 
   // GraphQL mutations
   const [createInvestigation] = useMutation(CREATE_INVESTIGATION);
@@ -179,6 +190,34 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
   });
 
   useEffect(() => {
+    let cancelled = false;
+
+    const hydrate = async () => {
+      const cached = await getCachedResource(cacheKey);
+      if (cancelled) return;
+
+      if (cached?.data) {
+        const payload = cached.data;
+        if (typeof payload.activeStep === 'number') setActiveStep(payload.activeStep);
+        if (payload.completed) setCompleted(payload.completed);
+        if (payload.wizardData) setWizardData((prev) => ({ ...prev, ...payload.wizardData }));
+        if (payload.formData) setFormData((prev) => ({ ...prev, ...payload.formData }));
+        if (typeof payload.useDemo === 'boolean') setUseDemo(payload.useDemo);
+        setLastSaved(cached.updatedAt ?? null);
+      }
+
+      setRestoring(false);
+    };
+
+    void hydrate();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (useDemo) {
       setFormData({
         investigationName: 'Demo Investigation: Corporate Network Analysis',
@@ -191,6 +230,31 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
       });
     }
   }, [useDemo]);
+
+  useEffect(() => {
+    if (restoring) return;
+
+    let cancelled = false;
+
+    const persist = async () => {
+      await setCachedResource(cacheKey, {
+        activeStep,
+        completed,
+        wizardData,
+        formData,
+        useDemo,
+      });
+      if (!cancelled) {
+        setLastSaved(Date.now());
+      }
+    };
+
+    void persist();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeStep, completed, wizardData, formData, useDemo, restoring]);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -208,6 +272,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
     if (onComplete) {
       onComplete(wizardData);
     }
+    clearWizardState();
     onClose();
   };
 
@@ -347,6 +412,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
     if (onComplete) {
       onComplete(wizardData);
     }
+    clearWizardState();
     onClose();
   };
 
@@ -662,6 +728,22 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
             value={(activeStep / (steps.length - 1)) * 100}
             sx={{ mb: 2 }}
           />
+
+          {isOffline && (
+            <Alert severity="info" variant="outlined" data-testid="wizard-offline-alert">
+              Working offline. {pendingMutations > 0 ? `${pendingMutations} change${pendingMutations === 1 ? '' : 's'} queued.` : 'Your updates will sync once reconnected.'}
+              {lastSaved && (
+                <Typography variant="caption" display="block" color="text.secondary">
+                  Progress saved {new Date(lastSaved).toLocaleString()}.
+                </Typography>
+              )}
+            </Alert>
+          )}
+          {!isOffline && lastSaved && (
+            <Alert severity="success" variant="outlined" data-testid="wizard-saved-alert">
+              Wizard progress synced {new Date(lastSaved).toLocaleString()}.
+            </Alert>
+          )}
         </Box>
 
         <Stepper activeStep={activeStep} orientation="vertical">
