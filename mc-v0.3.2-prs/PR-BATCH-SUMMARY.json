@@ -1,0 +1,43 @@
+{
+  "pr_batch_metadata": {
+    "version": "v0.3.2-mc",
+    "generated_at": "2025-09-25T17:47:44.334521",
+    "total_files": 17,
+    "pr_count": 4
+  },
+  "pr_breakdown": {
+    "PR-1_tier3_autonomy": {
+      "branch": "feature/t3-autonomy-t2",
+      "files": 4,
+      "description": "Tier-3 autonomy expansion for TENANT_002"
+    },
+    "PR-2_readiness_pipeline": {
+      "branch": "feature/aa-readiness-t6-t7",
+      "files": 4,
+      "description": "Readiness assessment pipeline for TENANT_006/007"
+    },
+    "PR-3_mcp_a2a_gateways": {
+      "branch": "feature/mcp-a2a-gateways",
+      "files": 5,
+      "description": "MCP/A2A interop gateways with policy enforcement"
+    },
+    "PR-4_evidence_scaffold": {
+      "branch": "release/v0.3.2-mc",
+      "files": 4,
+      "description": "Evidence scaffold and CI automation"
+    }
+  },
+  "quick_execution": {
+    "local_kit_verify": "make all",
+    "docker_compose_verify": "docker compose -f docker-compose.local-kit.yml up --profile test",
+    "tier3_autonomy": "export MC_APPROVAL_TOKEN=$(op read op://secrets/mc/approvalToken) && bash ops/autonomy/scripts/enable-tier3.sh TENANT_002",
+    "readiness_assessment": "bash ops/readiness/run-assessment.sh TENANT_006 && bash ops/readiness/run-assessment.sh TENANT_007",
+    "interop_test": "curl -X POST $A2A_URL/a2a/perform -H 'Content-Type: application/json' -d '{\"tenantId\":\"TENANT_001\",\"purpose\":\"investigation\",\"residency\":\"US\",\"pqid\":\"pq.getPersonById\",\"agent\":\"code-refactor\",\"task\":{\"repo\":\"svc-api\",\"goal\":\"add pagination\"}}' | jq ."
+  },
+  "definition_of_done": [
+    "Tier-3 (computed) live on TENANT_002 with \u226599.9% success, \u22640.5% compensation",
+    "TENANT_006/007 readiness status: READY with checklists and DR schedule",
+    "MCP/A2A gateways merged with e2e tests and audit events",
+    "evidence/v0.3.2/* produced from CI with signed manifest"
+  ]
+}
