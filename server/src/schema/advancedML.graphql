@@ -324,6 +324,24 @@ type DeleteMLModelResponse {
   error: String
 }
 
+type MLRetrainingJob {
+  id: ID!
+  modelId: String!
+  status: String!
+  scheduledAt: DateTime!
+  startedAt: DateTime
+  completedAt: DateTime
+  dataWindowStart: DateTime
+  dataWindowEnd: DateTime
+  records: Int!
+  reason: String
+  kubernetesJobName: String
+  kubernetesNamespace: String
+  mlflowRunId: String
+  metrics: JSON
+  error: String
+}
+
 # Root Types
 extend type Query {
   # System Information
@@ -334,6 +352,10 @@ extend type Query {
 
   # Metrics and Monitoring
   mlMetrics: MLMetrics!
+
+  # Retraining
+  mlRetrainingJobs: [MLRetrainingJob!]!
+  mlRetrainingJob(jobId: ID!): MLRetrainingJob
 }
 
 extend type Mutation {
@@ -358,6 +380,9 @@ extend type Mutation {
     optimizationType: String
     numQubits: Int
   ): QuantumGraphOptimizationResponse!
+
+  # Retraining
+  triggerMLRetraining(modelId: String!, reason: String): MLRetrainingJob!
 }
 
 # Subscriptions for real-time ML monitoring

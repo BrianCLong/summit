@@ -1,0 +1,13 @@
+# MLflow experiment configuration for automated retraining
+experiment:
+  name: intelgraph-retraining
+  description: |
+    Tracks automated retraining jobs triggered by the feed-processor pipeline.
+    Each run corresponds to a Kubernetes retraining job and captures data
+    window metadata alongside evaluation metrics.
+  tracking_uri: ${MLFLOW_TRACKING_URI:-http://mlflow:5000}
+  artifact_location: ${MLFLOW_ARTIFACT_URI:-s3://intelgraph-ml-artifacts/retraining}
+  tags:
+    owner: ml-platform
+    pipeline: feed-processor
+    purpose: automated-retraining

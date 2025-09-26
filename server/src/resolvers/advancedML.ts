@@ -73,6 +73,24 @@ const resolvers = {
         throw new Error(`Failed to get ML metrics: ${error.message}`);
       }
     },
+
+    mlRetrainingJobs: async () => {
+      try {
+        return await advancedMLService.listRetrainingJobs();
+      } catch (error) {
+        logger.error('Failed to list retraining jobs', { error: error.message });
+        throw new Error(`Failed to list retraining jobs: ${error.message}`);
+      }
+    },
+
+    mlRetrainingJob: async (_parent, { jobId }) => {
+      try {
+        return await advancedMLService.getRetrainingJob(jobId);
+      } catch (error) {
+        logger.error('Failed to fetch retraining job', { error: error.message, jobId });
+        throw new Error(`Failed to fetch retraining job: ${error.message}`);
+      }
+    },
   },
 
   Mutation: {
@@ -378,6 +396,19 @@ const resolvers = {
           error: error.message,
           modelId,
         };
+      }
+    },
+
+    triggerMLRetraining: async (_parent, { modelId, reason }) => {
+      try {
+        const job = await advancedMLService.triggerRetraining(modelId, reason);
+        return job;
+      } catch (error) {
+        logger.error('Failed to trigger ML retraining', {
+          error: error.message,
+          modelId,
+        });
+        throw new Error(`Failed to trigger ML retraining: ${error.message}`);
       }
     },
   },

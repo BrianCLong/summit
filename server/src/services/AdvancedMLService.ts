@@ -347,6 +347,59 @@ export class AdvancedMLService {
   }
 
   /**
+   * List retraining jobs from the Python service
+   */
+  async listRetrainingJobs(): Promise<any[]> {
+    try {
+      const response = await axios.get(`${this.mlServiceUrl}/retraining/jobs`, {
+        timeout: this.defaultTimeout,
+      });
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to fetch retraining jobs', { error: error.message });
+      throw new Error('Failed to fetch retraining jobs');
+    }
+  }
+
+  /**
+   * Get a single retraining job by ID
+   */
+  async getRetrainingJob(jobId: string): Promise<any> {
+    try {
+      const response = await axios.get(`${this.mlServiceUrl}/retraining/jobs/${jobId}`, {
+        timeout: this.defaultTimeout,
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      logger.error('Failed to load retraining job', { error: error.message, jobId });
+      throw new Error('Failed to load retraining job');
+    }
+  }
+
+  /**
+   * Trigger retraining for a model
+   */
+  async triggerRetraining(modelId: string, reason?: string): Promise<any> {
+    try {
+      const response = await axios.post(
+        `${this.mlServiceUrl}/models/${modelId}/retrain`,
+        reason ? { reason } : {},
+        {
+          timeout: this.defaultTimeout,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to trigger ML retraining', { error: error.message, modelId });
+      throw new Error('Failed to trigger ML retraining');
+    }
+  }
+
+  /**
    * Get model-specific metrics
    */
   async getModelMetrics(): Promise<any> {
