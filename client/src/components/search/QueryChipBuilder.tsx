@@ -11,6 +11,11 @@ import {
   Button,
 } from '@mui/material';
 import { Add, Clear, FilterList, Save, Share } from '@mui/icons-material';
+import { useFeatureTour } from '../../features/onboarding/FeatureTourProvider.tsx';
+import {
+  queryBuilderSteps,
+  QUERY_BUILDER_TOUR_KEY,
+} from '../../features/onboarding/tourSteps.tsx';
 
 export interface QueryChip {
   id: string;
@@ -47,6 +52,8 @@ const OPERATORS = {
 export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: QueryChipBuilderProps) {
   const [newChip, setNewChip] = useState<Partial<QueryChip>>({});
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const { startTour, resetTour, progress } = useFeatureTour();
+  const completedTour = progress[QUERY_BUILDER_TOUR_KEY]?.completed ?? false;
 
   const addChip = useCallback(() => {
     if (!newChip.field || !newChip.operator || !newChip.value) return;
@@ -91,13 +98,29 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
     [chips, onChipsChange],
   );
 
+  const handleTour = useCallback(() => {
+    if (completedTour) {
+      resetTour(QUERY_BUILDER_TOUR_KEY);
+    }
+    startTour(QUERY_BUILDER_TOUR_KEY, queryBuilderSteps);
+  }, [completedTour, resetTour, startTour]);
+
   return (
-    <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
+    <Paper elevation={1} sx={{ p: 2, mb: 2 }} data-tour-id="query-builder-card">
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
         <FilterList color="primary" />
         <Typography variant="subtitle2">Query Builder</Typography>
 
         <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={handleTour}
+            data-tour-id="query-builder-tour-button"
+            aria-label={completedTour ? 'Replay query builder tour' : 'Start query builder tour'}
+          >
+            {completedTour ? 'Replay tour' : 'Guided tour'}
+          </Button>
           {onSave && (
             <Tooltip title="Save search">
               <IconButton size="small" onClick={() => setSaveDialogOpen(true)}>
@@ -124,7 +147,10 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
 
       {/* Active filter chips */}
       {chips.length > 0 && (
-        <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        <Box
+          sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}
+          data-tour-id="query-builder-chips"
+        >
           {chips.map((chip) => (
             <Chip
               key={chip.id}
@@ -151,11 +177,12 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
             }
           }}
           helperText="Press Enter to parse. Format: field:value, field>value, field<value"
+          data-tour-id="query-builder-dsl"
         />
       </Box>
 
       {/* Manual chip builder */}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }} data-tour-id="query-builder-fields">
         <Autocomplete
           size="small"
           sx={{ minWidth: 120 }}
@@ -195,7 +222,13 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
       </Box>
 
       {chips.length > 0 && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ mt: 1, display: 'block' }}
+          role="status"
+          aria-live="polite"
+        >
           {chips.length} active filter{chips.length !== 1 ? 's' : ''}
         </Typography>
       )}

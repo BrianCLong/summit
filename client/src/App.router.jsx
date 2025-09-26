@@ -77,6 +77,15 @@ import ClaimsViewer from './features/conductor/ClaimsViewer';
 import RetractionQueue from './features/conductor/RetractionQueue';
 import CostAdvisor from './features/conductor/CostAdvisor';
 import RunSearch from './features/conductor/RunSearch';
+import GoldenPathWizard from './components/onboarding/GoldenPathWizard.jsx';
+import { QueryChipBuilder } from './components/search/QueryChipBuilder.tsx';
+import { FeatureTourProvider, useFeatureTour } from './features/onboarding/FeatureTourProvider.tsx';
+import {
+  ingestWizardSteps,
+  queryBuilderSteps,
+  INGEST_WIZARD_TOUR_KEY,
+  QUERY_BUILDER_TOUR_KEY,
+} from './features/onboarding/tourSteps.tsx';
 
 // Navigation items
 const navigationItems = [
@@ -246,6 +255,11 @@ function DashboardPage() {
     activeUsers: 8,
     alertsCount: 2,
   });
+  const [wizardOpen, setWizardOpen] = React.useState(false);
+  const [queryChips, setQueryChips] = React.useState([]);
+  const { progress } = useFeatureTour();
+  const ingestTour = progress[INGEST_WIZARD_TOUR_KEY];
+  const queryTour = progress[QUERY_BUILDER_TOUR_KEY];
 
   // Simulate real-time updates
   React.useEffect(() => {
@@ -283,6 +297,31 @@ function DashboardPage() {
               </Typography>
               <Typography variant="h6" sx={{ opacity: 0.9 }}>
                 Real-time intelligence analysis and monitoring dashboard
+              </Typography>
+              <Box
+                sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mt: 2 }}
+                role="group"
+                aria-label="Onboarding shortcuts"
+              >
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  onClick={() => setWizardOpen(true)}
+                  data-testid="open-ingest-wizard"
+                  aria-label="Open ingest onboarding wizard"
+                >
+                  Launch ingest wizard
+                </Button>
+              </Box>
+              <Typography
+                variant="body2"
+                sx={{ opacity: 0.9, mt: 1 }}
+                role="status"
+                aria-live="polite"
+              >
+                {ingestTour?.completed
+                  ? 'Guided tour completed. You can replay it from within the wizard.'
+                  : 'Use the ingest wizard to explore the guided setup for new data sources.'}
               </Typography>
             </CardContent>
           </Card>
@@ -503,6 +542,32 @@ function DashboardPage() {
           </Card>
         </Grid>
 
+        {/* Query Builder Guide */}
+        <Grid item xs={12} md={6}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                🔎 Query Builder Playground
+              </Typography>
+              <Typography variant="body2" color="text.secondary" paragraph>
+                Craft reusable search filters and experiment with keyboard-friendly chip controls.
+              </Typography>
+              <QueryChipBuilder chips={queryChips} onChipsChange={setQueryChips} />
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 2 }}
+                role="status"
+                aria-live="polite"
+              >
+                {queryTour?.completed
+                  ? 'Query builder tour completed. Replay it from the guided tour button inside the card.'
+                  : 'Take the guided tour to learn how to add, remove, and share advanced filters.'}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
         {/* Live Collaboration Panel */}
         <Grid item xs={12} md={4}>
           <LiveCollaborationPanel />
@@ -562,6 +627,12 @@ function DashboardPage() {
           </Card>
         </Grid>
       </Grid>
+
+      <GoldenPathWizard
+        open={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        onComplete={() => setWizardOpen(false)}
+      />
     </Container>
   );
 }
@@ -725,11 +796,13 @@ function App() {
     <Provider store={store}>
       <ApolloProvider client={apolloClient}>
         <AuthProvider>
-          <ThemedAppShell>
-            <Router>
-              <MainLayout />
-            </Router>
-          </ThemedAppShell>
+          <FeatureTourProvider>
+            <ThemedAppShell>
+              <Router>
+                <MainLayout />
+              </Router>
+            </ThemedAppShell>
+          </FeatureTourProvider>
         </AuthProvider>
       </ApolloProvider>
     </Provider>
