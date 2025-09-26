@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Summit GraphQL API Documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css"
+      integrity="sha384-9lh1cseAkVr8j94hVhO372kJSWyNOKlsz+HBsfRzyPww6O9UguDGpYrrF0DC2UDN"
+      crossorigin="anonymous"
+    />
+    <style>
+      body {
+        margin: 0;
+        background: #0f172a;
+      }
+      #swagger-ui {
+        box-sizing: border-box;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script
+      src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"
+      integrity="sha384-nyxgvhqbJFvzbviRGmjlF8pt0We1gqlvrM63bQ2TpXlG06VzuXIQXuybeRaAOXP9"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"
+      integrity="sha384-kqoqTg6yUH3pzKgdOAyySim2TygiBLh12ne09LrIN/uHv/8SRZSipHy3YzOuAQsj"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      window.onload = () => {
+        window.ui = SwaggerUIBundle({
+          url: './swagger.json',
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          docExpansion: 'list',
+          tryItOutEnabled: false,
+          presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+          layout: 'StandaloneLayout',
+        });
+      };
+    </script>
+  </body>
+</html>
