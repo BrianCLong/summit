@@ -7,7 +7,7 @@
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "bundler",
     "strict": true,
-    "types": ["react", "react-dom", "vite/client", "jest", "@testing-library/jest-dom"]
+    "types": ["vite/client", "jest"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "build"]
