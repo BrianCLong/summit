@@ -8,18 +8,21 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "echo client tests temporarily disabled",
+    "test": "pnpm run test:ci",
     "test:mcp": "jest src/__tests__/MCPRegistry.test.tsx src/__tests__/ConductorToolsEvidence.test.tsx --runInBand",
     "test:jest": "jest",
     "test:vitest": "vitest",
     "test:e2e": "playwright test",
     "test:golden-path": "playwright test golden-path-ci-gate.spec.ts",
     "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --runInBand --coverage --reporters=default --reporters=jest-junit",
     "lint": "eslint src --ext js,jsx,ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext js,jsx,ts,tsx --fix",
     "format": "prettier --write .",
     "persist:queries": "pnpm exec graphql-codegen --config codegen.js",
-    "generate:persisted": "node scripts/generate-persisted-operations.js"
+    "generate:persisted": "node scripts/generate-persisted-operations.js",
+    "ci:verify": "pnpm run lint && pnpm run test:ci && pnpm run build",
+    "sonar": "sonar-scanner -Dproject.settings=sonar-project.properties"
   },
   "dependencies": {
     "@apollo/client": "^3.13.9",
