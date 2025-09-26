@@ -5,6 +5,7 @@ import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
 import { Pool, PoolClient } from 'pg';
+import { getRbacService } from './rbac/RbacService.js';
 
 interface UserData {
   email: string;
@@ -23,6 +24,8 @@ interface User {
   lastName?: string;
   fullName?: string;
   role: string;
+  roles?: string[];
+  permissions?: string[];
   isActive: boolean;
   lastLogin?: Date;
   createdAt: Date;
@@ -61,77 +64,11 @@ interface TokenPair {
   refreshToken: string;
 }
 
-// Define permissions for each role
-const ROLE_PERMISSIONS: Record<string, string[]> = {
-  ADMIN: [
-    '*', // Admin has all permissions
-  ],
-  ANALYST: [
-    'investigation:create',
-    'investigation:read',
-    'investigation:update',
-    'entity:create',
-    'entity:read',
-    'entity:update',
-    'entity:delete',
-    'relationship:create',
-    'relationship:read',
-    'relationship:update',
-    'relationship:delete',
-    'tag:create',
-    'tag:read',
-    'tag:delete',
-    'graph:read',
-    'graph:export',
-    'ai:request',
-    // Maestro permissions
-    'pipeline:create',
-    'pipeline:read',
-    'pipeline:update',
-    'pipeline:execute',
-    'run:create',
-    'run:read',
-    'run:update',
-    'dashboard:read',
-    'autonomy:read',
-    'autonomy:update',
-    'recipe:read',
-    'executor:read',
-  ],
-  OPERATOR: [
-    // Operations-focused role for pipeline management
-    'pipeline:read',
-    'pipeline:update',
-    'pipeline:execute',
-    'run:create',
-    'run:read',
-    'run:update',
-    'run:cancel',
-    'dashboard:read',
-    'autonomy:read',
-    'recipe:read',
-    'executor:read',
-    'executor:update',
-  ],
-  VIEWER: [
-    'investigation:read',
-    'entity:read',
-    'relationship:read',
-    'tag:read',
-    'graph:read',
-    'graph:export',
-    // Read-only Maestro permissions
-    'pipeline:read',
-    'run:read',
-    'dashboard:read',
-    'autonomy:read',
-    'recipe:read',
-    'executor:read',
-  ],
-};
+const PERMISSION_WILDCARD = '*';
 
 export class AuthService {
   private pool: Pool | null = null;
+  private rbac = getRbacService();
 
   private getPool(): Pool {
     if (!this.pool) {
@@ -178,8 +115,16 @@ export class AuthService {
 
       await client.query('COMMIT');
 
+      let access;
+      try {
+        await this.rbac.assignRoleToUserByName(user.id, user.role || 'ANALYST');
+        access = await this.rbac.getUserAccess(user.id, user.role);
+      } catch (error) {
+        logger.warn('Failed to synchronize RBAC assignment for new user', { error });
+      }
+
       return {
-        user: this.formatUser(user),
+        user: this.formatUser(user, access),
         token,
         refreshToken,
         expiresIn: 24 * 60 * 60,
@@ -223,9 +168,10 @@ export class AuthService {
       ]);
 
       const { token, refreshToken } = await this.generateTokens(user, client);
+      const access = await this.rbac.getUserAccess(user.id, user.role, client);
 
       return {
-        user: this.formatUser(user),
+        user: this.formatUser(user, access),
         token,
         refreshToken,
         expiresIn: 24 * 60 * 60,
@@ -256,8 +202,9 @@ export class AuthService {
         user.id,
       ]);
       const { token, refreshToken } = await this.generateTokens(user, client);
+      const access = await this.rbac.getUserAccess(user.id, user.role, client);
       return {
-        user: this.formatUser(user),
+        user: this.formatUser(user, access),
         token,
         refreshToken,
         expiresIn: 24 * 60 * 60,
@@ -310,7 +257,10 @@ export class AuthService {
         return null;
       }
 
-      return this.formatUser(userResult.rows[0] as DatabaseUser);
+      const databaseUser = userResult.rows[0] as DatabaseUser;
+      const access = await this.rbac.getUserAccess(databaseUser.id, databaseUser.role);
+
+      return this.formatUser(databaseUser, access);
     } catch (error: any) {
       logger.warn('Invalid token:', error.message);
       return null;
@@ -321,34 +271,23 @@ export class AuthService {
    * Check if a user has a specific permission
    */
   hasPermission(user: User, permission: string): boolean {
-    if (!user || !user.role || !user.isActive) {
+    if (!user || !user.isActive) {
       return false;
     }
 
-    const userPermissions = ROLE_PERMISSIONS[user.role.toUpperCase()] || [];
-
-    // Admin has wildcard permission
-    if (userPermissions.includes('*')) {
+    const permissionList = (user.permissions ?? []).map((perm) => perm.toLowerCase());
+    if (permissionList.includes(PERMISSION_WILDCARD)) {
       return true;
     }
 
-    // Check exact permission match
-    if (userPermissions.includes(permission)) {
+    const normalized = permission.toLowerCase();
+    if (permissionList.includes(normalized)) {
       return true;
     }
 
-    // Check wildcard permissions (e.g., 'investigation:*' matches 'investigation:create')
-    const wildcardPermissions = userPermissions.filter((p) => p.endsWith(':*'));
-    const permissionPrefix = permission.split(':')[0];
-
-    for (const wildcardPerm of wildcardPermissions) {
-      const wildcardPrefix = wildcardPerm.replace(':*', '');
-      if (permissionPrefix === wildcardPrefix) {
-        return true;
-      }
-    }
-
-    return false;
+    return permissionList.some(
+      (perm) => perm.endsWith('.*') && normalized.startsWith(perm.substring(0, perm.length - 2)),
+    );
   }
 
   /**
@@ -369,22 +308,38 @@ export class AuthService {
    * Get all permissions for a user
    */
   getUserPermissions(user: User): string[] {
-    if (!user || !user.role || !user.isActive) {
+    if (!user || !user.isActive) {
       return [];
     }
 
-    return ROLE_PERMISSIONS[user.role.toUpperCase()] || [];
+    return [...(user.permissions ?? [])];
   }
 
-  private formatUser(user: DatabaseUser): User {
+  private formatUser(
+    user: DatabaseUser,
+    access?: { roles?: string[]; permissions?: string[] },
+  ): User {
+    const primaryRole = user.role ? user.role.toUpperCase() : 'VIEWER';
+    const normalizedRoles = (access?.roles ?? []).map((role) => role.toUpperCase());
+    const roles = Array.from(new Set(normalizedRoles.length ? normalizedRoles : [primaryRole]));
+    const permissions = access?.permissions?.length
+      ? Array.from(new Set(access.permissions.map((perm) => perm.toLowerCase())))
+      : [];
+
+    const firstName = user.first_name ?? '';
+    const lastName = user.last_name ?? '';
+    const fullName = `${firstName} ${lastName}`.trim();
+
     return {
       id: user.id,
       email: user.email,
       username: user.username,
       firstName: user.first_name,
       lastName: user.last_name,
-      fullName: `${user.first_name} ${user.last_name}`,
-      role: user.role,
+      fullName: fullName || undefined,
+      role: roles[0] || primaryRole,
+      roles,
+      permissions,
       isActive: user.is_active,
       lastLogin: user.last_login,
       createdAt: user.created_at,

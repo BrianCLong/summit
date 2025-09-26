@@ -1,18 +1,21 @@
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
-import { getPostgresPool } from '../db/postgres.js';
-import baseLogger from '../config/logger';
 import { randomUUID as uuidv4 } from 'crypto';
+import baseLogger from '../config/logger';
+import AuthService from '../services/AuthService.js';
 
 const logger = baseLogger.child({ name: 'auth' });
 const JWT_SECRET =
   process.env.JWT_SECRET || 'dev_jwt_secret_12345_very_long_secret_for_development';
+const authService = new AuthService();
 
 interface User {
   id: string;
   email: string;
   username?: string;
   role?: string;
+  roles?: string[];
+  permissions?: string[];
 }
 
 interface AuthContext {
@@ -30,7 +33,12 @@ export const getContext = async ({ req }: { req: any }): Promise<AuthContext> =>
       return { isAuthenticated: false, requestId };
     }
 
-    const user = await verifyToken(token);
+    const user = await authService.verifyToken(token);
+    if (!user) {
+      logger.info({ requestId }, 'Token verification failed');
+      return { isAuthenticated: false, requestId };
+    }
+
     logger.info({ requestId, userId: user.id }, 'Authenticated request');
     return { user, isAuthenticated: true, requestId };
   } catch (error) {
@@ -41,30 +49,22 @@ export const getContext = async ({ req }: { req: any }): Promise<AuthContext> =>
 
 export const verifyToken = async (token: string): Promise<User> => {
   try {
-    // For development, accept a simple test token
     if (process.env.NODE_ENV === 'development' && token === 'dev-token') {
       return {
         id: 'dev-user-1',
         email: 'developer@intelgraph.com',
         username: 'developer',
         role: 'ADMIN',
+        roles: ['ADMIN'],
+        permissions: ['*'],
       };
     }
 
-    // Verify JWT token
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-
-    // Get user from database
-    const pool = getPostgresPool();
-    const result = await pool.query('SELECT id, email, username, role FROM users WHERE id = $1', [
-      decoded.userId,
-    ]);
-
-    if (result.rows.length === 0) {
+    const user = await authService.verifyToken(token);
+    if (!user) {
       throw new Error('User not found');
     }
-
-    return result.rows[0];
+    return user;
   } catch (error) {
     throw new GraphQLError('Invalid or expired token', {
       extensions: {
@@ -101,7 +101,9 @@ export const requireAuth = (context: AuthContext): User => {
 
 export const requireRole = (context: AuthContext, requiredRole: string): User => {
   const user = requireAuth(context);
-  if (user.role !== requiredRole && user.role !== 'ADMIN') {
+  const normalizedRoles = user.roles?.map((role) => role.toUpperCase()) || (user.role ? [user.role.toUpperCase()] : []);
+  const target = requiredRole.toUpperCase();
+  if (!normalizedRoles.includes(target) && !normalizedRoles.includes('ADMIN')) {
     throw new GraphQLError('Insufficient permissions', {
       extensions: {
         code: 'FORBIDDEN',
