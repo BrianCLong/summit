@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import { PubSub } from 'graphql-subscriptions';
 import { cacheService } from './cacheService';
+import metrics from '../telemetry/metrics';
 
 export interface User {
   id: string;
@@ -84,6 +85,10 @@ export class CollaborationService extends EventEmitter {
    * User joins an investigation
    */
   async joinInvestigation(userId: string, investigationId: string, userInfo: User): Promise<void> {
+    const presenceKey = `${userId}:${investigationId}`;
+    const wasAlreadyPresent = this.activeUsers.has(presenceKey);
+    const previousUserCount = this.getInvestigationUserCount(investigationId);
+
     const presence: UserPresence = {
       userId,
       investigationId,
@@ -91,7 +96,7 @@ export class CollaborationService extends EventEmitter {
       timestamp: new Date().toISOString(),
     };
 
-    this.activeUsers.set(`${userId}:${investigationId}`, presence);
+    this.activeUsers.set(presenceKey, presence);
 
     // Cache user presence
     await cacheService.set(`presence:${userId}:${investigationId}`, presence, 300);
@@ -111,6 +116,19 @@ export class CollaborationService extends EventEmitter {
     this.emit('userJoined', { userId, investigationId, userInfo, presence });
     this.pubsub.publish('userJoined', { userId, investigationId, userInfo, presence });
 
+    metrics.recordCollaborationEvent('user_joined', investigationId, userId);
+
+    if (!wasAlreadyPresent) {
+      metrics.updateCollaborationUsers(1, investigationId, 'join');
+
+      const currentCount = previousUserCount + 1;
+      metrics.recordCollaborationConcurrency(investigationId, currentCount);
+
+      if (previousUserCount === 0) {
+        metrics.updateCollaborationSessions(1, investigationId, 'start');
+      }
+    }
+
     console.log(`[COLLABORATION] User ${userInfo.name} joined investigation ${investigationId}`);
   }
 
@@ -124,6 +142,16 @@ export class CollaborationService extends EventEmitter {
     if (presence) {
       this.activeUsers.delete(presenceKey);
       await cacheService.delete(`presence:${userId}:${investigationId}`);
+
+      metrics.recordCollaborationEvent('user_left', investigationId, userId);
+      metrics.updateCollaborationUsers(-1, investigationId, 'leave');
+
+      const remainingUsers = this.getInvestigationUserCount(investigationId);
+      metrics.recordCollaborationConcurrency(investigationId, remainingUsers);
+
+      if (remainingUsers === 0) {
+        metrics.updateCollaborationSessions(-1, investigationId, 'end');
+      }
 
       const notification: LiveNotification = {
         id: `notif-${Date.now()}`,
@@ -169,6 +197,8 @@ export class CollaborationService extends EventEmitter {
         investigationId,
         presence: updatedPresence,
       });
+
+      metrics.recordCollaborationEvent('presence_updated', investigationId, userId);
     }
   }
 
@@ -231,6 +261,11 @@ export class CollaborationService extends EventEmitter {
 
     this.emit('editSubmitted', collaborativeEdit);
     this.pubsub.publish('editSubmitted', collaborativeEdit);
+    metrics.recordCollaborationEvent('edit_submitted', edit.investigationId, edit.userId);
+    metrics.recordCollaborationConcurrency(
+      edit.investigationId,
+      this.getInvestigationUserCount(edit.investigationId),
+    );
     console.log(`[COLLABORATION] Edit submitted: ${collaborativeEdit.id} by user ${edit.userId}`);
 
     return collaborativeEdit;
@@ -267,6 +302,16 @@ export class CollaborationService extends EventEmitter {
       }
 
       this.emit('editResolved', { editId, status, resolvedBy, edit });
+
+      const submittedAt = new Date(edit.timestamp).getTime();
+      const latencySeconds = (Date.now() - submittedAt) / 1000;
+      metrics.recordCollaborationEditLatency(
+        edit.investigationId,
+        latencySeconds,
+        status,
+        edit.entityId,
+      );
+      metrics.recordCollaborationEvent('edit_resolved', edit.investigationId, resolvedBy);
 
       // Remove from pending after 5 minutes
       setTimeout(() => {
@@ -308,6 +353,7 @@ export class CollaborationService extends EventEmitter {
     this.addNotification(notification);
     this.emit('commentAdded', newComment);
     this.pubsub.publish('commentAdded', newComment);
+    metrics.recordCollaborationEvent('comment_added', comment.investigationId, comment.userId);
 
     console.log(`[COLLABORATION] Comment added: ${newComment.id} by user ${comment.userId}`);
     return newComment;
@@ -399,6 +445,15 @@ export class CollaborationService extends EventEmitter {
       }
     }
 
+    if (conflicts.length > 0) {
+      metrics.recordCollaborationConflict(
+        newEdit.investigationId,
+        conflicts.length,
+        newEdit.entityId,
+      );
+      metrics.recordCollaborationEvent('edit_conflict_detected', newEdit.investigationId, newEdit.userId);
+    }
+
     return conflicts;
   }
 
@@ -427,12 +482,34 @@ export class CollaborationService extends EventEmitter {
         this.activeUsers.delete(key);
         cacheService.delete(`presence:${presence.userId}:${presence.investigationId}`);
         cleanedUp++;
+
+        metrics.recordCollaborationEvent('user_timeout', presence.investigationId, presence.userId);
+        metrics.updateCollaborationUsers(-1, presence.investigationId, 'timeout');
+
+        const remainingUsers = this.getInvestigationUserCount(presence.investigationId);
+        metrics.recordCollaborationConcurrency(presence.investigationId, remainingUsers);
+
+        if (remainingUsers === 0) {
+          metrics.updateCollaborationSessions(-1, presence.investigationId, 'timeout');
+        }
       }
     }
 
     if (cleanedUp > 0) {
       console.log(`[COLLABORATION] Cleaned up ${cleanedUp} inactive user presences`);
     }
+  }
+
+  private getInvestigationUserCount(investigationId: string): number {
+    let count = 0;
+
+    for (const presence of this.activeUsers.values()) {
+      if (presence.investigationId === investigationId) {
+        count++;
+      }
+    }
+
+    return count;
   }
 }
 
