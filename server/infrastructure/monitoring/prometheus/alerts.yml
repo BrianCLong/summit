@@ -3,6 +3,9 @@
 groups:
   - name: intelgraph.rules
     rules:
+      - record: slo:graphql_request_latency:95p
+        expr: histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[5m])) by (le, op))
+
       # Application Health Alerts
       - alert: IntelGraphDown
         expr: up{job="intelgraph-app"} == 0
@@ -30,6 +33,15 @@ groups:
         annotations:
           summary: 'High latency in IntelGraph'
           description: '95th percentile latency is {{ $value }}s, which is above the 2s threshold.'
+
+      - alert: GraphQLP95LatencyBreached
+        expr: histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[5m])) by (le)) > 0.35
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'GraphQL p95 latency above 350ms target'
+          description: 'GraphQL 95th percentile latency is {{ $value }}s, exceeding the 0.35s SLO.'
 
   - name: database.rules
     rules:
