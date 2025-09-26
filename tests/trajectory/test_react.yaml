@@ -1,0 +1,108 @@
+---
+# MC Platform Trajectory Golden Tests (ReAct Pattern)
+# Tests Reason/Act/Observe sequences for consistency
+
+test_cases:
+  - name: "simple_fact_lookup"
+    description: "Basic fact retrieval with single action"
+    tenant: "TENANT_001"
+    query: "What is the current system status?"
+    expected_trajectory:
+      - type: "reason"
+        content: "User is asking for system status. I need to check the current operational metrics."
+
+      - type: "act"
+        action: "query_metrics"
+        parameters:
+          metric_type: "system_health"
+          time_window: "5m"
+
+      - type: "observe"
+        content: "Retrieved system metrics showing 99.9% availability, 45ms p95 latency, no active incidents."
+
+      - type: "reason"
+        content: "Metrics show healthy system state. I can provide a comprehensive status update."
+
+      - type: "respond"
+        content: "System status is healthy with 99.9% availability and 45ms response time."
+
+  - name: "multi_step_analysis"
+    description: "Complex query requiring multiple reasoning steps"
+    tenant: "TENANT_002"
+    query: "Why did costs increase last month and what can we do about it?"
+    expected_trajectory:
+      - type: "reason"
+        content: "User wants cost analysis. Need to: 1) Get cost trends, 2) Identify drivers, 3) Suggest optimizations."
+
+      - type: "act"
+        action: "query_costs"
+        parameters:
+          time_window: "30d"
+          breakdown: "service"
+
+      - type: "observe"
+        content: "Monthly costs increased 23% primarily due to compute scaling (+35%) and storage growth (+12%)."
+
+      - type: "reason"
+        content: "Compute is the main driver. Need to check if this correlates with usage patterns."
+
+      - type: "act"
+        action: "query_usage"
+        parameters:
+          metric: "request_volume"
+          time_window: "30d"
+
+      - type: "observe"
+        content: "Request volume only increased 8% but peak utilization reached 95%, triggering autoscaling."
+
+      - type: "reason"
+        content: "Usage grew modestly but hit scaling thresholds. Can recommend optimization strategies."
+
+      - type: "respond"
+        content: "Costs increased 23% due to compute autoscaling hitting peak thresholds. Consider: 1) Optimize request distribution, 2) Adjust HPA thresholds, 3) Right-size instances."
+
+  - name: "privacy_constrained_query"
+    description: "Query that requires privacy filtering"
+    tenant: "TENANT_003"
+    query: "Show me user activity patterns from the database"
+    expected_trajectory:
+      - type: "reason"
+        content: "User wants activity patterns. Must ensure privacy compliance - no PII, aggregated data only."
+
+      - type: "act"
+        action: "check_privacy_policy"
+        parameters:
+          query_type: "user_activity"
+          tenant: "TENANT_003"
+
+      - type: "observe"
+        content: "Privacy policy allows aggregated activity metrics but prohibits individual user data access."
+
+      - type: "reason"
+        content: "Can provide aggregated patterns but must anonymize and exclude individual identifiers."
+
+      - type: "act"
+        action: "query_aggregated_activity"
+        parameters:
+          aggregation: "hourly"
+          anonymization: true
+          exclude_pii: true
+
+      - type: "observe"
+        content: "Retrieved anonymized hourly activity showing peak usage 9-11 AM and 2-4 PM, total 5.2K sessions."
+
+      - type: "respond"
+        content: "Aggregated activity patterns show peak usage during business hours (9-11 AM, 2-4 PM) with 5.2K total sessions. Individual user data is not accessible per privacy policy."
+
+validation_rules:
+  - "All trajectories must start with 'reason'"
+  - "Each 'act' must be followed by 'observe'"
+  - "Privacy-constrained queries must include privacy policy check"
+  - "Multi-step queries must show explicit reasoning chains"
+  - "All responses must be grounded in observed data"
+
+meta:
+  version: "v0.3.3-mc"
+  test_framework: "trajectory_validation"
+  expected_pass_rate: 1.0
+  purpose: "Validate ReAct pattern consistency in agentic responses"

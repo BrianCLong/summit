@@ -1,0 +1,26 @@
+[
+  {
+    "response_id": "sample_001",
+    "context": {
+      "tenant": "TENANT_001",
+      "query": "What is the company revenue?"
+    },
+    "response": "The company revenue for 2023 was $150 million, representing a 25% increase from the previous year.",
+    "sources": [
+      "Financial Report 2023: Revenue reached $150 million in 2023.",
+      "Growth metrics showed 25% year-over-year increase in revenue."
+    ]
+  },
+  {
+    "response_id": "sample_002",
+    "context": {
+      "tenant": "TENANT_002",
+      "query": "Who is the CEO?"
+    },
+    "response": "The current CEO is Sarah Johnson, who has been in this role since 2020.",
+    "sources": [
+      "Leadership team: CEO Sarah Johnson (appointed 2020)",
+      "Executive profile: Sarah Johnson leads the company as Chief Executive Officer."
+    ]
+  }
+]
