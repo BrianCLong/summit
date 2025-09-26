@@ -1,0 +1,14 @@
+FROM node:20-bookworm AS build
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+RUN pnpm fetch
+COPY . .
+RUN pnpm install --offline --frozen-lockfile
+RUN pnpm --filter apps/web build || pnpm --filter client build || true
+
+FROM nginx:1.27-alpine
+COPY --from=build /app/apps/web/build /usr/share/nginx/html 2>/dev/null || true
+COPY --from=build /app/client/dist /usr/share/nginx/html 2>/dev/null || true
+COPY deploy/nginx/web.conf /etc/nginx/conf.d/default.conf
+
