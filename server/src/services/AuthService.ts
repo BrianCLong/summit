@@ -1,10 +1,11 @@
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { randomUUID as uuidv4 } from 'crypto';
-import { getPostgresPool } from '../config/database.js';
+import { getPostgresPool, getRedisClient } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
 import { Pool, PoolClient } from 'pg';
+import type Redis from 'ioredis';
 
 interface UserData {
   email: string;
@@ -27,6 +28,7 @@ interface User {
   lastLogin?: Date;
   createdAt: Date;
   updatedAt?: Date;
+  permissions?: string[];
 }
 
 interface DatabaseUser {
@@ -132,6 +134,20 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
 
 export class AuthService {
   private pool: Pool | null = null;
+  private redis: Redis | null = null;
+  private readonly userCacheTtl: number;
+
+  constructor() {
+    this.userCacheTtl = Number(process.env.AUTH_CACHE_TTL_SEC || '300');
+    try {
+      this.redis = getRedisClient();
+    } catch (error) {
+      this.redis = null;
+      logger.debug('AuthService Redis unavailable, falling back to in-process cache', {
+        err: (error as Error)?.message,
+      });
+    }
+  }
 
   private getPool(): Pool {
     if (!this.pool) {
@@ -174,12 +190,15 @@ export class AuthService {
       );
 
       const user = userResult.rows[0] as DatabaseUser;
+      const decoratedUser = this.decorateUser(user);
       const { token, refreshToken } = await this.generateTokens(user, client);
 
       await client.query('COMMIT');
 
+      await this.writeUserCache(decoratedUser);
+
       return {
-        user: this.formatUser(user),
+        user: decoratedUser,
         token,
         refreshToken,
         expiresIn: 24 * 60 * 60,
@@ -222,10 +241,13 @@ export class AuthService {
         user.id,
       ]);
 
+      const decoratedUser = this.decorateUser(user);
       const { token, refreshToken } = await this.generateTokens(user, client);
 
+      await this.writeUserCache(decoratedUser);
+
       return {
-        user: this.formatUser(user),
+        user: decoratedUser,
         token,
         refreshToken,
         expiresIn: 24 * 60 * 60,
@@ -255,9 +277,11 @@ export class AuthService {
       await client.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [
         user.id,
       ]);
+      const decoratedUser = this.decorateUser(user);
       const { token, refreshToken } = await this.generateTokens(user, client);
+      await this.writeUserCache(decoratedUser);
       return {
-        user: this.formatUser(user),
+        user: decoratedUser,
         token,
         refreshToken,
         expiresIn: 24 * 60 * 60,
@@ -299,18 +323,29 @@ export class AuthService {
 
       const decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
 
-      const client = await this.getPool().connect();
-      const userResult = await client.query(
-        'SELECT * FROM users WHERE id = $1 AND is_active = true',
-        [decoded.userId],
-      );
-      client.release();
-
-      if (userResult.rows.length === 0) {
-        return null;
+      const cachedUser = await this.readUserCache(decoded.userId);
+      if (cachedUser) {
+        return cachedUser;
       }
 
-      return this.formatUser(userResult.rows[0] as DatabaseUser);
+      const client = await this.getPool().connect();
+      try {
+        const userResult = await client.query(
+          'SELECT * FROM users WHERE id = $1 AND is_active = true',
+          [decoded.userId],
+        );
+
+        if (userResult.rows.length === 0) {
+          await this.evictUserCache(decoded.userId);
+          return null;
+        }
+
+        const decoratedUser = this.decorateUser(userResult.rows[0] as DatabaseUser);
+        await this.writeUserCache(decoratedUser);
+        return decoratedUser;
+      } finally {
+        client.release();
+      }
     } catch (error: any) {
       logger.warn('Invalid token:', error.message);
       return null;
@@ -390,6 +425,57 @@ export class AuthService {
       createdAt: user.created_at,
       updatedAt: user.updated_at,
     };
+  }
+
+  private decorateUser(user: DatabaseUser): User {
+    const formatted = this.formatUser(user);
+    const permissions = this.getUserPermissions(formatted);
+    return { ...formatted, permissions };
+  }
+
+  private buildUserCacheKey(userId: string): string {
+    return `auth:user:${userId}`;
+  }
+
+  private async readUserCache(userId: string): Promise<User | null> {
+    if (!this.redis || !userId) {
+      return null;
+    }
+
+    try {
+      const cached = await this.redis.get(this.buildUserCacheKey(userId));
+      if (!cached) {
+        return null;
+      }
+      return JSON.parse(cached) as User;
+    } catch (error) {
+      logger.debug('Failed to read cached user profile', { err: (error as Error)?.message });
+      return null;
+    }
+  }
+
+  private async writeUserCache(user: User): Promise<void> {
+    if (!this.redis || !user?.id) {
+      return;
+    }
+
+    try {
+      await this.redis.set(this.buildUserCacheKey(user.id), JSON.stringify(user), 'EX', this.userCacheTtl);
+    } catch (error) {
+      logger.debug('Failed to cache user profile', { err: (error as Error)?.message });
+    }
+  }
+
+  private async evictUserCache(userId: string): Promise<void> {
+    if (!this.redis || !userId) {
+      return;
+    }
+
+    try {
+      await this.redis.del(this.buildUserCacheKey(userId));
+    } catch (error) {
+      logger.debug('Failed to evict cached user profile', { err: (error as Error)?.message });
+    }
   }
 }
 
