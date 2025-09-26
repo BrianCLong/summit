@@ -1,0 +1,15 @@
+{
+  "name": "@summit/cli",
+  "version": "0.1.0",
+  "description": "Summit local development toolkit",
+  "type": "module",
+  "bin": {
+    "summit": "./bin/summit.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  }
+}
