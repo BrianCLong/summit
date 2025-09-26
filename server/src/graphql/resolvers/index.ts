@@ -12,6 +12,7 @@ import { triggerN8nFlow } from '../../integrations/n8n.js';
 import { checkN8nTriggerAllowed } from '../../integrations/n8n-policy.js';
 import { isEnabled as flagEnabled } from '../../featureFlags/flagsmith.js';
 import { doclingResolvers } from './docling.ts';
+import { emailTemplateResolvers } from './notifications';
 
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
@@ -25,6 +26,7 @@ const resolvers = {
     // Production core resolvers (PostgreSQL + Neo4j)
     ...coreResolvers.Query,
     ...doclingResolvers.Query,
+    ...emailTemplateResolvers.Query,
     async pipeline(_p: any, args: { id: string }) {
       const { getPipelineDef } = await import('../../db/repositories/pipelines.js');
       return await getPipelineDef(args.id);
@@ -63,6 +65,7 @@ const resolvers = {
     // Production core resolvers
     ...coreResolvers.Mutation,
     ...doclingResolvers.Mutation,
+    ...emailTemplateResolvers.Mutation,
 
     // Legacy resolvers (will be phased out)
     ...entityResolvers.Mutation,

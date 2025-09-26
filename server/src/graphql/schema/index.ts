@@ -5,6 +5,7 @@ import graphModule from '../schema.graphops.js';
 import aiModule from '../schema.ai.js';
 import annotationsModule from '../schema.annotations.js';
 import graphragTypesModule from '../types/graphragTypes.js';
+import { notificationsTypeDefs } from '../schema.notifications.ts';
 import { crystalTypeDefs } from '../schema.crystal.js';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
@@ -39,6 +40,7 @@ export const typeDefs = [
   aiTypeDefs,
   annotationsTypeDefs,
   crystalTypeDefs,
+  notificationsTypeDefs,
 ];
 
 export default typeDefs;
