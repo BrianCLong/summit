@@ -50,6 +50,14 @@ pnpm dev
 
 Server runs at `http://localhost:4000`
 
+## 🎥 Onboarding Tutorials
+
+Accelerate team onboarding with short, script-backed walkthroughs. Recordings can be captured with Loom for rapid sharing or OBS Studio when you need multi-scene production. Each video includes a narrator script, transcript for captioning, and a placeholder link to swap once the final recording is available.
+
+- **Data Ingestion Wizard Onboarding** – [Script](docs/tutorials/data-ingestion-wizard-script.md) · [Transcript](docs/tutorials/data-ingestion-wizard-transcript.md) · [Recording placeholder](https://loom.com/share/TBD-data-ingestion-wizard)
+- **Graph Querying Essentials** – [Script](docs/tutorials/graph-querying-script.md) · [Transcript](docs/tutorials/graph-querying-transcript.md) · [Recording placeholder](https://loom.com/share/TBD-graph-querying)
+- **ML Integration Kickstart** – [Script](docs/tutorials/ml-integration-script.md) · [Transcript](docs/tutorials/ml-integration-transcript.md) · [Recording placeholder](https://loom.com/share/TBD-ml-integration)
+
 ### First Query
 
 ```bash
