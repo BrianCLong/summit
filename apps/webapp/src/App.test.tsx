@@ -1,7 +1,42 @@
+import { expect, jest, test } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 import { App } from './App';
 import { store, selectNode } from './store';
+
+jest.mock('@apollo/client', () => ({
+  gql: (strings: TemplateStringsArray) => strings.join(''),
+  useSubscription: () => ({ data: undefined, error: undefined }),
+  ApolloProvider: ({ children }: { children: ReactNode }) => children,
+  HttpLink: class {},
+  InMemoryCache: class {},
+  split: () => ({}),
+  ApolloClient: class {
+    constructor() {
+      return {};
+    }
+  },
+}));
+
+jest.mock('@apollo/client/testing', () => ({
+  MockedProvider: ({ children }: { children: ReactNode }) => children,
+}));
+
+jest.mock('graphql-ws', () => ({
+  createClient: () => ({}),
+}));
+
+jest.mock('@apollo/client/link/subscriptions', () => ({
+  GraphQLWsLink: class {},
+}));
+
+jest.mock('@apollo/client/utilities', () => ({
+  getMainDefinition: () => ({
+    kind: 'OperationDefinition',
+    operation: 'subscription',
+  }),
+}));
 
 jest.mock('cytoscape', () => () => ({
   on: () => {},
@@ -43,7 +78,7 @@ test('renders panes', () => {
       <App />
     </Provider>,
   );
-  expect(screen.getByLabelText('toggle theme')).toBeInTheDocument();
+  expect(screen.getByLabelText('toggle theme')).toBeTruthy();
 });
 
 test('selection updates store', () => {
