@@ -55,6 +55,8 @@ import {
   QuestionMark,
 } from '@mui/icons-material';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import { useInteractiveTutorial } from '../../hooks/useInteractiveTutorial';
+import { graphQueryTutorialSteps } from '../../tutorials/graphQueryTutorial';
 
 function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
   const [query, setQuery] = useState('');
@@ -67,9 +69,34 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
   const [showHistory, setShowHistory] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const inputRef = useRef(null);
+  const [tutorialPrompted, setTutorialPrompted] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return window.sessionStorage.getItem('graph-query-tutorial-shown') === 'true';
+  });
+  const { startIfNeeded: startTutorialIfNeeded } = useInteractiveTutorial({
+    tutorialId: 'graph-query',
+    steps: graphQueryTutorialSteps,
+    startWhen: true,
+  });
 
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
+
+  useEffect(() => {
+    if (tutorialPrompted) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      startTutorialIfNeeded();
+      setTutorialPrompted(true);
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.setItem('graph-query-tutorial-shown', 'true');
+      }
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [tutorialPrompted, startTutorialIfNeeded]);
 
   useEffect(() => {
     if (transcript && transcript !== query) {
@@ -627,6 +654,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
       {/* Main Query Input */}
       <Box sx={{ position: 'relative', mb: 2 }}>
         <TextField
+          id="graph-query-input"
           ref={inputRef}
           fullWidth
           variant="outlined"
@@ -645,7 +673,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
           onFocus={(e) => setAnchorEl(e.currentTarget)}
           InputProps={{
             endAdornment: (
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box id="graph-query-action-buttons" sx={{ display: 'flex', gap: 1 }}>
                 {browserSupportsSpeechRecognition && (
                   <IconButton
                     onClick={isListening ? stopListening : startListening}
@@ -661,6 +689,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
                   <Help />
                 </IconButton>
                 <IconButton
+                  id="graph-query-run-button"
                   onClick={() => executeQuery()}
                   disabled={!query.trim() || loading}
                   color="primary"
@@ -717,85 +746,95 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
       )}
 
       {/* Query Results */}
-      {results && (
-        <Card sx={{ mb: 2 }}>
-          <CardContent>
-            {results.error ? (
-              <Alert severity="error">
-                <Typography variant="body2">{results.error}</Typography>
-                {results.suggestions && (
-                  <Box sx={{ mt: 1 }}>
-                    <Typography variant="caption">Try these instead:</Typography>
-                    {results.suggestions.map((suggestion, index) => (
-                      <Chip
-                        key={index}
-                        label={suggestion}
-                        size="small"
-                        onClick={() => handleSuggestionClick({ text: suggestion })}
-                        sx={{ m: 0.5 }}
-                      />
-                    ))}
+      <Box id="graph-query-results" sx={{ mt: 2 }}>
+        {results ? (
+          <Card sx={{ mb: 2 }}>
+            <CardContent>
+              {results.error ? (
+                <Alert severity="error">
+                  <Typography variant="body2">{results.error}</Typography>
+                  {results.suggestions && (
+                    <Box sx={{ mt: 1 }}>
+                      <Typography variant="caption">Try these instead:</Typography>
+                      {results.suggestions.map((suggestion, index) => (
+                        <Chip
+                          key={index}
+                          label={suggestion}
+                          size="small"
+                          onClick={() => handleSuggestionClick({ text: suggestion })}
+                          sx={{ m: 0.5 }}
+                        />
+                      ))}
+                    </Box>
+                  )}
+                </Alert>
+              ) : (
+                <>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <CheckCircle color="success" />
+                    <Typography variant="h6">Query Results</Typography>
+                    <Badge
+                      badgeContent={results.metadata?.count || results.nodes?.length || 0}
+                      color="primary"
+                    >
+                      <Chip label={results.action} variant="outlined" />
+                    </Badge>
                   </Box>
-                )}
-              </Alert>
-            ) : (
-              <>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <CheckCircle color="success" />
-                  <Typography variant="h6">Query Results</Typography>
-                  <Badge
-                    badgeContent={results.metadata?.count || results.nodes?.length || 0}
-                    color="primary"
-                  >
-                    <Chip label={results.action} variant="outlined" />
-                  </Badge>
-                </Box>
 
-                {results.nodes && results.nodes.length > 0 && (
-                  <Accordion>
-                    <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Typography>Found {results.nodes.length} entities</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <List dense>
-                        {results.nodes.slice(0, 10).map((node, index) => (
-                          <ListItem key={index}>
-                            <ListItemIcon>
-                              <Chip
-                                label={node.type}
-                                size="small"
-                                color="primary"
-                                variant="outlined"
-                              />
-                            </ListItemIcon>
-                            <ListItemText primary={node.label} secondary={`ID: ${node.id}`} />
-                          </ListItem>
-                        ))}
-                        {results.nodes.length > 10 && (
-                          <Typography variant="caption" color="text.secondary">
-                            ... and {results.nodes.length - 10} more
-                          </Typography>
-                        )}
-                      </List>
-                    </AccordionDetails>
-                  </Accordion>
-                )}
+                  {results.nodes && results.nodes.length > 0 && (
+                    <Accordion>
+                      <AccordionSummary expandIcon={<ExpandMore />}>
+                        <Typography>Found {results.nodes.length} entities</Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <List dense>
+                          {results.nodes.slice(0, 10).map((node, index) => (
+                            <ListItem key={index}>
+                              <ListItemIcon>
+                                <Chip
+                                  label={node.type}
+                                  size="small"
+                                  color="primary"
+                                  variant="outlined"
+                                />
+                              </ListItemIcon>
+                              <ListItemText primary={node.label} secondary={`ID: ${node.id}`} />
+                            </ListItem>
+                          ))}
+                          {results.nodes.length > 10 && (
+                            <Typography variant="caption" color="text.secondary">
+                              ... and {results.nodes.length - 10} more
+                            </Typography>
+                          )}
+                        </List>
+                      </AccordionDetails>
+                    </Accordion>
+                  )}
 
-                {results.metadata && Object.keys(results.metadata).length > 0 && (
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Analysis Details:
-                    </Typography>
-                    <pre style={{ fontSize: '0.75rem', color: '#666' }}>
-                      {JSON.stringify(results.metadata, null, 2)}
-                    </pre>
-                  </Box>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
-      )}
+                  {results.metadata && Object.keys(results.metadata).length > 0 && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Analysis Details:
+                      </Typography>
+                      <pre style={{ fontSize: '0.75rem', color: '#666' }}>
+                        {JSON.stringify(results.metadata, null, 2)}
+                      </pre>
+                    </Box>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <Card variant="outlined" sx={{ mb: 2 }}>
+            <CardContent>
+              <Typography variant="body2" color="text.secondary">
+                Query results and AI insights will appear here after you run a graph question.
+              </Typography>
+            </CardContent>
+          </Card>
+        )}
+      </Box>
 
       {/* Query History */}
       {showHistory && queryHistory.length > 0 && (

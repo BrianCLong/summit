@@ -69,6 +69,8 @@ import {
 } from '@mui/icons-material';
 import { useMutation, useQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
+import { useInteractiveTutorial } from '../../hooks/useInteractiveTutorial';
+import { ingestWizardSteps } from '../../tutorials/ingestWizardTutorial';
 
 // GraphQL operations (would be imported from actual files)
 const CREATE_INVESTIGATION = `
@@ -160,6 +162,11 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
   });
   const [useDemo, setUseDemo] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const { progress: tutorialProgress, startIfNeeded } = useInteractiveTutorial({
+    tutorialId: 'ingest-wizard',
+    steps: ingestWizardSteps,
+    startWhen: open,
+  });
 
   const navigate = useNavigate();
 
@@ -191,6 +198,16 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
       });
     }
   }, [useDemo]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      startIfNeeded();
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [open, startIfNeeded]);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -627,10 +644,18 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">IntelGraph Quick Start</Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Typography variant="h6">IntelGraph Quick Start</Typography>
+            <Chip
+              size="small"
+              color={tutorialProgress?.completed ? 'success' : 'info'}
+              label={tutorialProgress?.completed ? 'Tutorial complete' : 'Guided tour available'}
+            />
+          </Box>
           <Box display="flex" gap={1}>
             <Tooltip title="Use demo data">
               <Button
+                id="ingest-wizard-demo-toggle"
                 size="small"
                 variant={useDemo ? 'contained' : 'outlined'}
                 onClick={() => setUseDemo(!useDemo)}
@@ -658,13 +683,14 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
           </Typography>
 
           <LinearProgress
+            id="ingest-wizard-progress"
             variant="determinate"
             value={(activeStep / (steps.length - 1)) * 100}
             sx={{ mb: 2 }}
           />
         </Box>
 
-        <Stepper activeStep={activeStep} orientation="vertical">
+        <Stepper id="ingest-wizard-stepper" activeStep={activeStep} orientation="vertical">
           {steps.map((step, index) => (
             <Step key={step.label}>
               <StepLabel
@@ -681,7 +707,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
               >
                 {step.label}
               </StepLabel>
-              <StepContent>
+              <StepContent id={activeStep === index ? 'ingest-wizard-active-step' : undefined}>
                 <Typography variant="body2" color="textSecondary" paragraph>
                   {step.description}
                 </Typography>
@@ -728,7 +754,11 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={() => setShowHelp(!showHelp)} startIcon={<HelpIcon />}>
+        <Button
+          id="ingest-wizard-help-button"
+          onClick={() => setShowHelp(!showHelp)}
+          startIcon={<HelpIcon />}
+        >
           {showHelp ? 'Hide Help' : 'Show Help'}
         </Button>
         <Button onClick={onClose}>Close</Button>

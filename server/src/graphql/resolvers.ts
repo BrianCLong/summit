@@ -12,13 +12,41 @@ const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
 
 const redisClient = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : null;
 
+const KNOWN_TUTORIALS = ['ingest-wizard', 'graph-query'];
+
+function assertUser(ctx: any) {
+  const user = getUser(ctx);
+  if (!user?.id) {
+    const error = new Error('Not authenticated');
+    error.name = 'UNAUTHENTICATED';
+    throw error;
+  }
+  return user;
+}
+
+function mapTutorialProgress(tutorialId: string, row?: any) {
+  return {
+    tutorialId,
+    completed: row?.completed ?? false,
+    completedAt: row?.completed_at ?? null,
+  };
+}
+
+function assertTutorialId(tutorialId: string) {
+  if (!KNOWN_TUTORIALS.includes(tutorialId)) {
+    const error = new Error(`Unknown tutorial: ${tutorialId}`);
+    error.name = 'BAD_USER_INPUT';
+    throw error;
+  }
+}
+
 export const resolvers = {
   DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),
-  Query: { 
+  Query: {
     async tenantCoherence(_: any, { tenantId }: any, ctx: any) {
       const end = gqlDuration.startTimer({ op: 'tenantCoherence' });
       try {
-        const user = getUser(ctx); 
+        const user = getUser(ctx);
         
         // Enhanced ABAC enforcement with purpose checking
         const policyDecision = await policyEnforcer.requirePurpose('investigation', {
@@ -87,9 +115,33 @@ export const resolvers = {
       } finally {
         end();
       }
+    },
+
+    async tutorialProgress(_: any, { tutorialId }: any, ctx: any) {
+      assertTutorialId(tutorialId);
+      const user = assertUser(ctx);
+      const tenantId = user?.tenant || 'default';
+      const row = await pg.oneOrNone(
+        'SELECT tutorial_id, completed, completed_at FROM user_tutorial_progress WHERE user_id=$1 AND tutorial_id=$2',
+        [user.id, tutorialId],
+        { tenantId }
+      );
+      return mapTutorialProgress(tutorialId, row);
+    },
+
+    async tutorialChecklist(_: any, __: any, ctx: any) {
+      const user = assertUser(ctx);
+      const tenantId = user?.tenant || 'default';
+      const rows = await pg.readMany(
+        'SELECT tutorial_id, completed, completed_at FROM user_tutorial_progress WHERE user_id=$1',
+        [user.id],
+        { tenantId }
+      );
+      const rowMap = new Map((rows || []).map((row: any) => [row.tutorial_id, row]));
+      return KNOWN_TUTORIALS.map((id) => mapTutorialProgress(id, rowMap.get(id)));
     }
   },
-  Mutation: { 
+  Mutation: {
     async publishCoherenceSignal(_: any, { input }: any, ctx: any) {
       const end = gqlDuration.startTimer({ op: 'publishCoherenceSignal' });
       try {
@@ -116,6 +168,38 @@ export const resolvers = {
       } finally {
         end();
       }
+    },
+
+    async completeTutorial(_: any, { tutorialId }: any, ctx: any) {
+      assertTutorialId(tutorialId);
+      const user = assertUser(ctx);
+      const tenantId = user?.tenant || 'default';
+      const row = await pg.oneOrNone(
+        `INSERT INTO user_tutorial_progress (user_id, tutorial_id, completed, completed_at)
+         VALUES ($1, $2, TRUE, now())
+         ON CONFLICT (user_id, tutorial_id)
+         DO UPDATE SET completed = TRUE, completed_at = now(), updated_at = now()
+         RETURNING tutorial_id, completed, completed_at`,
+        [user.id, tutorialId],
+        { tenantId, forceWrite: true }
+      );
+      return mapTutorialProgress(tutorialId, row);
+    },
+
+    async resetTutorial(_: any, { tutorialId }: any, ctx: any) {
+      assertTutorialId(tutorialId);
+      const user = assertUser(ctx);
+      const tenantId = user?.tenant || 'default';
+      const row = await pg.oneOrNone(
+        `INSERT INTO user_tutorial_progress (user_id, tutorial_id, completed, completed_at)
+         VALUES ($1, $2, FALSE, NULL)
+         ON CONFLICT (user_id, tutorial_id)
+         DO UPDATE SET completed = FALSE, completed_at = NULL, updated_at = now()
+         RETURNING tutorial_id, completed, completed_at`,
+        [user.id, tutorialId],
+        { tenantId, forceWrite: true }
+      );
+      return mapTutorialProgress(tutorialId, row);
     }
   },
   Subscription: {

@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTutorials } from '../context/TutorialContext';
+import { TUTORIAL_CONFIG, type TutorialId } from '../tutorials/constants';
+import InteractiveTutorialMenu from './tutorials/InteractiveTutorialMenu';
 
 interface HelpTopic {
   id: string;
@@ -18,6 +22,53 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ isVisible, onClose, initialTopi
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTopic, setActiveTopic] = useState<string | null>(initialTopic || null);
+  const navigate = useNavigate();
+  const {
+    progress: tutorialProgress,
+    loading: tutorialsLoading,
+    requestTutorialStart,
+    resetTutorial,
+    isMutating,
+  } = useTutorials();
+
+  const tutorialItems = useMemo(
+    () =>
+      Object.values(TUTORIAL_CONFIG).map((meta) => ({
+        id: meta.id,
+        title: meta.title,
+        description: meta.description,
+        featureArea: meta.featureArea,
+        estimatedTime: meta.estimatedTime,
+        completed: tutorialProgress[meta.id]?.completed ?? false,
+        completedAt: tutorialProgress[meta.id]?.completedAt ?? null,
+      })),
+    [tutorialProgress]
+  );
+
+  const handleStartTutorial = (tutorialId: string) => {
+    const id = tutorialId as TutorialId;
+    if (id === 'graph-query') {
+      navigate('/graph');
+    }
+    requestTutorialStart(id);
+    onClose();
+  };
+
+  const handleRestartTutorial = async (tutorialId: string) => {
+    const id = tutorialId as TutorialId;
+    await resetTutorial(id);
+    if (id === 'graph-query') {
+      navigate('/graph');
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.removeItem('graph-query-tutorial-shown');
+      }
+    }
+    if (id === 'ingest-wizard' && typeof window !== 'undefined') {
+      window.sessionStorage.removeItem('ingest-wizard-prompted');
+    }
+    requestTutorialStart(id);
+    onClose();
+  };
 
   const helpTopics: HelpTopic[] = [
     {
@@ -499,6 +550,15 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ isVisible, onClose, initialTopi
 
         {/* Content Area */}
         <div className="flex-1 flex flex-col">
+          <div className="p-6 border-b bg-gray-50">
+            <h3 className="text-lg font-semibold mb-3">Interactive Tutorials</h3>
+            <InteractiveTutorialMenu
+              tutorials={tutorialItems}
+              onStart={handleStartTutorial}
+              onRestart={handleRestartTutorial}
+              isLoading={tutorialsLoading || isMutating}
+            />
+          </div>
           {activeTopic ? (
             <div className="flex-1 overflow-y-auto">
               {(() => {
