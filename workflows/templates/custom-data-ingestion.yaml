@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: data-ingestion-template
+  namespace: intelgraph
+  labels:
+    summit.svc/component: pipelines
+spec:
+  entrypoint: ingestion-pipeline
+  arguments:
+    parameters:
+      - name: sourceUrl
+        description: Source endpoint for ingestion
+      - name: outputBucket
+        description: S3 bucket used to persist normalized data
+      - name: batchSize
+        value: "500"
+        description: Maximum records per batch before upload
+  templates:
+    - name: ingestion-pipeline
+      steps:
+        - - name: fetch-raw
+            template: fetch-raw
+        - - name: normalize
+            template: normalize
+            arguments:
+              parameters:
+                - name: batchSize
+                  value: "{{workflow.parameters.batchSize}}"
+        - - name: publish
+            template: publish
+    - name: fetch-raw
+      inputs:
+        parameters:
+          - name: sourceUrl
+      container:
+        image: ghcr.io/summit/ingestion-fetcher:latest
+        command: ["/bin/ingest"]
+        args:
+          - "--source={{inputs.parameters.sourceUrl}}"
+    - name: normalize
+      inputs:
+        parameters:
+          - name: batchSize
+      container:
+        image: ghcr.io/summit/ingestion-normalizer:latest
+        args:
+          - "--batch-size={{inputs.parameters.batchSize}}"
+    - name: publish
+      inputs:
+        parameters:
+          - name: outputBucket
+      container:
+        image: ghcr.io/summit/ingestion-publisher:latest
+        args:
+          - "--bucket={{workflow.parameters.outputBucket}}"
+          - "--input=/data/out"
