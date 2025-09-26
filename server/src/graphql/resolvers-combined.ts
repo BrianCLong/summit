@@ -6,6 +6,7 @@ const aiResolvers = require('./resolvers.ai.js');
 const annotationsResolvers = require('./resolvers.annotations.js');
 import crystalResolvers from './resolvers.crystal.js';
 import { randomUUID as uuidv4 } from 'crypto';
+import { createMLStreamingResolvers } from './resolvers/mlStreaming.js';
 
 interface User {
   id: string;
@@ -54,12 +55,15 @@ const goals: Array<{
 }> = []; // replace with DB later
 let seq = 1;
 
+const mlStreamingResolvers = createMLStreamingResolvers(pubsub);
+
 export const resolvers = {
   Query: {
     ...(crystalResolvers.Query || {}),
     ...(copilotResolvers.Query || {}),
     ...(aiResolvers.Query || {}),
     ...(annotationsResolvers.Query || {}),
+    ...(mlStreamingResolvers.Query || {}),
     me: async (_: any, __: any, { user }: Context): Promise<User> => {
       if (!user) throw new Error('Not authenticated');
       return user;
@@ -113,6 +117,7 @@ export const resolvers = {
     ...(copilotResolvers.Subscription || {}),
     ...(aiResolvers.Subscription || {}),
     ...(annotationsResolvers.Subscription || {}),
+    ...(mlStreamingResolvers.Subscription || {}),
     investigationUpdated: {
       subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED']),
     },
