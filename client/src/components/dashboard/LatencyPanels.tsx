@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo, useId } from 'react';
 import { useAppSelector } from '../../store/index.ts';
-import { Card, CardContent, Stack, Typography, Skeleton } from '@mui/material';
+import { Card, CardContent, Stack, Typography, Skeleton, Box } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
+import { visuallyHidden } from '@mui/utils';
 
 export default function LatencyPanels() {
   const { tenant, status, operation } = useAppSelector((s) => s.ui);
@@ -20,45 +21,78 @@ export default function LatencyPanels() {
     deps: [tenant, status],
   });
 
+  const latestLatency = trend?.[trend.length - 1]?.ms ?? null;
+  const firstLatency = trend?.[0]?.ms ?? null;
+  const trendLabelId = useId();
+  const trendDescriptionId = useId();
+  const latencyHeadingId = useId();
+
+  const trendSummary = useMemo(() => {
+    if (!trend || trend.length < 2) {
+      return 'Latency trend data is unavailable at this time.';
+    }
+    const direction = latestLatency && firstLatency
+      ? latestLatency > firstLatency
+        ? 'increased'
+        : latestLatency < firstLatency
+          ? 'decreased'
+          : 'remained stable'
+      : 'remained stable';
+    return `Latest p95 latency is ${(latestLatency ?? 0).toFixed(1)} milliseconds, which has ${direction} compared to ${(firstLatency ?? 0).toFixed(1)} milliseconds earlier in the interval.`;
+  }, [firstLatency, latestLatency, trend]);
+
   return (
     <Stack spacing={2}>
-      <Card>
+      <Card component="section" aria-labelledby={latencyHeadingId}>
         <CardContent>
-          <Typography variant="subtitle2" color="text.secondary">
+          <Typography id={latencyHeadingId} variant="subtitle2" color="text.secondary" gutterBottom>
             p95 Latency (5m) — Tenant×Status
           </Typography>
           {loadingP95 ? (
-            <Skeleton height={40} width={140} />
+            <Skeleton height={40} width={140} aria-label="Loading p95 latency" />
           ) : (
-            <Typography variant="h4">{p95?.valueMs.toFixed(1)} ms</Typography>
+            <Typography variant="h4" aria-live="polite">
+              {p95?.valueMs.toFixed(1)} ms
+            </Typography>
           )}
+          <Typography variant="caption" color="text.secondary">
+            Real-time p95 latency sampled over the last five minutes for the selected tenant and status.
+          </Typography>
         </CardContent>
       </Card>
-      <Card>
+      <Card component="section" aria-labelledby={trendLabelId}>
         <CardContent>
-          <Typography variant="subtitle2" color="text.secondary">
+          <Typography id={trendLabelId} variant="subtitle2" color="text.secondary" gutterBottom>
             p95 Trend (5m) — Tenant×Status
           </Typography>
-          <div style={{ height: 220 }}>
+          <Box component="figure" sx={{ height: 220, m: 0 }}>
+            <Box component="figcaption" id={trendDescriptionId} sx={visuallyHidden}>
+              {trendSummary}
+            </Box>
             {loadingTrend ? (
-              <Skeleton variant="rounded" height={200} />
+              <Skeleton variant="rounded" height={200} aria-label="Loading latency trend" />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trend} aria-label="p95 trend">
+                <LineChart
+                  data={trend ?? []}
+                  role="img"
+                  aria-labelledby={`${trendLabelId} ${trendDescriptionId}`}
+                >
                   <XAxis dataKey="ts" tickFormatter={(v) => new Date(v).toLocaleTimeString()} />
                   <YAxis unit=" ms" />
                   <Tooltip labelFormatter={(v) => new Date(Number(v)).toLocaleString()} />
                   <Line
                     type="monotone"
                     dataKey="ms"
-                    stroke="#1976d2"
+                    stroke="#0f172a"
+                    strokeWidth={2}
                     dot={false}
                     isAnimationActive={false}
                   />
                 </LineChart>
               </ResponsiveContainer>
             )}
-          </div>
+          </Box>
         </CardContent>
       </Card>
     </Stack>

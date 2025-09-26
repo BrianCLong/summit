@@ -1,5 +1,5 @@
 import React from 'react';
-import { Skeleton, Stack, Typography } from '@mui/material';
+import { Box, Skeleton, Stack, Typography } from '@mui/material';
 
 export default function StatsOverview() {
   // TODO: Re-enable GraphQL query when schema is available
@@ -16,32 +16,66 @@ export default function StatsOverview() {
     queries: { total: 0, avgLatency: 0 },
   };
 
+  const statItems = [
+    {
+      id: 'entities',
+      label: 'Total Entities',
+      value: mockStats.entities.total.toLocaleString(),
+      description: 'Count of unique graph entities available in the workspace.',
+    },
+    {
+      id: 'relationships',
+      label: 'Total Relationships',
+      value: mockStats.relationships.total.toLocaleString(),
+      description: 'Total relationships connecting entities in the knowledge graph.',
+    },
+    {
+      id: 'investigations',
+      label: 'Active Investigations',
+      value: mockStats.investigations.active.toLocaleString(),
+      description: 'Investigations currently being tracked.',
+    },
+    {
+      id: 'query-latency',
+      label: 'Average Query Latency',
+      value: `${mockStats.queries.avgLatency} ms`,
+      description: 'Mean response time for graph queries over the last five minutes.',
+    },
+  ];
+
   return (
-    <Stack direction="row" spacing={6} role="group" aria-label="Overview stats">
-      <div>
-        <Typography variant="subtitle2" color="text.secondary">
-          Total Entities
-        </Typography>
-        <Typography variant="h5">{mockStats.entities.total.toLocaleString()}</Typography>
-      </div>
-      <div>
-        <Typography variant="subtitle2" color="text.secondary">
-          Total Relationships
-        </Typography>
-        <Typography variant="h5">{mockStats.relationships.total.toLocaleString()}</Typography>
-      </div>
-      <div>
-        <Typography variant="subtitle2" color="text.secondary">
-          Investigations
-        </Typography>
-        <Typography variant="h5">{mockStats.investigations.active}</Typography>
-      </div>
-      <div>
-        <Typography variant="subtitle2" color="text.secondary">
-          Query Latency
-        </Typography>
-        <Typography variant="h5">{mockStats.queries.avgLatency}ms</Typography>
-      </div>
+    <Stack
+      component="dl"
+      direction={{ xs: 'column', md: 'row' }}
+      spacing={6}
+      aria-label="Overview stats"
+      sx={{
+        width: '100%',
+        justifyContent: 'space-between',
+        '& > *': { minWidth: { xs: '100%', md: 160 } },
+      }}
+    >
+      {statItems.map((stat) => (
+        <Box key={stat.id} component="div">
+          <Typography component="dt" variant="subtitle2" color="text.secondary" gutterBottom>
+            {stat.label}
+          </Typography>
+          {loading ? (
+            <Skeleton width={120} height={36} aria-label={`Loading ${stat.label}`} />
+          ) : error ? (
+            <Typography component="dd" variant="body2" color="error.main" aria-live="assertive">
+              Unavailable
+            </Typography>
+          ) : (
+            <Typography component="dd" variant="h5" aria-live="polite">
+              {stat.value}
+            </Typography>
+          )}
+          <Typography component="p" variant="caption" color="text.secondary">
+            {stat.description}
+          </Typography>
+        </Box>
+      ))}
     </Stack>
   );
 }

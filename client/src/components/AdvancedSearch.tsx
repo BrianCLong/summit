@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useQuery, gql } from '@apollo/client';
 
 const SEARCH_ENTITIES = gql`
@@ -48,6 +48,15 @@ function AdvancedSearch({
     investigations: [],
   });
 
+  const searchLabelId = useId();
+  const searchInputId = useId();
+  const filtersPanelId = useId();
+  const resultsListId = useId();
+  const statusMessageId = useId();
+  const filterCountId = useId();
+  const filterPanelRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLUListElement>(null);
+
   const { data, loading, error } = useQuery(SEARCH_ENTITIES, {
     variables: { query, filters },
     skip: !query.trim(),
@@ -92,67 +101,92 @@ function AdvancedSearch({
     (filters.dateRange[0] || filters.dateRange[1] ? 1 : 0) +
     filters.investigations.length;
 
+  useEffect(() => {
+    if (showFilterPanel) {
+      filterPanelRef.current?.focus();
+    }
+  }, [showFilterPanel]);
+
+  useEffect(() => {
+    if (showResults) {
+      resultsRef.current?.focus();
+    }
+  }, [showResults]);
+
+  useEffect(() => {
+    if (!showFilterPanel && !showResults) {
+      return;
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowFilterPanel(false);
+        setShowResults(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showFilterPanel, showResults]);
+
+  const searchStatus = useMemo(() => {
+    if (loading) {
+      return 'Searching…';
+    }
+    if (error) {
+      return `Search failed: ${error.message}`;
+    }
+    if (showResults && data?.searchEntities?.nodes?.length === 0) {
+      return `No results found for "${query}".`;
+    }
+    if (showResults && data?.searchEntities?.nodes?.length) {
+      return `${data.searchEntities.nodes.length} results shown out of ${data.searchEntities.totalCount ?? data.searchEntities.nodes.length}.`;
+    }
+    return 'Type at least three characters to search entities, investigations, or actions.';
+  }, [data, error, loading, query, showResults]);
+
+  const results = data?.searchEntities?.nodes ?? [];
+  const resultsOffset = showFilterPanel ? '440px' : '12px';
+
   return (
-    <div style={{ position: 'relative', width: '100%' }}>
-      {/* Search Input */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          border: '2px solid var(--hairline)',
-          borderRadius: '8px',
-          backgroundColor: '#fff',
-          padding: '4px',
-        }}
-      >
-        <div style={{ padding: '8px 12px', color: '#666' }}>🔍</div>
+    <section
+      className="advanced-search"
+      aria-labelledby={searchLabelId}
+      data-testid="advanced-search"
+    >
+      <h2 id={searchLabelId} className="sr-only">
+        Advanced entity search
+      </h2>
+      <div className="advanced-search__input-container" role="search" aria-describedby={statusMessageId}>
+        <span className="advanced-search__icon" aria-hidden="true">
+          🔍
+        </span>
+        <label htmlFor={searchInputId} className="sr-only">
+          {placeholder}
+        </label>
         <input
+          id={searchInputId}
           type="text"
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
           placeholder={placeholder}
-          style={{
-            flex: 1,
-            border: 'none',
-            outline: 'none',
-            fontSize: '16px',
-            padding: '8px 4px',
-          }}
+          className="advanced-search__input"
           onFocus={() => query.length > 2 && setShowResults(true)}
+          aria-controls={showResults ? resultsListId : undefined}
         />
 
         {showFilters && (
           <button
+            type="button"
             onClick={() => setShowFilterPanel(!showFilterPanel)}
-            style={{
-              padding: '8px 12px',
-              border: 'none',
-              background: activeFilterCount > 0 ? '#1a73e8' : 'transparent',
-              color: activeFilterCount > 0 ? 'white' : '#666',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              position: 'relative',
-            }}
+            className={`advanced-search__toggle${
+              showFilterPanel || activeFilterCount > 0 ? ' advanced-search__toggle--active' : ''
+            }`}
+            aria-expanded={showFilterPanel}
+            aria-controls={filtersPanelId}
+            aria-describedby={activeFilterCount > 0 ? filterCountId : undefined}
           >
             ⚙️ Filters
             {activeFilterCount > 0 && (
-              <span
-                style={{
-                  position: 'absolute',
-                  top: '-4px',
-                  right: '-4px',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  borderRadius: '50%',
-                  width: '18px',
-                  height: '18px',
-                  fontSize: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+              <span className="advanced-search__badge" id={filterCountId}>
                 {activeFilterCount}
               </span>
             )}
@@ -160,59 +194,40 @@ function AdvancedSearch({
         )}
       </div>
 
+      <div
+        id={statusMessageId}
+        className={`advanced-search__status ${
+          error ? 'advanced-search__status--error' : 'advanced-search__status--muted'
+        }`}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {searchStatus}
+      </div>
+
       {/* Filter Panel */}
       {showFilterPanel && showFilters && (
         <div
-          className="panel"
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            zIndex: 1000,
-            marginTop: '8px',
-            padding: '20px',
-            maxHeight: '400px',
-            overflowY: 'auto',
-          }}
+          id={filtersPanelId}
+          className="advanced-search__panel"
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby={`${filtersPanelId}-heading`}
+          ref={filterPanelRef}
+          tabIndex={-1}
         >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '16px',
-            }}
-          >
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', margin: 0 }}>Advanced Filters</h3>
-            <button
-              onClick={clearFilters}
-              style={{
-                color: '#666',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '14px',
-              }}
-            >
-              Clear All
+          <div className="advanced-search__panel-header">
+            <h3 id={`${filtersPanelId}-heading`}>Advanced Filters</h3>
+            <button type="button" onClick={clearFilters} className="advanced-search__panel-clear">
+              Clear all filters
             </button>
           </div>
 
           {/* Entity Types */}
-          <div style={{ marginBottom: '20px' }}>
-            <label
-              style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', display: 'block' }}
-            >
-              Entity Types
-            </label>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                gap: '8px',
-              }}
-            >
+          <div className="advanced-search__panel-section">
+            <p className="advanced-search__panel-label">Entity Types</p>
+            <div className="advanced-search__filter-grid">
               {entityTypes.map((type) => (
                 <label
                   key={type}
@@ -235,18 +250,17 @@ function AdvancedSearch({
           </div>
 
           {/* Confidence Range */}
-          <div style={{ marginBottom: '20px' }}>
-            <label
-              style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', display: 'block' }}
-            >
+          <div className="advanced-search__panel-section">
+            <p className="advanced-search__panel-label">
               Confidence Range: {filters.confidenceRange[0]}% - {filters.confidenceRange[1]}%
-            </label>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            </p>
+            <div className="advanced-search__range-inputs">
               <input
                 type="range"
                 min="0"
                 max="100"
                 value={filters.confidenceRange[0]}
+                aria-label="Minimum confidence percentage"
                 onChange={(e) =>
                   handleFilterChange('confidenceRange', [
                     parseInt(e.target.value),
@@ -260,6 +274,7 @@ function AdvancedSearch({
                 min="0"
                 max="100"
                 value={filters.confidenceRange[1]}
+                aria-label="Maximum confidence percentage"
                 onChange={(e) =>
                   handleFilterChange('confidenceRange', [
                     filters.confidenceRange[0],
@@ -272,39 +287,27 @@ function AdvancedSearch({
           </div>
 
           {/* Date Range */}
-          <div style={{ marginBottom: '16px' }}>
-            <label
-              style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', display: 'block' }}
-            >
-              Date Range
-            </label>
-            <div style={{ display: 'flex', gap: '12px' }}>
+          <div className="advanced-search__panel-section">
+            <p className="advanced-search__panel-label">Date Range</p>
+            <div className="advanced-search__dates">
               <input
                 type="date"
                 value={filters.dateRange[0]}
+                aria-label="Start date"
                 onChange={(e) =>
                   handleFilterChange('dateRange', [e.target.value, filters.dateRange[1]])
                 }
-                style={{
-                  flex: 1,
-                  padding: '6px',
-                  border: '1px solid var(--hairline)',
-                  borderRadius: '4px',
-                }}
+                className="advanced-search__date-input"
               />
               <span style={{ alignSelf: 'center' }}>to</span>
               <input
                 type="date"
                 value={filters.dateRange[1]}
+                aria-label="End date"
                 onChange={(e) =>
                   handleFilterChange('dateRange', [filters.dateRange[0], e.target.value])
                 }
-                style={{
-                  flex: 1,
-                  padding: '6px',
-                  border: '1px solid var(--hairline)',
-                  borderRadius: '4px',
-                }}
+                className="advanced-search__date-input"
               />
             </div>
           </div>
@@ -313,111 +316,54 @@ function AdvancedSearch({
 
       {/* Search Results */}
       {showResults && query.length > 2 && (
-        <div
-          className="panel"
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            zIndex: 999,
-            marginTop: showFilterPanel ? '420px' : '8px',
-            maxHeight: '400px',
-            overflowY: 'auto',
-          }}
-        >
-          {loading && (
-            <div style={{ padding: '20px', textAlign: 'center' }}>
-              <div>🔍 Searching...</div>
-            </div>
-          )}
-
-          {error && (
-            <div style={{ padding: '20px', textAlign: 'center', color: '#dc2626' }}>
-              <div>❌ Search failed: {error.message}</div>
-            </div>
-          )}
-
-          {data?.searchEntities?.nodes?.length === 0 && !loading && (
-            <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
-              <div>🔍 No results found for "{query}"</div>
-              <div style={{ fontSize: '14px', marginTop: '8px' }}>
-                Try adjusting your search terms or filters
-              </div>
-            </div>
-          )}
-
-          {data?.searchEntities?.nodes?.map((result: any) => (
-            <div
-              key={result.id}
-              onClick={() => {
-                onResultSelect?.(result);
-                setShowResults(false);
-              }}
-              style={{
-                padding: '16px',
-                borderBottom: '1px solid var(--hairline)',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8f9fa')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  marginBottom: '4px',
-                }}
-              >
-                <div style={{ fontWeight: '600', fontSize: '16px' }}>{result.label}</div>
-                <div
-                  style={{
-                    fontSize: '12px',
-                    padding: '2px 6px',
-                    backgroundColor: '#e5e7eb',
-                    borderRadius: '3px',
-                    textTransform: 'capitalize',
+        <div className="advanced-search__results-wrapper" style={{ marginTop: resultsOffset }}>
+          <ul
+            id={resultsListId}
+            className="advanced-search__results"
+            role="listbox"
+            aria-labelledby={searchLabelId}
+            aria-describedby={statusMessageId}
+            aria-busy={loading}
+            tabIndex={-1}
+            ref={resultsRef}
+          >
+            {results.map((result: any) => (
+              <li key={result.id} className="advanced-search__result-item">
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected="false"
+                  className="advanced-search__result-button"
+                  onClick={() => {
+                    onResultSelect?.(result);
+                    setShowResults(false);
                   }}
                 >
-                  {result.type}
-                </div>
-              </div>
-              {result.description && (
-                <div style={{ color: '#666', fontSize: '14px', marginBottom: '8px' }}>
-                  {result.description.length > 100
-                    ? `${result.description.substring(0, 100)}...`
-                    : result.description}
-                </div>
-              )}
-              <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: '#999' }}>
-                <span>Confidence: {result.confidence}%</span>
-                <span>ID: {result.id}</span>
-                {result.updatedAt && (
-                  <span>Updated: {new Date(result.updatedAt).toLocaleDateString()}</span>
-                )}
-              </div>
-            </div>
-          ))}
-
+                  <div className="advanced-search__result-header">
+                    <span className="advanced-search__result-title">{result.label}</span>
+                    <span className="advanced-search__result-type">{result.type}</span>
+                  </div>
+                  {result.description && (
+                    <p className="advanced-search__result-description">
+                      {result.description.length > 160
+                        ? `${result.description.substring(0, 160)}…`
+                        : result.description}
+                    </p>
+                  )}
+                  <div className="advanced-search__result-meta">
+                    <span>Confidence: {result.confidence}%</span>
+                    <span>ID: {result.id}</span>
+                    {result.updatedAt && (
+                      <span>Updated: {new Date(result.updatedAt).toLocaleDateString()}</span>
+                    )}
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
           {data?.searchEntities?.hasMore && (
-            <div
-              style={{
-                padding: '16px',
-                textAlign: 'center',
-                borderTop: '1px solid var(--hairline)',
-              }}
-            >
-              <button
-                style={{
-                  color: '#1a73e8',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                }}
-              >
+            <div className="advanced-search__load-more">
+              <button type="button" className="advanced-search__load-more-button">
                 Load more results ({data.searchEntities.totalCount} total)
               </button>
             </div>
@@ -428,21 +374,15 @@ function AdvancedSearch({
       {/* Click outside to close */}
       {(showResults || showFilterPanel) && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 998,
-          }}
+          className="advanced-search__overlay"
           onClick={() => {
             setShowResults(false);
             setShowFilterPanel(false);
           }}
+          aria-hidden="true"
         />
       )}
-    </div>
+    </section>
   );
 }
 

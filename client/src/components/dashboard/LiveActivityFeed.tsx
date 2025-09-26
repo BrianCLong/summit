@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useId } from 'react';
 import {
   Box,
   Paper,
@@ -9,8 +9,8 @@ import {
   ListItemIcon,
   Chip,
   Badge,
-  IconButton,
   Collapse,
+  ButtonBase,
 } from '@mui/material';
 import {
   Timeline as TimelineIcon,
@@ -21,6 +21,7 @@ import {
   Search as SearchIcon,
   Security as SecurityIcon,
 } from '@mui/icons-material';
+import { visuallyHidden } from '@mui/utils';
 // TODO: Re-enable GraphQL subscription when schema is available
 // import { useActivityFeedSubscription } from '../../generated/graphql';
 
@@ -69,6 +70,9 @@ const getActivityColor = (type: string) => {
 
 export default function LiveActivityFeed() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const headerId = useId();
+  const panelId = useId();
+  const descriptionId = useId();
 
   // Mock activities for development
   const mockActivities: ActivityEvent[] = [
@@ -149,62 +153,116 @@ export default function LiveActivityFeed() {
   };
 
   return (
-    <Paper elevation={1} sx={{ borderRadius: 3 }}>
-      <Box
-        sx={{
-          p: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'pointer',
-        }}
+    <Paper
+      component="section"
+      elevation={1}
+      sx={{ borderRadius: 3 }}
+      aria-labelledby={headerId}
+    >
+      <ButtonBase
         onClick={handleToggleExpand}
+        aria-expanded={isExpanded}
+        aria-controls={panelId}
+        sx={{
+          width: '100%',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          p: 2,
+          textAlign: 'left',
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          borderRadius: 3,
+          '&:focus-visible': {
+            outline: (theme) => `3px solid ${theme.palette.primary.main}`,
+            outlineOffset: 2,
+          },
+        }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Badge badgeContent={newActivityCount} color="error" invisible={newActivityCount === 0}>
-            <TimelineIcon />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Badge
+            badgeContent={newActivityCount}
+            color="error"
+            invisible={newActivityCount === 0}
+            aria-label={
+              newActivityCount === 0
+                ? 'No unread activity'
+                : `${newActivityCount} unread activity ${newActivityCount === 1 ? 'item' : 'items'}`
+            }
+          >
+            <TimelineIcon aria-hidden="true" />
           </Badge>
-          <Typography variant="h6">Live Activity</Typography>
+          <Typography id={headerId} variant="h6" component="h2">
+            Live Activity
+          </Typography>
           {loading && (
-            <Chip label="Connecting..." size="small" color="warning" variant="outlined" />
+            <Chip
+              label="Connecting"
+              size="small"
+              color="warning"
+              variant="outlined"
+              role="status"
+              aria-live="polite"
+            />
           )}
-          {error && <Chip label="Offline" size="small" color="error" variant="outlined" />}
+          {error && (
+            <Chip label="Offline" size="small" color="error" variant="outlined" role="status" />
+          )}
+          {newActivityCount > 0 && (
+            <Typography component="span" sx={visuallyHidden} aria-live="polite">
+              {newActivityCount} new activity {newActivityCount === 1 ? 'update' : 'updates'} available
+            </Typography>
+          )}
         </Box>
-        <IconButton size="small">{isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+        <Box component="span" aria-hidden="true" sx={{ display: 'flex', alignItems: 'center' }}>
+          {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        </Box>
+      </ButtonBase>
+
+      <Box component="p" id={descriptionId} sx={visuallyHidden}>
+        Expanded live activity reveals the most recent investigations, entity updates, and alerts with
+        timestamps.
       </Box>
 
-      <Collapse in={isExpanded}>
+      <Collapse in={isExpanded} id={panelId} role="region" aria-labelledby={headerId} aria-describedby={descriptionId}>
         <Box sx={{ pb: 2 }}>
           {activities.length === 0 ? (
-            <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ p: 2, textAlign: 'center' }}
+              role="status"
+              aria-live="polite"
+            >
               No recent activity
             </Typography>
           ) : (
-            <List dense>
+            <List dense aria-live="polite" aria-labelledby={headerId} aria-describedby={descriptionId}>
               {activities.map((activity) => (
-                <ListItem key={activity.id} sx={{ py: 0.5 }}>
-                  <ListItemIcon sx={{ minWidth: 32 }}>
+                <ListItem key={activity.id} sx={{ py: 0.75, alignItems: 'flex-start' }}>
+                  <ListItemIcon sx={{ minWidth: 32 }} aria-hidden="true">
                     {getActivityIcon(activity.type)}
                   </ListItemIcon>
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                        <Typography variant="body2">{activity.message}</Typography>
+                        <Typography variant="body2" component="p" sx={{ color: 'text.primary' }}>
+                          {activity.message}
+                        </Typography>
                         <Chip
                           label={activity.type.toLowerCase().replace('_', ' ')}
                           size="small"
                           color={getActivityColor(activity.type)}
                           variant="outlined"
+                          aria-label={`Activity type: ${activity.type.toLowerCase().replace('_', ' ')}`}
                         />
                       </Box>
                     }
                     secondary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          {activity.actor.name}
+                      <Box sx={{ display: 'flex', gap: 1.5, mt: 0.5, flexWrap: 'wrap' }}>
+                        <Typography component="span" variant="caption" color="text.secondary">
+                          Performed by {activity.actor.name}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          • {formatTimestamp(activity.timestamp)}
+                        <Typography component="span" variant="caption" color="text.secondary">
+                          {formatTimestamp(activity.timestamp)}
                         </Typography>
                       </Box>
                     }
