@@ -5,7 +5,9 @@
  */
 
 // CRITICAL: Start OTEL before any other imports
+import http from 'http';
 import { startOtel, validateOtelConfig } from './otel';
+import { initRealtime } from './realtime/collab.js';
 
 async function bootstrap() {
   try {
@@ -23,9 +25,12 @@ async function bootstrap() {
     const { createApp } = await import('./app');
     const app = await createApp();
 
-    const port = process.env.PORT || 4000;
+    const port = Number(process.env.PORT || 4000);
+    const httpServer = http.createServer(app);
 
-    app.listen(port, () => {
+    await initRealtime(httpServer);
+
+    httpServer.listen(port, () => {
       console.log(`✅ IntelGraph Server running on port ${port}`);
       console.log(`🔍 Tracing enabled: ${process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'localhost'}`);
       console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);

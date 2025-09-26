@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import ServerStatus from '../components/ServerStatus';
@@ -28,6 +28,7 @@ import BehavioralAnalytics from '../components/behavioral/BehavioralAnalytics';
 import ReportingCaseManagement from '../components/reporting/ReportingCaseManagement';
 import ThreatHuntingDarkWeb from '../components/threat/ThreatHuntingDarkWeb';
 import IntelligenceFeedsEnrichment from '../components/intelligence/IntelligenceFeedsEnrichment';
+import { useAuth } from '../context/AuthContext.jsx';
 
 function HomeRouteInner() {
   const navigate = useNavigate();
@@ -60,6 +61,86 @@ function HomeRouteInner() {
   const graphStats = useSelector((state: any) => state.graph?.graphStats);
   const { showHelp, HelpComponent } = useHelpSystem();
   const toast = useToast();
+  const auth = useAuth();
+
+  const sessionUserId =
+    typeof window !== 'undefined' ? window.sessionStorage.getItem('collabUserId') : null;
+  const sessionTenantId =
+    typeof window !== 'undefined' ? window.sessionStorage.getItem('collabTenantId') : null;
+  const currentUserId = sessionUserId || auth?.user?.id || 'demo-user';
+  const currentTenantId = sessionTenantId || 'demo-tenant';
+
+  const graphVisualizationSeed = useMemo(
+    () => ({
+      nodes: [
+        {
+          id: 'investigation-root',
+          label: selectedInvestigation?.name || 'Shared Graph',
+          type: 'entity',
+          x: 200,
+          y: 160,
+          size: 20,
+          color: '#2563eb',
+          risk: 3,
+          confidence: 0.9,
+        },
+        {
+          id: 'investigation-target',
+          label: 'Target Entity',
+          type: 'organization',
+          x: 360,
+          y: 260,
+          size: 18,
+          color: '#10b981',
+          risk: 4,
+          confidence: 0.88,
+        },
+        {
+          id: 'signal-1',
+          label: 'Signal Node',
+          type: 'event',
+          x: 120,
+          y: 300,
+          size: 16,
+          color: '#f59e0b',
+          risk: 2,
+          confidence: 0.82,
+        },
+      ],
+      edges: [
+        {
+          id: 'seed-edge-1',
+          source: 'investigation-root',
+          target: 'investigation-target',
+          type: 'association',
+          weight: 1,
+          label: 'links to',
+          color: '#6366f1',
+        },
+        {
+          id: 'seed-edge-2',
+          source: 'investigation-root',
+          target: 'signal-1',
+          type: 'relationship',
+          weight: 0.8,
+          label: 'observed',
+          color: '#64748b',
+        },
+      ],
+    }),
+    [selectedInvestigation?.id, selectedInvestigation?.name],
+  );
+
+  const graphCollaborationOptions = useMemo(
+    () => ({
+      graphId: selectedInvestigation?.id ?? 'home-graph',
+      investigationId: selectedInvestigation?.id ?? 'home-graph',
+      userId: currentUserId,
+      tenantId: currentTenantId,
+      enabled: true,
+    }),
+    [selectedInvestigation?.id, currentUserId, currentTenantId],
+  );
 
   const handleNavigateToAction = () => {
     if (actionId.trim()) {
@@ -784,7 +865,10 @@ function HomeRouteInner() {
 
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <InteractiveGraphCanvas
+              data={graphVisualizationSeed}
               investigationId={selectedInvestigation?.id}
+              collaborationOptions={graphCollaborationOptions}
+              enableCollaboration
               onNodeSelect={(nodes) => {
                 console.log('Selected nodes:', nodes);
                 toast.info('Graph Selection', `Selected ${nodes.length} node(s)`);
