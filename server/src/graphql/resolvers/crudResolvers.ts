@@ -13,6 +13,23 @@ import { NeighborhoodCache } from '../../services/neighborhood-cache.js';
 const pubsub = new PubSub();
 const nbhdCache = new NeighborhoodCache(getRedisClient());
 
+type NodeTypeColorMap = Record<string, string>;
+
+const DEFAULT_NODE_TYPE_COLORS: NodeTypeColorMap = Object.freeze({
+  person: '#FF5733',
+  organization: '#33FF57',
+  location: '#3357FF',
+  event: '#FF33FF',
+  generic: '#888888',
+});
+
+const DEFAULT_STYLE_SETTINGS = Object.freeze({
+  nodeTypeColors: DEFAULT_NODE_TYPE_COLORS,
+  nodeSize: 48,
+  edgeColor: '#cccccc',
+  edgeWidth: 2,
+});
+
 interface User {
   id: string;
   email?: string;
@@ -82,6 +99,89 @@ interface GraphDataFilter {
 interface GraphDataArgs {
   investigationId: string;
   filter?: GraphDataFilter;
+}
+
+interface GraphStyleSettingsInput {
+  nodeTypeColors?: NodeTypeColorMap;
+  nodeSize?: number;
+  edgeColor?: string;
+  edgeWidth?: number;
+}
+
+interface GraphStyleSettings {
+  nodeTypeColors: NodeTypeColorMap;
+  nodeSize: number;
+  edgeColor: string;
+  edgeWidth: number;
+  updatedAt: string;
+}
+
+function toIsoString(value?: unknown): string {
+  if (!value) {
+    return new Date().toISOString();
+  }
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  if (typeof value === 'string') {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+  }
+  return new Date().toISOString();
+}
+
+function normalizeNumber(value: unknown, fallback: number, min: number, max: number): number {
+  const parsed =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string'
+        ? Number.parseFloat(value)
+        : Number.NaN;
+  if (Number.isFinite(parsed)) {
+    return Math.max(min, Math.min(max, Math.round(parsed)));
+  }
+  return fallback;
+}
+
+function normalizeColor(value: unknown, fallback: string): string {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(trimmed)) {
+      return trimmed;
+    }
+  }
+  return fallback;
+}
+
+function parseNodeTypeColors(value?: unknown): NodeTypeColorMap {
+  if (!value) {
+    return {};
+  }
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      return parseNodeTypeColors(parsed);
+    } catch (error) {
+      logger.warn({ error }, 'Failed to parse stored node type colors, falling back to defaults');
+      return {};
+    }
+  }
+  if (typeof value !== 'object') {
+    return {};
+  }
+  return Object.entries(value as Record<string, unknown>).reduce<NodeTypeColorMap>((acc, [key, color]) => {
+    if (typeof color === 'string' && color.trim()) {
+      acc[key] = color;
+    }
+    return acc;
+  }, {});
+}
+
+function mergeNodeTypeColors(value?: unknown): NodeTypeColorMap {
+  return {
+    ...DEFAULT_NODE_TYPE_COLORS,
+    ...parseNodeTypeColors(value),
+  };
 }
 
 const crudResolvers = {
@@ -565,9 +665,132 @@ const crudResolvers = {
         await session.close();
       }
     },
+
+    graphStyleSettings: async (_: any, __: unknown, { user }: Context): Promise<GraphStyleSettings> => {
+      if (!user) throw new Error('Not authenticated');
+
+      const pgPool = getPostgresPool();
+      const tenantId = user.tenantId || 'default';
+
+      const result = await pgPool.query(
+        `SELECT node_type_colors, node_size, edge_color, edge_width, updated_at
+         FROM graph_visualization_settings
+         WHERE user_id = $1 AND tenant_id = $2
+         LIMIT 1`,
+        [user.id, tenantId],
+      );
+
+      if (result.rows.length === 0) {
+        return {
+          nodeTypeColors: { ...DEFAULT_STYLE_SETTINGS.nodeTypeColors },
+          nodeSize: DEFAULT_STYLE_SETTINGS.nodeSize,
+          edgeColor: DEFAULT_STYLE_SETTINGS.edgeColor,
+          edgeWidth: DEFAULT_STYLE_SETTINGS.edgeWidth,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+
+      const row = result.rows[0];
+      return {
+        nodeTypeColors: mergeNodeTypeColors(row.node_type_colors),
+        nodeSize: normalizeNumber(row.node_size, DEFAULT_STYLE_SETTINGS.nodeSize, 16, 160),
+        edgeColor: normalizeColor(row.edge_color, DEFAULT_STYLE_SETTINGS.edgeColor),
+        edgeWidth: normalizeNumber(row.edge_width, DEFAULT_STYLE_SETTINGS.edgeWidth, 1, 16),
+        updatedAt: toIsoString(row.updated_at),
+      };
+    },
   },
 
   Mutation: {
+    updateGraphStyleSettings: async (
+      _: any,
+      { input }: { input: GraphStyleSettingsInput },
+      { user }: Context,
+    ): Promise<GraphStyleSettings> => {
+      if (!user) throw new Error('Not authenticated');
+
+      const pgPool = getPostgresPool();
+      const tenantId = user.tenantId || 'default';
+
+      const existingResult = await pgPool.query(
+        `SELECT node_type_colors, node_size, edge_color, edge_width
+         FROM graph_visualization_settings
+         WHERE user_id = $1 AND tenant_id = $2
+         LIMIT 1`,
+        [user.id, tenantId],
+      );
+
+      const existingRow = existingResult.rows[0];
+      const existingColors = mergeNodeTypeColors(existingRow?.node_type_colors);
+      const incomingColors = parseNodeTypeColors(input.nodeTypeColors);
+
+      const nodeTypeColors = {
+        ...DEFAULT_NODE_TYPE_COLORS,
+        ...existingColors,
+        ...incomingColors,
+      };
+
+      const nodeSize = normalizeNumber(
+        input.nodeSize ?? existingRow?.node_size ?? DEFAULT_STYLE_SETTINGS.nodeSize,
+        DEFAULT_STYLE_SETTINGS.nodeSize,
+        16,
+        160,
+      );
+
+      const edgeWidth = normalizeNumber(
+        input.edgeWidth ?? existingRow?.edge_width ?? DEFAULT_STYLE_SETTINGS.edgeWidth,
+        DEFAULT_STYLE_SETTINGS.edgeWidth,
+        1,
+        16,
+      );
+
+      const edgeColor = normalizeColor(
+        input.edgeColor ?? existingRow?.edge_color ?? DEFAULT_STYLE_SETTINGS.edgeColor,
+        DEFAULT_STYLE_SETTINGS.edgeColor,
+      );
+
+      const now = new Date().toISOString();
+
+      const upsertResult = await pgPool.query(
+        `INSERT INTO graph_visualization_settings (
+           user_id,
+           tenant_id,
+           node_type_colors,
+           node_size,
+           edge_color,
+           edge_width,
+           updated_at
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (user_id, tenant_id)
+         DO UPDATE SET
+           node_type_colors = EXCLUDED.node_type_colors,
+           node_size = EXCLUDED.node_size,
+           edge_color = EXCLUDED.edge_color,
+           edge_width = EXCLUDED.edge_width,
+           updated_at = EXCLUDED.updated_at
+         RETURNING node_type_colors, node_size, edge_color, edge_width, updated_at`,
+        [
+          user.id,
+          tenantId,
+          JSON.stringify(nodeTypeColors),
+          nodeSize,
+          edgeColor,
+          edgeWidth,
+          now,
+        ],
+      );
+
+      const row = upsertResult.rows[0];
+
+      return {
+        nodeTypeColors: mergeNodeTypeColors(row.node_type_colors),
+        nodeSize: normalizeNumber(row.node_size, nodeSize, 16, 160),
+        edgeColor: normalizeColor(row.edge_color, edgeColor),
+        edgeWidth: normalizeNumber(row.edge_width, edgeWidth, 1, 16),
+        updatedAt: toIsoString(row.updated_at),
+      };
+    },
+
     // Entity mutations
     createEntity: async (_: any, { input }: { input: EntityInput }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
