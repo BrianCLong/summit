@@ -6,6 +6,7 @@ const TagService = require('../services/TagService');
 const { enqueueAIRequest } = require('../services/AIQueueService');
 const { metrics } = require('../monitoring/metrics');
 const { NeighborhoodCache } = require('../services/neighborhood-cache.js');
+const graphExportService = require('../services/GraphExportService');
 
 const expandSchema = Joi.object({
   entityId: Joi.string().trim().min(1).required(),
@@ -29,6 +30,22 @@ const tagSchema = Joi.object({
 
 const aiSchema = Joi.object({
   entityId: Joi.string().trim().min(1).required(),
+});
+
+const exportSchema = Joi.object({
+  investigationId: Joi.string().trim().optional(),
+  tenantId: Joi.string().trim().optional(),
+  format: Joi.string().valid('GRAPHML', 'GEXF').required(),
+  filters: Joi.object({
+    nodeTypes: Joi.array().items(Joi.string().trim()).optional(),
+    relationshipTypes: Joi.array().items(Joi.string().trim()).optional(),
+    minConfidence: Joi.number().min(0).max(1).optional(),
+    minWeight: Joi.number().min(0).optional(),
+    maxNodes: Joi.number().integer().min(1).max(100000).optional(),
+    maxEdges: Joi.number().integer().min(1).max(100000).optional(),
+  })
+    .optional()
+    .default({}),
 });
 
 function ensureRole(user, allowedRoles = []) {
@@ -294,7 +311,54 @@ const resolvers = {
         throw err;
       }
     },
+
+    exportInvestigationGraph: async (_, args, { user, logger }) => {
+      const start = Date.now();
+      const tId = traceId();
+      const { value, error } = exportSchema.validate(args, { abortEarly: false, stripUnknown: true });
+      if (error) {
+        const err = new Error(`Invalid input: ${error.message}`);
+        err.code = 'BAD_USER_INPUT';
+        err.traceId = tId;
+        throw err;
+      }
+
+      ensureRole(user, ['ANALYST', 'ADMIN']);
+      const tenantId = value.tenantId || user?.tenantId || user?.tenant || null;
+
+      try {
+        const result = await graphExportService.exportSubgraph({
+          format: value.format,
+          tenantId,
+          investigationId: value.investigationId || null,
+          filters: value.filters || {},
+          requestedBy: user?.id,
+          traceId: tId,
+        });
+
+        metrics.resolverLatencyMs.labels('exportInvestigationGraph').observe(Date.now() - start);
+        if (logger && typeof logger.info === 'function') {
+          logger.info('graph export generated', {
+            exportId: result.exportId,
+            tenantId,
+            investigationId: value.investigationId || null,
+            traceId: tId,
+          });
+        }
+
+        return result;
+      } catch (e) {
+        if (logger && typeof logger.error === 'function') {
+          logger.error('exportInvestigationGraph error', { err: e, traceId: tId });
+        }
+        const err = new Error('GRAPH_EXPORT_FAILED');
+        err.code = 'GRAPH_EXPORT_FAILED';
+        err.details = e.message;
+        err.traceId = tId;
+        throw err;
+      }
+    },
   },
 };
 
-module.exports = { graphResolvers: resolvers };
+module.exports = { ...resolvers, graphResolvers: resolvers };
