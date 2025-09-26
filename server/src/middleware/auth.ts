@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import AuthService from '../services/AuthService.js';
 import logger from '../utils/logger.js';
+import { federatedUserFromSaml } from '../security/federated-identity.js';
 
 interface AuthenticatedRequest extends Request {
   user?: any;
@@ -38,10 +39,53 @@ export async function ensureAuthenticated(
       const k = apiKeyHeader;
       const hit = API_KEYS_CACHE.find(x => x.key === k && Date.now() < x.expiresAt);
       if (hit) {
-        req.user = { id: "api-key", role: hit.scope === "admin" ? "ADMIN" : hit.scope.toUpperCase() };
+        const scopeRole = hit.scope === "admin" ? 'ADMIN' : hit.scope.toUpperCase();
+        req.user = {
+          id: 'api-key',
+          role: scopeRole,
+          roles: [scopeRole],
+          identityProvider: 'api-key',
+          federated: false,
+        };
         res.setHeader("X-Auth-Method", "api-key"); // auditable
         return next();
       }
+    }
+
+    const samlAssertionHeader =
+      (req.headers['x-saml-assertion'] as string) ||
+      (req.headers.authorization?.startsWith('SAML ')
+        ? req.headers.authorization.slice('SAML '.length)
+        : '');
+
+    const samlEnabled = (process.env.SAML_ENABLED || '').toLowerCase() === 'true';
+
+    if (samlAssertionHeader && samlEnabled) {
+      try {
+        const federatedUser = federatedUserFromSaml(samlAssertionHeader);
+        req.user = {
+          ...federatedUser,
+          role: federatedUser.role,
+          roles: federatedUser.roles,
+        };
+        res.setHeader('X-Auth-Method', 'saml');
+        return next();
+      } catch (err) {
+        logger.warn(
+          {
+            message: (err as Error).message,
+            component: 'auth-middleware',
+            reason: 'saml-assertion-invalid',
+          },
+          'Rejected federated identity assertion',
+        );
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+    } else if (samlAssertionHeader && !samlEnabled) {
+      logger.warn(
+        { component: 'auth-middleware', reason: 'saml-disabled' },
+        'Received SAML assertion while federation disabled',
+      );
     }
 
     const auth = req.headers.authorization || '';
@@ -51,7 +95,11 @@ export async function ensureAuthenticated(
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     const user = await getAuthService().verifyToken(token);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
-    req.user = user;
+    req.user = {
+      ...user,
+      roles: user.roles || (user.role ? [user.role] : []),
+      identityProvider: user.identityProvider || 'oidc',
+    };
     next();
   } catch (e) {
     return res.status(401).json({ error: 'Unauthorized' });

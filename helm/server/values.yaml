@@ -53,6 +53,33 @@ env:
       secretKeyRef:
         name: server-secret
         key: jwt-refresh-secret
+  - name: SAML_ENABLED
+    value: 'false'
+  - name: SAML_IDP_ENTITY_ID
+    value: ''
+  - name: SAML_IDP_SSO_URL
+    value: ''
+  - name: SAML_IDP_CERT
+    valueFrom:
+      secretKeyRef:
+        name: saml-idp-cert
+        key: certificate
+  - name: SAML_SP_ENTITY_ID
+    value: 'urn:intelgraph:api'
+  - name: SAML_SP_ASSERTION_CONSUMER_SERVICE_URL
+    value: 'https://api.example.com/saml/acs'
+  - name: SAML_AUDIENCE
+    value: 'urn:intelgraph:api'
+  - name: SAML_ROLE_ATTRIBUTE
+    value: 'http://schemas.xmlsoap.org/claims/Group'
+  - name: SAML_ROLE_MAPPINGS
+    value: 'OneLogin_Admin=ADMIN,OneLogin_Analyst=ANALYST,OneLogin_Viewer=VIEWER'
+  - name: SAML_DEFAULT_ROLE
+    value: 'VIEWER'
+  - name: SAML_REQUIRE_SIGNED_ASSERTIONS
+    value: 'true'
+  - name: SAML_CLOCK_TOLERANCE_SECONDS
+    value: '180'
   - name: ALLOWED_ORIGINS
     value: 'https://app.intelgraph.com'
   - name: CORS_ORIGIN
