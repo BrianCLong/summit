@@ -3,12 +3,12 @@ replicaCount: 1
 
 image:
   server:
-    repository: ghcr.io/brianlong/intelgraph/server
-    tag: "dev"
+    repository: 046481635604.dkr.ecr.us-east-1.amazonaws.com/intelgraph/app
+    tag: "latest"
     pullPolicy: IfNotPresent
   client:
-    repository: ghcr.io/brianlong/intelgraph/client
-    tag: "dev"
+    repository: 046481635604.dkr.ecr.us-east-1.amazonaws.com/intelgraph/web
+    tag: "latest"
     pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -49,17 +49,18 @@ service:
 
 ingress:
   enabled: true
-  className: "nginx"
+  className: "alb"
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-  host: intelgraph-dev.example.com
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:046481635604:certificate/a90a49b1-6739-4739-8d98-f2f7785e2657
+    alb.ingress.kubernetes.io/group.name: intelgraph-dev
+  host: dev.topicality.co
   path: /
   pathType: Prefix
   tls:
-    enabled: true
-    secretName: intelgraph-tls
+    enabled: false
 
 resources:
   server:
