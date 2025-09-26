@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * {
   margin: 0;
   padding: 0;
@@ -9,19 +13,70 @@ body,
 #root {
   height: 100%;
 }
+
+:root {
+  color-scheme: light;
+  --background: 214 25% 97%;
+  --foreground: 222 47% 11%;
+  --muted: 214 30% 94%;
+  --muted-foreground: 215 16% 47%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --border: 215 17% 88%;
+  --input: 215 17% 88%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --primary: 215 87% 47%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 215 16% 80%;
+  --secondary-foreground: 222 47% 11%;
+  --accent: 215 71% 84%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 215 92% 60%;
+  --radius: 0.75rem;
+  --hairline: rgba(12, 13, 14, 0.08);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: 218 39% 8%;
+  --foreground: 214 32% 91%;
+  --muted: 223 35% 17%;
+  --muted-foreground: 216 20% 66%;
+  --popover: 221 39% 10%;
+  --popover-foreground: 214 32% 91%;
+  --border: 215 28% 23%;
+  --input: 215 28% 23%;
+  --card: 221 39% 12%;
+  --card-foreground: 214 32% 91%;
+  --primary: 215 82% 62%;
+  --primary-foreground: 222 67% 12%;
+  --secondary: 223 32% 18%;
+  --secondary-foreground: 214 32% 91%;
+  --accent: 213 77% 24%;
+  --accent-foreground: 214 32% 91%;
+  --destructive: 0 65% 55%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 214 82% 55%;
+  --hairline: rgba(255, 255, 255, 0.08);
+}
+
 body {
   font-family:
     ui-sans-serif,
     -apple-system,
-    Segoe UI,
+    'Segoe UI',
     Roboto,
     Inter,
     Helvetica,
     Arial,
     sans-serif;
   line-height: 1.55;
-  color: #0c0d0e;
-  background-color: #fafbfc;
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
@@ -37,7 +92,7 @@ body {
 .graph-canvas {
   width: 100%;
   height: 100%;
-  background-color: #fafafa;
+  background-color: hsl(var(--card));
 }
 
 .loading-spinner {
@@ -48,36 +103,38 @@ body {
 }
 
 .error-message {
-  color: #d32f2f;
+  color: hsl(var(--destructive));
   text-align: center;
   padding: 20px;
 }
 
-/* Tufte/Wright-inspired refinements */
-:root {
-  --hairline: rgba(12, 13, 14, 0.08);
-}
 .hairline {
   border-color: var(--hairline) !important;
 }
+
 .muted {
-  color: rgba(12, 13, 14, 0.56);
+  color: hsl(var(--muted-foreground));
 }
+
 .smallcaps {
   font-variant-caps: small-caps;
   letter-spacing: 0.06em;
 }
+
 .note {
-  color: rgba(12, 13, 14, 0.56);
+  color: hsl(var(--muted-foreground));
   font-size: 0.85rem;
 }
+
 .section-title {
   font-weight: 600;
   letter-spacing: 0.12rem;
   text-transform: none;
 }
+
 .panel {
   border: 1px solid var(--hairline);
   border-radius: 6px;
-  background: #fff;
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
 }

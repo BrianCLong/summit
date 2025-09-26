@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -10,8 +10,6 @@ import {
 import { Provider } from 'react-redux';
 import { ApolloProvider } from '@apollo/client';
 import {
-  ThemeProvider,
-  CssBaseline,
   Container,
   Box,
   Card,
@@ -41,10 +39,8 @@ import {
   Assessment,
   Settings,
 } from '@mui/icons-material';
-import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
 import { apolloClient } from './services/apollo';
-import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
@@ -77,6 +73,9 @@ import ClaimsViewer from './features/conductor/ClaimsViewer';
 import RetractionQueue from './features/conductor/RetractionQueue';
 import CostAdvisor from './features/conductor/CostAdvisor';
 import RunSearch from './features/conductor/RunSearch';
+import ThemeProvider, { useThemeContext } from './theme/ThemeProvider';
+import ThemeToggle from './components/theme/ThemeToggle';
+import { alpha } from '@mui/material/styles';
 
 // Navigation items
 const navigationItems = [
@@ -196,7 +195,14 @@ function NavigationDrawer({ open, onClose }) {
   });
 
   return (
-    <Drawer anchor="left" open={open} onClose={onClose}>
+    <Drawer
+      anchor="left"
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        className: 'bg-card text-card-foreground transition-colors border-r border-border/60',
+      }}
+    >
       <Box sx={{ width: 250, mt: 8 }}>
         <List>
           {items.map((item) => (
@@ -222,14 +228,25 @@ function AppHeader({ onMenuClick }) {
   const currentPage = navigationItems.find((item) => item.path === location.pathname);
 
   return (
-    <AppBar position="fixed">
-      <Toolbar>
+    <AppBar
+      position="fixed"
+      elevation={0}
+      color="transparent"
+      className="border-b border-border/60 bg-background/80 backdrop-blur transition-colors"
+    >
+      <Toolbar className="gap-2">
         <IconButton edge="start" color="inherit" onClick={onMenuClick} sx={{ mr: 2 }}>
           <MenuIcon />
         </IconButton>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{ flexGrow: 1, fontWeight: 600 }}
+          className="text-foreground"
+        >
           IntelGraph Platform - {currentPage?.label || 'Unknown'}
         </Typography>
+        <ThemeToggle />
       </Toolbar>
     </AppBar>
   );
@@ -265,17 +282,23 @@ function DashboardPage() {
   }, []);
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="lg" className="space-y-6" sx={{ py: 4 }}>
       <ConnectionStatus />
 
       <Grid container spacing={3}>
         {/* Header */}
         <Grid item xs={12}>
           <Card
-            sx={{
-              background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
-              color: 'white',
-            }}
+            className="shadow-sm transition-colors"
+            sx={(theme) => ({
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${
+                theme.palette.mode === 'dark'
+                  ? alpha(theme.palette.primary.dark, 0.85)
+                  : theme.palette.primary.light
+              } 100%)`,
+              color: theme.palette.primary.contrastText,
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+            })}
           >
             <CardContent>
               <Typography variant="h3" gutterBottom>
@@ -291,11 +314,17 @@ function DashboardPage() {
         {/* Key Metrics */}
         <Grid item xs={12} sm={6} md={3}>
           <Card
-            sx={{
+            className="shadow-sm transition-colors"
+            sx={(theme) => ({
               height: '100%',
-              background: 'linear-gradient(135deg, #4caf50 0%, #81c784 100%)',
-              color: 'white',
-            }}
+              background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${
+                theme.palette.mode === 'dark'
+                  ? alpha(theme.palette.success.main, 0.55)
+                  : theme.palette.success.light
+              } 100%)`,
+              color: theme.palette.getContrastText(theme.palette.success.main),
+              border: `1px solid ${alpha(theme.palette.success.main, 0.25)}`,
+            })}
           >
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
@@ -311,11 +340,17 @@ function DashboardPage() {
 
         <Grid item xs={12} sm={6} md={3}>
           <Card
-            sx={{
+            className="shadow-sm transition-colors"
+            sx={(theme) => ({
               height: '100%',
-              background: 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)',
-              color: 'white',
-            }}
+              background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${
+                theme.palette.mode === 'dark'
+                  ? alpha(theme.palette.warning.main, 0.6)
+                  : theme.palette.warning.light
+              } 100%)`,
+              color: theme.palette.getContrastText(theme.palette.warning.main),
+              border: `1px solid ${alpha(theme.palette.warning.main, 0.25)}`,
+            })}
           >
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
@@ -331,11 +366,17 @@ function DashboardPage() {
 
         <Grid item xs={12} sm={6} md={3}>
           <Card
-            sx={{
+            className="shadow-sm transition-colors"
+            sx={(theme) => ({
               height: '100%',
-              background: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)',
-              color: 'white',
-            }}
+              background: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${
+                theme.palette.mode === 'dark'
+                  ? alpha(theme.palette.secondary.main, 0.6)
+                  : theme.palette.secondary.light || alpha(theme.palette.secondary.main, 0.45)
+              } 100%)`,
+              color: theme.palette.getContrastText(theme.palette.secondary.main),
+              border: `1px solid ${alpha(theme.palette.secondary.main, 0.25)}`,
+            })}
           >
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
@@ -351,11 +392,17 @@ function DashboardPage() {
 
         <Grid item xs={12} sm={6} md={3}>
           <Card
-            sx={{
+            className="shadow-sm transition-colors"
+            sx={(theme) => ({
               height: '100%',
-              background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
-              color: 'white',
-            }}
+              background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${
+                theme.palette.mode === 'dark'
+                  ? alpha(theme.palette.error.main, 0.55)
+                  : theme.palette.error.light
+              } 100%)`,
+              color: theme.palette.getContrastText(theme.palette.error.main),
+              border: `1px solid ${alpha(theme.palette.error.main, 0.25)}`,
+            })}
           >
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
@@ -629,7 +676,11 @@ function MainLayout() {
       <AppHeader onMenuClick={() => setDrawerOpen(true)} />
       <NavigationDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
-      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+      <Box
+        component="main"
+        className="bg-background text-foreground transition-colors"
+        sx={{ flexGrow: 1, p: 3, mt: 8 }}
+      >
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedRoute />}>
@@ -678,37 +729,20 @@ function MainLayout() {
   );
 }
 
-// Themed App Shell with Beautiful Background
+// Themed App Shell driven by context + Tailwind tokens
 
 function ThemedAppShell({ children }) {
-  const mode = useSelector((state) => state.ui?.theme || 'light');
-  const theme = useMemo(() => getIntelGraphTheme(mode), [mode]);
+  const { mode } = useThemeContext();
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box
-        sx={{
-          background:
-            'linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 25%, #eceff1 50%, #e8eaf6 75%, #e1f5fe 100%)',
-          minHeight: '100vh',
-          position: 'relative',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background:
-              'radial-gradient(circle at 20% 50%, rgba(33, 150, 243, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(63, 81, 181, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(3, 169, 244, 0.1) 0%, transparent 50%)',
-            pointerEvents: 'none',
-          },
-        }}
-      >
-        <Box sx={{ position: 'relative', zIndex: 1 }}>{children}</Box>
-      </Box>
-    </ThemeProvider>
+    <Box
+      component="div"
+      data-theme-mode={mode}
+      className="min-h-screen bg-background text-foreground transition-colors duration-300"
+      sx={{ position: 'relative' }}
+    >
+      {children}
+    </Box>
   );
 }
 
@@ -725,11 +759,13 @@ function App() {
     <Provider store={store}>
       <ApolloProvider client={apolloClient}>
         <AuthProvider>
-          <ThemedAppShell>
-            <Router>
-              <MainLayout />
-            </Router>
-          </ThemedAppShell>
+          <ThemeProvider>
+            <ThemedAppShell>
+              <Router>
+                <MainLayout />
+              </Router>
+            </ThemedAppShell>
+          </ThemeProvider>
         </AuthProvider>
       </ApolloProvider>
     </Provider>
