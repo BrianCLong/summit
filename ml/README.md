@@ -172,6 +172,60 @@ trainer = DistributedTrainingManager(config)
 trainer.train(model, train_dataset, eval_dataset)
 ```
 
+### AutoML Entity Recognition
+
+The AutoML pipeline automatically tunes models for entity recognition tasks
+using Auto-PyTorch when available and a scikit-learn fallback for lightweight
+environments.
+
+```python
+from app.training.automl import EntityAutoMLTrainer, AutoMLJobConfig
+
+trainer = EntityAutoMLTrainer()
+config = AutoMLJobConfig(metric="f1", backend_preference="auto_pytorch")
+
+examples = [
+    {"text": "IntelGraph integrates with Summit Analytics", "label": "PARTNERSHIP"},
+    {"text": "Neo4j powers the IntelGraph knowledge graph", "label": "TECH"},
+    {"text": "Summit Analytics launches new advisory services", "label": "SERVICE"},
+]
+
+result = trainer.run_job(
+    [example["text"] for example in examples],
+    [example["label"] for example in examples],
+    config=config,
+)
+
+print(result.best_model, result.best_score)
+```
+
+Trigger the same workflow from GraphQL via the unified API:
+
+```graphql
+mutation RunEntityAutoML($input: EntityAutoMLInput!) {
+  runEntityAutoML(input: $input) {
+    jobId
+    backend
+    bestScore
+    bestModel
+    metrics
+  }
+}
+```
+
+```json
+{
+  "input": {
+    "metric": "f1",
+    "examples": [
+      {"text": "IntelGraph integrates with Summit Analytics", "label": "PARTNERSHIP"},
+      {"text": "Neo4j powers the IntelGraph knowledge graph", "label": "TECH"},
+      {"text": "Summit Analytics launches new advisory services", "label": "SERVICE"}
+    ]
+  }
+}
+```
+
 ## 🔌 API Endpoints
 
 ### Model Management

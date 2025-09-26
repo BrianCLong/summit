@@ -3,12 +3,19 @@ Health check functionality for IntelGraph ML service
 """
 import time
 import asyncio
-import psutil
+try:  # pragma: no cover - optional dependency during testing
+    import psutil
+except ImportError:  # pragma: no cover - fallback when psutil missing
+    psutil = None
 from datetime import datetime
 from typing import Dict, Any
 import redis
 import httpx
-from neo4j import GraphDatabase
+
+try:  # pragma: no cover - optional dependency
+    from neo4j import GraphDatabase
+except Exception:  # pragma: no cover - fallback when optional deps missing
+    GraphDatabase = None
 
 
 class HealthChecker:
@@ -64,6 +71,12 @@ class HealthChecker:
     
     async def check_neo4j(self) -> Dict[str, Any]:
         """Check Neo4j connectivity"""
+        if GraphDatabase is None:  # pragma: no cover - optional dependency missing
+            return {
+                'status': 'warning',
+                'details': 'Neo4j driver not available',
+                'response_time_ms': None,
+            }
         try:
             import os
             
@@ -128,6 +141,15 @@ class HealthChecker:
     
     def check_system_resources(self) -> Dict[str, Any]:
         """Check system resource utilization"""
+        if psutil is None:  # pragma: no cover - optional dependency missing
+            return {
+                'status': 'warning',
+                'timestamp': datetime.utcnow().isoformat(),
+                'memory_percent': None,
+                'cpu_percent': None,
+                'disk_percent': None,
+                'warnings': ['psutil not available; system metrics unavailable'],
+            }
         try:
             # Memory check
             memory = psutil.virtual_memory()
@@ -345,11 +367,18 @@ class HealthChecker:
     
     def liveness_probe(self) -> Dict[str, Any]:
         """Simple liveness probe for Kubernetes"""
+        uptime_seconds = None
+        pid = None
+        if psutil is not None:
+            process = psutil.Process()
+            uptime_seconds = round(time.time() - process.create_time())
+            pid = process.pid
+
         return {
             'status': 'alive',
             'timestamp': datetime.utcnow().isoformat(),
-            'uptime_seconds': round(time.time() - psutil.Process().create_time()),
-            'pid': psutil.Process().pid
+            'uptime_seconds': uptime_seconds,
+            'pid': pid,
         }
     
     async def readiness_probe(self) -> Dict[str, Any]:
