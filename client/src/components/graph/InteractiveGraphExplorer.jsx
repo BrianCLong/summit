@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -37,6 +37,7 @@ import {
   Psychology as PsychologyIcon,
 } from '@mui/icons-material';
 import DynamicEntityClustering from './DynamicEntityClustering';
+import { alpha, useTheme as useMuiTheme } from '@mui/material/styles';
 
 // Simulated graph data for demo
 const sampleNodes = [
@@ -68,39 +69,49 @@ const nodeTypeConfig = {
 
 // Graph Canvas Component
 function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
+  const theme = useMuiTheme();
   const canvasRef = useRef(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const overlayBackground = alpha(
+    theme.palette.background.paper,
+    theme.palette.mode === 'dark' ? 0.85 : 0.92,
+  );
+  const overlayBorder = alpha(theme.palette.divider, 0.7);
+  const overlayText = theme.palette.text.primary;
 
-  useEffect(() => {
-    drawGraph();
-  }, [nodes, edges, selectedNode, zoom, pan]);
-
-  const drawGraph = () => {
+  const drawGraph = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     const rect = canvas.getBoundingClientRect();
+    const devicePixelRatio = window.devicePixelRatio || 1;
 
-    // Set canvas size
-    canvas.width = rect.width * window.devicePixelRatio;
-    canvas.height = rect.height * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = rect.height + 'px';
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
 
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    ctx.fillStyle = theme.palette.background.paper;
+    ctx.fillRect(0, 0, rect.width, rect.height);
 
-    // Apply zoom and pan
     ctx.save();
     ctx.translate(pan.x, pan.y);
     ctx.scale(zoom, zoom);
 
-    // Draw edges
+    const nodePalette = {
+      person: theme.palette.info.main,
+      organization: theme.palette.warning.main,
+      location: theme.palette.success.main,
+      event: theme.palette.secondary.main,
+      document: theme.palette.error.main,
+    };
+
     edges.forEach((edge) => {
       const fromNode = nodes.find((n) => n.id === edge.from);
       const toNode = nodes.find((n) => n.id === edge.to);
@@ -109,52 +120,50 @@ function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
         ctx.beginPath();
         ctx.moveTo(fromNode.x, fromNode.y);
         ctx.lineTo(toNode.x, toNode.y);
-        ctx.strokeStyle = `rgba(100, 100, 100, ${edge.strength})`;
-        ctx.lineWidth = 2 * edge.strength;
+        ctx.strokeStyle = alpha(theme.palette.text.secondary, 0.35 + edge.strength * 0.25);
+        ctx.lineWidth = 1.5 * edge.strength;
         ctx.stroke();
 
-        // Draw edge label
         const midX = (fromNode.x + toNode.x) / 2;
         const midY = (fromNode.y + toNode.y) / 2;
-        ctx.fillStyle = '#666';
-        ctx.font = '12px Arial';
+        ctx.fillStyle = theme.palette.text.secondary;
+        ctx.font = '12px Inter, Arial';
         ctx.textAlign = 'center';
         ctx.fillText(edge.type, midX, midY - 5);
       }
     });
 
-    // Draw nodes
     nodes.forEach((node) => {
       const config = nodeTypeConfig[node.type];
       const isSelected = selectedNode?.id === node.id;
+      const baseColor = nodePalette[node.type] || theme.palette.primary.main;
+      const fillColor = isSelected ? theme.palette.warning.main : baseColor;
 
-      // Node circle
       ctx.beginPath();
       ctx.arc(node.x, node.y, config.size / 2, 0, 2 * Math.PI);
-      ctx.fillStyle = isSelected ? '#FFD700' : config.color;
+      ctx.fillStyle = fillColor;
       ctx.fill();
-      ctx.strokeStyle = isSelected ? '#FFA000' : '#fff';
+      ctx.strokeStyle = isSelected
+        ? alpha(theme.palette.warning.light || fillColor, 0.8)
+        : alpha(fillColor, 0.7);
       ctx.lineWidth = isSelected ? 3 : 2;
       ctx.stroke();
 
-      // Node icon/emoji
-      ctx.font = `${config.size / 2}px Arial`;
+      ctx.font = `${config.size / 2}px Inter, Arial`;
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = theme.palette.getContrastText(fillColor);
       ctx.fillText(config.icon, node.x, node.y + 5);
 
-      // Node label
-      ctx.font = '14px Arial';
-      ctx.fillStyle = '#333';
+      ctx.font = '14px Inter, Arial';
+      ctx.fillStyle = theme.palette.text.primary;
       ctx.fillText(node.label, node.x, node.y + config.size / 2 + 20);
 
-      // Connection count badge
       ctx.beginPath();
       ctx.arc(node.x + config.size / 3, node.y - config.size / 3, 8, 0, 2 * Math.PI);
-      ctx.fillStyle = '#E91E63';
+      ctx.fillStyle = theme.palette.secondary.main;
       ctx.fill();
-      ctx.font = '10px Arial';
-      ctx.fillStyle = '#fff';
+      ctx.font = '10px Inter, Arial';
+      ctx.fillStyle = theme.palette.getContrastText(theme.palette.secondary.main);
       ctx.fillText(
         node.connections.toString(),
         node.x + config.size / 3,
@@ -163,7 +172,11 @@ function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
     });
 
     ctx.restore();
-  };
+  }, [edges, nodes, pan, selectedNode, theme, zoom]);
+
+  useEffect(() => {
+    drawGraph();
+  }, [drawGraph]);
 
   const handleMouseDown = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
@@ -206,15 +219,21 @@ function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
 
   return (
     <Box
-      sx={{
+      className="transition-colors"
+      sx={(theme) => ({
         position: 'relative',
         width: '100%',
         height: '500px',
-        border: '2px solid #e0e0e0',
+        border: `1px solid ${theme.palette.divider}`,
         borderRadius: 2,
         overflow: 'hidden',
         cursor: isDragging ? 'grabbing' : 'grab',
-      }}
+        backgroundColor: theme.palette.background.paper,
+        boxShadow:
+          theme.palette.mode === 'dark'
+            ? '0 12px 30px rgba(15, 23, 42, 0.45)'
+            : '0 12px 30px rgba(15, 23, 42, 0.1)',
+      })}
     >
       <canvas
         ref={canvasRef}
@@ -222,11 +241,8 @@ function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onWheel={handleWheel}
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'block',
-        }}
+        className="h-full w-full"
+        style={{ display: 'block' }}
       />
 
       {/* Zoom Controls */}
@@ -243,7 +259,14 @@ function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
         <Tooltip title="Zoom In">
           <IconButton
             size="small"
-            sx={{ bgcolor: 'rgba(255,255,255,0.9)' }}
+            sx={{
+              bgcolor: overlayBackground,
+              color: overlayText,
+              border: `1px solid ${overlayBorder}`,
+              '&:hover': {
+                bgcolor: alpha(overlayBackground, 0.9),
+              },
+            }}
             onClick={() => setZoom((prev) => Math.min(3, prev * 1.2))}
           >
             <ZoomInIcon />
@@ -252,7 +275,14 @@ function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
         <Tooltip title="Zoom Out">
           <IconButton
             size="small"
-            sx={{ bgcolor: 'rgba(255,255,255,0.9)' }}
+            sx={{
+              bgcolor: overlayBackground,
+              color: overlayText,
+              border: `1px solid ${overlayBorder}`,
+              '&:hover': {
+                bgcolor: alpha(overlayBackground, 0.9),
+              },
+            }}
             onClick={() => setZoom((prev) => Math.max(0.1, prev * 0.8))}
           >
             <ZoomOutIcon />
@@ -261,7 +291,14 @@ function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
         <Tooltip title="Center View">
           <IconButton
             size="small"
-            sx={{ bgcolor: 'rgba(255,255,255,0.9)' }}
+            sx={{
+              bgcolor: overlayBackground,
+              color: overlayText,
+              border: `1px solid ${overlayBorder}`,
+              '&:hover': {
+                bgcolor: alpha(overlayBackground, 0.9),
+              },
+            }}
             onClick={() => {
               setZoom(1);
               setPan({ x: 0, y: 0 });
@@ -278,9 +315,11 @@ function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
           position: 'absolute',
           bottom: 10,
           left: 10,
-          bgcolor: 'rgba(255,255,255,0.9)',
+          bgcolor: overlayBackground,
+          color: overlayText,
           p: 1,
           borderRadius: 1,
+          border: `1px solid ${overlayBorder}`,
         }}
       >
         <Typography variant="caption">
@@ -295,18 +334,32 @@ function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
 function NodeDetailsPanel({ node, onClose }) {
   if (!node) return null;
 
+  const theme = useMuiTheme();
   const config = nodeTypeConfig[node.type];
+  const paletteMap = {
+    person: theme.palette.info.main,
+    organization: theme.palette.warning.main,
+    location: theme.palette.success.main,
+    event: theme.palette.secondary.main,
+    document: theme.palette.error.main,
+  };
+  const nodeColor = paletteMap[node.type] || config.color;
 
   return (
-    <Drawer anchor="right" open={!!node} onClose={onClose}>
-      <Box sx={{ width: 350, p: 3 }}>
+    <Drawer
+      anchor="right"
+      open={!!node}
+      onClose={onClose}
+      PaperProps={{ className: 'bg-card text-card-foreground transition-colors' }}
+    >
+      <Box sx={{ width: 350, p: 3 }} className="space-y-3">
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Box
             sx={{
               width: 40,
               height: 40,
               borderRadius: '50%',
-              bgcolor: config.color,
+              bgcolor: nodeColor,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -322,7 +375,10 @@ function NodeDetailsPanel({ node, onClose }) {
           </Box>
         </Box>
 
-        <Card sx={{ mb: 2 }}>
+        <Card
+          sx={{ mb: 2 }}
+          className="border border-border/60 bg-card text-card-foreground transition-colors"
+        >
           <CardContent>
             <Typography variant="subtitle2" gutterBottom>
               Entity Information
@@ -339,7 +395,10 @@ function NodeDetailsPanel({ node, onClose }) {
           </CardContent>
         </Card>
 
-        <Card sx={{ mb: 2 }}>
+        <Card
+          sx={{ mb: 2 }}
+          className="border border-border/60 bg-card text-card-foreground transition-colors"
+        >
           <CardContent>
             <Typography variant="subtitle2" gutterBottom>
               AI Insights
@@ -401,7 +460,10 @@ export default function InteractiveGraphExplorer() {
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <Card sx={{ mb: 2 }}>
+      <Card
+        sx={{ mb: 2 }}
+        className="border border-border/60 bg-card text-card-foreground transition-colors shadow-sm"
+      >
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box>
@@ -437,7 +499,10 @@ export default function InteractiveGraphExplorer() {
 
       {/* Controls Panel */}
       {controlsOpen && (
-        <Card sx={{ mb: 2 }}>
+        <Card
+          sx={{ mb: 2 }}
+          className="border border-border/60 bg-card text-card-foreground transition-colors"
+        >
           <CardContent>
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -478,7 +543,10 @@ export default function InteractiveGraphExplorer() {
       <Grid container spacing={2} sx={{ flexGrow: 1 }}>
         {/* Graph Visualization */}
         <Grid item xs={12} lg={8}>
-          <Card sx={{ height: '100%' }}>
+          <Card
+            sx={{ height: '100%' }}
+            className="border border-border/60 bg-card text-card-foreground transition-colors shadow-sm"
+          >
             <CardContent sx={{ height: '100%', p: 1 }}>
               <GraphCanvas
                 nodes={filteredNodes}

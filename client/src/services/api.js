@@ -168,3 +168,15 @@ export const GeointAPI = {
       body: JSON.stringify({ points, intervalMinutes }),
     }),
 };
+
+export const PreferencesAPI = {
+  async getTheme() {
+    return apiFetch('/api/preferences/theme');
+  },
+  async setTheme(theme) {
+    return apiFetch('/api/preferences/theme', {
+      method: 'PUT',
+      body: JSON.stringify({ theme }),
+    });
+  },
+};

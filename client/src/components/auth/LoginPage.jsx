@@ -3,6 +3,7 @@ import { Box, Paper, TextField, Button, Typography, Alert } from '@mui/material'
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../../store/slices/authSlice';
+import ThemeToggle from '../theme/ThemeToggle';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -37,15 +38,17 @@ function LoginPage() {
 
   return (
     <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        bgcolor: 'grey.100',
-      }}
+      className="flex min-h-screen items-center justify-center bg-background text-foreground transition-colors"
+      sx={{ px: 3, py: 6 }}
     >
-      <Paper sx={{ p: 4, maxWidth: 400, width: '100%' }}>
+      <Paper
+        elevation={0}
+        className="w-full max-w-md rounded-2xl border border-border/60 bg-card text-card-foreground shadow-lg transition-colors"
+        sx={{ p: 4 }}
+      >
+        <Box className="mb-4 flex justify-end">
+          <ThemeToggle />
+        </Box>
         <Typography variant="h4" align="center" gutterBottom fontWeight="bold">
           IntelGraph
         </Typography>

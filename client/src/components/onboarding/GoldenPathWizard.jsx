@@ -624,8 +624,17 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        className:
+          'bg-card text-card-foreground transition-colors border border-border/60 shadow-xl',
+      }}
+    >
+      <DialogTitle className="border-b border-border/60 bg-background/50 text-foreground">
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">IntelGraph Quick Start</Typography>
           <Box display="flex" gap={1}>
@@ -650,7 +659,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
         </Box>
       </DialogTitle>
 
-      <DialogContent>
+      <DialogContent className="space-y-4 text-foreground">
         <Box mb={3}>
           <Typography variant="body2" color="textSecondary" paragraph>
             Welcome to IntelGraph! This 5-step wizard will guide you through creating your first
@@ -708,7 +717,10 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
 
         {/* Help Section */}
         <Collapse in={showHelp}>
-          <Paper sx={{ p: 2, mt: 2, bgcolor: 'background.default' }}>
+          <Paper
+            sx={{ p: 2, mt: 2 }}
+            className="rounded-xl border border-border/60 bg-muted/40 text-foreground transition-colors"
+          >
             <Typography variant="subtitle2" gutterBottom>
               Need Help?
             </Typography>
@@ -727,7 +739,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
         </Collapse>
       </DialogContent>
 
-      <DialogActions>
+      <DialogActions className="border-t border-border/60 bg-background/40">
         <Button onClick={() => setShowHelp(!showHelp)} startIcon={<HelpIcon />}>
           {showHelp ? 'Hide Help' : 'Show Help'}
         </Button>
