@@ -37,6 +37,8 @@ import {
   Psychology as PsychologyIcon,
 } from '@mui/icons-material';
 import DynamicEntityClustering from './DynamicEntityClustering';
+import { useOffline } from '../../context/OfflineContext';
+import { getCachedResource, setCachedResource } from '../../services/offline/indexedDb';
 
 // Simulated graph data for demo
 const sampleNodes = [
@@ -373,12 +375,59 @@ function NodeDetailsPanel({ node, onClose }) {
 
 // Main Graph Explorer Component
 export default function InteractiveGraphExplorer() {
+  const { isOffline } = useOffline();
+  const graphCacheKey = 'graph:interactive-explorer';
   const [nodes, setNodes] = useState(sampleNodes);
   const [edges, setEdges] = useState(sampleEdges);
+  const [lastSaved, setLastSaved] = useState(null);
+  const hasHydratedRef = useRef(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const hydrateGraph = async () => {
+      const cached = await getCachedResource(graphCacheKey);
+      if (cancelled) return;
+
+      if (cached?.data) {
+        const payload = cached.data;
+        setNodes(payload.nodes ?? sampleNodes);
+        setEdges(payload.edges ?? sampleEdges);
+        setLastSaved(cached.updatedAt ?? null);
+      }
+      hasHydratedRef.current = true;
+    };
+
+    void hydrateGraph();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydratedRef.current) return;
+
+    let cancelled = false;
+
+    const persistGraph = async () => {
+      await setCachedResource(graphCacheKey, { nodes, edges });
+      if (!cancelled) {
+        setLastSaved(Date.now());
+      }
+    };
+
+    void persistGraph();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [nodes, edges]);
 
   const handleAddNode = () => {
     const newNode = {
@@ -400,6 +449,18 @@ export default function InteractiveGraphExplorer() {
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {isOffline && (
+        <Alert
+          severity="info"
+          variant="outlined"
+          sx={{ mb: 2 }}
+          data-testid="graph-offline-indicator"
+        >
+          Viewing cached graph snapshot
+          {lastSaved ? ` from ${new Date(lastSaved).toLocaleString()}` : ''}.
+        </Alert>
+      )}
+
       {/* Header */}
       <Card sx={{ mb: 2 }}>
         <CardContent>
