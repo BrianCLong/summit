@@ -1,17 +1,13 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Tabs,
   Tab,
   Box,
-  TextField,
   Stack,
-  Button,
   Typography,
   Card,
   CardContent,
   Grid,
-  IconButton,
-  Tooltip,
   FormControl,
   InputLabel,
   Select,
@@ -34,14 +30,13 @@ import {
   FilterList,
   History,
   SavedSearch,
-  Share,
   ExpandMore,
   AccountTree,
   Timeline,
   Place,
 } from '@mui/icons-material';
 import ResultList from './components/ResultList';
-import { useSafeQuery } from '../../hooks/useSafeQuery';
+import FullTextSearchBar, { type FullTextSearchResponse } from '../../components/search/FullTextSearchBar';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -69,56 +64,53 @@ interface SearchResult {
 
 export default function SearchHome() {
   const [selectedTab, setSelectedTab] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [lastQuery, setLastQuery] = useState('');
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchResponse, setSearchResponse] = useState<FullTextSearchResponse | null>(null);
   const [savedSearches] = useState<string[]>([
     'APT29 related entities',
     'Financial transactions > $10,000',
     'Suspicious network traffic',
     'Email communications - Executive',
   ]);
+  const uiResults = useMemo<SearchResult[]>(() => {
+    if (!searchResponse) {
+      return [];
+    }
 
-  const { data: searchResults } = useSafeQuery<SearchResult[]>({
-    queryKey: `search_results_${searchQuery}`,
-    mock: searchQuery
-      ? [
-          {
-            id: 'result1',
-            type: 'PERSON',
-            title: 'John Smith',
-            description: 'CEO at TechCorp, involved in multiple financial transactions',
-            score: 0.95,
-            tags: ['Executive', 'High-Value', 'Finance'],
-            lastUpdated: '2025-08-27T02:30:00Z',
-          },
-          {
-            id: 'result2',
-            type: 'ORGANIZATION',
-            title: 'Suspicious Shell Company LLC',
-            description: 'Recently incorporated entity with unclear beneficial ownership',
-            score: 0.88,
-            tags: ['Shell Company', 'Investigation', 'Finance'],
-            lastUpdated: '2025-08-26T15:45:00Z',
-          },
-          {
-            id: 'result3',
-            type: 'DOCUMENT',
-            title: 'Wire Transfer Authorization #WT-2025-4821',
-            description: 'Large wire transfer to offshore account flagged by compliance',
-            score: 0.82,
-            tags: ['Wire Transfer', 'Compliance', 'Offshore'],
-            lastUpdated: '2025-08-25T09:20:00Z',
-          },
-        ]
-      : [],
-    deps: [searchQuery],
-  });
+    const allowedTypes: SearchResult['type'][] = [
+      'PERSON',
+      'ORGANIZATION',
+      'DOCUMENT',
+      'EVENT',
+      'LOCATION',
+      'IOC',
+    ];
 
-  const handleSearch = () => {
-    setIsSearching(true);
-    // Simulate search delay
-    setTimeout(() => setIsSearching(false), 1000);
-  };
+    return searchResponse.results.map((result) => {
+      const rawType = (result.nodeType || result.type || 'DOCUMENT').toUpperCase();
+      const normalizedType = (allowedTypes.includes(rawType as SearchResult['type'])
+        ? rawType
+        : 'DOCUMENT') as SearchResult['type'];
+
+      const lastUpdated = result.updatedAt ?? result.createdAt ?? new Date().toISOString();
+      const tags: string[] = [
+        result.source,
+        result.nodeType ? result.nodeType.toUpperCase() : null,
+      ].filter(Boolean) as string[];
+
+      return {
+        id: result.id,
+        type: normalizedType,
+        title: result.title || result.nodeType || 'Untitled Result',
+        description: result.summary || 'No summary provided.',
+        score: typeof result.score === 'number' ? result.score : 0.5,
+        tags,
+        lastUpdated,
+      };
+    });
+  }, [searchResponse]);
 
   const entityTypes = ['Person', 'Organization', 'Document', 'Event', 'Location', 'IOC'];
   const timeRanges = ['Last 24 hours', 'Last 7 days', 'Last 30 days', 'Last 90 days', 'All time'];
@@ -135,39 +127,40 @@ export default function SearchHome() {
             Advanced intelligence search across entities, documents, and relationships
           </Typography>
 
-          <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 2 }}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Search entities, documents, relationships..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              InputProps={{
-                startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
-              }}
-              sx={{ maxWidth: 600 }}
-            />
-            <Button
-              variant="contained"
-              size="large"
-              onClick={handleSearch}
-              disabled={isSearching}
-              startIcon={<Search />}
+          <FullTextSearchBar
+            onSearchStart={(query) => {
+              setIsSearching(true);
+              setSearchError(null);
+              setLastQuery(query);
+            }}
+            onResults={(response) => {
+              setIsSearching(false);
+              setSearchResponse(response);
+              setSearchError(null);
+            }}
+            onError={(message) => {
+              setIsSearching(false);
+              setSearchError(message);
+            }}
+          />
+
+          {searchError && (
+            <Alert severity="error" sx={{ mt: 2 }} data-testid="fulltext-search-error">
+              {searchError}
+            </Alert>
+          )}
+
+          {searchResponse && !searchError && (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: 2 }}
+              data-testid="fulltext-search-summary"
             >
-              Search
-            </Button>
-            <Tooltip title="Save Search">
-              <IconButton>
-                <SavedSearch />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Share Query">
-              <IconButton>
-                <Share />
-              </IconButton>
-            </Tooltip>
-          </Stack>
+              Showing {searchResponse.results.length} of {searchResponse.total} results for "{lastQuery}" (took{' '}
+              {searchResponse.tookMs}ms)
+            </Typography>
+          )}
         </CardContent>
       </Card>
 
@@ -248,8 +241,31 @@ export default function SearchHome() {
             </Grid>
 
             <Grid item xs={12} md={9}>
-              {searchQuery ? (
-                <ResultList results={searchResults || []} loading={isSearching} />
+              {uiResults.length > 0 ? (
+                <ResultList results={uiResults} loading={isSearching} />
+              ) : isSearching ? (
+                <Card sx={{ borderRadius: 3 }}>
+                  <CardContent sx={{ textAlign: 'center', py: 6 }}>
+                    <Typography variant="h6" gutterBottom>
+                      Searching for "{lastQuery}"…
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Gathering results across graph metadata and ingested datasets.
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ) : lastQuery ? (
+                <Card sx={{ borderRadius: 3 }}>
+                  <CardContent sx={{ textAlign: 'center', py: 6 }}>
+                    <Search sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                    <Typography variant="h6" gutterBottom>
+                      No results for "{lastQuery}"
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Try adjusting filters or broadening your search terms.
+                    </Typography>
+                  </CardContent>
+                </Card>
               ) : (
                 <Card sx={{ borderRadius: 3 }}>
                   <CardContent sx={{ textAlign: 'center', py: 6 }}>

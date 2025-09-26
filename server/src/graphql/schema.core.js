@@ -80,6 +80,11 @@ export const coreTypeDefs = gql`
     COMPLETED
   }
 
+  enum SearchSource {
+    GRAPH
+    INGESTED
+  }
+
   # Helper types
   type RelationshipCount {
     incoming: Int!
@@ -90,6 +95,26 @@ export const coreTypeDefs = gql`
   type InvestigationStats {
     entityCount: Int!
     relationshipCount: Int!
+  }
+
+  type FullTextSearchResult {
+    id: ID!
+    type: String!
+    nodeType: String
+    title: String
+    summary: String
+    score: Float
+    source: SearchSource!
+    tenantId: String!
+    createdAt: DateTime
+    updatedAt: DateTime
+    metadata: JSON
+  }
+
+  type FullTextSearchResponse {
+    results: [FullTextSearchResult!]!
+    total: Int!
+    tookMs: Int!
   }
 
   # Input types for mutations
@@ -152,6 +177,17 @@ export const coreTypeDefs = gql`
     offset: Int = 0
   }
 
+  input FullTextSearchInput {
+    tenantId: String
+    query: String!
+    nodeTypes: [String!]
+    sources: [SearchSource!]
+    startTimestamp: DateTime
+    endTimestamp: DateTime
+    limit: Int = 25
+    offset: Int = 0
+  }
+
   # Graph traversal types
   type GraphNeighborhood {
     center: Entity!
@@ -193,6 +229,9 @@ export const coreTypeDefs = gql`
 
     # Search across all entity types
     searchEntities(tenantId: String!, query: String!, kinds: [String!], limit: Int = 50): [Entity!]!
+
+    # Federated full-text search across graph metadata and ingested records
+    fullTextSearch(input: FullTextSearchInput!): FullTextSearchResponse!
   }
 
   # Extended Mutation operations

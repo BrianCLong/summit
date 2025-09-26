@@ -17,7 +17,11 @@ const EnvSchema = z.object({
   DOCLING_SVC_TIMEOUT_MS: z.string().default('15000'),
   DOCLING_PURPOSE_POLICY: z.string().default('docling/purpose_enforcement'),
   DOCLING_RETENTION_POLICY: z.string().default('docling/retention_enforcement'),
-  DOCLING_LICENSE_POLICY: z.string().default('docling/license_enforcement')
+  DOCLING_LICENSE_POLICY: z.string().default('docling/license_enforcement'),
+  ELASTICSEARCH_NODE: z.string().url().optional(),
+  ELASTICSEARCH_USERNAME: z.string().optional(),
+  ELASTICSEARCH_PASSWORD: z.string().optional(),
+  ELASTICSEARCH_INDEX: z.string().default('intelgraph-search')
 });
 
 export type Env = z.infer<typeof EnvSchema>;

@@ -11,6 +11,7 @@ import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../config/logger.js';
 import { z } from 'zod';
+import searchService, { type SearchSource } from '../../services/SearchService.js';
 
 const resolverLogger = logger.child({ name: 'CoreResolvers' });
 
@@ -147,6 +148,26 @@ export const coreResolvers = {
         limit,
         offset,
       });
+    },
+
+    fullTextSearch: async (_: any, { input }: any, context: any) => {
+      const effectiveTenantId = input.tenantId || context.tenantId;
+      if (!effectiveTenantId) {
+        throw new Error('Tenant ID is required');
+      }
+
+      const response = await searchService.fullTextSearch({
+        tenantId: effectiveTenantId,
+        query: input.query,
+        nodeTypes: input.nodeTypes ?? undefined,
+        sources: input.sources as SearchSource[] | undefined,
+        startTimestamp: input.startTimestamp ?? undefined,
+        endTimestamp: input.endTimestamp ?? undefined,
+        limit: input.limit ?? undefined,
+        offset: input.offset ?? undefined,
+      });
+
+      return response;
     },
 
     // Graph traversal (temporarily disabled due to schema mismatch)
