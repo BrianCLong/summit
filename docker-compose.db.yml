@@ -35,6 +35,31 @@ services:
       retries: 5
     restart: unless-stopped
 
+  neo4j:
+    image: neo4j:5.23-community
+    container_name: maestro-neo4j
+    environment:
+      NEO4J_AUTH: neo4j/testtest1
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1024m
+      NEO4J_dbms_memory_pagecache_size: 512m
+    ports:
+      - '7474:7474'
+      - '7687:7687'
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          "cypher-shell -a bolt://localhost:7687 -u neo4j -p testtest1 'RETURN 1' || exit 1",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
+  neo4j_data:
