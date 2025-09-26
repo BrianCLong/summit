@@ -5,6 +5,14 @@ image:
 
 replicas: 1
 
+resources:
+  requests:
+    cpu: 200m
+    memory: 384Mi
+  limits:
+    cpu: 600m
+    memory: 768Mi
+
 env:
   - name: KAFKA_BROKERS
     valueFrom: { secretKeyRef: { name: kafka-bootstrap, key: brokers } }
@@ -25,6 +33,19 @@ keda:
   pollingInterval: 10
   cooldownPeriod: 60
   lagThreshold: "100"
+
+vpa:
+  enabled: true
+  updatePolicy: Auto
+  minAllowed:
+    cpu: 150m
+    memory: 256Mi
+  maxAllowed:
+    cpu: 1000m
+    memory: 1.5Gi
+  controlledResources:
+    - cpu
+    - memory
 
 kafka:
   bootstrapServers: "PLAINTEXT://kafka:9092"

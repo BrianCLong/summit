@@ -1,0 +1,20 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: api-resource-stress
+  namespace: chaos-testing
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - intelgraph-prod
+    labelSelectors:
+      app.kubernetes.io/name: server
+  stressors:
+    cpu:
+      workers: 2
+      load: 85
+    memory:
+      workers: 1
+      size: "300Mi"
+  duration: "10m"

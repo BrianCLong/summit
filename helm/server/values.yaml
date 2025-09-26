@@ -64,10 +64,10 @@ env:
 
 resources:
   requests:
-    cpu: 200m
-    memory: 256Mi
+    cpu: 400m
+    memory: 512Mi
   limits:
-    cpu: 1000m
+    cpu: 900m
     memory: 1Gi
 
 ingress:
@@ -93,6 +93,19 @@ hpa:
   targetCPUUtilizationPercentage: 70
   # Scale up when cypher queries exceed this rate (queries/sec)
   cypherQueryRate: null
+
+vpa:
+  enabled: true
+  updatePolicy: Auto
+  minAllowed:
+    cpu: 250m
+    memory: 384Mi
+  maxAllowed:
+    cpu: 1500m
+    memory: 2Gi
+  controlledResources:
+    - cpu
+    - memory
 
 networkPolicy:
   enabled: true
