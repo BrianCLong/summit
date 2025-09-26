@@ -1,0 +1,99 @@
+{
+  "entities": {
+    "index": "graph-metadata-entities-v1",
+    "aliases": ["graph-metadata-entities"],
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1,
+      "refresh_interval": "15s",
+      "analysis": {
+        "analyzer": {
+          "metadata_text": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": ["lowercase", "asciifolding", "metadata_stop"]
+          }
+        },
+        "filter": {
+          "metadata_stop": {
+            "type": "stop",
+            "stopwords": "_english_"
+          }
+        }
+      }
+    },
+    "mappings": {
+      "dynamic": true,
+      "properties": {
+        "entity_id": { "type": "keyword" },
+        "entity_type": { "type": "keyword" },
+        "name": {
+          "type": "text",
+          "analyzer": "metadata_text",
+          "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+        },
+        "summary": { "type": "text", "analyzer": "metadata_text" },
+        "properties": {
+          "type": "object",
+          "dynamic": true
+        },
+        "tags": { "type": "keyword" },
+        "source": { "type": "keyword" },
+        "ingested_at": { "type": "date" },
+        "metadata_hash": { "type": "keyword" }
+      },
+      "dynamic_templates": [
+        {
+          "properties_strings": {
+            "path_match": "properties.*",
+            "mapping": {
+              "type": "text",
+              "analyzer": "metadata_text",
+              "fields": {
+                "keyword": { "type": "keyword", "ignore_above": 256 }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "relationships": {
+    "index": "graph-metadata-relationships-v1",
+    "aliases": ["graph-metadata-relationships"],
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1,
+      "refresh_interval": "15s"
+    },
+    "mappings": {
+      "dynamic": true,
+      "properties": {
+        "relationship_id": { "type": "keyword" },
+        "relationship_type": { "type": "keyword" },
+        "source_id": { "type": "keyword" },
+        "target_id": { "type": "keyword" },
+        "properties": {
+          "type": "object",
+          "dynamic": true
+        },
+        "ingested_at": { "type": "date" },
+        "metadata_hash": { "type": "keyword" }
+      },
+      "dynamic_templates": [
+        {
+          "properties_strings": {
+            "path_match": "properties.*",
+            "mapping": {
+              "type": "text",
+              "analyzer": "standard",
+              "fields": {
+                "keyword": { "type": "keyword", "ignore_above": 256 }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
