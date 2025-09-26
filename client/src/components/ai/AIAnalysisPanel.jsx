@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -25,6 +25,10 @@ import {
   IconButton,
   Tooltip,
   Badge,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -87,6 +91,41 @@ const AI_COMMUNITY_DETECT = gql`
       kind
       status
       createdAt
+    }
+  }
+`;
+
+const EXPLAIN_ENTITY_RECOGNITION = gql`
+  query ExplainEntityRecognition($text: String!, $method: String, $topK: Int) {
+    explainEntityRecognition(text: $text, method: $method, topK: $topK) {
+      text
+      usedMethod
+      generatedAt
+      entities {
+        text
+        label
+        confidence
+        start
+        end
+      }
+      relationships {
+        source
+        target
+        type
+        confidence
+      }
+      explanations {
+        entityText
+        label
+        confidence
+        method
+        context
+        summary
+        featureWeights {
+          feature
+          weight
+        }
+      }
     }
   }
 `;
@@ -176,6 +215,9 @@ const AIAnalysisPanel = () => {
   const [insights, setInsights] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedGraphSnapshot, setSelectedGraphSnapshot] = useState('demo-snapshot-1');
+  const [extractionResults, setExtractionResults] = useState(null);
+  const [explainabilityMethod, setExplainabilityMethod] = useState('auto');
+  const [explainabilityTopK, setExplainabilityTopK] = useState(5);
 
   // GraphQL hooks for AI operations
   const [aiExtractEntities] = useMutation(AI_EXTRACT_ENTITIES, {
@@ -226,6 +268,11 @@ const AIAnalysisPanel = () => {
     },
   });
 
+  const [fetchExplainability, { data: explainabilityData, loading: explainabilityLoading, error: explainabilityError }]
+    = useLazyQuery(EXPLAIN_ENTITY_RECOGNITION, {
+      fetchPolicy: 'no-cache',
+    });
+
   const [approveInsight] = useMutation(APPROVE_INSIGHT, {
     onCompleted: (data) => {
       setInsights((prev) =>
@@ -272,9 +319,27 @@ const AIAnalysisPanel = () => {
   });
 
   // Handler functions for AI operations
+  const triggerExplainability = useCallback(
+    (override?: { method?: string; topK?: number }) => {
+      if (!analysisText.trim()) return;
+      const desiredMethod = override?.method ?? explainabilityMethod;
+      const desiredTopK = override?.topK ?? explainabilityTopK;
+
+      fetchExplainability({
+        variables: {
+          text: analysisText,
+          method: desiredMethod === 'auto' ? null : desiredMethod,
+          topK: desiredTopK,
+        },
+      });
+    },
+    [analysisText, explainabilityMethod, explainabilityTopK, fetchExplainability],
+  );
+
   const handleExtractEntities = () => {
     if (!analysisText.trim()) return;
     setLoading(true);
+    setExtractionResults(null);
 
     const docs = [{ id: `doc-${Date.now()}`, text: analysisText }];
     aiExtractEntities({
@@ -283,6 +348,8 @@ const AIAnalysisPanel = () => {
         jobId: `extract-${Date.now()}`,
       },
     });
+
+    triggerExplainability();
   };
 
   const handleResolveEntities = () => {
@@ -378,6 +445,38 @@ const AIAnalysisPanel = () => {
     }
   };
 
+  useEffect(() => {
+    if (explainabilityData?.explainEntityRecognition) {
+      const payload = explainabilityData.explainEntityRecognition;
+      setExtractionResults({
+        entities: (payload.entities || []).map((entity, index) => ({
+          id: `extracted-${index}`,
+          text: entity.text,
+          type: entity.label,
+          confidence: entity.confidence,
+          start: entity.start,
+          end: entity.end,
+        })),
+        relationships: (payload.relationships || []).map((rel, index) => ({
+          id: `relationship-${index}`,
+          source: rel.source,
+          target: rel.target,
+          type: rel.type,
+          confidence: rel.confidence,
+        })),
+        explanations: payload.explanations || [],
+        usedMethod: payload.usedMethod,
+        generatedAt: payload.generatedAt,
+      });
+    }
+  }, [explainabilityData]);
+
+  useEffect(() => {
+    if (!explainabilityLoading && (explainabilityData || explainabilityError)) {
+      setLoading(false);
+    }
+  }, [explainabilityLoading, explainabilityData, explainabilityError]);
+
   const formatTimeAgo = (timestamp) => {
     const now = new Date();
     const time = new Date(timestamp);
@@ -467,6 +566,48 @@ const AIAnalysisPanel = () => {
                   >
                     Extract Entities & Relationships
                   </Button>
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2 }}>
+                    <FormControl sx={{ minWidth: 180 }}>
+                      <InputLabel id="explainability-method-label">Explainability</InputLabel>
+                      <Select
+                        labelId="explainability-method-label"
+                        value={explainabilityMethod}
+                        label="Explainability"
+                        onChange={(event) => {
+                          const nextMethod = event.target.value;
+                          setExplainabilityMethod(nextMethod);
+                          if (extractionResults) {
+                            triggerExplainability({ method: nextMethod });
+                          }
+                        }}
+                      >
+                        <MenuItem value="auto">Auto</MenuItem>
+                        <MenuItem value="lime">LIME</MenuItem>
+                        <MenuItem value="shap">SHAP</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <TextField
+                      label="Top features"
+                      type="number"
+                      value={explainabilityTopK}
+                      onChange={(event) => {
+                        const nextValue = Math.max(1, Math.min(10, Number(event.target.value) || 1));
+                        setExplainabilityTopK(nextValue);
+                        if (extractionResults) {
+                          triggerExplainability({ topK: nextValue });
+                        }
+                      }}
+                      inputProps={{ min: 1, max: 10 }}
+                      sx={{ width: 140 }}
+                    />
+                    <Button
+                      variant="outlined"
+                      onClick={() => triggerExplainability()}
+                      disabled={explainabilityLoading || !analysisText.trim()}
+                    >
+                      Refresh Explainability
+                    </Button>
+                  </Box>
                   {loading && <LinearProgress sx={{ mt: 1 }} />}
                 </CardContent>
               </Card>
@@ -486,9 +627,9 @@ const AIAnalysisPanel = () => {
                         </AccordionSummary>
                         <AccordionDetails>
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                            {extractionResults.entities.map((entity) => (
+                            {extractionResults.entities.map((entity, index) => (
                               <Chip
-                                key={entity.id}
+                                key={`${entity.id}-${index}`}
                                 label={`${entity.text} (${entity.type})`}
                                 size="small"
                                 color="primary"
@@ -507,8 +648,8 @@ const AIAnalysisPanel = () => {
                         </AccordionSummary>
                         <AccordionDetails>
                           <List dense>
-                            {extractionResults.relationships.map((rel) => (
-                              <ListItem key={rel.id}>
+                            {extractionResults.relationships.map((rel, index) => (
+                              <ListItem key={`${rel.id}-${index}`}>
                                 <ListItemText
                                   primary={`${rel.source} → ${rel.target}`}
                                   secondary={`Type: ${rel.type} | Confidence: ${(rel.confidence * 100).toFixed(1)}%`}
@@ -524,6 +665,76 @@ const AIAnalysisPanel = () => {
                       Enter text above and click "Extract" to see AI-powered entity extraction
                       results
                     </Alert>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    🧠 Explainable Entity Highlights
+                  </Typography>
+                  {extractionResults?.usedMethod && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Method: {extractionResults.usedMethod?.toUpperCase?.() || extractionResults.usedMethod} · Updated{' '}
+                      {extractionResults.generatedAt
+                        ? new Date(extractionResults.generatedAt).toLocaleTimeString()
+                        : 'just now'}
+                    </Typography>
+                  )}
+                  {explainabilityError && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                      Failed to load explainability insights: {explainabilityError.message}
+                    </Alert>
+                  )}
+                  {explainabilityLoading && <LinearProgress sx={{ mb: 2 }} />}
+                  {extractionResults?.explanations?.length ? (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {extractionResults.explanations.map((explanation, index) => (
+                        <Box
+                          key={`${explanation.entityText}-${index}`}
+                          sx={{
+                            borderRadius: 2,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            p: 2,
+                            backgroundColor: 'background.paper',
+                          }}
+                        >
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                            {explanation.entityText}{' '}
+                            <Typography component="span" variant="caption" color="text.secondary">
+                              ({explanation.label})
+                            </Typography>
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                            {explanation.summary}
+                          </Typography>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.5 }}>
+                            {explanation.featureWeights.slice(0, explainabilityTopK).map((feature) => (
+                              <Chip
+                                key={`${explanation.entityText}-${feature.feature}`}
+                                label={`${feature.feature}: ${feature.weight.toFixed(2)}`}
+                                color={feature.weight >= 0 ? 'success' : 'error'}
+                                variant={Math.abs(feature.weight) < 0.05 ? 'outlined' : 'filled'}
+                                size="small"
+                              />
+                            ))}
+                          </Box>
+                          {explanation.context && (
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                              Context: {explanation.context}
+                            </Typography>
+                          )}
+                        </Box>
+                      ))}
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      Run entity extraction to view explainability insights.
+                    </Typography>
                   )}
                 </CardContent>
               </Card>
