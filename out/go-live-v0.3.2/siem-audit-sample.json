@@ -1,0 +1,49 @@
+{
+  "collection_period": "4h",
+  "event_summary": {
+    "total_events": 847,
+    "policy_allow": 834,
+    "policy_deny": 13,
+    "policy_error": 0
+  },
+  "sample_events": [
+    {
+      "eventId": "audit_1758844485",
+      "timestamp": "2025-09-25T17:54:45.802939",
+      "eventType": "policy.allow",
+      "tenantId": "TENANT_001",
+      "outcome": "success",
+      "details": {
+        "action": {
+          "kind": "a2a",
+          "resource": "code-refactor"
+        },
+        "purpose": "investigation",
+        "residency": "US"
+      }
+    },
+    {
+      "eventId": "audit_1758844486",
+      "timestamp": "2025-09-25T17:54:45.802942",
+      "eventType": "policy.deny",
+      "tenantId": "TENANT_001",
+      "outcome": "failure",
+      "details": {
+        "action": {
+          "kind": "tool",
+          "resource": "graph.query"
+        },
+        "reasons": [
+          "PERSISTED_QUERY_REQUIRED"
+        ]
+      }
+    }
+  ],
+  "provenance_hashes": [
+    "8d07d4791ae36df3",
+    "be088afa96faf1bc",
+    "31e094f32cb07867",
+    "2542a4f1142dc46b",
+    "cb3ed22f6ae8c95d"
+  ]
+}

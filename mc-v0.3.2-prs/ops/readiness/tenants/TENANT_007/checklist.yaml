@@ -1,0 +1,74 @@
+cache_plan:
+  cache_hit_rate_target: 0.94
+  eviction_policy: adaptive_lfu
+  hot_key_ttl_seconds: 600
+  max_keys: 35000
+  warming_strategy: predictive_with_ml
+compliance_requirements:
+  audit_completeness: '>=0.999'
+  persisted_query_rate: '>=0.999'
+  privacy_blocks_expected: '>=0.997'
+  residency_violations_max: 0
+disaster_recovery:
+  backup_regions:
+  - eu-north-1
+  dr_drill_frequency: monthly
+  enrollment_status: ready
+  rpo_target_minutes: 3
+  rto_target_minutes: 25
+query_budgets:
+  budget_enforcement: hard_limit_with_degradation
+  overage_action: rate_limit_with_backpressure
+  top_operations:
+  - daily_budget: 680000
+    p95_ms: 42
+    pqid: pq.getPersonById
+  - daily_budget: 420000
+    p95_ms: 115
+    pqid: pq.searchEntitiesByName
+  - daily_budget: 250000
+    p95_ms: 200
+    pqid: pq.getInvestigationData
+readiness_gates:
+  infrastructure:
+  - vpc_setup
+  - security_groups
+  - load_balancers
+  - cdn_config
+  monitoring:
+  - prometheus_rules
+  - grafana_dashboards
+  - alerting
+  - slo_contracts
+  security:
+  - opa_policies
+  - network_policies
+  - sealed_secrets
+  - encryption_keys
+  testing:
+  - k6_scenarios
+  - chaos_experiments
+  - privacy_redteam
+  - load_baseline
+residency_configuration:
+  adequacy_decisions:
+  - EU-UK
+  - EU-CH
+  cross_border_restrictions:
+  - US
+  - APAC
+  data_residency_tags:
+  - eu-west-1
+  - eu-central-1
+  primary_regions:
+  - EU
+tenant_metadata:
+  assessment_date: '2025-09-25T17:47:44.334521'
+  priority: high
+  target_wave: C
+  tenant_id: TENANT_007
+traffic_profile:
+  daily_operations: 1800000
+  data_volume_gb: 52.1
+  peak_qps: 250
+  query_complexity_avg: 2.7

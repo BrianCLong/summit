@@ -1,0 +1,10 @@
+{
+  "version": "v0.3.2-mc",
+  "capturedAt": "2025-09-26T00:02:14Z",
+  "endpoints": {
+    "GraphQL.reads.p95_ms": 317,
+    "GraphQL.writes.p95_ms": 591,
+    "Graph.1hop.p95_ms": 249
+  },
+  "availability": 99.97
+}

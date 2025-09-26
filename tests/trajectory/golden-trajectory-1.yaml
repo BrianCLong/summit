@@ -1,0 +1,29 @@
+id: gt-001
+description: Basic ReAct search + cite
+steps:
+  - role: thought
+    text: plan search
+  - role: action
+    label: web.search
+    text: query=site:example.com policy update
+  - role: observation
+    text: found 3 results
+  - role: thought
+    text: choose first
+  - role: action
+    label: web.open
+    text: open result 1
+  - role: observation
+    text: content mentions retention 30d
+  - role: thought
+    text: craft answer
+  - role: action
+    label: answer
+    text: final
+  - role: observation
+    text: user sees answer
+expectations:
+  must_include_labels: [web.search, web.open, answer]
+  forbid_labels: [tool.inject]
+  max_steps: 12
+  outcome_contains: ["retention", "30d"]

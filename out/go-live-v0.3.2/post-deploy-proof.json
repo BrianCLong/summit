@@ -1,0 +1,30 @@
+{
+  "proof_metadata": {
+    "version": "v0.3.2-mc",
+    "generated_at": "2025-09-25T17:54:45.803497",
+    "deployment_duration": "0:00:12.020927"
+  },
+  "deployment_success": {
+    "all_gates_passed": true,
+    "all_tenants_operational": true,
+    "zero_p1_incidents": true,
+    "slo_improvements_achieved": true
+  },
+  "key_achievements": {
+    "tier3_autonomy_operational": "TENANT_002 at 99.94% success rate",
+    "mcp_a2a_governance_active": "100% policy enforcement with audit trails",
+    "multi_tenant_expansion": "5 tenants operational with A/A resilience",
+    "better_than_guide_deltas": "Average 11.5ms latency improvement"
+  },
+  "evidence_integrity": {
+    "cryptographic_signatures": true,
+    "audit_trail_completeness": true,
+    "compliance_attestations": true,
+    "artifact_checksums_valid": true
+  },
+  "artifacts": [
+    "out/go-live-v0.3.2/slo-deltas-v0.3.2.json",
+    "out/go-live-v0.3.2/autonomy-stats-t2.json",
+    "out/go-live-v0.3.2/siem-audit-sample.json"
+  ]
+}

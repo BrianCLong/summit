@@ -1,0 +1,1 @@
+{"ok": true, "result": {"echoTask": {"repo": "svc-api", "goal": "add pagination"}, "policy": {"allow": true, "reasons": ["dev stub"]}}, "provenance": {"hash": "c627ced0255943e68df3f539fa9bce5df5ea06dcca95f9aa5cf9c463f0f73453", "time": 1758845686}}

@@ -1,0 +1,22 @@
+name: local-kit-verify
+on: [pull_request]
+jobs:
+  run-kit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y jq curl
+      - run: echo "A2A_URL=http://127.0.0.1:8080\nMC_VERSION=v0.3.2-mc\nMC_SIGNING_KEY=ci-demo" > .env
+      - run: python3 mock/a2a_server.py & sleep 1
+      - run: python3 tools/mc.py slo snapshot --out out/slo-v0.3.2-baseline.json
+      - run: python3 tools/gates_runner.py --stage stage --strict --report out/gates-stage.json
+      - run: python3 tools/gates_runner.py --stage production --strict --report out/gates-prod.json
+      - run: |
+          curl -sS -X POST $A2A_URL/a2a/perform -H 'Content-Type: application/json' \
+            -d '{"tenantId":"TENANT_001","purpose":"investigation","residency":"US","pqid":"pq.getPersonById","agent":"code-refactor","task":{"repo":"svc-api","goal":"add pagination"}}' \
+            | tee out/a2a-smoke.json | jq -e '.ok==true'
+      - run: python3 tools/mc.py evidence pack --out dist/evidence-v0.3.2-mc.json
+      - run: python3 tools/mc.py evidence verify dist/evidence-v0.3.2-mc.json | tee out/verify.json
+      - run: jq -e '.ok==true' out/verify.json
+      - uses: actions/upload-artifact@v4
+        with: { name: local-kit-evidence, path: dist/evidence-v0.3.2-mc.json }

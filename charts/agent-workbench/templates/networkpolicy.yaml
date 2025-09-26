@@ -1,0 +1,80 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "agent-workbench.fullname" . }}
+  labels:
+    {{- include "agent-workbench.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "agent-workbench.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress from ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow Prometheus scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow intra-pod communication
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "agent-workbench.selectorLabels" . | nindent 14 }}
+  egress:
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow OPA policy server access
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: opa-system
+        - podSelector:
+            matchLabels:
+              app: opa
+      ports:
+        - protocol: TCP
+          port: 8181
+    # Allow HTTPS egress for LLM APIs
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow internal service mesh communication
+    - to:
+        - namespaceSelector: {}
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: mc-platform
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8443
+        - protocol: TCP
+          port: 9090
+{{- end }}

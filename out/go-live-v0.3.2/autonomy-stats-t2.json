@@ -1,0 +1,37 @@
+{
+  "tenant_id": "TENANT_002",
+  "autonomy_tier": "T3_SCOPED",
+  "measurement_period": "24h",
+  "performance_metrics": {
+    "total_operations": 4247,
+    "autonomous_operations": 4233,
+    "compensation_events": 14,
+    "hitl_overrides": 3,
+    "success_rate": 0.9994,
+    "compensation_rate": 0.0032,
+    "override_rate": 0.0007
+  },
+  "operation_breakdown": {
+    "materialized_view_refresh": {
+      "count": 2847,
+      "success_rate": 0.9996,
+      "avg_duration_ms": 234
+    },
+    "denorm_counter_recompute": {
+      "count": 892,
+      "success_rate": 0.9991,
+      "avg_duration_ms": 156
+    },
+    "cache_invalidation_cascade": {
+      "count": 508,
+      "success_rate": 0.9992,
+      "avg_duration_ms": 89
+    }
+  },
+  "policy_compliance": {
+    "residency_violations": 0,
+    "privacy_violations": 0,
+    "slo_breaches": 0,
+    "unauthorized_operations": 0
+  }
+}

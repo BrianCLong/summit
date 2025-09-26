@@ -1,0 +1,76 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "MC v0.3+ Expansion Monitoring",
+    "tags": [
+      "mc-platform",
+      "expansion",
+      "autonomy"
+    ],
+    "timezone": "UTC",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Tenant SLO Compliance",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "service:request_duration_seconds:p95",
+            "legendFormat": "{{ tenant_id }} p95"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 300
+                },
+                {
+                  "color": "red",
+                  "value": 350
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Replication Lag",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "pg_replica_lag_seconds{tenant=~\"TENANT_004|TENANT_005\"}",
+            "legendFormat": "{{ tenant }} lag"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Autonomy Pilot Metrics",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(autonomy_operations_total{tenant=\"TENANT_001\"}[1h]))",
+            "legendFormat": "Operations/hour"
+          },
+          {
+            "expr": "(sum(rate(autonomy_compensation_events_total{tenant=\"TENANT_001\"}[1h])) / sum(rate(autonomy_operations_total{tenant=\"TENANT_001\"}[1h]))) * 100",
+            "legendFormat": "Compensation %"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-4h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

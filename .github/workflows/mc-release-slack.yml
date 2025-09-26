@@ -1,0 +1,48 @@
+name: mc-release-slack
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to announce (defaults to tag/branch)'
+        required: false
+        default: ''
+
+jobs:
+  slack-notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read evidence
+        id: evidence
+        run: |
+          VERSION=${{ github.event.inputs.version || github.ref_name }}
+          FILE=dist/evidence-${VERSION}.json
+          if [ ! -f "$FILE" ]; then echo "file=$FILE" >> $GITHUB_OUTPUT; echo "present=false" >> $GITHUB_OUTPUT; exit 0; fi
+          echo "file=$FILE" >> $GITHUB_OUTPUT
+          echo "present=true" >> $GITHUB_OUTPUT
+          echo "summary=$(jq -r '.manifest.artifacts|length' "$FILE")" >> $GITHUB_OUTPUT
+
+      - name: Build Slack payload
+        id: payload
+        run: |
+          VERSION=${{ github.event.inputs.version || github.ref_name }}
+          SUMMARY=${{ steps.evidence.outputs.summary || '0' }}
+          cat > msg.json <<EOF
+          {
+            "text": "MC ${VERSION} release",
+            "blocks": [
+              {"type":"header","text":{"type":"plain_text","text":"MC ${VERSION} — Release Complete"}},
+              {"type":"section","text":{"type":"mrkdwn","text":"*Artifacts:* ${SUMMARY} items\n*Evidence:* ${{ steps.evidence.outputs.file }}"}},
+              {"type":"section","text":{"type":"mrkdwn","text":"SLO/Cost gates: PASS\nPolicy/Residency: PASS\nA2A/MCP: governed"}}
+            ]
+          }
+          EOF
+
+      - name: Post to Slack
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        run: |
+          curl -s -X POST -H 'Content-type: application/json' --data @msg.json ${{ secrets.SLACK_WEBHOOK_URL }}

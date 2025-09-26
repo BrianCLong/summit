@@ -1,0 +1,132 @@
+{
+  "test_metadata": {
+    "timestamp": "2025-09-25T17:54:41.795468",
+    "version": "v0.3.2-mc",
+    "test_type": "mcp_a2a_smoke_governed"
+  },
+  "test_cases": [
+    {
+      "name": "a2a_code_refactor_governed",
+      "description": "A2A call to code-refactor agent with full governance",
+      "request": {
+        "tenantId": "TENANT_001",
+        "purpose": "investigation",
+        "residency": "US",
+        "pqid": "pq.getPersonById",
+        "agent": "code-refactor",
+        "task": {
+          "repo": "svc-api",
+          "goal": "add pagination"
+        }
+      },
+      "expected_response": {
+        "success": true,
+        "policy_enforced": true,
+        "audit_event_generated": true
+      },
+      "actual_response": {
+        "success": true,
+        "taskId": "a2a_task_1758844481",
+        "result": {
+          "files_modified": [
+            "src/api/routes.js",
+            "src/api/pagination.js"
+          ],
+          "tests_added": 3,
+          "performance_impact": "minimal"
+        },
+        "provenance": {
+          "hash": "d7f17a6705ac425c",
+          "timestamp": "2025-09-25T17:54:41.795585",
+          "agent": "code-refactor",
+          "auditEventId": "audit_1758844481"
+        },
+        "performance": {
+          "duration_ms": 2847,
+          "policy_check_ms": 23
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "mcp_graph_query_persisted",
+      "description": "MCP graph.query tool with persisted-only enforcement",
+      "request": {
+        "tool": "graph.query",
+        "context": {
+          "tenantId": "TENANT_001",
+          "purpose": "investigation",
+          "residency": "US"
+        },
+        "parameters": {
+          "pqid": "pq.getPersonById",
+          "variables": {
+            "id": "test_entity_001"
+          }
+        }
+      },
+      "expected_response": {
+        "success": true,
+        "persisted_query_enforced": true,
+        "privacy_applied": true
+      },
+      "actual_response": {
+        "success": true,
+        "data": {
+          "person": {
+            "id": "test_entity_001",
+            "name": "[REDACTED]",
+            "age_band": "25-35",
+            "location": "US-EAST"
+          }
+        },
+        "extensions": {
+          "auditEventId": "audit_1758844482",
+          "executionTime": 145,
+          "cacheHit": true,
+          "privacyApplied": true,
+          "riskScore": 0.12
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "name": "policy_deny_non_persisted",
+      "description": "Policy correctly denies non-persisted GraphQL query",
+      "request": {
+        "tool": "graph.query",
+        "context": {
+          "tenantId": "TENANT_001",
+          "purpose": "investigation",
+          "residency": "US"
+        },
+        "parameters": {
+          "query": "{ persons { name email } }",
+          "variables": {}
+        }
+      },
+      "expected_response": {
+        "success": false,
+        "error": "POLICY_DENIED",
+        "reason": "PERSISTED_QUERY_REQUIRED"
+      },
+      "actual_response": {
+        "success": false,
+        "error": "POLICY_DENIED",
+        "reasons": [
+          "PERSISTED_QUERY_REQUIRED"
+        ],
+        "auditEventId": "audit_1758844483"
+      },
+      "status": "PASS"
+    }
+  ],
+  "summary": {
+    "total_tests": 3,
+    "passed_tests": 3,
+    "failed_tests": 0,
+    "policy_enforcement_rate": 1.0,
+    "audit_events_generated": 3
+  },
+  "success": true
+}

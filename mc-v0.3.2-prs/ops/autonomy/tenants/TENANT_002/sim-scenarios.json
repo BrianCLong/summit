@@ -1,0 +1,73 @@
+{
+  "metadata": {
+    "tenant": "TENANT_002",
+    "scenario_set": "derived_updates",
+    "version": "v0.3.2-mc"
+  },
+  "scenarios": [
+    {
+      "name": "mv_refresh_hotkeys",
+      "description": "Refresh materialized views for hot-key entities",
+      "operations_count": 2500,
+      "duration_minutes": 60,
+      "expected_results": {
+        "success_rate": ">=0.999",
+        "compensation_rate": "<=0.005",
+        "p95_latency_ms": "<=50",
+        "slo_impact": "<=0.01"
+      },
+      "test_conditions": {
+        "load_multiplier": 1.2,
+        "failure_injection": "random_5_percent",
+        "network_partition": false
+      }
+    },
+    {
+      "name": "counter_recompute_aggregates",
+      "description": "Recompute denormalized counter aggregates",
+      "operations_count": 500,
+      "duration_minutes": 30,
+      "expected_results": {
+        "success_rate": ">=0.999",
+        "compensation_rate": "<=0.005",
+        "p95_latency_ms": "<=200",
+        "slo_impact": "<=0.005"
+      },
+      "test_conditions": {
+        "load_multiplier": 1.0,
+        "failure_injection": "none",
+        "network_partition": false
+      }
+    },
+    {
+      "name": "cache_invalidation_cascade",
+      "description": "Cascade cache invalidation with recompute",
+      "operations_count": 1500,
+      "duration_minutes": 45,
+      "expected_results": {
+        "success_rate": ">=0.999",
+        "compensation_rate": "<=0.005",
+        "p95_latency_ms": "<=100",
+        "slo_impact": "<=0.008"
+      },
+      "test_conditions": {
+        "load_multiplier": 1.1,
+        "failure_injection": "timeout_2_percent",
+        "network_partition": false
+      }
+    }
+  ],
+  "global_constraints": {
+    "max_concurrent_operations": 100,
+    "resource_limits": {
+      "cpu_percent": 15,
+      "memory_mb": 512,
+      "disk_iops": 1000
+    },
+    "abort_conditions": [
+      "privacy_violation",
+      "residency_violation",
+      "slo_breach_critical"
+    ]
+  }
+}

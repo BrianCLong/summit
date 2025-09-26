@@ -1,0 +1,17 @@
+{
+  "stage": "canary_50",
+  "ts": 1758845686,
+  "slo": {
+    "reads_p95_ms": 320,
+    "writes_p95_ms": 670,
+    "availability": 99.93
+  },
+  "cost": {
+    "utilization": 60.2
+  },
+  "policy": {
+    "residency_pass": true,
+    "persisted_only": true
+  },
+  "result": "PASS"
+}

@@ -1,0 +1,63 @@
+{
+  "integration_metadata": {
+    "version": "v0.3.1-mc",
+    "generated_at": "2025-09-25T16:17:25.219248",
+    "integration_scope": "v0.3_plus_expansion_evidence"
+  },
+  "artifact_integration": {
+    "ga_delta_report": {
+      "source": "out/v0.3-capitalization/ga-delta-report-v0.3.json",
+      "integration_target": "dist/evidence-v0.3.1-mc.json",
+      "section": "cost_slo_deltas",
+      "append_mode": true
+    },
+    "qi_catalog_v1": {
+      "source": [
+        "out/v0.3-capitalization/qi-catalog-v1.json",
+        "out/v0.3-capitalization/qi-catalog-v1.yaml"
+      ],
+      "integration_target": "dist/evidence-v0.3.1-mc.json",
+      "section": "privacy_governance",
+      "status": "FROZEN_v1.0.0",
+      "review_schedule": "90_day_cycle"
+    },
+    "dr_drill_schedule": {
+      "source": "out/v0.3-capitalization/dr-drill-schedule-monthly.json",
+      "integration_target": "runbooks/dr-automation.json",
+      "calendar_integration": "required",
+      "k6_chaos_scenarios": "referenced_artifacts"
+    },
+    "privacy_dashboard_tiles": {
+      "source": "out/v0.3-capitalization/privacy-dashboard-tiles.json",
+      "integration_target": "monitoring/grafana-dashboards/",
+      "visibility": "INTERNAL_ADMIN_ONLY",
+      "import_method": "grafana_api_provisioning"
+    }
+  },
+  "evidence_bundle_updates": {
+    "new_tenant_sections": {
+      "TENANT_004": {
+        "readiness_assessment": "linked",
+        "rollout_evidence": "pending_wave_a",
+        "validation_artifacts": "generated_per_stage"
+      },
+      "TENANT_005": {
+        "readiness_assessment": "linked",
+        "rollout_evidence": "pending_wave_b",
+        "validation_artifacts": "generated_per_stage"
+      }
+    },
+    "autonomy_pilot_evidence": {
+      "pilot_tenant": "TENANT_001",
+      "simulation_results": "continuous_collection",
+      "approval_audit_trail": "comprehensive_logging",
+      "compensation_events": "detailed_analysis"
+    }
+  },
+  "compliance_attestations": {
+    "dpo_sign_off": "required_for_qi_catalog_freeze",
+    "cto_approval": "required_for_autonomy_pilot",
+    "security_review": "completed_for_expansion_plan",
+    "external_audit_notification": "30_day_advance_notice"
+  }
+}

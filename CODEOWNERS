@@ -1,8 +1,31 @@
-# Ensure critical paths get the right reviewers
-.github/workflows/ @BrianCLong @org/devops
-ops/**               @org/devops
-charts/**            @org/platform
-infra/**             @org/platform
-services/**          @org/owners
-packages/**          @org/owners
-**/migrations/**     @org/data-team
+# CODEOWNERS
+
+# This file specifies the owners of different parts of the codebase.
+# When a pull request modifies files owned by a team or individual, that team or individual will be automatically requested for review.
+
+# Default owners for the entire repository
+* @your-org/mc-team @your-org/sre-team
+
+# Changesets and release-related files
+.changeset/ @your-org/mc-team
+.github/workflows/release.yml @your-org/mc-team @your-org/sre-team
+.github/workflows/pin-actions.yml @your-org/mc-team @your-org/sre-team
+.github/scripts/pin-actions.sh @your-org/mc-team @your-org/sre-team
+package.json @your-org/mc-team @your-org/sre-team
+Makefile @your-org/mc-team @your-org/sre-team
+
+# Documentation
+docs/ @your-org/mc-team
+CONTRIBUTING.md @your-org/mc-team
+README.md @your-org/mc-team
+
+# Core backend services (example)
+server/ @your-org/sre-team
+agentic-rag/ @your-org/sre-team
+mc-mcp-adapter/ @your-org/sre-team
+a2a-bridge/ @your-org/sre-team
+
+# Tests and tools
+tests/ @your-org/qa-team
+tools/ @your-org/qa-team
+scripts/ @your-org/sre-team

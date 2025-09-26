@@ -1,0 +1,40 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "agent-workbench.fullname" . }}
+  labels:
+    release: prometheus
+    {{- include "agent-workbench.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "agent-workbench.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  namespaceSelector:
+    matchNames: [ {{ .Release.Namespace }} ]
+  endpoints:
+    - port: http
+      interval: 15s
+      path: /metrics
+      metricRelabelings:
+        - action: drop
+          regex: 'go_.+'
+          sourceLabels: [ __name__ ]
+        - action: drop
+          regex: 'process_.+'
+          sourceLabels: [ __name__ ]
+        - action: replace
+          targetLabel: job
+          replacement: mc
+        # Relabel MC platform specific metrics for custom HPA
+        - sourceLabels: [__name__]
+          regex: 'mc_platform_(.*)'
+          targetLabel: __name__
+          replacement: 'mc_${1}'
+        # Add service and namespace labels for custom metrics
+        - sourceLabels: [__meta_kubernetes_service_name]
+          targetLabel: service
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+{{- end }}

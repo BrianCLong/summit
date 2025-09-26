@@ -1,0 +1,122 @@
+{
+  "expansion_metadata": {
+    "version": "v0.3.1-mc",
+    "generated_at": "2025-09-25T16:17:25.219248",
+    "expansion_type": "aa_ga_plus_2_tenants",
+    "prerequisite_validation": "14_day_green_required"
+  },
+  "tenant_assessments": {
+    "TENANT_004": {
+      "tenant_id": "TENANT_004",
+      "traffic_daily": 1450000,
+      "data_volume_gb": 28.7,
+      "residency_coverage": 97.3,
+      "persisted_query_compliance": 99.2,
+      "slo_baseline_p95": 380.0,
+      "status": "needs_work",
+      "readiness_score": 0.7341666666666666,
+      "blockers": [
+        "cache_warming_incomplete"
+      ]
+    },
+    "TENANT_005": {
+      "tenant_id": "TENANT_005",
+      "traffic_daily": 2100000,
+      "data_volume_gb": 41.2,
+      "residency_coverage": 99.1,
+      "persisted_query_compliance": 99.8,
+      "slo_baseline_p95": 290.0,
+      "status": "ready",
+      "readiness_score": 0.8207,
+      "blockers": []
+    }
+  },
+  "rollout_waves": {
+    "wave_a": {
+      "tenants": [
+        "TENANT_004"
+      ],
+      "timeline": "Weeks 1-2",
+      "stages": [
+        "staging_24h",
+        "canary_20_8h",
+        "canary_50_8h",
+        "production_24h"
+      ]
+    },
+    "wave_b": {
+      "tenants": [
+        "TENANT_005"
+      ],
+      "timeline": "Weeks 3-4",
+      "stages": [
+        "staging_24h",
+        "canary_20_8h",
+        "canary_50_8h",
+        "production_24h"
+      ]
+    }
+  },
+  "prerequisites": {
+    "current_tenant_green_days": 14,
+    "slo_compliance_min": 0.994,
+    "cost_budget_utilization_max": 0.8,
+    "privacy_violations_tolerance": 0
+  },
+  "validation_criteria": {
+    "replication_lag_max_ms": 60000,
+    "conflict_rate_max": 0.0005,
+    "rpo_target_minutes": 5,
+    "rto_target_minutes": 30,
+    "privacy_violation_tolerance": 0,
+    "budget_utilization_max": 0.8
+  },
+  "tripwires": [
+    {
+      "name": "error_budget_burn_fast",
+      "condition": "error_budget < 60%",
+      "threshold": 0.6,
+      "duration_minutes": 60,
+      "action": "pause_rollout",
+      "escalation_channel": "#mc-alerts"
+    },
+    {
+      "name": "replication_lag_spike",
+      "condition": "replication_lag > 60s",
+      "threshold": 60.0,
+      "duration_minutes": 10,
+      "action": "bias_glb_healthy_region",
+      "escalation_channel": "#mc-alerts"
+    },
+    {
+      "name": "conflict_rate_spike",
+      "condition": "conflict_rate > 0.1%",
+      "threshold": 0.001,
+      "duration_minutes": 5,
+      "action": "rollback_to_ap",
+      "escalation_channel": "#mc-critical"
+    },
+    {
+      "name": "residency_violation",
+      "condition": "residency_violations > 0",
+      "threshold": 0.0,
+      "duration_minutes": 1,
+      "action": "immediate_rollback_page_dpo",
+      "escalation_channel": "#privacy-emergency"
+    },
+    {
+      "name": "non_persisted_query_spike",
+      "condition": "non_persisted_rate > 0.1%",
+      "threshold": 0.001,
+      "duration_minutes": 15,
+      "action": "rollback_tenant_to_ap",
+      "escalation_channel": "#mc-alerts"
+    }
+  ],
+  "backout_procedures": {
+    "glb_bias_single_region": "immediate",
+    "disable_ttl_autotune": "preserve_cache_state",
+    "persisted_only_enforcement": "maintain_enabled",
+    "replay_idempotent_ops": "preserve_provenance"
+  }
+}

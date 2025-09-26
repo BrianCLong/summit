@@ -1,0 +1,37 @@
+name: canary-analysis
+on:
+  workflow_dispatch:
+    inputs:
+      baseline: { description: 'Baseline URL', required: true }
+      candidate: { description: 'Candidate URL', required: true }
+      minutes: { description: 'Window minutes', required: false, default: '10' }
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Warmup & sample
+        run: |
+          BASE=${{ github.event.inputs.baseline }}
+          CAND=${{ github.event.inputs.candidate }}
+          MIN=${{ github.event.inputs.minutes }}
+          for i in $(seq 1 $((MIN*6))); do
+            curl -s -o /dev/null -w "%{time_total}\n" "$BASE/graphql?query=%7Bhealth%7D" >> base.lat
+            curl -s -o /dev/null -w "%{time_total}\n" "$CAND/graphql?query=%7Bhealth%7D" >> cand.lat
+            sleep 10
+          done
+      - name: Compute stats & decision
+        run: |
+          python3 - << 'PY'
+          import statistics as s
+          def read(f):
+            with open(f) as fh: return [float(x.strip()) for x in fh if x.strip()]
+          b=read('base.lat'); c=read('cand.lat')
+          p95=lambda xs: sorted(xs)[int(0.95*len(xs))-1]
+          rb, rc = p95(b), p95(c)
+          print({'baseline_p95_ms':rb*1000,'candidate_p95_ms':rc*1000})
+          if rc <= rb*1.05: print('DECISION=PROMOTE')
+          else: print('DECISION=HOLD')
+          PY
+      - uses: actions/upload-artifact@v4
+        with: { name: canary-samples, path: "*.lat" }
