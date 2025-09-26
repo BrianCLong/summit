@@ -152,6 +152,49 @@ export const coreTypeDefs = gql`
     offset: Int = 0
   }
 
+  enum GraphCompressionAlgorithm {
+    GZIP
+    ZSTD
+  }
+
+  enum GraphCompressionMode {
+    COMPRESS
+    DECOMPRESS
+  }
+
+  input GraphCompressionJobInput {
+    bucket: String!
+    sourceKey: String!
+    targetKey: String
+    algorithm: GraphCompressionAlgorithm!
+    level: Int
+    metadata: JSON
+    deleteSourceAfter: Boolean = false
+  }
+
+  input GraphDecompressionJobInput {
+    bucket: String!
+    sourceKey: String!
+    targetKey: String
+    algorithm: GraphCompressionAlgorithm!
+    metadata: JSON
+    deleteSourceAfter: Boolean = false
+  }
+
+  type GraphCompressionResult {
+    bucket: String!
+    sourceKey: String!
+    targetKey: String!
+    algorithm: GraphCompressionAlgorithm!
+    mode: GraphCompressionMode!
+    bytesIn: Float!
+    bytesOut: Float!
+    compressionRatio: Float
+    durationMs: Float!
+    etag: String
+    metadata: JSON
+  }
+
   # Graph traversal types
   type GraphNeighborhood {
     center: Entity!
@@ -214,6 +257,10 @@ export const coreTypeDefs = gql`
     # Bulk operations
     createEntitiesBatch(inputs: [EntityInput!]!, tenantId: String!): [Entity!]!
     createRelationshipsBatch(inputs: [RelationshipInput!]!, tenantId: String!): [Relationship!]!
+
+    # Graph compression utilities
+    compressGraphSnapshot(input: GraphCompressionJobInput!): GraphCompressionResult!
+    decompressGraphSnapshot(input: GraphDecompressionJobInput!): GraphCompressionResult!
   }
 
   # Real-time subscriptions for graph changes
