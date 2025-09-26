@@ -20,6 +20,17 @@ services:
     replicaCount: 2
   feedProcessor:
     replicaCount: 1
+    kafka:
+      bootstrapServers: 'kafka.staging.svc.cluster.local:9092'
+      inputTopic: 'intel.raw'
+      outputTopic: 'intel.enriched'
+      deadLetterTopic: 'intel.dlq'
+      consumerGroup: 'feed-processor-staging'
+    processor:
+      maxRetries: 4
+      retryBackoffSeconds: 0.5
+    telemetry:
+      prometheusAlertThreshold: 3
   searchEngine:
     replicaCount: 1
   workflowEngine:

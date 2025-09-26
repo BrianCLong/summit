@@ -69,6 +69,17 @@ services:
       requests:
         cpu: '500m'
         memory: '512Mi'
+    kafka:
+      bootstrapServers: 'kafka.prod.svc.cluster.local:9092'
+      inputTopic: 'intel.raw'
+      outputTopic: 'intel.enriched'
+      deadLetterTopic: 'intel.dlq'
+      consumerGroup: 'feed-processor'
+    processor:
+      maxRetries: 7
+      retryBackoffSeconds: 1.0
+    telemetry:
+      prometheusAlertThreshold: 10
 
   searchEngine:
     replicaCount: 3
