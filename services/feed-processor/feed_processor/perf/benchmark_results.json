@@ -1,0 +1,12 @@
+{
+  "records_total": 20000.0,
+  "batches_total": 40.0,
+  "throughput_avg_window": 10518.121043464927,
+  "throughput_avg_overall": 7224.021571679625,
+  "throughput_peak_window": 22497.491529540934,
+  "batch_size": 500,
+  "records": 20000,
+  "worker_concurrency": 6,
+  "parallelism": 12,
+  "queue": "feed:benchmark"
+}
