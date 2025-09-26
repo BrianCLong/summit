@@ -1,0 +1,103 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-daily-backup
+  namespace: data
+spec:
+  schedule: "0 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: database-backup
+          restartPolicy: OnFailure
+          containers:
+            - name: postgres-backup
+              image: postgres:16
+              imagePullPolicy: IfNotPresent
+              envFrom:
+                - secretRef:
+                    name: postgres-backup-credentials
+                - secretRef:
+                    name: database-backup-storage
+              env:
+                - name: S3_PREFIX
+                  valueFrom:
+                    configMapKeyRef:
+                      name: database-backup-settings
+                      key: POSTGRES_S3_PREFIX
+              volumeMounts:
+                - name: backup-scripts
+                  mountPath: /opt/db-backups
+                - name: tmp
+                  mountPath: /tmp
+              command:
+                - /bin/bash
+                - -lc
+                - >-
+                  export DEBIAN_FRONTEND=noninteractive &&
+                  apt-get update && apt-get install -y --no-install-recommends awscli &&
+                  chmod +x /opt/db-backups/postgres-backup.sh &&
+                  /opt/db-backups/postgres-backup.sh
+          volumes:
+            - name: backup-scripts
+              configMap:
+                name: database-backup-scripts
+                defaultMode: 0755
+            - name: tmp
+              emptyDir: {}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: neo4j-daily-backup
+  namespace: data
+spec:
+  schedule: "30 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: database-backup
+          restartPolicy: OnFailure
+          containers:
+            - name: neo4j-backup
+              image: neo4j:5.19
+              imagePullPolicy: IfNotPresent
+              envFrom:
+                - secretRef:
+                    name: neo4j-backup-credentials
+                - secretRef:
+                    name: database-backup-storage
+              env:
+                - name: S3_PREFIX
+                  valueFrom:
+                    configMapKeyRef:
+                      name: database-backup-settings
+                      key: NEO4J_S3_PREFIX
+              volumeMounts:
+                - name: backup-scripts
+                  mountPath: /opt/db-backups
+                - name: tmp
+                  mountPath: /tmp
+              command:
+                - /bin/bash
+                - -lc
+                - >-
+                  export DEBIAN_FRONTEND=noninteractive &&
+                  apt-get update && apt-get install -y --no-install-recommends awscli &&
+                  chmod +x /opt/db-backups/neo4j-backup.sh &&
+                  /opt/db-backups/neo4j-backup.sh
+          volumes:
+            - name: backup-scripts
+              configMap:
+                name: database-backup-scripts
+                defaultMode: 0755
+            - name: tmp
+              emptyDir: {}
