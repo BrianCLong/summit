@@ -1,6 +1,6 @@
 import type { ApolloServerPlugin } from '@apollo/server';
 import type { GraphQLRequestContext, GraphQLRequestContextWillSendResponse } from '@apollo/server';
-import { Counter, Histogram } from 'prom-client';
+import { Counter, Gauge, Histogram } from 'prom-client';
 import { registry } from './registry.js';
 
 const reqTotal = new Counter({
@@ -34,6 +34,20 @@ const resDur = new Histogram({
   help: 'Resolver duration seconds',
   labelNames: ['parent', 'field'] as const,
   buckets: [0.001, 0.003, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1],
+  registers: [registry],
+});
+
+const cacheEvents = new Counter({
+  name: 'apollo_cache_events_total',
+  help: 'GraphQL cache events recorded during request execution',
+  labelNames: ['operation', 'status', 'store', 'tenant'] as const,
+  registers: [registry],
+});
+
+const cacheHitRatio = new Gauge({
+  name: 'apollo_cache_hit_ratio',
+  help: 'Per-operation cache hit ratio observed over the request lifecycle',
+  labelNames: ['operation', 'tenant'] as const,
   registers: [registry],
 });
 
@@ -92,6 +106,30 @@ export function apolloPromPlugin(): ApolloServerPlugin {
             for (const e of rctx.errors!) {
               const code = (e.extensions && (e.extensions as any).code) || 'UNKNOWN';
               reqErrors.labels(name, type, String(code), tenant).inc();
+            }
+          }
+
+          const cacheMetrics = (rctx.contextValue as any)?.__cacheMetrics;
+          if (cacheMetrics?.events?.length) {
+            const totals = new Map<string, { hits: number; total: number; tenant: string }>();
+            for (const event of cacheMetrics.events as Array<{
+              op?: string;
+              status: 'hit' | 'miss';
+              store: string;
+              tenant?: string;
+            }>) {
+              const op = event.op || name || 'unknown';
+              const tenantLabel = event.tenant || tenant || 'unknown';
+              cacheEvents.labels(op, event.status, event.store, tenantLabel).inc();
+              const acc = totals.get(op) || { hits: 0, total: 0, tenant: tenantLabel };
+              acc.total += 1;
+              if (event.status === 'hit') acc.hits += 1;
+              acc.tenant = tenantLabel;
+              totals.set(op, acc);
+            }
+            for (const [op, summary] of totals.entries()) {
+              const ratio = summary.total ? summary.hits / summary.total : 0;
+              cacheHitRatio.labels(op, summary.tenant).set(ratio);
             }
           }
         },
