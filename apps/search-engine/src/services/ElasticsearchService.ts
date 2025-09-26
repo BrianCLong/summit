@@ -365,6 +365,10 @@ export class ElasticsearchService {
   }
 
   private getSearchIndices(query: SearchQuery): string[] {
+    if (query.filters?.indices && query.filters.indices.length > 0) {
+      return query.filters.indices;
+    }
+
     const indices = ['entities', 'cases', 'documents', 'comments', 'events'];
 
     if (query.filters?.entityTypes) {
