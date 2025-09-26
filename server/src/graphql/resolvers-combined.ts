@@ -46,6 +46,20 @@ interface CopilotGoalsArgs {
 const pubsub = new PubSub();
 const authService = new AuthService();
 
+function mapSession(session: any) {
+  if (!session) {
+    return null;
+  }
+  return {
+    id: session.sessionId || session.id,
+    createdAt: session.createdAt,
+    lastActivityAt: session.lastActivityAt,
+    expiresAt: session.expiresAt,
+    ipAddress: session.ipAddress,
+    userAgent: session.userAgent,
+  };
+}
+
 const goals: Array<{
   id: string;
   text: string;
@@ -82,11 +96,47 @@ export const resolvers = {
       const ipAddress = req?.ip;
       const userAgent = req?.get('User-Agent');
 
-      return await authService.login(email, password, ipAddress, userAgent);
+      const result = await authService.login(email, password, ipAddress, userAgent);
+      return {
+        ...result,
+        session: mapSession(result.session),
+      };
     },
 
     register: async (_: any, { input }: { input: RegisterInput }) => {
-      return await authService.register(input);
+      const result = await authService.register(input);
+      return {
+        ...result,
+        session: mapSession(result.session),
+      };
+    },
+
+    revokeSession: async (_: any, { sessionId }: { sessionId: string }, { user }: Context) => {
+      if (!user?.id) {
+        throw new Error('Not authenticated');
+      }
+      const success = await authService.revokeSession(user.id, sessionId);
+      return {
+        success,
+        revokedCount: success ? 1 : 0,
+        message: success ? 'Session revoked' : 'Session not found',
+      };
+    },
+
+    revokeAllSessions: async (
+      _: any,
+      { exceptSessionId }: { exceptSessionId?: string },
+      { user }: Context,
+    ) => {
+      if (!user?.id) {
+        throw new Error('Not authenticated');
+      }
+      const revokedCount = await authService.revokeAllSessions(user.id, exceptSessionId || undefined);
+      return {
+        success: revokedCount > 0,
+        revokedCount,
+        message: revokedCount > 0 ? 'Sessions revoked' : 'No sessions revoked',
+      };
     },
 
     createCopilotGoal: async (_: any, { text, investigationId }: CreateCopilotGoalArgs) => {

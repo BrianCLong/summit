@@ -2,6 +2,15 @@
 
 * OIDC/JWKS SSO; rotate keys; **step‑up auth** for risky actions (WebAuthn)
 * **ABAC/RBAC** with policy tags (origin, sensitivity, legal basis, need‑to‑know)
+* Redis-backed session store with hashed refresh tokens and SOC2-aligned telemetry
+
+### Session Management
+
+* JWT refresh tokens bound to Redis session state (`session_id`) with per-user revocation
+* Idle timeout enforcement (15 minutes default via `SESSION_IDLE_TIMEOUT_MS`) with automatic cleanup
+* GraphQL mutations `revokeSession` & `revokeAllSessions` exposed for security responders
+* Postgres `user_sessions` table tracks `session_id`, IP, user agent, revoked timestamps for audit
+* Ensure Redis high availability and access controls (TLS/auth) for compliance evidence (SOC2 CC6/CC7)
 
 ### GraphQL Surface
 

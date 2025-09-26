@@ -3,6 +3,16 @@ const { getPostgresPool } = require('../../src/config/database');
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 
+const mockSessionStore = {
+  saveSession: jest.fn(),
+  getSession: jest.fn(),
+  revokeSession: jest.fn(),
+  revokeAllSessionsForUser: jest.fn(),
+  listSessionsForUser: jest.fn(),
+  hashRefreshToken: jest.fn((token) => `hashed-${token}`),
+  touchSession: jest.fn(),
+};
+
 // Mock database pool and client
 jest.mock('../../src/config/database', () => ({
   getPostgresPool: jest.fn(),
@@ -17,6 +27,10 @@ jest.mock('argon2', () => ({
 jest.mock('jsonwebtoken', () => ({
   sign: jest.fn(),
   verify: jest.fn(),
+}));
+
+jest.mock('../../src/services/sessionStore', () => ({
+  sessionStore: mockSessionStore,
 }));
 
 describe('AuthService', () => {
@@ -37,6 +51,22 @@ describe('AuthService', () => {
 
     // Reset mocks before each test
     jest.clearAllMocks();
+    Object.values(mockSessionStore).forEach((fn) => {
+      if (typeof fn.mockReset === 'function') {
+        fn.mockReset();
+      }
+    });
+    mockSessionStore.hashRefreshToken.mockImplementation((token) => `hashed-${token}`);
+    mockSessionStore.listSessionsForUser.mockResolvedValue([]);
+    mockSessionStore.revokeAllSessionsForUser.mockResolvedValue(0);
+    mockSessionStore.getSession.mockResolvedValue(null);
+    mockSessionStore.touchSession.mockResolvedValue(null);
+    mockSessionStore.saveSession.mockResolvedValue(undefined);
+    mockSessionStore.revokeSession.mockResolvedValue(undefined);
+
+    jwt.sign.mockImplementation((payload) =>
+      payload && payload.type === 'refresh' ? 'mockRefreshToken' : 'mockToken',
+    );
   });
 
   describe('hasPermission', () => {
@@ -83,11 +113,10 @@ describe('AuthService', () => {
         .mockResolvedValueOnce({
           rows: [{ id: 'user123', ...userData, is_active: true, created_at: new Date() }],
         }) // For user insert
+        .mockResolvedValueOnce({}) // For session insert
         .mockResolvedValueOnce({}); // For COMMIT
 
       argon2.hash.mockResolvedValue('hashedpassword');
-      jwt.sign.mockReturnValue('mockToken');
-      mockClient.query.mockResolvedValue({}); // For user_sessions insert
 
       const result = await authService.register(userData);
 
@@ -98,9 +127,14 @@ describe('AuthService', () => {
         expect.any(Array),
       );
       expect(jwt.sign).toHaveBeenCalled();
+      expect(mockSessionStore.saveSession).toHaveBeenCalledTimes(1);
       expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
       expect(result.user.email).toBe('test@example.com');
       expect(result.token).toBe('mockToken');
+      expect(result.refreshToken).toBe('mockRefreshToken');
+      expect(result.session).toBeDefined();
+      const savedSession = mockSessionStore.saveSession.mock.calls[0][0];
+      expect(savedSession.refreshTokenHash).toBe('hashed-mockRefreshToken');
     });
 
     it('should throw error if user already exists', async () => {
@@ -134,13 +168,15 @@ describe('AuthService', () => {
         .mockResolvedValueOnce({}); // For user_sessions insert
 
       argon2.verify.mockResolvedValue(true);
-      jwt.sign.mockReturnValue('mockToken');
 
       const result = await authService.login(email, password, '127.0.0.1', 'test-agent');
 
       expect(argon2.verify).toHaveBeenCalledWith('hashedpassword', 'password123');
       expect(result.user.email).toBe(email);
       expect(result.token).toBe('mockToken');
+      expect(result.refreshToken).toBe('mockRefreshToken');
+      expect(result.session).toBeDefined();
+      expect(mockSessionStore.saveSession).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error for invalid credentials', async () => {
@@ -163,7 +199,12 @@ describe('AuthService', () => {
 
   describe('verifyToken', () => {
     const token = 'validToken';
-    const decodedPayload = { userId: 'user123', email: 'test@example.com', role: 'ANALYST' };
+    const decodedPayload = {
+      userId: 'user123',
+      email: 'test@example.com',
+      role: 'ANALYST',
+      sessionId: 'session123',
+    };
     const user = {
       id: 'user123',
       email: 'test@example.com',
@@ -175,13 +216,30 @@ describe('AuthService', () => {
     };
 
     it('should return user for a valid token', async () => {
+      const activeSession = {
+        sessionId: 'session123',
+        userId: 'user123',
+        refreshTokenId: 'refresh123',
+        refreshTokenHash: 'hash',
+        createdAt: new Date().toISOString(),
+        lastActivityAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        ipAddress: null,
+        userAgent: null,
+        revoked: false,
+      };
       jwt.verify.mockReturnValue(decodedPayload);
-      mockClient.query.mockResolvedValueOnce({ rows: [user] });
+      mockSessionStore.getSession.mockResolvedValue(activeSession);
+      mockSessionStore.touchSession.mockResolvedValue(activeSession);
+      mockClient.query
+        .mockResolvedValueOnce({ rows: [user] })
+        .mockResolvedValueOnce({});
 
       const result = await authService.verifyToken(token);
 
       expect(result).toBeDefined();
       expect(result.id).toBe('user123');
+      expect(mockSessionStore.touchSession).toHaveBeenCalledWith('session123');
     });
 
     it('should return null for an invalid token', async () => {
@@ -195,12 +253,29 @@ describe('AuthService', () => {
     });
 
     it('should return null if user not found or inactive', async () => {
+      const activeSession = {
+        sessionId: 'session123',
+        userId: 'user123',
+        refreshTokenId: 'refresh123',
+        refreshTokenHash: 'hash',
+        createdAt: new Date().toISOString(),
+        lastActivityAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        ipAddress: null,
+        userAgent: null,
+        revoked: false,
+      };
       jwt.verify.mockReturnValue(decodedPayload);
-      mockClient.query.mockResolvedValueOnce({ rows: [] });
+      mockSessionStore.getSession.mockResolvedValue(activeSession);
+      mockSessionStore.touchSession.mockResolvedValue(activeSession);
+      mockClient.query
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rowCount: 1 });
 
       const result = await authService.verifyToken(token);
 
       expect(result).toBeNull();
+      expect(mockSessionStore.revokeSession).toHaveBeenCalledWith('session123');
     });
   });
 });

@@ -173,6 +173,22 @@ async function createPostgresTables(): Promise<void> {
       )
     `);
 
+    await client.query(
+      "ALTER TABLE user_sessions ADD COLUMN IF NOT EXISTS session_id UUID UNIQUE",
+    );
+    await client.query(
+      "ALTER TABLE user_sessions ADD COLUMN IF NOT EXISTS ip_address INET",
+    );
+    await client.query(
+      "ALTER TABLE user_sessions ADD COLUMN IF NOT EXISTS user_agent TEXT",
+    );
+    await client.query(
+      "ALTER TABLE user_sessions ADD COLUMN IF NOT EXISTS revoked BOOLEAN DEFAULT FALSE",
+    );
+    await client.query(
+      "ALTER TABLE user_sessions ADD COLUMN IF NOT EXISTS revoked_at TIMESTAMP",
+    );
+
     // Analysis results table
     await client.query(`
       CREATE TABLE IF NOT EXISTS analysis_results (
@@ -192,6 +208,12 @@ async function createPostgresTables(): Promise<void> {
       'CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)',
     );
     await client.query('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id)');
+    await client.query(
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_sessions_session_id ON user_sessions(session_id)',
+    );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_sessions_revoked ON user_sessions(user_id, revoked)',
+    );
     await client.query(
       'CREATE INDEX IF NOT EXISTS idx_analysis_investigation ON analysis_results(investigation_id)',
     );

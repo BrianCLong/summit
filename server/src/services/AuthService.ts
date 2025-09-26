@@ -1,10 +1,11 @@
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { randomUUID as uuidv4 } from 'crypto';
+import { Pool, PoolClient } from 'pg';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
-import { Pool, PoolClient } from 'pg';
+import { sessionStore, ActiveSessionRecord } from './sessionStore.js';
 
 interface UserData {
   email: string;
@@ -48,17 +49,25 @@ interface AuthResponse {
   token: string;
   refreshToken: string;
   expiresIn: number;
+  session: ActiveSessionRecord;
 }
 
 interface TokenPayload {
   userId: string;
   email: string;
   role: string;
+  sessionId: string;
 }
 
 interface TokenPair {
   token: string;
   refreshToken: string;
+  session: ActiveSessionRecord;
+}
+
+interface SessionContext {
+  ipAddress?: string;
+  userAgent?: string;
 }
 
 // Define permissions for each role
@@ -132,6 +141,10 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
 
 export class AuthService {
   private pool: Pool | null = null;
+  private readonly idleTimeoutMs: number = parseInt(
+    process.env.SESSION_IDLE_TIMEOUT_MS || String(15 * 60 * 1000),
+    10,
+  );
 
   private getPool(): Pool {
     if (!this.pool) {
@@ -174,7 +187,7 @@ export class AuthService {
       );
 
       const user = userResult.rows[0] as DatabaseUser;
-      const { token, refreshToken } = await this.generateTokens(user, client);
+      const { token, refreshToken, session } = await this.generateTokens(user, client);
 
       await client.query('COMMIT');
 
@@ -183,6 +196,7 @@ export class AuthService {
         token,
         refreshToken,
         expiresIn: 24 * 60 * 60,
+        session,
       };
     } catch (error) {
       await client.query('ROLLBACK');
@@ -222,13 +236,17 @@ export class AuthService {
         user.id,
       ]);
 
-      const { token, refreshToken } = await this.generateTokens(user, client);
+      const { token, refreshToken, session } = await this.generateTokens(user, client, {
+        ipAddress,
+        userAgent,
+      });
 
       return {
         user: this.formatUser(user),
         token,
         refreshToken,
         expiresIn: 24 * 60 * 60,
+        session,
       };
     } catch (error) {
       logger.error('Error logging in user:', error);
@@ -255,42 +273,95 @@ export class AuthService {
       await client.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [
         user.id,
       ]);
-      const { token, refreshToken } = await this.generateTokens(user, client);
+      const { token, refreshToken, session } = await this.generateTokens(user, client);
       return {
         user: this.formatUser(user),
         token,
         refreshToken,
         expiresIn: 24 * 60 * 60,
+        session,
       };
     } finally {
       client.release();
     }
   }
 
-  private async generateTokens(user: DatabaseUser, client: PoolClient): Promise<TokenPair> {
+  private async generateTokens(
+    user: DatabaseUser,
+    client: PoolClient,
+    context: SessionContext = {},
+  ): Promise<TokenPair> {
+    const sessionId = uuidv4();
+    const refreshTokenId = uuidv4();
+    const issuedAt = new Date();
+    const refreshTtlMs = this.getRefreshTtlMs();
+    const expiresAt = new Date(issuedAt.getTime() + refreshTtlMs);
+
     const tokenPayload: TokenPayload = {
       userId: user.id,
       email: user.email,
       role: user.role,
+      sessionId,
     };
 
     const token = jwt.sign(tokenPayload, config.jwt.secret, {
       expiresIn: config.jwt.expiresIn,
     });
 
-    const refreshToken = uuidv4();
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
+    const refreshToken = jwt.sign(
+      {
+        sub: user.id,
+        sid: sessionId,
+        jti: refreshTokenId,
+        type: 'refresh',
+      },
+      config.jwt.refreshSecret,
+      {
+        expiresIn: config.jwt.refreshExpiresIn,
+      },
+    );
+
+    const refreshTokenHash = sessionStore.hashRefreshToken(refreshToken);
 
     await client.query(
       `
-      INSERT INTO user_sessions (user_id, refresh_token, expires_at)
-      VALUES ($1, $2, $3)
+      INSERT INTO user_sessions (session_id, user_id, refresh_token, expires_at, ip_address, user_agent, revoked, last_used)
+      VALUES ($1, $2, $3, $4, $5, $6, FALSE, $7)
+      ON CONFLICT (session_id) DO UPDATE
+        SET refresh_token = EXCLUDED.refresh_token,
+            expires_at = EXCLUDED.expires_at,
+            ip_address = EXCLUDED.ip_address,
+            user_agent = EXCLUDED.user_agent,
+            revoked = FALSE,
+            last_used = EXCLUDED.last_used
     `,
-      [user.id, refreshToken, expiresAt],
+      [
+        sessionId,
+        user.id,
+        refreshTokenHash,
+        expiresAt,
+        context.ipAddress ?? null,
+        context.userAgent ?? null,
+        issuedAt,
+      ],
     );
 
-    return { token, refreshToken };
+    const session: ActiveSessionRecord = {
+      sessionId,
+      userId: user.id,
+      refreshTokenId,
+      refreshTokenHash,
+      createdAt: issuedAt.toISOString(),
+      lastActivityAt: issuedAt.toISOString(),
+      expiresAt: expiresAt.toISOString(),
+      ipAddress: context.ipAddress ?? null,
+      userAgent: context.userAgent ?? null,
+      revoked: false,
+    };
+
+    await sessionStore.saveSession(session, Math.ceil(refreshTtlMs / 1000));
+
+    return { token, refreshToken, session };
   }
 
   async verifyToken(token: string): Promise<User | null> {
@@ -298,23 +369,111 @@ export class AuthService {
       if (!token) return null;
 
       const decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
-
-      const client = await this.getPool().connect();
-      const userResult = await client.query(
-        'SELECT * FROM users WHERE id = $1 AND is_active = true',
-        [decoded.userId],
-      );
-      client.release();
-
-      if (userResult.rows.length === 0) {
+      if (!decoded.sessionId) {
+        logger.warn('Access token missing session identifier');
         return null;
       }
 
-      return this.formatUser(userResult.rows[0] as DatabaseUser);
+      const session = await sessionStore.getSession(decoded.sessionId);
+      if (!session || session.userId !== decoded.userId || session.revoked) {
+        await this.markSessionRevoked(decoded.sessionId);
+        return null;
+      }
+
+      if (this.isSessionExpired(session)) {
+        await this.revokeSession(session.userId, session.sessionId);
+        return null;
+      }
+
+      if (this.isSessionIdle(session)) {
+        await this.revokeSession(session.userId, session.sessionId);
+        return null;
+      }
+
+      await sessionStore.touchSession(session.sessionId);
+
+      const client = await this.getPool().connect();
+      try {
+        const userResult = await client.query(
+          'SELECT * FROM users WHERE id = $1 AND is_active = true',
+          [decoded.userId],
+        );
+
+        if (userResult.rows.length === 0) {
+          await this.revokeSession(session.userId, session.sessionId);
+          return null;
+        }
+
+        await client.query('UPDATE user_sessions SET last_used = CURRENT_TIMESTAMP WHERE session_id = $1', [
+          session.sessionId,
+        ]);
+
+        return this.formatUser(userResult.rows[0] as DatabaseUser);
+      } finally {
+        client.release();
+      }
     } catch (error: any) {
       logger.warn('Invalid token:', error.message);
       return null;
     }
+  }
+
+  async revokeSession(userId: string, sessionId: string): Promise<boolean> {
+    const client = await this.getPool().connect();
+    try {
+      const result = await client.query(
+        `UPDATE user_sessions
+         SET revoked = TRUE, revoked_at = CURRENT_TIMESTAMP
+         WHERE user_id = $1 AND session_id = $2 AND revoked = FALSE`,
+        [userId, sessionId],
+      );
+
+      await sessionStore.revokeSession(sessionId);
+      return result.rowCount > 0;
+    } catch (error) {
+      logger.error('Error revoking session:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async revokeAllSessions(userId: string, exceptSessionId?: string): Promise<number> {
+    const client = await this.getPool().connect();
+    try {
+      const query = exceptSessionId
+        ? `UPDATE user_sessions
+           SET revoked = TRUE, revoked_at = CURRENT_TIMESTAMP
+           WHERE user_id = $1 AND session_id <> $2 AND revoked = FALSE`
+        : `UPDATE user_sessions
+           SET revoked = TRUE, revoked_at = CURRENT_TIMESTAMP
+           WHERE user_id = $1 AND revoked = FALSE`;
+
+      const params = exceptSessionId ? [userId, exceptSessionId] : [userId];
+      const result = await client.query(query, params);
+      const redisRevoked = await sessionStore.revokeAllSessionsForUser(userId, exceptSessionId);
+      return Math.max(result.rowCount, redisRevoked);
+    } catch (error) {
+      logger.error('Error revoking all sessions:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async listActiveSessions(userId: string): Promise<ActiveSessionRecord[]> {
+    const sessions = await sessionStore.listSessionsForUser(userId);
+    const active: ActiveSessionRecord[] = [];
+
+    for (const session of sessions) {
+      if (this.isSessionExpired(session) || this.isSessionIdle(session)) {
+        await this.revokeSession(userId, session.sessionId);
+        continue;
+      }
+      active.push(session);
+    }
+
+    return active;
   }
 
   /**
@@ -390,6 +549,60 @@ export class AuthService {
       createdAt: user.created_at,
       updatedAt: user.updated_at,
     };
+  }
+
+  private async markSessionRevoked(sessionId: string): Promise<void> {
+    const client = await this.getPool().connect();
+    try {
+      await client.query(
+        'UPDATE user_sessions SET revoked = TRUE, revoked_at = CURRENT_TIMESTAMP WHERE session_id = $1',
+        [sessionId],
+      );
+    } catch (error) {
+      logger.warn('Failed to mark session revoked', error);
+    } finally {
+      client.release();
+    }
+  }
+
+  private parseDurationToMs(value: string): number {
+    const trimmed = value.trim();
+    const numeric = Number(trimmed);
+    if (!Number.isNaN(numeric) && trimmed === numeric.toString()) {
+      return numeric;
+    }
+
+    const match = /^([0-9]+)([smhd])$/i.exec(trimmed);
+    if (!match) {
+      return 7 * 24 * 60 * 60 * 1000; // default 7 days
+    }
+
+    const amount = parseInt(match[1], 10);
+    const unit = match[2].toLowerCase();
+    switch (unit) {
+      case 's':
+        return amount * 1000;
+      case 'm':
+        return amount * 60 * 1000;
+      case 'h':
+        return amount * 60 * 60 * 1000;
+      case 'd':
+        return amount * 24 * 60 * 60 * 1000;
+      default:
+        return amount;
+    }
+  }
+
+  private getRefreshTtlMs(): number {
+    return this.parseDurationToMs(config.jwt.refreshExpiresIn);
+  }
+
+  private isSessionExpired(session: ActiveSessionRecord): boolean {
+    return new Date(session.expiresAt).getTime() <= Date.now();
+  }
+
+  private isSessionIdle(session: ActiveSessionRecord): boolean {
+    return Date.now() - new Date(session.lastActivityAt).getTime() > this.idleTimeoutMs;
   }
 }
 
