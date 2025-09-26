@@ -7,6 +7,9 @@ import { redactionService } from '../redaction/redact';
 import { gqlDuration, subscriptionFanoutLatency } from '../metrics';
 import { makePubSub } from '../subscriptions/pubsub';
 import Redis from 'ioredis';
+import neo4j from 'neo4j-driver';
+
+import { runNaturalLanguageProcessor } from '../services/nlq/pythonBridge.js';
 
 const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
 
@@ -14,11 +17,11 @@ const redisClient = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : n
 
 export const resolvers = {
   DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),
-  Query: { 
+  Query: {
     async tenantCoherence(_: any, { tenantId }: any, ctx: any) {
       const end = gqlDuration.startTimer({ op: 'tenantCoherence' });
       try {
-        const user = getUser(ctx); 
+        const user = getUser(ctx);
         
         // Enhanced ABAC enforcement with purpose checking
         const policyDecision = await policyEnforcer.requirePurpose('investigation', {
@@ -87,6 +90,65 @@ export const resolvers = {
       } finally {
         end();
       }
+    },
+    async naturalLanguageGraphSearch(_: any, { input }: any, ctx: any) {
+      const end = gqlDuration.startTimer({ op: 'naturalLanguageGraphSearch' });
+      try {
+        const user = getUser(ctx);
+        const tenantId = String(input?.tenantId ?? '').trim();
+        if (!tenantId) {
+          throw new Error('tenantId is required for natural language graph search');
+        }
+
+        const policyDecision = await policyEnforcer.requirePurpose('investigation', {
+          tenantId,
+          userId: user?.id,
+          action: 'read' as Action,
+          resource: 'graph_search',
+          purpose: ctx.purpose as Purpose,
+          clientIP: ctx.req?.ip,
+          userAgent: ctx.req?.get('user-agent')
+        });
+
+        if (!policyDecision.allow) {
+          throw new Error(`Access denied: ${policyDecision.reason}`);
+        }
+
+        const processorResult = await runNaturalLanguageProcessor({
+          prompt: String(input?.prompt ?? ''),
+          tenantId,
+          limit: typeof input?.limit === 'number' ? input.limit : undefined
+        });
+
+        const finalParams: Record<string, unknown> = {
+          ...processorResult.params,
+          tenantId
+        };
+
+        if (typeof finalParams.limit !== 'number') {
+          finalParams.limit = typeof input?.limit === 'number' ? input.limit : 25;
+        }
+
+        if (typeof finalParams.limit === 'number') {
+          const limitNumber = Number(finalParams.limit);
+          finalParams.limit = Math.max(1, Math.min(limitNumber, 100));
+        }
+
+        const neoResult = await neo.run(processorResult.cypher, finalParams, { tenantId });
+        const rows = Array.isArray(neoResult?.records)
+          ? neoResult.records.map((record: any) => serializeRecord(record))
+          : [];
+
+        return {
+          cypher: processorResult.cypher,
+          graphql: processorResult.graphql,
+          params: serializeValue(finalParams),
+          warnings: processorResult.warnings ?? [],
+          rows
+        };
+      } finally {
+        end();
+      }
     }
   },
   Mutation: { 
@@ -136,3 +198,58 @@ export const resolvers = {
     },
   },
 };
+
+function serializeRecord(record: any) {
+  const obj = record.toObject();
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [key, serializeValue(value)])
+  );
+}
+
+function serializeValue(value: any): any {
+  if (value === null || value === undefined) {
+    return value;
+  }
+
+  if (neo4j.isInt(value)) {
+    return (value as neo4j.Integer).toNumber();
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => serializeValue(item));
+  }
+
+  if (value && typeof value === 'object') {
+    if ('identity' in value && 'labels' in value && 'properties' in value) {
+      const node = value as neo4j.Node;
+      return {
+        id: node.identity.toString(),
+        labels: node.labels,
+        properties: serializeValue(node.properties)
+      };
+    }
+
+    if ('identity' in value && 'type' in value && 'start' in value && 'end' in value) {
+      const relationship = value as neo4j.Relationship;
+      return {
+        id: relationship.identity.toString(),
+        type: relationship.type,
+        start: relationship.start.toString(),
+        end: relationship.end.toString(),
+        properties: serializeValue(relationship.properties)
+      };
+    }
+
+    if (value instanceof Map) {
+      return Object.fromEntries(
+        Array.from(value.entries(), ([k, v]) => [k, serializeValue(v)])
+      );
+    }
+
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, serializeValue(v)])
+    );
+  }
+
+  return value;
+}

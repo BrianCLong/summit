@@ -21,6 +21,22 @@ This document captures the minimal API contracts added for the Sprint 14 vertica
     - `estimatedCost: Float`
     - `warnings: [String!]!`
     - `diffVsManual: JSON`
+- Query `naturalLanguageGraphSearch(input: NaturalLanguageGraphInput!): NaturalLanguageGraphResult!`
+  - Wraps the LangChain-backed Python processor to produce Cypher and execute the graph search in Neo4j.
+  - Input fields:
+    - `prompt: String!` — natural language question; sanitized before execution.
+    - `tenantId: String!`
+    - `limit: Int = 25`
+  - Response fields:
+    - `cypher: String!`
+    - `graphql: String`
+    - `params: JSON!`
+    - `warnings: [String!]!`
+    - `rows: [JSON!]!`
+  - Example prompts:
+    - `"Show people connected to Project Atlas"`
+    - `"List relationships between vendors and agencies for tenant-1"`
+    - `"Find organizations about the Falcon incident"`
 
 ## Service Endpoints (optional wiring)
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { PREVIEW_NL_QUERY } from '../../graphql/nlq.gql.js';
+import { useLazyQuery, useMutation } from '@apollo/client';
+import { PREVIEW_NL_QUERY, RUN_NL_GRAPH_SEARCH } from '../../graphql/nlq.gql.js';
 
 interface NLPreview {
   cypher: string;
@@ -19,8 +19,18 @@ export function NlqModal() {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [diff, setDiff] = useState<any | null>(null);
   const [tenantId, setTenantId] = useState<string>('default');
+  const [graphRows, setGraphRows] = useState<any[]>([]);
 
   const [preview, { loading, error }] = useMutation(PREVIEW_NL_QUERY);
+  const [runGraphSearch, { loading: searchLoading, error: searchError }] = useLazyQuery(
+    RUN_NL_GRAPH_SEARCH,
+    {
+      fetchPolicy: 'no-cache'
+    }
+  );
+
+  const sanitizePrompt = (value: string) =>
+    value.replace(/[^a-zA-Z0-9\s,\.\-_'?]/g, ' ').replace(/\s+/g, ' ').trim();
 
   const handlePreview = async () => {
     try {
@@ -29,6 +39,7 @@ export function NlqModal() {
       });
       const p: NLPreview | undefined = data?.previewNLQuery;
       if (!p) return;
+      setGraphRows([]);
       setCypher(p.cypher || '');
       setRows(p.estimatedRows ?? null);
       setCost(p.estimatedCost ?? null);
@@ -36,6 +47,45 @@ export function NlqModal() {
       setDiff(p.diffVsManual ?? null);
     } catch (e) {
       // Errors are shown minimally in UI; keep state as-is
+    }
+  };
+
+  const handleGraphSearch = async () => {
+    const sanitized = sanitizePrompt(nl);
+    if (!sanitized) {
+      setWarnings(['Enter a valid question to run a graph search.']);
+      return;
+    }
+
+    try {
+      const { data } = await runGraphSearch({
+        variables: {
+          input: {
+            prompt: sanitized,
+            tenantId,
+            limit: 25
+          }
+        }
+      });
+
+      const result = data?.naturalLanguageGraphSearch;
+      if (!result) {
+        return;
+      }
+
+      const warningMessages = [...(result.warnings ?? [])];
+      if (sanitized !== nl.trim()) {
+        warningMessages.push('Unsupported characters were removed before executing the search.');
+      }
+
+      setCypher(result.cypher || '');
+      setGraphRows(result.rows ?? []);
+      setWarnings(warningMessages);
+      setRows(null);
+      setCost(null);
+      setDiff(null);
+    } catch (e) {
+      setWarnings(['Failed to run the graph search.']);
     }
   };
 
@@ -63,12 +113,12 @@ export function NlqModal() {
           onChange={(e) => setManual(e.target.value)}
         />
       </div>
-      <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+      <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <button onClick={handlePreview} disabled={loading}>
           Preview
         </button>
-        <button onClick={handlePreview} disabled={loading || !cypher}>
-          Run in Sandbox
+        <button onClick={handleGraphSearch} disabled={searchLoading}>
+          Run Graph Search
         </button>
       </div>
       {cypher && (
@@ -87,6 +137,12 @@ export function NlqModal() {
               </ul>
             </div>
           ) : null}
+          {graphRows.length ? (
+            <div aria-label="graph-results" style={{ marginTop: 12 }}>
+              <strong>Graph Results</strong>
+              <pre>{JSON.stringify(graphRows, null, 2)}</pre>
+            </div>
+          ) : null}
           {diff ? (
             <details>
               <summary>Diff vs Manual</summary>
@@ -94,6 +150,9 @@ export function NlqModal() {
             </details>
           ) : null}
           {error ? <p style={{ color: 'crimson' }}>Error: {(error as any)?.message}</p> : null}
+          {searchError ? (
+            <p style={{ color: 'crimson' }}>Graph Search Error: {(searchError as any)?.message}</p>
+          ) : null}
         </div>
       )}
     </div>

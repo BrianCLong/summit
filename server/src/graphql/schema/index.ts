@@ -13,6 +13,26 @@ const { aiTypeDefs } = aiModule as { aiTypeDefs: any };
 const { annotationsTypeDefs } = annotationsModule as { annotationsTypeDefs: any };
 const graphragTypes = (graphragTypesModule as any).default || graphragTypesModule;
 
+const nlqTypeDefs = gql`
+  input NaturalLanguageGraphInput {
+    prompt: String!
+    tenantId: String!
+    limit: Int = 25
+  }
+
+  type NaturalLanguageGraphResult {
+    cypher: String!
+    graphql: String
+    params: JSON!
+    warnings: [String!]!
+    rows: [JSON!]!
+  }
+
+  extend type Query {
+    naturalLanguageGraphSearch(input: NaturalLanguageGraphInput!): NaturalLanguageGraphResult!
+  }
+`;
+
 const base = gql`
   scalar JSON
   scalar DateTime
@@ -39,6 +59,7 @@ export const typeDefs = [
   aiTypeDefs,
   annotationsTypeDefs,
   crystalTypeDefs,
+  nlqTypeDefs,
 ];
 
 export default typeDefs;
