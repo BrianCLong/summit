@@ -23,11 +23,39 @@ const typeDefs = gql`
 
     # Enqueues a request for AI to analyze an entity
     requestAIAnalysis(entityId: ID!): AIRequestResult!
+
+    # Exports graph query results as CSV or JSON
+    exportGraphData(input: GraphExportInput!): GraphExportPayload!
   }
 
   type AIRequestResult {
     ok: Boolean!
     requestId: ID
+  }
+
+  enum GraphExportFormat {
+    CSV
+    JSON
+  }
+
+  enum GraphDataSource {
+    NEO4J
+    POSTGRES
+  }
+
+  input GraphExportInput {
+    query: String!
+    parameters: JSON
+    format: GraphExportFormat!
+    dataSource: GraphDataSource = NEO4J
+  }
+
+  type GraphExportPayload {
+    filename: String!
+    contentType: String!
+    content: String!
+    contentEncoding: String!
+    recordCount: Int!
   }
 `;
 

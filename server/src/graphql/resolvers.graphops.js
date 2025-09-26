@@ -6,6 +6,7 @@ const TagService = require('../services/TagService');
 const { enqueueAIRequest } = require('../services/AIQueueService');
 const { metrics } = require('../monitoring/metrics');
 const { NeighborhoodCache } = require('../services/neighborhood-cache.js');
+const GraphExportService = require('../services/GraphExportService');
 
 const expandSchema = Joi.object({
   entityId: Joi.string().trim().min(1).required(),
@@ -29,6 +30,15 @@ const tagSchema = Joi.object({
 
 const aiSchema = Joi.object({
   entityId: Joi.string().trim().min(1).required(),
+});
+
+const exportSchema = Joi.object({
+  query: Joi.string().trim().min(5).required(),
+  parameters: Joi.alternatives()
+    .try(Joi.object().unknown(true), Joi.array().items(Joi.any()))
+    .default({}),
+  format: Joi.string().valid('CSV', 'JSON').required(),
+  dataSource: Joi.string().valid('NEO4J', 'POSTGRES').default('NEO4J'),
 });
 
 function ensureRole(user, allowedRoles = []) {
@@ -253,6 +263,62 @@ const resolvers = {
         logger.error('deleteTag error', { err: e, traceId: tId });
         const err = new Error('DELETE_TAG_FAILED');
         err.code = 'DELETE_TAG_FAILED';
+        err.details = e.message;
+        err.traceId = tId;
+        throw err;
+      }
+    },
+
+    exportGraphData: async (_, args, { user, logger }) => {
+      const start = Date.now();
+      const tId = traceId();
+      ensureRole(user, ['ANALYST', 'ADMIN']);
+
+      const { value, error } = exportSchema.validate(args.input || args, {
+        stripUnknown: true,
+      });
+      if (error) {
+        const err = new Error(`Invalid input: ${error.message}`);
+        err.code = 'BAD_USER_INPUT';
+        err.traceId = tId;
+        throw err;
+      }
+
+      const redis = getRedisClient();
+      if (redis) {
+        try {
+          const rlKey = `rl:graph-export:${user?.id || 'anon'}`;
+          const count = await redis.incr(rlKey);
+          if (count === 1) {
+            await redis.expire(rlKey, 60);
+          }
+          const max = Number(process.env.GRAPH_EXPORT_LIMIT_PER_MINUTE) || 20;
+          if (count > max) {
+            const err = new Error('Rate limit exceeded');
+            err.code = 'RATE_LIMITED';
+            err.traceId = tId;
+            throw err;
+          }
+        } catch (rateErr) {
+          if (rateErr && rateErr.code === 'RATE_LIMITED') {
+            throw rateErr;
+          }
+          /* Intentionally empty */
+        }
+      }
+
+      try {
+        const result = await GraphExportService.exportGraphData({
+          ...value,
+          user,
+          traceId: tId,
+        });
+        metrics.resolverLatencyMs.labels('exportGraphData').observe(Date.now() - start);
+        return result;
+      } catch (e) {
+        logger.error('exportGraphData error', { err: e, traceId: tId });
+        const err = new Error('GRAPH_EXPORT_FAILED');
+        err.code = 'GRAPH_EXPORT_FAILED';
         err.details = e.message;
         err.traceId = tId;
         throw err;
