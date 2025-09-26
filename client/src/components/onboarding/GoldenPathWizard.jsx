@@ -69,6 +69,8 @@ import {
 } from '@mui/icons-material';
 import { useMutation, useQuery } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
+import { useFeatureTour } from '../../features/onboarding/FeatureTourProvider.tsx';
+import { ingestWizardSteps, INGEST_WIZARD_TOUR_KEY } from '../../features/onboarding/tourSteps.tsx';
 
 // GraphQL operations (would be imported from actual files)
 const CREATE_INVESTIGATION = `
@@ -162,6 +164,15 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
   const [showHelp, setShowHelp] = useState(false);
 
   const navigate = useNavigate();
+  const { startTour, resetTour, progress } = useFeatureTour();
+  const tourProgress = progress[INGEST_WIZARD_TOUR_KEY];
+
+  const handleStartTour = () => {
+    if (tourProgress?.completed) {
+      resetTour(INGEST_WIZARD_TOUR_KEY);
+    }
+    startTour(INGEST_WIZARD_TOUR_KEY, ingestWizardSteps);
+  };
 
   // GraphQL mutations
   const [createInvestigation] = useMutation(CREATE_INVESTIGATION);
@@ -624,35 +635,53 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth aria-labelledby="ingest-wizard-heading">
+      <DialogTitle id="ingest-wizard-heading" data-tour-id="ingest-wizard-title">
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">IntelGraph Quick Start</Typography>
           <Box display="flex" gap={1}>
+            <Tooltip
+              title={tourProgress?.completed ? 'Replay guided tour' : 'Start guided tour'}
+              placement="bottom"
+            >
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={handleStartTour}
+                data-tour-id="ingest-wizard-tour-button"
+                aria-label={
+                  tourProgress?.completed ? 'Replay ingest wizard tour' : 'Start ingest wizard tour'
+                }
+              >
+                {tourProgress?.completed ? 'Replay tour' : 'Guided tour'}
+              </Button>
+            </Tooltip>
             <Tooltip title="Use demo data">
               <Button
                 size="small"
                 variant={useDemo ? 'contained' : 'outlined'}
                 onClick={() => setUseDemo(!useDemo)}
+                data-tour-id="ingest-wizard-demo-toggle"
+                aria-pressed={useDemo}
               >
                 Demo Mode
               </Button>
             </Tooltip>
             <Tooltip title="Skip tutorial">
-              <IconButton onClick={handleSkip} size="small">
+              <IconButton onClick={handleSkip} size="small" aria-label="Skip tutorial">
                 <SkipIcon />
               </IconButton>
             </Tooltip>
-            <IconButton onClick={onClose} size="small">
+            <IconButton onClick={onClose} size="small" aria-label="Close wizard">
               <CloseIcon />
             </IconButton>
           </Box>
         </Box>
       </DialogTitle>
 
-      <DialogContent>
+      <DialogContent aria-live="polite">
         <Box mb={3}>
-          <Typography variant="body2" color="textSecondary" paragraph>
+          <Typography variant="body2" color="textSecondary" paragraph role="status">
             Welcome to IntelGraph! This 5-step wizard will guide you through creating your first
             investigation, adding data, and running AI analysis. Estimated time: 5-15 minutes.
           </Typography>
@@ -661,6 +690,8 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
             variant="determinate"
             value={(activeStep / (steps.length - 1)) * 100}
             sx={{ mb: 2 }}
+            data-tour-id="ingest-wizard-progress"
+            aria-label="Wizard progress"
           />
         </Box>
 
@@ -681,8 +712,8 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
               >
                 {step.label}
               </StepLabel>
-              <StepContent>
-                <Typography variant="body2" color="textSecondary" paragraph>
+              <StepContent data-tour-id="ingest-wizard-action">
+                <Typography variant="body2" color="textSecondary" paragraph role="status">
                   {step.description}
                 </Typography>
                 {getStepContent(index)}
