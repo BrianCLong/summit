@@ -1,5 +1,6 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ElementDefinition } from 'cytoscape';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import type { ElementDefinition } from 'cytoscape';
 
 export interface GraphDataState {
   nodes: ElementDefinition[];

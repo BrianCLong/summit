@@ -2,3 +2,5 @@ build/
 dist/
 coverage/
 node_modules/
+docs-site/
+tmp/
