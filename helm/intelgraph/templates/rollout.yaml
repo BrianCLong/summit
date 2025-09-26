@@ -1,4 +1,4 @@
-# Argo Rollouts Blue/Green Deployment for Zero-Downtime Upgrades
+# Argo Rollouts Canary Deployment for Zero-Downtime Upgrades
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -10,36 +10,48 @@ metadata:
 spec:
   replicas: {{ .Values.conductor.replicas | default 3 }}
   strategy:
-    blueGreen:
-      activeService: conductor-active
-      previewService: conductor-preview
-      autoPromotionEnabled: {{ .Values.rollout.autoPromotionEnabled | default false }}
+    canary:
+      stableService: conductor-active
+      canaryService: conductor-preview
+      maxSurge: {{ .Values.rollout.canary.maxSurge | default 1 }}
+      maxUnavailable: {{ .Values.rollout.canary.maxUnavailable | default 0 }}
       scaleDownDelaySeconds: {{ .Values.rollout.scaleDownDelaySeconds | default 30 }}
-      prePromotionAnalysis:
-        templates:
-        - templateName: success-rate
-        args:
-        - name: service-name
-          value: conductor-preview
-        - name: prometheus-server
-          value: {{ .Values.monitoring.prometheus.server | default "prometheus-server.monitoring.svc.cluster.local" }}
-      postPromotionAnalysis:
-        templates:
-        - templateName: success-rate
-        args:
-        - name: service-name
-          value: conductor-active
-        - name: prometheus-server
-          value: {{ .Values.monitoring.prometheus.server | default "prometheus-server.monitoring.svc.cluster.local" }}
-      previewReplicaCount: {{ .Values.conductor.previewReplicas | default 1 }}
-      {{- if .Values.rollout.tests.enabled }}
-      prePromotionAnalysis:
-        templates:
-        - templateName: smoke-tests
-        args:
-        - name: service-name
-          value: conductor-preview
-      {{- end }}
+      steps:
+      - setWeight: {{ .Values.rollout.canary.initialWeight | default 10 }}
+      - pause:
+          duration: {{ .Values.rollout.canary.initialPause | default "5m" }}
+      - analysis:
+          templates:
+          - templateName: success-rate
+            args:
+            - name: service-name
+              value: conductor-preview
+            - name: prometheus-server
+              value: {{ .Values.monitoring.prometheus.server | default "prometheus-server.monitoring.svc.cluster.local" }}
+          {{- if .Values.rollout.tests.enabled }}
+          - templateName: smoke-tests
+            args:
+            - name: service-name
+              value: conductor-preview
+          {{- end }}
+      - setWeight: {{ .Values.rollout.canary.secondWeight | default 50 }}
+      - pause:
+          duration: {{ .Values.rollout.canary.secondPause | default "10m" }}
+      - analysis:
+          templates:
+          - templateName: success-rate
+            args:
+            - name: service-name
+              value: conductor-preview
+            - name: prometheus-server
+              value: {{ .Values.monitoring.prometheus.server | default "prometheus-server.monitoring.svc.cluster.local" }}
+          {{- if .Values.rollout.tests.enabled }}
+          - templateName: smoke-tests
+            args:
+            - name: service-name
+              value: conductor-preview
+          {{- end }}
+  progressDeadlineSeconds: {{ .Values.rollout.progressDeadlineSeconds | default 600 }}
   selector:
     matchLabels:
       app: conductor
@@ -96,7 +108,7 @@ spec:
         - name: AUDIT_BUCKET
           value: {{ .Values.audit.bucket }}
         - name: ROLLOUT_CANARY_ENABLED
-          value: "true"
+          value: "{{ .Values.rollout.enabled | default true }}"
         livenessProbe:
           httpGet:
             path: /health
@@ -257,7 +269,7 @@ spec:
                   - conductor
               topologyKey: kubernetes.io/hostname
 ---
-# Blue/Green Services
+# Canary Services
 apiVersion: v1
 kind: Service
 metadata:
@@ -314,40 +326,40 @@ spec:
   - name: prometheus-server
   metrics:
   - name: success-rate
-    interval: 30s
-    count: 5
-    successCondition: result[0] >= 0.95
-    failureCondition: result[0] < 0.90
+    interval: {{ .Values.rollout.metrics.interval | default "30s" }}
+    count: {{ .Values.rollout.metrics.count | default 5 }}
+    successCondition: {{ .Values.rollout.metrics.successRate.successCondition | default "result[0] >= 0.95" }}
+    failureCondition: {{ .Values.rollout.metrics.successRate.failureCondition | default "result[0] < 0.90" }}
     provider:
       prometheus:
         address: "http://{{`{{.args.prometheus-server}}`}}:9090"
         query: |
           sum(
             rate(http_requests_total{service="{{`{{.args.service-name}}`}}", code!~"5.."}[2m])
-          ) / 
+          ) /
           sum(
             rate(http_requests_total{service="{{`{{.args.service-name}}`}}"}[2m])
           )
   - name: error-rate
-    interval: 30s
-    count: 5
-    successCondition: result[0] <= 0.05
-    failureCondition: result[0] > 0.10
+    interval: {{ .Values.rollout.metrics.interval | default "30s" }}
+    count: {{ .Values.rollout.metrics.count | default 5 }}
+    successCondition: {{ .Values.rollout.metrics.errorRate.successCondition | default "result[0] <= 0.05" }}
+    failureCondition: {{ .Values.rollout.metrics.errorRate.failureCondition | default "result[0] > 0.10" }}
     provider:
       prometheus:
         address: "http://{{`{{.args.prometheus-server}}`}}:9090"
         query: |
           sum(
             rate(http_requests_total{service="{{`{{.args.service-name}}`}}", code=~"5.."}[2m])
-          ) / 
+          ) /
           sum(
             rate(http_requests_total{service="{{`{{.args.service-name}}`}}"}[2m])
           )
   - name: response-time-p95
-    interval: 30s
-    count: 5
-    successCondition: result[0] <= 2000
-    failureCondition: result[0] > 5000
+    interval: {{ .Values.rollout.metrics.interval | default "30s" }}
+    count: {{ .Values.rollout.metrics.count | default 5 }}
+    successCondition: {{ .Values.rollout.metrics.latency.successCondition | default "result[0] <= 2000" }}
+    failureCondition: {{ .Values.rollout.metrics.latency.failureCondition | default "result[0] > 5000" }}
     provider:
       prometheus:
         address: "http://{{`{{.args.prometheus-server}}`}}:9090"
