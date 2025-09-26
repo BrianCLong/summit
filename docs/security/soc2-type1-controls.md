@@ -5,3 +5,4 @@
 | Access            | Least privilege RBAC reviewed     | access-review.pdf           |
 | Change Management | GitHub workflows and code reviews | release-ga.yml              |
 | Incident Response | On-call runbooks and alerts       | docs/runbooks/support-l1.md |
+| Audit Logging     | GraphQL export gated by RBAC with signed CSV/JSON outputs | graphql-export-audit-logs.md |

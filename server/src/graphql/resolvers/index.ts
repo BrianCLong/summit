@@ -6,6 +6,7 @@ import entityResolvers from './entity';
 import relationshipResolvers from './relationship';
 import userResolvers from './user';
 import investigationResolvers from './investigation';
+import { auditExportResolvers } from './audit-export.js';
 import { WargameResolver } from '../../resolvers/WargameResolver.js'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { SafeMutationsResolvers } from '../resolvers/safe-mutations.js';
 import { triggerN8nFlow } from '../../integrations/n8n.js';
@@ -44,6 +45,7 @@ const resolvers = {
     ...entityResolvers.Query,
     ...userResolvers.Query,
     ...investigationResolvers.Query,
+    ...auditExportResolvers.Query,
 
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY (temporarily disabled due to schema mismatch)
     // getCrisisTelemetry: wargameResolver.getCrisisTelemetry.bind(wargameResolver),
