@@ -11,3 +11,15 @@ export const PREVIEW_NL_QUERY = gql`
     }
   }
 `;
+
+export const RUN_NL_GRAPH_SEARCH = gql`
+  query NaturalLanguageGraphSearch($input: NaturalLanguageGraphInput!) {
+    naturalLanguageGraphSearch(input: $input) {
+      cypher
+      graphql
+      params
+      warnings
+      rows
+    }
+  }
+`;
