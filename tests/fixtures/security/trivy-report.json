@@ -1,0 +1,93 @@
+{
+  "SchemaVersion": "2.0.2",
+  "ArtifactName": "summit-app:latest",
+  "ArtifactType": "container_image",
+  "Summary": {
+    "Critical": 0,
+    "High": 0,
+    "Medium": 1,
+    "Low": 2,
+    "Unknown": 0
+  },
+  "Results": [
+    {
+      "Target": "summit-app:latest (alpine 3.19)",
+      "Class": "os-pkgs",
+      "Type": "alpine",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2025-1234",
+          "PkgName": "openssl",
+          "InstalledVersion": "3.1.2-r0",
+          "FixedVersion": "3.1.3-r0",
+          "Severity": "MEDIUM",
+          "Title": "OpenSSL timing side-channel hardening",
+          "Description": "Patch strengthens constant-time operations for JWT signing keys.",
+          "References": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-1234",
+            "SOC2:CC6.7",
+            "FedRAMP:SC-12",
+            "GDPR:32"
+          ]
+        }
+      ]
+    },
+    {
+      "Target": "summit-config/policies/rbac.rego",
+      "Class": "config",
+      "Type": "rego",
+      "Misconfigurations": [
+        {
+          "ID": "OPA-RBAC-001",
+          "Type": "authorization",
+          "Title": "RBAC policy enforces least privilege",
+          "Description": "OPA policy denies cross-tenant access and requires clearance for TS data.",
+          "Severity": "LOW",
+          "CauseMetadata": {
+            "Resource": "intelgraph.authz",
+            "Annotation": "OPA policy simulation" 
+          },
+          "Resolution": "Validated with Conftest",
+          "References": [
+            "SOC2:CC6.1",
+            "FedRAMP:AC-6",
+            "GDPR:25"
+          ]
+        }
+      ]
+    },
+    {
+      "Target": "summit-infra/terraform/state",
+      "Class": "config",
+      "Type": "iac",
+      "Misconfigurations": [
+        {
+          "ID": "ENCRYPTION-AT-REST",
+          "Type": "encryption",
+          "Title": "Storage encryption enforced",
+          "Description": "S3 and RDS storage resources enforce AES-256 server-side encryption.",
+          "Severity": "LOW",
+          "Resolution": "Maintain CMK rotation",
+          "References": [
+            "SOC2:CC1.1",
+            "FedRAMP:SC-28",
+            "GDPR:5(1)(f)"
+          ]
+        },
+        {
+          "ID": "TLS-STRICT",
+          "Type": "transport",
+          "Title": "TLS 1.2 minimum enforced",
+          "Description": "Load balancer requires TLS 1.2+ and modern cipher suites.",
+          "Severity": "LOW",
+          "Resolution": "Monitor AWS ELB security policy",
+          "References": [
+            "SOC2:CC7.1",
+            "FedRAMP:SC-13",
+            "GDPR:32"
+          ]
+        }
+      ]
+    }
+  ]
+}
