@@ -8,6 +8,32 @@ const typeDefs = gql`
     tags: [String!]!
   }
 
+  input GraphCsvImportInput {
+    nodesCsv: String
+    relationshipsCsv: String
+    delimiter: String
+    batchSize: Int
+    dryRun: Boolean
+  }
+
+  type GraphCsvImportSummary {
+    processed: Int!
+    imported: Int!
+  }
+
+  type GraphCsvImportError {
+    code: String!
+    message: String!
+    row: Int
+  }
+
+  type GraphCsvImportResult {
+    success: Boolean!
+    nodes: GraphCsvImportSummary!
+    relationships: GraphCsvImportSummary!
+    errors: [GraphCsvImportError!]
+  }
+
   extend type Mutation {
     # Expands neighbors around a given entity with role-based limits
     expandNeighbors(entityId: ID!, limit: Int): Graph
@@ -23,6 +49,9 @@ const typeDefs = gql`
 
     # Enqueues a request for AI to analyze an entity
     requestAIAnalysis(entityId: ID!): AIRequestResult!
+
+    # Imports graph data into Neo4j from CSV payloads
+    importGraphCsv(input: GraphCsvImportInput!): GraphCsvImportResult!
   }
 
   type AIRequestResult {
