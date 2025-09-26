@@ -186,6 +186,41 @@ class GNNService {
     });
   }
 
+  async exportOptimizedModel(modelId, options = {}) {
+    const {
+      formats = ['onnx'],
+      quantization = undefined,
+      sampleSize = 32,
+      exportName = undefined,
+      token = '',
+    } = options;
+
+    const payload = {
+      formats,
+      sample_size: sampleSize,
+    };
+
+    if (quantization) payload.quantization = quantization;
+    if (exportName) payload.export_name = exportName;
+
+    const response = await fetch(`${this.mlServiceUrl}/models/${modelId}/export`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+      body: JSON.stringify(payload),
+      timeout: this.defaultTimeout,
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(`Model export failed (${response.status}): ${detail}`);
+    }
+
+    return response.json();
+  }
+
   /**
    * Perform graph classification using GNN
    */

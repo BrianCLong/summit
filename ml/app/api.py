@@ -9,6 +9,7 @@ import logging
 import asyncio
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 # Import our new ML components
 from .models.accelerated_gnn import GPUAcceleratedGNN, DistributedGNNTrainer, ModelOptimizer
@@ -21,8 +22,12 @@ from .quantum.quantum_ml import (
 from .training.distributed_trainer import DistributedTrainingManager, TrainingConfig
 from .monitoring.metrics import MLMetrics
 from .monitoring.health import HealthCheck
+from .edge.conversion import export_model_to_edge_formats, ExportError
 
 logger = logging.getLogger(__name__)
+
+EXPORT_ROOT = Path(os.getenv("ML_EXPORT_DIR", "runs/edge_exports"))
+EXPORT_ROOT.mkdir(parents=True, exist_ok=True)
 
 # Pydantic models for API
 class ModelConfig(BaseModel):
@@ -83,6 +88,35 @@ class InferenceResponse(BaseModel):
     confidence_scores: Optional[List[float]] = None
     device: str
 
+class ModelExportArtifact(BaseModel):
+    """Metadata describing a model export artifact."""
+
+    format: str
+    path: str
+    size_bytes: int
+    created_at: datetime
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ExportModelResponse(BaseModel):
+    """Response returned after exporting a model."""
+
+    model_id: str
+    status: str
+    artifacts: List[ModelExportArtifact]
+
+
+class ExportModelRequest(BaseModel):
+    """Request payload for exporting a model to edge formats."""
+
+    formats: List[str] = Field(..., description="Target export formats", min_items=1)
+    export_name: Optional[str] = Field(None, description="Override base filename for artifacts")
+    sample_size: int = Field(32, description="Number of synthetic nodes for tracing", ge=2, le=4096)
+    quantization: Optional[str] = Field(
+        None,
+        description="Optional post-export quantization strategy (int8, uint8, float16)",
+    )
+
 # Global state management
 class MLServiceState:
     def __init__(self):
@@ -99,6 +133,28 @@ class MLServiceState:
 
 # Global state instance
 ml_state = MLServiceState()
+
+
+def _get_model_device(model: torch.nn.Module) -> torch.device:
+    try:
+        first_param = next(model.parameters())
+        return first_param.device
+    except StopIteration:
+        return torch.device("cpu")
+
+
+def _synthesize_gnn_inputs(config: ModelConfig, sample_size: int) -> tuple[torch.Tensor, torch.Tensor]:
+    num_nodes = max(2, sample_size)
+    num_features = getattr(config, "num_node_features", 128)
+    x = torch.randn(num_nodes, num_features, dtype=torch.float32)
+    source = torch.arange(0, num_nodes - 1, dtype=torch.long)
+    target = torch.arange(1, num_nodes, dtype=torch.long)
+    if len(source) == 0:
+        edge_index = torch.zeros((2, 1), dtype=torch.long)
+    else:
+        edge_index = torch.stack([source, target])
+    return x, edge_index
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -483,12 +539,70 @@ async def optimize_model(model_id: str, request: OptimizationRequest):
         ml_state.models[model_id]["status"] = "optimized"
         
         logger.info(f"Model {model_id} optimized with {request.optimization_type}")
-        
+
         return {"message": f"Model optimized with {request.optimization_type}", "model_id": model_id}
-        
+
     except Exception as e:
         logger.error(f"Optimization failed for model {model_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Optimization failed: {str(e)}")
+
+
+@app.post("/models/{model_id}/export", response_model=ExportModelResponse)
+async def export_model(model_id: str, request: ExportModelRequest):
+    """Export a model into edge-friendly deployment formats."""
+
+    if model_id not in ml_state.models:
+        raise HTTPException(status_code=404, detail="Model not found")
+
+    model_record = ml_state.models[model_id]
+    model = model_record["model"]
+    config = model_record["config"]
+
+    export_name = request.export_name or f"{model_id}_edge"
+    export_dir = EXPORT_ROOT / model_id
+
+    original_device = _get_model_device(model)
+    logger.info(
+        "Exporting model %s to formats %s (quantization=%s)",
+        model_id,
+        request.formats,
+        request.quantization,
+    )
+
+    try:
+        model_cpu = model.to(torch.device("cpu"))
+        example_inputs = _synthesize_gnn_inputs(config, request.sample_size)
+        example_inputs = tuple(t.to(torch.device("cpu")) for t in example_inputs)
+
+        artifacts = export_model_to_edge_formats(
+            model_cpu,
+            example_inputs,
+            export_dir,
+            export_name,
+            request.formats,
+            dynamic_axes={"input_0": {0: "nodes"}, "input_1": {1: "edges"}},
+            quantization=request.quantization,
+        )
+    except ExportError as exc:
+        logger.error("Export failed for model %s: %s", model_id, exc)
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logger.exception("Unexpected error exporting model %s", model_id)
+        raise HTTPException(status_code=500, detail=f"Export failed: {exc}")
+    finally:
+        try:
+            model.to(original_device)
+        except Exception:
+            logger.warning("Failed to restore model %s to device %s", model_id, original_device)
+
+    artifact_dicts = [artifact.to_dict() for artifact in artifacts]
+    model_record.setdefault("exports", []).extend(artifact_dicts)
+
+    return ExportModelResponse(
+        model_id=model_id,
+        status="exported",
+        artifacts=[ModelExportArtifact(**artifact) for artifact in artifact_dicts],
+    )
 
 # Quantum computing endpoints
 @app.post("/quantum/optimize")
