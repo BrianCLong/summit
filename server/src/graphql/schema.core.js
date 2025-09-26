@@ -169,6 +169,27 @@ export const coreTypeDefs = gql`
     limit: Int = 100
   }
 
+  enum RateLimitScope {
+    TENANT
+    USER
+  }
+
+  type IngestionRateLimit {
+    scope: RateLimitScope!
+    scopeId: ID!
+    maxPerMinute: Int!
+    burst: Int!
+    updatedAt: DateTime!
+    updatedBy: String!
+  }
+
+  input IngestionRateLimitInput {
+    scope: RateLimitScope!
+    scopeId: ID!
+    maxPerMinute: Int!
+    burst: Int!
+  }
+
   # Extended Query operations
   extend type Query {
     # Entity queries
@@ -193,6 +214,10 @@ export const coreTypeDefs = gql`
 
     # Search across all entity types
     searchEntities(tenantId: String!, query: String!, kinds: [String!], limit: Int = 50): [Entity!]!
+
+    # Ingestion controls
+    ingestionRateLimit(scope: RateLimitScope!, scopeId: ID!): IngestionRateLimit
+    ingestionRateLimits(scope: RateLimitScope!): [IngestionRateLimit!]!
   }
 
   # Extended Mutation operations
@@ -214,6 +239,10 @@ export const coreTypeDefs = gql`
     # Bulk operations
     createEntitiesBatch(inputs: [EntityInput!]!, tenantId: String!): [Entity!]!
     createRelationshipsBatch(inputs: [RelationshipInput!]!, tenantId: String!): [Relationship!]!
+
+    # Ingestion rate limits
+    upsertIngestionRateLimit(input: IngestionRateLimitInput!): IngestionRateLimit!
+    deleteIngestionRateLimit(scope: RateLimitScope!, scopeId: ID!): Boolean!
   }
 
   # Real-time subscriptions for graph changes
