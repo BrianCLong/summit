@@ -42,6 +42,33 @@ type Community {
   members: [ID!]!
 }
 
+type AutoMLJob {
+  jobId: ID!
+  task: String!
+  status: String!
+  backend: String!
+  metric: String!
+  bestScore: Float!
+  bestModel: String!
+  durationSeconds: Float!
+  createdAt: String!
+  completedAt: String!
+  metrics: JSON
+}
+
+input AutoMLEntityExampleInput {
+  text: String!
+  label: String!
+}
+
+input EntityAutoMLInput {
+  examples: [AutoMLEntityExampleInput!]!
+  metric: String
+  backendPreference: String
+  maxRuntimeSeconds: Int
+  testSize: Float
+}
+
 extend type Query {
   aiJob(id: ID!): AIJob
   insights(status: String, kind: String): [Insight!]!
@@ -52,6 +79,7 @@ extend type Mutation {
   aiResolveEntities(records: [JSON!]!, threshold: Float, jobId: ID): AIJob!
   aiLinkPredict(graphSnapshotId: ID!, topK: Int, jobId: ID): AIJob!
   aiCommunityDetect(graphSnapshotId: ID!, jobId: ID): AIJob!
+  runEntityAutoML(input: EntityAutoMLInput!, authToken: String): AutoMLJob!
 
   approveInsight(id: ID!): Insight!
   rejectInsight(id: ID!, reason: String): Insight!

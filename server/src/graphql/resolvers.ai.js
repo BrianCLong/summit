@@ -2,9 +2,11 @@ const { getNeo4jDriver, getRedisClient, getPostgresPool } = require('../config/d
 import logger from '../utils/logger.js';
 const { PubSub } = require('graphql-subscriptions');
 const GNNService = require('../services/GNNService');
+const AutoMLService = require('../services/AutoMLService');
 
 const pubsub = new PubSub();
 const gnnService = new GNNService();
+const automlService = new AutoMLService();
 
 // Helper: fetch full Entity node by id (to satisfy non-null fields)
 async function loadEntitiesByIds(ids) {
@@ -317,6 +319,41 @@ const aiResolvers = {
         await session.close();
       }
       return { entityId, anomalyScore, reason: reason || 'Anomaly detected' };
+    },
+    async runEntityAutoML(_, { input, authToken }, { user }) {
+      if (!user) throw new Error('Not authenticated');
+
+      const payload = {
+        examples: (input.examples || []).map((example) => ({
+          text: example.text,
+          label: example.label,
+        })),
+        metric: input.metric || 'f1',
+        backendPreference: input.backendPreference,
+        maxRuntimeSeconds: input.maxRuntimeSeconds,
+        testSize: input.testSize,
+        token: authToken,
+      };
+
+      const response = await automlService.runEntityAutoML(payload);
+      if (!response.success) {
+        throw new Error(response.error || 'Unable to execute AutoML job');
+      }
+
+      const job = response.job || {};
+      return {
+        jobId: job.job_id,
+        task: job.task,
+        status: job.status,
+        backend: job.backend,
+        metric: job.metric,
+        bestScore: job.best_score,
+        bestModel: job.best_model,
+        durationSeconds: job.duration_seconds,
+        createdAt: job.created_at,
+        completedAt: job.completed_at,
+        metrics: job.metrics,
+      };
     },
   },
   Subscription: {
