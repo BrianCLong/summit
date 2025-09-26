@@ -23,6 +23,7 @@ export interface SearchFilters {
     max?: number;
   };
   custom?: Record<string, any>;
+  indices?: string[];
 }
 
 export interface SortOptions {

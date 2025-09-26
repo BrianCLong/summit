@@ -1,0 +1,72 @@
+{
+  "index_patterns": [
+    "graphql-query-logs*"
+  ],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1,
+      "refresh_interval": "30s",
+      "codec": "best_compression"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "traceId": { "type": "keyword" },
+        "spanId": { "type": "keyword" },
+        "durationMs": { "type": "float" },
+        "status": { "type": "keyword" },
+        "requestId": { "type": "keyword" },
+        "http": {
+          "properties": {
+            "method": { "type": "keyword" },
+            "path": { "type": "keyword" },
+            "userAgent": { "type": "keyword" },
+            "ip": { "type": "ip" }
+          }
+        },
+        "operation": {
+          "properties": {
+            "name": { "type": "keyword" },
+            "type": { "type": "keyword" },
+            "rootFields": { "type": "keyword" },
+            "document": {
+              "type": "text",
+              "fields": {
+                "raw": {
+                  "type": "keyword",
+                  "ignore_above": 512
+                }
+              }
+            }
+          }
+        },
+        "variables": {
+          "type": "flattened"
+        },
+        "user": {
+          "properties": {
+            "id": { "type": "keyword" },
+            "email": { "type": "keyword" },
+            "tenant": { "type": "keyword" },
+            "role": { "type": "keyword" }
+          }
+        },
+        "errors": {
+          "type": "nested",
+          "properties": {
+            "message": { "type": "text" },
+            "path": { "type": "keyword" },
+            "extensions": { "type": "flattened" }
+          }
+        }
+      }
+    }
+  },
+  "priority": 200,
+  "_meta": {
+    "description": "Index template for GraphQL query observability logs produced by the Summit api-server",
+    "owner": "observability"
+  }
+}
