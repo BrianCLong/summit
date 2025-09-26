@@ -3,6 +3,23 @@ global:
   tag: '2025.08.21+build.1'
   pullPolicy: Always
 
+  vault:
+    enabled: true
+    role: intelgraph-prod
+    secrets:
+      - name: app-env
+        path: secret/data/intelgraph/prod/api-gateway
+        destination: app.env
+        template: |
+          {{- with secret "secret/data/intelgraph/prod/api-gateway" -}}
+          POSTGRES_URI={{ .Data.data.postgres_uri }}
+          POSTGRES_USER={{ .Data.data.postgres_user }}
+          POSTGRES_PASSWORD={{ .Data.data.postgres_password }}
+          REDIS_URI={{ .Data.data.redis_uri }}
+          REDIS_PASSWORD={{ .Data.data.redis_password }}
+          API_TOKEN={{ .Data.data.api_token }}
+          {{- end }}
+
   ingress:
     host: intelgraph.mycorp.com
     annotations:
