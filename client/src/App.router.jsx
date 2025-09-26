@@ -77,6 +77,7 @@ import ClaimsViewer from './features/conductor/ClaimsViewer';
 import RetractionQueue from './features/conductor/RetractionQueue';
 import CostAdvisor from './features/conductor/CostAdvisor';
 import RunSearch from './features/conductor/RunSearch';
+import IngestWizardPage from './pages/IngestWizardPage';
 
 // Navigation items
 const navigationItems = [
@@ -647,6 +648,7 @@ function MainLayout() {
             <Route path="/conductor/retractions" element={<RetractionQueue />} />
             <Route path="/conductor/cost-advisor" element={<CostAdvisor />} />
             <Route path="/conductor/search" element={<RunSearch />} />
+            <Route path="/ingest/wizard" element={<IngestWizardPage />} />
             <Route path="/pipelines" element={<VisualPipelines />} />
             <Route path="/executors" element={<ExecutorsPage />} />
             <Route path="/observability" element={<ObservabilityPanel />} />

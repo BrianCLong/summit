@@ -1,0 +1,25 @@
+version: '3.9'
+
+services:
+  ui:
+    build:
+      context: ../client
+      dockerfile: Dockerfile.dev
+    environment:
+      VITE_API_URL: http://localhost:4000/graphql
+      VITE_HOST: 0.0.0.0
+      VITE_PORT: 3000
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000').then(()=>process.exit(0)).catch(()=>process.exit(1))"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped

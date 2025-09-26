@@ -6,6 +6,12 @@ export default defineConfig({
     alias: {
       '@app': path.resolve(__dirname, '../src'),
       '@ui': path.resolve(__dirname, './src'),
+      '@packages': path.resolve(__dirname, '../packages'),
+    },
+  },
+  server: {
+    fs: {
+      allow: ['..'],
     },
   },
 });
