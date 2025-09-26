@@ -29,7 +29,7 @@ spec:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
-    # Custom metrics for advanced scaling
+    # Custom metrics for advanced scaling via Prometheus Adapter
     - type: Pods
       pods:
         metric:
@@ -44,6 +44,30 @@ spec:
         target:
           type: AverageValue
           averageValue: "200"
+    # A2A Gateway success rate scaling
+    - type: Object
+      object:
+        metric:
+          name: mc_platform_a2a_success_rate
+        target:
+          type: Value
+          value: "95"
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: {{ include "agent-workbench.fullname" . }}
+    # Active tenants scaling
+    - type: Object
+      object:
+        metric:
+          name: mc_platform_active_tenants
+        target:
+          type: Value
+          value: "10"
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: {{ include "agent-workbench.fullname" . }}
   {{- with .Values.autoscaling.behavior }}
   behavior:
     {{- toYaml . | nindent 4 }}

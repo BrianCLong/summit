@@ -4,36 +4,37 @@ kind: ServiceMonitor
 metadata:
   name: {{ include "agent-workbench.fullname" . }}
   labels:
+    release: prometheus
     {{- include "agent-workbench.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- include "agent-workbench.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{ include "agent-workbench.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  namespaceSelector:
+    matchNames: [ {{ .Release.Namespace }} ]
   endpoints:
     - port: http
+      interval: 15s
       path: /metrics
-      interval: {{ .Values.serviceMonitor.interval | default "30s" }}
-      scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout | default "10s" }}
-      relabelings:
-        - sourceLabels: [__meta_kubernetes_pod_name]
-          targetLabel: instance
-        - sourceLabels: [__meta_kubernetes_pod_node_name]
-          targetLabel: node
-        - sourceLabels: [__meta_kubernetes_namespace]
-          targetLabel: namespace
-        - sourceLabels: [__meta_kubernetes_service_name]
-          targetLabel: service
       metricRelabelings:
-        # Drop verbose metrics to reduce cardinality
-        - sourceLabels: [__name__]
-          regex: 'go_.*'
-          action: drop
-        - sourceLabels: [__name__]
-          regex: 'process_.*'
-          action: drop
-        # Relabel MC platform specific metrics
+        - action: drop
+          regex: 'go_.+'
+          sourceLabels: [ __name__ ]
+        - action: drop
+          regex: 'process_.+'
+          sourceLabels: [ __name__ ]
+        - action: replace
+          targetLabel: job
+          replacement: mc
+        # Relabel MC platform specific metrics for custom HPA
         - sourceLabels: [__name__]
           regex: 'mc_platform_(.*)'
           targetLabel: __name__
           replacement: 'mc_${1}'
+        # Add service and namespace labels for custom metrics
+        - sourceLabels: [__meta_kubernetes_service_name]
+          targetLabel: service
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
 {{- end }}

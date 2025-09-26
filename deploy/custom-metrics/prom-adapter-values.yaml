@@ -1,0 +1,92 @@
+# Prometheus Adapter Values for MC Platform Custom Metrics
+prometheus:
+  url: http://prometheus-server.monitoring.svc.cluster.local
+  port: 80
+
+rules:
+  default: false
+  custom:
+    # MC Platform Request Rate (QPS)
+    - seriesQuery: 'mc_requests_total{namespace!="",service!=""}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          service: {resource: "service"}
+      name:
+        matches: "^mc_requests_total"
+        as: "mc_platform_requests_per_second"
+      metricsQuery: 'rate(<<.Series>>{<<.LabelMatchers>>}[2m])'
+
+    # MC Platform P95 Latency
+    - seriesQuery: 'mc_request_duration_seconds{namespace!="",service!="",quantile="0.95"}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          service: {resource: "service"}
+      name:
+        matches: "^mc_request_duration_seconds"
+        as: "mc_platform_p95_latency_ms"
+      metricsQuery: '<<.Series>>{<<.LabelMatchers>>} * 1000'
+
+    # MC Platform A2A Gateway Success Rate
+    - seriesQuery: 'mc_a2a_requests_total{namespace!="",service!=""}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          service: {resource: "service"}
+      name:
+        matches: "^mc_a2a_requests_total"
+        as: "mc_platform_a2a_success_rate"
+      metricsQuery: 'rate(<<.Series>>{<<.LabelMatchers>>,status="success"}[5m]) / rate(<<.Series>>{<<.LabelMatchers>>}[5m]) * 100'
+
+    # MC Platform Active Tenants
+    - seriesQuery: 'mc_active_tenants{namespace!="",service!=""}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          service: {resource: "service"}
+      name:
+        matches: "^mc_active_tenants"
+        as: "mc_platform_active_tenants"
+      metricsQuery: '<<.Series>>{<<.LabelMatchers>>}'
+
+# Resource rules for per-pod metrics
+resourceRules:
+  cpu:
+    containerQuery: sum(rate(container_cpu_usage_seconds_total{<<.LabelMatchers>>,container!="POD",container!="",pod!=""}[3m])) by (<<.GroupBy>>)
+    containerLabel: container
+  memory:
+    containerQuery: sum(container_memory_working_set_bytes{<<.LabelMatchers>>,container!="POD",container!="",pod!=""}) by (<<.GroupBy>>)
+    containerLabel: container
+  window: 3m
+
+# Logging and debugging
+logLevel: 6
+
+# Security and resource configuration
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 443
+
+# TLS configuration
+tls:
+  enable: true
+  ca: ""
+  key: ""
+  certificate: ""
+
+# Replica count
+replicas: 1
