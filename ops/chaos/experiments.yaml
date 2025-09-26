@@ -113,6 +113,43 @@ experiments:
       - cache_hit_rate: 0.7
       - service_restart: true
 
+  - name: "ml_gpu_node_drain"
+    description: "Validate autoscaler recovery when a GPU node is drained"
+    type: "infrastructure"
+    target:
+      service: "intelgraph-ml-service"
+      resource: "gpu-node"
+    fault_injection:
+      type: "node-drain"
+      selector: "accelerator=nvidia"
+      duration: "10m"
+    expected_behavior:
+      - hpa_scale_out: true
+      - inference_queue_backlog: "<80"
+      - gpu_workload_rebalanced: true
+    success_criteria:
+      - autoscale_recovery_time: "<5m"
+      - error_rate: "<0.05"
+      - pending_pods: "<3"
+
+  - name: "ml_pod_failure_under_load"
+    description: "Ensure HPA replaces ML pods quickly during sustained load"
+    type: "service_failure"
+    target:
+      service: "intelgraph-ml-service"
+      percentage: 50
+    fault_injection:
+      type: "pod_kill"
+      duration: "2m"
+    expected_behavior:
+      - hpa_scale_out: true
+      - request_queue_shed: false
+      - inference_latency_spike: "<2x"
+    success_criteria:
+      - replacement_time: "<3m"
+      - rps_sustained: ">80%"
+      - gpu_utilization_recovered: true
+
   # Network resilience
   - name: "inter_service_network_partition"
     description: "Test service mesh resilience during network partitions"

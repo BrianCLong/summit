@@ -1,6 +1,26 @@
 global:
   scrape_interval: 15s
+rule_files:
+  - prometheus-rule-slo.yaml
+  - ml-autoscaling-rules.yaml
 scrape_configs:
   - job_name: otel-collector
     static_configs:
       - targets: ['otel-collector:9464']
+  - job_name: ml-engine
+    metrics_path: /metrics
+    kubernetes_sd_configs:
+      - role: endpoints
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app]
+        action: keep
+        regex: intelgraph-ml
+      - source_labels: [__meta_kubernetes_service_label_component]
+        action: keep
+        regex: ml-service
+      - source_labels: [__meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: http
+  - job_name: gpu-telemetry
+    static_configs:
+      - targets: ['dcgm-exporter:9400']

@@ -26,6 +26,55 @@ hpa:
   enabled: true
   minReplicas: 1
   maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: External
+      external:
+        metric:
+          name: dcgm_gpu_utilization
+          selector:
+            matchLabels:
+              component: gpu
+              job: gpu-telemetry
+        target:
+          type: AverageValue
+          averageValue: "70"
+    - type: External
+      external:
+        metric:
+          name: ml_inference_requests_per_second
+          selector:
+            matchLabels:
+              app: intelgraph-ml
+              component: ml-service
+        target:
+          type: AverageValue
+          averageValue: "40"
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      selectPolicy: Max
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+        - type: Pods
+          value: 4
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 180
+      selectPolicy: Max
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 120
+  # Legacy knobs retained for backward compatibility with chart consumers that
+  # have not migrated to the declarative metrics block above.
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
   targetGPUUtilizationPercentage: null

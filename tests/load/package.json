@@ -8,7 +8,8 @@
     "test:soak": "k6 run --duration 14400s soak-test.js",
     "test:capacity": "k6 run capacity-planning.js",
     "test:load:ci": "k6 run --quiet --vus 10 --duration 60s maestro-load-test.js",
-    "test:smoke": "k6 run --vus 1 --duration 30s maestro-load-test.js"
+    "test:smoke": "k6 run --vus 1 --duration 30s maestro-load-test.js",
+    "test:ml-autoscale": "k6 run tests/load/ml-inference.k6.js"
   },
   "devDependencies": {
     "k6": "^0.48.0"
