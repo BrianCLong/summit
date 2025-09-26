@@ -10,6 +10,10 @@ spec:
     name: {{ include "ai-service.fullname" . }}
   minReplicas: {{ .Values.hpa.minReplicas }}
   maxReplicas: {{ .Values.hpa.maxReplicas }}
+  {{- if .Values.hpa.metrics }}
+  metrics:
+{{- toYaml .Values.hpa.metrics | nindent 4 }}
+  {{- else }}
   metrics:
     - type: Resource
       resource:
@@ -34,5 +38,10 @@ spec:
           type: AverageValue
           averageValue: {{ .Values.hpa.targetGPUUtilizationPercentage }}
     {{- end }}
+  {{- end }}
+  {{- if .Values.hpa.behavior }}
+  behavior:
+{{- toYaml .Values.hpa.behavior | nindent 4 }}
+  {{- end }}
 {{- end }}
 

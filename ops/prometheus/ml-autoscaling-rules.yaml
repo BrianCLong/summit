@@ -1,0 +1,42 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ml-autoscaling-rules
+  labels:
+    app.kubernetes.io/name: intelgraph-ml
+    app.kubernetes.io/component: autoscaling
+spec:
+  groups:
+    - name: ml.autoscaling
+      interval: 30s
+      rules:
+        - record: ml_engine:gpu_utilization:avg
+          expr: avg(dcgm_gpu_utilization{job="gpu-telemetry", pod=~"intelgraph-ml-service-.*"})
+        - record: ml_engine:inference_rps:rate1m
+          expr: sum(rate(ml_inference_requests_total{job="ml-engine"}[1m]))
+        - record: ml_engine:inference_queue_depth:avg
+          expr: avg(ml_inference_queue_depth{job="ml-engine"})
+        - alert: MLInferenceBacklogGrowing
+          expr: ml_engine:inference_queue_depth:avg > 100
+          for: 5m
+          labels:
+            severity: warning
+            team: ml-platform
+          annotations:
+            summary: 'Inference backlog increasing for intelgraph-ml-service'
+            description: |
+              Queue depth has been above 100 for more than 5 minutes which indicates
+              the autoscaler is not draining the inference backlog fast enough.
+              Inspect HPA status, GPU utilization and recent deploys.
+        - alert: MLGpuStarvation
+          expr: ml_engine:inference_rps:rate1m > 25 and ml_engine:gpu_utilization:avg < 30
+          for: 5m
+          labels:
+            severity: critical
+            team: ml-platform
+          annotations:
+            summary: 'GPU utilization is low while inference traffic remains high'
+            description: |
+              Inference traffic sustained above 25 RPS but GPUs are below 30% utilized.
+              Check Prometheus adapter configuration and DCGM exporter health to ensure
+              GPU metrics are being ingested for autoscaling decisions.
