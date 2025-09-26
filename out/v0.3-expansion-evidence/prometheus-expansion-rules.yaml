@@ -1,0 +1,35 @@
+groups:
+- interval: 30s
+  name: api-slo-expansion
+  rules:
+  - expr: histogram_quantile(0.95, sum(rate(http_server_duration_seconds_bucket{job="gateway"}[5m]))
+      by (le, tenant_id))
+    record: service:request_duration_seconds:p95
+  - alert: ApiP95TooHigh
+    annotations:
+      runbook: Runbooks/API-Latency.md
+      summary: Read p95 over 350ms for {{ $labels.tenant_id }}
+    expr: service:request_duration_seconds:p95 > 0.35
+    for: 10m
+    labels:
+      severity: warning
+      slo: reads
+- name: db-replication-expansion
+  rules:
+  - alert: ReplicaLagHigh
+    annotations:
+      summary: "Replica lag >60s \u2014 tripwire for {{ $labels.tenant }}"
+    expr: pg_replica_lag_seconds{tenant=~"TENANT_004|TENANT_005"} > 60
+    for: 5m
+    labels:
+      severity: critical
+- name: autonomy-pilot
+  rules:
+  - alert: AutonomyCompensationHigh
+    annotations:
+      summary: Autonomy compensation rate >0.5% on TENANT_001
+    expr: (sum(rate(autonomy_compensation_events_total{tenant="TENANT_001"}[1h]))
+      / sum(rate(autonomy_operations_total{tenant="TENANT_001"}[1h]))) > 0.005
+    for: 15m
+    labels:
+      severity: warning

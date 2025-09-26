@@ -1,0 +1,6 @@
+{
+  "claims": [
+    { "text": "GraphQL read p95 <= 350ms.", "citations": [{ "url": "https://grafana.example/api/dashboards/uid/abc", "quote": "p95 320ms" }] },
+    { "text": "PII retention 30d.", "citations": [{ "url": "https://policy.example/retention", "quote": "PII retained for 30 days" }] }
+  ]
+}

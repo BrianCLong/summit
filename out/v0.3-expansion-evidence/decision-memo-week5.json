@@ -1,0 +1,42 @@
+{
+  "memo_metadata": {
+    "version": "v0.3.1-mc",
+    "generated_at": "2025-09-25T17:17:44.089334",
+    "expansion_period": "Sep 29 - Nov 9, 2025",
+    "decision_date": "2025-11-09"
+  },
+  "kpi_table": {
+    "autonomy_success_rate": 0.9994,
+    "compensation_rate": 0.0032,
+    "error_budget_burn": 0.15,
+    "residency_incidents": 0,
+    "cost_vs_guardrail": 0.67
+  },
+  "wave_summary": {
+    "wave_a_status": "SUCCESS - TENANT_004 operational",
+    "wave_b_status": "SUCCESS - TENANT_005 operational",
+    "pilot_status": "SUCCESS - 99.94% autonomy rate achieved",
+    "p1_incidents": 0,
+    "rollbacks": 0
+  },
+  "recommendation": {
+    "decision": "PROCEED",
+    "rationale": "All success criteria met; zero P1 incidents; autonomy pilot exceeding targets",
+    "next_actions": [
+      "Expand Tier-3 autonomy to TENANT_002",
+      "Increase autonomy scope to include computed aggregations",
+      "Schedule +2 additional tenant assessment (TENANT_006, TENANT_007)"
+    ]
+  },
+  "policy_changes": {
+    "cache_strategy": "Extend warming profile to all new tenants",
+    "regional_routing": "Enable cross-region failover for all GA tenants",
+    "autonomy_thresholds": "Reduce compensation threshold to 0.3% for expanded scope"
+  },
+  "signoffs": {
+    "mc_platform": "APPROVED",
+    "sre_team": "APPROVED",
+    "security_privacy": "APPROVED_WITH_CONDITIONS",
+    "pm_exec": "PENDING"
+  }
+}

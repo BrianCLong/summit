@@ -481,3 +481,25 @@ Please note that this project is released with a [Code of Conduct](CODE_OF_CONDU
 **Thank you for contributing to IntelGraph!** 🚀
 
 *Together, we're building the future of intelligence analysis.*
+
+## Post‑Merge Checks (Main)
+After a PR merges to `main`, maintainers verify:
+1. **CI Evidence artifact** `ci-evidence-<sha>` is present and archived.
+2. **Grounding SARIF** uploaded with 0 new warnings, or triaged with labels.
+3. **Canary Gate** job passed with no tripwires.
+
+## Threshold Tuning Policy
+- `TRAJ_MIN_PASS_RATE`: start **0.95** → raise to **0.98** once the suite has ≥ 25 stable cases.
+- `GROUNDING_MIN_SCORE`: start **0.90** → raise to **0.95** after two green weeks.
+- `GROUNDING_MAX_GAPS`: keep at **0**. Temporary exceptions require a feature flag and issue link.
+
+## RACI for CI Gates
+- **MC** — owns thresholds & evidence policy, approves changes.
+- **SRE** — owns `canary-gate.js` inputs (SLO/Cost evidence), monitors lag & error‑budget.
+- **Security** — monitors SARIF, tunes grounding cases.
+- **QA** — curates trajectory golden‑set growth and flake triage.
+
+## PR Checklist (Contributor)
+- [ ] Added/updated trajectory YAMLs and/or grounding cases as needed.
+- [ ] `npm run validate:trajectory` and `npm run validate:grounding` green locally.
+- [ ] If touching canary‑relevant code, included a short note on expected SLO/cost impact.

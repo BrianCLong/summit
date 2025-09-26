@@ -1,0 +1,456 @@
+[
+  {
+    "timestamp": "2025-09-25T17:17:24.030843",
+    "phase": "preflight",
+    "action": "tenant_readiness_TENANT_004",
+    "status": "PASS",
+    "details": {
+      "tenant_id": "TENANT_004",
+      "passed": true,
+      "metrics": {
+        "slo_score": 0.9956,
+        "persisted_compliance": 0.995,
+        "residency_coverage": 98.7,
+        "error_budget_remaining": 0.78,
+        "blockers": []
+      },
+      "command": "./tenant_readiness_check.sh --tenant TENANT_004 --window 14d --slo 0.994"
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:24.030871",
+    "phase": "preflight",
+    "action": "tenant_readiness_TENANT_005",
+    "status": "PASS",
+    "details": {
+      "tenant_id": "TENANT_005",
+      "passed": true,
+      "metrics": {
+        "slo_score": 0.9956,
+        "persisted_compliance": 0.998,
+        "residency_coverage": 99.1,
+        "error_budget_remaining": 0.84,
+        "blockers": []
+      },
+      "command": "./tenant_readiness_check.sh --tenant TENANT_005 --window 14d --slo 0.994"
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:24.030894",
+    "phase": "preflight",
+    "action": "cache_warm_validation",
+    "status": "PASS",
+    "details": {
+      "tenant_id": "TENANT_004",
+      "hit_rate": 0.943,
+      "warm_keys": 15847,
+      "mv_refresh_count": 23,
+      "baseline_p95_ms": 187.3,
+      "warming_strategy": "top_n_mv_refresh"
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:24.032439",
+    "phase": "preflight",
+    "action": "monitoring_config",
+    "status": "PASS",
+    "details": {
+      "rules_loaded": true,
+      "prometheus_rule_count": 3,
+      "grafana_dashboard_id": "mc-expansion-monitoring",
+      "alert_rules": 12,
+      "recording_rules": 8
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:24.032515",
+    "phase": "preflight",
+    "action": "opa_validation",
+    "status": "PASS",
+    "details": {
+      "total_tests": 4,
+      "passed_tests": 4,
+      "all_tests_passed": true,
+      "test_results": [
+        {
+          "policy": "residency_enforcement",
+          "input": {
+            "tenant": "TENANT_004",
+            "region": "us-east-1"
+          },
+          "expected": "allow"
+        },
+        {
+          "policy": "residency_enforcement",
+          "input": {
+            "tenant": "TENANT_005",
+            "region": "eu-west-1"
+          },
+          "expected": "allow"
+        },
+        {
+          "policy": "purpose_limitation",
+          "input": {
+            "purpose": "investigation",
+            "data_class": "pii"
+          },
+          "expected": "allow"
+        },
+        {
+          "policy": "purpose_limitation",
+          "input": {
+            "purpose": "marketing",
+            "data_class": "pii"
+          },
+          "expected": "deny"
+        }
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:24.032541",
+    "phase": "preflight",
+    "action": "canary_staging",
+    "status": "PASS",
+    "details": {
+      "staged": true,
+      "canary_percentages": [
+        2,
+        10,
+        25,
+        50,
+        100
+      ],
+      "soak_duration_minutes": 15,
+      "regions": [
+        "us-east-1",
+        "us-west-2",
+        "eu-west-1"
+      ],
+      "toggle_mechanism": "feature_flags"
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:24.032563",
+    "phase": "preflight",
+    "action": "overall_decision",
+    "status": "GO",
+    "details": {
+      "tenant_004_readiness": true,
+      "tenant_005_readiness": true,
+      "cache_warm_plan": true,
+      "prometheus_rules": true,
+      "opa_policies": true,
+      "canary_toggle_staged": true
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:24.032603",
+    "phase": "wave_a",
+    "action": "staging_rollout",
+    "status": "SUCCESS",
+    "details": {
+      "stage": "staging",
+      "percentage": 0,
+      "status": "SUCCESS",
+      "start_time": "2025-09-25T17:17:24.032599",
+      "metrics": {
+        "p95_latency_ms": 187.3,
+        "error_rate": 0.0023,
+        "throughput_rps": 2847,
+        "cache_hit_rate": 0.943
+      },
+      "evidence_artifacts": [
+        "logs-TENANT_004-staging.json",
+        "traces-TENANT_004-staging.json",
+        "slo-snapshot-TENANT_004-staging.json"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:24.032636",
+    "phase": "wave_a",
+    "action": "canary_2_rollout",
+    "status": "SUCCESS",
+    "details": {
+      "stage": "canary_2",
+      "percentage": 2,
+      "status": "SUCCESS",
+      "start_time": "2025-09-25T17:17:24.032633",
+      "metrics": {
+        "p95_latency_ms": 188.3,
+        "error_rate": 0.0023,
+        "throughput_rps": 2877,
+        "cache_hit_rate": 0.941
+      },
+      "evidence_artifacts": [
+        "logs-TENANT_004-canary_2.json",
+        "traces-TENANT_004-canary_2.json",
+        "slo-snapshot-TENANT_004-canary_2.json"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:26.036849",
+    "phase": "wave_a",
+    "action": "canary_10_rollout",
+    "status": "SUCCESS",
+    "details": {
+      "stage": "canary_10",
+      "percentage": 10,
+      "status": "SUCCESS",
+      "start_time": "2025-09-25T17:17:26.036819",
+      "metrics": {
+        "p95_latency_ms": 192.3,
+        "error_rate": 0.0023,
+        "throughput_rps": 2997,
+        "cache_hit_rate": 0.9329999999999999
+      },
+      "evidence_artifacts": [
+        "logs-TENANT_004-canary_10.json",
+        "traces-TENANT_004-canary_10.json",
+        "slo-snapshot-TENANT_004-canary_10.json"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:28.043336",
+    "phase": "wave_a",
+    "action": "canary_25_rollout",
+    "status": "SUCCESS",
+    "details": {
+      "stage": "canary_25",
+      "percentage": 25,
+      "status": "SUCCESS",
+      "start_time": "2025-09-25T17:17:28.043300",
+      "metrics": {
+        "p95_latency_ms": 199.8,
+        "error_rate": 0.0023,
+        "throughput_rps": 3222,
+        "cache_hit_rate": 0.9179999999999999
+      },
+      "evidence_artifacts": [
+        "logs-TENANT_004-canary_25.json",
+        "traces-TENANT_004-canary_25.json",
+        "slo-snapshot-TENANT_004-canary_25.json"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:30.048674",
+    "phase": "wave_a",
+    "action": "canary_50_rollout",
+    "status": "SUCCESS",
+    "details": {
+      "stage": "canary_50",
+      "percentage": 50,
+      "status": "SUCCESS",
+      "start_time": "2025-09-25T17:17:30.048662",
+      "metrics": {
+        "p95_latency_ms": 212.3,
+        "error_rate": 0.0023,
+        "throughput_rps": 3597,
+        "cache_hit_rate": 0.8929999999999999
+      },
+      "evidence_artifacts": [
+        "logs-TENANT_004-canary_50.json",
+        "traces-TENANT_004-canary_50.json",
+        "slo-snapshot-TENANT_004-canary_50.json"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:32.049277",
+    "phase": "wave_a",
+    "action": "production_rollout",
+    "status": "SUCCESS",
+    "details": {
+      "stage": "production",
+      "percentage": 100,
+      "status": "SUCCESS",
+      "start_time": "2025-09-25T17:17:32.049261",
+      "metrics": {
+        "p95_latency_ms": 237.3,
+        "error_rate": 0.0023,
+        "throughput_rps": 4347,
+        "cache_hit_rate": 0.843
+      },
+      "evidence_artifacts": [
+        "logs-TENANT_004-production.json",
+        "traces-TENANT_004-production.json",
+        "slo-snapshot-TENANT_004-production.json"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:34.057270",
+    "phase": "pilot_start",
+    "action": "autonomy_enable",
+    "status": "SUCCESS",
+    "details": {
+      "phase": "autonomy_pilot_start",
+      "tenant_id": "TENANT_001",
+      "enable_result": {
+        "status": "SUCCESS",
+        "tier": "T3_SCOPED",
+        "scope": "read-only-derived",
+        "hitl_override": true,
+        "simulation_enabled": true
+      },
+      "simulation_result": {
+        "status": "SUCCESS",
+        "duration": "60m",
+        "operations_simulated": 1847,
+        "simulation_delta": 0.0032,
+        "confidence_score": 0.987,
+        "false_negative_rate": 0.0008
+      },
+      "enactment_result": {
+        "status": "SUCCESS",
+        "approval_token": "PILOT_APPROVED_001",
+        "operations_enacted": 1623,
+        "autonomy_rate": 0.9994,
+        "compensation_events": 1
+      },
+      "weekly_review_scheduled": true
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:34.058064",
+    "phase": "wave_a",
+    "action": "staging_rollout",
+    "status": "SUCCESS",
+    "details": {
+      "stage": "staging",
+      "percentage": 0,
+      "status": "SUCCESS",
+      "start_time": "2025-09-25T17:17:34.058058",
+      "metrics": {
+        "p95_latency_ms": 187.3,
+        "error_rate": 0.0023,
+        "throughput_rps": 2847,
+        "cache_hit_rate": 0.943
+      },
+      "evidence_artifacts": [
+        "logs-TENANT_005-staging.json",
+        "traces-TENANT_005-staging.json",
+        "slo-snapshot-TENANT_005-staging.json"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:34.058225",
+    "phase": "wave_a",
+    "action": "canary_2_rollout",
+    "status": "SUCCESS",
+    "details": {
+      "stage": "canary_2",
+      "percentage": 2,
+      "status": "SUCCESS",
+      "start_time": "2025-09-25T17:17:34.058220",
+      "metrics": {
+        "p95_latency_ms": 188.3,
+        "error_rate": 0.0023,
+        "throughput_rps": 2877,
+        "cache_hit_rate": 0.941
+      },
+      "evidence_artifacts": [
+        "logs-TENANT_005-canary_2.json",
+        "traces-TENANT_005-canary_2.json",
+        "slo-snapshot-TENANT_005-canary_2.json"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:36.067376",
+    "phase": "wave_a",
+    "action": "canary_10_rollout",
+    "status": "SUCCESS",
+    "details": {
+      "stage": "canary_10",
+      "percentage": 10,
+      "status": "SUCCESS",
+      "start_time": "2025-09-25T17:17:36.067188",
+      "metrics": {
+        "p95_latency_ms": 192.3,
+        "error_rate": 0.0023,
+        "throughput_rps": 2997,
+        "cache_hit_rate": 0.9329999999999999
+      },
+      "evidence_artifacts": [
+        "logs-TENANT_005-canary_10.json",
+        "traces-TENANT_005-canary_10.json",
+        "slo-snapshot-TENANT_005-canary_10.json"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:38.069773",
+    "phase": "wave_a",
+    "action": "canary_25_rollout",
+    "status": "SUCCESS",
+    "details": {
+      "stage": "canary_25",
+      "percentage": 25,
+      "status": "SUCCESS",
+      "start_time": "2025-09-25T17:17:38.069754",
+      "metrics": {
+        "p95_latency_ms": 199.8,
+        "error_rate": 0.0023,
+        "throughput_rps": 3222,
+        "cache_hit_rate": 0.9179999999999999
+      },
+      "evidence_artifacts": [
+        "logs-TENANT_005-canary_25.json",
+        "traces-TENANT_005-canary_25.json",
+        "slo-snapshot-TENANT_005-canary_25.json"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:40.076295",
+    "phase": "wave_a",
+    "action": "canary_50_rollout",
+    "status": "SUCCESS",
+    "details": {
+      "stage": "canary_50",
+      "percentage": 50,
+      "status": "SUCCESS",
+      "start_time": "2025-09-25T17:17:40.075991",
+      "metrics": {
+        "p95_latency_ms": 212.3,
+        "error_rate": 0.0023,
+        "throughput_rps": 3597,
+        "cache_hit_rate": 0.8929999999999999
+      },
+      "evidence_artifacts": [
+        "logs-TENANT_005-canary_50.json",
+        "traces-TENANT_005-canary_50.json",
+        "slo-snapshot-TENANT_005-canary_50.json"
+      ]
+    }
+  },
+  {
+    "timestamp": "2025-09-25T17:17:42.081952",
+    "phase": "wave_a",
+    "action": "production_rollout",
+    "status": "SUCCESS",
+    "details": {
+      "stage": "production",
+      "percentage": 100,
+      "status": "SUCCESS",
+      "start_time": "2025-09-25T17:17:42.081932",
+      "metrics": {
+        "p95_latency_ms": 237.3,
+        "error_rate": 0.0023,
+        "throughput_rps": 4347,
+        "cache_hit_rate": 0.843
+      },
+      "evidence_artifacts": [
+        "logs-TENANT_005-production.json",
+        "traces-TENANT_005-production.json",
+        "slo-snapshot-TENANT_005-production.json"
+      ]
+    }
+  }
+]

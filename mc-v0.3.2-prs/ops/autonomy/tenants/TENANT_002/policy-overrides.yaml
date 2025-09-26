@@ -1,0 +1,41 @@
+autonomy_tier: T3_SCOPED
+enabled_scopes:
+- read_only
+- computed
+scopes:
+  computed:
+    exclusions:
+    - data_export
+    - retention_policies
+    - cross_tenant_operations
+    - direct_data_modification
+    hitl_required:
+    - schema_changes
+    - index_operations
+    - bulk_updates
+    write_targets:
+    - materialized_views
+    - denorm_counters
+    - aggregation_cache
+simulation_parameters:
+  confidence_threshold: 0.95
+  false_negative_max: 0.001
+  operations_sample: 10000
+tenant_id: TENANT_002
+tripwires:
+  compensation_rate:
+    action: pause_and_analyze
+    threshold: 0.005
+    window_seconds: 86400
+  residency_violation:
+    action: immediate_halt_page_dpo
+    threshold: 0
+    window_seconds: 1
+  slo_fast_burn:
+    action: halt_and_revert_t2
+    threshold: 0.02
+    window_seconds: 3600
+  slo_slow_burn:
+    action: halt_and_revert_t2
+    threshold: 0.1
+    window_seconds: 21600

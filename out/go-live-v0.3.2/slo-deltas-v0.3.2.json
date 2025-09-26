@@ -1,0 +1,37 @@
+{
+  "baseline_timestamp": "2025-09-24T17:54:33.782572",
+  "comparison_timestamp": "2025-09-25T17:54:45.802927",
+  "tenant_deltas": {
+    "TENANT_001": {
+      "p95_latency_delta_ms": -12.3,
+      "error_rate_delta": -0.0002,
+      "throughput_delta_percent": 3.4,
+      "slo_compliance_delta": 0.0012
+    },
+    "TENANT_002": {
+      "p95_latency_delta_ms": -8.7,
+      "error_rate_delta": -0.0001,
+      "throughput_delta_percent": 2.1,
+      "autonomy_rate": 0.9994,
+      "compensation_rate": 0.0032
+    },
+    "TENANT_004": {
+      "p95_latency_delta_ms": -15.2,
+      "error_rate_delta": -0.0003,
+      "throughput_delta_percent": 4.7,
+      "slo_compliance_delta": 0.0023
+    },
+    "TENANT_005": {
+      "p95_latency_delta_ms": -9.8,
+      "error_rate_delta": -0.0001,
+      "throughput_delta_percent": 3.8,
+      "slo_compliance_delta": 0.0018
+    }
+  },
+  "overall_impact": {
+    "avg_latency_improvement_ms": 11.5,
+    "error_rate_improvement": 0.00018,
+    "slo_compliance_improvement": 0.00183,
+    "cost_impact_percent": -2.1
+  }
+}

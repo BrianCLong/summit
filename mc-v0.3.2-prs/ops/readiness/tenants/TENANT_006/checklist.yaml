@@ -1,0 +1,68 @@
+cache_plan:
+  cache_hit_rate_target: 0.92
+  eviction_policy: lru_with_frequency
+  hot_key_ttl_seconds: 300
+  max_keys: 20000
+  warming_strategy: top_entities_first
+compliance_requirements:
+  audit_completeness: '>=0.999'
+  persisted_query_rate: '>=0.999'
+  privacy_blocks_expected: '>=0.995'
+  residency_violations_max: 0
+disaster_recovery:
+  backup_regions:
+  - us-central-1
+  dr_drill_frequency: monthly
+  enrollment_status: pending
+  rpo_target_minutes: 5
+  rto_target_minutes: 30
+query_budgets:
+  budget_enforcement: soft_limit_with_alerts
+  overage_action: throttle_with_notification
+  top_operations:
+  - daily_budget: 450000
+    p95_ms: 45
+    pqid: pq.getPersonById
+  - daily_budget: 280000
+    p95_ms: 120
+    pqid: pq.searchEntitiesByName
+  - daily_budget: 180000
+    p95_ms: 80
+    pqid: pq.getRelationships
+readiness_gates:
+  infrastructure:
+  - vpc_setup
+  - security_groups
+  - load_balancers
+  monitoring:
+  - prometheus_rules
+  - grafana_dashboards
+  - alerting
+  security:
+  - opa_policies
+  - network_policies
+  - sealed_secrets
+  testing:
+  - k6_scenarios
+  - chaos_experiments
+  - privacy_redteam
+residency_configuration:
+  adequacy_decisions:
+  - US-EU
+  - US-UK
+  cross_border_restrictions: []
+  data_residency_tags:
+  - us-east-1
+  - us-west-2
+  primary_regions:
+  - US
+tenant_metadata:
+  assessment_date: '2025-09-25T17:47:44.334521'
+  priority: medium
+  target_wave: C
+  tenant_id: TENANT_006
+traffic_profile:
+  daily_operations: 1200000
+  data_volume_gb: 34.7
+  peak_qps: 180
+  query_complexity_avg: 2.3

@@ -1,0 +1,23 @@
+{
+  "version": "v0.3.2-mc",
+  "source_artifact": "out/v0.3-capitalization/dr-drill-schedule-monthly.json",
+  "integration_notes": "Links existing DR drill schedule for tenant enrollment",
+  "new_tenants": [
+    "TENANT_006",
+    "TENANT_007"
+  ],
+  "schedule_updates": {
+    "TENANT_006": {
+      "next_drill": "2025-10-09T17:47:44.334521",
+      "drill_type": "comprehensive_failover",
+      "rpo_target": 5,
+      "rto_target": 30
+    },
+    "TENANT_007": {
+      "next_drill": "2025-10-16T17:47:44.334521",
+      "drill_type": "comprehensive_failover",
+      "rpo_target": 3,
+      "rto_target": 25
+    }
+  }
+}

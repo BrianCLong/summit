@@ -1,0 +1,77 @@
+{
+  "pilot_metadata": {
+    "version": "v0.3.1-mc",
+    "generated_at": "2025-09-25T16:17:25.219248",
+    "pilot_type": "tier_3_scoped_autonomy",
+    "pilot_tenant": "TENANT_001"
+  },
+  "pilot_configuration": {
+    "tenant_id": "TENANT_001",
+    "tier": "T3_scoped",
+    "scope": [
+      "read_only_derived_updates",
+      "cache_materialized_views",
+      "computed_aggregations"
+    ],
+    "hitl_override": true,
+    "simulation_enabled": true,
+    "approval_required": true,
+    "compensation_enabled": true,
+    "success_rate_target": 0.999,
+    "compensation_rate_max": 0.005,
+    "false_negative_max": 0.001
+  },
+  "scope_controls": {
+    "allowed_operations": [
+      "update_derived_entity_cache",
+      "refresh_materialized_view",
+      "recompute_aggregation_index"
+    ],
+    "forbidden_operations": [
+      "export_data",
+      "retention_policy_changes",
+      "cross_tenant_operations",
+      "direct_data_modification"
+    ],
+    "hitl_override_required": [
+      "any_export_operation",
+      "retention_modification",
+      "policy_change",
+      "cross_tenant_access"
+    ]
+  },
+  "simulation_framework": {
+    "shadow_environment": "enabled",
+    "counterfactual_validation": "mandatory",
+    "approval_token_required": true,
+    "evidence_collection": "comprehensive"
+  },
+  "success_criteria": {
+    "autonomy_success_rate_min": 99.9,
+    "compensation_rate_max": 0.5,
+    "false_negative_rate_max": 0.1,
+    "slo_regression_tolerance": 0.0,
+    "privacy_incident_tolerance": 0
+  },
+  "monitoring_framework": {
+    "real_time_metrics": [
+      "autonomy_decision_rate",
+      "compensation_trigger_rate",
+      "simulation_accuracy",
+      "hitl_override_frequency"
+    ],
+    "alert_thresholds": {
+      "error_budget_burn_fast": "2%/1h",
+      "error_budget_burn_slow": "10%/6h",
+      "risk_score_anomaly": "threshold_deviation",
+      "residency_denial_spike": "immediate_abort"
+    }
+  },
+  "operational_runbook": {
+    "enable_pilot": "mc autonomy set --tenant TENANT_001 --tier T3 --scope read-only --require-hitl true",
+    "run_simulation": "mc autonomy simulate --tenant TENANT_001 --op-set derived_updates --evidence out/sim.json",
+    "enact_with_approval": "mc autonomy enact --tenant TENANT_001 --approval-token $TOKEN --from-sim out/sim.json --evidence out/enact.json",
+    "compensate_if_needed": "mc autonomy compensate --tenant TENANT_001 --from-evidence out/enact.json",
+    "emergency_downgrade": "mc autonomy set --tenant TENANT_001 --tier T2"
+  }
+}

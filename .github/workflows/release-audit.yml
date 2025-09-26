@@ -1,0 +1,33 @@
+name: Release Audit
+on:
+  schedule: [{cron: "17 5 * * *"}]  # daily 05:17 UTC
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions: {contents: read}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5 # Using a standard action version
+        with:
+          python-version: '3.x'
+      - name: Install gh CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+      - name: Verify latest release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST_TAG=$(gh release list --limit 1 --json tagName -q '.[0].tagName')
+          python3 tools/verify_release.py --tag "$LATEST_TAG" --require 
+            reports/junit-trajectory.xml 
+            reports/trajectory-report.json 
+            reports/trajectory-summary.md 
+            reports/grounding.sarif 
+            reports/grounding-report.json 
+            reports/grounding-summary.md 
+            sbom.json 
+            evidence/release/manifest.json 
+            evidence/release/SHA256SUMS

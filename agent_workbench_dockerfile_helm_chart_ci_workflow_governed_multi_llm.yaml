@@ -1,0 +1,306 @@
+# ────────────────────────────────────────────────────────────────────────────────
+# Dockerfile
+# ────────────────────────────────────────────────────────────────────────────────
+---
+kind: file
+name: Dockerfile
+content: |
+  # syntax=docker/dockerfile:1.7-labs
+  FROM node:20-alpine AS deps
+  WORKDIR /app
+  COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+  RUN --mount=type=cache,target=/root/.npm npm ci || npm install
+
+  FROM node:20-alpine AS build
+  WORKDIR /app
+  COPY --from=deps /app/node_modules ./node_modules
+  COPY . .
+  RUN npm run build
+
+  FROM node:20-alpine AS runtime
+  ENV NODE_ENV=production \
+      PERSISTED_ONLY=true \
+      PORT=8080
+  WORKDIR /srv
+  RUN addgroup -g 10001 app && adduser -D -u 10001 -G app app
+  COPY --from=build /app/dist ./dist
+  COPY package.json ./
+  COPY config ./config
+  RUN npm prune --omit=dev
+  USER app
+  EXPOSE 8080
+  HEALTHCHECK --interval=30s --timeout=5s --start-period=30s CMD wget -qO- http://127.0.0.1:8080/graphql?query=%7Bhealth%7D || exit 1
+  CMD ["node","dist/server.js"]
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Helm Chart (chart: agent-workbench)
+# ────────────────────────────────────────────────────────────────────────────────
+---
+kind: file
+name: charts/agent-workbench/Chart.yaml
+content: |
+  apiVersion: v2
+  name: agent-workbench
+  description: Governed Agent Workbench backend (persisted-only, policy, audit, multi-LLM)
+  type: application
+  version: 0.1.0
+  appVersion: "0.1.0"
+---
+kind: file
+name: charts/agent-workbench/values.yaml
+content: |
+  image:
+    repository: ghcr.io/your-org/agent-workbench
+    tag: "0.1.0"
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  service:
+    type: ClusterIP
+    port: 8080
+  env:
+    PERSISTED_ONLY: "true"
+    PQ_INDEX_PATH: "/config/persisted-queries.json"
+    OPA_URL: "http://opa:8181/v1/data/intelgraph/allow"
+    DEFAULT_OPENAI_MODEL: "gpt-4o-mini"
+    DEFAULT_ANTHROPIC_MODEL: "claude-3-5-sonnet-20240620"
+  secrets:
+    OPENAI_API_KEY: ""
+    ANTHROPIC_API_KEY: ""
+    GENERIC_BASE_URL: ""
+    GENERIC_API_KEY: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  ingress:
+    enabled: false
+    className: ""
+    hosts:
+      - host: agent.your-domain.tld
+        paths:
+          - path: /
+            pathType: Prefix
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+---
+kind: file
+name: charts/agent-workbench/templates/deployment.yaml
+content: |
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: {{ include "agent-workbench.fullname" . }}
+    labels: { app.kubernetes.io/name: {{ include "agent-workbench.name" . }}, app.kubernetes.io/instance: {{ .Release.Name }} }
+  spec:
+    replicas: {{ .Values.replicaCount }}
+    selector:
+      matchLabels: { app.kubernetes.io/name: {{ include "agent-workbench.name" . }}, app.kubernetes.io/instance: {{ .Release.Name }} }
+    template:
+      metadata:
+        labels: { app.kubernetes.io/name: {{ include "agent-workbench.name" . }}, app.kubernetes.io/instance: {{ .Release.Name }} }
+      spec:
+        containers:
+          - name: backend
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            ports:
+              - containerPort: 8080
+            env:
+              - name: PERSISTED_ONLY
+                value: {{ .Values.env.PERSISTED_ONLY | quote }}
+              - name: PQ_INDEX_PATH
+                value: {{ .Values.env.PQ_INDEX_PATH | quote }}
+              - name: OPA_URL
+                value: {{ .Values.env.OPA_URL | quote }}
+              - name: DEFAULT_OPENAI_MODEL
+                value: {{ .Values.env.DEFAULT_OPENAI_MODEL | quote }}
+              - name: DEFAULT_ANTHROPIC_MODEL
+                value: {{ .Values.env.DEFAULT_ANTHROPIC_MODEL | quote }}
+              - name: OPENAI_API_KEY
+                valueFrom:
+                  secretKeyRef: { name: {{ include "agent-workbench.fullname" . }}-secrets, key: OPENAI_API_KEY }
+              - name: ANTHROPIC_API_KEY
+                valueFrom:
+                  secretKeyRef: { name: {{ include "agent-workbench.fullname" . }}-secrets, key: ANTHROPIC_API_KEY }
+              - name: GENERIC_BASE_URL
+                valueFrom:
+                  secretKeyRef: { name: {{ include "agent-workbench.fullname" . }}-secrets, key: GENERIC_BASE_URL }
+              - name: GENERIC_API_KEY
+                valueFrom:
+                  secretKeyRef: { name: {{ include "agent-workbench.fullname" . }}-secrets, key: GENERIC_API_KEY }
+            volumeMounts:
+              - name: config
+                mountPath: /config
+            readinessProbe:
+              httpGet: { path: /graphql?query=%7Bhealth%7D, port: 8080 }
+              initialDelaySeconds: 10
+              periodSeconds: 10
+            livenessProbe:
+              httpGet: { path: /graphql?query=%7Bhealth%7D, port: 8080 }
+              initialDelaySeconds: 20
+              periodSeconds: 20
+            resources:
+              {{- toYaml .Values.resources | nindent 14 }}
+        volumes:
+          - name: config
+            configMap: { name: {{ include "agent-workbench.fullname" . }}-config }
+---
+kind: file
+name: charts/agent-workbench/templates/service.yaml
+content: |
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: {{ include "agent-workbench.fullname" . }}
+  spec:
+    type: {{ .Values.service.type }}
+    selector: { app.kubernetes.io/name: {{ include "agent-workbench.name" . }}, app.kubernetes.io/instance: {{ .Release.Name }} }
+    ports:
+      - port: {{ .Values.service.port }}
+        targetPort: 8080
+        protocol: TCP
+        name: http
+---
+kind: file
+name: charts/agent-workbench/templates/ingress.yaml
+content: |
+  {{- if .Values.ingress.enabled }}
+  apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: {{ include "agent-workbench.fullname" . }}
+    annotations:
+      kubernetes.io/ingress.class: {{ .Values.ingress.className | quote }}
+  spec:
+    rules:
+      {{- range .Values.ingress.hosts }}
+      - host: {{ .host }}
+        http:
+          paths:
+            {{- range .paths }}
+            - path: {{ .path }}
+              pathType: {{ .pathType }}
+              backend:
+                service:
+                  name: {{ include "agent-workbench.fullname" $ }}
+                  port: { number: {{ $.Values.service.port }} }
+            {{- end }}
+      {{- end }}
+  {{- end }}
+---
+kind: file
+name: charts/agent-workbench/templates/secret.yaml
+content: |
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: {{ include "agent-workbench.fullname" . }}-secrets
+  type: Opaque
+  stringData:
+    OPENAI_API_KEY: {{ .Values.secrets.OPENAI_API_KEY | quote }}
+    ANTHROPIC_API_KEY: {{ .Values.secrets.ANTHROPIC_API_KEY | quote }}
+    GENERIC_BASE_URL: {{ .Values.secrets.GENERIC_BASE_URL | quote }}
+    GENERIC_API_KEY: {{ .Values.secrets.GENERIC_API_KEY | quote }}
+---
+kind: file
+name: charts/agent-workbench/templates/configmap.yaml
+content: |
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: {{ include "agent-workbench.fullname" . }}-config
+  data:
+    persisted-queries.json: |
+      { "pq.getPersonById": { "id": "pq.getPersonById", "name": "Get Person By Id", "operation": "query" } }
+---
+kind: file
+name: .github/workflows/ci.yml
+content: |
+  name: ci-cd
+  on:
+    push: { branches: [ main ] }
+    pull_request:
+  jobs:
+    build-test-scan:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-node@v4
+          with: { node-version: 20 }
+        - run: npm ci
+        - run: npm run lint --if-present
+        - run: npm test --if-present
+        - name: Type check
+          run: npx tsc -p . --noEmit
+        - name: Policy simulation (OPA)
+          env:
+            OPA_URL: ${{ secrets.OPA_URL }}
+          run: |
+            node -e "(async()=>{const f=await fetch(process.env.OPA_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({input:{tenantId:'TENANT_001',purpose:'investigation',residency:'US',pqid:'pq.getPersonById'}})}); if(!(await f.json()).result){process.exit(1)}})()"
+        - name: Verify persisted query index
+          run: |
+            test -f config/persisted-queries.json || (echo "missing PQ index" && exit 1)
+            node -e "const j=require('./config/persisted-queries.json'); if(!j||!Object.keys(j).length) process.exit(2)"
+        - name: Build Docker image
+          run: docker build -t ghcr.io/${{ github.repository }}:${{ github.sha }} .
+        - name: Push image
+          if: github.ref == 'refs/heads/main'
+          uses: docker/login-action@v3
+          with:
+            registry: ghcr.io
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+        - name: Docker push
+          if: github.ref == 'refs/heads/main'
+          run: docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
+    deploy:
+      if: github.ref == 'refs/heads/main'
+      needs: build-test-scan
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - name: Setup kubectl
+          uses: azure/setup-kubectl@v4
+          with: { version: 'v1.29.4' }
+        - name: Helm setup
+          uses: azure/setup-helm@v4
+          with: { version: 'v3.14.4' }
+        - name: Kubeconfig
+          run: echo "${KUBECONFIG_DATA}" | base64 -d > $HOME/.kube/config
+          env: { KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_B64 }} }
+        - name: Helm upgrade --install
+          run: |
+            helm upgrade --install agent-workbench charts/agent-workbench \
+              --set image.repository=ghcr.io/${{ github.repository }} \
+              --set image.tag=${{ github.sha }} \
+              --set secrets.OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+              --set secrets.ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }} \
+              --set secrets.GENERIC_BASE_URL=${{ secrets.GENERIC_BASE_URL }} \
+              --set secrets.GENERIC_API_KEY=${{ secrets.GENERIC_API_KEY }}
+        - name: Post-deploy health check
+          run: |
+            kubectl rollout status deploy/agent-workbench -n default --timeout=180s
+            kubectl run tmp-curl --image=curlimages/curl -i --rm --restart=Never --command -- curl -fsS http://agent-workbench.default.svc.cluster.local:8080/graphql?query=%7Bhealth%7D
+---
+kind: file
+name: README-INTEGRATIONS.md
+content: |
+  # Integrations Cheat‑Sheet (Zed, Claude Code CLI, GH Speckit)
+
+  ## Zed (zed.dev) — preferred dev UX
+  - Transparent agent work: see every diff and command; not over‑complex like GH Speckit when retrofitting.
+  - Use Zed for day‑to‑day coding; route agent calls through the Workbench so requests are persisted‑only, policy‑simulated, and audit‑logged.
+
+  ## Claude Code CLI (CC) — best CLI agent for Anthropic/GLM endpoints
+  - Great for CLI‑first workflows; pairs perfectly with Workbench policies.
+  - Example piping CC → Workbench `/api/workbench/chat` included in backend README.
+
+  ## GH Speckit — superb for greenfield; tricky for large retrofits
+  - Spin up new repos/projects fast (it’s our go‑to for new starts).
+  - For complex existing codebases, keep Speckit at the edges: let it scaffold modules, then merge via PRs that pass MC gates.
+  - Always go through persisted‑only and policy simulation to avoid accidental unsafe writes.

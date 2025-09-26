@@ -1,0 +1,17 @@
+{
+  "stage": "production",
+  "ts": 1758845686,
+  "slo": {
+    "reads_p95_ms": 310,
+    "writes_p95_ms": 660,
+    "availability": 99.94
+  },
+  "cost": {
+    "utilization": 60.1
+  },
+  "policy": {
+    "residency_pass": true,
+    "persisted_only": true
+  },
+  "result": "PASS"
+}

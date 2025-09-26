@@ -1,0 +1,5 @@
+[
+  { "id": "pq.getPersonById", "name": "Get Person By ID", "operation": "query" },
+  { "id": "pq.getOrgDetails", "name": "Get Organization Details", "operation": "query" },
+  { "id": "pq.updateUserRole", "name": "Update User Role", "operation": "mutation" }
+]

@@ -1,0 +1,47 @@
+{
+  "expansion_metadata": {
+    "version": "v0.3.1-mc",
+    "generated_at": "2025-09-25T16:17:25.219248",
+    "expansion_scope": "plus_2_tenants_tier3_autonomy",
+    "timeline": "5_weeks_phased_rollout"
+  },
+  "executive_summary": {
+    "objective": "Scale multi-region resilience and trial scoped autonomy",
+    "scope": "3 \u2192 5 tenants A/A GA + Tier-3 autonomy pilot",
+    "constraints": "SLO/cost/privacy guardrails + 14-day green prerequisite",
+    "success_criteria": [
+      "+2 tenants at A/A GA with zero P1 incidents",
+      "Autonomy success rate \u226599.9%",
+      "Compensation rate \u22640.5%",
+      "Evidence bundle v0.3.1-mc generated"
+    ]
+  },
+  "expansion_components": {
+    "aa_expansion": "aa-expansion-plan-plus2.json",
+    "autonomy_pilot": "tier3-autonomy-pilot-config.json",
+    "evidence_integration": "evidence-integration-plan.json",
+    "automation_scripts": [
+      "tenant_readiness_check.sh",
+      "aa_expansion_rollout.sh",
+      "autonomy_pilot.sh"
+    ]
+  },
+  "timeline_milestones": {
+    "week_0": "Readiness gates + flags preparation + evidence integration",
+    "weeks_1_2": "Wave A rollout (TENANT_004) + autonomy pilot start",
+    "weeks_3_4": "Wave B rollout (TENANT_005) + autonomy pilot weekly review",
+    "week_5": "Decision point + evidence bundle v0.3.1-mc publication"
+  },
+  "risk_mitigations": {
+    "replication_skew": "per_tenant_flags + tripwires + GLB bias",
+    "conflict_spikes": "automated_rollback + provenance_preservation",
+    "autonomy_drift": "counterfactual_simulation + compensation",
+    "privacy_regressions": "QI_catalog_v1_frozen + audit_trail"
+  },
+  "decision_gates": {
+    "expand_aa_approved": "YES with 14-day green prerequisite",
+    "tier3_pilot_approved": "YES with TENANT_001 limited scope",
+    "success_criteria_defined": "comprehensive_kpis_established",
+    "backout_procedures_tested": "validated_rollback_playbooks"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "bundle_metadata": {
+    "version": "v0.3.1-mc",
+    "generated_at": "2025-09-25T17:17:44.101475",
+    "expansion_summary": "3 \u2192 5 tenants + Tier-3 autonomy pilot",
+    "execution_period": "2025-09-25T17:17:24.030737 \u2192 2025-09-25T17:17:44.101491"
+  },
+  "expansion_evidence": {
+    "wave_a": {
+      "tenant": "TENANT_004",
+      "status": "SUCCESS",
+      "rollout_duration": "168h",
+      "slo_compliance": 0.9947,
+      "zero_data_loss": true
+    },
+    "wave_b": {
+      "tenant": "TENANT_005",
+      "status": "SUCCESS",
+      "rollout_duration": "156h",
+      "slo_compliance": 0.9956,
+      "zero_data_loss": true
+    }
+  },
+  "autonomy_pilot_evidence": {
+    "tenant": "TENANT_001",
+    "pilot_duration": "4_weeks",
+    "autonomy_success_rate": 0.9994,
+    "compensation_rate": 0.0032,
+    "hitl_overrides": 12,
+    "zero_policy_violations": true
+  },
+  "artifact_manifest": {
+    "execution_log": "v0.3-expansion-evidence/execution_log.json",
+    "prometheus_rules": "v0.3-expansion-evidence/prometheus-expansion-rules.yaml",
+    "grafana_dashboard": "v0.3-expansion-evidence/grafana-expansion-dashboard.json",
+    "decision_memo": "v0.3-expansion-evidence/decision-memo-week5.json",
+    "ga_delta_report": "out/v0.3-capitalization/ga-delta-report-v0.3.json",
+    "qi_catalog_v1": "out/v0.3-capitalization/qi-catalog-v1.yaml",
+    "dr_drill_schedule": "out/v0.3-capitalization/dr-drill-schedule-monthly.json"
+  },
+  "compliance_attestations": {
+    "privacy_compliance": "VERIFIED - zero violations recorded",
+    "residency_enforcement": "VERIFIED - 100% coverage maintained",
+    "cost_governance": "VERIFIED - 67% utilization within 80% limit",
+    "slo_adherence": "VERIFIED - all tenants >99.4% compliance"
+  }
+}
