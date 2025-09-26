@@ -223,6 +223,12 @@ CREATE INDEX IF NOT EXISTS idx_residency_tenant ON data_residency_configs(tenant
 CREATE INDEX IF NOT EXISTS idx_kms_tenant ON kms_configs(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_residency_audit_tenant ON data_residency_audit(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_encryption_audit_tenant ON encryption_audit(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_encryption_audit_tenant_classification_inc
+  ON encryption_audit (tenant_id, classification_level) INCLUDE (compliant);
+CREATE INDEX IF NOT EXISTS idx_encryption_audit_tenant_noncompliant
+  ON encryption_audit (tenant_id) WHERE NOT compliant;
+CREATE INDEX IF NOT EXISTS idx_encryption_audit_tenant_method_not_none
+  ON encryption_audit (tenant_id) WHERE encryption_method <> 'none';
 CREATE INDEX IF NOT EXISTS idx_decryption_audit_tenant ON decryption_audit(tenant_id);
 
 -- Quality Evaluation Platform Tables
