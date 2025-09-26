@@ -9,6 +9,34 @@ export const coreTypeDefs = gql`
   scalar DateTime
   scalar JSON
 
+  input GraphQueryDebugInput {
+    graphql: String!
+    variables: JSON
+    operationName: String
+    tenantId: String
+  }
+
+  type GraphQueryDebugError {
+    stage: String!
+    message: String!
+    hint: String
+  }
+
+  type GraphQueryOptimizationSuggestion {
+    title: String!
+    detail: String!
+    level: String!
+    applied: Boolean
+  }
+
+  type GraphQueryMetrics {
+    estimatedCost: Float
+    complexity: Int
+    nodeCount: Int
+    relationshipCount: Int
+    requiredIndexes: [String!]
+  }
+
   # Core entity types
   type Entity {
     id: ID!
@@ -191,8 +219,21 @@ export const coreTypeDefs = gql`
     # Graph operations
     graphNeighborhood(input: GraphTraversalInput!): GraphNeighborhood!
 
+    # Graph debugging
+    graphQueryDebug(input: GraphQueryDebugInput!): GraphQueryDebugPayload!
+
     # Search across all entity types
     searchEntities(tenantId: String!, query: String!, kinds: [String!], limit: Int = 50): [Entity!]!
+  }
+
+  type GraphQueryDebugPayload {
+    cypher: String
+    parameters: JSON
+    plan: JSON
+    planSummary: String
+    suggestions: [GraphQueryOptimizationSuggestion!]!
+    errors: [GraphQueryDebugError!]!
+    metrics: GraphQueryMetrics
   }
 
   # Extended Mutation operations
