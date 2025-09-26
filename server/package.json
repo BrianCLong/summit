@@ -42,6 +42,7 @@
     "ioredis": "^5.8.0",
     "neo4j-driver": "^5.0.0",
     "node-fetch": "^3.3.2",
+    "papaparse": "^5.4.1",
     "pg": "^8.0.0",
     "pino": "^9.0.0",
     "pino-http": "^10.5.0",

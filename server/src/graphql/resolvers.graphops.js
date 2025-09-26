@@ -6,6 +6,9 @@ const TagService = require('../services/TagService');
 const { enqueueAIRequest } = require('../services/AIQueueService');
 const { metrics } = require('../monitoring/metrics');
 const { NeighborhoodCache } = require('../services/neighborhood-cache.js');
+const { GraphCsvImportService, GraphCsvImportError } = require('../services/GraphCsvImportService');
+
+const graphCsvImportService = new GraphCsvImportService();
 
 const expandSchema = Joi.object({
   entityId: Joi.string().trim().min(1).required(),
@@ -290,6 +293,61 @@ const resolvers = {
         const err = new Error('AI_REQUEST_FAILED');
         err.code = 'AI_REQUEST_FAILED';
         err.details = e.message;
+        err.traceId = tId;
+        throw err;
+      }
+    },
+
+    importGraphCsv: async (_, { input }, { user, logger }) => {
+      const tId = traceId();
+      ensureRole(user, ['ANALYST', 'ADMIN']);
+
+      const localLogger = logger?.child ? logger.child({ resolver: 'importGraphCsv', traceId: tId }) : logger;
+
+      const batchSize = Number.isInteger(input?.batchSize) && input.batchSize > 0 ? input.batchSize : undefined;
+      const payload = {
+        nodesCsv: input?.nodesCsv ?? null,
+        relationshipsCsv: input?.relationshipsCsv ?? null,
+        delimiter: input?.delimiter ?? ',',
+        dryRun: Boolean(input?.dryRun),
+        ...(batchSize ? { batchSize: Math.min(batchSize, 2000) } : {}),
+      };
+
+      try {
+        const result = await graphCsvImportService.importGraphCsv(payload);
+        localLogger?.info?.('Graph CSV import executed', {
+          traceId: tId,
+          dryRun: payload.dryRun,
+          nodesProcessed: result.nodes.processed,
+          relationshipsProcessed: result.relationships.processed,
+          errors: result.errors.length,
+        });
+
+        return {
+          success: result.errors.length === 0,
+          nodes: result.nodes,
+          relationships: result.relationships,
+          errors: result.errors,
+        };
+      } catch (error) {
+        if (error instanceof GraphCsvImportError) {
+          localLogger?.warn?.('Graph CSV import rejected', {
+            code: error.code,
+            message: error.message,
+            traceId: tId,
+          });
+
+          return {
+            success: false,
+            nodes: { processed: 0, imported: 0 },
+            relationships: { processed: 0, imported: 0 },
+            errors: [error.toJSON()],
+          };
+        }
+
+        localLogger?.error?.('Graph CSV import failed', { err: error, traceId: tId });
+        const err = new Error('GRAPH_IMPORT_FAILED');
+        err.code = 'GRAPH_IMPORT_FAILED';
         err.traceId = tId;
         throw err;
       }
