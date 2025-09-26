@@ -18,10 +18,13 @@ spec:
       - -c
       - |
         echo "Testing GraphQL endpoint accessibility..."
-        # Test GraphQL endpoint returns valid response (even if introspection is disabled)
-        curl -f -X POST -H "Content-Type: application/json" \
-          -d '{"query":"query { __typename }"}' \
-          http://{{ include "server.fullname" . }}:{{ .Values.service.port }}/graphql
+        {{- $enabledVersions := default (list "v1" "v2") .Values.graphql.enabledVersions }}
+        for path in /graphql{{- range $enabledVersions }} /graphql/{{ . }}{{- end }}; do
+          echo "  -> Checking ${path}"
+          curl -f -X POST -H "Content-Type: application/json" \
+            -d '{"query":"query { __typename }"}' \
+            http://{{ include "server.fullname" . }}:{{ .Values.service.port }}${path}
+        done
         
         echo "Testing metrics endpoint..."
         curl -f http://{{ include "server.fullname" . }}:{{ .Values.service.port }}/metrics

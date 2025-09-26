@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
-// import { expressMiddleware } from '@as-integrations/express4';
+import { expressMiddleware } from '@apollo/server/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -55,9 +55,8 @@ import { fipsService } from './federal/fips-compliance.js';
 import { airGapService } from './federal/airgap-service.js';
 import { assertFipsAndHsm, hsmEnforcement } from './federal/hsm-enforcement.js';
 import { wormAuditChain } from './federal/worm-audit-chain.js';
-import { typeDefs } from './graphql/schema/index.js';
 import { budgetDirective } from './graphql/directives/budget.js';
-import resolvers from './graphql/resolvers/index.js';
+import { v1Resolvers, v1TypeDefs, v2Resolvers, v2TypeDefs } from './graphql/versions/index.js';
 import { tokcountRouter } from './routes/tokcount.js';
 import { enforceTokenBudget } from './middleware/llm-preflight.js';
 import { getContext } from './lib/auth.js';
@@ -443,12 +442,22 @@ export const createApp = async () => {
     }
   });
 
-  let schema = makeExecutableSchema({ typeDefs, resolvers });
-  if (process.env.REQUIRE_BUDGET_PLUGIN === 'true') {
-    const { budgetDirectiveTypeDefs, budgetDirectiveTransformer } = budgetDirective();
-    schema = makeExecutableSchema({ typeDefs: [budgetDirectiveTypeDefs, ...typeDefs], resolvers });
-    schema = budgetDirectiveTransformer(schema as any) as any;
-  }
+  const buildSchema = (schemaTypeDefs: any[], schemaResolvers: any) => {
+    if (process.env.REQUIRE_BUDGET_PLUGIN === 'true') {
+      const { budgetDirectiveTypeDefs, budgetDirectiveTransformer } = budgetDirective();
+      const schemaWithDirective = makeExecutableSchema({
+        typeDefs: [budgetDirectiveTypeDefs, ...schemaTypeDefs],
+        resolvers: schemaResolvers,
+      });
+      return budgetDirectiveTransformer(schemaWithDirective as any) as any;
+    }
+    return makeExecutableSchema({ typeDefs: schemaTypeDefs, resolvers: schemaResolvers });
+  };
+
+  const versionedSchemas = {
+    v1: buildSchema(v1TypeDefs, v1Resolvers),
+    v2: buildSchema(v2TypeDefs, v2Resolvers),
+  } as const;
 
   // GraphQL over HTTP
   const { persistedQueriesPlugin } = await import('./graphql/plugins/persistedQueries.js');
@@ -459,44 +468,67 @@ export const createApp = async () => {
   const { depthLimit } = await import('./graphql/validation/depthLimit.js');
   const { otelApolloPlugin } = await import('./graphql/middleware/otelPlugin.js');
 
-  const apollo = new ApolloServer({
-    schema,
-    // Security plugins - Order matters for execution lifecycle
-    plugins: [
-      otelApolloPlugin(),
-      persistedQueriesPlugin as any,
-      resolverMetricsPlugin as any,
-      auditLoggerPlugin as any,
-      // Enable DLP scanning
-      dlpPlugin({
-        enabled: process.env.DLP_ENABLED !== 'false',
-        scanVariables: true,
-        scanResponse: process.env.NODE_ENV === 'production',
-        blockOnViolation: process.env.NODE_ENV === 'production'
-      }) as any,
-      // Enable PBAC in production
-      ...(process.env.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
-    ],
-    // Security configuration based on environment
-    introspection: process.env.NODE_ENV !== 'production',
-    // Enhanced query validation rules
-    validationRules: [
-      depthLimit(process.env.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
-    ],
-    // Security context
-    formatError: (err) => {
-      // Don't expose internal errors in production
-      if (process.env.NODE_ENV === 'production') {
-        appLogger.error(`GraphQL Error: ${err.message}`, { stack: err.stack });
-        return new Error('Internal server error');
-      }
-      return err;
-    },
-  });
-  await apollo.start();
+  const buildApolloServer = (schema: any) =>
+    new ApolloServer({
+      schema,
+      // Security plugins - Order matters for execution lifecycle
+      plugins: [
+        otelApolloPlugin(),
+        persistedQueriesPlugin as any,
+        resolverMetricsPlugin as any,
+        auditLoggerPlugin as any,
+        // Enable DLP scanning
+        dlpPlugin({
+          enabled: process.env.DLP_ENABLED !== 'false',
+          scanVariables: true,
+          scanResponse: process.env.NODE_ENV === 'production',
+          blockOnViolation: process.env.NODE_ENV === 'production',
+        }) as any,
+        // Enable PBAC in production
+        ...(process.env.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
+      ],
+      // Security configuration based on environment
+      introspection: process.env.NODE_ENV !== 'production',
+      // Enhanced query validation rules
+      validationRules: [
+        depthLimit(process.env.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
+      ],
+      // Security context
+      formatError: (err) => {
+        // Don't expose internal errors in production
+        if (process.env.NODE_ENV === 'production') {
+          appLogger.error(`GraphQL Error: ${err.message}`, { stack: err.stack });
+          return new Error('Internal server error');
+        }
+        return err;
+      },
+    });
+
+  const requestedVersions = (process.env.GRAPHQL_ENABLED_VERSIONS || 'v1,v2')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+  const isSupportedVersion = (value: string): value is 'v1' | 'v2' => value === 'v1' || value === 'v2';
+  const enabledVersions = requestedVersions.filter(isSupportedVersion);
+  if (!enabledVersions.length) {
+    enabledVersions.push('v1');
+  }
+
+  const apolloServers: Partial<Record<'v1' | 'v2', ApolloServer>> = {};
+  for (const version of enabledVersions) {
+    if (!apolloServers[version]) {
+      apolloServers[version] = buildApolloServer(versionedSchemas[version]);
+    }
+  }
+
+  await Promise.all(
+    Object.values(apolloServers)
+      .filter((server): server is ApolloServer => Boolean(server))
+      .map((server) => server.start()),
+  );
 
   // Production Authentication - Use proper JWT validation
-  const { productionAuthMiddleware, applyProductionSecurity, graphqlSecurityConfig } = await import(
+  const { productionAuthMiddleware, applyProductionSecurity } = await import(
     './config/production-security.js'
   );
 
@@ -520,12 +552,30 @@ export const createApp = async () => {
           next();
         };
 
-  app.use(
-    '/graphql',
-    express.json(),
-    authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-// expressMiddleware(apollo, { context: getContext }),
-  );
+  const resolveDefaultVersion = (): 'v1' | 'v2' => {
+    const configuredDefault = (process.env.GRAPHQL_DEFAULT_VERSION || 'v1') as 'v1' | 'v2';
+    if (enabledVersions.includes(configuredDefault)) {
+      return configuredDefault;
+    }
+    return enabledVersions[0] || 'v1';
+  };
+
+  const mountGraphqlEndpoint = (path: string, server: ApolloServer) => {
+    app.use(path, express.json(), authenticateToken, expressMiddleware(server, { context: getContext }));
+  };
+
+  if (apolloServers.v1) {
+    mountGraphqlEndpoint('/graphql/v1', apolloServers.v1);
+  }
+  if (apolloServers.v2) {
+    mountGraphqlEndpoint('/graphql/v2', apolloServers.v2);
+  }
+
+  const defaultVersion = resolveDefaultVersion();
+  const defaultServer = apolloServers[defaultVersion];
+  if (defaultServer) {
+    mountGraphqlEndpoint('/graphql', defaultServer);
+  }
 
   // Centralized error handler (Express 5-compatible)
   // Keep 4 args to mark as error middleware

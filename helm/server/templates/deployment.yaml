@@ -28,6 +28,12 @@ spec:
               containerPort: {{ .Values.service.port }}
           env:
             {{- toYaml .Values.env | nindent 12 }}
+            {{- $enabledVersions := default (list "v1" "v2") .Values.graphql.enabledVersions }}
+            {{- $defaultVersion := default "v1" .Values.graphql.defaultVersion }}
+            - name: GRAPHQL_ENABLED_VERSIONS
+              value: {{ join "," $enabledVersions | quote }}
+            - name: GRAPHQL_DEFAULT_VERSION
+              value: {{ $defaultVersion | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           readinessProbe:
