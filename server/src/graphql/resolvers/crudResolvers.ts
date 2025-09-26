@@ -13,6 +13,14 @@ import { NeighborhoodCache } from '../../services/neighborhood-cache.js';
 const pubsub = new PubSub();
 const nbhdCache = new NeighborhoodCache(getRedisClient());
 
+const SUPPORTED_LAYOUTS = new Set(['force', 'hierarchical', 'circular', 'grid']);
+
+const DEFAULT_GRAPH_LAYOUT_PREFERENCE = {
+  layout: 'force',
+  physicsEnabled: true,
+  options: { orientation: 'vertical' },
+};
+
 interface User {
   id: string;
   email?: string;
@@ -20,6 +28,8 @@ interface User {
   lastName?: string;
   role?: string;
   permissions?: string[];
+  tenantId?: string;
+  tenant?: string;
 }
 
 interface Context {
@@ -540,6 +550,33 @@ const crudResolvers = {
       }
     },
 
+    graphLayoutPreference: async (_: any, __: unknown, { user }: Context) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const pgPool = getPostgresPool();
+      const result = await pgPool.query(
+        `SELECT layout, physics_enabled, options, updated_at
+         FROM graph_visualization_preferences
+         WHERE user_id = $1`,
+        [user.id],
+      );
+
+      if (result.rowCount === 0) {
+        return {
+          ...DEFAULT_GRAPH_LAYOUT_PREFERENCE,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+
+      const row = result.rows[0];
+      return {
+        layout: row.layout,
+        physicsEnabled: row.physics_enabled,
+        options: row.options ?? {},
+        updatedAt: row.updated_at ?? new Date().toISOString(),
+      };
+    },
+
     // Related entities query
     relatedEntities: async (_: any, { entityId }: { entityId: string }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');
@@ -568,6 +605,48 @@ const crudResolvers = {
   },
 
   Mutation: {
+    saveGraphLayoutPreference: async (
+      _: any,
+      { input }: { input: { layout: string; physicsEnabled: boolean; options?: any } },
+      { user }: Context,
+    ) => {
+      if (!user) throw new Error('Not authenticated');
+
+      if (!SUPPORTED_LAYOUTS.has(input.layout)) {
+        throw new Error(`Unsupported layout "${input.layout}"`);
+      }
+
+      const pgPool = getPostgresPool();
+      const sanitizedOptions = input.options ?? {};
+      const result = await pgPool.query(
+        `INSERT INTO graph_visualization_preferences (user_id, tenant_id, layout, physics_enabled, options, updated_at)
+         VALUES ($1, $2, $3, $4, COALESCE($5::jsonb, '{}'::jsonb), now())
+         ON CONFLICT (user_id)
+         DO UPDATE SET
+           layout = EXCLUDED.layout,
+           physics_enabled = EXCLUDED.physics_enabled,
+           options = EXCLUDED.options,
+           updated_at = now(),
+           tenant_id = EXCLUDED.tenant_id
+         RETURNING layout, physics_enabled, options, updated_at`,
+        [
+          user.id,
+          (user as any).tenantId || (user as any).tenant || null,
+          input.layout,
+          input.physicsEnabled,
+          JSON.stringify(sanitizedOptions),
+        ],
+      );
+
+      const row = result.rows[0];
+      return {
+        layout: row.layout,
+        physicsEnabled: row.physics_enabled,
+        options: row.options ?? {},
+        updatedAt: row.updated_at ?? new Date().toISOString(),
+      };
+    },
+
     // Entity mutations
     createEntity: async (_: any, { input }: { input: EntityInput }, { user }: Context) => {
       if (!user) throw new Error('Not authenticated');

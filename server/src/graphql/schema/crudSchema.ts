@@ -355,6 +355,9 @@ export const crudTypeDefs = gql`
     # Graph data for investigation
     graphData(investigationId: ID!, filter: GraphDataFilter): GraphData!
 
+    # Persisted graph visualization preference for the current analyst
+    graphLayoutPreference: GraphLayoutPreference!
+
     # Related entities query
     relatedEntities(entityId: ID!): [RelatedEntity!]!
 
@@ -376,6 +379,20 @@ export const crudTypeDefs = gql`
     edgeCount: Int!
   }
 
+  # Analyst graph visualization preference persisted in PostgreSQL
+  type GraphLayoutPreference {
+    layout: String!
+    physicsEnabled: Boolean!
+    options: JSON
+    updatedAt: DateTime!
+  }
+
+  input GraphLayoutPreferenceInput {
+    layout: String!
+    physicsEnabled: Boolean!
+    options: JSON
+  }
+
   # Core Mutations
   type Mutation {
     # Entity mutations
@@ -393,6 +410,9 @@ export const crudTypeDefs = gql`
       lastSeenTimestamp: DateTime!
     ): Relationship!
     deleteRelationship(id: ID!): Boolean!
+
+    # Analyst customization for graph visualization
+    saveGraphLayoutPreference(input: GraphLayoutPreferenceInput!): GraphLayoutPreference!
 
     # Investigation mutations
     createInvestigation(input: InvestigationInput!): Investigation!

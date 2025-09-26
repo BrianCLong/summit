@@ -13,7 +13,7 @@ import { ToastProvider, useToast } from '../components/ToastContainer';
 import EnhancedAIAssistant from '../components/ai-enhanced/EnhancedAIAssistant';
 import RealTimePresence from '../components/collaboration/RealTimePresence';
 import AdvancedAnalyticsDashboard from '../components/analytics/AdvancedAnalyticsDashboard';
-import InteractiveGraphCanvas from '../components/visualization/InteractiveGraphCanvas';
+import GraphVisualizationPanel from '../components/visualization/GraphVisualizationPanel';
 import TemporalAnalysis from '../components/timeline/TemporalAnalysis';
 import ThreatIntelligenceHub from '../components/intelligence/ThreatIntelligenceHub';
 import ModelManagementDashboard from '../components/mlops/ModelManagementDashboard';
@@ -782,23 +782,15 @@ function HomeRouteInner() {
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
-            <InteractiveGraphCanvas
-              investigationId={selectedInvestigation?.id}
-              onNodeSelect={(nodes) => {
-                console.log('Selected nodes:', nodes);
-                toast.info('Graph Selection', `Selected ${nodes.length} node(s)`);
-              }}
-              onEdgeSelect={(edges) => {
-                console.log('Selected edges:', edges);
-                toast.info('Graph Selection', `Selected ${edges.length} edge(s)`);
-              }}
-              layoutAlgorithm="force"
-              enablePhysics={true}
-              showPerformanceMetrics={true}
-              className="h-full w-full"
-            />
-          </div>
+          <GraphVisualizationPanel
+            investigationId={selectedInvestigation?.id}
+            onPreferenceApplied={(pref) => {
+              toast.success(
+                'Visualization preference saved',
+                `Layout set to ${pref.layout} with physics ${pref.physicsEnabled ? 'on' : 'off'}.`,
+              );
+            }}
+          />
         </div>
       )}
 
