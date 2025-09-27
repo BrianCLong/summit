@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: companyos
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: companyos }
+  strategy:
+    canary:
+      canaryService: companyos-canary
+      stableService: companyos-stable
+      trafficRouting:
+        nginx: {}
+      steps:
+        - setWeight: 20
+        - analysis:
+            templates:
+              - templateName: {{ .Values.rollout.analysisTemplates | first | quote }}
+            args:
+              - name: mcUrl
+                value: {{ .Values.rollout.mcUrl | quote }}
+              - name: service
+                value: {{ .Values.rollout.service | quote }}
+              - name: releaseId
+                valueFrom:
+                  fieldRef: { fieldPath: metadata.labels['release-id'] }
+        - setWeight: 50
+        - analysis:
+            templates:
+              - templateName: {{ .Values.rollout.analysisTemplates | first | quote }}
+            args:
+              - name: mcUrl
+                value: {{ .Values.rollout.mcUrl | quote }}
+              - name: service
+                value: {{ .Values.rollout.service | quote }}
+              - name: releaseId
+                valueFrom:
+                  fieldRef: { fieldPath: metadata.labels['release-id'] }
+  template:
+    metadata:
+      labels: { app: companyos }
+    spec:
+      containers:
+      - name: companyos
+        image: "{{ .Values.image.repository }}@{{ .Values.image.digest }}"
+        ports:
+        - containerPort: 3000
+

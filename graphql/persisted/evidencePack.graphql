@@ -1,0 +1,1 @@
+mutation evidencePack($version: String!) { evidencePack(version: $version) { ok evidenceId hash sizeBytes audit { ts actor evidenceId } } }

@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 PY := python3
 
-.PHONY: bootstrap up down logs ps server client ingest graph smoke clean reset-db ingest-assets
+.PHONY: bootstrap up down logs ps server client ingest graph smoke clean reset-db ingest-assets up-local logs-local down-local demo
 
 bootstrap: ; @test -f .env || cp .env.example .env; echo "✅ .env ready. Next: make up"
 up: ; docker compose up -d --build
@@ -24,6 +24,27 @@ reset-db: ; docker compose down; \
   V=$$(docker volume ls -q | grep neo4j_data || true); \
   if [ -n "$$V" ]; then docker volume rm $$V; fi; \
   echo "🗑️  Neo4j volume removed"
+
+up-local:
+	cd compose && docker compose up -d --build
+
+logs-local:
+	cd compose && docker compose logs -f
+
+down-local:
+	cd compose && docker compose down -v
+
+.demo-setup:
+	make pack sign || true
+
+_demo_url := http://localhost:4000/v1/policy/packs/policy-pack-v0
+
+demo: .demo-setup up-local
+	@echo "Waiting for MC at $(_demo_url)..."; sleep 3
+	curl -sSI $(_demo_url) | tee /dev/stderr
+	@echo "Publishing sample evidence..."
+	npm --workspace=companyos run evidence:sample || true
+	@echo "Open Grafana: http://localhost:3001 (admin/admin)"
 
 sprint23:
 	npm test

@@ -1,19 +1,18 @@
-Contracts Starter Bundle
+# MC v0.3.9 Contracts
 
-This folder documents the versioned seam between Maestro Conductor (MC) and CompanyOS (COS).
+## GraphQL
+- SDL: `graphql/schema/mc-admin.graphql`
+- Persisted-only: hashes in `graphql/persisted/*.graphql`, manifest resolved during CI.
 
-- Policy Pack: versioned, signed OPA bundle. Starter lives at `contracts/policy-pack/v0`.
-- Evidence API: GraphQL mutation `publishEvidence(input: EvidenceInput!)` and REST stub `POST /v1/evidence`.
-- Rollouts: Argo Rollouts canary with SLO+cost gates at `server/k8s/production/rollout.yaml`.
-- AppSets: ArgoCD ApplicationSets for MC and COS in `deploy/argocd/`.
+## OPA Policies
+- `policy/mc-admin.rego` + tests in `policy/tests`.
 
-- The pack tar is available at `/v1/policy/packs/policy-pack-v0`.
-- The Sigstore verification bundle is exposed at `/v1/policy/packs/policy-pack-v0/attestation`.
-- For local DX, you may set `MC_DEV_AUTO_BUILD_PACK=true` and `MC_INLINE_BUNDLE=true`.
-- Never enable `MC_DEV_AUTO_BUILD_PACK` in production; CI should be the only producer of artifacts.
+## Gateway
+- `gateway/persisted-query-resolver.json` enforces persisted-only & audit headers.
 
-Next steps
-- Wire CI to package `contracts/policy-pack/v0` into a tarball and sign with cosign.
-- Point COS to GET `/v1/policy/packs/policy-pack-v0` and verify signature.
-- Emit Evidence via GraphQL and test gates in a canary rollout.
+## E2E
+- `tests/e2e/admin-console.spec.ts` validates UI → API invariants (persisted-only, provenance headers).
+
+## CI
+- `.github/workflows/contract-verify.yml` lints SDL, rebuilds manifest, runs OPA tests, lints Prom rules, and runs Playwright smoke.
 

@@ -77,6 +77,17 @@ This document outlines the threat model for the IntelGraph AI-augmented intellig
   - **Impact**: High - Unauthorized data access
   - **Mitigation**: RBAC, least privilege, policy enforcement (OPA/Kyverno)
 
+- **T012**: Policy Bypass via Fuzzing
+  - **Impact**: Critical - Undetected policy violations leading to data breaches or compliance failures
+  - **Mitigation**: Robust oracle, comprehensive attack grammars, metamorphic testing, continuous fuzzer development
+
+## Abuse/Misuse Cases
+- **Policy Fuzzer Misinterpretation**: Fuzzer results are misinterpreted, leading to incorrect policy changes or false sense of security.
+- **Adversarial Fuzzer Use**: An attacker uses a similar fuzzer to discover policy bypasses in a deployed system.
+
+## Controls Mapping
+-
+
 ## Risk Assessment Matrix
 
 | Threat ID | Likelihood | Impact | Risk Level | Priority |
@@ -92,6 +103,7 @@ This document outlines the threat model for the IntelGraph AI-augmented intellig
 | T009      | Medium     | Medium | Medium     | P3       |
 | T010      | Low        | Critical| High      | P1       |
 | T011      | Medium     | High   | High       | P1       |
+| T012      | High       | Critical| Critical   | P0       |
 
 ## Security Controls
 
