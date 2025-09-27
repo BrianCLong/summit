@@ -1,0 +1,30 @@
+version: 1.0.0
+clauses:
+  - scope: profile.read
+    description: Reading user profile for permitted operations
+    allow:
+      - purpose: analytics
+        lawful_basis: legitimate_interest
+        notes: Aggregated metrics only
+      - purpose: support_diagnostics
+        lawful_basis: contract
+    deny:
+      - advertising
+  - scope: payments.process
+    description: Payment processor integrations
+    allow:
+      - purpose: settlement
+        lawful_basis: contract
+      - purpose: fraud_detection
+        lawful_basis: legal_obligation
+    deny:
+      - advertising
+  - scope: messaging.send
+    description: Transactional messaging to users
+    allow:
+      - purpose: transactional
+        lawful_basis: contract
+      - purpose: security_alert
+        lawful_basis: vital_interest
+    deny:
+      - marketing
