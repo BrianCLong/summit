@@ -7,6 +7,9 @@
     ".": "./src/index.ts"
   },
   "types": "./src/index.ts",
+  "bin": {
+    "hapl-verify": "./src/cli/hapl-verify.js"
+  },
   "scripts": {
     "test": "vitest run && node --test tests",
     "test:record": "node --loader ts-node/esm ./tests/record.test.ts"
