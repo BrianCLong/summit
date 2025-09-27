@@ -1,0 +1,469 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CAB Simulator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <style>
+      body {
+        background: #0f172a;
+        color: #e2e8f0;
+      }
+      main {
+        max-width: 1100px;
+        margin: 2rem auto;
+      }
+      .card {
+        background: rgba(15, 23, 42, 0.85);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.4);
+      }
+      .grid {
+        display: grid;
+        gap: 1rem;
+      }
+      .grid.two {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+      textarea {
+        min-height: 120px;
+      }
+      .decision-allow {
+        color: #4ade80;
+      }
+      .decision-step-up {
+        color: #fbbf24;
+      }
+      .decision-deny {
+        color: #f87171;
+      }
+      .scenario-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(30, 41, 59, 0.8);
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        margin-bottom: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="app"></main>
+    <script type="text/babel">
+      const { useState, useEffect } = React;
+
+      const defaultRequest = {
+        action: 'workspace:update',
+        subject: { role: 'admin' },
+        resource: { classification: 'internal' },
+        signals: {
+          geo: 'US',
+          devicePosture: 'trusted',
+          anomalyScore: 0.2,
+        },
+      };
+
+      const API = {
+        async request(baseUrl, path, options = {}) {
+          const url = `${baseUrl}${path}`;
+          const response = await fetch(url, {
+            headers: { 'Content-Type': 'application/json' },
+            ...options,
+          });
+          const text = await response.text();
+          const json = text ? JSON.parse(text) : {};
+          if (!response.ok) {
+            throw new Error(json.error || response.statusText);
+          }
+          return json;
+        },
+        evaluate(baseUrl, payload) {
+          return API.request(baseUrl, '/evaluate', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+          });
+        },
+        saveScenario(baseUrl, name, request) {
+          return API.request(baseUrl, '/scenarios', {
+            method: 'POST',
+            body: JSON.stringify({ name, request }),
+          });
+        },
+        listScenarios(baseUrl) {
+          return API.request(baseUrl, '/scenarios', {
+            method: 'GET',
+          });
+        },
+        replayScenario(baseUrl, id) {
+          return API.request(baseUrl, `/scenarios/${id}/replay`, {
+            method: 'POST',
+          });
+        },
+      };
+
+      const ScenarioStorage = {
+        key: 'cab-scenarios',
+        load() {
+          try {
+            const raw = window.localStorage.getItem(ScenarioStorage.key);
+            return raw ? JSON.parse(raw) : [];
+          } catch (error) {
+            console.warn('Failed to load scenarios', error);
+            return [];
+          }
+        },
+        save(scenarios) {
+          window.localStorage.setItem(ScenarioStorage.key, JSON.stringify(scenarios));
+        },
+      };
+
+      function DecisionBadge({ decision }) {
+        const className = {
+          allow: 'decision-allow',
+          'step-up': 'decision-step-up',
+          deny: 'decision-deny',
+        }[decision] || '';
+        return <strong className={className}>{decision.toUpperCase()}</strong>;
+      }
+
+      function RequestEditor({ request, onChange }) {
+        const updateField = (section, key, value) => {
+          const next = { ...request, [section]: { ...request[section], [key]: value } };
+          if (section === 'signals' && key === 'anomalyScore') {
+            next.signals.anomalyScore = parseFloat(value) || 0;
+          }
+          onChange(next);
+        };
+
+        return (
+          <div className="grid two">
+            <div className="card">
+              <h3>Subject</h3>
+              <label>
+                Role
+                <input
+                  value={request.subject.role || ''}
+                  onChange={(e) => updateField('subject', 'role', e.target.value)}
+                />
+              </label>
+            </div>
+            <div className="card">
+              <h3>Resource</h3>
+              <label>
+                Classification
+                <input
+                  value={request.resource.classification || ''}
+                  onChange={(e) => updateField('resource', 'classification', e.target.value)}
+                />
+              </label>
+            </div>
+            <div className="card">
+              <h3>Action</h3>
+              <label>
+                Action
+                <input value={request.action} onChange={(e) => onChange({ ...request, action: e.target.value })} />
+              </label>
+            </div>
+            <div className="card">
+              <h3>Signals</h3>
+              <label>
+                Geo
+                <input
+                  value={request.signals.geo}
+                  onChange={(e) => updateField('signals', 'geo', e.target.value)}
+                />
+              </label>
+              <label>
+                Device Posture
+                <input
+                  value={request.signals.devicePosture}
+                  onChange={(e) => updateField('signals', 'devicePosture', e.target.value)}
+                />
+              </label>
+              <label>
+                Anomaly Score
+                <input
+                  type="number"
+                  step="0.01"
+                  value={request.signals.anomalyScore}
+                  onChange={(e) => updateField('signals', 'anomalyScore', e.target.value)}
+                />
+              </label>
+            </div>
+          </div>
+        );
+      }
+
+      function StepUpInputs({ responses, onChange }) {
+        const update = (key, value) => {
+          onChange({ ...responses, [key]: value });
+        };
+        return (
+          <div className="card">
+            <h3>Step-Up Challenges</h3>
+            <label>
+              TOTP Code
+              <input value={responses.totp || ''} onChange={(e) => update('totp', e.target.value)} />
+            </label>
+            <label>
+              Hardware Assertion
+              <input value={responses.hardware || ''} onChange={(e) => update('hardware', e.target.value)} />
+            </label>
+            <small>Use code <code>654321</code> and assertion <code>cab-hardware-assertion</code> to satisfy defaults.</small>
+          </div>
+        );
+      }
+
+      function RiskBreakdown({ breakdown }) {
+        return (
+          <div className="card">
+            <h3>Risk Breakdown</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Source</th>
+                  <th>Level</th>
+                  <th>Score</th>
+                  <th>Reasons</th>
+                </tr>
+              </thead>
+              <tbody>
+                {breakdown.map((entry) => (
+                  <tr key={entry.name}>
+                    <td>{entry.name}</td>
+                    <td>{entry.level}</td>
+                    <td>{entry.score.toFixed(2)}</td>
+                    <td>{entry.reasons.join(', ')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      }
+
+      function ScenarioList({ scenarios, onReplay, onSelect }) {
+        return (
+          <div className="card">
+            <h3>Saved Scenarios</h3>
+            {scenarios.length === 0 ? (
+              <p>No scenarios saved yet.</p>
+            ) : (
+              <ul className="scenario-list">
+                {scenarios.map((scenario) => (
+                  <li key={scenario.id}>
+                    <div>
+                      <strong>{scenario.name}</strong>
+                      <br />
+                      <small>{scenario.response.decision.toUpperCase()}</small>
+                    </div>
+                    <div>
+                      <button onClick={() => onSelect(scenario)}>Load</button>
+                      <button onClick={() => onReplay(scenario)}>Replay</button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      }
+
+      function App() {
+        const [baseUrl, setBaseUrl] = useState('http://localhost:8085');
+        const [request, setRequest] = useState(defaultRequest);
+        const [responses, setResponses] = useState({ totp: '', hardware: '' });
+        const [decision, setDecision] = useState(null);
+        const [loading, setLoading] = useState(false);
+        const [error, setError] = useState('');
+        const [scenarios, setScenarios] = useState(() => ScenarioStorage.load());
+        const [serverScenarios, setServerScenarios] = useState([]);
+        const [replayStatus, setReplayStatus] = useState('');
+
+        useEffect(() => {
+          ScenarioStorage.save(scenarios);
+        }, [scenarios]);
+
+        const evaluate = async (overrideResponses) => {
+          setLoading(true);
+          setError('');
+          setReplayStatus('');
+          try {
+            const challengeResponses = buildChallenges(overrideResponses ?? responses);
+            const payload = {
+              ...request,
+              ...(challengeResponses ? { challengeResponses } : {}),
+            };
+            const result = await API.evaluate(baseUrl, payload);
+            setDecision(result);
+            return result;
+          } catch (err) {
+            setError(err.message || String(err));
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        const saveScenario = async () => {
+          if (!decision) return;
+          const name = window.prompt('Scenario name');
+          if (!name) return;
+          try {
+            const remote = await API.saveScenario(baseUrl, name, request);
+            const local = { id: remote.id, name, request, response: decision };
+            setScenarios((prev) => [...prev, local]);
+            await refreshServerScenarios();
+          } catch (err) {
+            setError(err.message || String(err));
+          }
+        };
+
+        const refreshServerScenarios = async () => {
+          try {
+            const remote = await API.listScenarios(baseUrl);
+            setServerScenarios(remote);
+          } catch (err) {
+            console.warn('Unable to list scenarios', err);
+          }
+        };
+
+        useEffect(() => {
+          refreshServerScenarios();
+        }, []);
+
+        const handleReplay = async (scenario) => {
+          try {
+            const result = await API.replayScenario(baseUrl, scenario.id);
+            setReplayStatus(result.match ? 'Scenario decision reproduced.' : 'Decision drift detected.');
+            setDecision(result.decision);
+          } catch (err) {
+            setError(err.message || String(err));
+          }
+        };
+
+        const loadScenario = (scenario) => {
+          setRequest(scenario.request);
+          setDecision(scenario.response);
+        };
+
+        const challengeSummaries = decision?.requiredChallenges?.map((c) => `${c.type}: ${c.prompt}`);
+
+        return (
+          <main>
+            <header>
+              <h1>Contextual Access Broker Simulator</h1>
+              <p>
+                Exercise CAB policies with adjustable signals. Decisions are deterministic for a given input, and saved
+                scenarios can be replayed to confirm stability.
+              </p>
+            </header>
+
+            <article className="card">
+              <label>
+                CAB Base URL
+                <input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} />
+              </label>
+              <button disabled={loading} onClick={() => evaluate()}>
+                {loading ? 'Evaluating…' : 'Evaluate request'}
+              </button>
+              {decision?.decision === 'step-up' && (
+                <button
+                  style={{ marginLeft: '0.5rem' }}
+                  onClick={() =>
+                    evaluate({
+                      totp: responses.totp,
+                      hardware: responses.hardware,
+                    })
+                  }
+                >
+                  Re-run with challenges
+                </button>
+              )}
+              <button style={{ marginLeft: '0.5rem' }} disabled={!decision} onClick={saveScenario}>
+                Save scenario
+              </button>
+              <button style={{ marginLeft: '0.5rem' }} onClick={refreshServerScenarios}>
+                Refresh server scenarios
+              </button>
+              {error && <p style={{ color: '#f87171' }}>{error}</p>}
+              {replayStatus && <p style={{ color: '#38bdf8' }}>{replayStatus}</p>}
+            </article>
+
+            <section>
+              <RequestEditor request={request} onChange={setRequest} />
+              <StepUpInputs responses={responses} onChange={setResponses} />
+            </section>
+
+            {decision && (
+              <section className="card">
+                <h2>
+                  Decision: <DecisionBadge decision={decision.decision} />
+                </h2>
+                <p>
+                  Risk level: <strong>{decision.riskLevel.toUpperCase()}</strong>
+                </p>
+                <p>{decision.reasons.join(', ')}</p>
+                {challengeSummaries && challengeSummaries.length > 0 && (
+                  <ul>
+                    {challengeSummaries.map((summary) => (
+                      <li key={summary}>{summary}</li>
+                    ))}
+                  </ul>
+                )}
+                {decision.riskBreakdown && decision.riskBreakdown.length > 0 && (
+                  <RiskBreakdown breakdown={decision.riskBreakdown} />
+                )}
+              </section>
+            )}
+
+            <section className="grid two">
+              <ScenarioList scenarios={scenarios} onReplay={handleReplay} onSelect={loadScenario} />
+              <div className="card">
+                <h3>Server Scenarios</h3>
+                {serverScenarios.length === 0 ? (
+                  <p>No server-side scenarios stored yet.</p>
+                ) : (
+                  <ul className="scenario-list">
+                    {serverScenarios.map((scenario) => (
+                      <li key={scenario.id}>
+                        <div>
+                          <strong>{scenario.name}</strong>
+                          <br />
+                          <small>{scenario.response.decision.toUpperCase()}</small>
+                        </div>
+                        <div>
+                          <button onClick={() => loadScenario(scenario)}>Load</button>
+                          <button onClick={() => handleReplay(scenario)}>Replay</button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </section>
+          </main>
+        );
+      }
+
+      function buildChallenges(responses) {
+        const entries = {};
+        if (responses.totp) {
+          entries['totp'] = { code: responses.totp };
+        }
+        if (responses.hardware) {
+          entries['hardware-key'] = { assertion: responses.hardware };
+        }
+        return Object.keys(entries).length > 0 ? entries : null;
+      }
+
+      ReactDOM.createRoot(document.getElementById('app')).render(<App />);
+    </script>
+  </body>
+</html>
