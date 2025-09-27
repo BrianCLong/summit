@@ -1,0 +1,382 @@
+{
+  "workstream": "Workstream 1 — Maestro Conductor Summary",
+  "releases": [
+    {
+      "id": "R1",
+      "name": "Release 1",
+      "window": "Weeks 1-2",
+      "target_tag": "v24.1.0",
+      "objective": "Baseline guardrail instrumentation and publish Workstream 1 governance assets.",
+      "evidence": {
+        "logs": ["conductor-summary-r1.log"],
+        "metrics": ["prometheus://conductor_guardrails_latency_histogram"],
+        "tests": ["npm run lint:backlog", "npm run test:guardrails"],
+        "provenance": ["git tag v24.1.0", "backlog/backlog.json@R1"]
+      }
+    },
+    {
+      "id": "R2",
+      "name": "Release 2",
+      "window": "Weeks 3-4",
+      "target_tag": "v24.2.0",
+      "objective": "Automate cost/SLO alerting and finalize cross-workstream accountability handoffs.",
+      "evidence": {
+        "logs": ["conductor-summary-r2.log"],
+        "metrics": ["grafana://dashboards/conductor_guardrails"],
+        "tests": ["npm run lint:backlog", "npm run test:alerts"],
+        "provenance": ["git tag v24.2.0", "docs/raci.md@R2"]
+      }
+    }
+  ],
+  "epics": [
+    {
+      "id": "EP-WS1-001",
+      "name": "Guardrail Telemetry Blueprint",
+      "moscow": "Must",
+      "summary": "Define and validate SLO and cost telemetry hooks supporting Workstreams 2–8.",
+      "release": "R1",
+      "dependencies": ["Workstream 2", "Workstream 3", "Workstream 4", "Workstream 5"],
+      "evidence": {
+        "logs": ["telemetry-blueprint.log"],
+        "metrics": ["neo4j://latency/p95", "billing://env_costs"],
+        "tests": ["npm run test:telemetry"],
+        "provenance": ["ADR-telemetry-link"],
+        "hooks": ["SLO_histograms", "cost_alert_thresholds"]
+      },
+      "stories": [
+        {
+          "id": "ST-WS1-001A",
+          "name": "Document latency metric contracts",
+          "moscow": "Must",
+          "description": "Capture API, subscription, and Neo4j latency contracts with owners and sampling plans.",
+          "dependencies": ["Workstream 2", "Workstream 3"],
+          "acceptance_criteria": [
+            "SLO table lists owners, metric names, and collection frequency for reads, writes, subscriptions, Neo4j hops.",
+            "Sampling plan references existing Prometheus jobs and Neo4j tracing exporters.",
+            "Evidence hooks mapped to dashboard panels consumed by Workstream 5 (Observability)."
+          ],
+          "testability_notes": "Validate using markdown lint and jsonschema check for metric references; cross-verify with Grafana API snapshot.",
+          "verification": {
+            "steps": [
+              "Run npm run lint:docs on docs/conductor-summary.md",
+              "Execute scripts/validate_slo_schema.js",
+              "Confirm Grafana snapshot saved with timestamp and owner"
+            ]
+          },
+          "evidence": {
+            "logs": ["slo-contracts.log"],
+            "metrics": ["prometheus://conductor_slo_latency"],
+            "tests": ["npm run lint:docs"],
+            "provenance": ["Notion export -> repo commit"]
+          },
+          "tasks": [
+            {
+              "id": "TK-WS1-001A-1",
+              "description": "Create SLO contract table in docs/conductor-summary.md with metric IDs and owners.",
+              "moscow": "Must",
+              "evidence": {
+                "logs": ["git log -1 --stat"],
+                "metrics": ["conductor_slo_contract_table"],
+                "tests": ["npm run lint:docs"],
+                "provenance": ["docs/conductor-summary.md"]
+              }
+            },
+            {
+              "id": "TK-WS1-001A-2",
+              "description": "Update Grafana dashboard JSON with new panels and label Workstream 5 dependency.",
+              "moscow": "Should",
+              "evidence": {
+                "logs": ["grafana-dashboard-update.log"],
+                "metrics": ["grafana://dashboard_validation"],
+                "tests": ["scripts/validate_dashboard.py"],
+                "provenance": ["grafana-dashboard.json"]
+              }
+            }
+          ]
+        },
+        {
+          "id": "ST-WS1-001B",
+          "name": "Align cost guardrail instrumentation",
+          "moscow": "Must",
+          "description": "Specify cost telemetry collection for Dev, Staging, Prod, and LLM usage with 80% alerts.",
+          "dependencies": ["Workstream 6"],
+          "acceptance_criteria": [
+            "Cost data sources for all environments documented with API endpoints and refresh cadence.",
+            "Alert thresholds for 80% spend automatically notify Slack channel and PagerDuty runbook.",
+            "Link to Workstream 6 backlog item covering FinOps automation." 
+          ],
+          "testability_notes": "Use mock billing exporter to simulate spend and assert alert triggers in staging sandbox.",
+          "verification": {
+            "steps": [
+              "Run npm run test:alerts",
+              "Replay cost mock data via scripts/cost/mock.sh",
+              "Verify PagerDuty webhook receipts logged"
+            ]
+          },
+          "evidence": {
+            "logs": ["cost-guardrails.log"],
+            "metrics": ["billing://monthly_spend"],
+            "tests": ["npm run test:alerts"],
+            "provenance": ["runbooks/cost-guardrail.md"]
+          },
+          "tasks": [
+            {
+              "id": "TK-WS1-001B-1",
+              "description": "Publish cost telemetry matrix referencing Workstream 6 FinOps automation backlog.",
+              "moscow": "Must",
+              "evidence": {
+                "logs": ["cost-matrix.log"],
+                "metrics": ["finops://cost_threshold"],
+                "tests": ["npm run lint:docs"],
+                "provenance": ["docs/conductor-summary.md#cost-guardrails"]
+              }
+            },
+            {
+              "id": "TK-WS1-001B-2",
+              "description": "Configure alert routing with staging Slack webhook and PagerDuty service key.",
+              "moscow": "Could",
+              "evidence": {
+                "logs": ["alert-routing-test.log"],
+                "metrics": ["pagerduty://alerts_sent"],
+                "tests": ["scripts/test_alert_routing.sh"],
+                "provenance": ["ops/alert-routing.md"]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EP-WS1-002",
+      "name": "Backlog & Governance Delivery",
+      "moscow": "Must",
+      "summary": "Publish prioritized backlog, acceptance criteria, and validation tooling for Workstreams 2–8 handoff.",
+      "release": "R1",
+      "dependencies": ["Workstream 7", "Workstream 8"],
+      "evidence": {
+        "logs": ["backlog-delivery.log"],
+        "metrics": ["ci://lint_backlog_pass"],
+        "tests": ["npm run lint:backlog"],
+        "provenance": ["backlog/backlog.json"]
+      },
+      "stories": [
+        {
+          "id": "ST-WS1-002A",
+          "name": "Author backlog schema and automation",
+          "moscow": "Must",
+          "description": "Define JSON schema, lint command, and provenance fields for backlog/backlog.json.",
+          "dependencies": ["Workstream 7"],
+          "acceptance_criteria": [
+            "backlog/backlog.json validates against documented schema with MoSCoW and evidence fields.",
+            "CI command documented (npm run lint:backlog) and runnable locally.",
+            "Backlog references Workstreams 2–8 in dependency metadata."
+          ],
+          "testability_notes": "Implement schema validation script; ensure failing schema blocks release candidate in CI dry run.",
+          "verification": {
+            "steps": [
+              "Execute npm run lint:backlog",
+              "Review generated schema report in artifacts/backlog-schema.json",
+              "Capture screenshot of validation passing for audit"
+            ]
+          },
+          "evidence": {
+            "logs": ["lint-backlog.log"],
+            "metrics": ["ci://backlog_schema_pass_rate"],
+            "tests": ["npm run lint:backlog"],
+            "provenance": ["backlog/backlog.json"]
+          },
+          "tasks": [
+            {
+              "id": "TK-WS1-002A-1",
+              "description": "Draft backlog JSON with epics/stories/tasks and evidence metadata.",
+              "moscow": "Must",
+              "evidence": {
+                "logs": ["backlog-draft.log"],
+                "metrics": ["git_diff_lines"],
+                "tests": ["npm run lint:backlog"],
+                "provenance": ["backlog/backlog.json@draft"]
+              }
+            },
+            {
+              "id": "TK-WS1-002A-2",
+              "description": "Add npm script entry for backlog schema validation (ties to Workstream 7 CI hardening).",
+              "moscow": "Should",
+              "evidence": {
+                "logs": ["package-json-update.log"],
+                "metrics": ["ci://lint_backlog_runs"],
+                "tests": ["npm run lint:backlog"],
+                "provenance": ["package.json"]
+              }
+            }
+          ]
+        },
+        {
+          "id": "ST-WS1-002B",
+          "name": "Publish RACI accountability links",
+          "moscow": "Must",
+          "description": "Ensure docs/raci.md aligns with backlog and Workstream 8 governance requirements.",
+          "dependencies": ["Workstream 8"],
+          "acceptance_criteria": [
+            "RACI table lists Dev, Sec, SRE, Data, Docs for each milestone week.",
+            "Milestones align to release plan (R1/R2) and include dependency callouts to Workstreams 2–8.",
+            "Evidence hooks for sign-off recorded in docs/raci.md."
+          ],
+          "testability_notes": "Manual review plus markdown lint; cross-reference with backlog IDs.",
+          "verification": {
+            "steps": [
+              "Run npm run lint:docs",
+              "Cross-check backlog story IDs referenced in docs/raci.md",
+              "Record approvals in provenance register"
+            ]
+          },
+          "evidence": {
+            "logs": ["raci-publication.log"],
+            "metrics": ["governance://raci_alignment"],
+            "tests": ["npm run lint:docs"],
+            "provenance": ["docs/raci.md"]
+          },
+          "tasks": [
+            {
+              "id": "TK-WS1-002B-1",
+              "description": "Draft docs/raci.md with week-level milestones and role assignments.",
+              "moscow": "Must",
+              "evidence": {
+                "logs": ["raci-draft.log"],
+                "metrics": ["docs://raci_completion"],
+                "tests": ["npm run lint:docs"],
+                "provenance": ["docs/raci.md@draft"]
+              }
+            },
+            {
+              "id": "TK-WS1-002B-2",
+              "description": "Link backlog story references (e.g., ST-WS1-002B) inside docs/raci.md footnotes.",
+              "moscow": "Should",
+              "evidence": {
+                "logs": ["raci-backlog-link.log"],
+                "metrics": ["docs://linkcheck"],
+                "tests": ["npm run lint:docs"],
+                "provenance": ["docs/raci.md#references"]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EP-WS1-003",
+      "name": "Release 2 Alerting & Accountability",
+      "moscow": "Should",
+      "summary": "Finalize automated alerting, provenance capture, and cross-workstream handoffs for Release 2.",
+      "release": "R2",
+      "dependencies": ["Workstream 4", "Workstream 5", "Workstream 6", "Workstream 7", "Workstream 8"],
+      "evidence": {
+        "logs": ["release2-alerting.log"],
+        "metrics": ["alertmanager://guardrail_alerts"],
+        "tests": ["npm run test:alerts"],
+        "provenance": ["docs/raci.md#release-2"]
+      },
+      "stories": [
+        {
+          "id": "ST-WS1-003A",
+          "name": "Automate guardrail alert verification",
+          "moscow": "Should",
+          "description": "Implement weekly synthetic checks that validate latency and cost guardrails prior to staging cut.",
+          "dependencies": ["Workstream 4", "Workstream 5"],
+          "acceptance_criteria": [
+            "Synthetic job runs weekly with pass/fail summary published to observability Slack channel.",
+            "Neo4j query traces for 1-hop and 3-hop scenarios captured and stored for 30 days.",
+            "Cost alert dry run generates notification without paging when below threshold."
+          ],
+          "testability_notes": "Use CI pipeline to schedule synthetic check; confirm fail path triggers issue creation.",
+          "verification": {
+            "steps": [
+              "Configure GitHub workflow synthetic-check.yml",
+              "Review Slack notification logs",
+              "Inspect Neo4j trace retention via cypher query"
+            ]
+          },
+          "evidence": {
+            "logs": ["synthetic-guardrail-check.log"],
+            "metrics": ["synthetics://guardrail_pass_rate"],
+            "tests": ["npm run test:synthetics"],
+            "provenance": [".github/workflows/synthetic-check.yml"]
+          },
+          "tasks": [
+            {
+              "id": "TK-WS1-003A-1",
+              "description": "Author synthetic check workflow referencing Workstream 5 observability modules.",
+              "moscow": "Should",
+              "evidence": {
+                "logs": ["synthetic-workflow.log"],
+                "metrics": ["ci://synthetic_runs"],
+                "tests": ["npm run test:synthetics"],
+                "provenance": [".github/workflows/synthetic-check.yml@draft"]
+              }
+            },
+            {
+              "id": "TK-WS1-003A-2",
+              "description": "Record Neo4j trace retention query outputs in provenance folder.",
+              "moscow": "Could",
+              "evidence": {
+                "logs": ["neo4j-trace-retention.log"],
+                "metrics": ["neo4j://trace_storage"],
+                "tests": ["scripts/test_neo4j_retention.sh"],
+                "provenance": ["provenance/neo4j-trace-retention.md"]
+              }
+            }
+          ]
+        },
+        {
+          "id": "ST-WS1-003B",
+          "name": "Capture release provenance and sign-offs",
+          "moscow": "Should",
+          "description": "Define provenance logging pattern for release tags and RACI approvals with Workstream 8 compliance.",
+          "dependencies": ["Workstream 7", "Workstream 8"],
+          "acceptance_criteria": [
+            "Release checklist captures commit SHA, tag, and approver signatures.",
+            "Docs team publishes sign-off summary with links to guardrail evidence.",
+            "Security review artifact attached before production push."
+          ],
+          "testability_notes": "Manual review of provenance log entries and automated link checker on docs.",
+          "verification": {
+            "steps": [
+              "Update provenance/release-log.md",
+              "Run npm run lint:docs",
+              "Confirm security artifact accessible via docs/security directory"
+            ]
+          },
+          "evidence": {
+            "logs": ["release-provenance.log"],
+            "metrics": ["governance://signoff_latency"],
+            "tests": ["npm run lint:docs"],
+            "provenance": ["provenance/release-log.md"]
+          },
+          "tasks": [
+            {
+              "id": "TK-WS1-003B-1",
+              "description": "Draft provenance template referencing Workstream 8 compliance controls.",
+              "moscow": "Should",
+              "evidence": {
+                "logs": ["provenance-template.log"],
+                "metrics": ["compliance://template_usage"],
+                "tests": ["npm run lint:docs"],
+                "provenance": ["provenance/release-log.md@template"]
+              }
+            },
+            {
+              "id": "TK-WS1-003B-2",
+              "description": "Integrate tag verification step into release checklist referencing Workstream 7 CI pipeline.",
+              "moscow": "Could",
+              "evidence": {
+                "logs": ["release-checklist.log"],
+                "metrics": ["ci://tag_verification"],
+                "tests": ["scripts/test_release_checklist.sh"],
+                "provenance": ["docs/raci.md#release-2"]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
