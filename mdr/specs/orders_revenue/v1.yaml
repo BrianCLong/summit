@@ -1,0 +1,30 @@
+name: orders_revenue
+version: 1
+description: Orders level revenue and counts aggregated by order and customer.
+grain:
+  - column: order_id
+    type: string
+    description: Unique identifier for the order.
+  - column: customer_id
+    type: string
+    description: Unique identifier for the customer.
+source: analytics.orders
+filters:
+  - column: order_status
+    operator: '='
+    value: completed
+measures:
+  - name: total_revenue
+    expression: SUM(amount)
+    type: number
+    description: Sum of order revenue in currency units.
+  - name: order_count
+    expression: COUNT(DISTINCT order_id)
+    type: integer
+    description: Number of distinct orders in the grain.
+owners:
+  - data-platform@example.com
+  - finance-ops@example.com
+tests:
+  - name: completeness
+    query: SELECT COUNT(*) FROM metrics.orders_revenue_v1;
