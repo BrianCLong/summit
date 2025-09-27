@@ -40,6 +40,7 @@ import {
   Map,
   Assessment,
   Settings,
+  Policy,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -64,6 +65,7 @@ import MCPRegistry from './pages/MCPRegistry.tsx';
 import { Security, Engineering, Description } from '@mui/icons-material';
 import ObservabilityPanel from './features/observability/ObservabilityPanel';
 import AdminStudio from './features/admin/AdminStudio';
+import BgprDashboard from './features/bgpr/BgprDashboard';
 import WorkBoard from './features/work/Board';
 import TicketDetails from './features/work/TicketDetails';
 import WorkflowEditor from './features/workflows/Editor';
@@ -110,6 +112,7 @@ const navigationItems = [
   { path: '/access-intel', label: 'Access Intel', icon: <Security /> },
   { path: '/geoint', label: 'GeoInt Map', icon: <Map /> },
   { path: '/reports', label: 'Reports', icon: <Assessment /> },
+  { path: '/bgpr', label: 'BGPR Rollouts', icon: <Policy /> },
   { path: '/system', label: 'System', icon: <Settings />, roles: ['ADMIN'] },
   {
     path: '/admin/osint-feeds',
@@ -664,6 +667,7 @@ function MainLayout() {
             <Route path="/access-intel" element={<AccessIntelPage />} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
+            <Route path="/bgpr" element={<BgprDashboard />} />
             <Route element={<ProtectedRoute roles={['ADMIN']} />}>
               <Route path="/system" element={<InvestigationsPage />} />
               <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
