@@ -10,3 +10,6 @@ node_modules
 **/*.snap
 **/generated/**
 **/.graphqlrc*
+infra/helm/intelgraph/templates/configmap.yaml
+infra/helm/intelgraph/templates/deployment-api-gateway.yaml
+infra/helm/intelgraph/templates/file-drop-pvc.yaml

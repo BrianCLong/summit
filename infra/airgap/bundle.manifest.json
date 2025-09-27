@@ -1,0 +1,35 @@
+{
+  "bundleVersion": "1.0.0",
+  "output": {
+    "archiveName": "intelgraph-airgap-bundle.tgz",
+    "directory": "dist"
+  },
+  "charts": [
+    {
+      "name": "intelgraph",
+      "path": "infra/helm/intelgraph",
+      "values": ["infra/helm/intelgraph/values/airgap.yaml"]
+    },
+    {
+      "name": "gateway",
+      "path": "infra/helm/gateway"
+    },
+    {
+      "name": "postgres",
+      "path": "infra/helm/postgres"
+    },
+    {
+      "name": "redis",
+      "path": "infra/helm/redis"
+    }
+  ],
+  "images": [
+    { "name": "ghcr.io/brianlong/intelgraph/server:dev" },
+    { "name": "ghcr.io/brianlong/intelgraph/client:dev" },
+    { "name": "ghcr.io/brianlong/intelgraph/gateway:dev" }
+  ],
+  "provenance": {
+    "ledgerPath": "ledger/provenance-ledger.json",
+    "resyncManifest": "ledger/resync-manifest.json"
+  }
+}

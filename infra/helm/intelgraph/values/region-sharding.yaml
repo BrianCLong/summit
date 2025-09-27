@@ -1,0 +1,28 @@
+regionSharding:
+  enabled: true
+  defaultRegion: us-west-2
+  routing:
+    header: x-intelgraph-region
+    fallbackPolicy: nearest
+  regions:
+    - name: us-west-2
+      gatewayHost: gateway.us-west-2.prod.intelgraph.example
+      readReplica:
+        role: primary
+        endpoint: postgres.primary.us-west-2.rds.amazonaws.com:5432
+    - name: us-east-1
+      gatewayHost: gateway.us-east-1.prod.intelgraph.example
+      readReplica:
+        role: read-replica
+        endpoint: postgres.replica.us-east-1.rds.amazonaws.com:5432
+        promotionWindow: '05:00-05:15'
+    - name: eu-central-1
+      gatewayHost: gateway.eu-central-1.prod.intelgraph.example
+      readReplica:
+        role: read-replica
+        endpoint: postgres.replica.eu-central-1.rds.amazonaws.com:5432
+        promotionWindow: '05:15-05:30'
+  tenants:
+    gov-west: { region: us-west-2 }
+    gov-east: { region: us-east-1, fallback: [us-west-2] }
+    emea: { region: eu-central-1, fallback: [us-west-2] }

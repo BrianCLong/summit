@@ -1,0 +1,59 @@
+federal:
+  classification: 'CUI'
+  airGap:
+    enabled: true
+    export:
+      signingRequired: true
+    bundle:
+      ledgerMountPath: /var/intelgraph/provenance
+      dropboxPath: /var/intelgraph/dropbox
+
+services:
+  apiGateway:
+    enabled: true
+    name: intelgraph-gateway
+    replicaCount: 2
+    port: 8080
+  worker:
+    enabled: true
+  analytics:
+    enabled: true
+
+fileDrop:
+  enabled: true
+  dropboxPath: /var/intelgraph/dropbox
+  pvc:
+    name: file-drop
+    storageClassName: airgap-shared
+    size: 50Gi
+
+regionSharding:
+  enabled: true
+  defaultRegion: us-west-2
+  routing:
+    header: x-intelgraph-region
+    fallbackPolicy: nearest
+  regions:
+    - name: us-west-2
+      gatewayHost: gateway.us-west-2.airgap.local
+      readReplica:
+        role: primary
+        endpoint: postgres.primary.svc.cluster.local:5432
+    - name: us-east-1
+      gatewayHost: gateway.us-east-1.airgap.local
+      readReplica:
+        role: read-replica
+        endpoint: postgres.us-east-1.svc.cluster.local:5432
+      metrics:
+        latencyBudgetMs: 120
+    - name: eu-central-1
+      gatewayHost: gateway.eu-central-1.airgap.local
+      readReplica:
+        role: read-replica
+        endpoint: postgres.eu-central-1.svc.cluster.local:5432
+      metrics:
+        latencyBudgetMs: 180
+  tenants:
+    alpha: { region: us-west-2 }
+    bravo: { region: us-east-1, fallback: [us-west-2] }
+    charlie: { region: eu-central-1, fallback: [us-west-2] }

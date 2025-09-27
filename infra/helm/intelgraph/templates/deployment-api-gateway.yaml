@@ -1,3 +1,4 @@
+# prettier-ignore
 {{- $service := .Values.services.apiGateway -}}
 {{- if $service.enabled }}
 apiVersion: apps/v1
@@ -43,6 +44,13 @@ spec:
           env:
             {{- include "intelgraph.commonEnv" . | nindent 12 }}
             {{- include "intelgraph.serviceEnv" (dict "service" $service "root" .) | nindent 12 }}
+            {{- if .Values.regionSharding.enabled }}
+            - name: REGION_ROUTING_TABLE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "intelgraph.fullname" . }}-config
+                  key: intelgraph-settings.yaml
+            {{- end }}
           livenessProbe:
             {{- include "intelgraph.livenessProbe" (dict "service" $service "root" .) | nindent 12 }}
           readinessProbe:

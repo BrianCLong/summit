@@ -1,0 +1,19 @@
+# prettier-ignore
+{{- if and .Values.fileDrop.enabled .Values.fileDrop.pvc }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.fileDrop.pvc.name | default (printf "%s-file-drop" (include "intelgraph.fullname" .)) }}
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    purpose: file-drop
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.fileDrop.pvc.size | default "20Gi" }}
+  {{- with .Values.fileDrop.pvc.storageClassName }}
+  storageClassName: {{ . }}
+  {{- end }}
+{{- end }}
