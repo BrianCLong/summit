@@ -61,7 +61,7 @@ import ConductorStudio from './features/conductor/ConductorStudio.tsx';
 import VisualPipelines from './pages/VisualPipelines.tsx';
 import ExecutorsPage from './pages/Executors.tsx';
 import MCPRegistry from './pages/MCPRegistry.tsx';
-import { Security, Engineering, Description } from '@mui/icons-material';
+import { Security, Engineering, Description, Insights } from '@mui/icons-material';
 import ObservabilityPanel from './features/observability/ObservabilityPanel';
 import AdminStudio from './features/admin/AdminStudio';
 import WorkBoard from './features/work/Board';
@@ -77,6 +77,7 @@ import ClaimsViewer from './features/conductor/ClaimsViewer';
 import RetractionQueue from './features/conductor/RetractionQueue';
 import CostAdvisor from './features/conductor/CostAdvisor';
 import RunSearch from './features/conductor/RunSearch';
+import DataProfilingPage from './pages/ingestion/DataProfilingPage.tsx';
 
 // Navigation items
 const navigationItems = [
@@ -96,6 +97,7 @@ const navigationItems = [
   { path: '/pipelines', label: 'Pipelines', icon: <Engineering /> },
   { path: '/executors', label: 'Executors', icon: <Engineering /> },
   { path: '/observability', label: 'Observability', icon: <Assessment /> },
+  { path: '/ingestion/profiling', label: 'Data Profiling', icon: <Insights /> },
   { path: '/admin/studio', label: 'Admin Studio', icon: <Settings />, roles: ['ADMIN'] },
   // Feature-flagged entries
   ...(import.meta.env.VITE_FEATURE_WORK === 'true'
@@ -650,6 +652,7 @@ function MainLayout() {
             <Route path="/pipelines" element={<VisualPipelines />} />
             <Route path="/executors" element={<ExecutorsPage />} />
             <Route path="/observability" element={<ObservabilityPanel />} />
+            <Route path="/ingestion/profiling" element={<DataProfilingPage />} />
               <Route path="/admin/studio" element={<AdminStudio />} />
           {import.meta.env.VITE_FEATURE_WORK === 'true' && (
             <Route path="/work" element={<WorkBoard />} />
