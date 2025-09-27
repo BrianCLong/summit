@@ -1,0 +1,59 @@
+# ML observability alert rules for Prometheus
+# Focuses on model accuracy, inference latency, and data drift metrics.
+groups:
+  - name: ml-observability
+    interval: 30s
+    rules:
+      - record: model:inference_latency_seconds:p95
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le, model, deployment) (
+              rate(ml_inference_latency_seconds_bucket{deployment="prod"}[5m])
+            )
+          )
+      - record: model:accuracy_avg_1h
+        expr: avg_over_time(ml_model_accuracy_score{deployment="prod"}[1h])
+      - alert: ModelAccuracyDrift
+        expr: |
+          model:accuracy_avg_1h{deployment="prod"}
+            < (ml_model_accuracy_target{deployment="prod"} - 0.05)
+        for: 15m
+        labels:
+          severity: page
+          component: ml-observability
+          service: ml-platform
+        annotations:
+          summary: 'Model accuracy drift beyond threshold'
+          description: |
+            Accuracy for model {{ $labels.model }} in {{ $labels.deployment }} dropped more than 5% below target for 15 minutes.
+            Investigate dataset freshness, concept drift, and retraining pipelines.
+          runbook_url: 'https://runbooks.summit.ai/ml-alerting-guide#model-accuracy-drift'
+      - alert: ModelInferenceLatencyHigh
+        expr: |
+          model:inference_latency_seconds:p95{deployment="prod"} > 0.75
+        for: 10m
+        labels:
+          severity: page
+          component: ml-observability
+          service: ml-platform
+        annotations:
+          summary: 'p95 inference latency above 750ms'
+          description: |
+            p95 inference latency for model {{ $labels.model }} in {{ $labels.deployment }} has exceeded 750ms for 10 minutes.
+            Check feature service, hardware accelerators, and upstream dependencies.
+          runbook_url: 'https://runbooks.summit.ai/ml-alerting-guide#inference-latency'
+      - alert: ModelDataDriftHigh
+        expr: |
+          avg_over_time(ml_data_drift_score{deployment="prod"}[30m]) > 0.7
+        for: 30m
+        labels:
+          severity: page
+          component: ml-observability
+          service: ml-platform
+        annotations:
+          summary: 'Data drift score above 0.7'
+          description: |
+            Data drift score for model {{ $labels.model }} exceeded 0.7 over the last 30 minutes.
+            Validate upstream data quality, feature distributions, and refresh cadence.
+          runbook_url: 'https://runbooks.summit.ai/ml-alerting-guide#data-drift'

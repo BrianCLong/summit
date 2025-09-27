@@ -1,0 +1,43 @@
+# PagerDuty service configuration for ML observability alerts
+apiVersion: pagerduty.summit.ai/v1alpha1
+kind: PagerDutyService
+metadata:
+  name: intelgraph-ml-observability
+spec:
+  description: PagerDuty service dedicated to ML metrics (accuracy, latency, drift).
+  escalation_policy: sre-ml-primary
+  response_play: ml-major-incident
+  integrations:
+    - name: Prometheus Alertmanager
+      type: events-api-v2
+      routing_key_secret: PAGERDUTY_ML_ROUTING_KEY
+      vendor: prometheus
+      auto_resolve: true
+  incident_urgency_rules:
+    during_support_hours:
+      type: constant
+      urgency: high
+    outside_support_hours:
+      type: constant
+      urgency: high
+  event_rules:
+    - description: Route ML observability alerts as critical incidents
+      conditions:
+        operator: and
+        subconditions:
+          - fact: details.component
+            operator: equals
+            value: ml-observability
+          - fact: severity
+            operator: equals
+            value: page
+      actions:
+        severity: critical
+        route_to: intelgraph-ml-observability
+        suppress: false
+        annotate: "Triggered by Prometheus ML alert. See runbook: https://runbooks.summit.ai/ml-alerting-guide"
+  stakeholders:
+    - team: ml-platform
+      contact: '#ml-ops'
+    - team: sre
+      contact: '#sre-alerts'
