@@ -10,6 +10,54 @@ data:
   slos.yaml: |
     # Service Level Objectives for Safe Mutations
     slos:
+      - name: "intelgraph-api-availability"
+        description: "IntelGraph API success rate ≥ 99.9% (error budget 0.1%)"
+        sli_query: 'sum(rate(http_requests_total{service="intelgraph-api",status!~"5.."}[5m])) /
+          sum(rate(http_requests_total{service="intelgraph-api"}[5m])))'
+        objective: 0.999
+        unit: "ratio"
+        warning_threshold: 0.995
+        critical_threshold: 0.99
+        evaluation_window: "5m"
+        alert_duration: "5m"
+        burn_rates:
+          - window: "5m"
+            threshold: 14.4
+          - window: "1h"
+            threshold: 6
+          - window: "6h"
+            threshold: 2
+        pagerduty_service: sre-primary
+
+      - name: "intelgraph-ingest-success"
+        description: "Streaming ingest success ≥ 99.5% (error budget 0.5%)"
+        sli_query: 'sum(rate(ingest_success_total[5m])) /
+          sum(rate(ingest_attempts_total[5m])))'
+        objective: 0.995
+        unit: "ratio"
+        warning_threshold: 0.99
+        critical_threshold: 0.985
+        evaluation_window: "5m"
+        alert_duration: "10m"
+        burn_rates:
+          - window: "5m"
+            threshold: 8
+          - window: "1h"
+            threshold: 4
+          - window: "6h"
+            threshold: 1.5
+        pagerduty_service: sre-primary
+
+      - name: "intelgraph-cost-guardrail"
+        description: "Monthly platform spend must remain ≤ 80% of budget"
+        sli_query: 'intelgraph_monthly_spend_usd / intelgraph_monthly_budget_usd'
+        objective: 0.8
+        unit: "ratio"
+        warning_threshold: 0.8
+        critical_threshold: 0.9
+        evaluation_window: "1d"
+        alert_duration: "15m"
+
       - name: "budget-guard-latency"
         description: "Budget guard latency p95 ≤ 30ms per mutation"
         sli_query: 'histogram_quantile(0.95, rate(mutation_latency_ms_bucket{stage="budget"}[5m]))'
@@ -55,6 +103,93 @@ data:
     groups:
       - name: intelgraph_safe_mutations
         rules:
+          # Platform SLO burn alerts
+          - alert: APIErrorBudgetFastBurn
+            expr: |
+              (1 - (sum(rate(http_requests_total{service="intelgraph-api",status!~"5.."}[5m])) /
+                sum(rate(http_requests_total{service="intelgraph-api"}[5m])))) / 0.001 > 14.4
+            for: 5m
+            labels:
+              severity: critical
+              service: intelgraph-api
+              slo: intelgraph-api-availability
+              pagerduty_service: sre-primary
+            annotations:
+              summary: "API error budget burning too fast (5m window)"
+              description: "IntelGraph API burn rate >14.4x. Auto-rollback triggered in pipeline."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/observability-sre"
+
+          - alert: APIErrorBudgetSlowBurn
+            expr: |
+              (1 - (sum(rate(http_requests_total{service="intelgraph-api",status!~"5.."}[1h])) /
+                sum(rate(http_requests_total{service="intelgraph-api"}[1h])))) / 0.001 > 6
+            for: 15m
+            labels:
+              severity: warning
+              service: intelgraph-api
+              slo: intelgraph-api-availability
+              pagerduty_service: sre-primary
+            annotations:
+              summary: "API error budget sustained burn (1h window)"
+              description: "IntelGraph API error budget consuming >6x over 1h. Investigate before budget exhaustion."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/observability-sre"
+
+          - alert: IngestErrorBudgetFastBurn
+            expr: |
+              (1 - (sum(rate(ingest_success_total[5m])) /
+                sum(rate(ingest_attempts_total[5m])))) / 0.005 > 8
+            for: 10m
+            labels:
+              severity: critical
+              service: intelgraph-ingest
+              slo: intelgraph-ingest-success
+              pagerduty_service: sre-primary
+            annotations:
+              summary: "Ingest error budget fast burn"
+              description: "Streaming ingest burn rate >8x (5m). Canary rollback recommended."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/observability-sre"
+
+          - alert: IngestErrorBudgetSlowBurn
+            expr: |
+              (1 - (sum(rate(ingest_success_total[1h])) /
+                sum(rate(ingest_attempts_total[1h])))) / 0.005 > 4
+            for: 20m
+            labels:
+              severity: warning
+              service: intelgraph-ingest
+              slo: intelgraph-ingest-success
+              pagerduty_service: sre-primary
+            annotations:
+              summary: "Ingest error budget sustained burn"
+              description: "Ingest pipeline burning >4x budget over 1h. Address backlog or pause deploys."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/observability-sre"
+
+          - alert: PlatformCostGuardrailWarning
+            expr: (intelgraph_monthly_spend_usd / intelgraph_monthly_budget_usd) > 0.8
+            for: 15m
+            labels:
+              severity: warning
+              service: finops
+              slo: intelgraph-cost-guardrail
+              pagerduty_service: sre-primary
+            annotations:
+              summary: "Platform costs exceeded 80% of budget"
+              description: "FinOps data shows {{ $value | humanizePercentage }} of monthly budget used. Coordinate feature flags."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/observability-sre#finops-guardrail"
+
+          - alert: PlatformCostGuardrailCritical
+            expr: (intelgraph_monthly_spend_usd / intelgraph_monthly_budget_usd) > 0.9
+            for: 5m
+            labels:
+              severity: critical
+              service: finops
+              slo: intelgraph-cost-guardrail
+              pagerduty_service: sre-primary
+            annotations:
+              summary: "Platform costs exceeded 90% of budget"
+              description: "Monthly spend is {{ $value | humanizePercentage }} of budget. Freeze deploys and trigger cost rollback."
+              runbook_url: "https://docs.intelgraph.dev/runbooks/observability-sre#finops-guardrail"
+
           # SLO-1: Budget Guard Latency
           - alert: BudgetGuardLatencyWarning
             expr: histogram_quantile(0.95, rate(mutation_latency_ms_bucket{stage="budget"}[5m])) > 60

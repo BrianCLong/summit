@@ -1,0 +1,210 @@
+name: platform-sre-pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Semantic version to release (vX.Y.Z)"
+        required: false
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+env:
+  NODE_VERSION: '20.x'
+  REGISTRY: ghcr.io/${{ github.repository_owner }}/summit
+  RELEASE_ENV: production
+
+jobs:
+  version:
+    name: Verify semantic version tag
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Ensure version tag provided
+        id: version
+        run: |
+          VERSION="${{ github.event.inputs.release_version || github.ref_name }}"
+          if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Release version must match vX.Y.Z"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Create annotated tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git tag -a "${{ steps.version.outputs.version }}" -m "Automated release ${{ steps.version.outputs.version }}"
+          git push origin "${{ steps.version.outputs.version }}"
+
+  build:
+    name: Build and unit test
+    runs-on: ubuntu-latest
+    needs: version
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build workspace
+        run: npm run build --if-present
+      - name: Run unit tests
+        run: npm test -- --ci --reporters=jest-junit
+
+  security_scans:
+    name: Lint, scan & SBOM
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Dependency audit
+        run: npm audit --production
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          artifact-name: summit-sbom
+
+  integration_tests:
+    name: Integration tests & smoke
+    runs-on: ubuntu-latest
+    needs: security_scans
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install deps
+        run: npm ci
+      - name: Start services
+        run: npm run dev:ci -- --headless &
+      - name: Wait for readiness
+        run: ./scripts/wait-for-ready.sh http://localhost:3000 120
+      - name: Run smoke tests
+        run: npm run test:smoke
+      - name: Archive logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-logs
+          path: logs/**/*.log
+
+  canary_deploy:
+    name: Canary deploy
+    runs-on: ubuntu-latest
+    needs: integration_tests
+    environment:
+      name: canary
+      url: https://canary.intelgraph.dev
+    steps:
+      - uses: actions/checkout@v4
+      - name: Authenticate to cluster
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.CANARY_KUBECONFIG }}
+      - name: Render Helm values
+        run: |
+          yq eval '.image.tag = "${{ needs.version.outputs.version }}"' ops/deployment/intelgraph-canary-values.yaml > /tmp/canary-values.yaml
+      - name: Deploy canary (25%)
+        run: |
+          helm upgrade --install intelgraph-canary charts/intelgraph \
+            --namespace platform-canary \
+            -f /tmp/canary-values.yaml \
+            --set rollout.strategy=canary \
+            --set rollout.steps='{25}'
+      - name: Simulate deploy guardrails
+        run: |
+          ./ops/deployment/simulate-canary-deploy.sh \
+            --environment canary \
+            --service api \
+            --slo-budget-threshold 0.001 \
+            --cost-threshold 0.8
+
+  slo_enforcement:
+    name: Error budget & cost enforcement
+    runs-on: ubuntu-latest
+    needs: canary_deploy
+    steps:
+      - uses: actions/checkout@v4
+      - name: Evaluate burn rate windows
+        run: |
+          python ops/observability-ci/scripts/check_burn_rate.py \
+            --slo-config ops/slos-and-alerts.yaml \
+            --service intelgraph-api \
+            --warning-threshold 0.8
+      - name: Evaluate ingest budget
+        run: |
+          python ops/observability-ci/scripts/check_burn_rate.py \
+            --slo-config ops/slos-and-alerts.yaml \
+            --service intelgraph-ingest \
+            --warning-threshold 0.8
+      - name: Evaluate cost guardrail
+        run: |
+          python ops/observability-ci/scripts/check_cloud_costs.py \
+            --budget-config ops/observability/cost-budget.yaml \
+            --threshold 0.8
+
+  progressive_delivery:
+    name: Promote to production
+    runs-on: ubuntu-latest
+    needs: slo_enforcement
+    environment:
+      name: production
+      url: https://app.intelgraph.dev
+    steps:
+      - uses: actions/checkout@v4
+      - name: Authenticate to cluster
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.PROD_KUBECONFIG }}
+      - name: Promote traffic to 100%
+        run: |
+          kubectl argo rollouts promote intelgraph -n platform-prod --full
+      - name: Post-deploy verification
+        run: |
+          ./ops/deployment/simulate-canary-deploy.sh \
+            --environment production \
+            --service api \
+            --verify-only
+
+  rollback:
+    name: Auto rollback
+    runs-on: ubuntu-latest
+    needs: canary_deploy
+    if: failure()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Authenticate to cluster
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.CANARY_KUBECONFIG }}
+      - name: Rollback last canary release
+        run: |
+          kubectl argo rollouts rollback intelgraph -n platform-canary
+      - name: Post-rollback validation
+        run: |
+          ./ops/deployment/simulate-canary-deploy.sh \
+            --environment canary \
+            --service api \
+            --verify-only
