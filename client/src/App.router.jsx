@@ -40,6 +40,7 @@ import {
   Map,
   Assessment,
   Settings,
+  Insights,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -77,6 +78,7 @@ import ClaimsViewer from './features/conductor/ClaimsViewer';
 import RetractionQueue from './features/conductor/RetractionQueue';
 import CostAdvisor from './features/conductor/CostAdvisor';
 import RunSearch from './features/conductor/RunSearch';
+import UserActivityAnalyticsPage from './pages/UserActivityAnalytics.tsx';
 
 // Navigation items
 const navigationItems = [
@@ -96,6 +98,7 @@ const navigationItems = [
   { path: '/pipelines', label: 'Pipelines', icon: <Engineering /> },
   { path: '/executors', label: 'Executors', icon: <Engineering /> },
   { path: '/observability', label: 'Observability', icon: <Assessment /> },
+  { path: '/analytics/user-activity', label: 'User Analytics', icon: <Insights /> },
   { path: '/admin/studio', label: 'Admin Studio', icon: <Settings />, roles: ['ADMIN'] },
   // Feature-flagged entries
   ...(import.meta.env.VITE_FEATURE_WORK === 'true'
@@ -650,12 +653,12 @@ function MainLayout() {
             <Route path="/pipelines" element={<VisualPipelines />} />
             <Route path="/executors" element={<ExecutorsPage />} />
             <Route path="/observability" element={<ObservabilityPanel />} />
-              <Route path="/admin/studio" element={<AdminStudio />} />
-          {import.meta.env.VITE_FEATURE_WORK === 'true' && (
-            <Route path="/work" element={<WorkBoard />} />
-          )}
-          <Route path="/tickets/:provider/:externalId" element={<TicketDetails />} />
-          <Route path="/runs/viewer" element={<RunViewer />} />
+            <Route path="/analytics/user-activity" element={<UserActivityAnalyticsPage />} />
+            {import.meta.env.VITE_FEATURE_WORK === 'true' && (
+              <Route path="/work" element={<WorkBoard />} />
+            )}
+            <Route path="/tickets/:provider/:externalId" element={<TicketDetails />} />
+            <Route path="/runs/viewer" element={<RunViewer />} />
             {import.meta.env.VITE_FEATURE_WORKFLOWS === 'true' && (
               <Route path="/workflows" element={<WorkflowEditor />} />
             )}
@@ -667,10 +670,11 @@ function MainLayout() {
             <Route element={<ProtectedRoute roles={['ADMIN']} />}>
               <Route path="/system" element={<InvestigationsPage />} />
               <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
+              <Route path="/admin/studio" element={<AdminStudio />} />
               <Route path="/wargame-dashboard" element={<ExecutiveDashboard />} />
             </Route>
-            <Route path="*" element={<NotFoundPage />} />
             <Route path="/api-docs" element={<APIDocs />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
       </Box>

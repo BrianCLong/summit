@@ -160,6 +160,35 @@ export const coreTypeDefs = gql`
     depth: Int!
   }
 
+  # User activity analytics
+  type UserActivityPoint {
+    date: DateTime!
+    loginCount: Int!
+    queryCount: Int!
+  }
+
+  type UserActivityTopUser {
+    userId: String!
+    loginCount: Int!
+    queryCount: Int!
+    lastActiveAt: DateTime
+  }
+
+  type UserActivitySummary {
+    totalLogins: Int!
+    totalQueries: Int!
+    uniqueUsers: Int!
+    activeUsersByDay: [UserActivityPoint!]!
+    topUsers: [UserActivityTopUser!]!
+  }
+
+  type UserActivityEvent {
+    timestamp: DateTime!
+    type: String!
+    userId: String
+    metadata: JSON
+  }
+
   input GraphTraversalInput {
     startEntityId: ID!
     tenantId: String!
@@ -193,6 +222,19 @@ export const coreTypeDefs = gql`
 
     # Search across all entity types
     searchEntities(tenantId: String!, query: String!, kinds: [String!], limit: Int = 50): [Entity!]!
+
+    # Analytics
+    userActivitySummary(
+      tenantId: String
+      rangeStart: DateTime
+      rangeEnd: DateTime
+    ): UserActivitySummary!
+    recentUserActivity(
+      tenantId: String
+      rangeStart: DateTime
+      rangeEnd: DateTime
+      limit: Int = 50
+    ): [UserActivityEvent!]!
   }
 
   # Extended Mutation operations

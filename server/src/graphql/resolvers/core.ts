@@ -11,6 +11,7 @@ import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../config/logger.js';
 import { z } from 'zod';
+import { UserActivityAnalyticsService } from '../../services/UserActivityAnalyticsService.js';
 
 const resolverLogger = logger.child({ name: 'CoreResolvers' });
 
@@ -44,6 +45,7 @@ const neo4j = getNeo4jDriver();
 const entityRepo = new EntityRepo(pg, neo4j);
 const relationshipRepo = new RelationshipRepo(pg, neo4j);
 const investigationRepo = new InvestigationRepo(pg);
+const userActivityAnalytics = new UserActivityAnalyticsService();
 
 // Custom scalars
 const DateTimeScalar = new GraphQLScalarType({
@@ -269,6 +271,68 @@ export const coreResolvers = {
     //     createdBy: row.created_by
     //   }));
     // }
+
+    userActivitySummary: async (
+      _: any,
+      { tenantId, rangeStart, rangeEnd }: { tenantId?: string; rangeStart?: string; rangeEnd?: string },
+      context: any,
+    ) => {
+      const effectiveTenantId = tenantId || context?.tenantId || context?.user?.tenantId || null;
+      const endDate = rangeEnd ? new Date(rangeEnd) : new Date();
+      if (Number.isNaN(endDate.getTime())) {
+        throw new Error('Invalid rangeEnd provided');
+      }
+      const startDate = rangeStart
+        ? new Date(rangeStart)
+        : new Date(endDate.getTime() - 1000 * 60 * 60 * 24 * 30);
+      if (Number.isNaN(startDate.getTime())) {
+        throw new Error('Invalid rangeStart provided');
+      }
+      if (startDate > endDate) {
+        throw new Error('rangeStart must be before rangeEnd');
+      }
+
+      return await userActivityAnalytics.getSummary({
+        tenantId: effectiveTenantId,
+        rangeStart: startDate.toISOString(),
+        rangeEnd: endDate.toISOString(),
+      });
+    },
+
+    recentUserActivity: async (
+      _: any,
+      {
+        tenantId,
+        rangeStart,
+        rangeEnd,
+        limit,
+      }: { tenantId?: string; rangeStart?: string; rangeEnd?: string; limit?: number },
+      context: any,
+    ) => {
+      const effectiveTenantId = tenantId || context?.tenantId || context?.user?.tenantId || null;
+      const endDate = rangeEnd ? new Date(rangeEnd) : new Date();
+      if (Number.isNaN(endDate.getTime())) {
+        throw new Error('Invalid rangeEnd provided');
+      }
+      const startDate = rangeStart
+        ? new Date(rangeStart)
+        : new Date(endDate.getTime() - 1000 * 60 * 60 * 24 * 7);
+      if (Number.isNaN(startDate.getTime())) {
+        throw new Error('Invalid rangeStart provided');
+      }
+      if (startDate > endDate) {
+        throw new Error('rangeStart must be before rangeEnd');
+      }
+
+      const boundedLimit = Math.min(Math.max(limit ?? 25, 1), 500);
+
+      return await userActivityAnalytics.getRecentActivity(
+        effectiveTenantId,
+        startDate.toISOString(),
+        endDate.toISOString(),
+        boundedLimit,
+      );
+    },
   },
 
   Mutation: {
