@@ -6,6 +6,7 @@ const aiResolvers = require('./resolvers.ai.js');
 const annotationsResolvers = require('./resolvers.annotations.js');
 import crystalResolvers from './resolvers.crystal.js';
 import { randomUUID as uuidv4 } from 'crypto';
+import customGraphMetricResolvers from './resolvers.customGraphMetrics.js';
 
 interface User {
   id: string;
@@ -56,6 +57,7 @@ let seq = 1;
 
 export const resolvers = {
   Query: {
+    ...(customGraphMetricResolvers.Query || {}),
     ...(crystalResolvers.Query || {}),
     ...(copilotResolvers.Query || {}),
     ...(aiResolvers.Query || {}),
