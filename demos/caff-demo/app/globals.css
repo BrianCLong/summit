@@ -1,0 +1,24 @@
+:root {
+  color-scheme: light dark;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top, #0e1f40, #050912 80%);
+  color: #f4f7ff;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+input, textarea {
+  font-family: inherit;
+}
