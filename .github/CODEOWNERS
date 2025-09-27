@@ -1,104 +1,14 @@
-# IntelGraph Platform Code Ownership - GREEN TRAIN Merge Readiness
+# Lines starting with '#' are comments.
 # Each line is a file pattern followed by one or more owners.
-# These owners will be requested for review when someone opens a pull request.
 
-# Global fallback - platform lead owns everything by default
-* @BrianCLong
+# These owners will be suggested for any code changes in the .github/workflows directory
+/.github/workflows/ @intelgraph-devops-team
 
-# CRITICAL PATHS - Require multiple approvals for high-impact changes
+# These owners will be suggested for any code changes in the client directory
+/client/ @intelgraph-frontend-team
 
-# Core web applications
-/apps/web/**/* @BrianCLong @frontend-lead
-/apps/web/public/**/* @design-lead @BrianCLong
-/apps/mobile-interface/**/* @BrianCLong @mobile-lead
-/apps/analytics-engine/**/* @BrianCLong @analytics-lead
-/apps/search-engine/**/* @BrianCLong @search-lead
+# These owners will be suggested for any code changes in the server directory
+/server/ @intelgraph-backend-team
 
-# Backend services - core platform
-/server/**/* @BrianCLong @backend-lead
-/services/graph-xai/**/* @BrianCLong @ai-lead
-/services/prov-ledger/**/* @BrianCLong @platform-lead
-/services/agent-runtime/**/* @BrianCLong @ai-lead
-/services/predictive-suite/**/* @BrianCLong @ai-lead
-/services/feed-processor/**/* @BrianCLong @data-lead
-/services/authz-gateway/**/* @BrianCLong @security-lead
-
-# CRITICAL: Data & migrations (requires 2+ approvals)
-/server/src/migrations/**/* @BrianCLong @db-lead @security-lead
-/server/db/**/* @BrianCLong @db-lead
-/server/src/db/**/* @BrianCLong @db-lead
-/ingestion/**/* @BrianCLong @data-lead
-
-# CRITICAL: API surface changes (GraphQL schema is contract)
-/server/src/graphql/**/* @BrianCLong @backend-lead @security-lead
-/server/graphql/**/* @BrianCLong @backend-lead
-/packages/common-types/**/* @BrianCLong @backend-lead
-
-# Infrastructure as Code & Deployment
-/deploy/helm/**/* @BrianCLong @platform-lead
-/deploy/terraform/**/* @BrianCLong @platform-lead @security-lead
-/deploy/k8s/**/* @BrianCLong @platform-lead
-/infrastructure/**/* @BrianCLong @platform-lead
-
-# CRITICAL: CI/CD & Workflows (affects merge train)
-/.github/workflows/**/* @BrianCLong @platform-lead @security-lead
-/.github/actions/**/* @BrianCLong @platform-lead
-
-# CRITICAL: Security & policies (requires security approval)
-/security/**/* @BrianCLong @security-lead
-/server/src/security/**/* @BrianCLong @security-lead
-/server/policies/**/* @BrianCLong @security-lead
-/.trivyignore @BrianCLong @security-lead
-/.github/SECURITY.md @BrianCLong @security-lead
-
-# Monitoring & Observability
-/monitoring/**/* @BrianCLong @platform-lead
-/server/src/telemetry/**/* @BrianCLong @platform-lead
-/server/src/metrics/**/* @BrianCLong @platform-lead
-
-# CRITICAL: Package management (affects entire workspace)
-package.json @BrianCLong @platform-lead
-pnpm-lock.yaml @BrianCLong @platform-lead
-/packages/*/package.json @BrianCLong @platform-lead
-/.nvmrc @BrianCLong @platform-lead
-/.npmrc @BrianCLong @platform-lead
-
-# Core configuration files
-tsconfig*.json @BrianCLong @platform-lead
-/.eslintrc* @BrianCLong @platform-lead
-/Dockerfile* @BrianCLong @platform-lead
-
-# Performance testing & SLO framework
-/perf/**/* @BrianCLong @platform-lead
-/scripts/performance/**/* @BrianCLong @platform-lead
-/k6/**/* @BrianCLong @platform-lead
-
-# AI/ML specific domains
-/ai/**/* @BrianCLong @ai-lead
-/ml/**/* @BrianCLong @ai-lead
-/notebooks/**/* @BrianCLong @ai-lead
-
-# Documentation (domain-specific ownership)
-/docs/api/**/* @BrianCLong @backend-lead
-/docs/deployment/**/* @BrianCLong @platform-lead
-/docs/security/**/* @BrianCLong @security-lead
-README.md @BrianCLong
-
-# Legal and compliance
-LICENSE @BrianCLong @legal
-/legal/**/* @BrianCLong @legal
-/compliance/**/* @BrianCLong @security-lead @legal
-
-# Legacy paths maintained for compatibility
-charts/** @BrianCLong @platform-lead
-ops/** @BrianCLong @platform-lead
-
-# Special Project Files
-/ga-* @BrianCLong
-/prov-ledger/ @BrianCLong
-/conductor-ui/ @BrianCLong
-
-# Ops Calendar & Evidence Collection
-/audit/ @BrianCLong
-/runbooks/ @BrianCLong
-/Makefile @BrianCLong
+# You can also specify individuals
+# /docs/ @your-username

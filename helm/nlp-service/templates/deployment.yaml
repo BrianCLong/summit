@@ -1,27 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: { { include "nlp-service.fullname" . } }
+  name: {{ include "nlp-service.fullname" . }}
   labels:
-    app.kubernetes.io/name: { { include "nlp-service.name" . } }
-    app.kubernetes.io/instance: { { .Release.Name } }
+    app.kubernetes.io/name: {{ include "nlp-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
-  replicas: { { .Values.replicaCount } }
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: { { include "nlp-service.name" . } }
-      app.kubernetes.io/instance: { { .Release.Name } }
+      app.kubernetes.io/name: {{ include "nlp-service.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: { { include "nlp-service.name" . } }
-        app.kubernetes.io/instance: { { .Release.Name } }
+        app.kubernetes.io/name: {{ include "nlp-service.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
         - name: nlp-service
-          image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
-          imagePullPolicy: { { .Values.image.pullPolicy } }
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: { { .Values.service.port } }
-          resources: { { - toYaml .Values.resources | nindent 12 } }
+              containerPort: {{ .Values.service.port }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+

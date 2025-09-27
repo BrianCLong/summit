@@ -8,12 +8,12 @@ async function testEndpoint(url, description) {
       console.log(`✅ ${description}: ${res.statusCode}`);
       resolve(res.statusCode < 400);
     });
-
+    
     req.on('error', (err) => {
       console.log(`❌ ${description}: ${err.message}`);
       resolve(false);
     });
-
+    
     req.setTimeout(5000, () => {
       console.log(`⏰ ${description}: Timeout`);
       req.destroy();
@@ -25,9 +25,9 @@ async function testEndpoint(url, description) {
 async function testGraphQL() {
   return new Promise((resolve) => {
     const data = JSON.stringify({
-      query: '{ __typename }',
+      query: '{ __typename }'
     });
-
+    
     const options = {
       hostname: 'localhost',
       port: 4000,
@@ -35,13 +35,13 @@ async function testGraphQL() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(data),
-      },
+        'Content-Length': Buffer.byteLength(data)
+      }
     };
-
+    
     const req = http.request(options, (res) => {
       let responseData = '';
-      res.on('data', (chunk) => (responseData += chunk));
+      res.on('data', chunk => responseData += chunk);
       res.on('end', () => {
         try {
           const parsed = JSON.parse(responseData);
@@ -58,18 +58,18 @@ async function testGraphQL() {
         }
       });
     });
-
+    
     req.on('error', (err) => {
       console.log(`❌ GraphQL API: ${err.message}`);
       resolve(false);
     });
-
+    
     req.setTimeout(5000, () => {
       console.log('⏰ GraphQL API: Timeout');
       req.destroy();
       resolve(false);
     });
-
+    
     req.write(data);
     req.end();
   });
@@ -77,18 +77,18 @@ async function testGraphQL() {
 
 async function runSmokeTests() {
   console.log('🚀 Running IntelGraph Platform Smoke Tests...\n');
-
+  
   const tests = [
     () => testEndpoint('http://localhost:3000', 'Frontend (Client)'),
     () => testEndpoint('http://localhost:4000', 'Backend (Server)'),
-    () => testGraphQL(),
+    () => testGraphQL()
   ];
-
-  const results = await Promise.all(tests.map((test) => test()));
+  
+  const results = await Promise.all(tests.map(test => test()));
   const passed = results.filter(Boolean).length;
-
+  
   console.log(`\n📊 Test Results: ${passed}/${results.length} passed`);
-
+  
   if (passed === results.length) {
     console.log('🎉 All smoke tests passed! Application is working correctly.');
     process.exit(0);

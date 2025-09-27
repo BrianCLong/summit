@@ -1,7 +1,7 @@
 import { User } from '../types/context'; // Assuming User type is defined here
-import baseLogger from '../config/logger';
+import pino from 'pino';
 
-const logger = baseLogger.child({ name: 'dataRedaction' });
+const logger = pino();
 
 // Define PII types and their associated properties/paths
 // This should ideally be driven by a central schema or configuration
@@ -100,20 +100,14 @@ export function redactData(data: any, user: User, sensitivity?: string): any {
 
   applyRedaction(redactedData, []);
 
-  logger.info(
-    `Data redaction complete for user ${user.id} (role: ${userRole}). Redacted ${piiRedactedCount} PII fields.`,
-  );
+  logger.info(`Data redaction complete for user ${user.id} (role: ${userRole}). Redacted ${piiRedactedCount} PII fields.`);
   // You might want to audit this redaction event
   // auditService.logRedaction(user.id, userRole, piiFieldsRedacted, sensitivity);
 
   return redactedData;
 }
 
-function applyStrategy(
-  value: any,
-  piiType: keyof typeof PII_DEFINITIONS,
-  strategy: RedactionStrategy,
-): any {
+function applyStrategy(value: any, piiType: keyof typeof PII_DEFINITIONS, strategy: RedactionStrategy): any {
   if (value === undefined || value === null) return value;
 
   switch (strategy) {

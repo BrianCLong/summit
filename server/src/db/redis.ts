@@ -1,43 +1,36 @@
 import Redis from 'ioredis';
 import dotenv from 'dotenv';
-import baseLogger from '../config/logger';
+import pino from 'pino';
 
 dotenv.config();
 
-const logger = baseLogger.child({ name: 'redis' });
+const logger: pino.Logger = pino();
 
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD || '';
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'devpassword';
 
 let redisClient: Redis;
 
 export function getRedisClient(): Redis {
   if (!redisClient) {
     try {
-      const config: any = {
+      redisClient = new Redis({
         host: REDIS_HOST,
         port: REDIS_PORT,
+        password: REDIS_PASSWORD,
         connectTimeout: 5000,
         lazyConnect: true,
-        maxRetriesPerRequest: null, // Required for BullMQ compatibility
-      };
-
-      if (REDIS_PASSWORD) {
-        config.password = REDIS_PASSWORD;
-      }
-
-      redisClient = new Redis(config);
-
+      });
+      
       redisClient.on('connect', () => logger.info('Redis client connected.'));
       redisClient.on('error', (err) => {
         logger.warn(`Redis connection failed - using mock responses. Error: ${err.message}`);
         redisClient = createMockRedisClient() as any;
       });
+      
     } catch (error) {
-      logger.warn(
-        `Redis initialization failed - using development mode. Error: ${(error as Error).message}`,
-      );
+      logger.warn(`Redis initialization failed - using development mode. Error: ${(error as Error).message}`);
       redisClient = createMockRedisClient() as any;
     }
   }
@@ -68,7 +61,7 @@ function createMockRedisClient() {
     },
     quit: async () => {},
     on: () => {},
-    connect: async () => {},
+    connect: async () => {}
   };
 }
 

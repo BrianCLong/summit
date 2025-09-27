@@ -1,4 +1,9 @@
 creation_rules:
-  - path_regex: k8s/secrets/.*\.enc\.yaml
-    encrypted_regex: '^(data|stringData)$'
-    age: ['age1...REPLACE_WITH_YOUR_PUBLIC_KEY...']
+  - encrypted_regex: '^(data|stringData|password|secret|access_key|secret_key)$'
+    path_regex: '\\.(secret|secrets)\\.ya?ml$'
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    age:
+      - AGE-SECRET-KEY
+

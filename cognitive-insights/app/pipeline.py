@@ -42,18 +42,6 @@ def _derive_bias(cues: dict[str, float]) -> List[BiasIndicator]:
         indicators.append(
             BiasIndicator(type="confirmation_framing", confidence=cues["confirmation_bias"])
         )
-    if cues.get("availability_bias"):
-        indicators.append(
-            BiasIndicator(type="availability_framing", confidence=cues["availability_bias"])
-        )
-    if cues.get("anchoring_bias"):
-        indicators.append(
-            BiasIndicator(type="anchoring_framing", confidence=cues["anchoring_bias"])
-        )
-    if cues.get("bandwagon_bias"):
-        indicators.append(
-            BiasIndicator(type="bandwagon_framing", confidence=cues["bandwagon_bias"])
-        )
     if not indicators:
         indicators.append(BiasIndicator(type="balanced_language", confidence=0.0))
     return indicators
@@ -74,8 +62,6 @@ def analyze_batch(items: List[TextItem]) -> List[AnalysisResult]:
         ]
         if cues.get("absolutist_terms", 0) > 0.3:
             safety.append("avoid absolutist phrasing to reduce polarization")
-        if cues.get("bandwagon_bias", 0) > 0.2:
-            safety.append("evaluate evidence independently of crowd trends")
         results.append(
             AnalysisResult(
                 item_id=item.id,

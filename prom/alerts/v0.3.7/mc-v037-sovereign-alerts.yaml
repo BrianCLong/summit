@@ -1,0 +1,241 @@
+groups:
+  - name: mc-v037-sovereign-alerts
+    interval: 30s
+    rules:
+      # Zero-Knowledge Provenance alerts
+      - alert: ZKCoverageBelowThreshold
+        expr: mc_zk_coverage_percent < 99.5
+        for: 15m
+        labels:
+          severity: page
+          service: agent-workbench
+          slo: zk-coverage
+        annotations:
+          summary: "zk-Provenance coverage below 99.5%"
+          description: |
+            Zero-knowledge proof coverage is {{ $value | printf "%.2f" }}% (<99.5%).
+            Some responses lack cryptographic verification of policy compliance.
+            Check zk-proof generation and verifier capacity.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#zk-coverage
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-1h&to=now
+
+      - alert: ZKVerifierHighLatency
+        expr: mc_zk_verification_p95_ms > 250
+        for: 10m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: zk-performance
+        annotations:
+          summary: "zk-Proof verification P95 above 250ms"
+          description: |
+            Zero-knowledge proof verification P95 latency is {{ $value | printf "%.1f" }}ms (>250ms SLA).
+            Proof verification is degraded. Check circuit parameters and prover capacity.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#zk-performance
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-30m&to=now
+
+      # Byzantine Fault Tolerance alerts
+      - alert: BFTQuorumFailure
+        expr: mc_bft_quorum_success_rate < 0.95
+        for: 5m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: bft-quorum
+        annotations:
+          summary: "BFT quorum success rate below 95%"
+          description: |
+            Byzantine fault tolerant quorum success rate is {{ $value | printf "%.2%%" }} (<95%).
+            CRITICAL: Multi-region write consensus is failing. Check regional connectivity
+            and committee membership. Data consistency may be at risk.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#bft-quorum
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?var-region={{ $labels.region | urlquery }}&from=now-15m&to=now
+
+      - alert: BFTWriteOverheadHigh
+        expr: mc_bft_write_overhead_percent > 8
+        for: 15m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: bft-performance
+        annotations:
+          summary: "BFT write overhead exceeds 8%"
+          description: |
+            Byzantine fault tolerant write overhead is {{ $value | printf "%.1f" }}% (>8% SLA).
+            BFT consensus is impacting write performance. Check network latency between
+            regions and consider committee size optimization.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#bft-performance
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?var-region={{ $labels.region | urlquery }}&from=now-30m&to=now
+
+      # Continuous Safety Equivalence alerts
+      - alert: CSEScoreBelowPromoteThreshold
+        expr: mc_cse_composite_score < 0.99
+        for: 10m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: cse-safety
+        annotations:
+          summary: "CSE score below promote threshold (0.99)"
+          description: |
+            Continuous Safety Equivalence score is {{ $value | printf "%.3f" }} (<0.99).
+            CRITICAL: Safety invariant violations detected. Deployment will be HELD.
+            Check shadow traffic results and invariant failures immediately.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#cse-hold
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-15m&to=now
+
+      - alert: CSEInvariantViolation
+        expr: rate(mc_cse_invariant_violations_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: cse-safety
+        annotations:
+          summary: "CSE safety invariant violations detected"
+          description: |
+            {{ $value | printf "%.2f" }} safety invariant violations per second detected.
+            CRITICAL: Behavioral equivalence broken between baseline and candidate.
+            Auto-HOLD triggered. Review failing invariants and apply remediation.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#invariant-violation
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-15m&to=now
+
+      # Sovereign Compliance alerts
+      - alert: SovereignComplianceDrift
+        expr: mc_sovereign_policy_drift_rate > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: sovereign-compliance
+        annotations:
+          summary: "Sovereign compliance policy drift detected"
+          description: |
+            {{ $value | printf "%.2f" }} policy drift events per second.
+            CRITICAL: Runtime policy hash differs from declared tenant stance.
+            Compliance guarantees compromised. Block operations until resolved.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#policy-drift
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-15m&to=now
+
+      - alert: SovereignComplianceCoverageLow
+        expr: mc_sovereign_compliance_coverage < 1.0
+        for: 5m
+        labels:
+          severity: page
+          service: agent-workbench
+          slo: sovereign-compliance
+        annotations:
+          summary: "Sovereign compliance coverage below 100%"
+          description: |
+            Compliance policy tagging coverage is {{ $value | printf "%.2%%" }} (<100%).
+            Some requests are not tagged with tenant policy hash. Compliance
+            audit trails are incomplete. Check tagging service health.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#compliance-coverage
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-15m&to=now
+
+      - alert: SovereignAuditPackGenerationSlow
+        expr: mc_sovereign_audit_generation_p95_seconds > 60
+        for: 10m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: sovereign-audit
+        annotations:
+          summary: "Audit pack generation exceeds 60s SLA"
+          description: |
+            Sovereign audit pack generation P95 time is {{ $value | printf "%.1f" }}s (>60s SLA).
+            On-demand compliance audits are taking too long. Check evidence collection
+            performance and storage I/O.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#audit-performance
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-30m&to=now
+
+      # GreenOps optimization alerts
+      - alert: GreenOpsOptimizationRegression
+        expr: |
+          (mc_greenops_cost_reduction_percent < 10 and
+           mc_greenops_latency_improvement_percent < 8 and
+           mc_greenops_carbon_reduction_percent < 5)
+        for: 30m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: greenops-optimization
+        annotations:
+          summary: "GreenOps optimization targets not met"
+          description: |
+            GreenOps tri-objective optimization failing to meet targets:
+            Cost reduction: {{ printf "%.1f%%" .Labels.cost_reduction }}
+            Latency improvement: {{ printf "%.1f%%" .Labels.latency_improvement }}
+            Carbon reduction: {{ printf "%.1f%%" .Labels.carbon_reduction }}
+            Need ≥10% cost + ≥8% latency OR ≥5% carbon reduction.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#greenops-regression
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?from=now-2h&to=now
+
+      - alert: GreenOpsSLOViolations
+        expr: mc_greenops_slo_violation_rate > 0.01
+        for: 15m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: greenops-slo
+        annotations:
+          summary: "GreenOps causing SLO violations"
+          description: |
+            GreenOps optimization causing {{ $value | printf "%.3f" }} SLO violations/sec.
+            Cost/carbon optimization may be compromising latency SLAs.
+            Consider switching to latency-first mode.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#greenops-slo
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?from=now-1h&to=now
+
+      # Sovereign Resilience composite health
+      - alert: SovereignResilienceHealthDegraded
+        expr: mc_sovereign_resilience_health_score < 0.8
+        for: 10m
+        labels:
+          severity: page
+          service: agent-workbench
+          slo: sovereign-resilience
+        annotations:
+          summary: "Sovereign resilience health degraded"
+          description: |
+            Overall sovereign resilience health score is {{ $value | printf "%.2f" }} (<0.8).
+            Multiple mythic systems may be degraded. Check zk-provenance, BFT consensus,
+            CSE safety equivalence, sovereign compliance, and GreenOps optimization.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#health-score
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?from=now-30m&to=now
+
+      # Regional resilience alerts
+      - alert: RegionalHealthDegraded
+        expr: mc_regional_health_score < 0.7
+        for: 15m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: regional-health
+        annotations:
+          summary: "Regional health degraded in {{ $labels.region }}"
+          description: |
+            Regional health score for {{ $labels.region }} is {{ $value | printf "%.2f" }} (<0.7).
+            Check BFT participation, network connectivity, and resource availability.
+            Consider failing over traffic to healthy regions.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#regional-health
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?var-region={{ $labels.region | urlquery }}&from=now-30m&to=now
+
+      # Advanced threat detection
+      - alert: ByzantineBehaviorDetected
+        expr: |
+          (mc_bft_vote_inconsistency_rate > 0.05 or
+           mc_bft_committee_split_votes > 0.1)
+        for: 5m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: byzantine-detection
+        annotations:
+          summary: "Potential Byzantine behavior detected"
+          description: |
+            SECURITY ALERT: Potential Byzantine fault behavior detected in BFT committee.
+            Vote inconsistency or split voting patterns observed. This may indicate
+            compromised regions or network attacks. Immediate investigation required.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.7-ops.md#byzantine-behavior
+          dashboard_url: https://grafana.example.com/d/mc-v037-sovereign?var-region={{ $labels.region | urlquery }}&from=now-15m&to=now

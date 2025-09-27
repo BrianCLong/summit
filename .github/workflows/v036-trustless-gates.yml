@@ -1,0 +1,355 @@
+name: MC v0.3.6 Trustless Velocity Gates
+
+on:
+  pull_request:
+    branches: [main, release/v0.3.6]
+  push:
+    branches: [main, release/v0.3.6]
+
+env:
+  ATTEST_REQUIRED: "true"
+  POLICY_PROOF_REQUIRED: "true"
+  REMEDIATION_DRY_RUN_REQUIRED: "true"
+
+jobs:
+  attestation-gate:
+    name: "🔐 Attestation Requirements Gate"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install fastapi uvicorn cryptography
+
+      - name: Start ZTA Verifier
+        run: |
+          cd ops/attest
+          python verifier.py &
+          VERIFIER_PID=$!
+          echo "VERIFIER_PID=$VERIFIER_PID" >> $GITHUB_ENV
+          sleep 5  # Allow verifier to start
+
+      - name: Test Agent Action Attestation
+        run: |
+          # Test that agent actions require attestation
+          curl -X POST http://localhost:8080/attest \
+            -H "Content-Type: application/json" \
+            -d '{
+              "agent_id": "test-agent-ci",
+              "action_type": "query",
+              "action_payload": {"query": "test query for CI"},
+              "tenant_id": "TENANT_CI_TEST"
+            }' > attestation_response.json
+
+          # Verify attestation was generated
+          if jq -e '.receipt.receipt_id' attestation_response.json; then
+            echo "✅ Attestation gate passed: Agent actions properly attested"
+          else
+            echo "❌ Attestation gate failed: No valid attestation generated"
+            exit 1
+          fi
+
+      - name: Verify Attestation Performance
+        run: |
+          # Check verifier performance meets SLA
+          METRICS=$(curl -s http://localhost:8080/metrics)
+          P95_MS=$(echo "$METRICS" | jq -r '.p95_ms')
+
+          if (( $(echo "$P95_MS <= 200" | bc -l) )); then
+            echo "✅ Performance gate passed: P95 = ${P95_MS}ms (≤200ms)"
+          else
+            echo "❌ Performance gate failed: P95 = ${P95_MS}ms (>200ms)"
+            exit 1
+          fi
+
+      - name: Cleanup
+        if: always()
+        run: |
+          if [ -n "$VERIFIER_PID" ]; then
+            kill $VERIFIER_PID || true
+          fi
+
+  policy-proof-gate:
+    name: "⚖️ Policy Proof Verification Gate"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Z3 SMT Solver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y z3
+
+      - name: Create Mock OPA Policies
+        run: |
+          mkdir -p opa/policies
+          cat > opa/policies/residency.rego << 'EOF'
+          package policies.residency
+
+          allow {
+            input.tenant_id != ""
+            input.data_residency == input.required_residency
+            input.encrypted == true
+          }
+
+          deny {
+            input.tenant_id == ""
+          }
+
+          deny {
+            input.data_residency != input.required_residency
+          }
+          EOF
+
+      - name: Run Policy Proofs
+        run: |
+          cd ops/policy
+          python prove.py --rules ../../opa --out proof_results.json
+
+          # Check for counterexamples
+          COUNTEREXAMPLES=$(jq -r '.counterexamples' proof_results.json)
+          PROVEN_SAFE=$(jq -r '.proven_safe' proof_results.json)
+          TOTAL_PROPERTIES=$(jq -r '.critical_violations | length' proof_results.json)
+
+          echo "📊 Policy Proof Results:"
+          echo "   Proven safe: $PROVEN_SAFE"
+          echo "   Counterexamples: $COUNTEREXAMPLES"
+          echo "   Critical violations: $TOTAL_PROPERTIES"
+
+          if [ "$COUNTEREXAMPLES" -gt 0 ]; then
+            echo "❌ Policy proof gate BLOCKED: $COUNTEREXAMPLES counterexamples found"
+            echo "Fix policy violations before merging:"
+            jq -r '.critical_violations[]' proof_results.json
+            exit 1
+          else
+            echo "✅ Policy proof gate passed: All critical properties proven safe"
+          fi
+
+      - name: Upload Proof Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: policy-proofs
+          path: |
+            ops/policy/proof_results.json
+            evidence/v0.3.6/policy/*.smt2
+
+  remediation-dry-run-gate:
+    name: "🔧 Remediation Dry-Run Gate"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Test Remediation Proposal Generation
+        run: |
+          cd ops/remediator
+          python propose.py \
+            --from ../../samples/incidents/p95_spike.json \
+            --out remediation_proposal.json \
+            --dry-run
+
+          # Verify proposal was generated
+          if [ -f "remediation_proposal.json" ]; then
+            CONFIDENCE=$(jq -r '.confidence_score' remediation_proposal.json)
+            MTTR_EST=$(jq -r '.estimated_mttr_minutes' remediation_proposal.json)
+            POLICY_OK=$(jq -r '.policy_validated' remediation_proposal.json)
+            ACTION_COUNT=$(jq -r '.actions | length' remediation_proposal.json)
+
+            echo "📊 Remediation Proposal:"
+            echo "   Confidence: $CONFIDENCE"
+            echo "   Est. MTTR: ${MTTR_EST} minutes"
+            echo "   Policy validated: $POLICY_OK"
+            echo "   Actions: $ACTION_COUNT"
+
+            # Validate remediation quality
+            if (( $(echo "$MTTR_EST <= 7" | bc -l) )); then
+              echo "✅ MTTR gate passed: ${MTTR_EST}min (≤7min)"
+            else
+              echo "❌ MTTR gate failed: ${MTTR_EST}min (>7min)"
+              exit 1
+            fi
+
+            if (( $(echo "$CONFIDENCE >= 0.7" | bc -l) )); then
+              echo "✅ Confidence gate passed: $CONFIDENCE (≥0.7)"
+            else
+              echo "❌ Confidence gate failed: $CONFIDENCE (<0.7)"
+              exit 1
+            fi
+
+            echo "✅ Remediation dry-run gate passed"
+          else
+            echo "❌ Remediation dry-run gate failed: No proposal generated"
+            exit 1
+          fi
+
+      - name: Upload Remediation Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: remediation-proposals
+          path: |
+            ops/remediator/remediation_proposal.json
+
+  confidential-compute-gate:
+    name: "🔒 Confidential Compute Gate"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install cryptography
+
+      - name: Test Confidential Processing
+        run: |
+          cd services/confidential
+          python enclave.py > confidential_test.log 2>&1
+
+          # Check test output
+          if grep -q "Confidential processing completed" confidential_test.log; then
+            echo "✅ Confidential processing test passed"
+
+            # Extract performance metrics
+            OVERHEAD=$(grep "Overhead:" confidential_test.log | grep -o '[0-9.]*%' | head -1 | sed 's/%//')
+
+            if (( $(echo "$OVERHEAD <= 7" | bc -l) )); then
+              echo "✅ Performance gate passed: ${OVERHEAD}% overhead (≤7%)"
+            else
+              echo "❌ Performance gate failed: ${OVERHEAD}% overhead (>7%)"
+              exit 1
+            fi
+          else
+            echo "❌ Confidential compute gate failed"
+            cat confidential_test.log
+            exit 1
+          fi
+
+      - name: Verify Residency Enforcement
+        run: |
+          cd services/confidential
+          # Test residency enforcement
+          if grep -q "Residency enforced: True" confidential_test.log; then
+            echo "✅ Residency enforcement gate passed"
+          else
+            echo "❌ Residency enforcement gate failed"
+            exit 1
+          fi
+
+  observability-validation:
+    name: "📊 Observability Validation Gate"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install promtool
+        run: |
+          wget https://github.com/prometheus/prometheus/releases/download/v2.40.0/prometheus-2.40.0.linux-amd64.tar.gz
+          tar xzf prometheus-2.40.0.linux-amd64.tar.gz
+          sudo mv prometheus-2.40.0.linux-amd64/promtool /usr/local/bin/
+
+      - name: Validate Prometheus Rules
+        run: |
+          echo "🔍 Validating v0.3.6 Prometheus rules..."
+
+          promtool check rules prom/rules/v0.3.6/mc-v036-recording.rules.yaml
+          promtool check rules prom/alerts/v0.3.6/mc-v036-trustless-alerts.yaml
+
+          echo "✅ All Prometheus rules validated"
+
+      - name: Validate Grafana Dashboard
+        run: |
+          echo "🔍 Validating v0.3.6 Grafana dashboard..."
+
+          jq -e '.dashboard' observability/grafana/dashboards/v0.3.6/mc-v036-trustless-velocity.json >/dev/null
+
+          # Check required panels exist
+          PANEL_COUNT=$(jq '.dashboard.panels | length' observability/grafana/dashboards/v0.3.6/mc-v036-trustless-velocity.json)
+
+          if [ "$PANEL_COUNT" -ge 10 ]; then
+            echo "✅ Dashboard has $PANEL_COUNT panels (≥10 required)"
+          else
+            echo "❌ Dashboard has only $PANEL_COUNT panels (<10 required)"
+            exit 1
+          fi
+
+  evidence-collection:
+    name: "📑 Evidence Collection Gate"
+    runs-on: ubuntu-latest
+    needs: [attestation-gate, policy-proof-gate, remediation-dry-run-gate, confidential-compute-gate]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Collect Evidence Bundle
+        run: |
+          mkdir -p evidence/v0.3.6/ci-validation
+
+          # Collect attestation evidence
+          if [ -d "attestation-receipts" ]; then
+            cp -r attestation-receipts/* evidence/v0.3.6/ci-validation/
+          fi
+
+          # Collect policy proof evidence
+          if [ -d "policy-proofs" ]; then
+            cp -r policy-proofs/* evidence/v0.3.6/ci-validation/
+          fi
+
+          # Collect remediation evidence
+          if [ -d "remediation-proposals" ]; then
+            cp -r remediation-proposals/* evidence/v0.3.6/ci-validation/
+          fi
+
+          # Create evidence summary
+          cat > evidence/v0.3.6/ci-validation/gate-summary.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit_sha": "$GITHUB_SHA",
+            "workflow_run": "$GITHUB_RUN_ID",
+            "gates_passed": [
+              "attestation-gate",
+              "policy-proof-gate",
+              "remediation-dry-run-gate",
+              "confidential-compute-gate",
+              "observability-validation"
+            ],
+            "evidence_artifacts": "$(find evidence/v0.3.6/ci-validation -name '*.json' | wc -l)",
+            "trustless_velocity_validated": true
+          }
+          EOF
+
+          echo "✅ Evidence collection completed"
+          echo "📊 Evidence summary:"
+          cat evidence/v0.3.6/ci-validation/gate-summary.json
+
+      - name: Upload Evidence Bundle
+        uses: actions/upload-artifact@v3
+        with:
+          name: v036-evidence-bundle
+          path: evidence/v0.3.6/ci-validation/

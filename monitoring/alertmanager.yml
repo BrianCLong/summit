@@ -23,14 +23,14 @@ route:
       receiver: critical-alerts
       group_wait: 0s
       repeat_interval: 5m
-
+    
     # Warning alerts are grouped and sent less frequently
     - match:
         severity: warning
       receiver: warning-alerts
       group_wait: 30s
       repeat_interval: 30m
-
+    
     # Info alerts are sent to monitoring channel
     - match:
         severity: info
@@ -55,16 +55,16 @@ receivers:
         body: |
           Alert: {{ .GroupLabels.alertname }}
           Severity: {{ .CommonLabels.severity }}
-
+          
           {{ range .Alerts }}
           - {{ .Annotations.summary }}
             {{ .Annotations.description }}
             Labels: {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
           {{ end }}
-
+          
           Dashboard: http://grafana:3000/dashboards
           Prometheus: http://prometheus:9090
-
+    
     # Slack integration for critical alerts
     slack_configs:
       - api_url: '${SLACK_WEBHOOK_URL}'
@@ -74,7 +74,7 @@ receivers:
           {{ range .Alerts }}
           *{{ .Annotations.summary }}*
           {{ .Annotations.description }}
-
+          
           *Labels:* {{ range .Labels.SortedPairs }}`{{ .Name }}={{ .Value }}` {{ end }}
           {{ end }}
         send_resolved: true
@@ -86,13 +86,13 @@ receivers:
         subject: '⚠️ Warning Alerts ({{ .Alerts | len }})'
         body: |
           {{ .Alerts | len }} warning alerts triggered:
-
+          
           {{ range .Alerts }}
           - {{ .Annotations.summary }}
             {{ .Annotations.description }}
             Labels: {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
           {{ end }}
-
+    
     slack_configs:
       - api_url: '${SLACK_WEBHOOK_URL}'
         channel: '#alerts-warning'
@@ -122,7 +122,7 @@ inhibit_rules:
     target_match:
       alertname: HighErrorRate
     equal: ['instance']
-
+  
   # If there's a critical alert, suppress related warnings
   - source_match:
       severity: critical

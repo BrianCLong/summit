@@ -1,0 +1,70 @@
+{
+  "default_daily_limit": 1000.0,
+  "default_monthly_limit": 25000.0,
+  "default_query_rate_limit": 100,
+  "default_epsilon_rate_limit": 1.0,
+  "enforcement_timeout_seconds": 120,
+  "ml_prediction_enabled": true,
+  "auto_tune_enabled": true,
+  "anomaly_detection_threshold": 0.7,
+  "budget_alert_thresholds": {
+    "warning": 0.8,
+    "critical": 0.9,
+    "exceeded": 1.0
+  },
+  "tenant_tiers": {
+    "TENANT_001": {
+      "tier": "enterprise",
+      "daily_limit": 1500.0,
+      "monthly_limit": 35000.0,
+      "enforcement_mode": "throttle",
+      "auto_tune_enabled": true
+    },
+    "TENANT_002": {
+      "tier": "professional",
+      "daily_limit": 800.0,
+      "monthly_limit": 20000.0,
+      "enforcement_mode": "block",
+      "auto_tune_enabled": true
+    },
+    "TENANT_003": {
+      "tier": "enterprise",
+      "daily_limit": 2000.0,
+      "monthly_limit": 50000.0,
+      "enforcement_mode": "throttle",
+      "auto_tune_enabled": true
+    },
+    "TENANT_004": {
+      "tier": "starter",
+      "daily_limit": 1000.0,
+      "monthly_limit": 25000.0,
+      "enforcement_mode": "alert_only",
+      "auto_tune_enabled": false
+    },
+    "TENANT_005": {
+      "tier": "starter",
+      "daily_limit": 1000.0,
+      "monthly_limit": 25000.0,
+      "enforcement_mode": "alert_only",
+      "auto_tune_enabled": false
+    }
+  },
+  "ml_models": {
+    "usage_predictor": {
+      "model_type": "random_forest",
+      "n_estimators": 100,
+      "retrain_interval_hours": 24
+    },
+    "anomaly_detector": {
+      "model_type": "isolation_forest",
+      "contamination": 0.1,
+      "retrain_interval_hours": 12
+    }
+  },
+  "backpressure": {
+    "enabled": true,
+    "persisted_queries_only": true,
+    "throttle_factor": 0.5,
+    "max_queue_size": 1000
+  }
+}

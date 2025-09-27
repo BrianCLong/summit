@@ -25,4 +25,5 @@
     Unauthorized file access in IntelGraph uploads directory (container=%container.name user=%user.name file=%fd.name)
   priority: CRITICAL
   tags: [intelgraph, security, file_access]
+
 # Add more rules based on IntelGraph specific behaviors and known threats

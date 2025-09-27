@@ -1,14 +1,5 @@
 import * as React from 'react'
-import {
-  X,
-  ExternalLink,
-  Edit3,
-  Trash2,
-  Tag,
-  Calendar,
-  User,
-  MapPin,
-} from 'lucide-react'
+import { X, ExternalLink, Edit3, Trash2, Tag, Calendar, User, MapPin } from 'lucide-react'
 import {
   Drawer,
   DrawerContent,
@@ -20,11 +11,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/Tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip'
 import { formatDate, getRiskColor, capitalizeFirst } from '@/lib/utils'
 import type { Entity, Relationship, PanelProps } from '@/types'
 
@@ -50,41 +37,27 @@ export function EntityDrawer({
 
   const getEntityIcon = (type: string) => {
     switch (type) {
-      case 'PERSON':
-        return '👤'
-      case 'ORGANIZATION':
-        return '🏢'
-      case 'LOCATION':
-        return '📍'
-      case 'IP_ADDRESS':
-        return '🌐'
-      case 'DOMAIN':
-        return '🔗'
-      case 'EMAIL':
-        return '📧'
-      case 'PHONE':
-        return '📞'
-      case 'FILE':
-        return '📄'
-      case 'HASH':
-        return '🔑'
-      case 'MALWARE':
-        return '🦠'
-      default:
-        return '📊'
+      case 'PERSON': return '👤'
+      case 'ORGANIZATION': return '🏢'
+      case 'LOCATION': return '📍'
+      case 'IP_ADDRESS': return '🌐'
+      case 'DOMAIN': return '🔗'
+      case 'EMAIL': return '📧'
+      case 'PHONE': return '📞'
+      case 'FILE': return '📄'
+      case 'HASH': return '🔑'
+      case 'MALWARE': return '🦠'
+      default: return '📊'
     }
   }
 
   const getRelatedEntities = () => {
     if (!selectedEntity) return []
-
+    
     const relatedIds = relationships
-      .filter(
-        r =>
-          r.sourceId === selectedEntity.id || r.targetId === selectedEntity.id
-      )
-      .map(r => (r.sourceId === selectedEntity.id ? r.targetId : r.sourceId))
-
+      .filter(r => r.sourceId === selectedEntity.id || r.targetId === selectedEntity.id)
+      .map(r => r.sourceId === selectedEntity.id ? r.targetId : r.sourceId)
+    
     return entities.filter(e => relatedIds.includes(e.id))
   }
 
@@ -113,23 +86,14 @@ export function EntityDrawer({
       <DrawerContent side="right" className="w-96">
         <DrawerHeader>
           <div className="flex items-center gap-3">
-            <span className="text-2xl">
-              {getEntityIcon(selectedEntity.type)}
-            </span>
+            <span className="text-2xl">{getEntityIcon(selectedEntity.type)}</span>
             <div className="flex-1 min-w-0">
-              <DrawerTitle className="truncate">
-                {selectedEntity.name}
-              </DrawerTitle>
+              <DrawerTitle className="truncate">{selectedEntity.name}</DrawerTitle>
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant="outline">{selectedEntity.type}</Badge>
-                <Badge
-                  variant={
-                    selectedEntity.confidence > 0.8
-                      ? 'success'
-                      : selectedEntity.confidence > 0.6
-                        ? 'warning'
-                        : 'error'
-                  }
+                <Badge 
+                  variant={selectedEntity.confidence > 0.8 ? 'success' : 
+                          selectedEntity.confidence > 0.6 ? 'warning' : 'error'}
                 >
                   {Math.round(selectedEntity.confidence * 100)}% confidence
                 </Badge>
@@ -148,7 +112,7 @@ export function EntityDrawer({
                 </TooltipTrigger>
                 <TooltipContent>Edit entity</TooltipContent>
               </Tooltip>
-
+              
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -161,7 +125,7 @@ export function EntityDrawer({
                 </TooltipTrigger>
                 <TooltipContent>Delete entity</TooltipContent>
               </Tooltip>
-
+              
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -186,10 +150,7 @@ export function EntityDrawer({
               <TabsTrigger value="timeline">Timeline</TabsTrigger>
             </TabsList>
 
-            <TabsContent
-              value="overview"
-              className="space-y-4 p-4 overflow-y-auto"
-            >
+            <TabsContent value="overview" className="space-y-4 p-4 overflow-y-auto">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm">Properties</CardTitle>
@@ -200,7 +161,7 @@ export function EntityDrawer({
                     <span className="text-muted-foreground">Created:</span>
                     <span>{formatDate(selectedEntity.createdAt)}</span>
                   </div>
-
+                  
                   <div className="flex items-center gap-2 text-sm">
                     <User className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Source:</span>
@@ -228,11 +189,7 @@ export function EntityDrawer({
                   <CardContent>
                     <div className="flex flex-wrap gap-1">
                       {selectedEntity.tags.map(tag => (
-                        <Badge
-                          key={tag}
-                          variant="secondary"
-                          className="text-xs"
-                        >
+                        <Badge key={tag} variant="secondary" className="text-xs">
                           {tag}
                         </Badge>
                       ))}
@@ -247,33 +204,26 @@ export function EntityDrawer({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {Object.entries(selectedEntity.properties).map(
-                      ([key, value]) => (
-                        <div key={key} className="flex justify-between text-sm">
-                          <span className="text-muted-foreground capitalize">
-                            {key.replace('_', ' ')}:
-                          </span>
-                          <span className="text-right max-w-32 truncate">
-                            {typeof value === 'object'
-                              ? JSON.stringify(value)
-                              : String(value)}
-                          </span>
-                        </div>
-                      )
-                    )}
+                    {Object.entries(selectedEntity.properties).map(([key, value]) => (
+                      <div key={key} className="flex justify-between text-sm">
+                        <span className="text-muted-foreground capitalize">
+                          {key.replace('_', ' ')}:
+                        </span>
+                        <span className="text-right max-w-32 truncate">
+                          {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent
-              value="relationships"
-              className="space-y-4 p-4 overflow-y-auto"
-            >
+            <TabsContent value="relationships" className="space-y-4 p-4 overflow-y-auto">
               <div className="text-sm text-muted-foreground mb-4">
                 {relatedEntities.length} related entities found
               </div>
-
+              
               {relatedEntities.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   No relationships found
@@ -281,33 +231,21 @@ export function EntityDrawer({
               ) : (
                 <div className="space-y-2">
                   {relatedEntities.map(entity => {
-                    const relationship = relationships.find(
-                      r =>
-                        (r.sourceId === selectedEntity.id &&
-                          r.targetId === entity.id) ||
-                        (r.targetId === selectedEntity.id &&
-                          r.sourceId === entity.id)
+                    const relationship = relationships.find(r => 
+                      (r.sourceId === selectedEntity.id && r.targetId === entity.id) ||
+                      (r.targetId === selectedEntity.id && r.sourceId === entity.id)
                     )
-
+                    
                     return (
-                      <Card
-                        key={entity.id}
-                        className="cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => onSelect?.(entity)}
-                      >
+                      <Card key={entity.id} className="cursor-pointer hover:bg-muted/50 transition-colors"
+                            onClick={() => onSelect?.(entity)}>
                         <CardContent className="p-3">
                           <div className="flex items-center gap-3">
-                            <span className="text-lg">
-                              {getEntityIcon(entity.type)}
-                            </span>
+                            <span className="text-lg">{getEntityIcon(entity.type)}</span>
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium truncate">
-                                {entity.name}
-                              </div>
+                              <div className="font-medium truncate">{entity.name}</div>
                               <div className="text-xs text-muted-foreground">
-                                {relationship?.type
-                                  .replace('_', ' ')
-                                  .toLowerCase()}
+                                {relationship?.type.replace('_', ' ').toLowerCase()}
                               </div>
                             </div>
                             <Badge variant="outline" className="text-xs">
@@ -322,14 +260,11 @@ export function EntityDrawer({
               )}
             </TabsContent>
 
-            <TabsContent
-              value="timeline"
-              className="space-y-4 p-4 overflow-y-auto"
-            >
+            <TabsContent value="timeline" className="space-y-4 p-4 overflow-y-auto">
               <div className="text-sm text-muted-foreground mb-4">
                 Entity activity timeline
               </div>
-
+              
               <div className="space-y-3">
                 <div className="flex gap-3">
                   <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
@@ -340,7 +275,7 @@ export function EntityDrawer({
                     </div>
                   </div>
                 </div>
-
+                
                 <div className="flex gap-3">
                   <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                   <div>
@@ -360,3 +295,4 @@ export function EntityDrawer({
     </Drawer>
   )
 }
+

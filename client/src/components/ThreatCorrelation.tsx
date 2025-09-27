@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useMutation, gql } from '@apollo/client'; // Assuming Apollo Client is set up
-import cytoscape, { Core } from 'cytoscape';
+import React, { useState, useEffect, useRef } from "react";
+import { useMutation, gql } from "@apollo/client"; // Assuming Apollo Client is set up
+import cytoscape, { Core } from "cytoscape";
 
 const CORRELATE_THREATS_MUTATION = gql`
   mutation CorrelateThreats($osintInput: JSON!) {
@@ -13,8 +13,10 @@ const CORRELATE_THREATS_MUTATION = gql`
 `;
 
 const ThreatCorrelation: React.FC = () => {
-  const [osintData, setOsintData] = useState('');
-  const [correlateThreats, { data, loading, error }] = useMutation(CORRELATE_THREATS_MUTATION);
+  const [osintData, setOsintData] = useState("");
+  const [correlateThreats, { data, loading, error }] = useMutation(
+    CORRELATE_THREATS_MUTATION,
+  );
   const cyContainer = useRef<HTMLDivElement | null>(null);
   const cyInstance = useRef<Core | null>(null);
 
@@ -23,7 +25,7 @@ const ThreatCorrelation: React.FC = () => {
       const parsedOsintData = JSON.parse(osintData);
       await correlateThreats({ variables: { osintInput: parsedOsintData } });
     } catch (e) {
-      alert('Invalid JSON input for OSINT data.');
+      alert("Invalid JSON input for OSINT data.");
       console.error(e);
     }
   };
@@ -46,11 +48,11 @@ const ThreatCorrelation: React.FC = () => {
       cyInstance.current = cytoscape({
         container: cyContainer.current,
         elements,
-        layout: { name: 'grid' },
+        layout: { name: "grid" },
         style: [
           {
-            selector: 'node',
-            style: { 'background-color': '#0074D9', label: 'data(id)' },
+            selector: "node",
+            style: { "background-color": "#0074D9", label: "data(id)" },
           },
         ],
       });
@@ -73,7 +75,7 @@ const ThreatCorrelation: React.FC = () => {
         onClick={handleSubmit}
         disabled={loading}
       >
-        {loading ? 'Correlating...' : 'Run Threat Correlation'}
+        {loading ? "Correlating..." : "Run Threat Correlation"}
       </button>
 
       {error && <p className="text-red-500 mt-4">Error: {error.message}</p>}

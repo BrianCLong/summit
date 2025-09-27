@@ -1,0 +1,117 @@
+groups:
+  - name: mc-v036-recording
+    interval: 15s
+    rules:
+      # Zero-Trust Attestation metrics
+      - record: mc_zta_coverage_percent
+        expr: |
+          (
+            sum(rate(mc_zta_verified_actions_total[5m]))
+            /
+            clamp_min(sum(rate(mc_agent_actions_total[5m])), 1)
+          ) * 100
+
+      - record: mc_zta_verification_p95_ms
+        expr: |
+          histogram_quantile(0.95, sum(rate(mc_zta_verification_duration_seconds_bucket[5m])) by (le)) * 1000
+
+      - record: mc_zta_verification_p50_ms
+        expr: |
+          histogram_quantile(0.50, sum(rate(mc_zta_verification_duration_seconds_bucket[5m])) by (le)) * 1000
+
+      # Policy Proof metrics
+      - record: mc_policy_proof_success_ratio
+        expr: |
+          (
+            sum(mc_policy_proofs_successful_total)
+            /
+            clamp_min(sum(mc_policy_proofs_total), 1)
+          )
+
+      - record: mc_policy_counterexamples_rate
+        expr: |
+          rate(mc_policy_counterexamples_total[5m])
+
+      # Remediation metrics
+      - record: mc_remediation_mttr_p95_minutes
+        expr: |
+          histogram_quantile(0.95, sum(rate(mc_remediation_mttr_minutes_bucket[5m])) by (le, incident_class))
+
+      - record: mc_remediation_mttr_p50_minutes
+        expr: |
+          histogram_quantile(0.50, sum(rate(mc_remediation_mttr_minutes_bucket[5m])) by (le, incident_class))
+
+      - record: mc_remediation_approval_rate
+        expr: |
+          (
+            sum(rate(mc_remediation_decisions_total{decision="approved"}[5m]))
+            /
+            clamp_min(sum(rate(mc_remediation_decisions_total[5m])), 1)
+          ) * 100
+
+      - record: mc_remediation_auto_apply_rate
+        expr: |
+          (
+            sum(rate(mc_remediation_decisions_total{decision="auto_applied"}[5m]))
+            /
+            clamp_min(sum(rate(mc_remediation_decisions_total[5m])), 1)
+          ) * 100
+
+      # Confidential compute metrics
+      - record: mc_confidential_performance_overhead_percent
+        expr: |
+          (
+            (
+              histogram_quantile(0.95, sum(rate(mc_confidential_inference_duration_seconds_bucket[5m])) by (le))
+              -
+              histogram_quantile(0.95, sum(rate(mc_standard_inference_duration_seconds_bucket[5m])) by (le))
+            )
+            /
+            clamp_min(histogram_quantile(0.95, sum(rate(mc_standard_inference_duration_seconds_bucket[5m])) by (le)), 0.001)
+          ) * 100
+
+      - record: mc_residency_enforcement_success_rate
+        expr: |
+          (
+            sum(rate(mc_residency_checks_passed_total[5m]))
+            /
+            clamp_min(sum(rate(mc_residency_checks_total[5m])), 1)
+          )
+
+      - record: mc_enclave_attestation_rate
+        expr: |
+          rate(mc_enclave_attestations_total[5m])
+
+      # Combined trustless velocity health score
+      - record: mc_trustless_velocity_health_score
+        expr: |
+          (
+            # ZTA coverage weight (30%)
+            (clamp_max(mc_zta_coverage_percent / 100, 1) * 0.3)
+            +
+            # Policy proof success weight (25%)
+            (mc_policy_proof_success_ratio * 0.25)
+            +
+            # Remediation performance weight (25%) - MTTR under 7 minutes
+            (clamp_max((7 - mc_remediation_mttr_p95_minutes) / 7, 1) * 0.25)
+            +
+            # Confidential compute overhead weight (20%) - under 7% overhead
+            (clamp_max((7 - mc_confidential_performance_overhead_percent) / 7, 1) * 0.2)
+          )
+
+      # Weekly trend indicators
+      - record: mc_zta_coverage_trend_7d
+        expr: |
+          (
+            avg_over_time(mc_zta_coverage_percent[7d])
+            -
+            avg_over_time(mc_zta_coverage_percent[7d] offset 7d)
+          )
+
+      - record: mc_remediation_mttr_trend_7d
+        expr: |
+          (
+            avg_over_time(mc_remediation_mttr_p95_minutes[7d])
+            -
+            avg_over_time(mc_remediation_mttr_p95_minutes[7d] offset 7d)
+          )

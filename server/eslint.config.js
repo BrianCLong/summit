@@ -5,9 +5,9 @@ import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
 
 export default [
-  { ignores: ['dist/**', 'coverage/**', 'node_modules/**', 'eslint.config.js'] },
+  { ignores: ['dist/**', 'coverage/**', 'node_modules/**'] },
   js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.recommended,
   {
     files: ['src/**/*.ts', 'tests/**/*.ts', 'scripts/**/*.ts', '*.ts'],
     languageOptions: {
@@ -16,7 +16,7 @@ export default [
       sourceType: 'module',
       globals: { ...globals.node },
       parserOptions: {
-        projectService: true,
+        // Avoid project: './tsconfig.json' until tsconfig includes tests to prevent perf/parse errors
         ecmaFeatures: { jsx: false }
       }
     },

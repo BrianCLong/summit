@@ -57,16 +57,9 @@ test.describe('AI Insights Panel', () => {
     const sliderBoundingBox = await slider.boundingBox();
     if (sliderBoundingBox) {
       // Drag the slider to a new position (e.g., filter for communities 0-50)
-      await page.mouse.move(
-        sliderBoundingBox.x + sliderBoundingBox.width / 2,
-        sliderBoundingBox.y + sliderBoundingBox.height / 2,
-      );
+      await page.mouse.move(sliderBoundingBox.x + sliderBoundingBox.width / 2, sliderBoundingBox.y + sliderBoundingBox.height / 2);
       await page.mouse.down();
-      await page.mouse.move(
-        sliderBoundingBox.x + sliderBoundingBox.width * 0.25,
-        sliderBoundingBox.y + sliderBoundingBox.height / 2,
-        { steps: 5 },
-      );
+      await page.mouse.move(sliderBoundingBox.x + sliderBoundingBox.width * 0.25, sliderBoundingBox.y + sliderBoundingBox.height / 2, { steps: 5 });
       await page.mouse.up();
     }
 
@@ -79,7 +72,7 @@ test.describe('AI Insights Panel', () => {
     await page.getByRole('button', { name: 'AI Tools' }).click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByRole('button', { name: 'Export CSV' }).click(),
+      page.getByRole('button', { name: 'Export CSV' }).click()
     ]);
     expect(download.suggestedFilename()).toMatch(/graph-export-\d+\.csv/);
   });
@@ -88,7 +81,7 @@ test.describe('AI Insights Panel', () => {
     await page.getByRole('button', { name: 'AI Tools' }).click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByRole('button', { name: 'Export JSON' }).click(),
+      page.getByRole('button', { name: 'Export JSON' }).click()
     ]);
     expect(download.suggestedFilename()).toMatch(/graph-export-\d+\.json/);
   });

@@ -1,0 +1,14 @@
+{
+  "name": "angleton-counterdeception",
+  "redactionMask": "*",
+  "rules": {
+    "email": "pii",
+    "phone": "pii",
+    "ssn": "pii",
+    "account": "sensitive",
+    "apiKey": "secret",
+    "token": "secret",
+    "address": "pii"
+  }
+}
+

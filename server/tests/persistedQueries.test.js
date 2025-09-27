@@ -23,10 +23,7 @@ describe('persisted queries per tenant', () => {
   function buildApp() {
     const app = express();
     app.use(express.json());
-    const pq = createPersistedQueriesMiddleware({
-      manifestDirectory: tmpDir,
-      enforceInProduction: true,
-    });
+    const pq = createPersistedQueriesMiddleware({ manifestDirectory: tmpDir, enforceInProduction: true });
     app.use(pq.middleware());
     app.post('/graphql', (_req, res) => res.json({ data: { ok: true } }));
     return app;
@@ -34,7 +31,10 @@ describe('persisted queries per tenant', () => {
 
   it('allows operation from tenant manifest', async () => {
     const app = buildApp();
-    const res = await request(app).post('/graphql').set('x-tenant-id', tenantA).send({ id: hash });
+    const res = await request(app)
+      .post('/graphql')
+      .set('x-tenant-id', tenantA)
+      .send({ id: hash });
     expect(res.status).toBe(200);
   });
 

@@ -1,22 +1,22 @@
 const EMOTION_KEYWORDS = {
-  anger: ['hate', 'furious', 'rage'],
-  fear: ['fear', 'terror', 'panic'],
-  disgust: ['disgust', 'vile', 'gross'],
-  joy: ['happy', 'joy', 'delight'],
-  sadness: ['sad', 'depress', 'gloom'],
+  anger: ["hate", "furious", "rage"],
+  fear: ["fear", "terror", "panic"],
+  disgust: ["disgust", "vile", "gross"],
+  joy: ["happy", "joy", "delight"],
+  sadness: ["sad", "depress", "gloom"],
 };
 
 const BIAS_PHRASES = [
-  'everyone knows',
-  'no one can deny',
-  'fake news',
-  'the truth is',
-  'always',
-  'never',
+  "everyone knows",
+  "no one can deny",
+  "fake news",
+  "the truth is",
+  "always",
+  "never",
 ];
 
 export function analyzeText(text) {
-  const lower = (text || '').toLowerCase();
+  const lower = (text || "").toLowerCase();
   let score = 0;
   const tags = [];
 
@@ -29,7 +29,7 @@ export function analyzeText(text) {
 
   if (BIAS_PHRASES.some((p) => lower.includes(p))) {
     score += 0.2;
-    tags.push('bias');
+    tags.push("bias");
   }
 
   return {

@@ -1,0 +1,448 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "MC v0.3.7 - Sovereign Resilience",
+    "tags": ["mc-platform", "v0.3.7", "sovereign", "resilience", "mythic"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "zk Coverage",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99.5}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_zk_coverage_percent",
+            "legendFormat": "zk Coverage %",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "BFT Health",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "percent"
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_bft_quorum_success_rate * 100",
+            "legendFormat": "Quorum Success %",
+            "refId": "A"
+          },
+          {
+            "expr": "mc_bft_write_confirmation_rate * 100",
+            "legendFormat": "Write Confirmation %",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "CSE Score",
+        "type": "gauge",
+        "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.95},
+                {"color": "green", "value": 0.99}
+              ]
+            },
+            "min": 0,
+            "max": 1,
+            "unit": "short"
+          }
+        },
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "targets": [
+          {
+            "expr": "mc_cse_composite_score",
+            "legendFormat": "CSE Score",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "GreenOps Gains",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "percent"
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_greenops_cost_reduction_percent",
+            "legendFormat": "Cost Reduction %",
+            "refId": "A"
+          },
+          {
+            "expr": "mc_greenops_latency_improvement_percent",
+            "legendFormat": "Latency Improvement %",
+            "refId": "B"
+          },
+          {
+            "expr": "mc_greenops_carbon_reduction_percent",
+            "legendFormat": "Carbon Reduction %",
+            "refId": "C"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "zk Verification Performance",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 250}
+              ]
+            },
+            "unit": "ms"
+          }
+        },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(mc_zk_verification_duration_seconds_bucket[5m])) by (le)) * 1000",
+            "legendFormat": "P95 Verification Time",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(mc_zk_verification_duration_seconds_bucket[5m])) by (le)) * 1000",
+            "legendFormat": "P50 Verification Time",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "BFT Write Latency",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 8},
+                {"color": "red", "value": 15}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_bft_write_overhead_percent",
+            "legendFormat": "BFT Write Overhead %",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "CSE Invariant Status",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 14},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_cse_invariant_status",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {"Time": true},
+              "indexByName": {},
+              "renameByName": {
+                "invariant_type": "Invariant",
+                "Value": "Status"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Sovereign Compliance",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 8, "x": 8, "y": 14},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 100}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_sovereign_compliance_coverage * 100",
+            "legendFormat": "Compliance Coverage",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Policy Drift Detection",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 8, "x": 16, "y": 14},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "red", "value": 1}
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "targets": [
+          {
+            "expr": "sum(mc_sovereign_policy_drift_total)",
+            "legendFormat": "Policy Drift Count",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "GreenOps Decision Distribution",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 18},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "pieType": "pie",
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "values": ["percent"]
+          }
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(mc_greenops_decisions_total{mode=\"cost_first\"}[5m]))",
+            "legendFormat": "Cost First",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(mc_greenops_decisions_total{mode=\"latency_first\"}[5m]))",
+            "legendFormat": "Latency First",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(rate(mc_greenops_decisions_total{mode=\"carbon_first\"}[5m]))",
+            "legendFormat": "Carbon First",
+            "refId": "C"
+          },
+          {
+            "expr": "sum(rate(mc_greenops_decisions_total{mode=\"balanced\"}[5m]))",
+            "legendFormat": "Balanced",
+            "refId": "D"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Sovereign Resilience Health Score",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 18},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.8},
+                {"color": "green", "value": 0.95}
+              ]
+            },
+            "min": 0,
+            "max": 1,
+            "unit": "short"
+          }
+        },
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "targets": [
+          {
+            "expr": "mc_sovereign_resilience_health_score",
+            "legendFormat": "Health Score",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Audit Pack Generation",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 26},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "s"
+          }
+        },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(mc_sovereign_audit_generation_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "P95 Generation Time",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(mc_sovereign_audit_packs_generated_total[5m])",
+            "legendFormat": "Generation Rate/sec",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "System Events Log",
+        "type": "logs",
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 26},
+        "targets": [
+          {
+            "expr": "{job=\"mc-sovereign\"} |= \"zk-proof\" or \"bft-quorum\" or \"cse-hold\" or \"policy-drift\"",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": false,
+          "wrapLogMessage": false,
+          "prettifyLogMessage": false,
+          "enableLogDetails": true,
+          "dedupStrategy": "none",
+          "sortOrder": "Descending"
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": [
+        {
+          "name": "tenant",
+          "type": "query",
+          "query": "label_values(mc_sovereign_compliance_coverage, tenant_id)",
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "region",
+          "type": "query",
+          "query": "label_values(mc_bft_quorum_success_rate, region)",
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "zk Proof Failures",
+          "datasource": "prometheus",
+          "expr": "changes(mc_zk_proof_failures_total[5m])",
+          "iconColor": "red"
+        },
+        {
+          "name": "BFT Epoch Changes",
+          "datasource": "prometheus",
+          "expr": "changes(mc_bft_epoch_number[5m])",
+          "iconColor": "blue"
+        },
+        {
+          "name": "CSE Holds",
+          "datasource": "prometheus",
+          "expr": "changes(mc_cse_deployment_holds_total[5m])",
+          "iconColor": "orange"
+        }
+      ]
+    },
+    "refresh": "10s",
+    "schemaVersion": 36,
+    "version": 1
+  }
+}

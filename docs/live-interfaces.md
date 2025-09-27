@@ -2,13 +2,12 @@
 
 This document outlines the real-time collaboration interfaces for IntelGraph.
 It summarizes the presence, graph operations and commenting features that are
-exposed over a Socket.IO namespace and consumed by the frontend. The implementation
+exposed over a Socket.IO namespace and consumed by the frontend. The implementation 
 is intentionally minimal and intended for extension.
 
 ## Socket Namespaces
 
 ### `/live` Namespace
-
 - Authenticated via JWT and workspace membership.
 - Rooms per workspace allow event fan‑out.
 - Supported events:
@@ -18,7 +17,6 @@ is intentionally minimal and intended for extension.
   - `comment:add` / `comment:new` – post and receive inline comments.
 
 ### `/realtime` Namespace (Legacy)
-
 The realtime socket server exposes a basic presence system. Clients connect to the `/realtime` namespace with a JWT and `workspaceId` in the auth payload. The server tracks active users per workspace and broadcasts `presence:update` events whenever members join, change status, or disconnect.
 
 ## Presence System

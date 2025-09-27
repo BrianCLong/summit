@@ -128,7 +128,7 @@ router.get('/health/info', (req: Request, res: Response) => {
       rss: Math.round(process.memoryUsage().rss / 1024 / 1024),
     },
   };
-
+  
   res.json(info);
 });
 

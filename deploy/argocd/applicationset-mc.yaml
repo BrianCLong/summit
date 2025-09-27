@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: maestro-conductor
+spec:
+  generators:
+    - list:
+        elements:
+          - env: dev
+          - env: stage
+          - env: prod
+  template:
+    metadata:
+      name: mc-{{env}}
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/intelgraph/summit
+        targetRevision: HEAD
+        path: charts/maestro-conductor
+        helm:
+          valueFiles:
+            - values/{{env}}.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: mc-{{env}}
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+

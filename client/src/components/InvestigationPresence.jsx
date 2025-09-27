@@ -15,18 +15,18 @@ function InvestigationPresence() {
 
       // Listen for presence updates
       socket.on('presence:join', (data) => {
-        setActiveUsers((prevUsers) => ({
+        setActiveUsers(prevUsers => ({
           ...prevUsers,
           [data.userId]: {
             username: data.username,
             avatarUrl: data.avatarUrl,
-            sid: data.sid,
-          },
+            sid: data.sid
+          }
         }));
       });
 
       socket.on('presence:leave', (data) => {
-        setActiveUsers((prevUsers) => {
+        setActiveUsers(prevUsers => {
           const newUsers = { ...prevUsers };
           delete newUsers[data.userId]; // Remove user when they leave
           return newUsers;
@@ -51,10 +51,7 @@ function InvestigationPresence() {
   }
 
   return (
-    <Paper
-      elevation={1}
-      sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}
-    >
+    <Paper elevation={1} sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
       <Typography variant="caption" color="text.secondary">
         Active in Investigation:
       </Typography>
@@ -63,12 +60,12 @@ function InvestigationPresence() {
           No one else here
         </Typography>
       ) : (
-        usersArray.map((user) => (
+        usersArray.map(user => (
           <Tooltip key={user.sid} title={user.username}>
-            <Avatar
-              alt={user.username}
-              src={user.avatarUrl}
-              sx={{ width: 24, height: 24, fontSize: 12 }}
+            <Avatar 
+              alt={user.username} 
+              src={user.avatarUrl} 
+              sx={{ width: 24, height: 24, fontSize: 12 }} 
             />
           </Tooltip>
         ))

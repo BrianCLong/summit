@@ -30,6 +30,6 @@ For more advanced secret management, integrate with HashiCorp Vault.
 
 ## Best Practices
 
-- **Least Privilege**: Ensure only necessary personnel and automated systems have access to decrypt secrets.
-- **Rotation**: Regularly rotate secrets (e.g., database passwords, API keys).
-- **Auditing**: Log all access and decryption of secrets for auditing purposes.
+*   **Least Privilege**: Ensure only necessary personnel and automated systems have access to decrypt secrets.
+*   **Rotation**: Regularly rotate secrets (e.g., database passwords, API keys).
+*   **Auditing**: Log all access and decryption of secrets for auditing purposes.

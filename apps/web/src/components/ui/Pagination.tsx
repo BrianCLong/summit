@@ -59,9 +59,7 @@ export function Pagination({
   if (totalPages <= 1) return null
 
   return (
-    <div
-      className={cn('flex items-center justify-center space-x-2', className)}
-    >
+    <div className={cn('flex items-center justify-center space-x-2', className)}>
       {showFirstLast && (
         <Button
           variant="outline"

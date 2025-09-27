@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useMutation, gql } from '@apollo/client';
-import * as d3 from 'd3';
+import React, { useState, useEffect, useRef } from "react";
+import { useMutation, gql } from "@apollo/client";
+import * as d3 from "d3";
 
 const ANALYZE_SENTIMENT_VOLATILITY_MUTATION = gql`
   mutation AnalyzeSentimentVolatility($signalsInput: JSON!) {
@@ -12,7 +12,7 @@ const ANALYZE_SENTIMENT_VOLATILITY_MUTATION = gql`
 `;
 
 const SentimentVolatility: React.FC = () => {
-  const [signalsData, setSignalsData] = useState('');
+  const [signalsData, setSignalsData] = useState("");
   const [analyzeSentimentVolatility, { data, loading, error }] = useMutation(
     ANALYZE_SENTIMENT_VOLATILITY_MUTATION,
   );
@@ -25,7 +25,7 @@ const SentimentVolatility: React.FC = () => {
         variables: { signalsInput: parsedSignalsData },
       });
     } catch (e) {
-      alert('Invalid JSON input for signals data.');
+      alert("Invalid JSON input for signals data.");
       console.error(e);
     }
   };
@@ -40,12 +40,12 @@ const SentimentVolatility: React.FC = () => {
 
       const width = 300;
       const height = 200;
-      d3.select(chartRef.current).selectAll('*').remove();
+      d3.select(chartRef.current).selectAll("*").remove();
       const svg = d3
         .select(chartRef.current)
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height);
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
 
       const x = d3
         .scaleBand()
@@ -57,19 +57,22 @@ const SentimentVolatility: React.FC = () => {
         .domain([0, d3.max(points, (p) => p.value) || 1])
         .range([height, 0]);
 
-      svg.append('g').attr('transform', `translate(0,${height})`).call(d3.axisBottom(x));
-      svg.append('g').call(d3.axisLeft(y));
+      svg
+        .append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x));
+      svg.append("g").call(d3.axisLeft(y));
 
       svg
-        .selectAll('rect')
+        .selectAll("rect")
         .data(points)
         .enter()
-        .append('rect')
-        .attr('x', (d) => x(d.label) || 0)
-        .attr('y', (d) => y(d.value))
-        .attr('width', x.bandwidth())
-        .attr('height', (d) => height - y(d.value))
-        .attr('fill', '#10b981');
+        .append("rect")
+        .attr("x", (d) => x(d.label) || 0)
+        .attr("y", (d) => y(d.value))
+        .attr("width", x.bandwidth())
+        .attr("height", (d) => height - y(d.value))
+        .attr("fill", "#10b981");
     }
   }, [data]);
 
@@ -87,7 +90,7 @@ const SentimentVolatility: React.FC = () => {
         onClick={handleSubmit}
         disabled={loading}
       >
-        {loading ? 'Analyzing...' : 'Run Sentiment-to-Volatility Analysis'}
+        {loading ? "Analyzing..." : "Run Sentiment-to-Volatility Analysis"}
       </button>
 
       {error && <p className="text-red-500 mt-4">Error: {error.message}</p>}

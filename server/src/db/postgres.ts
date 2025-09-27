@@ -1,10 +1,10 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
-import baseLogger from '../config/logger';
+import pino from 'pino';
 
 dotenv.config();
 
-const logger = baseLogger.child({ name: 'postgres' });
+const logger: pino.Logger = pino();
 
 const POSTGRES_HOST = process.env.POSTGRES_HOST || 'postgres';
 const POSTGRES_USER = process.env.POSTGRES_USER || 'intelgraph';
@@ -26,22 +26,18 @@ export function getPostgresPool(): Pool {
         connectionTimeoutMillis: 5000,
       });
       logger.info('PostgreSQL pool initialized.');
-
+      
       // Test the connection
-      pool
-        .connect()
-        .then((client) => {
-          client.release();
-          logger.info('PostgreSQL connection verified.');
-        })
-        .catch((err) => {
-          logger.warn(`PostgreSQL connection failed - using mock responses. Error: ${err.message}`);
-          pool = createMockPostgresPool();
-        });
+      pool.connect().then(client => {
+        client.release();
+        logger.info('PostgreSQL connection verified.');
+      }).catch(err => {
+        logger.warn(`PostgreSQL connection failed - using mock responses. Error: ${err.message}`);
+        pool = createMockPostgresPool();
+      });
+      
     } catch (error) {
-      logger.warn(
-        `PostgreSQL initialization failed - using development mode. Error: ${(error as Error).message}`,
-      );
+      logger.warn(`PostgreSQL initialization failed - using development mode. Error: ${(error as Error).message}`);
       pool = createMockPostgresPool();
     }
   }
@@ -56,10 +52,10 @@ function createMockPostgresPool(): Pool {
     },
     connect: async () => ({
       query: async (text: string, params?: any[]) => ({ rows: [], rowCount: 0, fields: [] }),
-      release: () => {},
+      release: () => {}
     }),
     end: async () => {},
-    on: () => {},
+    on: () => {}
   } as any;
 }
 

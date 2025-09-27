@@ -1,6 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Grid, Card, CardContent, Button, Chip } from '@mui/material';
-import { Add as AddIcon, TrendingUp, Group, AccountTree, Assessment } from '@mui/icons-material';
+import { 
+  Box, 
+  Typography, 
+  Grid, 
+  Card, 
+  CardContent, 
+  Button,
+  Chip,
+} from '@mui/material';
+import { 
+  Add as AddIcon, 
+  TrendingUp, 
+  Group, 
+  AccountTree,
+  Assessment 
+} from '@mui/icons-material';
 import { useMutation, gql } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
 import OnboardingTour from '../onboarding/OnboardingTour';
@@ -35,46 +49,18 @@ function Dashboard() {
   ];
 
   const recentInvestigations = [
-    {
-      id: 1,
-      title: 'Financial Network Analysis',
-      status: 'active',
-      entities: 45,
-      updated: '2 hours ago',
-    },
-    {
-      id: 2,
-      title: 'Supply Chain Investigation',
-      status: 'pending',
-      entities: 78,
-      updated: '5 hours ago',
-    },
-    {
-      id: 3,
-      title: 'Communication Pattern Analysis',
-      status: 'completed',
-      entities: 123,
-      updated: '1 day ago',
-    },
-    {
-      id: 4,
-      title: 'Geographic Movement Tracking',
-      status: 'active',
-      entities: 34,
-      updated: '2 days ago',
-    },
+    { id: 1, title: 'Financial Network Analysis', status: 'active', entities: 45, updated: '2 hours ago' },
+    { id: 2, title: 'Supply Chain Investigation', status: 'pending', entities: 78, updated: '5 hours ago' },
+    { id: 3, title: 'Communication Pattern Analysis', status: 'completed', entities: 123, updated: '1 day ago' },
+    { id: 4, title: 'Geographic Movement Tracking', status: 'active', entities: 34, updated: '2 days ago' },
   ];
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'completed':
-        return 'info';
-      default:
-        return 'default';
+      case 'active': return 'success';
+      case 'pending': return 'warning';
+      case 'completed': return 'info';
+      default: return 'default';
     }
   };
 
@@ -92,23 +78,10 @@ function Dashboard() {
         >
           New Investigation
         </Button>
-        <Button
-          sx={{ ml: 2 }}
-          variant="outlined"
-          onClick={() => setShowTemplateModal(true)}
-          size="large"
-        >
+        <Button sx={{ ml: 2 }} variant="outlined" onClick={() => setShowTemplateModal(true)} size="large">
           Start from Template
         </Button>
-        <Button
-          sx={{ ml: 2 }}
-          variant="outlined"
-          onClick={() =>
-            createAlert({
-              variables: { title: 'Demo alert', message: 'This is a demo alert from Dashboard' },
-            })
-          }
-        >
+        <Button sx={{ ml: 2 }} variant="outlined" onClick={() => createAlert({ variables: { title: 'Demo alert', message: 'This is a demo alert from Dashboard' } })}>
           Send Demo Alert
         </Button>
       </Box>
@@ -119,15 +92,13 @@ function Dashboard() {
             <Card sx={{ height: '100%' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Box
-                    sx={{
-                      p: 1,
-                      borderRadius: 2,
-                      bgcolor: `${stat.color}.light`,
-                      color: `${stat.color}.main`,
-                      mr: 2,
-                    }}
-                  >
+                  <Box sx={{ 
+                    p: 1, 
+                    borderRadius: 2, 
+                    bgcolor: `${stat.color}.light`,
+                    color: `${stat.color}.main`,
+                    mr: 2 
+                  }}>
                     {stat.icon}
                   </Box>
                   <Typography variant="h4" fontWeight="bold">
@@ -180,8 +151,8 @@ function Dashboard() {
                     {investigation.entities} entities • Updated {investigation.updated}
                   </Typography>
                 </Box>
-                <Chip
-                  label={investigation.status}
+                <Chip 
+                  label={investigation.status} 
                   color={getStatusColor(investigation.status)}
                   size="small"
                 />
@@ -192,13 +163,7 @@ function Dashboard() {
       </Card>
 
       {showOnboarding && (
-        <OnboardingTour
-          open
-          onClose={() => {
-            localStorage.setItem('onboarding_seen', '1');
-            setShowOnboarding(false);
-          }}
-        />
+        <OnboardingTour open onClose={() => { localStorage.setItem('onboarding_seen', '1'); setShowOnboarding(false); }} />
       )}
       {showTemplateModal && (
         <TemplateModal

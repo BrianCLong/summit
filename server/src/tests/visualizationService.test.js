@@ -15,28 +15,28 @@ describe('Visualization Service - P2 Priority', () => {
   beforeEach(() => {
     mockSession = {
       run: jest.fn(),
-      close: jest.fn(),
+      close: jest.fn()
     };
 
     mockNeo4jDriver = {
-      session: jest.fn(() => mockSession),
+      session: jest.fn(() => mockSession)
     };
 
     mockMultimodalService = {
       getEntityMediaContent: jest.fn(),
-      generateEntityThumbnail: jest.fn(),
+      generateEntityThumbnail: jest.fn()
     };
 
     mockLogger = {
       info: jest.fn(),
       error: jest.fn(),
-      warn: jest.fn(),
+      warn: jest.fn()
     };
 
     visualizationService = new VisualizationService(
       mockNeo4jDriver,
       mockMultimodalService,
-      mockLogger,
+      mockLogger
     );
 
     // Mock methods called in constructor
@@ -55,31 +55,31 @@ describe('Visualization Service - P2 Priority', () => {
   describe('Visualization Engine Initialization', () => {
     test('should initialize all supported visualization types', () => {
       const types = visualizationService.getSupportedVisualizationTypes();
-
+      
       expect(types).toHaveLength(10);
-      expect(types.map((t) => t.id)).toContain('NETWORK_GRAPH');
-      expect(types.map((t) => t.id)).toContain('TIMELINE_VIEW');
-      expect(types.map((t) => t.id)).toContain('GEOSPATIAL_MAP');
-      expect(types.map((t) => t.id)).toContain('HIERARCHICAL_TREE');
-      expect(types.map((t) => t.id)).toContain('MATRIX_VIEW');
-      expect(types.map((t) => t.id)).toContain('SANKEY_DIAGRAM');
-      expect(types.map((t) => t.id)).toContain('CHORD_DIAGRAM');
-      expect(types.map((t) => t.id)).toContain('FORCE_DIRECTED_3D');
-      expect(types.map((t) => t.id)).toContain('HEATMAP_OVERLAY');
-      expect(types.map((t) => t.id)).toContain('CUSTOM_DASHBOARD');
+      expect(types.map(t => t.id)).toContain('NETWORK_GRAPH');
+      expect(types.map(t => t.id)).toContain('TIMELINE_VIEW');
+      expect(types.map(t => t.id)).toContain('GEOSPATIAL_MAP');
+      expect(types.map(t => t.id)).toContain('HIERARCHICAL_TREE');
+      expect(types.map(t => t.id)).toContain('MATRIX_VIEW');
+      expect(types.map(t => t.id)).toContain('SANKEY_DIAGRAM');
+      expect(types.map(t => t.id)).toContain('CHORD_DIAGRAM');
+      expect(types.map(t => t.id)).toContain('FORCE_DIRECTED_3D');
+      expect(types.map(t => t.id)).toContain('HEATMAP_OVERLAY');
+      expect(types.map(t => t.id)).toContain('CUSTOM_DASHBOARD');
     });
 
     test('should configure rendering engines correctly', () => {
       const engines = visualizationService.getSupportedRenderingEngines();
+      
+      expect(engines.map(e => e.id)).toContain('CYTOSCAPE');
+      expect(engines.map(e => e.id)).toContain('D3');
+      expect(engines.map(e => e.id)).toContain('THREEJS');
+      expect(engines.map(e => e.id)).toContain('LEAFLET');
+      expect(engines.map(e => e.id)).toContain('PLOTLY');
+      expect(engines.map(e => e.id)).toContain('CANVAS');
 
-      expect(engines.map((e) => e.id)).toContain('CYTOSCAPE');
-      expect(engines.map((e) => e.id)).toContain('D3');
-      expect(engines.map((e) => e.id)).toContain('THREEJS');
-      expect(engines.map((e) => e.id)).toContain('LEAFLET');
-      expect(engines.map((e) => e.id)).toContain('PLOTLY');
-      expect(engines.map((e) => e.id)).toContain('CANVAS');
-
-      const cytoscapeEngine = engines.find((e) => e.id === 'CYTOSCAPE');
+      const cytoscapeEngine = engines.find(e => e.id === 'CYTOSCAPE');
       expect(cytoscapeEngine.capabilities).toContain('network_graphs');
       expect(cytoscapeEngine.capabilities).toContain('interactive_layouts');
     });
@@ -88,7 +88,7 @@ describe('Visualization Service - P2 Priority', () => {
       const networkType = visualizationService.getVisualizationType('NETWORK_GRAPH');
       expect(networkType.compatibleEngines).toContain('CYTOSCAPE');
       expect(networkType.compatibleEngines).toContain('D3');
-
+      
       const timelineType = visualizationService.getVisualizationType('TIMELINE_VIEW');
       expect(timelineType.compatibleEngines).toContain('D3');
       expect(timelineType.compatibleEngines).toContain('PLOTLY');
@@ -99,25 +99,22 @@ describe('Visualization Service - P2 Priority', () => {
     test('should create network graph visualizations', async () => {
       // Mock graph data
       mockSession.run
-        .mockResolvedValueOnce({
-          // Nodes query
+        .mockResolvedValueOnce({ // Nodes query
           records: [
             { get: () => ({ properties: { id: 'n1', label: 'Node 1', type: 'PERSON' } }) },
-            { get: () => ({ properties: { id: 'n2', label: 'Node 2', type: 'ORGANIZATION' } }) },
-          ],
+            { get: () => ({ properties: { id: 'n2', label: 'Node 2', type: 'ORGANIZATION' } }) }
+          ]
         })
-        .mockResolvedValueOnce({
-          // Edges query
+        .mockResolvedValueOnce({ // Edges query
           records: [
             {
               get: (field) => {
                 if (field === 'source') return { properties: { id: 'n1' } };
                 if (field === 'target') return { properties: { id: 'n2' } };
-                if (field === 'relationship')
-                  return { properties: { type: 'WORKS_FOR', weight: 0.8 } };
-              },
-            },
-          ],
+                if (field === 'relationship') return { properties: { type: 'WORKS_FOR', weight: 0.8 } };
+              }
+            }
+          ]
         });
 
       const visualizationRequest = {
@@ -128,13 +125,13 @@ describe('Visualization Service - P2 Priority', () => {
           layout: 'cose',
           showLabels: true,
           nodeSize: 'centrality',
-          edgeThickness: 'weight',
+          edgeThickness: 'weight'
         },
-        userId: 'analyst123',
+        userId: 'analyst123'
       };
 
       const visualization = await visualizationService.createVisualization(visualizationRequest);
-
+      
       expect(visualization.id).toBeDefined();
       expect(visualization.type).toBe('NETWORK_GRAPH');
       expect(visualization.engine).toBe('CYTOSCAPE');
@@ -146,17 +143,17 @@ describe('Visualization Service - P2 Priority', () => {
     test('should create timeline visualizations', async () => {
       mockSession.run.mockResolvedValue({
         records: [
-          {
-            get: () => ({
-              properties: {
-                id: 'event1',
+          { 
+            get: () => ({ 
+              properties: { 
+                id: 'event1', 
                 timestamp: new Date('2024-01-01'),
                 event_type: 'COMMUNICATION',
-                description: 'Phone call between entities',
-              },
-            }),
-          },
-        ],
+                description: 'Phone call between entities'
+              } 
+            }) 
+          }
+        ]
       });
 
       const visualizationRequest = {
@@ -166,13 +163,13 @@ describe('Visualization Service - P2 Priority', () => {
         parameters: {
           timeRange: { start: '2024-01-01', end: '2024-12-31' },
           groupBy: 'event_type',
-          showDetails: true,
+          showDetails: true
         },
-        userId: 'analyst123',
+        userId: 'analyst123'
       };
 
       const visualization = await visualizationService.createVisualization(visualizationRequest);
-
+      
       expect(visualization.type).toBe('TIMELINE_VIEW');
       expect(visualization.data.events).toHaveLength(1);
       expect(visualization.data.events[0].timestamp).toBeInstanceOf(Date);
@@ -182,18 +179,18 @@ describe('Visualization Service - P2 Priority', () => {
     test('should create geospatial map visualizations', async () => {
       mockSession.run.mockResolvedValue({
         records: [
-          {
-            get: () => ({
-              properties: {
+          { 
+            get: () => ({ 
+              properties: { 
                 id: 'loc1',
                 latitude: 40.7128,
-                longitude: -74.006,
+                longitude: -74.0060,
                 label: 'New York Office',
-                entity_type: 'LOCATION',
-              },
-            }),
-          },
-        ],
+                entity_type: 'LOCATION'
+              } 
+            }) 
+          }
+        ]
       });
 
       const visualizationRequest = {
@@ -203,16 +200,16 @@ describe('Visualization Service - P2 Priority', () => {
         parameters: {
           mapStyle: 'satellite',
           clusterPoints: true,
-          showHeatmap: false,
+          showHeatmap: false
         },
-        userId: 'analyst123',
+        userId: 'analyst123'
       };
 
       const visualization = await visualizationService.createVisualization(visualizationRequest);
-
+      
       expect(visualization.type).toBe('GEOSPATIAL_MAP');
       expect(visualization.data.locations).toHaveLength(1);
-      expect(visualization.data.locations[0].coordinates).toEqual([40.7128, -74.006]);
+      expect(visualization.data.locations[0].coordinates).toEqual([40.7128, -74.0060]);
       expect(visualization.config.mapStyle).toBe('satellite');
     });
 
@@ -224,9 +221,9 @@ describe('Visualization Service - P2 Priority', () => {
               if (field === 'parent') return { properties: { id: 'root', label: 'Root Node' } };
               if (field === 'child') return { properties: { id: 'child1', label: 'Child 1' } };
               if (field === 'depth') return 1;
-            },
-          },
-        ],
+            }
+          }
+        ]
       });
 
       const visualizationRequest = {
@@ -236,13 +233,13 @@ describe('Visualization Service - P2 Priority', () => {
         parameters: {
           maxDepth: 3,
           expandAll: false,
-          orientation: 'vertical',
+          orientation: 'vertical'
         },
-        userId: 'analyst123',
+        userId: 'analyst123'
       };
 
       const visualization = await visualizationService.createVisualization(visualizationRequest);
-
+      
       expect(visualization.type).toBe('HIERARCHICAL_TREE');
       expect(visualization.data.hierarchy).toBeDefined();
       expect(visualization.config.maxDepth).toBe(3);
@@ -254,7 +251,7 @@ describe('Visualization Service - P2 Priority', () => {
       const mockMatrixData = [
         [0.8, 0.3, 0.1],
         [0.3, 0.9, 0.4],
-        [0.1, 0.4, 0.7],
+        [0.1, 0.4, 0.7]
       ];
 
       mockSession.run.mockResolvedValue({
@@ -263,8 +260,8 @@ describe('Visualization Service - P2 Priority', () => {
             if (field === 'row_entity') return `entity${i}`;
             if (field === 'col_entity') return `entity${field.split('_')[2] || 0}`;
             if (field === 'value') return row[field.split('_')[2] || 0];
-          },
-        })),
+          }
+        }))
       });
 
       const visualizationRequest = {
@@ -274,13 +271,13 @@ describe('Visualization Service - P2 Priority', () => {
         parameters: {
           metric: 'similarity',
           colorScale: 'viridis',
-          showValues: true,
+          showValues: true
         },
-        userId: 'analyst123',
+        userId: 'analyst123'
       };
 
       const visualization = await visualizationService.createVisualization(visualizationRequest);
-
+      
       expect(visualization.type).toBe('MATRIX_VIEW');
       expect(visualization.data.matrix).toBeDefined();
       expect(visualization.config.colorScale).toBe('viridis');
@@ -294,9 +291,9 @@ describe('Visualization Service - P2 Priority', () => {
               if (field === 'source') return 'Source A';
               if (field === 'target') return 'Target B';
               if (field === 'value') return 50;
-            },
-          },
-        ],
+            }
+          }
+        ]
       });
 
       const visualizationRequest = {
@@ -306,13 +303,13 @@ describe('Visualization Service - P2 Priority', () => {
         parameters: {
           flowMetric: 'transaction_volume',
           nodeAlignment: 'left',
-          iterations: 32,
+          iterations: 32
         },
-        userId: 'analyst123',
+        userId: 'analyst123'
       };
 
       const visualization = await visualizationService.createVisualization(visualizationRequest);
-
+      
       expect(visualization.type).toBe('SANKEY_DIAGRAM');
       expect(visualization.data.flows).toBeDefined();
       expect(visualization.config.flowMetric).toBe('transaction_volume');
@@ -321,7 +318,9 @@ describe('Visualization Service - P2 Priority', () => {
     test('should create 3D force-directed visualizations', async () => {
       mockSession.run
         .mockResolvedValueOnce({
-          records: [{ get: () => ({ properties: { id: 'n1', label: 'Node 1', type: 'PERSON' } }) }],
+          records: [
+            { get: () => ({ properties: { id: 'n1', label: 'Node 1', type: 'PERSON' } }) }
+          ]
         })
         .mockResolvedValueOnce({
           records: [
@@ -330,9 +329,9 @@ describe('Visualization Service - P2 Priority', () => {
                 if (field === 'source') return { properties: { id: 'n1' } };
                 if (field === 'target') return { properties: { id: 'n2' } };
                 if (field === 'relationship') return { properties: { type: 'CONNECTED' } };
-              },
-            },
-          ],
+              }
+            }
+          ]
         });
 
       const visualizationRequest = {
@@ -343,18 +342,18 @@ describe('Visualization Service - P2 Priority', () => {
           physics: {
             strength: -300,
             distance: 100,
-            decay: 0.4,
+            decay: 0.4
           },
           camera: {
             position: [0, 0, 300],
-            lookAt: [0, 0, 0],
-          },
+            lookAt: [0, 0, 0]
+          }
         },
-        userId: 'analyst123',
+        userId: 'analyst123'
       };
 
       const visualization = await visualizationService.createVisualization(visualizationRequest);
-
+      
       expect(visualization.type).toBe('FORCE_DIRECTED_3D');
       expect(visualization.engine).toBe('THREEJS');
       expect(visualization.config.physics).toBeDefined();
@@ -370,16 +369,18 @@ describe('Visualization Service - P2 Priority', () => {
         data: {
           nodes: [
             { id: 'n1', label: 'Node 1' },
-            { id: 'n2', label: 'Node 2' },
+            { id: 'n2', label: 'Node 2' }
           ],
-          edges: [{ source: 'n1', target: 'n2' }],
-        },
+          edges: [
+            { source: 'n1', target: 'n2' }
+          ]
+        }
       };
 
       visualizationService.visualizations.set('viz123', visualization);
 
       const result = await visualizationService.selectNode('viz123', 'n1', 'user123');
-
+      
       expect(result.success).toBe(true);
       expect(result.selectedNode).toBe('n1');
       expect(result.highlightedNodes).toContain('n1');
@@ -393,18 +394,18 @@ describe('Visualization Service - P2 Priority', () => {
           nodes: [
             { id: 'n1', label: 'Alice Smith', type: 'PERSON' },
             { id: 'n2', label: 'Bob Jones', type: 'PERSON' },
-            { id: 'n3', label: 'Acme Corp', type: 'ORGANIZATION' },
-          ],
-        },
+            { id: 'n3', label: 'Acme Corp', type: 'ORGANIZATION' }
+          ]
+        }
       };
 
       visualizationService.visualizations.set('viz123', visualization);
 
       const filterResult = await visualizationService.applyNodeFilter('viz123', {
         type: 'PERSON',
-        labelContains: 'Smith',
+        labelContains: 'Smith'
       });
-
+      
       expect(filterResult.visibleNodes).toEqual(['n1']);
       expect(filterResult.hiddenNodes).toEqual(['n2', 'n3']);
     });
@@ -413,16 +414,16 @@ describe('Visualization Service - P2 Priority', () => {
       const visualization = {
         id: 'viz123',
         type: 'NETWORK_GRAPH',
-        config: { layout: 'grid' },
+        config: { layout: 'grid' }
       };
 
       visualizationService.visualizations.set('viz123', visualization);
 
       const result = await visualizationService.changeLayout('viz123', 'force-directed', {
         iterations: 100,
-        linkDistance: 50,
+        linkDistance: 50
       });
-
+      
       expect(result.success).toBe(true);
       expect(result.newLayout).toBe('force-directed');
       expect(result.layoutConfig.iterations).toBe(100);
@@ -431,7 +432,7 @@ describe('Visualization Service - P2 Priority', () => {
     test('should support zoom and pan operations', async () => {
       const visualization = {
         id: 'viz123',
-        viewport: { zoom: 1.0, x: 0, y: 0 },
+        viewport: { zoom: 1.0, x: 0, y: 0 }
       };
 
       visualizationService.visualizations.set('viz123', visualization);
@@ -439,9 +440,9 @@ describe('Visualization Service - P2 Priority', () => {
       const result = await visualizationService.updateViewport('viz123', {
         zoom: 2.0,
         x: 100,
-        y: 50,
+        y: 50
       });
-
+      
       expect(result.success).toBe(true);
       expect(result.viewport.zoom).toBe(2.0);
       expect(result.viewport.x).toBe(100);
@@ -454,13 +455,13 @@ describe('Visualization Service - P2 Priority', () => {
       const visualization = {
         id: 'viz123',
         type: 'NETWORK_GRAPH',
-        engine: 'CYTOSCAPE',
+        engine: 'CYTOSCAPE'
       };
 
       // Mock canvas operations
       const mockCanvas = {
         toBuffer: jest.fn().mockReturnValue(Buffer.from('png data')),
-        toDataURL: jest.fn().mockReturnValue('data:image/png;base64,iVBOR...'),
+        toDataURL: jest.fn().mockReturnValue('data:image/png;base64,iVBOR...')
       };
 
       visualizationService.createCanvas = jest.fn().mockReturnValue(mockCanvas);
@@ -470,9 +471,9 @@ describe('Visualization Service - P2 Priority', () => {
         format: 'png',
         width: 1200,
         height: 800,
-        quality: 0.9,
+        quality: 0.9
       });
-
+      
       expect(exportResult.format).toBe('png');
       expect(exportResult.buffer).toBeInstanceOf(Buffer);
       expect(exportResult.width).toBe(1200);
@@ -482,7 +483,7 @@ describe('Visualization Service - P2 Priority', () => {
     test('should export visualizations to SVG format', async () => {
       const visualization = {
         id: 'viz123',
-        type: 'NETWORK_GRAPH',
+        type: 'NETWORK_GRAPH'
       };
 
       visualizationService.visualizations.set('viz123', visualization);
@@ -490,9 +491,9 @@ describe('Visualization Service - P2 Priority', () => {
       const exportResult = await visualizationService.exportVisualization('viz123', {
         format: 'svg',
         includeCSS: true,
-        embedFonts: true,
+        embedFonts: true
       });
-
+      
       expect(exportResult.format).toBe('svg');
       expect(exportResult.svg).toContain('<svg');
       expect(exportResult.svg).toContain('</svg>');
@@ -504,9 +505,9 @@ describe('Visualization Service - P2 Priority', () => {
         type: 'NETWORK_GRAPH',
         data: {
           nodes: [{ id: 'n1', label: 'Node 1' }],
-          edges: [],
+          edges: []
         },
-        config: { layout: 'cose' },
+        config: { layout: 'cose' }
       };
 
       visualizationService.visualizations.set('viz123', visualization);
@@ -514,9 +515,9 @@ describe('Visualization Service - P2 Priority', () => {
       const exportResult = await visualizationService.exportVisualization('viz123', {
         format: 'json',
         includeConfig: true,
-        includeMetadata: true,
+        includeMetadata: true
       });
-
+      
       expect(exportResult.format).toBe('json');
       const jsonData = JSON.parse(exportResult.json);
       expect(jsonData.data.nodes).toHaveLength(1);
@@ -527,7 +528,7 @@ describe('Visualization Service - P2 Priority', () => {
       const visualization = {
         id: 'viz123',
         type: 'NETWORK_GRAPH',
-        engine: 'D3',
+        engine: 'D3'
       };
 
       visualizationService.visualizations.set('viz123', visualization);
@@ -535,9 +536,9 @@ describe('Visualization Service - P2 Priority', () => {
       const exportResult = await visualizationService.exportVisualization('viz123', {
         format: 'html',
         includeInteractivity: true,
-        includeControls: true,
+        includeControls: true
       });
-
+      
       expect(exportResult.format).toBe('html');
       expect(exportResult.html).toContain('<!DOCTYPE html>');
       expect(exportResult.html).toContain('<script');
@@ -550,11 +551,11 @@ describe('Visualization Service - P2 Priority', () => {
       const nodes = [
         { id: 'n1', x: 0, y: 0 },
         { id: 'n2', x: 100, y: 100 },
-        { id: 'n3', x: 200, y: 0 },
+        { id: 'n3', x: 200, y: 0 }
       ];
       const edges = [
         { source: 'n1', target: 'n2' },
-        { source: 'n2', target: 'n3' },
+        { source: 'n2', target: 'n3' }
       ];
 
       const layout = visualizationService.calculateForceDirectedLayout(
@@ -562,10 +563,10 @@ describe('Visualization Service - P2 Priority', () => {
         {
           iterations: 50,
           linkDistance: 100,
-          nodeStrength: -300,
-        },
+          nodeStrength: -300
+        }
       );
-
+      
       expect(layout).toBeDefined();
       expect(Object.keys(layout)).toHaveLength(3);
       expect(layout.n1).toHaveProperty('x');
@@ -577,15 +578,15 @@ describe('Visualization Service - P2 Priority', () => {
         { id: 'root', level: 0 },
         { id: 'child1', level: 1, parent: 'root' },
         { id: 'child2', level: 1, parent: 'root' },
-        { id: 'grandchild1', level: 2, parent: 'child1' },
+        { id: 'grandchild1', level: 2, parent: 'child1' }
       ];
 
       const layout = visualizationService.calculateHierarchicalLayout(nodes, {
         direction: 'vertical',
         levelSpacing: 100,
-        nodeSpacing: 80,
+        nodeSpacing: 80
       });
-
+      
       expect(layout.root.y).toBe(0);
       expect(layout.child1.y).toBe(100);
       expect(layout.child2.y).toBe(100);
@@ -593,34 +594,37 @@ describe('Visualization Service - P2 Priority', () => {
     });
 
     test('should implement circular layout', () => {
-      const nodes = [{ id: 'n1' }, { id: 'n2' }, { id: 'n3' }, { id: 'n4' }];
+      const nodes = [
+        { id: 'n1' },
+        { id: 'n2' },
+        { id: 'n3' },
+        { id: 'n4' }
+      ];
 
       const layout = visualizationService.calculateCircularLayout(nodes, {
         radius: 200,
-        startAngle: 0,
+        startAngle: 0
       });
-
+      
       expect(Object.keys(layout)).toHaveLength(4);
       // Verify nodes are positioned in a circle
-      const distances = Object.values(layout).map((pos) =>
-        Math.sqrt(pos.x * pos.x + pos.y * pos.y),
+      const distances = Object.values(layout).map(pos => 
+        Math.sqrt(pos.x * pos.x + pos.y * pos.y)
       );
-      distances.forEach((distance) => {
+      distances.forEach(distance => {
         expect(distance).toBeCloseTo(200, 1);
       });
     });
 
     test('should implement grid layout', () => {
-      const nodes = Array(9)
-        .fill()
-        .map((_, i) => ({ id: `n${i}` }));
+      const nodes = Array(9).fill().map((_, i) => ({ id: `n${i}` }));
 
       const layout = visualizationService.calculateGridLayout(nodes, {
         columns: 3,
         cellWidth: 100,
-        cellHeight: 100,
+        cellHeight: 100
       });
-
+      
       expect(Object.keys(layout)).toHaveLength(9);
       expect(layout.n0).toEqual({ x: 0, y: 0 });
       expect(layout.n1).toEqual({ x: 100, y: 0 });
@@ -634,8 +638,8 @@ describe('Visualization Service - P2 Priority', () => {
         id: 'viz123',
         data: {
           nodes: [{ id: 'n1', label: 'Node 1' }],
-          edges: [],
-        },
+          edges: []
+        }
       };
 
       visualizationService.visualizations.set('viz123', visualization);
@@ -643,9 +647,9 @@ describe('Visualization Service - P2 Priority', () => {
       const result = await visualizationService.addNode('viz123', {
         id: 'n2',
         label: 'Node 2',
-        type: 'PERSON',
+        type: 'PERSON'
       });
-
+      
       expect(result.success).toBe(true);
       expect(visualization.data.nodes).toHaveLength(2);
       expect(visualization.data.nodes[1].id).toBe('n2');
@@ -657,10 +661,10 @@ describe('Visualization Service - P2 Priority', () => {
         data: {
           nodes: [
             { id: 'n1', label: 'Node 1' },
-            { id: 'n2', label: 'Node 2' },
+            { id: 'n2', label: 'Node 2' }
           ],
-          edges: [],
-        },
+          edges: []
+        }
       };
 
       visualizationService.visualizations.set('viz123', visualization);
@@ -669,9 +673,9 @@ describe('Visualization Service - P2 Priority', () => {
         source: 'n1',
         target: 'n2',
         type: 'CONNECTED_TO',
-        weight: 0.8,
+        weight: 0.8
       });
-
+      
       expect(result.success).toBe(true);
       expect(visualization.data.edges).toHaveLength(1);
       expect(visualization.data.edges[0].source).toBe('n1');
@@ -682,8 +686,8 @@ describe('Visualization Service - P2 Priority', () => {
         id: 'viz123',
         data: {
           nodes: [{ id: 'n1', label: 'Old Label', risk: 0.3 }],
-          edges: [],
-        },
+          edges: []
+        }
       };
 
       visualizationService.visualizations.set('viz123', visualization);
@@ -691,9 +695,9 @@ describe('Visualization Service - P2 Priority', () => {
       const result = await visualizationService.updateNodeProperties('viz123', 'n1', {
         label: 'New Label',
         risk: 0.8,
-        color: '#ff0000',
+        color: '#ff0000'
       });
-
+      
       expect(result.success).toBe(true);
       expect(visualization.data.nodes[0].label).toBe('New Label');
       expect(visualization.data.nodes[0].risk).toBe(0.8);
@@ -704,59 +708,53 @@ describe('Visualization Service - P2 Priority', () => {
   describe('Performance Optimization', () => {
     test('should implement level-of-detail rendering', () => {
       const viewport = { zoom: 0.5, bounds: { x1: 0, y1: 0, x2: 1000, y2: 800 } };
-      const nodes = Array(10000)
-        .fill()
-        .map((_, i) => ({
-          id: `n${i}`,
-          x: Math.random() * 2000,
-          y: Math.random() * 1600,
-          size: Math.random() * 20 + 5,
-        }));
+      const nodes = Array(10000).fill().map((_, i) => ({
+        id: `n${i}`,
+        x: Math.random() * 2000,
+        y: Math.random() * 1600,
+        size: Math.random() * 20 + 5
+      }));
 
       const optimized = visualizationService.applyLevelOfDetail(nodes, viewport);
-
+      
       expect(optimized.visible.length).toBeLessThan(nodes.length);
       expect(optimized.simplified.length).toBeGreaterThan(0);
       expect(optimized.hidden.length).toBeGreaterThan(0);
     });
 
     test('should implement node clustering for large graphs', () => {
-      const nodes = Array(5000)
-        .fill()
-        .map((_, i) => ({
-          id: `n${i}`,
-          x: Math.random() * 1000,
-          y: Math.random() * 1000,
-          type: i % 3 === 0 ? 'PERSON' : i % 3 === 1 ? 'ORGANIZATION' : 'LOCATION',
-        }));
+      const nodes = Array(5000).fill().map((_, i) => ({
+        id: `n${i}`,
+        x: Math.random() * 1000,
+        y: Math.random() * 1000,
+        type: i % 3 === 0 ? 'PERSON' : i % 3 === 1 ? 'ORGANIZATION' : 'LOCATION'
+      }));
 
       const clusters = visualizationService.clusterNodes(nodes, {
         maxClusterSize: 50,
-        clusterDistance: 100,
+        clusterDistance: 100
       });
-
+      
       expect(clusters.length).toBeGreaterThan(0);
       expect(clusters.length).toBeLessThan(nodes.length);
-      clusters.forEach((cluster) => {
+      clusters.forEach(cluster => {
         expect(cluster.nodes.length).toBeLessThanOrEqual(50);
         expect(cluster.centroid).toBeDefined();
       });
     });
 
     test('should implement edge bundling for complex networks', () => {
-      const edges = Array(1000)
-        .fill()
-        .map((_, i) => ({
-          source: `n${i % 100}`,
-          target: `n${(i + 1) % 100}`,
-          weight: Math.random(),
-        }));
+      const edges = Array(1000).fill().map((_, i) => ({
+        source: `n${i % 100}`,
+        target: `n${(i + 1) % 100}`,
+        weight: Math.random()
+      }));
 
       const bundled = visualizationService.bundleEdges(edges, {
         bundleStrength: 0.8,
-        subdivisions: 3,
+        subdivisions: 3
       });
-
+      
       expect(bundled.bundles.length).toBeLessThan(edges.length);
       expect(bundled.controlPoints).toBeDefined();
     });
@@ -767,11 +765,11 @@ describe('Visualization Service - P2 Priority', () => {
       const visualization = {
         id: 'viz123',
         type: 'NETWORK_GRAPH',
-        config: { layout: 'cose', theme: 'dark' },
+        config: { layout: 'cose', theme: 'dark' }
       };
 
       const saved = await visualizationService.saveVisualization(visualization, 'user123');
-
+      
       expect(saved.success).toBe(true);
       expect(saved.id).toBeDefined();
 
@@ -784,16 +782,11 @@ describe('Visualization Service - P2 Priority', () => {
       const visualization = { id: 'viz123', userId: 'user1' };
       visualizationService.visualizations.set('viz123', visualization);
 
-      const result = await visualizationService.shareVisualization(
-        'viz123',
-        'user1',
-        ['user2', 'user3'],
-        {
-          permissions: ['view', 'interact'],
-          expiration: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        },
-      );
-
+      const result = await visualizationService.shareVisualization('viz123', 'user1', ['user2', 'user3'], {
+        permissions: ['view', 'interact'],
+        expiration: new Date(Date.now() + 24 * 60 * 60 * 1000)
+      });
+      
       expect(result.success).toBe(true);
       expect(result.shareId).toBeDefined();
       expect(result.sharedWith).toEqual(['user2', 'user3']);
@@ -804,14 +797,14 @@ describe('Visualization Service - P2 Priority', () => {
         id: 'viz123',
         data: { nodes: [], edges: [] },
         config: { layout: 'cose' },
-        viewport: { zoom: 1.5, x: 100, y: 200 },
+        viewport: { zoom: 1.5, x: 100, y: 200 }
       };
 
       const snapshot = await visualizationService.createSnapshot('viz123', 'user123', {
         name: 'Investigation Milestone',
-        description: 'Network state at key investigation point',
+        description: 'Network state at key investigation point'
       });
-
+      
       expect(snapshot.id).toBeDefined();
       expect(snapshot.name).toBe('Investigation Milestone');
       expect(snapshot.visualizationState).toBeDefined();
@@ -822,7 +815,7 @@ describe('Visualization Service - P2 Priority', () => {
   describe('Metrics and Analytics', () => {
     test('should track visualization usage metrics', () => {
       const metrics = visualizationService.getMetrics();
-
+      
       expect(metrics.totalVisualizations).toBeGreaterThanOrEqual(0);
       expect(metrics.activeVisualizations).toBeGreaterThanOrEqual(0);
       expect(metrics.typeBreakdown).toBeDefined();
@@ -837,7 +830,7 @@ describe('Visualization Service - P2 Priority', () => {
       visualizationService.recordRenderTime('NETWORK_GRAPH', 1100);
 
       const analytics = visualizationService.getPerformanceAnalytics();
-
+      
       expect(analytics.averageRenderTimes.NETWORK_GRAPH).toBeCloseTo(1150);
       expect(analytics.averageRenderTimes.TIMELINE_VIEW).toBe(800);
       expect(analytics.totalRenders).toBe(3);
@@ -851,11 +844,11 @@ describe('Visualization Service - P2 Priority', () => {
       const visualizationRequest = {
         type: 'NETWORK_GRAPH',
         investigationId: 'inv123',
-        userId: 'analyst123',
+        userId: 'analyst123'
       };
 
       const result = await visualizationService.createVisualization(visualizationRequest);
-
+      
       expect(result.success).toBe(false);
       expect(result.error).toContain('Database connection failed');
       expect(mockLogger.error).toHaveBeenCalled();
@@ -865,12 +858,11 @@ describe('Visualization Service - P2 Priority', () => {
       const invalidRequest = {
         type: 'INVALID_TYPE',
         engine: 'UNKNOWN_ENGINE',
-        parameters: { invalidParam: true },
+        parameters: { invalidParam: true }
       };
 
-      await expect(visualizationService.createVisualization(invalidRequest)).rejects.toThrow(
-        'Invalid visualization type',
-      );
+      await expect(visualizationService.createVisualization(invalidRequest))
+        .rejects.toThrow('Invalid visualization type');
     });
   });
 });
@@ -883,26 +875,22 @@ describe('Visualization Service Performance', () => {
     visualizationService = new VisualizationService(
       { session: () => ({ run: jest.fn(), close: jest.fn() }) },
       { getEntityMediaContent: jest.fn() },
-      { info: jest.fn(), error: jest.fn() },
+      { info: jest.fn(), error: jest.fn() }
     );
   });
 
   test('should handle large graph rendering efficiently', async () => {
     const largeGraph = {
-      nodes: Array(10000)
-        .fill()
-        .map((_, i) => ({
-          id: `node${i}`,
-          label: `Node ${i}`,
-          x: Math.random() * 1000,
-          y: Math.random() * 1000,
-        })),
-      edges: Array(15000)
-        .fill()
-        .map((_, i) => ({
-          source: `node${i % 10000}`,
-          target: `node${(i + 1) % 10000}`,
-        })),
+      nodes: Array(10000).fill().map((_, i) => ({ 
+        id: `node${i}`, 
+        label: `Node ${i}`,
+        x: Math.random() * 1000,
+        y: Math.random() * 1000
+      })),
+      edges: Array(15000).fill().map((_, i) => ({ 
+        source: `node${i % 10000}`, 
+        target: `node${(i + 1) % 10000}` 
+      }))
     };
 
     const startTime = Date.now();

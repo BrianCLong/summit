@@ -17,7 +17,7 @@ describe('Dashboard', () => {
             <Dashboard />
           </MemoryRouter>
         </Provider>
-      </MockedProvider>,
+      </MockedProvider>
     );
 
     expect(screen.getByText('Dashboard', { selector: 'h1' })).toBeInTheDocument();
@@ -25,3 +25,4 @@ describe('Dashboard', () => {
     expect(await screen.findByText('Send Demo Alert')).toBeInTheDocument();
   });
 });
+

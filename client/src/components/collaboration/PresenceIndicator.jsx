@@ -15,7 +15,7 @@ import {
   IconButton,
   Divider,
   Button,
-  Collapse,
+  Collapse
 } from '@mui/material';
 import {
   People,
@@ -24,7 +24,7 @@ import {
   Mouse,
   KeyboardArrowDown,
   KeyboardArrowUp,
-  Circle,
+  Circle
 } from '@mui/icons-material';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -85,9 +85,9 @@ function PresenceIndicator({ socket, investigationId }) {
         const position = {
           x: e.clientX,
           y: e.clientY,
-          element: e.target.id || e.target.className,
+          element: e.target.id || e.target.className
         };
-
+        
         // Throttle cursor updates
         clearTimeout(window.cursorUpdateTimeout);
         window.cursorUpdateTimeout = setTimeout(() => {
@@ -101,17 +101,17 @@ function PresenceIndicator({ socket, investigationId }) {
         const position = {
           x: e.clientX,
           y: e.clientY,
-          element: e.target.id || e.target.className,
+          element: e.target.id || e.target.className
         };
-
-        socket.emit('cursor:click', {
-          investigationId,
+        
+        socket.emit('cursor:click', { 
+          investigationId, 
           position,
           target: {
             id: e.target.id,
             className: e.target.className,
-            tagName: e.target.tagName,
-          },
+            tagName: e.target.tagName
+          }
         });
       }
     };
@@ -131,59 +131,57 @@ function PresenceIndicator({ socket, investigationId }) {
   };
 
   const handlePresenceUpdate = (data) => {
-    setOnlineUsers((prev) =>
-      prev.map((user) =>
-        user.userId === data.userId ? { ...user, presence: data.presence } : user,
-      ),
+    setOnlineUsers(prev => 
+      prev.map(user => 
+        user.userId === data.userId 
+          ? { ...user, presence: data.presence }
+          : user
+      )
     );
   };
 
   const handleUserOnline = (data) => {
-    setOnlineUsers((prev) => {
-      const exists = prev.find((u) => u.userId === data.userId);
+    setOnlineUsers(prev => {
+      const exists = prev.find(u => u.userId === data.userId);
       if (exists) return prev;
-      return [
-        ...prev,
-        {
-          userId: data.userId,
-          user: data.user,
-          presence: { status: 'online', lastSeen: data.timestamp },
-        },
-      ];
+      return [...prev, {
+        userId: data.userId,
+        user: data.user,
+        presence: { status: 'online', lastSeen: data.timestamp }
+      }];
     });
   };
 
   const handleUserOffline = (data) => {
-    setOnlineUsers((prev) =>
-      prev.map((user) =>
+    setOnlineUsers(prev => 
+      prev.map(user => 
         user.userId === data.userId
-          ? { ...user, presence: { ...user.presence, status: 'offline', lastSeen: data.timestamp } }
-          : user,
-      ),
+          ? { ...user, presence: { ...user.presence, status: 'offline', lastSeen: data.timestamp }}
+          : user
+      )
     );
   };
 
   const handleUserJoinedInvestigation = (data) => {
-    setInvestigationParticipants((prev) => {
-      const exists = prev.find((p) => p.userId === data.userId);
+    setInvestigationParticipants(prev => {
+      const exists = prev.find(p => p.userId === data.userId);
       if (exists) return prev;
-      return [
-        ...prev,
-        {
-          userId: data.userId,
-          user: data.user,
-          joinedAt: data.timestamp,
-          lastActivity: data.timestamp,
-        },
-      ];
+      return [...prev, {
+        userId: data.userId,
+        user: data.user,
+        joinedAt: data.timestamp,
+        lastActivity: data.timestamp
+      }];
     });
   };
 
   const handleUserLeftInvestigation = (data) => {
-    setInvestigationParticipants((prev) => prev.filter((p) => p.userId !== data.userId));
-
+    setInvestigationParticipants(prev => 
+      prev.filter(p => p.userId !== data.userId)
+    );
+    
     // Remove cursor
-    setUserCursors((prev) => {
+    setUserCursors(prev => {
       const newCursors = new Map(prev);
       newCursors.delete(data.userId);
       return newCursors;
@@ -191,18 +189,18 @@ function PresenceIndicator({ socket, investigationId }) {
   };
 
   const handleCursorUpdate = (data) => {
-    setUserCursors((prev) => {
+    setUserCursors(prev => {
       const newCursors = new Map(prev);
       newCursors.set(data.userId, {
         ...data,
-        lastUpdate: Date.now(),
+        lastUpdate: Date.now()
       });
       return newCursors;
     });
 
     // Auto-remove stale cursors
     setTimeout(() => {
-      setUserCursors((prev) => {
+      setUserCursors(prev => {
         const newCursors = new Map(prev);
         const cursor = newCursors.get(data.userId);
         if (cursor && Date.now() - cursor.lastUpdate > 5000) {
@@ -244,12 +242,12 @@ function PresenceIndicator({ socket, investigationId }) {
   };
 
   const handleTypingIndicator = (data) => {
-    setTypingUsers((prev) => {
+    setTypingUsers(prev => {
       const newTyping = new Map(prev);
       if (data.isTyping) {
         newTyping.set(data.userId, {
           ...data,
-          startTime: Date.now(),
+          startTime: Date.now()
         });
       } else {
         newTyping.delete(data.userId);
@@ -260,7 +258,7 @@ function PresenceIndicator({ socket, investigationId }) {
     // Auto-remove typing indicators after timeout
     if (data.isTyping) {
       setTimeout(() => {
-        setTypingUsers((prev) => {
+        setTypingUsers(prev => {
           const newTyping = new Map(prev);
           const typing = newTyping.get(data.userId);
           if (typing && Date.now() - typing.startTime > 3000) {
@@ -274,34 +272,21 @@ function PresenceIndicator({ socket, investigationId }) {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'online':
-        return '#4caf50';
-      case 'away':
-        return '#ff9800';
-      case 'busy':
-        return '#f44336';
-      case 'offline':
-        return '#9e9e9e';
-      default:
-        return '#9e9e9e';
+      case 'online': return '#4caf50';
+      case 'away': return '#ff9800';
+      case 'busy': return '#f44336';
+      case 'offline': return '#9e9e9e';
+      default: return '#9e9e9e';
     }
   };
 
   const getUserColor = (userId) => {
     const colors = [
-      '#FF6B35',
-      '#4ECDC4',
-      '#45B7D1',
-      '#96CEB4',
-      '#FFEAA7',
-      '#DDA0DD',
-      '#98D8C8',
-      '#F7DC6F',
-      '#BB8FCE',
-      '#85C1E9',
+      '#FF6B35', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+      '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
     ];
     const hash = userId.split('').reduce((a, b) => {
-      a = (a << 5) - a + b.charCodeAt(0);
+      a = ((a << 5) - a) + b.charCodeAt(0);
       return a & a;
     }, 0);
     return colors[Math.abs(hash) % colors.length];
@@ -318,11 +303,11 @@ function PresenceIndicator({ socket, investigationId }) {
         <Tooltip title="Show online users">
           <IconButton
             onClick={() => setPresenceDrawerOpen(true)}
-            sx={{
+            sx={{ 
               position: 'relative',
               bgcolor: 'background.paper',
               border: 1,
-              borderColor: 'divider',
+              borderColor: 'divider'
             }}
           >
             <Badge badgeContent={onlineUsers.length} color="primary">
@@ -332,17 +317,15 @@ function PresenceIndicator({ socket, investigationId }) {
         </Tooltip>
 
         {/* Active Users Avatars */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: -5,
-            right: -5,
-            display: 'flex',
-            flexDirection: 'row-reverse',
-          }}
-        >
+        <Box sx={{
+          position: 'absolute',
+          top: -5,
+          right: -5,
+          display: 'flex',
+          flexDirection: 'row-reverse'
+        }}>
           {investigationParticipants.slice(0, 3).map((participant, index) => (
-            <Tooltip
+            <Tooltip 
               key={participant.userId}
               title={`${participant.user.firstName} ${participant.user.lastName} - Active`}
             >
@@ -354,7 +337,7 @@ function PresenceIndicator({ socket, investigationId }) {
                   fontSize: '0.75rem',
                   border: 2,
                   borderColor: 'background.paper',
-                  ml: index > 0 ? -0.5 : 0,
+                  ml: index > 0 ? -0.5 : 0
                 }}
               >
                 {getInitials(participant.user)}
@@ -374,7 +357,7 @@ function PresenceIndicator({ socket, investigationId }) {
           width: '100vw',
           height: '100vh',
           pointerEvents: 'none',
-          zIndex: 9999,
+          zIndex: 9999
         }}
       >
         {Array.from(userCursors.entries()).map(([userId, cursor]) => (
@@ -386,14 +369,14 @@ function PresenceIndicator({ socket, investigationId }) {
               top: cursor.position.y,
               transform: 'translate(-2px, -2px)',
               pointerEvents: 'none',
-              zIndex: 10000,
+              zIndex: 10000
             }}
           >
             <Mouse
               sx={{
                 color: getUserColor(userId),
                 fontSize: 20,
-                filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))',
+                filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))'
               }}
             />
             <Paper
@@ -418,8 +401,8 @@ function PresenceIndicator({ socket, investigationId }) {
                   height: 0,
                   borderTop: '4px solid transparent',
                   borderBottom: '4px solid transparent',
-                  borderRight: `4px solid ${getUserColor(userId)}`,
-                },
+                  borderRight: `4px solid ${getUserColor(userId)}`
+                }
               }}
             >
               {cursor.user.firstName} {cursor.user.lastName}
@@ -430,20 +413,17 @@ function PresenceIndicator({ socket, investigationId }) {
 
       {/* Typing Indicators */}
       {typingUsers.size > 0 && (
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: 20,
-            left: 20,
-            zIndex: 1000,
-          }}
-        >
+        <Box sx={{
+          position: 'fixed',
+          bottom: 20,
+          left: 20,
+          zIndex: 1000
+        }}>
           <Paper elevation={3} sx={{ p: 2, maxWidth: 300 }}>
             <Typography variant="body2" color="text.secondary">
-              {Array.from(typingUsers.values())
-                .map((typing) => `${typing.user.firstName} ${typing.user.lastName}`)
-                .join(', ')}{' '}
-              {typingUsers.size === 1 ? 'is' : 'are'} typing...
+              {Array.from(typingUsers.values()).map(typing => 
+                `${typing.user.firstName} ${typing.user.lastName}`
+              ).join(', ')} {typingUsers.size === 1 ? 'is' : 'are'} typing...
             </Typography>
           </Paper>
         </Box>
@@ -466,7 +446,7 @@ function PresenceIndicator({ socket, investigationId }) {
             <Visibility sx={{ mr: 1 }} />
             Active in Investigation ({investigationParticipants.length})
           </Typography>
-
+          
           <List dense>
             {investigationParticipants.map((participant) => (
               <ListItem key={participant.userId}>
@@ -475,11 +455,11 @@ function PresenceIndicator({ socket, investigationId }) {
                     overlap="circular"
                     anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                     badgeContent={
-                      <Circle
-                        sx={{
+                      <Circle 
+                        sx={{ 
                           color: getStatusColor('online'),
-                          fontSize: 12,
-                        }}
+                          fontSize: 12
+                        }} 
                       />
                     }
                   >
@@ -493,8 +473,7 @@ function PresenceIndicator({ socket, investigationId }) {
                   secondary={
                     <Box>
                       <Typography variant="caption" display="block">
-                        Joined{' '}
-                        {formatDistanceToNow(new Date(participant.joinedAt), { addSuffix: true })}
+                        Joined {formatDistanceToNow(new Date(participant.joinedAt), { addSuffix: true })}
                       </Typography>
                       {userCursors.has(participant.userId) && (
                         <Chip
@@ -524,11 +503,9 @@ function PresenceIndicator({ socket, investigationId }) {
           <Divider sx={{ my: 2 }} />
 
           {/* All Online Users */}
-          <Box
-            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}
-          >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
             <Typography variant="subtitle1">
-              All Online Users ({onlineUsers.filter((u) => u.presence?.status === 'online').length})
+              All Online Users ({onlineUsers.filter(u => u.presence?.status === 'online').length})
             </Typography>
             <Button
               size="small"
@@ -542,40 +519,37 @@ function PresenceIndicator({ socket, investigationId }) {
           <Collapse in={showDetails}>
             <List dense>
               {onlineUsers
-                .filter((user) => user.presence?.status === 'online')
+                .filter(user => user.presence?.status === 'online')
                 .map((user) => (
-                  <ListItem key={user.userId}>
-                    <ListItemAvatar>
-                      <Badge
-                        overlap="circular"
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                        badgeContent={
-                          <Circle
-                            sx={{
-                              color: getStatusColor(user.presence?.status || 'offline'),
-                              fontSize: 12,
-                            }}
-                          />
-                        }
-                      >
-                        <Avatar sx={{ bgcolor: getUserColor(user.userId) }}>
-                          {getInitials(user.user)}
-                        </Avatar>
-                      </Badge>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={`${user.user.firstName} ${user.user.lastName}`}
-                      secondary={
-                        <Typography variant="caption">
-                          Last seen{' '}
-                          {formatDistanceToNow(new Date(user.presence?.lastSeen), {
-                            addSuffix: true,
-                          })}
-                        </Typography>
+                <ListItem key={user.userId}>
+                  <ListItemAvatar>
+                    <Badge
+                      overlap="circular"
+                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                      badgeContent={
+                        <Circle 
+                          sx={{ 
+                            color: getStatusColor(user.presence?.status || 'offline'),
+                            fontSize: 12
+                          }} 
+                        />
                       }
-                    />
-                  </ListItem>
-                ))}
+                    >
+                      <Avatar sx={{ bgcolor: getUserColor(user.userId) }}>
+                        {getInitials(user.user)}
+                      </Avatar>
+                    </Badge>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={`${user.user.firstName} ${user.user.lastName}`}
+                    secondary={
+                      <Typography variant="caption">
+                        Last seen {formatDistanceToNow(new Date(user.presence?.lastSeen), { addSuffix: true })}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              ))}
             </List>
           </Collapse>
         </Box>

@@ -4,8 +4,8 @@
  * Enables searching across multiple connected IntelGraph instances
  */
 
-const axios = require('axios');
-const { GraphQLClient } = require('graphql-request');
+const axios = require("axios");
+const { GraphQLClient } = require("graphql-request");
 
 class FederatedSearchService {
   constructor(authService, encryptionService = null) {
@@ -42,14 +42,14 @@ class FederatedSearchService {
       apiKey,
       publicKey, // For end-to-end encryption
       capabilities = [],
-      accessLevel = 'public', // public, restricted, private
+      accessLevel = "public", // public, restricted, private
       maxConcurrentQueries = 5,
       timeout = 30000,
     } = instanceConfig;
 
     // Validate configuration
     if (!id || !name || !endpoint) {
-      throw new Error('Instance ID, name, and endpoint are required');
+      throw new Error("Instance ID, name, and endpoint are required");
     }
 
     // Verify instance is reachable and valid
@@ -82,8 +82,8 @@ class FederatedSearchService {
     instance.graphqlClient = new GraphQLClient(`${instance.endpoint}/graphql`, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        'X-Federation-Source': process.env.INSTANCE_ID || 'unknown',
-        'X-Request-ID': () => this.generateRequestId(),
+        "X-Federation-Source": process.env.INSTANCE_ID || "unknown",
+        "X-Request-ID": () => this.generateRequestId(),
       },
       timeout: timeout,
     });
@@ -91,7 +91,9 @@ class FederatedSearchService {
     this.connectedInstances.set(id, instance);
     this.connectionStatus.set(id, { healthy: true, lastCheck: new Date() });
 
-    console.log(`Registered federated instance: ${name} (${id}) at ${endpoint}`);
+    console.log(
+      `Registered federated instance: ${name} (${id}) at ${endpoint}`,
+    );
     return instance;
   }
 
@@ -108,7 +110,9 @@ class FederatedSearchService {
     this.connectionStatus.delete(instanceId);
     this.accessControlList.delete(instanceId);
 
-    console.log(`Unregistered federated instance: ${instance.name} (${instanceId})`);
+    console.log(
+      `Unregistered federated instance: ${instance.name} (${instanceId})`,
+    );
   }
 
   /**
@@ -126,7 +130,7 @@ class FederatedSearchService {
       respectACL = true,
       cacheResults = true,
       userId = null,
-      userRole = 'viewer',
+      userRole = "viewer",
     } = options;
 
     try {
@@ -154,17 +158,25 @@ class FederatedSearchService {
       this.federationMetrics.cacheMisses++;
 
       // Determine target instances
-      const targetInstances = this.getTargetInstances(instances, query, userId, userRole);
+      const targetInstances = this.getTargetInstances(
+        instances,
+        query,
+        userId,
+        userRole,
+      );
 
       if (targetInstances.length === 0) {
-        throw new Error('No accessible instances available for query');
+        throw new Error("No accessible instances available for query");
       }
 
-      console.log(`Executing federated search across ${targetInstances.length} instances`, {
-        requestId,
-        query: this.sanitizeQueryForLogging(query),
-        instances: targetInstances.map((i) => i.name),
-      });
+      console.log(
+        `Executing federated search across ${targetInstances.length} instances`,
+        {
+          requestId,
+          query: this.sanitizeQueryForLogging(query),
+          instances: targetInstances.map((i) => i.name),
+        },
+      );
 
       // Execute query across instances in parallel
       const queryPromises = targetInstances.map((instance) =>
@@ -174,7 +186,11 @@ class FederatedSearchService {
       const results = await Promise.allSettled(queryPromises);
 
       // Process results
-      const processedResults = this.processQueryResults(results, targetInstances, aggregateResults);
+      const processedResults = this.processQueryResults(
+        results,
+        targetInstances,
+        aggregateResults,
+      );
 
       // Update metrics
       this.updateFederationMetrics(startTime, results);
@@ -195,7 +211,7 @@ class FederatedSearchService {
       };
     } catch (error) {
       this.federationMetrics.failedQueries++;
-      console.error('Federated search error:', error, { requestId });
+      console.error("Federated search error:", error, { requestId });
       throw error;
     } finally {
       this.federationMetrics.totalQueries++;
@@ -217,7 +233,9 @@ class FederatedSearchService {
 
       // Check concurrent query limit
       if (instance.activeQueries >= instance.maxConcurrentQueries) {
-        throw new Error(`Instance ${instance.name} has reached maximum concurrent queries`);
+        throw new Error(
+          `Instance ${instance.name} has reached maximum concurrent queries`,
+        );
       }
 
       instance.activeQueries++;
@@ -227,8 +245,13 @@ class FederatedSearchService {
 
       // Execute the query
       const result = await Promise.race([
-        instance.graphqlClient.request(transformedQuery.graphql, transformedQuery.variables),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Query timeout')), timeout)),
+        instance.graphqlClient.request(
+          transformedQuery.graphql,
+          transformedQuery.variables,
+        ),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Query timeout")), timeout),
+        ),
       ]);
 
       // Update instance metrics
@@ -269,7 +292,8 @@ class FederatedSearchService {
     if (requestedInstances.length > 0) {
       candidates = candidates.filter(
         (instance) =>
-          requestedInstances.includes(instance.id) || requestedInstances.includes(instance.name),
+          requestedInstances.includes(instance.id) ||
+          requestedInstances.includes(instance.name),
       );
     }
 
@@ -297,7 +321,7 @@ class FederatedSearchService {
    */
   checkInstanceAccess(instance, userId, userRole, query) {
     // Public instances are always accessible
-    if (instance.accessLevel === 'public') {
+    if (instance.accessLevel === "public") {
       return true;
     }
 
@@ -309,10 +333,10 @@ class FederatedSearchService {
 
     // Default access control by role
     switch (instance.accessLevel) {
-      case 'restricted':
-        return ['admin', 'lead', 'analyst'].includes(userRole);
-      case 'private':
-        return ['admin'].includes(userRole);
+      case "restricted":
+        return ["admin", "lead", "analyst"].includes(userRole);
+      case "private":
+        return ["admin"].includes(userRole);
       default:
         return false;
     }
@@ -344,17 +368,17 @@ class FederatedSearchService {
     const variables = { ...(query.variables || {}) };
 
     // Apply instance-specific transformations
-    if (instance.capabilities.has('geo_search')) {
+    if (instance.capabilities.has("geo_search")) {
       // Instance supports geospatial queries
       transformedQuery = this.addGeoCapabilities(transformedQuery);
     }
 
-    if (instance.capabilities.has('temporal_analysis')) {
+    if (instance.capabilities.has("temporal_analysis")) {
       // Instance supports time-based filtering
       transformedQuery = this.addTemporalCapabilities(transformedQuery);
     }
 
-    if (instance.capabilities.has('sentiment_analysis')) {
+    if (instance.capabilities.has("sentiment_analysis")) {
       // Instance can provide sentiment data
       transformedQuery = this.addSentimentFields(transformedQuery);
     }
@@ -386,7 +410,7 @@ class FederatedSearchService {
     results.forEach((result, index) => {
       const instance = instances[index];
 
-      if (result.status === 'fulfilled' && result.value.success) {
+      if (result.status === "fulfilled" && result.value.success) {
         successful.push(result.value);
         aggregated.metadata.successfulInstances++;
         aggregated.metadata.totalRecords += result.value.recordCount || 0;
@@ -396,13 +420,13 @@ class FederatedSearchService {
         }
       } else {
         const errorResult =
-          result.status === 'fulfilled'
+          result.status === "fulfilled"
             ? result.value
             : {
                 instanceId: instance.id,
                 instanceName: instance.name,
                 success: false,
-                error: result.reason?.message || 'Unknown error',
+                error: result.reason?.message || "Unknown error",
               };
         failed.push(errorResult);
         aggregated.metadata.failedInstances++;
@@ -480,7 +504,9 @@ class FederatedSearchService {
         deduplicated.push(node);
       } else {
         // Merge metadata from duplicate
-        const existing = deduplicated.find((n) => this.generateNodeKey(n) === key);
+        const existing = deduplicated.find(
+          (n) => this.generateNodeKey(n) === key,
+        );
         if (existing && node._federation) {
           existing._federation = {
             ...existing._federation,
@@ -532,20 +558,21 @@ class FederatedSearchService {
    * Perform health check on all connected instances
    */
   async performHealthChecks() {
-    const promises = Array.from(this.connectedInstances.values()).map((instance) =>
-      this.performHealthCheck(instance.endpoint, instance.apiKey)
-        .then((result) => ({ instanceId: instance.id, ...result }))
-        .catch((error) => ({
-          instanceId: instance.id,
-          healthy: false,
-          error: error.message,
-        })),
+    const promises = Array.from(this.connectedInstances.values()).map(
+      (instance) =>
+        this.performHealthCheck(instance.endpoint, instance.apiKey)
+          .then((result) => ({ instanceId: instance.id, ...result }))
+          .catch((error) => ({
+            instanceId: instance.id,
+            healthy: false,
+            error: error.message,
+          })),
     );
 
     const results = await Promise.allSettled(promises);
 
     results.forEach((result) => {
-      if (result.status === 'fulfilled') {
+      if (result.status === "fulfilled") {
         this.connectionStatus.set(result.value.instanceId, {
           healthy: result.value.healthy,
           lastCheck: new Date(),
@@ -560,10 +587,13 @@ class FederatedSearchService {
    */
   async performHealthCheck(endpoint, apiKey) {
     try {
-      const response = await axios.get(`${this.normalizeEndpoint(endpoint)}/health`, {
-        headers: { Authorization: `Bearer ${apiKey}` },
-        timeout: 5000,
-      });
+      const response = await axios.get(
+        `${this.normalizeEndpoint(endpoint)}/health`,
+        {
+          headers: { Authorization: `Bearer ${apiKey}` },
+          timeout: 5000,
+        },
+      );
 
       return {
         healthy: response.status === 200,
@@ -584,18 +614,20 @@ class FederatedSearchService {
    * Get federation statistics
    */
   getFederationStats() {
-    const instanceStats = Array.from(this.connectedInstances.values()).map((instance) => ({
-      id: instance.id,
-      name: instance.name,
-      endpoint: instance.endpoint,
-      accessLevel: instance.accessLevel,
-      capabilities: Array.from(instance.capabilities),
-      totalQueries: instance.totalQueries,
-      successRate: instance.successRate,
-      avgResponseTime: instance.avgResponseTime,
-      healthy: this.connectionStatus.get(instance.id)?.healthy,
-      lastHealthCheck: this.connectionStatus.get(instance.id)?.lastCheck,
-    }));
+    const instanceStats = Array.from(this.connectedInstances.values()).map(
+      (instance) => ({
+        id: instance.id,
+        name: instance.name,
+        endpoint: instance.endpoint,
+        accessLevel: instance.accessLevel,
+        capabilities: Array.from(instance.capabilities),
+        totalQueries: instance.totalQueries,
+        successRate: instance.successRate,
+        avgResponseTime: instance.avgResponseTime,
+        healthy: this.connectionStatus.get(instance.id)?.healthy,
+        lastHealthCheck: this.connectionStatus.get(instance.id)?.lastCheck,
+      }),
+    );
 
     return {
       connectedInstances: this.connectedInstances.size,
@@ -609,7 +641,7 @@ class FederatedSearchService {
   // Helper methods
 
   normalizeEndpoint(endpoint) {
-    return endpoint.replace(/\/$/, ''); // Remove trailing slash
+    return endpoint.replace(/\/$/, ""); // Remove trailing slash
   }
 
   generateRequestId() {
@@ -645,12 +677,12 @@ class FederatedSearchService {
   }
 
   validateQuery(query) {
-    if (!query || typeof query !== 'object') {
-      throw new Error('Query must be an object');
+    if (!query || typeof query !== "object") {
+      throw new Error("Query must be an object");
     }
 
-    if (!query.graphql || typeof query.graphql !== 'string') {
-      throw new Error('Query must contain a GraphQL string');
+    if (!query.graphql || typeof query.graphql !== "string") {
+      throw new Error("Query must contain a GraphQL string");
     }
   }
 
@@ -659,20 +691,26 @@ class FederatedSearchService {
     const queryString = query.graphql.toLowerCase();
 
     // Detect required capabilities from query
-    if (queryString.includes('geospatial') || queryString.includes('location')) {
-      requirements.push('geo_search');
+    if (
+      queryString.includes("geospatial") ||
+      queryString.includes("location")
+    ) {
+      requirements.push("geo_search");
     }
 
-    if (queryString.includes('temporal') || queryString.includes('timerange')) {
-      requirements.push('temporal_analysis');
+    if (queryString.includes("temporal") || queryString.includes("timerange")) {
+      requirements.push("temporal_analysis");
     }
 
-    if (queryString.includes('sentiment')) {
-      requirements.push('sentiment_analysis');
+    if (queryString.includes("sentiment")) {
+      requirements.push("sentiment_analysis");
     }
 
-    if (queryString.includes('analytics') || queryString.includes('centrality')) {
-      requirements.push('graph_analytics');
+    if (
+      queryString.includes("analytics") ||
+      queryString.includes("centrality")
+    ) {
+      requirements.push("graph_analytics");
     }
 
     return requirements;
@@ -690,7 +728,8 @@ class FederatedSearchService {
 
     if (success) {
       instance.avgResponseTime =
-        (instance.avgResponseTime * (instance.totalQueries - 1) + responseTime) /
+        (instance.avgResponseTime * (instance.totalQueries - 1) +
+          responseTime) /
         instance.totalQueries;
     }
 
@@ -698,23 +737,28 @@ class FederatedSearchService {
     const successfulQueries = Math.round(
       (instance.successRate * (instance.totalQueries - 1)) / 100,
     );
-    instance.successRate = ((successfulQueries + (success ? 1 : 0)) / instance.totalQueries) * 100;
+    instance.successRate =
+      ((successfulQueries + (success ? 1 : 0)) / instance.totalQueries) * 100;
   }
 
   updateFederationMetrics(startTime, results) {
     const latency = Date.now() - startTime;
 
     this.federationMetrics.avgLatency =
-      (this.federationMetrics.avgLatency * (this.federationMetrics.totalQueries - 1) + latency) /
+      (this.federationMetrics.avgLatency *
+        (this.federationMetrics.totalQueries - 1) +
+        latency) /
       this.federationMetrics.totalQueries;
 
-    const successCount = results.filter((r) => r.status === 'fulfilled' && r.value.success).length;
+    const successCount = results.filter(
+      (r) => r.status === "fulfilled" && r.value.success,
+    ).length;
     if (successCount > 0) {
       this.federationMetrics.successfulQueries++;
     }
 
     results.forEach((result) => {
-      if (result.status === 'fulfilled' && result.value.instanceId) {
+      if (result.status === "fulfilled" && result.value.instanceId) {
         this.federationMetrics.instancesQueried.add(result.value.instanceId);
       }
     });
@@ -723,7 +767,10 @@ class FederatedSearchService {
   calculateAverageResponseTime(successfulResults) {
     if (successfulResults.length === 0) return 0;
 
-    const totalTime = successfulResults.reduce((sum, result) => sum + result.responseTime, 0);
+    const totalTime = successfulResults.reduce(
+      (sum, result) => sum + result.responseTime,
+      0,
+    );
     return totalTime / successfulResults.length;
   }
 

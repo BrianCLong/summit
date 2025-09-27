@@ -1,17 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  Menu,
-  MenuItem,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Snackbar,
-  Alert,
-} from '@mui/material';
+import { Menu, MenuItem, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button, Snackbar, Alert } from '@mui/material';
 import { useMutation } from '@apollo/client';
 import { EXPAND_NEIGHBORS, TAG_ENTITY } from '../../graphql/graph.gql';
 import { graphInteractionActions as g } from '../../store/slices/graphInteractionSlice';
@@ -44,17 +33,10 @@ export default function GraphContextMenu() {
       const { data } = await expand({ variables: { entityId: contextMenu.targetId, limit: 50 } });
       const payload = data?.expandNeighbors;
       if (payload?.nodes || payload?.edges) {
-        const event = new CustomEvent('graph:addElements', {
-          detail: { nodes: payload.nodes || [], edges: payload.edges || [] },
-        });
+        const event = new CustomEvent('graph:addElements', { detail: { nodes: payload.nodes || [], edges: payload.edges || [] } });
         document.dispatchEvent(event);
-        const n = (payload.nodes || []).length;
-        const e = (payload.edges || []).length;
-        setSnackbar({
-          open: true,
-          message: `Neighbors expanded: +${n} nodes, +${e} edges`,
-          severity: 'success',
-        });
+        const n = (payload.nodes || []).length; const e = (payload.edges || []).length;
+        setSnackbar({ open: true, message: `Neighbors expanded: +${n} nodes, +${e} edges`, severity: 'success' });
       }
     } catch (e) {
       setSnackbar({ open: true, message: `Expand failed: ${e.message || e}`, severity: 'error' });
@@ -65,9 +47,7 @@ export default function GraphContextMenu() {
   const onSaveTag = async () => {
     try {
       await tagEntity({ variables: { entityId: contextMenu.targetId, tag } });
-      setTag('');
-      setTagOpen(false);
-      closeMenu();
+      setTag(''); setTagOpen(false); closeMenu();
       setSnackbar({ open: true, message: `Tag '${tag}' added`, severity: 'success' });
     } catch (e) {
       setSnackbar({ open: true, message: `Tag failed: ${e.message || e}`, severity: 'error' });
@@ -81,11 +61,7 @@ export default function GraphContextMenu() {
       socket.emit('ai:request', { entityId: contextMenu.targetId });
       setSnackbar({ open: true, message: 'AI analysis requested', severity: 'success' });
     } catch (e) {
-      setSnackbar({
-        open: true,
-        message: `AI request failed: ${e.message || e}`,
-        severity: 'error',
-      });
+      setSnackbar({ open: true, message: `AI request failed: ${e.message || e}`, severity: 'error' });
     }
   };
 
@@ -107,53 +83,26 @@ export default function GraphContextMenu() {
         <MenuItem onClick={onExploreSubgraph}>Explore Subgraph</MenuItem>
         <MenuItem onClick={onSendToAI}>Send to AI Analysis</MenuItem>
         {contextMenu?.targetType === 'edge' && (
-          <MenuItem
-            onClick={() => {
-              closeMenu();
-              document.dispatchEvent(
-                new CustomEvent('graph:openEdgeInspector', {
-                  detail: { edgeId: contextMenu.targetId },
-                }),
-              );
-            }}
-          >
-            Inspect Relationship
-          </MenuItem>
+          <MenuItem onClick={() => { closeMenu(); document.dispatchEvent(new CustomEvent('graph:openEdgeInspector', { detail: { edgeId: contextMenu.targetId } })); }}>Inspect Relationship</MenuItem>
         )}
       </Menu>
 
       <Dialog open={tagOpen} onClose={() => setTagOpen(false)}>
         <DialogTitle>Tag Entity</DialogTitle>
         <DialogContent>
-          <TextField
-            label="Tag"
-            fullWidth
-            autoFocus
-            value={tag}
-            onChange={(e) => setTag(e.target.value)}
-          />
+          <TextField label="Tag" fullWidth autoFocus value={tag} onChange={(e) => setTag(e.target.value)} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setTagOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={onSaveTag} disabled={!tag.trim()}>
-            Save
-          </Button>
+          <Button variant="contained" onClick={onSaveTag} disabled={!tag.trim()}>Save</Button>
         </DialogActions>
       </Dialog>
     </>
   );
 
-  <Snackbar
-    open={snackbar.open}
-    autoHideDuration={4000}
-    onClose={() => setSnackbar({ ...snackbar, open: false })}
-  >
-    <Alert
-      onClose={() => setSnackbar({ ...snackbar, open: false })}
-      severity={snackbar.severity}
-      sx={{ width: '100%' }}
-    >
-      {snackbar.message}
-    </Alert>
-  </Snackbar>;
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
 }

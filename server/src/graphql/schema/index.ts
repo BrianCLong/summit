@@ -6,6 +6,10 @@ import aiModule from '../schema.ai.js';
 import annotationsModule from '../schema.annotations.js';
 import graphragTypesModule from '../types/graphragTypes.js';
 import { crystalTypeDefs } from '../schema.crystal.js';
+import evidenceTypeDefs from '../schema.evidence.js';
+import evidenceOkTypeDefs from '../schema.evidenceOk.js';
+import trustRiskTypeDefs from '../schema.trust-risk.js';
+import provenanceTypeDefs from '../schema.provenance.js';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
 const { graphTypeDefs } = graphModule as { graphTypeDefs: any };
@@ -39,6 +43,10 @@ export const typeDefs = [
   aiTypeDefs,
   annotationsTypeDefs,
   crystalTypeDefs,
+  evidenceTypeDefs,
+  evidenceOkTypeDefs,
+  trustRiskTypeDefs,
+  provenanceTypeDefs,
 ];
 
 export default typeDefs;

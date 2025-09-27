@@ -1,7 +1,7 @@
-import React from 'react';
-import { gql, useQuery } from '@apollo/client';
-import { Drawer, List, ListItem, ListItemText } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { gql, useQuery } from "@apollo/client";
+import { Drawer, List, ListItem, ListItemText } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const SIMILAR_QUERY = gql`
   query SimilarEntities($entityId: ID!, $topK: Int!) {
@@ -19,7 +19,12 @@ interface Props {
   topK?: number;
 }
 
-export default function EntityDrawer({ entityId, open, onClose, topK = 20 }: Props) {
+export default function EntityDrawer({
+  entityId,
+  open,
+  onClose,
+  topK = 20,
+}: Props) {
   const navigate = useNavigate();
   const { data, loading } = useQuery(SIMILAR_QUERY, {
     variables: { entityId: entityId as string, topK },
@@ -46,7 +51,10 @@ export default function EntityDrawer({ entityId, open, onClose, topK = 20 }: Pro
               onClose();
             }}
           >
-            <ListItemText primary={n.id} secondary={`${(n.score * 100).toFixed(1)}%`} />
+            <ListItemText
+              primary={n.id}
+              secondary={`${(n.score * 100).toFixed(1)}%`}
+            />
           </ListItem>
         ))}
       </List>

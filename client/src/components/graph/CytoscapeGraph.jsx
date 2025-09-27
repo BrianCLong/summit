@@ -43,6 +43,27 @@ import {
   GroupWork,
   PlayArrow,
   Stop,
+<<<<<<< HEAD
+  Download
+} from '@mui/icons-material';
+import { useParams } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { setGraphData, addNode, addEdge, setSelectedNode, setSelectedEdge } from '../../store/slices/graphSlice';
+import { setCommunityData } from '../../store/slices/aiInsightsSlice';
+import { useSocket } from '../../hooks/useSocket';
+import { useAIOperations } from '../../ai/insightsHooks';
+import AIInsightsPanel from '../ai/AIInsightsPanel';
+import { useApolloClient } from '@apollo/client';
+import cytoscape from 'cytoscape';
+import cola from 'cytoscape-cola';
+import dagre from 'cytoscape-dagre';
+import fcose from 'cytoscape-fcose';
+import coseBilkent from 'cytoscape-cose-bilkent';
+import popper from 'cytoscape-popper';
+import ReactDOM from 'react-dom/client';
+import GraphPopover from './GraphPopover';
+import InvestigationPresence from '../InvestigationPresence'; // Import InvestigationPresence
+=======
   Download,
 } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
@@ -67,7 +88,7 @@ import coseBilkent from "cytoscape-cose-bilkent";
 import popper from "cytoscape-popper";
 import ReactDOM from "react-dom/client";
 import GraphPopover from "./GraphPopover";
-import InvestigationPresence from "../InvestigationPresence"; // Import InvestigationPresence
+>>>>>>> 1ae8cd71faa0d57638f1dd82b1f544b60eae109f
 
 // Register extensions
 cytoscape.use(cola);
@@ -110,15 +131,17 @@ function CytoscapeGraph() {
     relationshipTypes: [],
     timeRange: [0, 100],
   });
-  const [suggestedEdges, setSuggestedEdges] = useState([]);
-  const [lodMode, setLodMode] = useState("high"); // 'high', 'medium', 'low'
+<<<<<<< HEAD
+  const [lodMode, setLodMode] = useState('high'); // 'high', 'medium', 'low'
   const [lodModeChanges, setLodModeChanges] = useState(0); // Telemetry
 
   useEffect(() => {
     // Increment telemetry counter when LOD mode changes
-    setLodModeChanges((prev) => prev + 1);
+    setLodModeChanges(prev => prev + 1);
   }, [lodMode]);
+=======
   const [suggestedEdges, setSuggestedEdges] = useState([]);
+>>>>>>> 1ae8cd71faa0d57638f1dd82b1f544b60eae109f
 
   // WebSocket connection for real-time updates
   const socket = useSocket("ws://localhost:4000");
@@ -211,6 +234,40 @@ function CytoscapeGraph() {
     {
       selector: ".highlighted",
       style: {
+<<<<<<< HEAD
+        'opacity': 0.3
+      }
+    },
+    // LOD: Hide labels at low zoom levels
+    {
+      selector: 'node[zoom < 0.5]', // Adjust threshold as needed
+      style: {
+        'label': '',
+        'text-opacity': 0
+      }
+    },
+    {
+      selector: 'edge[zoom < 0.5]', // Adjust threshold as needed
+      style: {
+        'label': '',
+        'text-opacity': 0
+      }
+    },
+    // LOD: Simplified styles for low detail mode
+    {
+      selector: '.low-detail',
+      style: {
+        'width': 10,
+        'height': 10,
+        'border-width': 0,
+        'background-color': '#ccc',
+        'line-color': '#eee',
+        'target-arrow-shape': 'none',
+        'curve-style': 'haystack', // Simpler edge rendering
+        'opacity': 0.7
+      }
+    }
+=======
         "background-color": "#FFD700",
         "line-color": "#FFD700",
         "target-arrow-color": "#FFD700",
@@ -225,35 +282,7 @@ function CytoscapeGraph() {
         opacity: 0.3,
       },
     },
-    // LOD: Hide labels at low zoom levels
-    {
-      selector: "node[zoom < 0.5]", // Adjust threshold as needed
-      style: {
-        label: "",
-        "text-opacity": 0,
-      },
-    },
-    {
-      selector: "edge[zoom < 0.5]", // Adjust threshold as needed
-      style: {
-        label: "",
-        "text-opacity": 0,
-      },
-    },
-    // LOD: Simplified styles for low detail mode
-    {
-      selector: ".low-detail",
-      style: {
-        width: 10,
-        height: 10,
-        "border-width": 0,
-        "background-color": "#ccc",
-        "line-color": "#eee",
-        "target-arrow-shape": "none",
-        "curve-style": "haystack", // Simpler edge rendering
-        opacity: 0.7,
-      },
-    },
+>>>>>>> 1ae8cd71faa0d57638f1dd82b1f544b60eae109f
   ];
 
   // Layout configurations
@@ -683,30 +712,37 @@ function CytoscapeGraph() {
     return colors[communityId % colors.length];
   };
 
+<<<<<<< HEAD
+  }, [cy]);
+
   // Utility for debouncing
   const debounce = (func, delay) => {
     let timeout;
-    return function (...args) {
+    return function(...args) {
       const context = this;
       clearTimeout(timeout);
       timeout = setTimeout(() => func.apply(context, args), delay);
     };
   };
 
-  const debouncedApplyLayout = useRef(
-    debounce((layoutName) => {
-      if (cy) {
-        const startTime = performance.now();
-        const layout = cy.layout(layoutConfigs[layoutName]);
-        layout.run();
-        layout.promiseOn("layoutstop").then(() => {
-          const endTime = performance.now();
-          const duration = endTime - startTime;
-          console.log(`Layout '${layoutName}' took ${duration.toFixed(2)} ms`);
-        });
-      }
-    }, 300)
-  ).current; // Debounce for 300ms
+  const debouncedApplyLayout = useRef(debounce((layoutName) => {
+    if (cy) {
+      const startTime = performance.now();
+      const layout = cy.layout(layoutConfigs[layoutName]);
+      layout.run();
+      layout.promiseOn('layoutstop').then(() => {
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+        console.log(`Layout '${layoutName}' took ${duration.toFixed(2)} ms`);
+        // Here you would send this telemetry data to your analytics system
+        // For now, we'll just log it to the console.
+        // You could also store it in a state variable if needed for display.
+      });
+    }
+  }, 300)).current; // Debounce for 300ms
+
+=======
+>>>>>>> 1ae8cd71faa0d57638f1dd82b1f544b60eae109f
   // Apply AI Insights highlighting
   useEffect(() => {
     if (!cy) return;
@@ -1124,16 +1160,24 @@ function CytoscapeGraph() {
         </Box>
       </Box>
 
+<<<<<<< HEAD
       {/* Investigation Presence */}
       {id && <InvestigationPresence />}
 
-      <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
+      <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
         <Chip label={`Nodes: ${nodes.length}`} color="primary" variant="outlined" />
         <Chip label={`Edges: ${edges.length}`} color="secondary" variant="outlined" />
+        <Chip 
+          label={`Layout: ${currentLayout}`} 
+          color={loading ? "default" : "success"} 
+          variant="outlined" 
+=======
+      <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
         <Chip
-          label={`Layout: ${currentLayout}`}
-          color={loading ? "default" : "success"}
+          label={`Nodes: ${nodes.length}`}
+          color="primary"
           variant="outlined"
+>>>>>>> 1ae8cd71faa0d57638f1dd82b1f544b60eae109f
         />
         <Chip
           label={`Edges: ${edges.length}`}

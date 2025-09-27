@@ -1,7 +1,7 @@
 import Redis from 'ioredis';
-import baseLogger from '../config/logger';
+import pino from 'pino';
 
-const logger = baseLogger.child({ name: 'cache' });
+const logger = pino();
 const redisClient = new Redis(); // Assuming Redis is running and accessible
 
 redisClient.on('connect', () => logger.info('Redis client connected for caching.'));

@@ -1,0 +1,21 @@
+name: grafana-import-dashboards
+on:
+  push:
+    paths:
+      - 'server/grafana/**'
+      - 'scripts/grafana/export_dashboards.sh'
+  workflow_dispatch: {}
+
+jobs:
+  import:
+    runs-on: ubuntu-22.04
+    if: ${{ github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import dashboards to Grafana
+        env:
+          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+          GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+        run: |
+          bash scripts/grafana/export_dashboards.sh server/grafana
+

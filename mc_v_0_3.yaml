@@ -1,0 +1,164 @@
+# ────────────────────────────────────────────────────────────────────────────────
+# MC v0.3.4 “Trust, Throughput, Tenants” — Production Go‑Live Packet
+# Contents:
+#  1) Runbook page (ready-to-merge)
+#  2) Slack deployment messages (pre/during/post + hold/rollback)
+#  3) Canary configuration parameters (strict SLO gates)
+#  4) Pre‑filled evidence manifest (v0.3.4)
+#  5) One‑shot executor script (calls everything end‑to‑end)
+# ────────────────────────────────────────────────────────────────────────────────
+---
+kind: file
+name: docs/runbooks/v0.3.4-go-live.md
+content: |
+  # MC Platform v0.3.4 — Production Go‑Live Runbook
+
+  **Release:** v0.3.4-mc  
+  **Codename:** Trust · Throughput · Tenants
+
+  ## Preconditions (HARD GATES)
+  - Config attestation (pre): snapshot signed ✅
+  - Tests: unit/integration ✅, promtool ✅, trajectory ✅, grounding ≥95% ✅
+  - Change window approved ✅, PagerDuty on-call acked ✅
+
+  ## Rollout Stages (wave‑based)
+  1. **Stage smoke** → Slack PRE message → canary-analysis (10 min) → expect PROMOTE
+  2. **Prod Canary 20% (60m bake)** → SLO gate (p95 ≤ +5%, errors non‑worse)
+  3. **Prod Canary 50% (60m bake)** → SLO gate
+  4. **Prod 100%** → final evidence pack + Slack POST
+
+  ## Execute
+  ```bash
+  # Tag + pre‑evidence
+  git tag v0.3.4-mc && git push origin v0.3.4-mc
+  python3 tools/mc.py evidence pack --out dist/evidence-v0.3.4-mc-pre.json
+  python3 tools/mc.py evidence verify dist/evidence-v0.3.4-mc-pre.json
+
+  # Stage canary (baseline vs candidate)
+  gh workflow run canary-analysis.yml \
+    -f baseline=https://stage-blue.example.com \
+    -f candidate=https://stage-green.example.com \
+    -f minutes=10
+
+  # Gates runner (prod waves)
+  python3 .mc/v0.2/mc-gates-runner.py --stage canary_20 --strict --report out/gates-canary20-v034.json
+  python3 .mc/v0.2/mc-gates-runner.py --stage canary_50 --strict --report out/gates-canary50-v034.json
+  python3 .mc/v0.2/mc-gates-runner.py --stage production --strict --report out/gates-prod-v034.json
+
+  # Final evidence + Slack
+  python3 tools/mc.py evidence pack --out dist/evidence-v0.3.4-mc.json
+  python3 tools/mc.py evidence verify dist/evidence-v0.3.4-mc.json
+  gh workflow run release-slack.yml -f version=v0.3.4-mc
+  ```
+
+  ## Rollback/Abort
+  - **Canary HOLD** (Slack red): keep traffic at current wave, initiate root cause, consider rollback via `helm rollback` + GLB bias to blue.
+  - **Triggers:** GraphQL p95 > 350ms (30m), A/A lag > 120s (10m), Autonomy comp > 0.5% (24h), SIEM <95% (15m), Budget throttle oscillation.
+
+  ## Post‑Deploy
+  - Day‑1 ops delta (02:10 UTC) is automatic; verify DP ε/δ, provenance p95, budget guard events.
+  - Day‑7 DR drill + privacy red‑team subset; attach to evidence.
+
+---
+kind: file
+name: comms/templates/v0.3.4-slack-messages.md
+content: |
+  # Slack Deployment Messages — v0.3.4
+
+  ## PRE (kickoff)
+  > *MC v0.3.4 — Rollout starting*  
+  > Gates armed (p95≤+5%, error non‑worse). Evidence pre‑bundle signed. Stage canary running (10m).
+
+  ## CANARY PROMOTE
+  > *MC v0.3.4 — PROMOTE*  
+  > Canary passed (p95 within +5%, errors non‑worse). Advancing to next wave.
+
+  ## CANARY HOLD
+  > *MC v0.3.4 — HOLD*  
+  > Canary regression detected. Traffic frozen. Investigating. Evidence and samples attached. (Auto‑promotion blocked.)
+
+  ## POST (GA)
+  > *MC v0.3.4 — Production Complete*  
+  > All waves green. Evidence bundle signed. SLO/Safety guardrails holding. Nightly ops delta will include DP, provenance, budgets.
+
+  ## ROLLBACK
+  > *MC v0.3.4 — ROLLBACK initiated*  
+  > Return to prior tag. GLB biased to healthy stack. Evidence updated with rollback cause + metrics.
+
+---
+kind: file
+name: config/canary-params-v0.3.4.json
+content: |
+  {
+    "window_minutes": 10,
+    "promote_thresholds": {
+      "p95_latency_regression_pct": 5,
+      "error_rate_non_worse": true
+    },
+    "rollback_triggers": {
+      "graphql_p95_ms_30m": 350,
+      "aa_replication_lag_s_10m": 120,
+      "autonomy_comp_pct_24h": 0.5,
+      "siem_delivery_pct_15m": 95
+    },
+    "waves": [
+      {"name": "canary_20", "traffic_pct": 20, "bake_minutes": 60},
+      {"name": "canary_50", "traffic_pct": 50, "bake_minutes": 60},
+      {"name": "production", "traffic_pct": 100, "bake_minutes": 0}
+    ]
+  }
+
+---
+kind: file
+name: evidence/v0.3.4/manifest.prefill.json
+content: |
+  {
+    "version": "v0.3.4-mc",
+    "expected_artifacts": [
+      {"path": "out/gates-canary20-v034.json", "sha256": null},
+      {"path": "out/gates-canary50-v034.json", "sha256": null},
+      {"path": "out/gates-prod-v034.json",       "sha256": null},
+      {"path": "out/grounding-v034.json",         "sha256": null},
+      {"path": "evidence/v0.3.4/config/pre-snapshot.json", "sha256": null},
+      {"path": "observability/grafana/dashboards/mc-platform.json", "sha256": null},
+      {"path": "evidence/v0.3.4/budgets/ledger.json", "sha256": null},
+      {"path": "evidence/v0.3.4/provenance/prov-k6.json", "sha256": null},
+      {"path": "evidence/v0.3.4/dp/dp-audit.json", "sha256": null},
+      {"path": "evidence/v0.3.4/autonomy/TENANT_004/canary.json", "sha256": null},
+      {"path": "evidence/v0.3.4/autonomy/TENANT_005/canary.json", "sha256": null}
+    ],
+    "signing": {"algo": "sha256(HMAC-sim)", "keyRef": "env:MC_SIGNING_KEY"}
+  }
+
+---
+kind: file
+name: scripts/execute-v034-go-live.sh
+content: |
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  echo "[v0.3.4] Pre‑flight gates…"
+  python3 ops/config-attest.py snapshot --out evidence/v0.3.4/config/pre-snapshot.json
+  pytest -q
+  promtool check rules prom/**/*.y*ml
+  python3 ops/grounding/check-grounding.py --report out/grounding-v034.json
+
+  echo "[v0.3.4] Tag + pre‑evidence…"
+  git tag v0.3.4-mc && git push origin v0.3.4-mc || true
+  python3 tools/mc.py evidence pack --out dist/evidence-v0.3.4-mc-pre.json
+  python3 tools/mc.py evidence verify dist/evidence-v0.3.4-mc-pre.json
+
+  echo "[v0.3.4] Stage canary…"
+  gh workflow run canary-analysis.yml -f baseline=https://stage-blue.example.com -f candidate=https://stage-green.example.com -f minutes=10
+
+  echo "[v0.3.4] Prod waves…"
+  python3 .mc/v0.2/mc-gates-runner.py --stage canary_20 --strict --report out/gates-canary20-v034.json
+  python3 .mc/v0.2/mc-gates-runner.py --stage canary_50 --strict --report out/gates-canary50-v034.json
+  python3 .mc/v0.2/mc-gates-runner.py --stage production --strict --report out/gates-prod-v034.json
+
+  echo "[v0.3.4] Final evidence + Slack…"
+  python3 tools/mc.py evidence pack --out dist/evidence-v0.3.4-mc.json
+  python3 tools/mc.py evidence verify dist/evidence-v0.3.4-mc.json
+  gh workflow run release-slack.yml -f version=v0.3.4-mc
+
+  echo "✅ v0.3.4 execution complete."

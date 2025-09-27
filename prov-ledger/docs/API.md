@@ -1,5 +1,4 @@
 ## API Endpoints
-
 - `POST /claims/extract`
 - `POST /evidence/register`
 - `POST /claims/{id}/attach`

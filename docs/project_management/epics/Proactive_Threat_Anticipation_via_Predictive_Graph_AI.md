@@ -3,6 +3,5 @@
 Milestone: MVP1-Predictive-AI
 
 ## Child Issues
-
 - [ ] Predictive Model Training Pipeline
 - [ ] Alerting & Notification System

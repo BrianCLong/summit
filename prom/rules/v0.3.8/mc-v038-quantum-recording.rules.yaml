@@ -1,0 +1,271 @@
+groups:
+  - name: mc-v038-quantum-recording
+    interval: 15s
+    rules:
+      # Post-Quantum Attestation metrics
+      - record: mc_pqa_coverage_percent
+        expr: |
+          (
+            sum(rate(mc_pqa_verified_attestations_total[5m]))
+            /
+            clamp_min(sum(rate(mc_total_attestation_requests[5m])), 1)
+          ) * 100
+
+      - record: mc_pqa_verification_p95_ms
+        expr: |
+          histogram_quantile(0.95, sum(rate(mc_pqa_verification_duration_seconds_bucket[5m])) by (le)) * 1000
+
+      - record: mc_pqa_classical_signature_success_rate
+        expr: |
+          (
+            sum(rate(mc_pqa_classical_signatures_verified_total[5m]))
+            /
+            clamp_min(sum(rate(mc_pqa_classical_signatures_total[5m])), 1)
+          )
+
+      - record: mc_pqa_quantum_signature_success_rate
+        expr: |
+          (
+            sum(rate(mc_pqa_quantum_signatures_verified_total[5m]))
+            /
+            clamp_min(sum(rate(mc_pqa_quantum_signatures_total[5m])), 1)
+          )
+
+      # zk-Fairness & Safety Audits metrics
+      - record: mc_zkfsa_composite_health_score
+        expr: |
+          (
+            # Fairness score weight (50%)
+            (mc_zkfsa_fairness_score * 0.5)
+            +
+            # Safety score weight (50%)
+            (mc_zkfsa_safety_score * 0.5)
+          )
+
+      - record: mc_zkfsa_fairness_score
+        expr: |
+          (
+            sum(rate(mc_zkfsa_fairness_proofs_passed_total[5m]))
+            /
+            clamp_min(sum(rate(mc_zkfsa_fairness_proofs_total[5m])), 1)
+          )
+
+      - record: mc_zkfsa_safety_score
+        expr: |
+          (
+            sum(rate(mc_zkfsa_safety_proofs_passed_total[5m]))
+            /
+            clamp_min(sum(rate(mc_zkfsa_safety_proofs_total[5m])), 1)
+          )
+
+      - record: mc_zkfsa_audit_generation_p95_seconds
+        expr: |
+          histogram_quantile(0.95, sum(rate(mc_zkfsa_audit_duration_seconds_bucket[5m])) by (le))
+
+      - record: mc_zkfsa_privacy_preservation_rate
+        expr: |
+          (
+            sum(rate(mc_zkfsa_privacy_preserved_audits_total[5m]))
+            /
+            clamp_min(sum(rate(mc_zkfsa_audits_total[5m])), 1)
+          )
+
+      # Proof-of-DR metrics
+      - record: mc_podr_last_drill_hours_ago
+        expr: |
+          (time() - mc_podr_last_drill_timestamp) / 3600
+
+      - record: mc_podr_last_successful_drill_hours_ago
+        expr: |
+          (time() - mc_podr_last_successful_drill_timestamp) / 3600
+
+      - record: mc_podr_drill_success_rate
+        expr: |
+          (
+            sum(rate(mc_podr_successful_drills_total[24h]))
+            /
+            clamp_min(sum(rate(mc_podr_drills_total[24h])), 1)
+          )
+
+      - record: mc_podr_average_rto_achievement_rate
+        expr: |
+          (
+            sum(rate(mc_podr_rto_met_total[24h]))
+            /
+            clamp_min(sum(rate(mc_podr_drills_total[24h])), 1)
+          )
+
+      - record: mc_podr_average_rpo_achievement_rate
+        expr: |
+          (
+            sum(rate(mc_podr_rpo_met_total[24h]))
+            /
+            clamp_min(sum(rate(mc_podr_drills_total[24h])), 1)
+          )
+
+      - record: mc_podr_drill_compliance_score
+        expr: |
+          (
+            sum(mc_podr_drill_compliance_scores_sum)
+            /
+            clamp_min(sum(mc_podr_drill_compliance_scores_count), 1)
+          )
+
+      # Regulator-Grade Export metrics
+      - record: mc_rge_export_success_rate
+        expr: |
+          (
+            sum(rate(mc_rge_successful_exports_total[5m]))
+            /
+            clamp_min(sum(rate(mc_rge_export_attempts_total[5m])), 1)
+          )
+
+      - record: mc_rge_export_generation_p95_seconds
+        expr: |
+          histogram_quantile(0.95, sum(rate(mc_rge_export_duration_seconds_bucket[5m])) by (le))
+
+      - record: mc_rge_gdpr_compliance_percent
+        expr: |
+          (
+            sum(rate(mc_rge_gdpr_compliant_controls_total[5m]))
+            /
+            clamp_min(sum(rate(mc_rge_gdpr_controls_total[5m])), 1)
+          ) * 100
+
+      - record: mc_rge_soc2_compliance_percent
+        expr: |
+          (
+            sum(rate(mc_rge_soc2_compliant_controls_total[5m]))
+            /
+            clamp_min(sum(rate(mc_rge_soc2_controls_total[5m])), 1)
+          ) * 100
+
+      - record: mc_rge_iso27001_compliance_percent
+        expr: |
+          (
+            sum(rate(mc_rge_iso27001_compliant_controls_total[5m]))
+            /
+            clamp_min(sum(rate(mc_rge_iso27001_controls_total[5m])), 1)
+          ) * 100
+
+      - record: mc_rge_fedramp_compliance_percent
+        expr: |
+          (
+            sum(rate(mc_rge_fedramp_compliant_controls_total[5m]))
+            /
+            clamp_min(sum(rate(mc_rge_fedramp_controls_total[5m])), 1)
+          ) * 100
+
+      # BFT-Eco Quoruming metrics
+      - record: mc_bft_eco_quorum_reliability_score
+        expr: |
+          (
+            sum(rate(mc_bft_eco_successful_consensus_total[5m]))
+            /
+            clamp_min(sum(rate(mc_bft_eco_consensus_attempts_total[5m])), 1)
+          )
+
+      - record: mc_bft_eco_carbon_reduction_percent
+        expr: |
+          (
+            (mc_bft_eco_baseline_carbon_gco2_hour - avg(mc_bft_eco_actual_carbon_gco2_hour))
+            /
+            clamp_min(mc_bft_eco_baseline_carbon_gco2_hour, 0.001)
+          ) * 100
+
+      - record: mc_bft_eco_consensus_latency_p95_ms
+        expr: |
+          histogram_quantile(0.95, sum(rate(mc_bft_eco_consensus_duration_seconds_bucket[5m])) by (le)) * 1000
+
+      - record: mc_bft_eco_power_efficiency_score
+        expr: |
+          (
+            (mc_bft_eco_baseline_power_watts - avg(mc_bft_eco_actual_power_watts))
+            /
+            clamp_min(mc_bft_eco_baseline_power_watts, 1)
+          )
+
+      - record: mc_bft_eco_geographic_distribution_score
+        expr: |
+          clamp_max(count(count by (region) (mc_bft_eco_active_nodes)) / 3, 1)
+
+      # Quantum-Ready Equilibrium composite score
+      - record: mc_quantum_ready_equilibrium_score
+        expr: |
+          (
+            # PQA Coverage weight (20%)
+            (clamp_max(mc_pqa_coverage_percent / 100, 1) * 0.20)
+            +
+            # ZKFSA Health weight (20%)
+            (mc_zkfsa_composite_health_score * 0.20)
+            +
+            # PoDR Compliance weight (20%)
+            (mc_podr_drill_compliance_score * 0.20)
+            +
+            # RGE Success weight (20%)
+            (mc_rge_export_success_rate * 0.20)
+            +
+            # BFT-Eco Reliability weight (20%)
+            (mc_bft_eco_quorum_reliability_score * 0.20)
+          )
+
+      # Cross-system integration metrics
+      - record: mc_quantum_ready_sla_compliance_rate
+        expr: |
+          (
+            # All systems meeting SLA targets
+            step(mc_pqa_verification_p95_ms - 5) *
+            step(mc_zkfsa_audit_generation_p95_seconds - 30) *
+            step(mc_rge_export_generation_p95_seconds - 120) *
+            step(mc_bft_eco_consensus_latency_p95_ms - 1000)
+          )
+
+      # Security posture metrics
+      - record: mc_quantum_ready_security_posture
+        expr: |
+          (
+            # Cryptographic strength (40%)
+            ((mc_pqa_classical_signature_success_rate + mc_pqa_quantum_signature_success_rate) / 2 * 0.40)
+            +
+            # Privacy preservation (30%)
+            (mc_zkfsa_privacy_preservation_rate * 0.30)
+            +
+            # DR readiness (30%)
+            ((mc_podr_average_rto_achievement_rate + mc_podr_average_rpo_achievement_rate) / 2 * 0.30)
+          )
+
+      # Environmental impact tracking
+      - record: mc_quantum_ready_carbon_efficiency
+        expr: |
+          (
+            # BFT-Eco carbon reduction weight (60%)
+            (clamp_min(mc_bft_eco_carbon_reduction_percent / 100, 0) * 0.60)
+            +
+            # Power efficiency weight (40%)
+            (clamp_min(mc_bft_eco_power_efficiency_score, 0) * 0.40)
+          )
+
+      # Weekly trend indicators for quantum-ready capabilities
+      - record: mc_quantum_ready_trend_7d
+        expr: |
+          (
+            avg_over_time(mc_quantum_ready_equilibrium_score[7d])
+            -
+            avg_over_time(mc_quantum_ready_equilibrium_score[7d] offset 7d)
+          )
+
+      - record: mc_pqa_coverage_trend_7d
+        expr: |
+          (
+            avg_over_time(mc_pqa_coverage_percent[7d])
+            -
+            avg_over_time(mc_pqa_coverage_percent[7d] offset 7d)
+          )
+
+      - record: mc_zkfsa_health_trend_7d
+        expr: |
+          (
+            avg_over_time(mc_zkfsa_composite_health_score[7d])
+            -
+            avg_over_time(mc_zkfsa_composite_health_score[7d] offset 7d)
+          )

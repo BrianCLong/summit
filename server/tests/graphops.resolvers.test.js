@@ -16,13 +16,10 @@ describe('GraphOps resolvers', () => {
     const mockEntity = { id: 'e1', tags: [] };
     TagService.deleteTag.mockResolvedValue(mockEntity);
 
-    const result = await graphResolvers.Mutation.deleteTag(
-      null,
-      { entityId: 'e1', tag: 'ok' },
-      ctx,
-    );
+    const result = await graphResolvers.Mutation.deleteTag(null, { entityId: 'e1', tag: 'ok' }, ctx);
 
     expect(TagService.deleteTag).toHaveBeenCalledWith('e1', 'ok', expect.any(Object));
     expect(result).toEqual(mockEntity);
   });
 });
+

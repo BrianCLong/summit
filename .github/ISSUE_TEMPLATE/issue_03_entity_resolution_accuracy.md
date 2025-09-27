@@ -1,9 +1,9 @@
 ---
-name: 'Issue #3: Entity Resolution Accuracy Drop on Noisy Input'
+name: "Issue #3: Entity Resolution Accuracy Drop on Noisy Input"
 about: Improve AI-based entity resolution for noisy data
-title: 'Issue #3: Entity Resolution Accuracy Drop on Noisy Input'
-labels: 'bug, ai, ml, data-quality'
-assignees: ''
+title: "Issue #3: Entity Resolution Accuracy Drop on Noisy Input"
+labels: "bug, ai, ml, data-quality"
+assignees: ""
 ---
 
 **Branch**: `feature/er-noise-robustness`
@@ -161,7 +161,6 @@ def resolve_entities(new_entity_data: Dict, existing_entities: List[Entity], thr
 ```
 
 **Sub-tasks:**
-
 - [ ] Implement robust text normalization functions (lowercase, remove punctuation, handle common abbreviations) in `preprocessors.py`.
 - [ ] Integrate phonetic algorithms (e.g., Metaphone, Soundex) for name matching.
 - [ ] Incorporate fuzzy string matching (e.g., Levenshtein distance, Jaro-Winkler) for near-duplicate detection.

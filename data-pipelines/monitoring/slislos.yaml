@@ -45,11 +45,11 @@ sli_definitions:
 
 slo_targets:
   - sli: availability
-    target: 0.995 # 99.5%
+    target: 0.995             # 99.5%
     window: 30d
   - sli: freshness
-    target: 0.95 # 95% of batches
-    objective: freshness < 300 # 5 minutes
+    target: 0.95              # 95% of batches
+    objective: freshness < 300   # 5 minutes
     window: 7d
   - sli: completeness
     target: 0.99
@@ -58,7 +58,7 @@ slo_targets:
     target: 0.995
     window: 30d
   - sli: latency
-    objective: p95 < 120 # 2 minutes
+    objective: p95 < 120      # 2 minutes
     window: 7d
 
 burn_rates:
@@ -73,3 +73,4 @@ burn_rates:
       - 2h
       - 6h
     factor: 2
+

@@ -1,16 +1,7 @@
-# Auto-apply cohort labels based on changed files
-dependencies:
-  - changed-files:
-      - any-glob-to-any-file: ['**/package.json','**/pnpm-lock.yaml','**/requirements*.txt','**/pyproject.toml']
-docs:
-  - changed-files:
-      - any-glob-to-any-file: ['**/*.md','docs/**']
-workflows:
-  - changed-files:
-      - any-glob-to-any-file: ['.github/workflows/**']
-hardening:
-  - changed-files:
-      - any-glob-to-any-file: ['charts/**','infra/**','helm/**','k8s/**','kyverno/**','otel/**','prometheus/**','jaeger/**','tests/**']
-features:
-  - changed-files:
-      - any-glob-to-any-file: ['services/**','apps/**','packages/**']
+frontend: { - 'apps/frontend/**' }
+backend: { - 'apps/api/**' }
+analytics: { - 'apps/worker/**' }
+graphql: { - 'packages/graphql/**' }
+db: { - 'packages/db/**' }
+neo4j: { - 'packages/neo4j/**' }
+infra: { - 'infra/**' }

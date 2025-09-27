@@ -1,9 +1,9 @@
 import { spawn } from 'child_process';
 import path from 'path';
-import baseLogger from '../../config/logger';
+import pino from 'pino';
 import { ExtractionEngineConfig } from '../ExtractionEngine.js';
 
-const logger = baseLogger.child({ name: 'TextAnalysisEngine' });
+const logger = pino({ name: 'TextAnalysisEngine' });
 
 export interface NamedEntity {
   text: string;
@@ -110,10 +110,10 @@ export class TextAnalysisEngine {
     try {
       // Verify dependencies
       await this.verifyDependencies();
-
+      
       // Load language models
       await this.loadLanguageModels();
-
+      
       this.isInitialized = true;
       logger.info('Text Analysis Engine initialized successfully');
     } catch (error) {
@@ -125,7 +125,10 @@ export class TextAnalysisEngine {
   /**
    * Analyze text using multiple NLP techniques
    */
-  async analyzeText(text: string, options: TextAnalysisOptions = {}): Promise<TextAnalysisResult> {
+  async analyzeText(
+    text: string,
+    options: TextAnalysisOptions = {}
+  ): Promise<TextAnalysisResult> {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -140,7 +143,7 @@ export class TextAnalysisEngine {
       analyzeReadability = true,
       detectIntentions = false,
       enableCoreference = false,
-      enableDependencyParsing = false,
+      enableDependencyParsing = false
     } = options;
 
     logger.info(`Starting text analysis for ${text.length} characters`);
@@ -215,13 +218,12 @@ export class TextAnalysisEngine {
         summary,
         readabilityScore,
         intentions,
-        statistics,
+        statistics
       };
 
-      logger.info(
-        `Text analysis completed: ${entities.length} entities, sentiment: ${sentiment?.label || 'N/A'}`,
-      );
+      logger.info(`Text analysis completed: ${entities.length} entities, sentiment: ${sentiment?.label || 'N/A'}`);
       return result;
+
     } catch (error) {
       logger.error('Text analysis failed:', error);
       throw error;
@@ -234,11 +236,10 @@ export class TextAnalysisEngine {
   private async detectLanguage(text: string): Promise<LanguageDetection> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'language_detection.py');
-
+      
       const args = [
         pythonScript,
-        '--text',
-        text.substring(0, 1000), // Use first 1000 chars for detection
+        '--text', text.substring(0, 1000) // Use first 1000 chars for detection
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -260,7 +261,7 @@ export class TextAnalysisEngine {
             resolve({
               language: result.language || 'en',
               confidence: result.confidence || 0.8,
-              alternateLanguages: result.alternatives || [],
+              alternateLanguages: result.alternatives || []
             });
           } catch (parseError) {
             resolve({ language: 'en', confidence: 0.8 });
@@ -282,15 +283,12 @@ export class TextAnalysisEngine {
   private async extractNamedEntities(text: string, language: string): Promise<NamedEntity[]> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'named_entity_recognition.py');
-
+      
       const args = [
         pythonScript,
-        '--text',
-        text,
-        '--language',
-        language,
-        '--model',
-        this.getModelForLanguage(language, 'ner'),
+        '--text', text,
+        '--language', language,
+        '--model', this.getModelForLanguage(language, 'ner')
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -331,8 +329,13 @@ export class TextAnalysisEngine {
   private async analyzeSentiment(text: string, language: string): Promise<SentimentAnalysis> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'sentiment_analysis.py');
-
-      const args = [pythonScript, '--text', text, '--language', language, '--enable-aspects'];
+      
+      const args = [
+        pythonScript,
+        '--text', text,
+        '--language', language,
+        '--enable-aspects'
+      ];
 
       const python = spawn(this.config.pythonPath, args);
       let output = '';
@@ -354,7 +357,7 @@ export class TextAnalysisEngine {
               label: result.sentiment || 'neutral',
               score: result.score || 0,
               confidence: result.confidence || 0.8,
-              aspects: result.aspects || [],
+              aspects: result.aspects || []
             });
           } catch (parseError) {
             reject(parseError);
@@ -376,17 +379,13 @@ export class TextAnalysisEngine {
   private async extractTopics(text: string, language: string): Promise<Topic[]> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'topic_modeling.py');
-
+      
       const args = [
         pythonScript,
-        '--text',
-        text,
-        '--language',
-        language,
-        '--num-topics',
-        '5',
-        '--algorithm',
-        'lda',
+        '--text', text,
+        '--language', language,
+        '--num-topics', '5',
+        '--algorithm', 'lda'
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -428,15 +427,12 @@ export class TextAnalysisEngine {
   private async extractKeyPhrases(text: string, language: string): Promise<KeyPhrase[]> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'keyphrase_extraction.py');
-
+      
       const args = [
         pythonScript,
-        '--text',
-        text,
-        '--language',
-        language,
-        '--algorithm',
-        'textrank',
+        '--text', text,
+        '--language', language,
+        '--algorithm', 'textrank'
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -478,16 +474,13 @@ export class TextAnalysisEngine {
   private async generateSummary(text: string, language: string): Promise<TextSummary> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'text_summarization.py');
-
+      
       const args = [
         pythonScript,
-        '--text',
-        text,
-        '--language',
-        language,
-        '--extractive-sentences',
-        '3',
-        '--enable-abstractive',
+        '--text', text,
+        '--language', language,
+        '--extractive-sentences', '3',
+        '--enable-abstractive'
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -510,7 +503,7 @@ export class TextAnalysisEngine {
               extractive: result.extractive_summary || [],
               abstractive: result.abstractive_summary,
               keyPoints: result.key_points || [],
-              compressionRatio: (result.summary_length || text.length) / text.length,
+              compressionRatio: (result.summary_length || text.length) / text.length
             });
           } catch (parseError) {
             reject(parseError);
@@ -532,8 +525,12 @@ export class TextAnalysisEngine {
   private async detectIntentions(text: string, language: string): Promise<string[]> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'intention_detection.py');
-
-      const args = [pythonScript, '--text', text, '--language', language];
+      
+      const args = [
+        pythonScript,
+        '--text', text,
+        '--language', language
+      ];
 
       const python = spawn(this.config.pythonPath, args);
       let output = '';
@@ -597,9 +594,9 @@ export class TextAnalysisEngine {
     const characterCount = text.length;
     const words = text.toLowerCase().match(/\b\w+\b/g) || [];
     const wordCount = words.length;
-    const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
     const sentenceCount = sentences.length;
-    const paragraphs = text.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
+    const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
     const paragraphCount = paragraphs.length;
 
     const averageWordsPerSentence = sentenceCount > 0 ? wordCount / sentenceCount : 0;
@@ -611,8 +608,7 @@ export class TextAnalysisEngine {
 
     // Simple complexity score based on various factors
     const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / wordCount || 0;
-    const complexityScore =
-      averageWordsPerSentence * 0.4 + avgWordLength * 0.3 + (1 - vocabularyDiversity) * 0.3;
+    const complexityScore = (averageWordsPerSentence * 0.4) + (avgWordLength * 0.3) + ((1 - vocabularyDiversity) * 0.3);
 
     return {
       characterCount,
@@ -622,7 +618,7 @@ export class TextAnalysisEngine {
       averageWordsPerSentence,
       averageSentencesPerParagraph,
       vocabularyDiversity,
-      complexityScore,
+      complexityScore
     };
   }
 
@@ -631,16 +627,15 @@ export class TextAnalysisEngine {
    */
   private calculateReadabilityScore(text: string, statistics: TextStatistics): number {
     const { wordCount, sentenceCount } = statistics;
-
+    
     if (sentenceCount === 0 || wordCount === 0) return 0;
 
     // Count syllables (simplified approach)
     const syllableCount = this.countSyllables(text);
-
+    
     // Flesch Reading Ease formula
-    const score =
-      206.835 - 1.015 * (wordCount / sentenceCount) - 84.6 * (syllableCount / wordCount);
-
+    const score = 206.835 - (1.015 * (wordCount / sentenceCount)) - (84.6 * (syllableCount / wordCount));
+    
     return Math.max(0, Math.min(100, score));
   }
 
@@ -655,11 +650,11 @@ export class TextAnalysisEngine {
       // Simple syllable counting heuristic
       const vowelGroups = word.match(/[aeiouy]+/g) || [];
       let syllables = vowelGroups.length;
-
+      
       // Adjust for common patterns
       if (word.endsWith('e') && syllables > 1) syllables--;
       if (syllables === 0) syllables = 1;
-
+      
       syllableCount += syllables;
     }
 
@@ -679,7 +674,7 @@ export class TextAnalysisEngine {
    * Parse named entities from Python output
    */
   private parseNamedEntities(entities: any[]): NamedEntity[] {
-    return entities.map((entity) => ({
+    return entities.map(entity => ({
       text: entity.text,
       label: entity.label,
       start: entity.start,
@@ -687,7 +682,7 @@ export class TextAnalysisEngine {
       confidence: entity.confidence || 0.8,
       description: entity.description,
       canonicalForm: entity.canonical_form,
-      entityId: entity.entity_id,
+      entityId: entity.entity_id
     }));
   }
 
@@ -700,7 +695,7 @@ export class TextAnalysisEngine {
       keywords: topic.keywords || [],
       coherence: topic.coherence || 0.5,
       documents: topic.documents,
-      representative_text: topic.representative_text,
+      representative_text: topic.representative_text
     }));
   }
 
@@ -708,7 +703,7 @@ export class TextAnalysisEngine {
    * Parse key phrases from Python output
    */
   private parseKeyPhrases(phrases: any[], text: string): KeyPhrase[] {
-    return phrases.map((phrase) => {
+    return phrases.map(phrase => {
       // Find positions of the phrase in text
       const positions: number[] = [];
       let index = text.toLowerCase().indexOf(phrase.phrase.toLowerCase());
@@ -721,7 +716,7 @@ export class TextAnalysisEngine {
         phrase: phrase.phrase,
         relevance: phrase.relevance || 0.5,
         frequency: positions.length,
-        positions,
+        positions
       };
     });
   }
@@ -731,22 +726,22 @@ export class TextAnalysisEngine {
    */
   private getModelForLanguage(language: string, task: string): string {
     const modelMap: Record<string, Record<string, string>> = {
-      en: {
-        ner: 'en_core_web_lg',
-        sentiment: 'en_core_web_lg',
+      'en': {
+        'ner': 'en_core_web_lg',
+        'sentiment': 'en_core_web_lg'
       },
-      es: {
-        ner: 'es_core_news_lg',
-        sentiment: 'es_core_news_lg',
+      'es': {
+        'ner': 'es_core_news_lg',
+        'sentiment': 'es_core_news_lg'
       },
-      fr: {
-        ner: 'fr_core_news_lg',
-        sentiment: 'fr_core_news_lg',
+      'fr': {
+        'ner': 'fr_core_news_lg',
+        'sentiment': 'fr_core_news_lg'
       },
-      de: {
-        ner: 'de_core_news_lg',
-        sentiment: 'de_core_news_lg',
-      },
+      'de': {
+        'ner': 'de_core_news_lg',
+        'sentiment': 'de_core_news_lg'
+      }
     };
 
     return modelMap[language]?.[task] || modelMap['en'][task] || 'en_core_web_lg';
@@ -758,22 +753,18 @@ export class TextAnalysisEngine {
   private async verifyDependencies(): Promise<void> {
     return new Promise((resolve, reject) => {
       const python = spawn(this.config.pythonPath, [
-        '-c',
-        'import spacy, transformers, sklearn, nltk; print("Dependencies OK")',
+        '-c', 
+        'import spacy, transformers, sklearn, nltk; print("Dependencies OK")'
       ]);
-
+      
       python.on('close', (code) => {
         if (code === 0) {
           resolve();
         } else {
-          reject(
-            new Error(
-              'Required dependencies not found. Please install spacy, transformers, scikit-learn, nltk.',
-            ),
-          );
+          reject(new Error('Required dependencies not found. Please install spacy, transformers, scikit-learn, nltk.'));
         }
       });
-
+      
       python.on('error', () => {
         reject(new Error('Python not found or dependencies missing.'));
       });

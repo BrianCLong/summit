@@ -1,39 +1,39 @@
-const TemplateService = require('../src/services/TemplateService');
+const TemplateService = require("../src/services/TemplateService");
 
-describe('TemplateService', () => {
+describe("TemplateService", () => {
   afterEach(() => {
     TemplateService.templates.clear();
   });
 
-  it('creates and retrieves templates', () => {
+  it("creates and retrieves templates", () => {
     const tpl = TemplateService.createTemplate({
-      name: 'Test',
+      name: "Test",
       data: { graph: {} },
-      scope: 'personal',
-      ownerId: 'u1',
+      scope: "personal",
+      ownerId: "u1",
     });
     expect(tpl.id).toBeDefined();
     const fetched = TemplateService.getTemplate(tpl.id);
-    expect(fetched.name).toBe('Test');
+    expect(fetched.name).toBe("Test");
   });
 
-  it('lists templates by scope', () => {
+  it("lists templates by scope", () => {
     const orgTpl = TemplateService.createTemplate({
-      name: 'Org',
+      name: "Org",
       data: {},
-      scope: 'org',
+      scope: "org",
     });
     TemplateService.createTemplate({
-      name: 'Mine',
+      name: "Mine",
       data: {},
-      scope: 'personal',
-      ownerId: 'u2',
+      scope: "personal",
+      ownerId: "u2",
     });
-    const orgList = TemplateService.listTemplates({ scope: 'org' });
+    const orgList = TemplateService.listTemplates({ scope: "org" });
     expect(orgList.find((t) => t.id === orgTpl.id)).toBeTruthy();
     const personalList = TemplateService.listTemplates({
-      scope: 'personal',
-      userId: 'u2',
+      scope: "personal",
+      userId: "u2",
     });
     expect(personalList).toHaveLength(1);
   });

@@ -270,9 +270,9 @@
       "email": "sarah.chen@intelgraph.com",
       "role": "analyst",
       "permissions": [
-        { "resource": "investigations", "action": "read", "effect": "allow" },
-        { "resource": "investigations", "action": "write", "effect": "allow" },
-        { "resource": "entities", "action": "read", "effect": "allow" }
+        {"resource": "investigations", "action": "read", "effect": "allow"},
+        {"resource": "investigations", "action": "write", "effect": "allow"},
+        {"resource": "entities", "action": "read", "effect": "allow"}
       ],
       "avatar": "https://images.unsplash.com/photo-1494790108755-2616b612b898?w=150",
       "lastActive": "2024-01-16T16:30:00Z"
@@ -283,9 +283,9 @@
       "email": "mike.rodriguez@intelgraph.com",
       "role": "analyst",
       "permissions": [
-        { "resource": "investigations", "action": "read", "effect": "allow" },
-        { "resource": "investigations", "action": "write", "effect": "allow" },
-        { "resource": "entities", "action": "read", "effect": "allow" }
+        {"resource": "investigations", "action": "read", "effect": "allow"},
+        {"resource": "investigations", "action": "write", "effect": "allow"},
+        {"resource": "entities", "action": "read", "effect": "allow"}
       ],
       "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
       "lastActive": "2024-01-16T15:45:00Z"

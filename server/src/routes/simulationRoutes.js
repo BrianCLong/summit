@@ -19,11 +19,8 @@ router.post('/spread', async (req, res) => {
       const edgeQ = `MATCH (a:Entity)-[r]->(b:Entity) WHERE a.investigation_id = $id AND b.investigation_id = $id RETURN a.id AS source, b.id AS target`;
       const nodesRes = await session.run(nodeQ, { id: investigationId });
       const edgesRes = await session.run(edgeQ, { id: investigationId });
-      const nodes = nodesRes.records.map((r) => r.get('id'));
-      const edges = edgesRes.records.map((r) => ({
-        source: r.get('source'),
-        target: r.get('target'),
-      }));
+      const nodes = nodesRes.records.map(r => r.get('id'));
+      const edges = edgesRes.records.map(r => ({ source: r.get('source'), target: r.get('target') }));
       const out = sim.simulateSpread({ nodes, edges, seeds, steps, probability });
       res.json({ success: true, ...out });
     } finally {
@@ -35,3 +32,4 @@ router.post('/spread', async (req, res) => {
 });
 
 module.exports = router;
+

@@ -58,8 +58,7 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({ sce
 
       {playbooks.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
-          No strategic response playbooks available for this scenario yet. Run a simulation to
-          generate data.
+          No strategic response playbooks available for this scenario yet. Run a simulation to generate data.
         </Typography>
       ) : (
         <Box>

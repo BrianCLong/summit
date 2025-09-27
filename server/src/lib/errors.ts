@@ -1,8 +1,8 @@
-import { randomUUID as uuid } from 'crypto';
-import baseLogger from '../config/logger';
-import { ZodError } from 'zod';
+import { v4 as uuid } from "uuid";
+import pino from "pino";
+import { ZodError } from "zod";
 
-const logger = baseLogger.child({ name: 'ErrorMapper' });
+const logger = pino({ name: "ErrorMapper" });
 
 export class UserFacingError extends Error {
   statusCode: number;
@@ -15,17 +15,20 @@ export class UserFacingError extends Error {
   }
 }
 
-// Alias for backward compatibility
-export const AppError = UserFacingError;
-
 export function mapGraphRAGError(error: unknown): UserFacingError {
   const traceId = uuid();
-  let summary = 'Unknown error';
+  let summary = "Unknown error";
   if (error instanceof ZodError) {
-    summary = error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+    summary = error.issues
+      .map((i) => `${i.path.join('.')}: ${i.message}`)
+      .join('; ');
   } else if (error instanceof Error) {
     summary = error.message;
   }
-  logger.warn({ traceId, issues: summary }, 'GraphRAG schema validation failed');
-  return new UserFacingError(`Invalid GraphRAG response. Trace ID: ${traceId}`, 400, traceId);
+  logger.warn({ traceId, issues: summary }, "GraphRAG schema validation failed");
+  return new UserFacingError(
+    `Invalid GraphRAG response. Trace ID: ${traceId}`,
+    400,
+    traceId,
+  );
 }

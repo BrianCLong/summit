@@ -5,9 +5,7 @@ import { evaluate } from '../../services/AccessControl.js';
 function opName(info) {
   try {
     return info?.operation?.operation || 'query';
-  } catch (_) {
-    return 'query';
-  }
+  } catch (_) { return 'query'; }
 }
 
 export default function pbacPlugin() {
@@ -18,12 +16,12 @@ export default function pbacPlugin() {
           return {
             async willResolveField(fieldResolverParams) {
               const { source, args, contextValue, info } = fieldResolverParams;
-
+              
               // Skip introspection fields
               if (info.fieldName.startsWith('__')) {
                 return;
               }
-
+              
               // Build a resource descriptor from type and field path
               const parentType = info.parentType?.name;
               const fieldName = info.fieldName;
@@ -40,7 +38,7 @@ export default function pbacPlugin() {
               };
 
               const env = { tenant: process.env.TENANT || 'default' };
-
+              
               try {
                 const decision = await evaluate(action, user, resource, env);
                 if (!decision?.allow) {
@@ -61,4 +59,4 @@ export default function pbacPlugin() {
       };
     },
   };
-}
+};

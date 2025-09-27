@@ -4,7 +4,9 @@
     {
       "type": "graph",
       "title": "PBAC Decisions",
-      "targets": [{ "expr": "sum(rate(pbac_decisions_total[5m])) by (decision)" }]
+      "targets": [
+        { "expr": "sum(rate(pbac_decisions_total[5m])) by (decision)" }
+      ]
     }
   ]
 }

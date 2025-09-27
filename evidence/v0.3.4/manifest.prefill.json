@@ -1,0 +1,134 @@
+{
+  "version": "v0.3.4-mc",
+  "epic_theme": "Trust, Throughput, Tenants",
+  "expected_artifacts": [
+    {
+      "path": "out/gates-canary20-v034.json",
+      "description": "Canary 20% gate validation results",
+      "required": true,
+      "sha256": null
+    },
+    {
+      "path": "out/gates-canary50-v034.json",
+      "description": "Canary 50% gate validation results",
+      "required": true,
+      "sha256": null
+    },
+    {
+      "path": "out/gates-prod-v034.json",
+      "description": "Production gate validation results",
+      "required": true,
+      "sha256": null
+    },
+    {
+      "path": "out/grounding-v034.json",
+      "description": "AI grounding validation report",
+      "required": true,
+      "sha256": null
+    },
+    {
+      "path": "evidence/v0.3.4/config/pre-snapshot.json",
+      "description": "Pre-deployment config attestation",
+      "required": true,
+      "sha256": null
+    },
+    {
+      "path": "observability/grafana/dashboards/mc-platform.json",
+      "description": "Grafana dashboard configuration",
+      "required": false,
+      "sha256": null
+    },
+    {
+      "path": "evidence/v0.3.4/budgets/ledger.json",
+      "description": "Budget guard transaction ledger",
+      "required": true,
+      "sha256": null
+    },
+    {
+      "path": "evidence/v0.3.4/provenance/prov-k6.json",
+      "description": "Provenance API load test results",
+      "required": true,
+      "sha256": null
+    },
+    {
+      "path": "evidence/v0.3.4/dp/dp-audit.json",
+      "description": "Differential privacy audit report",
+      "required": true,
+      "sha256": null
+    },
+    {
+      "path": "evidence/v0.3.4/autonomy/TENANT_004/canary.json",
+      "description": "TENANT_004 autonomy canary validation",
+      "required": true,
+      "sha256": null
+    },
+    {
+      "path": "evidence/v0.3.4/autonomy/TENANT_005/canary.json",
+      "description": "TENANT_005 autonomy canary validation",
+      "required": true,
+      "sha256": null
+    },
+    {
+      "path": "out/remediate-v034.json",
+      "description": "Config auto-remediation drill results",
+      "required": true,
+      "sha256": null
+    },
+    {
+      "path": "out/budget-sim-v034.json",
+      "description": "Budget guard enforcement simulation",
+      "required": true,
+      "sha256": null
+    }
+  ],
+  "signing": {
+    "algorithm": "sha256_hmac_simulation",
+    "key_reference": "env:MC_SIGNING_KEY",
+    "timestamp_required": true,
+    "verification_command": "python3 tools/mc.py evidence verify"
+  },
+  "validation_gates": {
+    "differential_privacy": {
+      "pii_violations": 0,
+      "epsilon_consumption_present": true,
+      "audit_framework_operational": true
+    },
+    "config_auto_remediation": {
+      "mttr_under_10min": true,
+      "crypto_attestation_valid": true,
+      "drift_detection_operational": true
+    },
+    "budget_guard": {
+      "enforcement_under_120s": true,
+      "ml_auto_tuning_operational": true,
+      "backpressure_functional": true
+    },
+    "provenance_query": {
+      "response_under_200ms": true,
+      "success_rate_above_95pct": true,
+      "traceability_complete": true
+    },
+    "autonomy_tier3": {
+      "tenant_004_operational": true,
+      "tenant_005_operational": true,
+      "safety_score_above_85pct": true,
+      "compensation_under_05pct": true
+    }
+  },
+  "deployment_metadata": {
+    "created_timestamp": null,
+    "deployment_lead": null,
+    "environment": "production",
+    "git_commit": null,
+    "git_tag": "v0.3.4-mc",
+    "deployment_duration_minutes": null,
+    "rollback_events": 0
+  },
+  "compliance_attestation": {
+    "security_review_complete": true,
+    "privacy_validation_complete": true,
+    "evidence_retention_configured": true,
+    "audit_trail_complete": true,
+    "crypto_signatures_valid": true
+  }
+}

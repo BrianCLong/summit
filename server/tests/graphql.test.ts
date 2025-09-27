@@ -32,7 +32,7 @@ describe('GraphQL Integration Tests', () => {
           },
         },
       });
-
+    
     expect(registerRes.statusCode).toEqual(200);
     expect(registerRes.body.data.register.token).toBeDefined();
     expect(registerRes.body.data.register.user.id).toBeDefined();

@@ -7,16 +7,14 @@ function NotFound() {
   const navigate = useNavigate();
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '60vh',
-        textAlign: 'center',
-      }}
-    >
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      minHeight: '60vh',
+      textAlign: 'center'
+    }}>
       <Typography variant="h1" sx={{ fontSize: '6rem', fontWeight: 'bold', color: 'primary.main' }}>
         404
       </Typography>
@@ -26,7 +24,11 @@ function NotFound() {
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
         The page you're looking for doesn't exist.
       </Typography>
-      <Button variant="contained" startIcon={<Home />} onClick={() => navigate('/dashboard')}>
+      <Button
+        variant="contained"
+        startIcon={<Home />}
+        onClick={() => navigate('/dashboard')}
+      >
         Go Home
       </Button>
     </Box>

@@ -1,0 +1,186 @@
+name: validate-canary-params
+
+on:
+  pull_request:
+    paths:
+      - 'config/canary-params-*.json'
+      - '.github/workflows/canary-*.yml'
+      - '.github/workflows/deployment-*.yml'
+      - 'scripts/validate-canary-gates.sh'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate Canary Parameters
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq bc
+
+      - name: Validate canary gates consistency
+        run: |
+          chmod +x scripts/validate-canary-gates.sh
+          scripts/validate-canary-gates.sh
+
+      - name: Assert workflow gate alignment
+        run: |
+          echo "🔍 Checking workflow gate alignment..."
+
+          # Check for p95 regression threshold consistency
+          CANARY_REGRESSION=$(jq -r '.slo_gates.p95_latency_regression_pct' config/canary-params-v0.3.4.json)
+          echo "Canary config p95 regression threshold: ${CANARY_REGRESSION}%"
+
+          # Validate that workflow files reference similar thresholds
+          if grep -r "p95.*regression" .github/workflows/ | grep -q "$CANARY_REGRESSION"; then
+            echo "✅ p95 regression threshold aligned in workflows"
+          elif grep -r "latency.*5" .github/workflows/ >/dev/null; then
+            echo "✅ Latency threshold pattern found in workflows"
+          else
+            echo "⚠️ Warning: p95 regression threshold may not be aligned in workflows"
+          fi
+
+          # Check for error rate gates
+          if grep -r "error.*rate.*worse\|non.*worse" .github/workflows/ >/dev/null; then
+            echo "✅ Error rate non-worse gate found in workflows"
+          else
+            echo "⚠️ Warning: Error rate non-worse gate not found in workflows"
+          fi
+
+      - name: Validate rollback trigger consistency
+        run: |
+          echo "🚨 Checking rollback trigger consistency..."
+
+          # Extract rollback thresholds
+          GRAPHQL_P95=$(jq -r '.rollback_triggers.graphql_p95_ms_30m' config/canary-params-v0.3.4.json)
+          AUTONOMY_COMP=$(jq -r '.rollback_triggers.autonomy_comp_pct_24h' config/canary-params-v0.3.4.json)
+          SIEM_DELIVERY=$(jq -r '.rollback_triggers.siem_delivery_pct_15m' config/canary-params-v0.3.4.json)
+
+          echo "Configured rollback triggers:"
+          echo "  • GraphQL p95: ${GRAPHQL_P95}ms"
+          echo "  • Autonomy compensation: ${AUTONOMY_COMP}%"
+          echo "  • SIEM delivery: ${SIEM_DELIVERY}%"
+
+          # Validate reasonable thresholds
+          if [ "$GRAPHQL_P95" -gt 500 ]; then
+            echo "❌ GraphQL p95 threshold too high: ${GRAPHQL_P95}ms"
+            exit 1
+          fi
+
+          if (( $(echo "$AUTONOMY_COMP > 1.0" | bc -l) )); then
+            echo "❌ Autonomy compensation threshold too high: ${AUTONOMY_COMP}%"
+            exit 1
+          fi
+
+          if [ "$SIEM_DELIVERY" -lt 90 ]; then
+            echo "❌ SIEM delivery threshold too low: ${SIEM_DELIVERY}%"
+            exit 1
+          fi
+
+          echo "✅ All rollback triggers within acceptable ranges"
+
+      - name: Validate wave configuration
+        run: |
+          echo "🌊 Validating deployment wave configuration..."
+
+          # Check wave progression
+          WAVE_COUNT=$(jq '.waves | length' config/canary-params-v0.3.4.json)
+          WAVE_20_PCT=$(jq -r '.waves[0].traffic_pct' config/canary-params-v0.3.4.json)
+          WAVE_50_PCT=$(jq -r '.waves[1].traffic_pct' config/canary-params-v0.3.4.json)
+          WAVE_100_PCT=$(jq -r '.waves[2].traffic_pct' config/canary-params-v0.3.4.json)
+
+          echo "Wave configuration:"
+          echo "  • Total waves: $WAVE_COUNT"
+          echo "  • Wave 1: ${WAVE_20_PCT}%"
+          echo "  • Wave 2: ${WAVE_50_PCT}%"
+          echo "  • Wave 3: ${WAVE_100_PCT}%"
+
+          if [ "$WAVE_COUNT" -ne 3 ] || [ "$WAVE_20_PCT" -ne 20 ] || [ "$WAVE_50_PCT" -ne 50 ] || [ "$WAVE_100_PCT" -ne 100 ]; then
+            echo "❌ Invalid wave configuration"
+            exit 1
+          fi
+
+          echo "✅ Wave configuration validated"
+
+      - name: Validate feature flags
+        run: |
+          echo "🎛️ Validating feature flag configuration..."
+
+          # Check all epic features are enabled
+          DP_ENABLED=$(jq -r '.feature_flags.differential_privacy_enabled' config/canary-params-v0.3.4.json)
+          CONFIG_ENABLED=$(jq -r '.feature_flags.config_auto_remediation_enabled' config/canary-params-v0.3.4.json)
+          BUDGET_ENABLED=$(jq -r '.feature_flags.budget_guard_enforcement' config/canary-params-v0.3.4.json)
+          PROV_ENABLED=$(jq -r '.feature_flags.provenance_query_api_enabled' config/canary-params-v0.3.4.json)
+          T4_ENABLED=$(jq -r '.feature_flags.autonomy_tier3_tenant_004' config/canary-params-v0.3.4.json)
+          T5_ENABLED=$(jq -r '.feature_flags.autonomy_tier3_tenant_005' config/canary-params-v0.3.4.json)
+
+          echo "Feature flags status:"
+          echo "  • Differential Privacy: $DP_ENABLED"
+          echo "  • Config Auto-Remediation: $CONFIG_ENABLED"
+          echo "  • Budget Guard: $BUDGET_ENABLED"
+          echo "  • Provenance Query API: $PROV_ENABLED"
+          echo "  • Autonomy Tier-3 TENANT_004: $T4_ENABLED"
+          echo "  • Autonomy Tier-3 TENANT_005: $T5_ENABLED"
+
+          if [ "$DP_ENABLED" != "true" ] || [ "$CONFIG_ENABLED" != "true" ] || [ "$BUDGET_ENABLED" != "true" ] || \
+             [ "$PROV_ENABLED" != "true" ] || [ "$T4_ENABLED" != "true" ] || [ "$T5_ENABLED" != "true" ]; then
+            echo "❌ One or more epic features not enabled"
+            exit 1
+          fi
+
+          echo "✅ All epic features enabled for deployment"
+
+      - name: Generate gate consistency report
+        run: |
+          echo "📊 Generating gate consistency report..."
+
+          cat > gate-consistency-report.json << EOF
+          {
+            "gate_consistency_report": {
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+              "config_file": "config/canary-params-v0.3.4.json",
+              "validation_status": "PASSED",
+              "gates_validated": {
+                "slo_gates": {
+                  "p95_latency_regression_pct": $(jq '.slo_gates.p95_latency_regression_pct' config/canary-params-v0.3.4.json),
+                  "error_rate_non_worse": $(jq '.slo_gates.error_rate_non_worse' config/canary-params-v0.3.4.json)
+                },
+                "rollback_triggers": {
+                  "graphql_p95_ms": $(jq '.rollback_triggers.graphql_p95_ms_30m' config/canary-params-v0.3.4.json),
+                  "autonomy_comp_pct": $(jq '.rollback_triggers.autonomy_comp_pct_24h' config/canary-params-v0.3.4.json),
+                  "siem_delivery_pct": $(jq '.rollback_triggers.siem_delivery_pct_15m' config/canary-params-v0.3.4.json)
+                },
+                "deployment_waves": $(jq '.waves' config/canary-params-v0.3.4.json),
+                "epic_features_enabled": $(jq '.feature_flags' config/canary-params-v0.3.4.json)
+              },
+              "consistency_locked": true,
+              "deployment_ready": true
+            }
+          }
+          EOF
+
+      - name: Upload gate consistency report
+        uses: actions/upload-artifact@v3
+        with:
+          name: gate-consistency-report
+          path: gate-consistency-report.json
+
+      - name: Final validation summary
+        run: |
+          echo ""
+          echo "🔒 GATE CONSISTENCY VALIDATION COMPLETE ✅"
+          echo "========================================"
+          echo "✅ Canary configuration validated"
+          echo "✅ Rollback triggers verified"
+          echo "✅ Deployment waves configured"
+          echo "✅ Epic features enabled"
+          echo "✅ Workflow alignment checked"
+          echo ""
+          echo "🚀 MC Platform v0.3.4 READY FOR DEPLOYMENT"
+          echo "Epic: Trust, Throughput, Tenants"
+          echo "Configuration drift prevention: ACTIVE"
+          echo ""

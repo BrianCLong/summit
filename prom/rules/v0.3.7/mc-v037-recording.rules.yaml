@@ -1,0 +1,178 @@
+groups:
+  - name: mc-v037-recording
+    interval: 15s
+    rules:
+      # Zero-Knowledge Provenance metrics
+      - record: mc_zk_coverage_percent
+        expr: |
+          (
+            sum(rate(mc_zk_verified_responses_total[5m]))
+            /
+            clamp_min(sum(rate(mc_agentic_responses_total[5m])), 1)
+          ) * 100
+
+      - record: mc_zk_verification_p95_ms
+        expr: |
+          histogram_quantile(0.95, sum(rate(mc_zk_verification_duration_seconds_bucket[5m])) by (le)) * 1000
+
+      - record: mc_zk_proof_failure_rate
+        expr: |
+          rate(mc_zk_proof_failures_total[5m])
+
+      # Byzantine Fault Tolerance metrics
+      - record: mc_bft_quorum_success_rate
+        expr: |
+          (
+            sum(rate(mc_bft_quorum_achieved_total[5m]))
+            /
+            clamp_min(sum(rate(mc_bft_quorum_attempts_total[5m])), 1)
+          )
+
+      - record: mc_bft_write_confirmation_rate
+        expr: |
+          (
+            sum(rate(mc_bft_writes_confirmed_total[5m]))
+            /
+            clamp_min(sum(rate(mc_bft_writes_proposed_total[5m])), 1)
+          )
+
+      - record: mc_bft_write_overhead_percent
+        expr: |
+          (
+            (
+              histogram_quantile(0.95, sum(rate(mc_bft_write_duration_seconds_bucket[5m])) by (le))
+              -
+              histogram_quantile(0.95, sum(rate(mc_standard_write_duration_seconds_bucket[5m])) by (le))
+            )
+            /
+            clamp_min(histogram_quantile(0.95, sum(rate(mc_standard_write_duration_seconds_bucket[5m])) by (le)), 0.001)
+          ) * 100
+
+      - record: mc_bft_epoch_duration_minutes
+        expr: |
+          (time() - mc_bft_epoch_start_timestamp) / 60
+
+      # Continuous Safety Equivalence metrics
+      - record: mc_cse_composite_score
+        expr: |
+          (
+            sum(mc_cse_invariant_checks_passed_total)
+            /
+            clamp_min(sum(mc_cse_invariant_checks_total), 1)
+          )
+
+      - record: mc_cse_invariant_violation_rate
+        expr: |
+          rate(mc_cse_invariant_violations_total[5m])
+
+      - record: mc_cse_deployment_hold_rate
+        expr: |
+          rate(mc_cse_deployment_holds_total[5m])
+
+      # Sovereign Compliance metrics
+      - record: mc_sovereign_compliance_coverage
+        expr: |
+          (
+            sum(rate(mc_sovereign_requests_tagged_total[5m]))
+            /
+            clamp_min(sum(rate(mc_total_requests[5m])), 1)
+          )
+
+      - record: mc_sovereign_policy_drift_rate
+        expr: |
+          rate(mc_sovereign_policy_drift_total[5m])
+
+      - record: mc_sovereign_audit_generation_p95_seconds
+        expr: |
+          histogram_quantile(0.95, sum(rate(mc_sovereign_audit_generation_duration_seconds_bucket[5m])) by (le))
+
+      # GreenOps optimization metrics
+      - record: mc_greenops_cost_reduction_percent
+        expr: |
+          (
+            (mc_greenops_baseline_cost_per_1k - avg(mc_greenops_actual_cost_per_1k))
+            /
+            clamp_min(mc_greenops_baseline_cost_per_1k, 0.001)
+          ) * 100
+
+      - record: mc_greenops_latency_improvement_percent
+        expr: |
+          (
+            (mc_greenops_baseline_latency_ms - avg(mc_greenops_actual_latency_ms))
+            /
+            clamp_min(mc_greenops_baseline_latency_ms, 1)
+          ) * 100
+
+      - record: mc_greenops_carbon_reduction_percent
+        expr: |
+          (
+            (mc_greenops_baseline_carbon_kg_per_1k - avg(mc_greenops_actual_carbon_kg_per_1k))
+            /
+            clamp_min(mc_greenops_baseline_carbon_kg_per_1k, 0.000001)
+          ) * 100
+
+      - record: mc_greenops_slo_violation_rate
+        expr: |
+          rate(mc_greenops_slo_violations_total[5m])
+
+      # Sovereign Resilience composite health score
+      - record: mc_sovereign_resilience_health_score
+        expr: |
+          (
+            # zk Coverage weight (25%)
+            (clamp_max(mc_zk_coverage_percent / 100, 1) * 0.25)
+            +
+            # BFT Health weight (25%)
+            (mc_bft_quorum_success_rate * 0.25)
+            +
+            # CSE Score weight (25%)
+            (mc_cse_composite_score * 0.25)
+            +
+            # Sovereign Compliance weight (15%)
+            (mc_sovereign_compliance_coverage * 0.15)
+            +
+            # GreenOps Success weight (10%) - cost OR latency OR carbon improvement
+            (clamp_max(
+              (step(mc_greenops_cost_reduction_percent - 10) +
+               step(mc_greenops_latency_improvement_percent - 8) +
+               step(mc_greenops_carbon_reduction_percent - 5)), 1) * 0.10)
+          )
+
+      # Regional health metrics
+      - record: mc_regional_health_score
+        expr: |
+          (
+            # BFT participation weight (40%)
+            (mc_bft_region_participation_rate * 0.4)
+            +
+            # Network connectivity weight (30%)
+            (mc_network_connectivity_score * 0.3)
+            +
+            # Resource availability weight (30%)
+            (mc_resource_availability_score * 0.3)
+          )
+
+      # Weekly trend indicators
+      - record: mc_zk_coverage_trend_7d
+        expr: |
+          (
+            avg_over_time(mc_zk_coverage_percent[7d])
+            -
+            avg_over_time(mc_zk_coverage_percent[7d] offset 7d)
+          )
+
+      - record: mc_sovereign_health_trend_7d
+        expr: |
+          (
+            avg_over_time(mc_sovereign_resilience_health_score[7d])
+            -
+            avg_over_time(mc_sovereign_resilience_health_score[7d] offset 7d)
+          )
+
+      - record: mc_greenops_efficiency_trend_7d
+        expr: |
+          (
+            avg_over_time(mc_greenops_cost_reduction_percent[7d])
+            -
+            avg_over_time(mc_greenops_cost_reduction_percent[7d] offset 7d)
+          )

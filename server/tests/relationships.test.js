@@ -1,18 +1,8 @@
 const resolvers = require('../src/graphql/resolvers');
 
 jest.mock('../src/config/database', () => {
-  const session = {
-    run: jest
-      .fn()
-      .mockResolvedValue({
-        records: [{ get: () => ({ properties: { id: 'rel1', label: 'RELATED_TO' } }) }],
-      }),
-    close: jest.fn(),
-  };
-  return {
-    getNeo4jDriver: () => ({ session: () => session }),
-    getPostgresPool: () => ({ query: jest.fn() }),
-  };
+  const session = { run: jest.fn().mockResolvedValue({ records: [{ get: () => ({ properties: { id: 'rel1', label: 'RELATED_TO' } }) }] }), close: jest.fn() };
+  return { getNeo4jDriver: () => ({ session: () => session }), getPostgresPool: () => ({ query: jest.fn() }) };
 });
 
 describe('Relationship resolvers', () => {
@@ -26,11 +16,7 @@ describe('Relationship resolvers', () => {
   });
 
   test('updateRelationship returns payload', async () => {
-    const out = await resolvers.Mutation.updateRelationship(
-      null,
-      { id: 'rel1', input: { label: 'Updated' } },
-      { user },
-    );
+    const out = await resolvers.Mutation.updateRelationship(null, { id: 'rel1', input: { label: 'Updated' } }, { user });
     expect(out).toHaveProperty('id');
   });
 
@@ -39,3 +25,4 @@ describe('Relationship resolvers', () => {
     expect(out).toBe(true);
   });
 });
+
