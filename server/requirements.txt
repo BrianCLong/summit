@@ -9,7 +9,7 @@ scikit-image==0.21.0
 
 # Object Detection and Computer Vision Models
 ultralytics==8.0.206
-torch==2.1.0
+torch==2.8.0
 torchvision==0.16.0
 torchaudio==2.1.0
 
@@ -106,7 +106,7 @@ datasets==2.14.5
 
 # Acceleration (Optional - for GPU support)
 # Uncomment if you have NVIDIA GPU with CUDA support
-# torch==2.1.0+cu121
+# torch==2.8.0+cu121
 # torchvision==0.16.0+cu121
 # torchaudio==2.1.0+cu121
 # -f https://download.pytorch.org/whl/cu121/torch_stable.html
