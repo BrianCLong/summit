@@ -4,6 +4,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+sdk/typescript/package-lock.json
+cognitive_insights_engine/poetry.lock
 
 # Runtime data
 pids

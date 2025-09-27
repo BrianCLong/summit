@@ -1,0 +1,10 @@
+# Ignore generated lockfiles for SDK builds
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Ignore packaged artifacts that may be detected as binary
+*.tgz
+*.tar
+*.tar.gz
+*.zip
