@@ -1,0 +1,22 @@
+{
+  "name": "@summit/dprs-cli",
+  "version": "0.1.0",
+  "description": "CLI for the Differential Privacy Release Scheduler",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "dprs": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "typescript": "^5.4.5"
+  }
+}
