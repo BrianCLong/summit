@@ -1,0 +1,33 @@
+{
+  "name": "@summit/iab",
+  "version": "0.1.0",
+  "description": "Incident Attestation Bundler CLI for assembling signed incident artifact bundles.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "iab": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "bundle:sample": "npm run build && node dist/index.js bundle --incident ../../samples/iab/sample-incident.json --output ../../samples/iab/sample-bundle.tgz --private-key ../../samples/iab/keys/sample-private.pem",
+    "verify:sample": "npm run build && node dist/index.js verify --bundle ../../samples/iab/sample-bundle.tgz --public-key ../../samples/iab/keys/sample-public.pem",
+    "test": "npm run clean --silent || true && npm run bundle:sample && npm run verify:sample"
+  },
+  "files": [
+    "dist"
+  ],
+  "author": "Summit Engineering",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^20.12.7",
+    "fs-extra": "^11.2.0",
+    "js-yaml": "^4.1.0",
+    "tar": "^6.2.0",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.5"
+  }
+}
