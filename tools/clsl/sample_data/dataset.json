@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "id": "text-watermarked",
+      "type": "text",
+      "path": "watermarked.txt",
+      "ground_truth": {"watermark": true, "c2pa": true},
+      "metadata": {"c2pa_manifest": "watermarked.claim.json"}
+    },
+    {
+      "id": "text-plain",
+      "type": "text",
+      "path": "plain.txt",
+      "ground_truth": {"watermark": false, "c2pa": false},
+      "metadata": {}
+    }
+  ]
+}

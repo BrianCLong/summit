@@ -1,0 +1,1 @@
+Robust watermark provenance survives laundering because the embedded signature stays resilient.

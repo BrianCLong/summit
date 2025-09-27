@@ -1,0 +1,59 @@
+{
+  "dataset": "../sample_data/dataset.json",
+  "output_dir": "../sample_data/out",
+  "transforms": [
+    {
+      "name": "transcode",
+      "levels": [
+        {"label": "normalize", "settings": {}}
+      ]
+    },
+    {
+      "name": "crop",
+      "levels": [
+        {"label": "keep-90", "settings": {"keep_fraction": 0.9}},
+        {"label": "keep-60", "settings": {"keep_fraction": 0.6}}
+      ]
+    },
+    {
+      "name": "paraphrase",
+      "levels": [
+        {"label": "synonym-pass", "settings": {}}
+      ]
+    },
+    {
+      "name": "ocr_pivot",
+      "levels": [
+        {"label": "ocr", "settings": {"mode": "ocr"}},
+        {"label": "render", "settings": {"mode": "render"}}
+      ]
+    },
+    {
+      "name": "rescan",
+      "levels": [
+        {"label": "soft", "settings": {"intensity": 0.3}},
+        {"label": "hard", "settings": {"intensity": 0.8}}
+      ]
+    }
+  ],
+  "watermark_detector": {
+    "type": "keywords",
+    "threshold": 0.5,
+    "options": {"keywords": ["watermark", "provenance", "robust"], "severity_tolerance": 0.25}
+  },
+  "c2pa_detector": {
+    "type": "manifest",
+    "threshold": 0.55,
+    "options": {"noise_penalty": 0.25}
+  },
+  "hardening": [
+    {
+      "name": "watermark-relaxed",
+      "watermark": {"type": "keywords", "threshold": 0.4, "options": {"keywords": ["watermark", "provenance", "robust"], "severity_tolerance": 0.4}}
+    },
+    {
+      "name": "c2pa-strict",
+      "c2pa": {"type": "manifest", "threshold": 0.65, "options": {"noise_penalty": 0.2}}
+    }
+  ]
+}
