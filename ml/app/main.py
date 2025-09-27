@@ -49,6 +49,7 @@ from .monitoring import (
     health_checker,
 )
 from .agents.api import router as agent_router
+from .tracing import init_tracing
 
 logger = logging.getLogger(__name__)
 JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY", "")
@@ -85,6 +86,7 @@ def verify_token(authorization: str = Header(...)):
 link_predictor = LinkPredictor()
 
 api = FastAPI(title="IntelGraph ML Service", version="0.2.0")
+init_tracing(app=api)
 api.include_router(agent_router)
 
 
