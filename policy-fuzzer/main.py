@@ -105,3 +105,28 @@ def main():
         generate_reports(failing_cases, COVERAGE)
     else:
         print("No failing cases found.")
+
+    analyze_coverage_and_recommend(COVERAGE)
+
+def analyze_coverage_and_recommend(coverage_data):
+    print("\n--- Fuzzing Recommendations ---")
+    low_coverage_areas = []
+    for layer, metrics in coverage_data.items():
+        total_hits = sum(metrics.values())
+        if total_hits == 0:
+            low_coverage_areas.append(layer)
+        else:
+            for metric, count in metrics.items():
+                if count == 0:
+                    low_coverage_areas.append(f"{layer}.{metric}")
+
+    if low_coverage_areas:
+        print("Consider focusing on these under-covered areas in future runs:")
+        for area in low_coverage_areas:
+            print(f"- {area}")
+        print("\nTry enabling relevant attack grammars or adjusting policy templates to target these areas.")
+    else:
+        print("All tracked areas have been covered. Consider adding new attack grammars or policy types.")
+
+if __name__ == "__main__":
+    main()
