@@ -1,0 +1,20 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: nodejs-backend-pod-kill
+  namespace: chaos-testing
+  annotations:
+    summary: "Kill one Node.js backend pod to validate self-healing"
+spec:
+  action: pod-kill
+  mode: one
+  duration: 5m
+  selector:
+    namespaces:
+      - intelgraph-production
+    labelSelectors:
+      app: intelgraph
+      component: backend
+  scheduler:
+    cron: "0 */4 * * *"
+  gracePeriod: 0

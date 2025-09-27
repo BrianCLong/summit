@@ -1,0 +1,29 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: python-api-latency
+  namespace: chaos-testing
+  annotations:
+    summary: "Inject latency on Python API pods to validate graceful degradation"
+spec:
+  action: delay
+  mode: all
+  selector:
+    namespaces:
+      - intelgraph-production
+    labelSelectors:
+      app.kubernetes.io/name: analytics-api
+  delay:
+    latency: 200ms
+    correlation: "50"
+    jitter: 40ms
+  duration: 10m
+  direction: to
+  target:
+    selector:
+      namespaces:
+        - intelgraph-production
+      labelSelectors:
+        app: intelgraph
+        component: backend
+    mode: all
