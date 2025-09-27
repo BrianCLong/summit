@@ -1,0 +1,80 @@
+name: Model Catalog Staleness Check
+
+on:
+  schedule:
+    - cron: '21 08 * * 1'  # Mondays 08:21 UTC
+  workflow_dispatch:
+
+jobs:
+  stale-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm i yaml@2
+      - name: Check last_verified freshness and open issue if stale
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const YAML = require('yaml');
+            const path = 'model-catalog/catalog.yaml';
+            if (!fs.existsSync(path)) {
+              core.setOutput('status','no-catalog');
+              return;
+            }
+            const cat = YAML.parse(fs.readFileSync(path,'utf8')) || {};
+            const models = Array.isArray(cat.models) ? cat.models : [];
+            const now = new Date();
+            const stale = [];
+            for (const m of models) {
+              if (!m.last_verified) continue;
+              const d = new Date(m.last_verified);
+              const ageDays = Math.floor((now - d) / 86400000);
+              if (ageDays > 30) stale.push({id: m.id, last_verified: m.last_verified, ageDays});
+            }
+            if (!stale.length) {
+              core.info('Model Catalog is fresh (< 30d).');
+              return;
+            }
+            const title = 'MC: Refresh needed for stale last_verified entries';
+            const body = [
+              'The following Model Catalog entries have last_verified older than 30 days:',
+              '',
+              '| Model ID | last_verified | Age (days) |',
+              '|---------:|---------------|------------:|',
+              ...stale.map(s => `| ${s.id} | ${s.last_verified} | ${s.ageDays} |`),
+              '',
+              'Action: Review sources and update last_verified with evidence links in PR.'
+            ].join('\n');
+            // Find existing open issue with same title
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+            const existing = issues.data.find(i => i.title === title);
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body
+              });
+              core.info(`Updated existing issue #${existing.number}`);
+            } else {
+              const created = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['mc','docs','maintenance']
+              });
+              core.info(`Created issue #${created.data.number}`);
+            }
+

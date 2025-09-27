@@ -1,0 +1,54 @@
+name: Publish Model Catalog Doc
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'model-catalog/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm i yaml@2
+      - name: Render catalog.md
+        run: |
+          node -e '
+          const fs=require("fs");
+          const YAML=require("yaml");
+          const p="model-catalog/catalog.yaml";
+          if(!fs.existsSync(p)){ process.exit(0); }
+          const cat=YAML.parse(fs.readFileSync(p,"utf8"));
+          let out="# IntelGraph Model Catalog\n\n";
+          for (const m of cat.models||[]) {
+            out+=`## ${m.id}\n**Vendor:** ${m.vendor} · **Family:** ${m.family} · **Last verified:** ${m.last_verified}\n\n`;
+            if (Array.isArray(m.capability_highlights) && m.capability_highlights.length) {
+              out += m.capability_highlights.map(x=>`- ${x}`).join("\n")+"\n\n";
+            }
+            if (m.defaults) { out += `**Defaults:** ${JSON.stringify(m.defaults)}\n\n`; }
+          }
+          fs.mkdirSync("docs/model-catalog",{recursive:true});
+          fs.writeFileSync("docs/model-catalog/catalog.md", out);
+          '
+      - name: Commit docs if changed
+        run: |
+          if ! git diff --quiet -- docs/model-catalog/catalog.md; then
+            git config user.email "actions@github.com"
+            git config user.name "github-actions"
+            git add docs/model-catalog/catalog.md
+            git commit -m "docs(mc): update generated Model Catalog doc"
+            git push
+          else
+            echo "No changes to publish."
+          fi
+
