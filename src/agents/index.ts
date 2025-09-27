@@ -6,6 +6,18 @@ import { exec } from 'child_process';
 
 const execAsync = promisify(exec);
 
+type AgentMode = 'ci' | 'pr' | 'dev' | 'plan';
+
+type CriticAnalysis = Awaited<ReturnType<CriticAgent['analyze']>>;
+
+interface PlanItem {
+  title: string;
+  priority: 'high' | 'medium' | 'low';
+  summary: string;
+  actions: string[];
+  relatedChecks?: string[];
+}
+
 export interface AgentOrchestrationResult {
   phase: 'planning' | 'implementation' | 'criticism' | 'fixing' | 'testing' | 'review';
   success: boolean;
@@ -27,37 +39,46 @@ export class AgentOrchestrator {
     this.reflectiveLoop = new ReflectiveLoop(projectRoot);
   }
 
-  async orchestrate(mode: 'ci' | 'pr' | 'dev' = 'ci'): Promise<AgentOrchestrationResult[]> {
+  async orchestrate(mode: AgentMode = 'ci'): Promise<AgentOrchestrationResult[]> {
     console.log(`🎭 Starting agent orchestration in ${mode} mode...`);
-    
+
     const results: AgentOrchestrationResult[] = [];
+    const planMode = mode === 'plan';
 
     try {
       // Phase 1: Planning (analyze current state)
       console.log('\n📋 Phase 1: Planning & Analysis');
       const planningResult = await this.runPhase('planning', async () => {
-        const criticResult = await this.critic.analyze();
+        const criticResult: CriticAnalysis = await this.critic.analyze();
         return {
           riskScore: criticResult.riskScore,
           shouldProceed: criticResult.shouldProceed,
           recommendations: criticResult.recommendations,
+          diffSummary: criticResult.diffSummary,
           staticChecks: criticResult.staticCheckResults.map(r => ({
             tool: r.tool,
             passed: r.passed,
-            issueCount: r.issues.length
-          }))
+            issueCount: r.issues.length,
+            errors: r.issues.filter(i => i.severity === 'error').length,
+            warnings: r.issues.filter(i => i.severity === 'warning').length
+          })),
+          plan: this.generateActionPlan(criticResult)
         };
       });
-      
+
       results.push(planningResult);
 
-      if (!planningResult.shouldProceed && mode === 'ci') {
+      if (planMode) {
+        console.log('\n🧭 Plan mode enabled: skipping automated remediation and verification phases.');
+      }
+
+      if (!planMode && !planningResult.results.shouldProceed && mode === 'ci') {
         console.log('🛑 High risk detected in CI mode - stopping pipeline');
         return results;
       }
 
       // Phase 2: Implementation (fixes)
-      if (planningResult.results.riskScore > 10) {
+      if (!planMode && planningResult.results.riskScore > 10) {
         console.log('\n🔧 Phase 2: Implementation & Fixing');
         const implementationResult = await this.runPhase('implementation', async () => {
           const loopResult = await this.reflectiveLoop.execute();
@@ -77,24 +98,26 @@ export class AgentOrchestrator {
           const testingResult = await this.runPhase('testing', async () => {
             return await this.runTestSuite(mode);
           });
-          
+
           results.push(testingResult);
         }
       }
 
       // Phase 4: Final Review
-      console.log('\n👀 Phase 4: Final Review');
-      const reviewResult = await this.runPhase('review', async () => {
-        const finalAnalysis = await this.critic.analyze();
-        return {
-          finalRiskScore: finalAnalysis.riskScore,
-          readyForMerge: finalAnalysis.shouldProceed,
-          finalRecommendations: finalAnalysis.recommendations,
-          gate: this.determineGate(finalAnalysis, mode)
-        };
-      });
-      
-      results.push(reviewResult);
+      if (!planMode) {
+        console.log('\n👀 Phase 4: Final Review');
+        const reviewResult = await this.runPhase('review', async () => {
+          const finalAnalysis = await this.critic.analyze();
+          return {
+            finalRiskScore: finalAnalysis.riskScore,
+            readyForMerge: finalAnalysis.shouldProceed,
+            finalRecommendations: finalAnalysis.recommendations,
+            gate: this.determineGate(finalAnalysis, mode)
+          };
+        });
+
+        results.push(reviewResult);
+      }
 
     } catch (error) {
       console.error('❌ Agent orchestration failed:', error);
@@ -111,19 +134,21 @@ export class AgentOrchestrator {
   }
 
   private async runPhase(
-    phase: AgentOrchestrationResult['phase'], 
+    phase: AgentOrchestrationResult['phase'],
     operation: () => Promise<any>
   ): Promise<AgentOrchestrationResult> {
     try {
       const results = await operation();
       const success = this.evaluatePhaseSuccess(phase, results);
-      
+      const shouldProceed =
+        typeof results?.shouldProceed === 'boolean' ? results.shouldProceed : success;
+
       return {
         phase,
         success,
         results,
-        shouldProceed: success,
-        nextPhase: this.getNextPhase(phase, success)
+        shouldProceed,
+        nextPhase: this.getNextPhase(phase, shouldProceed)
       };
     } catch (error) {
       return {
@@ -163,7 +188,7 @@ export class AgentOrchestrator {
     return phaseFlow[currentPhase];
   }
 
-  private async runTestSuite(mode: string): Promise<any> {
+  private async runTestSuite(mode: AgentMode): Promise<any> {
     const results = {
       testsPass: false,
       buildsPass: false,
@@ -225,9 +250,13 @@ export class AgentOrchestrator {
     return results;
   }
 
-  private determineGate(analysis: any, mode: string): string {
+  private determineGate(analysis: any, mode: AgentMode): string {
     const riskScore = analysis.riskScore;
-    
+
+    if (mode === 'plan') {
+      return 'planning-only';
+    }
+
     if (mode === 'ci') {
       if (riskScore <= 10) return 'auto-merge';
       if (riskScore <= 30) return 'auto-approve';
@@ -243,7 +272,198 @@ export class AgentOrchestrator {
     }
   }
 
-  private logOrchestrationSummary(results: AgentOrchestrationResult[], mode: string): void {
+  private generateActionPlan(analysis: CriticAnalysis): PlanItem[] {
+    const plan: PlanItem[] = [];
+
+    for (const result of analysis.staticCheckResults) {
+      const issues = Array.isArray(result.issues) ? result.issues : [];
+      const errors = issues.filter((issue: any) => issue.severity === 'error');
+      const warnings = issues.filter((issue: any) => issue.severity === 'warning');
+
+      if (errors.length === 0 && warnings.length === 0) {
+        continue;
+      }
+
+      const summaryParts: string[] = [];
+      if (errors.length) {
+        summaryParts.push(`${errors.length} error${errors.length === 1 ? '' : 's'}`);
+      }
+      if (warnings.length) {
+        summaryParts.push(`${warnings.length} warning${warnings.length === 1 ? '' : 's'}`);
+      }
+
+      const actions = [
+        `Review ${result.tool} findings and group them by root cause.`,
+      ];
+
+      if (errors.length) {
+        actions.push(
+          `Resolve ${errors.length === 1 ? 'the blocking error' : `${errors.length} blocking errors`} reported by ${result.tool}.`
+        );
+      }
+
+      if (warnings.length) {
+        actions.push(
+          `Address ${warnings.length === 1 ? 'the warning' : `${warnings.length} warnings`} to maintain quality.`
+        );
+      }
+
+      actions.push(`Re-run ${result.tool} to confirm the workspace is clean.`);
+
+      plan.push({
+        title: `Resolve ${result.tool} findings`,
+        priority: errors.length ? 'high' : 'medium',
+        summary: summaryParts.length
+          ? `${result.tool} reported ${summaryParts.join(' and ')}.`
+          : `${result.tool} identified follow-up work.`,
+        actions: this.dedupeList(actions),
+        relatedChecks: [result.tool]
+      });
+    }
+
+    const diff = analysis.diffSummary;
+
+    if (diff) {
+      const modules = Array.isArray(diff.affectedModules)
+        ? diff.affectedModules.filter(Boolean)
+        : [];
+      const highlightedModules = modules.slice(0, 5);
+      const modulesSummary = highlightedModules.length
+        ? ` Key modules: ${highlightedModules.join(', ')}${modules.length > highlightedModules.length ? ', ...' : ''}.`
+        : '';
+
+      const footprintSummary = `Touches ${diff.filesChanged} file${diff.filesChanged === 1 ? '' : 's'} with ${diff.linesAdded} additions and ${diff.linesRemoved} deletions (complexity: ${diff.complexity}).`;
+
+      plan.push({
+        title: 'Assess change impact footprint',
+        priority: diff.complexity === 'high' ? 'high' : diff.complexity === 'medium' ? 'medium' : 'low',
+        summary: footprintSummary + modulesSummary,
+        actions: [
+          'Review architectural and dependency impacts with the affected module owners.',
+          'Plan focused regression and smoke tests covering the changed surface area.',
+          'Document rollback and contingency steps in case issues surface post-deploy.'
+        ],
+        relatedChecks: highlightedModules
+      });
+
+      if (typeof diff.testCoverage === 'number' && diff.testCoverage < 70) {
+        plan.push({
+          title: 'Improve automated test coverage',
+          priority: diff.testCoverage < 50 ? 'high' : 'medium',
+          summary: `Estimated coverage is ${diff.testCoverage}%. Strengthen automated confidence before rollout.`,
+          actions: [
+            'Add unit and integration tests targeting the highest-risk paths.',
+            'Capture before/after coverage reports to demonstrate improvement.',
+            'Gate merge on the updated suites to ensure regressions are caught.'
+          ],
+          relatedChecks: ['tests']
+        });
+      }
+    }
+
+    const governanceActions = [
+      ...analysis.recommendations,
+      'Share this plan with reviewers and assign accountable owners for each item.',
+      'Schedule a follow-up review to confirm remediation items are complete.'
+    ];
+
+    if (!analysis.shouldProceed) {
+      governanceActions.unshift('Block merge until the high-risk findings are remediated and re-validated.');
+    }
+
+    plan.push({
+      title: 'Governance & readiness checkpoints',
+      priority: this.priorityFromRisk(analysis.riskScore),
+      summary: `Overall risk score ${analysis.riskScore}/100 – ${analysis.shouldProceed ? 'automation deems the change proceedable with mitigation.' : 'manual approval is required before proceeding.'}`,
+      actions: this.dedupeList(governanceActions),
+      relatedChecks: ['governance']
+    });
+
+    return plan;
+  }
+
+  private priorityFromRisk(riskScore: number): PlanItem['priority'] {
+    if (riskScore >= 70) return 'high';
+    if (riskScore >= 40) return 'medium';
+    return 'low';
+  }
+
+  private dedupeList(items: string[]): string[] {
+    return Array.from(new Set(items.filter(item => typeof item === 'string' && item.trim().length > 0)));
+  }
+
+  private logPlanDetails(planningResult?: AgentOrchestrationResult): void {
+    if (!planningResult || !planningResult.results) {
+      return;
+    }
+
+    const { results } = planningResult;
+
+    console.log('\n🧭 PLAN OVERVIEW');
+
+    if (typeof results.riskScore === 'number') {
+      console.log(`Risk Score: ${results.riskScore}`);
+    }
+
+    if (typeof results.shouldProceed === 'boolean') {
+      console.log(
+        `Auto-Proceed Recommendation: ${results.shouldProceed ? 'Proceed after mitigation' : 'Hold for manual approval'}`
+      );
+    }
+
+    if (results.diffSummary) {
+      const diff = results.diffSummary;
+      console.log(
+        `Change Footprint: ${diff.filesChanged} files, ${diff.linesAdded} additions, ${diff.linesRemoved} deletions (complexity: ${diff.complexity})`
+      );
+
+      if (Array.isArray(diff.affectedModules) && diff.affectedModules.length) {
+        const highlighted = diff.affectedModules.slice(0, 6);
+        console.log(
+          `Affected Modules: ${highlighted.join(', ')}${diff.affectedModules.length > highlighted.length ? ', ...' : ''}`
+        );
+      }
+
+      if (typeof diff.testCoverage === 'number') {
+        console.log(`Estimated Coverage: ${diff.testCoverage}%`);
+      }
+    }
+
+    if (Array.isArray(results.staticChecks) && results.staticChecks.length) {
+      console.log('\n🔎 Static Check Snapshot:');
+      results.staticChecks.forEach((check: any) => {
+        const status = check.passed ? '✅' : '⚠️';
+        const errorCount = check.errors ?? 0;
+        const warningCount = check.warnings ?? 0;
+        const summary = check.passed
+          ? 'clean'
+          : `${errorCount} error${errorCount === 1 ? '' : 's'}, ${warningCount} warning${warningCount === 1 ? '' : 's'}`;
+        console.log(`  ${status} ${check.tool}: ${summary}`);
+      });
+    }
+
+    const planItems: PlanItem[] = Array.isArray(results.plan) ? results.plan : [];
+
+    if (!planItems.length) {
+      console.log('\n✨ No follow-up actions required – all systems go.');
+      return;
+    }
+
+    console.log('\n🗺️  Action Plan:');
+    planItems.forEach((item, index) => {
+      const stepNumber = String(index + 1).padStart(2, '0');
+      console.log(`  ${stepNumber}. [${item.priority.toUpperCase()}] ${item.title}`);
+      console.log(`      ${item.summary}`);
+
+      if (Array.isArray(item.actions) && item.actions.length) {
+        item.actions.forEach(action => {
+          console.log(`      - ${action}`);
+        });
+      }
+    });
+  }
+
+  private logOrchestrationSummary(results: AgentOrchestrationResult[], mode: AgentMode): void {
     console.log('\n' + '='.repeat(70));
     console.log('🎭 AGENT ORCHESTRATION SUMMARY');
     console.log('='.repeat(70));
@@ -273,6 +493,11 @@ export class AgentOrchestrator {
       }
     });
 
+    if (mode === 'plan') {
+      const planningPhase = results.find(r => r.phase === 'planning');
+      this.logPlanDetails(planningPhase);
+    }
+
     // Final recommendation
     const lastResult = results[results.length - 1];
     if (lastResult.phase === 'review') {
@@ -292,10 +517,10 @@ export class AgentOrchestrator {
 }
 
 // CLI Interface
-export async function runAgentPipeline(mode: 'ci' | 'pr' | 'dev' = 'ci'): Promise<void> {
+export async function runAgentPipeline(mode: AgentMode = 'ci'): Promise<void> {
   const orchestrator = new AgentOrchestrator();
   const results = await orchestrator.orchestrate(mode);
-  
+
   // Exit with appropriate code for CI
   if (mode === 'ci') {
     const lastResult = results[results.length - 1];
