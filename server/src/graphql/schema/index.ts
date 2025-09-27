@@ -6,6 +6,7 @@ import aiModule from '../schema.ai.js';
 import annotationsModule from '../schema.annotations.js';
 import graphragTypesModule from '../types/graphragTypes.js';
 import { crystalTypeDefs } from '../schema.crystal.js';
+import { contractsTypeDefs } from '../contracts/typeDefs.ts';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
 const { graphTypeDefs } = graphModule as { graphTypeDefs: any };
@@ -33,6 +34,7 @@ const base = gql`
 export const typeDefs = [
   base,
   coreTypeDefs,
+  contractsTypeDefs,
   copilotTypeDefs,
   graphTypeDefs,
   graphragTypes,
