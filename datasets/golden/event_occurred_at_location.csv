@@ -1,0 +1,4 @@
+event_id,location_id,confidence,purpose_tags,provenance_ref
+EVT-7001,LOC-ATL,0.95,security-monitoring|operations,s3csv/relationships/2025-09-01T15:30:00Z
+EVT-7002,LOC-FRA,0.90,operations|compliance,s3csv/relationships/2025-09-01T15:30:00Z
+EVT-7003,LOC-SIN,0.88,security-monitoring|analytics,s3csv/relationships/2025-09-01T15:30:00Z
