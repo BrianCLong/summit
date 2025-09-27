@@ -1,0 +1,24 @@
+{
+  "coverage": {
+    "global": 0.93,
+    "threshold": 0.9,
+    "modules": {
+      "circuitBreaker": {"actual": 0.97, "target": 0.95},
+      "policy": {"actual": 0.92, "target": 0.9}
+    }
+  },
+  "sbom": {
+    "generated": true,
+    "licenses": ["Apache-2.0", "MIT", "BSD-3-Clause"]
+  },
+  "chaos": {
+    "lastRunHours": 24
+  },
+  "load": {
+    "p95": 290,
+    "target": 300
+  },
+  "policyBundle": {
+    "version": "2025.09.01"
+  }
+}

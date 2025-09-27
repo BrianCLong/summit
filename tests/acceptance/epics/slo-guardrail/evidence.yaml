@@ -1,0 +1,16 @@
+artefacts:
+  coverage:
+    path: server/coverage/lcov.info
+    min_line: 0.9
+  health_playwright:
+    path: server/tests/e2e/.playwright-report
+    description: Health SLO Playwright evidence bundle
+  load_summary:
+    path: tests/load/output/health-p95-summary.json
+    slo: p95 <= 300
+  chaos_result:
+    path: chaos/results/control-plane-latency.json
+    description: Litmus chaos verdict export
+  sbom:
+    path: sbom.json
+    description: CycloneDX SBOM captured during gate run
