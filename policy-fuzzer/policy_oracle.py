@@ -4,215 +4,24 @@ from datetime import datetime, timedelta
 import re
 from attack_grammars import ATTACK_GRAMMARS
 from governance_layers import _resolve_field
+from policy_parser import generate_policy_from_definition # Import the new function
+
+def _apply_timezone_shift_to_datetime(dt, timezone_shift_str):
+    if timezone_shift_str:
+        sign = timezone_shift_str[0]
+        hours = int(timezone_shift_str[1:3])
+        minutes = int(timezone_shift_str[4:6])
+        offset = timedelta(hours=hours, minutes=minutes)
+        if sign == '-':
+            return dt + offset
+        else:
+            return dt - offset
+    return dt
 
 class PolicyOracle:
-    def __init__(self):
-        self.rules = self._define_rules()
-
-    def _define_rules(self):
-        """
-        Defines the rules for policy compliance.
-        Each rule is a dictionary with:
-        - 'layer': The governance layer it applies to (e.g., 'consent', 'geo').
-        - 'condition': A callable that takes policy and query and returns True if the condition is met.
-        - 'expected_compliance': The expected boolean outcome if the condition is met.
-        """
-        rules = []
-
-        # Consent Rules
-        rules.append({
-            'layer': 'consent',
-            'condition': lambda p, q: p.get('consent') == 'user_data' and \
-                                      _resolve_field(q, 'data') != 'user_data' and \
-                                      _resolve_field(q, 'data') not in ATTACK_GRAMMARS['synonym_dodges'].get('user_data', []),
-            'expected_compliance': False
-        })
-        rules.append({
-            'layer': 'consent',
-            'condition': lambda p, q: p.get('consent') == 'user_data' and \
-                                      (_resolve_field(q, 'data') == 'user_data' or \
-                                       _resolve_field(q, 'data') in ATTACK_GRAMMARS['synonym_dodges'].get('user_data', [])),
-            'expected_compliance': True
-        })
-
-        # Geo Rules
-        rules.append({
-            'layer': 'geo',
-            'condition': lambda p, q: p.get('geo') == 'US' and _resolve_field(q, 'location') != 'US',
-            'expected_compliance': False
-        })
-        rules.append({
-            'layer': 'geo',
-            'condition': lambda p, q: p.get('geo') == 'US' and _resolve_field(q, 'location') == 'US',
-            'expected_compliance': True
-        })
-        rules.append({
-            'layer': 'geo',
-            'condition': lambda p, q: p.get('geo') == 'EU' and _resolve_field(q, 'location') != 'EU',
-            'expected_compliance': False
-        })
-        rules.append({
-            'layer': 'geo',
-            'condition': lambda p, q: p.get('geo') == 'EU' and _resolve_field(q, 'location') == 'EU',
-            'expected_compliance': True
-        })
-
-        # License Rules
-        rules.append({
-            'layer': 'licenses',
-            'condition': lambda p, q: p.get('license') == 'license_A' and \
-                                       _resolve_field(q, 'license') != 'license_A' and \
-                                       _resolve_field(q, 'license') not in ATTACK_GRAMMARS['synonym_dodges'].get('license_A', []),
-            'expected_compliance': False
-        })
-        rules.append({
-            'layer': 'licenses',
-            'condition': lambda p, q: p.get('license') == 'license_A' and \
-                                       (_resolve_field(q, 'license') == 'license_A' or \
-                                        _resolve_field(q, 'license') in ATTACK_GRAMMARS['synonym_dodges'].get('license_A', [])),
-            'expected_compliance': True
-        })
-
-        # Retention Rules
-        rules.append({
-            'layer': 'retention',
-            'condition': lambda p, q: p.get('retention') == '30d' and \
-                                       _resolve_field(q, 'retention') is not None and \
-                                       _resolve_field(q, 'retention') != '30d' and \
-                                       not any(re.match(r, str(_resolve_field(q, 'retention'))) for r in ATTACK_GRAMMARS['regex_dodges'].get('retention_period', [])) and \
-                                       str(_resolve_field(q, 'retention')) not in ATTACK_GRAMMARS['data_type_mismatches'].get('retention_period', []),
-            'expected_compliance': False
-        })
-        rules.append({
-            'layer': 'retention',
-            'condition': lambda p, q: p.get('retention') == '30d' and \
-                                       (_resolve_field(q, 'retention') == '30d' or \
-                                        any(re.match(r, str(_resolve_field(q, 'retention'))) for r in ATTACK_GRAMMARS['regex_dodges'].get('retention_period', [])) or \
-                                        str(_resolve_field(q, 'retention')) in ATTACK_GRAMMARS['data_type_mismatches'].get('retention_period', [])),
-            'expected_compliance': True
-        })
-
-        # Time Window Rules
-        rules.append({
-            'layer': 'time_window',
-            'condition': lambda p, q: all([p.get('start_date'), p.get('end_date'), _resolve_field(q, 'access_date')]) and \
-                                       (str(_resolve_field(q, 'access_date')) in ATTACK_GRAMMARS['data_type_mismatches'].get('access_date', []) or \
-                                       not (datetime.fromisoformat(p['start_date']) <= _apply_timezone_shift(datetime.fromisoformat(_resolve_field(q, 'access_date')), q) <= datetime.fromisoformat(p['end_date']))),
-            'expected_compliance': False
-        })
-        rules.append({
-            'layer': 'time_window',
-            'condition': lambda p, q: all([p.get('start_date'), p.get('end_date'), _resolve_field(q, 'access_date')]) and \
-                                       (str(_resolve_field(q, 'access_date')) not in ATTACK_GRAMMARS['data_type_mismatches'].get('access_date', []) and \
-                                       (datetime.fromisoformat(p['start_date']) <= _apply_timezone_shift(datetime.fromisoformat(_resolve_field(q, 'access_date')), q) <= datetime.fromisoformat(p['end_date']))),
-            'expected_compliance': True
-        })
-
-class PolicyOracle:
-    def __init__(self):
-        self.rules = self._define_rules()
+    def __init__(self, policy_definition):
+        self.policy_evaluator = generate_policy_from_definition(policy_definition)
         self.properties = self._define_properties()
-
-    def _define_rules(self):
-        """
-        Defines the rules for policy compliance.
-        Each rule is a dictionary with:
-        - 'layer': The governance layer it applies to (e.g., 'consent', 'geo').
-        - 'condition': A callable that takes policy and query and returns True if the condition is met.
-        - 'expected_compliance': The expected boolean outcome if the condition is met.
-        """
-        rules = []
-
-        # Consent Rules
-        rules.append({
-            'layer': 'consent',
-            'condition': lambda p, q: p.get('consent') == 'user_data' and \
-                                      _resolve_field(q, 'data') != 'user_data' and \
-                                      _resolve_field(q, 'data') not in ATTACK_GRAMMARS['synonym_dodges'].get('user_data', []),
-            'expected_compliance': False
-        })
-        rules.append({
-            'layer': 'consent',
-            'condition': lambda p, q: p.get('consent') == 'user_data' and \
-                                      (_resolve_field(q, 'data') == 'user_data' or \
-                                       _resolve_field(q, 'data') in ATTACK_GRAMMARS['synonym_dodges'].get('user_data', [])),
-            'expected_compliance': True
-        })
-
-        # Geo Rules
-        rules.append({
-            'layer': 'geo',
-            'condition': lambda p, q: p.get('geo') == 'US' and _resolve_field(q, 'location') != 'US',
-            'expected_compliance': False
-        })
-        rules.append({
-            'layer': 'geo',
-            'condition': lambda p, q: p.get('geo') == 'US' and _resolve_field(q, 'location') == 'US',
-            'expected_compliance': True
-        })
-        rules.append({
-            'layer': 'geo',
-            'condition': lambda p, q: p.get('geo') == 'EU' and _resolve_field(q, 'location') != 'EU',
-            'expected_compliance': False
-        })
-        rules.append({
-            'layer': 'geo',
-            'condition': lambda p, q: p.get('geo') == 'EU' and _resolve_field(q, 'location') == 'EU',
-            'expected_compliance': True
-        })
-
-        # License Rules
-        rules.append({
-            'layer': 'licenses',
-            'condition': lambda p, q: p.get('license') == 'license_A' and \
-                                       _resolve_field(q, 'license') != 'license_A' and \
-                                       _resolve_field(q, 'license') not in ATTACK_GRAMMARS['synonym_dodges'].get('license_A', []),
-            'expected_compliance': False
-        })
-        rules.append({
-            'layer': 'licenses',
-            'condition': lambda p, q: p.get('license') == 'license_A' and \
-                                       (_resolve_field(q, 'license') == 'license_A' or \
-                                        _resolve_field(q, 'license') in ATTACK_GRAMMARS['synonym_dodges'].get('license_A', [])),
-            'expected_compliance': True
-        })
-
-        # Retention Rules
-        rules.append({
-            'layer': 'retention',
-            'condition': lambda p, q: p.get('retention') == '30d' and \
-                                       _resolve_field(q, 'retention') is not None and \
-                                       _resolve_field(q, 'retention') != '30d' and \
-                                       not any(re.match(r, str(_resolve_field(q, 'retention'))) for r in ATTACK_GRAMMARS['regex_dodges'].get('retention_period', [])) and \
-                                       str(_resolve_field(q, 'retention')) not in ATTACK_GRAMMARS['data_type_mismatches'].get('retention_period', []),
-            'expected_compliance': False
-        })
-        rules.append({
-            'layer': 'retention',
-            'condition': lambda p, q: p.get('retention') == '30d' and \
-                                       (_resolve_field(q, 'retention') == '30d' or \
-                                        any(re.match(r, str(_resolve_field(q, 'retention'))) for r in ATTACK_GRAMMARS['regex_dodges'].get('retention_period', [])) or \
-                                        str(_resolve_field(q, 'retention')) in ATTACK_GRAMMARS['data_type_mismatches'].get('retention_period', [])),
-            'expected_compliance': True
-        })
-
-        # Time Window Rules
-        rules.append({
-            'layer': 'time_window',
-            'condition': lambda p, q: all([p.get('start_date'), p.get('end_date'), _resolve_field(q, 'access_date')]) and \
-                                       (str(_resolve_field(q, 'access_date')) in ATTACK_GRAMMARS['data_type_mismatches'].get('access_date', []) or \
-                                       not (datetime.fromisoformat(p['start_date']) <= _apply_timezone_shift(datetime.fromisoformat(_resolve_field(q, 'access_date')), q) <= datetime.fromisoformat(p['end_date']))),
-            'expected_compliance': False
-        })
-        rules.append({
-            'layer': 'time_window',
-            'condition': lambda p, q: all([p.get('start_date'), p.get('end_date'), _resolve_field(q, 'access_date')]) and \
-                                       (str(_resolve_field(q, 'access_date')) not in ATTACK_GRAMMARS['data_type_mismatches'].get('access_date', []) and \
-                                       (datetime.fromisoformat(p['start_date']) <= _apply_timezone_shift(datetime.fromisoformat(_resolve_field(q, 'access_date')), q) <= datetime.fromisoformat(p['end_date']))),
-            'expected_compliance': True
-        })
-
-        return rules
 
     def _define_properties(self):
         """Defines high-level properties that compliant policy-query pairs should satisfy."""
@@ -236,18 +45,13 @@ class PolicyOracle:
         return properties
 
     def determine_expected_compliance(self, policy, query):
-        """Determines the expected compliance of a policy-query pair based on defined rules and properties."""
-        # First, determine compliance based on granular rules
-        is_compliant_by_rules = True
-        for rule in self.rules:
-            if rule['condition'](policy, query):
-                is_compliant_by_rules = rule['expected_compliance']
-                break # Apply the first matching rule
+        """Determines the expected compliance of a policy-query pair based on the policy evaluator and properties."""
+        # First, determine compliance based on the policy evaluator
+        is_compliant_by_evaluator = self.policy_evaluator(policy, query)
 
-        # Then, check if any properties are violated, regardless of granular rules
+        # Then, check if any properties are violated
         for prop in self.properties:
-            if not prop['check'](policy, query, is_compliant_by_rules):
+            if not prop['check'](policy, query, is_compliant_by_evaluator):
                 return False # Property violation means non-compliant
 
-        return is_compliant_by_rules # Return the result from granular rules if no property is violated
-
+        return is_compliant_by_evaluator # Return the result from the evaluator if no property is violated

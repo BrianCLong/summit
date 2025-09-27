@@ -1,8 +1,12 @@
+from policy_generator import generate_policy, SAMPLE_POLICY_DEFINITION
+from query_generator import generate_query
+from governance_layers import check_consent, check_licenses, check_geo, check_retention, check_time_window, _resolve_field, COVERAGE
 from reporter import generate_reports
 from canaries import CANARIES
 from attack_grammars import ATTACK_GRAMMARS
 from datetime import datetime
 from metamorphic_tester import MetamorphicTester
+from policy_oracle import PolicyOracle
 
 def main():
     """Main function to run the policy fuzzer."""
@@ -17,7 +21,7 @@ def main():
 
     print("Running policy-fuzzer...")
     failing_cases = []
-    oracle = PolicyOracle()
+    oracle = PolicyOracle(SAMPLE_POLICY_DEFINITION)
     metamorphic_tester = MetamorphicTester(oracle)
 
     # Test with canaries
