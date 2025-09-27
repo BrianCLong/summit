@@ -21,6 +21,8 @@ coverage
 client/dist
 server/dist
 packages/**/dist
+!packages/rsr/dist/
+!packages/rsr/dist/**
 client/tsconfig.tsbuildinfo
 **/tsconfig.tsbuildinfo
 **/tsconfig.test.tsbuildinfo
