@@ -1,0 +1,16 @@
+{
+  "name": "@summit/osrp-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "vitest run",
+    "dev": "ts-node src/index.ts fixtures/rollout_success_manifest.json"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}

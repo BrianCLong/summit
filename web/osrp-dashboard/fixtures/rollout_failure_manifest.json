@@ -1,0 +1,106 @@
+{
+  "version": "1.0.0",
+  "release": "osrp-demo",
+  "plannedAt": "2025-01-02T00:00:00Z",
+  "generatedAt": "2025-01-02T00:00:00Z",
+  "stages": [
+    {
+      "name": "canary",
+      "trafficPercent": 10,
+      "status": "approved",
+      "observations": {
+        "blockRate": 0.01,
+        "canaryCatchRate": 0.9756,
+        "latencyP95Ms": 210,
+        "businessKpi": 1.002
+      }
+    },
+    {
+      "name": "ramp",
+      "trafficPercent": 35,
+      "status": "halted",
+      "observations": {
+        "blockRate": 0.0457,
+        "canaryCatchRate": 0.75,
+        "latencyP95Ms": 280,
+        "businessKpi": 0.952
+      }
+    }
+  ],
+  "guardrails": [
+    {
+      "stage": "canary",
+      "guardrail": "block-rate",
+      "category": "policy",
+      "status": "pass",
+      "value": 0.01,
+      "threshold": 0.02,
+      "probability": 3.2572794339547073e-7
+    },
+    {
+      "stage": "canary",
+      "guardrail": "canary-catch-rate",
+      "category": "policy",
+      "status": "pass",
+      "value": 0.9756,
+      "threshold": 0.94,
+      "probability": 0.07372118934642799
+    },
+    {
+      "stage": "canary",
+      "guardrail": "latency-p95",
+      "category": "product",
+      "status": "pass",
+      "value": 210,
+      "threshold": 250
+    },
+    {
+      "stage": "canary",
+      "guardrail": "business-kpi",
+      "category": "product",
+      "status": "pass",
+      "value": 1.002,
+      "threshold": 0.98
+    },
+    {
+      "stage": "ramp",
+      "guardrail": "block-rate",
+      "category": "policy",
+      "status": "breach",
+      "value": 0.0457,
+      "threshold": 0.02,
+      "probability": 1
+    },
+    {
+      "stage": "ramp",
+      "guardrail": "canary-catch-rate",
+      "category": "policy",
+      "status": "breach",
+      "value": 0.75,
+      "threshold": 0.94,
+      "probability": 0.9999999999924456
+    },
+    {
+      "stage": "ramp",
+      "guardrail": "latency-p95",
+      "category": "product",
+      "status": "breach",
+      "value": 280,
+      "threshold": 250
+    },
+    {
+      "stage": "ramp",
+      "guardrail": "business-kpi",
+      "category": "product",
+      "status": "breach",
+      "value": 0.952,
+      "threshold": 0.98
+    }
+  ],
+  "autoRevert": {
+    "enabled": true,
+    "reason": "block rate 0.0457 breached policy threshold 0.0200; canary catch rate 0.7500 below policy minimum 0.9400; latency p95 280.00ms exceeds SLO 250.00ms; business KPI 0.9520 below guardrail 0.9800",
+    "trigger": "policy-and-product-violation"
+  },
+  "signature": "nqlJ1vsW/urCJa63plIFet6J8WfbUHn/XuPsTFtIEM8nCDGUkZPYygRJy7/Zr3i3kSTosZv8bbb8+W0owXw1Bg=="
+}

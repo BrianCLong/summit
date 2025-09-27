@@ -1,0 +1,10 @@
+{
+  "manifestVersion": "1.0.0",
+  "blockRateThreshold": 0.02,
+  "blockRateConfidence": 0.9,
+  "minCanaryCatchRate": 0.94,
+  "canaryConfidence": 0.9,
+  "maxLatencyP95": 250,
+  "minBusinessKpi": 0.98,
+  "signingKeyPath": "../fixtures/test-ed25519-priv.key"
+}

@@ -1,0 +1,150 @@
+{
+  "version": "1.0.0",
+  "release": "osrp-demo",
+  "plannedAt": "2025-01-01T00:00:00Z",
+  "generatedAt": "2025-01-01T00:00:00Z",
+  "stages": [
+    {
+      "name": "canary",
+      "trafficPercent": 10,
+      "status": "approved",
+      "observations": {
+        "blockRate": 0.01,
+        "canaryCatchRate": 0.9592,
+        "latencyP95Ms": 200,
+        "businessKpi": 0.991
+      }
+    },
+    {
+      "name": "ramp",
+      "trafficPercent": 50,
+      "status": "approved",
+      "observations": {
+        "blockRate": 0.007,
+        "canaryCatchRate": 0.94,
+        "latencyP95Ms": 210,
+        "businessKpi": 1.008
+      }
+    },
+    {
+      "name": "ga",
+      "trafficPercent": 100,
+      "status": "approved",
+      "observations": {
+        "blockRate": 0.007,
+        "canaryCatchRate": 0.94,
+        "latencyP95Ms": 225,
+        "businessKpi": 1.015
+      }
+    }
+  ],
+  "guardrails": [
+    {
+      "stage": "canary",
+      "guardrail": "block-rate",
+      "category": "policy",
+      "status": "pass",
+      "value": 0.01,
+      "threshold": 0.02,
+      "probability": 1.295178264637542e-8
+    },
+    {
+      "stage": "canary",
+      "guardrail": "canary-catch-rate",
+      "category": "policy",
+      "status": "pass",
+      "value": 0.9592,
+      "threshold": 0.94,
+      "probability": 0.21849583922551583
+    },
+    {
+      "stage": "canary",
+      "guardrail": "latency-p95",
+      "category": "product",
+      "status": "pass",
+      "value": 200,
+      "threshold": 250
+    },
+    {
+      "stage": "canary",
+      "guardrail": "business-kpi",
+      "category": "product",
+      "status": "pass",
+      "value": 0.991,
+      "threshold": 0.98
+    },
+    {
+      "stage": "ramp",
+      "guardrail": "block-rate",
+      "category": "policy",
+      "status": "pass",
+      "value": 0.007,
+      "threshold": 0.02,
+      "probability": 1.1102230246251565e-16
+    },
+    {
+      "stage": "ramp",
+      "guardrail": "canary-catch-rate",
+      "category": "policy",
+      "status": "pass",
+      "value": 0.94,
+      "threshold": 0.94,
+      "probability": 0.5175942462592917
+    },
+    {
+      "stage": "ramp",
+      "guardrail": "latency-p95",
+      "category": "product",
+      "status": "pass",
+      "value": 210,
+      "threshold": 250
+    },
+    {
+      "stage": "ramp",
+      "guardrail": "business-kpi",
+      "category": "product",
+      "status": "pass",
+      "value": 1.008,
+      "threshold": 0.98
+    },
+    {
+      "stage": "ga",
+      "guardrail": "block-rate",
+      "category": "policy",
+      "status": "pass",
+      "value": 0.007,
+      "threshold": 0.02,
+      "probability": 1.1102230246251565e-16
+    },
+    {
+      "stage": "ga",
+      "guardrail": "canary-catch-rate",
+      "category": "policy",
+      "status": "pass",
+      "value": 0.94,
+      "threshold": 0.94,
+      "probability": 0.5143191493644752
+    },
+    {
+      "stage": "ga",
+      "guardrail": "latency-p95",
+      "category": "product",
+      "status": "pass",
+      "value": 225,
+      "threshold": 250
+    },
+    {
+      "stage": "ga",
+      "guardrail": "business-kpi",
+      "category": "product",
+      "status": "pass",
+      "value": 1.015,
+      "threshold": 0.98
+    }
+  ],
+  "autoRevert": {
+    "enabled": false,
+    "trigger": "none"
+  },
+  "signature": "kq6tHLG9T2mvjXZeNA/ld/76eBRJYbHWg7poHjxVpNJfrYEkH9Z1PIN3NdwZEioPUXbAvPv6hY4rgwnRvTV1CQ=="
+}
