@@ -5,6 +5,7 @@ import graphModule from '../schema.graphops.js';
 import aiModule from '../schema.ai.js';
 import annotationsModule from '../schema.annotations.js';
 import graphragTypesModule from '../types/graphragTypes.js';
+import graphMetricsModule from '../schema.graphMetrics.js';
 import { crystalTypeDefs } from '../schema.crystal.js';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
@@ -12,6 +13,8 @@ const { graphTypeDefs } = graphModule as { graphTypeDefs: any };
 const { aiTypeDefs } = aiModule as { aiTypeDefs: any };
 const { annotationsTypeDefs } = annotationsModule as { annotationsTypeDefs: any };
 const graphragTypes = (graphragTypesModule as any).default || graphragTypesModule;
+const graphMetricsTypeDefs =
+  (graphMetricsModule as any).graphMetricsTypeDefs || (graphMetricsModule as any).default || graphMetricsModule;
 
 const base = gql`
   scalar JSON
@@ -35,6 +38,7 @@ export const typeDefs = [
   coreTypeDefs,
   copilotTypeDefs,
   graphTypeDefs,
+  graphMetricsTypeDefs,
   graphragTypes,
   aiTypeDefs,
   annotationsTypeDefs,
