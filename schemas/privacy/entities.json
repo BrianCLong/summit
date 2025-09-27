@@ -1,0 +1,64 @@
+{
+  "entities": [
+    {
+      "entity": "user_profile",
+      "table": "users",
+      "primaryKey": "id",
+      "primaryKeyType": "uuid",
+      "timestampColumn": "updated_at",
+      "subjectKey": "id",
+      "sensitivity": "pii",
+      "dataCategories": ["contact", "account"],
+      "defaultRetentionTier": "short-30d",
+      "retentionLabelColumn": "retention_label",
+      "retentionExpiresColumn": "retention_expires_at",
+      "tombstoneColumn": "tombstoned_at",
+      "anonymizeFields": ["email", "username", "first_name", "last_name"],
+      "description": "Primary user directory record containing direct identifiers and account metadata."
+    },
+    {
+      "entity": "user_session",
+      "table": "user_sessions",
+      "primaryKey": "id",
+      "primaryKeyType": "uuid",
+      "timestampColumn": "created_at",
+      "subjectKey": "user_id",
+      "sensitivity": "pii",
+      "dataCategories": ["session", "token"],
+      "defaultRetentionTier": "short-30d",
+      "retentionLabelColumn": "retention_label",
+      "retentionExpiresColumn": "retention_expires_at",
+      "tombstoneColumn": "tombstoned_at",
+      "description": "Opaque refresh tokens bound to user identity; retained for revocation checks only."
+    },
+    {
+      "entity": "audit_log",
+      "table": "audit_logs",
+      "primaryKey": "id",
+      "primaryKeyType": "uuid",
+      "timestampColumn": "created_at",
+      "sensitivity": "internal",
+      "dataCategories": ["audit"],
+      "defaultRetentionTier": "short-30d",
+      "retentionLabelColumn": "retention_label",
+      "retentionExpiresColumn": "retention_expires_at",
+      "tombstoneColumn": "tombstoned_at",
+      "description": "Immutable access trail used for compliance attestations and incident response."
+    },
+    {
+      "entity": "analysis_result",
+      "table": "analysis_results",
+      "primaryKey": "id",
+      "primaryKeyType": "uuid",
+      "timestampColumn": "created_at",
+      "subjectKey": "investigation_id",
+      "sensitivity": "internal",
+      "dataCategories": ["analytics"],
+      "defaultRetentionTier": "standard-365d",
+      "retentionLabelColumn": "retention_label",
+      "retentionExpiresColumn": "retention_expires_at",
+      "tombstoneColumn": "tombstoned_at",
+      "description": "Derived analytics artifacts used for investigations and reporting."
+    }
+  ]
+}
