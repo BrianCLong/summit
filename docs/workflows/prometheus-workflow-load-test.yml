@@ -1,0 +1,60 @@
+# Prometheus configuration for collecting metrics during Argo Workflow load tests.
+# Scrapes K6 metrics, Argo Workflow controller, and the workflow-engine service.
+
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'k6'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 'k6:6565'
+        labels:
+          service: 'k6-load-test'
+          component: 'load-generator'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'k6-runner'
+
+  - job_name: 'argo-workflows-controller'
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - 'argo-workflows-controller:9090'
+        labels:
+          namespace: 'argo'
+          service: 'argo-workflows-controller'
+
+  - job_name: 'workflow-engine'
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - 'workflow-engine:8080'
+        labels:
+          namespace: 'argo'
+          service: 'workflow-engine'
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'go_gc_duration_seconds.*'
+        action: drop
+      - source_labels: [__name__]
+        regex: 'process_(virtual_memory_bytes|open_fds)'
+        action: keep
+
+remote_write:
+  - url: '${PROM_REMOTE_WRITE_URL:http://prometheus:9090/api/v1/write}'
+    # Optional basic auth for remote storage or Thanos
+    basic_auth:
+      username: '${PROM_REMOTE_WRITE_USERNAME:}'
+      password: '${PROM_REMOTE_WRITE_PASSWORD:}'
+    queue_config:
+      max_samples_per_send: 2000
+      batch_send_deadline: 10s
+      min_backoff: 1s
+      max_backoff: 30s
