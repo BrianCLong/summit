@@ -1,0 +1,93 @@
+{
+  "signing_secret": "bench-secret",
+  "datasets": [
+    {
+      "id": "dataset-a",
+      "size_gb": 120,
+      "tenants": ["tenant-1"],
+      "replica_count": 2
+    },
+    {
+      "id": "dataset-b",
+      "size_gb": 80,
+      "tenants": ["tenant-2"]
+    }
+  ],
+  "regions": [
+    {
+      "id": "us-east-1",
+      "jurisdiction": "US",
+      "storage_cost_per_gb": 0.023,
+      "egress_cost_per_gb": 0.09
+    },
+    {
+      "id": "eu-west-1",
+      "jurisdiction": "EU",
+      "storage_cost_per_gb": 0.025,
+      "egress_cost_per_gb": 0.085
+    },
+    {
+      "id": "ap-south-1",
+      "jurisdiction": "IN",
+      "storage_cost_per_gb": 0.02,
+      "egress_cost_per_gb": 0.11
+    }
+  ],
+  "request_profiles": [
+    {
+      "id": "app-us",
+      "region": "us-east-1",
+      "latency_slo_ms": 120,
+      "demand_gb_per_dataset": {
+        "dataset-a": 60,
+        "dataset-b": 20
+      }
+    },
+    {
+      "id": "app-eu",
+      "region": "eu-west-1",
+      "latency_slo_ms": 80,
+      "demand_gb_per_dataset": {
+        "dataset-a": 40,
+        "dataset-b": 30
+      }
+    },
+    {
+      "id": "app-apac",
+      "region": "ap-south-1",
+      "latency_slo_ms": 180,
+      "demand_gb_per_dataset": {
+        "dataset-a": 10
+      }
+    }
+  ],
+  "residency_rules": [
+    {
+      "dataset_id": "dataset-a",
+      "tenant_id": "tenant-1",
+      "allowed_regions": ["us-east-1", "eu-west-1"]
+    },
+    {
+      "dataset_id": "dataset-b",
+      "tenant_id": "tenant-2",
+      "allowed_regions": ["eu-west-1"]
+    }
+  ],
+  "latency_matrix_ms": {
+    "us-east-1": {
+      "us-east-1": 30,
+      "eu-west-1": 90,
+      "ap-south-1": 180
+    },
+    "eu-west-1": {
+      "us-east-1": 95,
+      "eu-west-1": 40,
+      "ap-south-1": 200
+    },
+    "ap-south-1": {
+      "us-east-1": 190,
+      "eu-west-1": 210,
+      "ap-south-1": 35
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "created_at": "2025-09-27T01:44:02.355127+00:00",
+  "inputs_digest": "49bb27aac3762764a0496c2aabfddcba42c22065da6fca3623b84e94f4d416f9",
+  "objective_cost": 21.635,
+  "placements": {
+    "dataset-a": [
+      "eu-west-1",
+      "us-east-1"
+    ],
+    "dataset-b": [
+      "eu-west-1"
+    ]
+  },
+  "plan_id": "86afe1e939186b3897f97bbd609a2a7ea093d1e696f32392f37cd1f9364f22a4",
+  "signature": {
+    "algorithm": "HS256",
+    "value": "12f8c631531034d2b1193a856c0c3fdb8b0c05b53b806a97dfd573c3dbb348fd"
+  },
+  "solver_status": "Optimal"
+}
