@@ -1,0 +1,39 @@
+{
+  "name": "@summit/srpl",
+  "version": "0.1.0",
+  "description": "Safe Retrieval Pattern Library with ESLint plugin for approved data access macros",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "test": "vitest run",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "sql",
+    "lint",
+    "macro",
+    "security"
+  ],
+  "author": "Summit",
+  "license": "Apache-2.0",
+  "peerDependencies": {
+    "eslint": "^9.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/utils": "^8.44.0",
+    "@vitest/coverage-v8": "^2.1.4",
+    "eslint": "^9.36.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.4",
+    "@typescript-eslint/parser": "^8.44.0",
+    "@types/node": "^20.14.9"
+  }
+}
