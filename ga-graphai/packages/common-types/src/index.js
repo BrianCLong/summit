@@ -241,3 +241,18 @@ export function normalizeLatency(latency) {
   }
   return { p50, p95 };
 }
+
+export const MODEL_ALLOWLIST = [
+  "gpt-4.1-mini",
+  "claude-3.5-sonnet"
+];
+
+export const PURPOSE_ALLOWLIST = [
+  "investigation",
+  "threat-intel",
+  "fraud-risk",
+  "t&s",
+  "benchmarking",
+  "training",
+  "demo"
+];

@@ -9,6 +9,7 @@ import { ModelRegistry } from './adapters/registry.js';
 import { schema, buildRoot } from './graphql/schema.js';
 import { observePolicyDeny, observeSuccess, registry as metricsRegistry } from './metrics.js';
 import { InMemoryLedger, buildEvidencePayload } from 'prov-ledger';
+import { PromptContextAttributionReporter } from './pcar.js';
 
 const ALLOWED_PURPOSES = new Set([
   'investigation',
@@ -117,6 +118,7 @@ export function createApp(options = {}) {
   const policyEngine = options.policyEngine ?? PolicyEngine.fromFile(policyPath);
   const modelRegistry = options.modelRegistry ?? new ModelRegistry();
   const ledger = options.ledger ?? new InMemoryLedger();
+  const pcar = options.pcar ?? new PromptContextAttributionReporter(options.pcarOptions);
 
   const app = express();
   app.use(express.json({ limit: '1mb' }));
@@ -233,6 +235,73 @@ export function createApp(options = {}) {
     }
 
     const artifacts = buildGenerateArtifacts(input, adapterResult, decision, evaluation);
+    let attributionBundle;
+    if (pcar) {
+      const retrievalChunks = attachments.map((attachment, index) => {
+        const id = attachment.id ?? attachment.uri ?? `attachment-${index + 1}`;
+        const snippet = typeof attachment.content === 'string' && attachment.content.trim().length > 0
+          ? attachment.content
+          : typeof attachment.snippet === 'string'
+            ? attachment.snippet
+            : '';
+        const tags = Array.isArray(attachment.tags) ? attachment.tags : [];
+        const mustInclude = attachment.mustInclude === true || (Array.isArray(tags) && tags.includes('must-include'));
+        return {
+          id,
+          label: attachment.title ?? id,
+          content: snippet,
+          mustInclude,
+        };
+      });
+      const promptSegments = [
+        { id: 'objective', role: 'user', content: input.objective ?? '', mustInclude: true },
+        { id: 'purpose', role: 'system', content: `purpose:${context.purpose}`, mustInclude: false },
+      ];
+      if (decision.caps) {
+        promptSegments.push({
+          id: 'caps',
+          role: 'system',
+          content: `caps:${JSON.stringify(decision.caps)}`,
+          mustInclude: false,
+        });
+      }
+      if (input.language) {
+        promptSegments.push({
+          id: 'language',
+          role: 'system',
+          content: `language:${input.language}`,
+          mustInclude: false,
+        });
+      }
+      const generator = async ({ retrievalChunks: altChunks = retrievalChunks, promptSegments: altSegments = promptSegments }) => {
+        const keepIds = new Set(altChunks.map((chunk) => chunk.id));
+        const filteredAttachments = attachments.filter((_attachment, index) => {
+          const chunk = retrievalChunks[index];
+          return chunk ? keepIds.has(chunk.id) : false;
+        });
+        const objectiveSegment = altSegments.find((segment) => segment.id === 'objective');
+        const variantObjective = objectiveSegment?.content?.trim() ? objectiveSegment.content : input.objective;
+        const purposeSegment = altSegments.find((segment) => segment.id === 'purpose');
+        const variantPurpose = purposeSegment?.content?.replace(/^purpose:/, '')?.trim() || context.purpose;
+        const result = await modelRegistry.generate(decision.model.id, {
+          mode: 'generate',
+          objective: variantObjective ?? '',
+          language: input.language,
+          attachments: filteredAttachments,
+          tools: Array.isArray(toolSchema?.tools) ? toolSchema.tools : undefined,
+          context: variantPurpose,
+        });
+        return result.text;
+      };
+      attributionBundle = await pcar.evaluate({
+        runId: `${context.tenant}:${context.caseId}:generate`,
+        outputText: artifacts.content,
+        retrievalChunks,
+        promptSegments,
+        generator,
+      });
+      artifacts.attribution = attributionBundle;
+    }
     const evidence = ledger.record(
       buildEvidencePayload({
         tenant: context.tenant,
@@ -258,6 +327,7 @@ export function createApp(options = {}) {
     return {
       content: artifacts.content,
       citations: artifacts.citations,
+      attribution: attributionBundle,
       cost: {
         tokensIn: adapterResult.tokensIn,
         tokensOut: adapterResult.tokensOut,

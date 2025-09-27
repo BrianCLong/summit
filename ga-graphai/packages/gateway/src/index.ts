@@ -908,6 +908,7 @@ export { MetricsRecorder } from './metrics.js';
 export { OptimizationManager } from './optimizations.js';
 export { ValueDensityRouter } from './router.js';
 export { ZeroSpendOrchestrator } from './orchestrator.js';
+export { PromptContextAttributionReporter } from './pcar.js';
 
 // ============================================================================
 // CURSOR GOVERNANCE GATEWAY - Added from PR 1299

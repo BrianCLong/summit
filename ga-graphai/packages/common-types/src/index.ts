@@ -1528,3 +1528,45 @@ export function validateTaskSpec(spec: TaskSpec): ValidationResult {
     warnings,
   };
 }
+// ============================================================================
+// Prompt Context Attribution Reporter types
+// ============================================================================
+
+export type AttributionSourceType = 'retrieval' | 'prompt';
+
+export type AttributionMethod = 'leave-one-out' | 'token-occlusion';
+
+export interface AttributionMethodContribution {
+  method: AttributionMethod;
+  delta: number;
+}
+
+export interface AttributionHighlightSpan {
+  start: number;
+  end: number;
+  text: string;
+}
+
+export interface AttributionSourceScore {
+  id: string;
+  type: AttributionSourceType;
+  label: string;
+  score: number;
+  snippet?: string;
+  methodContributions: AttributionMethodContribution[];
+  highlightSpans: AttributionHighlightSpan[];
+  metadata?: Record<string, unknown>;
+}
+
+export interface AttributionBundle {
+  version: 'pcar.v1';
+  bundleId: string;
+  createdAt: string;
+  seed: number;
+  baselineHash: string;
+  signature: string;
+  outputText: string;
+  tokens: string[];
+  sources: AttributionSourceScore[];
+  metadata?: Record<string, unknown>;
+}

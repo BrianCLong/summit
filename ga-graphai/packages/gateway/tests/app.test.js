@@ -61,6 +61,35 @@ test('REST generate escalates to paid model when cap allows', async () => {
   assert.ok(response.body.cost.usd > 0);
 });
 
+test('REST generate returns signed attribution bundle', async () => {
+  const { app } = createApp();
+  const payload = {
+    objective: 'Summarize release readiness with compliance checkpoints',
+    attachments: [
+      {
+        uri: 's3://attestations/soc2',
+        title: 'SOC2 Attestation',
+        content: 'SOC2 controls signed on 2025-09-01.',
+        mustInclude: true
+      },
+      {
+        uri: 's3://briefings/customer',
+        title: 'Customer Briefing',
+        content: 'Optional customer narrative for context.'
+      }
+    ]
+  };
+  const response = await request(app)
+    .post('/v1/generate')
+    .set('x-tenant', 'acme-corp')
+    .set('x-purpose', 'investigation')
+    .send(payload);
+  assert.equal(response.status, 200);
+  assert.ok(response.body.attribution?.bundleId);
+  assert.ok(response.body.attribution?.signature);
+  assert.equal(response.body.attribution?.sources[0]?.id, 's3://attestations/soc2');
+});
+
 test('metrics endpoint exposes Prometheus data after a call', async () => {
   const { app } = createApp();
   await request(app)
