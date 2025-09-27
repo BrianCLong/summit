@@ -40,6 +40,7 @@ import {
   Map,
   Assessment,
   Settings,
+  Gavel,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -77,6 +78,7 @@ import ClaimsViewer from './features/conductor/ClaimsViewer';
 import RetractionQueue from './features/conductor/RetractionQueue';
 import CostAdvisor from './features/conductor/CostAdvisor';
 import RunSearch from './features/conductor/RunSearch';
+import RSSPPortal from './pages/RSSPPortal.tsx';
 
 // Navigation items
 const navigationItems = [
@@ -116,6 +118,12 @@ const navigationItems = [
     label: 'OSINT Feeds',
     icon: <Settings />,
     roles: ['ADMIN'],
+  },
+  {
+    path: '/rssp',
+    label: 'Regulator Proof Hub',
+    icon: <Gavel />,
+    roles: ['REGULATOR'],
   },
   // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
   // Ethics Compliance: This dashboard is for hypothetical scenario simulation only.
@@ -664,6 +672,9 @@ function MainLayout() {
             <Route path="/access-intel" element={<AccessIntelPage />} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
+            <Route element={<ProtectedRoute roles={['REGULATOR']} />}>
+              <Route path="/rssp" element={<RSSPPortal />} />
+            </Route>
             <Route element={<ProtectedRoute roles={['ADMIN']} />}>
               <Route path="/system" element={<InvestigationsPage />} />
               <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />

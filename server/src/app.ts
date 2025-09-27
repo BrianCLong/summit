@@ -83,6 +83,7 @@ import stripeRouter from './routes/stripe.js';
 import githubAppRouter from './routes/github-app.js';
 import stripeConnectRouter from './routes/stripe-connect.js';
 import { replayGuard, webhookRatelimit } from './middleware/webhook-guard.js';
+import { rsspRouter } from './routes/rssp.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -171,6 +172,7 @@ export const createApp = async () => {
   app.use('/api', (await import('./routes/replicate.js')).default);
   app.use('/api', (await import('./routes/regions.js')).default);
   app.use('/api', (await import('./routes/ops.js')).default);
+  app.use('/api/rssp', rsspRouter);
   // Signed, IP-filtered inbound callbacks from n8n
   app.use('/', n8nRouter);
   app.use('/api/incident', incidentRouter);
