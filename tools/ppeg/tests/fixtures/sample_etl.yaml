@@ -1,0 +1,41 @@
+pipeline:
+  name: sample_sales_pipeline
+  policy_version: policy-v1.0
+  description: Sample sales aggregation pipeline with provenance instrumentation.
+
+sources:
+  sales_ledger:
+    path: ../data/sales.csv
+    format: csv
+    description: Synthetic sales ledger entries.
+
+sinks:
+  regional_totals:
+    path: outputs/regional_totals.csv
+    format: csv
+    description: Aggregated totals per region with policy annotation.
+
+steps:
+  - id: compute_regional_totals
+    type: sql
+    input: sales_ledger
+    output: regional_totals_stage
+    description: Aggregate sales per region using SQL for transparency.
+    query: |
+      SELECT region, SUM(CAST(amount AS REAL)) AS total_amount
+      FROM input
+      GROUP BY region
+      ORDER BY region
+  - id: attach_policy_version
+    type: python
+    input: regional_totals_stage
+    output: regional_totals
+    sink: regional_totals
+    description: Annotate the aggregated totals with the current policy version.
+    code: |
+      for row in rows:
+          yield {
+              "region": row["region"],
+              "total_amount": f"{float(row['total_amount']):.2f}",
+              "policy_version": context["policy_version"],
+          }
