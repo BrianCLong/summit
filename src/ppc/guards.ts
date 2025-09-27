@@ -6,6 +6,7 @@ import {
   GuardEvaluation,
   GuardKind,
   GuardRuntimeState,
+  GuardStage,
   RedactorGuardOptions,
   RegexGuardOptions,
   ToolScopeGuardOptions,
@@ -27,8 +28,11 @@ const resolveTargetValue = (
 
 class RegexGuard implements Guard {
   public readonly kind: GuardKind = 'regex';
+  public readonly stage: GuardStage;
 
-  public constructor(private readonly options: RegexGuardOptions) {}
+  public constructor(private readonly options: RegexGuardOptions) {
+    this.stage = options.target;
+  }
 
   public get name(): string {
     return this.options.name;
@@ -82,8 +86,11 @@ class RegexGuard implements Guard {
 
 class ClassifierGuard implements Guard {
   public readonly kind: GuardKind = 'classifier';
+  public readonly stage: GuardStage;
 
-  public constructor(private readonly options: ClassifierGuardOptions) {}
+  public constructor(private readonly options: ClassifierGuardOptions) {
+    this.stage = options.target;
+  }
 
   public get name(): string {
     return this.options.name;
@@ -133,6 +140,7 @@ class ClassifierGuard implements Guard {
 
 class ToolScopeGuard implements Guard {
   public readonly kind: GuardKind = 'tool-scope';
+  public readonly stage: GuardStage = 'tools';
 
   public constructor(private readonly options: ToolScopeGuardOptions) {}
 
@@ -180,8 +188,11 @@ class ToolScopeGuard implements Guard {
 
 class RedactorGuard implements Guard {
   public readonly kind: GuardKind = 'redactor';
+  public readonly stage: GuardStage;
 
-  public constructor(private readonly options: RedactorGuardOptions) {}
+  public constructor(private readonly options: RedactorGuardOptions) {
+    this.stage = options.target;
+  }
 
   public get name(): string {
     return this.options.name;

@@ -51,6 +51,7 @@ interface ResponseDSL {
 
 interface ToolsDSL {
   limit(name: string, allowedTools: string[], options?: ToolScopeGuardConfig): void;
+  block(name: string, allowedTools: string[], options?: ToolScopeGuardConfig): void;
 }
 
 export interface DSL {
@@ -144,6 +145,17 @@ const createDSL = (definitions: GuardDefinition[]): DSL => {
         options: {
           name,
           allowedTools,
+          ...options,
+        },
+      });
+    },
+    block(name, allowedTools, options) {
+      push({
+        kind: 'tool-scope',
+        options: {
+          name,
+          allowedTools,
+          mode: 'block',
           ...options,
         },
       });

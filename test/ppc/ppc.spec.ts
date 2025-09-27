@@ -1,4 +1,9 @@
-import { createOpenAIAdapter, ppc, ClassifierFn } from '../../src/ppc';
+import {
+  createAnthropicAdapter,
+  createOpenAIAdapter,
+  ppc,
+  ClassifierFn,
+} from '../../src/ppc';
 import { goldenPrompts } from './golden-prompts';
 
 describe('Prompt Policy Composer (ppc)', () => {
@@ -29,6 +34,10 @@ describe('Prompt Policy Composer (ppc)', () => {
       ],
       { description: 'Prompt email redaction' }
     );
+
+    tools.block('enforce-high-risk-ban', ['search', 'math', 'code'], {
+      description: 'Blocks high-risk tools outright.',
+    });
 
     tools.limit('restrict-tools', ['search', 'math'], {
       description: 'Filters tools outside the approved list.',
@@ -63,10 +72,23 @@ describe('Prompt Policy Composer (ppc)', () => {
     expect(guardExecutionOrder).toEqual([
       'block-ssn',
       'mask-email',
+      'enforce-high-risk-ban',
       'restrict-tools',
       'toxicity',
       'mask-secrets',
     ]);
+
+    const guardStages = result.trace.map((entry) => entry.stage);
+    expect(guardStages).toEqual([
+      'prompt',
+      'prompt',
+      'tools',
+      'tools',
+      'response',
+      'response',
+    ]);
+
+    expect(result.violations).toEqual([]);
   });
 
   it('applies redaction and tool filtering during enforcement', async () => {
@@ -86,6 +108,19 @@ describe('Prompt Policy Composer (ppc)', () => {
     const toolTrace = result.trace.find((entry) => entry.name === 'restrict-tools');
     expect(toolTrace?.triggered).toBe(true);
     expect(toolTrace?.effect).toBe('limit-tools');
+
+    expect(result.violations).toEqual([
+      expect.objectContaining({
+        name: 'mask-email',
+        effect: 'redact',
+        stage: 'prompt',
+      }),
+      expect.objectContaining({
+        name: 'restrict-tools',
+        effect: 'limit-tools',
+        stage: 'tools',
+      }),
+    ]);
   });
 
   it('blocks harmful responses using classifier guard', async () => {
@@ -105,6 +140,70 @@ describe('Prompt Policy Composer (ppc)', () => {
     expect(result.blockedBy).toBe('toxicity');
     const toxicityTrace = result.trace.find((entry) => entry.name === 'toxicity');
     expect(toxicityTrace?.triggered).toBe(true);
+    expect(result.violations).toEqual([
+      expect.objectContaining({
+        name: 'toxicity',
+        effect: 'block',
+        stage: 'response',
+      }),
+    ]);
+  });
+
+  it('records dry-run trace without mutating the underlying state', async () => {
+    const baselineContext = {
+      prompt: 'Contact me at admin@example.com tomorrow.',
+      tools: ['search', 'code', 'math'],
+    } as const;
+
+    const result = await policy.dryRun(baselineContext);
+
+    expect(result.prompt).toBe(baselineContext.prompt);
+    expect(result.tools).toEqual(baselineContext.tools);
+    expect(result.violations).toEqual([
+      expect.objectContaining({
+        name: 'mask-email',
+        effect: 'redact',
+        stage: 'prompt',
+      }),
+      expect.objectContaining({
+        name: 'restrict-tools',
+        effect: 'limit-tools',
+        stage: 'tools',
+      }),
+    ]);
+  });
+
+  it('merges traces and violations across adapters', async () => {
+    const anthropic = createAnthropicAdapter(policy, {
+      async respond() {
+        return {
+          text: 'The mission is TOP SECRET and on schedule.',
+          metadata: { latency: 12 },
+        };
+      },
+    });
+
+    const result = await anthropic.complete({
+      prompt: 'Report the mission status.',
+      tools: ['search'],
+      metadata: { conversationId: 'abc123' },
+    });
+
+    expect(result.blocked).toBe(false);
+    expect(result.stage).toBe('complete');
+    expect(result.metadata).toMatchObject({
+      provider: 'anthropic',
+      conversationId: 'abc123',
+      latency: 12,
+    });
+    expect(result.trace).toHaveLength(12);
+    expect(result.violations).toEqual([
+      expect.objectContaining({
+        name: 'mask-secrets',
+        effect: 'redact',
+        stage: 'response',
+      }),
+    ]);
   });
 
   describe('golden prompt conformance suite', () => {
@@ -135,6 +234,13 @@ describe('Prompt Policy Composer (ppc)', () => {
 
         if (golden.expected.tools) {
           expect(result.tools).toEqual(golden.expected.tools);
+        }
+
+        if (golden.expected.violations) {
+          const violationSummaries = result.violations.map(
+            ({ name, effect, stage }) => ({ name, effect, stage })
+          );
+          expect(violationSummaries).toEqual(golden.expected.violations);
         }
       });
     }

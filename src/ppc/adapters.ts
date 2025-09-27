@@ -1,5 +1,6 @@
 import {
   GuardTrace,
+  GuardViolation,
   Policy,
   PolicyExecution,
 } from './types';
@@ -20,6 +21,7 @@ export interface GuardedLLMResult {
   metadata: Record<string, unknown>;
   trace: GuardTrace[];
   stage: 'prompt' | 'response' | 'complete';
+  violations: GuardViolation[];
 }
 
 export interface OpenAIStubCompletion {
@@ -73,6 +75,11 @@ const mergeTraces = (first: GuardTrace[], second: GuardTrace[]): GuardTrace[] =>
   ];
 };
 
+const mergeViolations = (
+  first: GuardViolation[],
+  second: GuardViolation[]
+): GuardViolation[] => [...first, ...second];
+
 const runPromptStage = async (
   policy: Policy,
   provider: string,
@@ -118,6 +125,7 @@ const dryRun = async (
     metadata: evaluation.metadata,
     trace: evaluation.trace,
     stage: request.response ? 'response' : 'prompt',
+    violations: evaluation.violations,
   };
 };
 
@@ -137,6 +145,7 @@ export const createOpenAIAdapter = (
         metadata: promptStage.metadata,
         trace: promptStage.trace,
         stage: 'prompt',
+        violations: promptStage.violations,
       };
     }
 
@@ -155,6 +164,10 @@ export const createOpenAIAdapter = (
     );
 
     const trace = mergeTraces(promptStage.trace, responseStage.trace);
+    const violations = mergeViolations(
+      promptStage.violations,
+      responseStage.violations
+    );
 
     if (!responseStage.allowed) {
       return {
@@ -166,6 +179,7 @@ export const createOpenAIAdapter = (
         metadata: { ...promptStage.metadata, ...normalized.metadata },
         trace,
         stage: 'response',
+        violations,
       };
     }
 
@@ -177,6 +191,7 @@ export const createOpenAIAdapter = (
       metadata: { ...promptStage.metadata, ...normalized.metadata },
       trace,
       stage: 'complete',
+      violations,
     };
   },
   dryRun(request: LLMRequest): Promise<GuardedLLMResult> {
@@ -200,6 +215,7 @@ export const createAnthropicAdapter = (
         metadata: promptStage.metadata,
         trace: promptStage.trace,
         stage: 'prompt',
+        violations: promptStage.violations,
       };
     }
 
@@ -217,6 +233,10 @@ export const createAnthropicAdapter = (
       normalized.output
     );
     const trace = mergeTraces(promptStage.trace, responseStage.trace);
+    const violations = mergeViolations(
+      promptStage.violations,
+      responseStage.violations
+    );
 
     if (!responseStage.allowed) {
       return {
@@ -228,6 +248,7 @@ export const createAnthropicAdapter = (
         metadata: { ...promptStage.metadata, ...normalized.metadata },
         trace,
         stage: 'response',
+        violations,
       };
     }
 
@@ -239,6 +260,7 @@ export const createAnthropicAdapter = (
       metadata: { ...promptStage.metadata, ...normalized.metadata },
       trace,
       stage: 'complete',
+      violations,
     };
   },
   dryRun(request: LLMRequest): Promise<GuardedLLMResult> {

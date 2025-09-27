@@ -2,6 +2,8 @@ export type GuardKind = 'regex' | 'classifier' | 'tool-scope' | 'redactor';
 
 export type GuardEffect = 'allow' | 'block' | 'redact' | 'limit-tools';
 
+export type GuardStage = 'prompt' | 'response' | 'tools';
+
 export interface PPCContext {
   prompt: string;
   response?: string;
@@ -29,12 +31,24 @@ export interface GuardTrace extends GuardEvaluation {
   name: string;
   kind: GuardKind;
   order: number;
+  stage: GuardStage;
 }
 
 export interface Guard {
   readonly name: string;
   readonly kind: GuardKind;
+  readonly stage: GuardStage;
   evaluate(state: GuardRuntimeState): Promise<GuardEvaluation> | GuardEvaluation;
+}
+
+export interface GuardViolation {
+  name: string;
+  kind: GuardKind;
+  stage: GuardStage;
+  effect: Exclude<GuardEffect, 'allow'>;
+  description?: string;
+  score?: number;
+  label?: string;
 }
 
 export interface PolicyExecution {
@@ -46,6 +60,7 @@ export interface PolicyExecution {
   metadata: Record<string, unknown>;
   trace: GuardTrace[];
   blockedBy?: string;
+  violations: GuardViolation[];
 }
 
 export interface PolicyExecutionOptions {

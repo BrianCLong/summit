@@ -4,6 +4,7 @@ import {
   GuardDefinition,
   GuardRuntimeState,
   GuardTrace,
+  GuardViolation,
   Policy,
   PolicyExecution,
   PolicyExecutionOptions,
@@ -63,6 +64,7 @@ class GuardPipeline implements Policy {
     };
 
     const trace: GuardTrace[] = [];
+    const violations: GuardViolation[] = [];
     let allowed = true;
     let blockedBy: string | undefined;
 
@@ -73,6 +75,7 @@ class GuardPipeline implements Policy {
         name: guard.name,
         kind: guard.kind,
         order: index,
+        stage: guard.stage,
         triggered: evaluation.triggered,
         effect: evaluation.effect,
         description: evaluation.description,
@@ -80,6 +83,18 @@ class GuardPipeline implements Policy {
         score: evaluation.score,
         label: evaluation.label,
       });
+
+      if (evaluation.triggered && evaluation.effect !== 'allow') {
+        violations.push({
+          name: guard.name,
+          kind: guard.kind,
+          stage: guard.stage,
+          effect: evaluation.effect,
+          description: evaluation.description,
+          score: evaluation.score,
+          label: evaluation.label,
+        });
+      }
 
       if (!options.dryRun) {
         applyModifications(state, evaluation.modifications);
@@ -103,6 +118,7 @@ class GuardPipeline implements Policy {
       metadata: state.metadata,
       trace,
       blockedBy,
+      violations,
     };
   }
 
