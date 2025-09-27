@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GCM Simulator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Governed Chargeback &amp; Metering Simulator</h1>
+        <p>
+          Exercise the GCM metering APIs, view signed manifests, and reconcile against
+          provider data from a single page.
+        </p>
+      </header>
+
+      <section class="card">
+        <h2>Connection</h2>
+        <label>
+          GCM Base URL
+          <input id="base-url" type="url" value="http://localhost:8080" />
+        </label>
+        <label>
+          API Key (optional)
+          <input id="api-key" type="text" placeholder="Bearer token" />
+        </label>
+        <button id="apply-config">Apply</button>
+        <p id="connection-status" class="status">SDK not initialised.</p>
+      </section>
+
+      <section class="card">
+        <h2>Submit Usage</h2>
+        <div class="grid">
+          <label>Account ID<input id="job-account" /></label>
+          <label>Policy Tier<input id="job-policy" value="pii.low" /></label>
+          <label>Residency<input id="job-residency" value="global" /></label>
+          <label>CPU Hours<input id="job-cpu" type="number" step="0.1" value="1" /></label>
+          <label>Storage GB<input id="job-storage" type="number" step="0.1" value="0" /></label>
+          <label>Egress GB<input id="job-egress" type="number" step="0.1" value="0" /></label>
+        </div>
+        <button id="submit-job">Submit Job</button>
+        <pre id="job-output" class="output"></pre>
+      </section>
+
+      <section class="card">
+        <h2>Billing Manifest</h2>
+        <div class="grid">
+          <label>Account ID<input id="manifest-account" /></label>
+        </div>
+        <button id="fetch-manifest">Fetch Manifest</button>
+        <pre id="manifest-output" class="output"></pre>
+      </section>
+
+      <section class="card">
+        <h2>Provider Usage</h2>
+        <div class="grid">
+          <label>Account ID<input id="provider-account" /></label>
+          <label>Policy Tier<input id="provider-policy" value="pii.low" /></label>
+          <label>Residency<input id="provider-residency" value="global" /></label>
+          <label>CPU Hours<input id="provider-cpu" type="number" step="0.1" value="1" /></label>
+          <label>Storage GB<input id="provider-storage" type="number" step="0.1" value="0" /></label>
+          <label>Egress GB<input id="provider-egress" type="number" step="0.1" value="0" /></label>
+          <label>Total Cost<input id="provider-cost" type="number" step="0.01" value="0" /></label>
+          <label>Currency<input id="provider-currency" value="USD" /></label>
+        </div>
+        <button id="submit-provider">Submit Provider Usage</button>
+        <pre id="provider-output" class="output"></pre>
+      </section>
+
+      <section class="card">
+        <h2>Reconciliation</h2>
+        <div class="grid">
+          <label>Account ID<input id="recon-account" /></label>
+        </div>
+        <button id="run-recon">Run Reconciliation</button>
+        <pre id="recon-output" class="output"></pre>
+      </section>
+    </main>
+
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
