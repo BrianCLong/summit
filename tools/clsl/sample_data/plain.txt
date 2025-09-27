@@ -1,0 +1,1 @@
+This reference passage lacks embedded protections and is expected to fail integrity checks.

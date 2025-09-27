@@ -1,0 +1,6 @@
+{
+  "claim": "Sample GW-DE asset",
+  "issuer": "CLSL",
+  "signature": "dummy-signature",
+  "timestamp": "2024-10-01T00:00:00Z"
+}

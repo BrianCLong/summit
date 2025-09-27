@@ -77,3 +77,6 @@ conflicts/
 .env.*
 *.pem
 *.key
+
+tools/clsl/sample_data/out/
+
