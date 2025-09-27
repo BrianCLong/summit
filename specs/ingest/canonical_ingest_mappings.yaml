@@ -1,0 +1,233 @@
+version: 1
+last_updated: 2025-09-15
+owner: ingest-platform
+
+mappings:
+  - connector: s3_csv
+    description: Day-0 bulk loader for S3 objects containing CSV records.
+    throughput_target_mb_per_s: 50
+    batch_size_rows: 5000
+    file_pattern: "s3://{bucket}/{tenant_id}/datasets/{dataset_id}/part-*.csv"
+    schema_version: "1.0"
+    dedupe:
+      primary_key_columns: ["record_id"]
+      hash_function: "SHA256"
+      hash_columns: ["record_id", "event_time", "entity_external_id", "raw_json"]
+      merge_strategy: "MERGE (r:Record {tenant_id: $tenant_id, record_hash: $record_hash})"
+    provenance:
+      attach:
+        - column: "source_uri"
+          target: "Provenance.lineage_uri"
+        - column: "ingest_job_id"
+          target: "Provenance.transform_chain[*].ingest_job_id"
+        - static:
+            step: "csv-normalize"
+            actor: "ingest-worker"
+            checksum_column: "file_checksum"
+    column_mappings:
+      tenant_id:
+        column: "tenant_id"
+      dataset_id:
+        column: "dataset_id"
+      record_id:
+        column: "record_id"
+      record_hash:
+        compute: "sha256(record_id, event_time, entity_external_id, raw_json)"
+      ingest_job_id:
+        column: "ingest_job_id"
+      ingested_at:
+        column: "ingest_timestamp"
+      schema_version:
+        column: "schema_version"
+      source_type:
+        static: "S3"
+      dataset_uri:
+        column: "source_uri"
+      dataset_checksum:
+        column: "file_checksum"
+      retention_tier:
+        static: "archive"
+      raw_payload_ref:
+        column: "raw_json"
+      purpose_tags:
+        transform: "split(csv_purpose_tags, '|')"
+      entity_ref:
+        entity_id:
+          column: "entity_external_id"
+        entity_type:
+          column: "entity_type"
+        display_name:
+          column: "entity_name"
+        identifiers:
+          external_id:
+            column: "entity_external_id"
+          email:
+            column: "entity_email"
+      location_ref:
+        location_id:
+          column: "location_id"
+        location_type:
+          column: "location_type"
+        coordinates:
+          transform: "POINT({latitude: toFloat(lat), longitude: toFloat(lon)})"
+        country_code:
+          column: "country_code"
+        asn:
+          column: "asn"
+      signal:
+        signal_id:
+          column: "signal_id"
+        signal_type:
+          column: "signal_type"
+        score:
+          column: "signal_score"
+        observed_at:
+          column: "event_time"
+        expires_at:
+          transform: "datetime(event_time) + duration('P30D')"
+        explainability_ref:
+          column: "explainability_uri"
+        event:
+          event_id:
+            column: "event_id"
+          event_type:
+            column: "event_type"
+          severity:
+            column: "event_severity"
+          status:
+            column: "event_status"
+          first_seen:
+            column: "event_time"
+          last_seen:
+            column: "event_time"
+          entity_refs:
+            - entity_id:
+                column: "entity_external_id"
+              entity_type:
+                column: "entity_type"
+              display_name:
+                column: "entity_name"
+              identifiers:
+                external_id:
+                  column: "entity_external_id"
+      indicators:
+        source_column: "indicator_list"
+        transform: "parse_json(indicator_list)" # expects JSON array per row
+      provenance:
+        prov_id:
+          transform: "concat('prov-', ingest_job_id, '-', record_id)"
+        collected_at:
+          column: "ingest_timestamp"
+        collector:
+          static: "ingest-worker"
+        transform_chain:
+          transform: |
+            [{
+              "step": "csv-normalize",
+              "actor": "ingest-worker",
+              "timestamp": ingest_timestamp,
+              "ingest_job_id": ingest_job_id,
+              "file_checksum": file_checksum
+            }]
+        lineage_uri:
+          column: "source_uri"
+    error_handling:
+      on_parse_error: "route_to_dlq"
+      dlq_topic: "neo4j.csv.parse.failures"
+      retry_limit: 3
+    metrics:
+      counters:
+        - name: "csv_records_ingested"
+          type: "increment"
+        - name: "csv_records_deduped"
+          type: "increment"
+      histograms:
+        - name: "csv_batch_latency_ms"
+          buckets: [50, 100, 200, 300]
+
+  - connector: http_ingest
+    description: Streaming HTTP webhook ingestion with JSON payloads.
+    throughput_target_mb_per_s: 15
+    batch_window_seconds: 2
+    schema_version: "1.0"
+    dedupe:
+      id_path: "$.payload.id"
+      hash_function: "SHA256"
+      hash_paths:
+        - "$.payload.id"
+        - "$.payload.observed_at"
+        - "$.payload.entity.identifiers.*"
+        - "$.payload.indicators[*].value"
+      merge_strategy: "MERGE (r:Record {tenant_id: $tenant_id, record_hash: $record_hash})"
+    provenance:
+      attach:
+        - header: "X-Request-ID"
+          target: "Provenance.transform_chain[*].request_id"
+        - header: "X-Forwarded-For"
+          target: "Provenance.transform_chain[*].ingest_source_ip"
+        - static:
+            step: "http-validate"
+            actor: "gateway"
+            checksum_path: "$.payload_checksum"
+    payload_mapping:
+      tenant_id_path: "$.tenant_id"
+      dataset_id_path: "$.dataset_id"
+      record:
+        record_id_path: "$.payload.id"
+        record_hash_expression: "sha256($.payload.id, $.payload.observed_at, stringify($.payload))"
+        ingested_at_path: "$.received_at"
+        schema_version: "1.0"
+        source_type: "HTTP"
+        dataset_id_path: "$.dataset_id"
+        dataset_uri_expression: "https://gateway/{tenant_id}/{dataset_id}"
+        dataset_checksum_path: "$.payload_checksum"
+        retention_tier: "hot"
+        ingest_job_id_path: "$.headers.X-Request-ID"
+        purpose_tags_path: "$.purpose_tags"
+        entity_ref:
+          entity_id_path: "$.payload.entity.id"
+          entity_type_path: "$.payload.entity.type"
+          display_name_path: "$.payload.entity.name"
+          identifiers_path: "$.payload.entity.identifiers"
+        location_ref:
+          location_id_path: "$.payload.location.id"
+          location_type_path: "$.payload.location.type"
+          coordinates_transform: "point({latitude: toFloat($.payload.location.lat), longitude: toFloat($.payload.location.lon)})"
+          country_code_path: "$.payload.location.country"
+          asn_path: "$.payload.location.asn"
+        signal:
+          signal_id_path: "$.payload.signal.id"
+          signal_type_path: "$.payload.signal.type"
+          score_path: "$.payload.signal.score"
+          observed_at_path: "$.payload.observed_at"
+          expires_at_transform: "datetime($.payload.observed_at) + duration('PT6H')"
+          explainability_ref_path: "$.payload.signal.explainability_uri"
+          event:
+            event_id_path: "$.payload.event.id"
+            event_type_path: "$.payload.event.type"
+            severity_path: "$.payload.event.severity"
+            status_path: "$.payload.event.status"
+            first_seen_path: "$.payload.event.first_seen"
+            last_seen_path: "$.payload.event.last_seen"
+            entity_refs_path: "$.payload.event.entities"
+        indicators_path: "$.payload.indicators"
+        provenance:
+          prov_id_path: "$.provenance.id"
+          collected_at_path: "$.provenance.collected_at"
+          collector_path: "$.provenance.collector"
+          transform_chain_path: "$.provenance.transform_chain"
+          lineage_uri_path: "$.provenance.lineage_uri"
+        raw_payload_ref_path: "$.payload"
+    error_handling:
+      on_parse_error: "respond_202_and_buffer"
+      retry_strategy: "exponential_backoff"
+      max_retries: 5
+    metrics:
+      counters:
+        - name: "http_messages_processed"
+          type: "increment"
+        - name: "http_messages_deduped"
+          type: "increment"
+      histograms:
+        - name: "http_pipeline_latency_ms"
+          buckets: [25, 50, 100, 200, 400]
