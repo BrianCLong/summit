@@ -1,0 +1,4 @@
+person_id,full_name,email,role,last_seen_at,residency_zone,purpose_tags,pii_level,provenance_ref
+P-0001,Alex Morgan,alex.morgan@summit.example.com,SOC Analyst,2025-09-01T15:20:00Z,us-east,security-monitoring|operations,restricted,s3csv/persons/2025-09-01T15:30:00Z
+P-0002,Jamie Patel,jamie.patel@summit.example.com,DevOps Lead,2025-09-01T16:05:00Z,us-east,operations|analytics,internal,s3csv/persons/2025-09-01T15:30:00Z
+P-0003,Maria Chen,maria.chen@eu.summit.example.com,Regional Manager,2025-09-01T14:45:00Z,eu-central,operations|compliance,restricted,s3csv/persons/2025-09-01T15:30:00Z

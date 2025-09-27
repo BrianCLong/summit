@@ -1,0 +1,4 @@
+source_system_id,name,connector_type,version,provenance_ref
+SRC-OKTA,Okta Admin Logs,connector-sdk-s3csv,1.4.2,s3csv/sources/2025-09-01T15:30:00Z
+SRC-DLP,EU DLP Stream,connector-sdk-s3csv,2.1.0,s3csv/sources/2025-09-01T15:30:00Z
+SRC-CI,CI Pipeline Webhook,connector-sdk-http-stream,3.0.1,s3csv/sources/2025-09-01T15:30:00Z

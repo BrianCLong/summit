@@ -1,0 +1,484 @@
+version: 1
+connector: connector-sdk-s3csv
+description: >-
+  S3-based bulk ingestion of canonical entities and relationships exported as CSV files.
+  Targets ≥50 MB/s throughput per worker and maintains idempotent merges via deterministic keys.
+
+performance:
+  max_workers: 8
+  throughput_target_mb_per_s: 50
+  p95_processing_ms: 100
+
+transport:
+  bucket: s3://summit-prod-ingest
+  region: us-east-1
+  kms_key: alias/summit-data-mesh
+  file_pattern: datasets/golden/*.csv
+
+staging:
+  format: csv
+  header: true
+  delimiter: ","
+  quote: '"'
+  escape: '"'
+  null_token: ""
+
+provenance:
+  strategy: attach-column
+  column: provenance_ref
+  lineage_node_label: SourceSystem
+  lineage_relationship: EMITTED_EVENT
+
+entities:
+  - label: Person
+    file: datasets/golden/persons.csv
+    schema:
+      person_id: string
+      full_name: string
+      email: string
+      role: string
+      last_seen_at: datetime
+      residency_zone: string
+      purpose_tags: list<string>
+      pii_level: string
+      provenance_ref: string
+    dedupe:
+      key: person_id
+      secondary_keys:
+        - email
+      strategy: merge
+      update_columns:
+        - full_name
+        - role
+        - last_seen_at
+        - purpose_tags
+        - pii_level
+    residency:
+      zone_column: residency_zone
+      fallback_zone: us-east
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+      - type: to-lower
+        column: email
+      - type: iso8601
+        column: last_seen_at
+
+  - label: Organization
+    file: datasets/golden/organizations.csv
+    schema:
+      org_id: string
+      name: string
+      category: string
+      jurisdiction: string
+      residency_zone: string
+      purpose_tags: list<string>
+      provenance_ref: string
+    dedupe:
+      key: org_id
+      strategy: merge
+      update_columns:
+        - name
+        - category
+        - jurisdiction
+        - residency_zone
+        - purpose_tags
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+
+  - label: Account
+    file: datasets/golden/accounts.csv
+    schema:
+      account_id: string
+      platform: string
+      status: string
+      created_at: datetime
+      last_auth_at: datetime
+      risk_score: float
+      pii_level: string
+      purpose_tags: list<string>
+      owner_person_id: string
+      org_id: string
+      provenance_ref: string
+    dedupe:
+      key: account_id
+      strategy: merge
+      update_columns:
+        - status
+        - last_auth_at
+        - risk_score
+        - purpose_tags
+        - pii_level
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+      - type: iso8601
+        columns:
+          - created_at
+          - last_auth_at
+
+  - label: Event
+    file: datasets/golden/events.csv
+    schema:
+      event_id: string
+      event_type: string
+      severity: string
+      occurred_at: datetime
+      processed_at: datetime
+      ingest_source: string
+      payload_hash: string
+      purpose_tags: list<string>
+      provenance_ref: string
+    dedupe:
+      key: event_id
+      strategy: merge
+      update_columns:
+        - severity
+        - processed_at
+        - payload_hash
+        - purpose_tags
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+      - type: iso8601
+        columns:
+          - occurred_at
+          - processed_at
+
+  - label: SourceSystem
+    file: datasets/golden/source_systems.csv
+    schema:
+      source_system_id: string
+      name: string
+      connector_type: string
+      version: string
+      provenance_ref: string
+    dedupe:
+      key: source_system_id
+      strategy: skip-if-exists
+
+  - label: DataAsset
+    file: datasets/golden/data_assets.csv
+    schema:
+      asset_id: string
+      name: string
+      classification: string
+      storage_type: string
+      residency_zone: string
+      purpose_tags: list<string>
+      provenance_ref: string
+    dedupe:
+      key: asset_id
+      strategy: merge
+      update_columns:
+        - name
+        - classification
+        - storage_type
+        - residency_zone
+        - purpose_tags
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+
+  - label: Location
+    file: datasets/golden/locations.csv
+    schema:
+      location_id: string
+      name: string
+      region: string
+      country: string
+      latitude: float
+      longitude: float
+      provenance_ref: string
+    dedupe:
+      key: location_id
+      strategy: skip-if-exists
+    transforms:
+      - type: iso-country
+        column: country
+
+relationships:
+  - type: MEMBER_OF
+    file: datasets/golden/person_member_of_org.csv
+    start:
+      label: Person
+      key: person_id
+      column: person_id
+    end:
+      label: Organization
+      key: org_id
+      column: org_id
+    schema:
+      person_id: string
+      org_id: string
+      assigned_at: datetime
+      role: string
+      purpose_tags: list<string>
+      provenance_ref: string
+    dedupe:
+      key_columns:
+        - person_id
+        - org_id
+        - assigned_at
+      strategy: merge
+      update_columns:
+        - role
+        - purpose_tags
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+      - type: iso8601
+        column: assigned_at
+
+  - type: USES
+    file: datasets/golden/person_uses_account.csv
+    start:
+      label: Person
+      key: person_id
+      column: person_id
+    end:
+      label: Account
+      key: account_id
+      column: account_id
+    schema:
+      person_id: string
+      account_id: string
+      connected_at: datetime
+      last_verified_at: datetime
+      purpose_tags: list<string>
+      provenance_ref: string
+    dedupe:
+      key_columns:
+        - person_id
+        - account_id
+      strategy: merge
+      update_columns:
+        - last_verified_at
+        - purpose_tags
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+      - type: iso8601
+        columns:
+          - connected_at
+          - last_verified_at
+
+  - type: ACCOUNT_OF
+    file: datasets/golden/account_of_org.csv
+    start:
+      label: Account
+      key: account_id
+      column: account_id
+    end:
+      label: Organization
+      key: org_id
+      column: org_id
+    schema:
+      account_id: string
+      org_id: string
+      purpose_tags: list<string>
+      provenance_ref: string
+    dedupe:
+      key_columns:
+        - account_id
+        - org_id
+      strategy: skip-if-exists
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+
+  - type: OWNS
+    file: datasets/golden/org_owns_asset.csv
+    start:
+      label: Organization
+      key: org_id
+      column: org_id
+    end:
+      label: DataAsset
+      key: asset_id
+      column: asset_id
+    schema:
+      org_id: string
+      asset_id: string
+      ownership_type: string
+      purpose_tags: list<string>
+      provenance_ref: string
+    dedupe:
+      key_columns:
+        - org_id
+        - asset_id
+      strategy: merge
+      update_columns:
+        - ownership_type
+        - purpose_tags
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+
+  - type: HOSTED_BY
+    file: datasets/golden/data_asset_hosted_by_org.csv
+    start:
+      label: DataAsset
+      key: asset_id
+      column: asset_id
+    end:
+      label: Organization
+      key: org_id
+      column: org_id
+    schema:
+      asset_id: string
+      org_id: string
+      hosting_model: string
+      purpose_tags: list<string>
+      provenance_ref: string
+    dedupe:
+      key_columns:
+        - asset_id
+        - org_id
+      strategy: merge
+      update_columns:
+        - hosting_model
+        - purpose_tags
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+
+  - type: OCCURRED_AT
+    file: datasets/golden/event_occurred_at_location.csv
+    start:
+      label: Event
+      key: event_id
+      column: event_id
+    end:
+      label: Location
+      key: location_id
+      column: location_id
+    schema:
+      event_id: string
+      location_id: string
+      confidence: float
+      purpose_tags: list<string>
+      provenance_ref: string
+    dedupe:
+      key_columns:
+        - event_id
+        - location_id
+      strategy: merge
+      update_columns:
+        - confidence
+        - purpose_tags
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+
+  - type: OBSERVED_ON
+    file: datasets/golden/event_observed_on_asset.csv
+    start:
+      label: Event
+      key: event_id
+      column: event_id
+    end:
+      label: DataAsset
+      key: asset_id
+      column: asset_id
+    schema:
+      event_id: string
+      asset_id: string
+      purpose_tags: list<string>
+      provenance_ref: string
+    dedupe:
+      key_columns:
+        - event_id
+        - asset_id
+      strategy: skip-if-exists
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+
+  - type: TRIGGERED
+    file: datasets/golden/event_triggered_entities.csv
+    start:
+      label: Event
+      key: event_id
+      column: event_id
+    end:
+      dynamic_label_column: target_label
+      key_column: target_id
+    schema:
+      event_id: string
+      target_id: string
+      target_label: string
+      impact: string
+      purpose_tags: list<string>
+      provenance_ref: string
+    dedupe:
+      key_columns:
+        - event_id
+        - target_id
+        - target_label
+      strategy: merge
+      update_columns:
+        - impact
+        - purpose_tags
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+
+  - type: EMITTED_EVENT
+    file: datasets/golden/source_emitted_event.csv
+    start:
+      label: SourceSystem
+      key: source_system_id
+      column: source_system_id
+    end:
+      label: Event
+      key: event_id
+      column: event_id
+    schema:
+      source_system_id: string
+      event_id: string
+      ingested_at: datetime
+      ingest_job_id: string
+      purpose_tags: list<string>
+      provenance_ref: string
+    dedupe:
+      key_columns:
+        - source_system_id
+        - event_id
+      strategy: skip-if-exists
+    transforms:
+      - type: split
+        column: purpose_tags
+        delimiter: '|'
+      - type: iso8601
+        column: ingested_at
+
+lineage:
+  manifests:
+    path: s3://summit-prod-ingest/manifests/
+    format: json
+  checkpoints:
+    enabled: true
+    table: analytics.ingest_checkpoints
+    primary_key: job_id
+
+quality:
+  schema_enforcement: strict
+  pii_scan: required
+  threshold_percent_invalid: 1
+  quarantine_prefix: quarantine/
+

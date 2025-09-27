@@ -1,0 +1,213 @@
+version: 1
+connector: connector-sdk-http-stream
+summary: Real-time HTTP streaming ingest for Event telemetry with dedupe and provenance enrichment.
+
+deployment:
+  replicas: 3
+  autoscale:
+    min_replicas: 2
+    max_replicas: 10
+    cpu_target: 70
+  throughput_target_events_per_s: 1000
+  p95_processing_ms: 100
+  ack_strategy: at-least-once
+
+endpoints:
+  - name: events-ingress
+    method: POST
+    path: /v1/events
+    auth:
+      type: oauth2-client-credentials
+      token_endpoint: https://auth.summit.example.com/oauth2/token
+      audience: summit-ingest
+      scope: events.write
+    request:
+      content_type: application/json
+      schema_ref: EventEnvelope
+    response:
+      success_code: 202
+      retry_codes:
+        - 429
+        - 503
+    rate_limits:
+      per_client_per_minute: 120000
+      burst: 2000
+    buffers:
+      max_inflight: 5000
+      retry_backoff_ms:
+        initial: 200
+        max: 5000
+        multiplier: 2
+    validation:
+      schema: strict
+      pii_scan: required
+      reject_on_missing_purpose: true
+    transforms:
+      - type: add-timestamp
+        field: processed_at
+      - type: hash
+        field: payload_hash
+        algorithm: sha256
+        source_fields:
+          - raw_payload
+      - type: enrich
+        target_field: provenance_ref
+        template: http-stream/events/{{ingest_id}}
+      - type: route
+        field: residency_zone
+        mapping:
+          US: us-east
+          EU: eu-central
+          default: us-east
+    dedupe:
+      key: payload_hash
+      strategy: drop-duplicate
+      cache_ttl_minutes: 120
+    mapping:
+      node_label: Event
+      merge_on: event_id
+      properties:
+        event_id: $.event.event_id
+        event_type: $.event.type
+        severity: $.event.severity
+        occurred_at: $.event.occurred_at
+        processed_at: $.processed_at
+        ingest_source: http-stream
+        payload_hash: $.payload_hash
+        purpose_tags: $.event.purpose_tags
+        provenance_ref: $.provenance_ref
+      relationships:
+        - type: TRIGGERED
+          direction: outbound
+          target_selector: $.event.targets[*]
+          dynamic_label_field: label
+          target_id_field: id
+          properties:
+            impact: $.impact
+            purpose_tags: $.purpose_tags
+            provenance_ref: $.provenance_ref
+        - type: OBSERVED_ON
+          direction: outbound
+          target_selector: $.event.assets[*]
+          target_label: DataAsset
+          target_id_field: asset_id
+          properties:
+            purpose_tags: $.purpose_tags
+            provenance_ref: $.provenance_ref
+        - type: OCCURRED_AT
+          direction: outbound
+          target_selector: $.event.locations[*]
+          target_label: Location
+          target_id_field: location_id
+          properties:
+            confidence: $.confidence
+            purpose_tags: $.purpose_tags
+            provenance_ref: $.provenance_ref
+        - type: EMITTED_EVENT
+          direction: inbound
+          source_label: SourceSystem
+          source_id_field: $.event.source_system_id
+          properties:
+            ingested_at: $.processed_at
+            ingest_job_id: {{ingest_id}}
+            purpose_tags: $.event.purpose_tags
+            provenance_ref: $.provenance_ref
+
+schemas:
+  EventEnvelope:
+    type: object
+    required:
+      - event
+    properties:
+      event:
+        type: object
+        required:
+          - event_id
+          - type
+          - severity
+          - occurred_at
+          - purpose_tags
+          - targets
+        properties:
+          event_id:
+            type: string
+          type:
+            type: string
+          severity:
+            type: string
+            enum: [low, medium, high, critical]
+          occurred_at:
+            type: string
+            format: date-time
+          purpose_tags:
+            type: array
+            items:
+              type: string
+          raw_payload:
+            type: object
+            additionalProperties: true
+          targets:
+            type: array
+            items:
+              type: object
+              required:
+                - id
+                - label
+                - purpose_tags
+              properties:
+                id:
+                  type: string
+                label:
+                  type: string
+                  enum: [Person, Account, Organization]
+                impact:
+                  type: string
+                purpose_tags:
+                  type: array
+                  items:
+                    type: string
+          assets:
+            type: array
+            items:
+              type: object
+              required:
+                - asset_id
+                - purpose_tags
+              properties:
+                asset_id:
+                  type: string
+                purpose_tags:
+                  type: array
+                  items:
+                    type: string
+          locations:
+            type: array
+            items:
+              type: object
+              required:
+                - location_id
+              properties:
+                location_id:
+                  type: string
+                confidence:
+                  type: number
+        additionalProperties: false
+      residency_zone:
+        type: string
+        enum: [US, EU, APAC]
+    additionalProperties: false
+
+lineage:
+  capture_headers:
+    - x-request-id
+    - x-summit-tenant
+  job_id_template: http-events-{{timestamp}}
+
+observability:
+  metrics:
+    namespace: summit.ingest.http
+    enabled: true
+  tracing:
+    exporter: otlp
+    endpoint: http://otel-collector:4318/v1/traces
+
