@@ -1,0 +1,9 @@
+{
+  "allowed": ["investigation", "fraud-risk", "t&s"],
+  "metadata": {
+    "investigation": { "description": "Analyst investigation tasks" },
+    "fraud-risk": { "description": "Risk assessment workflows" },
+    "t&s": { "description": "Trust & Safety ops" }
+  }
+}
+

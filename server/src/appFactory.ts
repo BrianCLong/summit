@@ -13,19 +13,17 @@ function createApp({ lightweight = false }: AppOptions = {}) {
   const app = express();
   app.disable('x-powered-by');
 
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'"],
-          imgSrc: ["'self'", 'data:', 'https:'],
-        },
-      },
-      referrerPolicy: { policy: 'no-referrer' },
-    }),
-  );
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"]
+      }
+    },
+    referrerPolicy: { policy: 'no-referrer' }
+  }));
 
   app.use(cors({ origin: config.cors.origin, credentials: true }));
   app.use(express.json({ limit: '10mb' }));
@@ -37,7 +35,7 @@ function createApp({ lightweight = false }: AppOptions = {}) {
       status: 'OK',
       timestamp: new Date().toISOString(),
       environment: config.env,
-      version: '1.0.0',
+      version: '1.0.0'
     });
   });
 

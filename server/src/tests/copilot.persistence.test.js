@@ -1,6 +1,6 @@
 /**
  * Tests for Copilot Postgres Persistence Layer
- *
+ * 
  * Covers:
  * - Copilot run persistence and retrieval
  * - Task management with idempotency
@@ -25,7 +25,7 @@ class MockPgClient {
     this.queries.push({ sql, params });
     const key = this.normalizeQuery(sql);
     const result = this.results.get(key);
-
+    
     if (!result) {
       throw new Error(`No mock result configured for query: ${key}`);
     }
@@ -61,12 +61,12 @@ class MockRedisClient {
     if (!this.streams.has(stream)) {
       this.streams.set(stream, []);
     }
-
+    
     const entry = { id: id === '*' ? Date.now() : id };
     for (let i = 0; i < args.length; i += 2) {
       entry[args[i]] = args[i + 1];
     }
-
+    
     this.streams.get(stream).push(entry);
     return entry.id;
   }
@@ -93,29 +93,27 @@ describe('CopilotPostgresStore', () => {
         goalText: 'Test goal',
         status: 'pending',
         plan: { steps: [] },
-        createdAt: new Date().toISOString(),
+        createdAt: new Date().toISOString()
       };
 
       // Mock the INSERT query
       mockPg.mockQuery(
         'insert into copilot_runs ( id, goal_id, goal_text, investigation_id, status, plan, metadata, created_at ) values ($1, $2, $3, $4, $5, $6, $7, $8) on conflict (id) do update set status = excluded.status, plan = excluded.plan, metadata = excluded.metadata, updated_at = now() returning *',
         {
-          rows: [
-            {
-              id: runId,
-              goal_id: null,
-              goal_text: 'Test goal',
-              investigation_id: null,
-              status: 'pending',
-              plan: '{"steps":[]}',
-              metadata: '{}',
-              created_at: run.createdAt,
-              updated_at: run.createdAt,
-              started_at: null,
-              finished_at: null,
-            },
-          ],
-        },
+          rows: [{
+            id: runId,
+            goal_id: null,
+            goal_text: 'Test goal',
+            investigation_id: null,
+            status: 'pending',
+            plan: '{"steps":[]}',
+            metadata: '{}',
+            created_at: run.createdAt,
+            updated_at: run.createdAt,
+            started_at: null,
+            finished_at: null
+          }]
+        }
       );
 
       const result = await store.saveRun(run);
@@ -123,17 +121,18 @@ describe('CopilotPostgresStore', () => {
       expect(result).toMatchObject({
         id: runId,
         goalText: 'Test goal',
-        status: 'pending',
+        status: 'pending'
       });
       expect(mockPg.getQueries()).toHaveLength(1);
     });
 
     test('should retrieve a run by ID', async () => {
       const runId = uuid();
-
-      mockPg.mockQuery('select * from copilot_runs where id = $1', {
-        rows: [
-          {
+      
+      mockPg.mockQuery(
+        'select * from copilot_runs where id = $1',
+        {
+          rows: [{
             id: runId,
             goal_id: null,
             goal_text: 'Test goal',
@@ -144,23 +143,26 @@ describe('CopilotPostgresStore', () => {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             started_at: new Date().toISOString(),
-            finished_at: null,
-          },
-        ],
-      });
+            finished_at: null
+          }]
+        }
+      );
 
       const result = await store.getRun(runId);
 
       expect(result).toMatchObject({
         id: runId,
         goalText: 'Test goal',
-        status: 'running',
+        status: 'running'
       });
       expect(result.plan).toEqual({ steps: [] });
     });
 
     test('should return null for non-existent run', async () => {
-      mockPg.mockQuery('select * from copilot_runs where id = $1', { rows: [] });
+      mockPg.mockQuery(
+        'select * from copilot_runs where id = $1',
+        { rows: [] }
+      );
 
       const result = await store.getRun('non-existent');
       expect(result).toBeNull();
@@ -177,28 +179,26 @@ describe('CopilotPostgresStore', () => {
         sequenceNumber: 0,
         taskType: 'NEO4J_QUERY',
         inputParams: { query: 'MATCH (n) RETURN count(n)' },
-        status: 'pending',
+        status: 'pending'
       };
 
       mockPg.mockQuery(
         'insert into copilot_tasks ( id, run_id, sequence_number, task_type, input_params, output_data, status, error_message, started_at, finished_at ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) on conflict (run_id, sequence_number) do update set status = excluded.status, output_data = excluded.output_data, error_message = excluded.error_message, started_at = excluded.started_at, finished_at = excluded.finished_at returning *',
         {
-          rows: [
-            {
-              id: taskId,
-              run_id: runId,
-              sequence_number: 0,
-              task_type: 'NEO4J_QUERY',
-              input_params: '{"query":"MATCH (n) RETURN count(n)"}',
-              output_data: '{}',
-              status: 'pending',
-              error_message: null,
-              created_at: new Date().toISOString(),
-              started_at: null,
-              finished_at: null,
-            },
-          ],
-        },
+          rows: [{
+            id: taskId,
+            run_id: runId,
+            sequence_number: 0,
+            task_type: 'NEO4J_QUERY',
+            input_params: '{"query":"MATCH (n) RETURN count(n)"}',
+            output_data: '{}',
+            status: 'pending',
+            error_message: null,
+            created_at: new Date().toISOString(),
+            started_at: null,
+            finished_at: null
+          }]
+        }
       );
 
       const result = await store.saveTask(task);
@@ -208,13 +208,13 @@ describe('CopilotPostgresStore', () => {
         runId,
         sequenceNumber: 0,
         taskType: 'NEO4J_QUERY',
-        status: 'pending',
+        status: 'pending'
       });
     });
 
     test('should get tasks for run ordered by sequence', async () => {
       const runId = uuid();
-
+      
       mockPg.mockQuery(
         'select * from copilot_tasks where run_id = $1 order by sequence_number asc',
         {
@@ -230,7 +230,7 @@ describe('CopilotPostgresStore', () => {
               error_message: null,
               created_at: new Date().toISOString(),
               started_at: new Date().toISOString(),
-              finished_at: new Date().toISOString(),
+              finished_at: new Date().toISOString()
             },
             {
               id: uuid(),
@@ -243,10 +243,10 @@ describe('CopilotPostgresStore', () => {
               error_message: null,
               created_at: new Date().toISOString(),
               started_at: null,
-              finished_at: null,
-            },
-          ],
-        },
+              finished_at: null
+            }
+          ]
+        }
       );
 
       const tasks = await store.getTasksForRun(runId);
@@ -266,24 +266,22 @@ describe('CopilotPostgresStore', () => {
         taskId: uuid(),
         level: 'info',
         message: 'Task started',
-        payload: { progress: 0 },
+        payload: { progress: 0 }
       };
 
       mockPg.mockQuery(
         'insert into copilot_events ( run_id, task_id, event_level, message, payload, created_at ) values ($1, $2, $3, $4, $5, $6) returning *',
         {
-          rows: [
-            {
-              id: 1,
-              run_id: runId,
-              task_id: event.taskId,
-              event_level: 'info',
-              message: 'Task started',
-              payload: '{"progress":0}',
-              created_at: new Date().toISOString(),
-            },
-          ],
-        },
+          rows: [{
+            id: 1,
+            run_id: runId,
+            task_id: event.taskId,
+            event_level: 'info',
+            message: 'Task started',
+            payload: '{"progress":0}',
+            created_at: new Date().toISOString()
+          }]
+        }
       );
 
       const result = await store.pushEvent(runId, event);
@@ -293,14 +291,14 @@ describe('CopilotPostgresStore', () => {
         runId,
         taskId: event.taskId,
         level: 'info',
-        message: 'Task started',
+        message: 'Task started'
       });
       expect(result.payload).toEqual({ progress: 0 });
     });
 
     test('should list events with pagination', async () => {
       const runId = uuid();
-
+      
       mockPg.mockQuery(
         'select * from copilot_events where run_id = $1 and id > $2 order by id asc limit $3',
         {
@@ -312,10 +310,10 @@ describe('CopilotPostgresStore', () => {
               event_level: 'info',
               message: 'Run started',
               payload: '{}',
-              created_at: new Date().toISOString(),
-            },
-          ],
-        },
+              created_at: new Date().toISOString()
+            }
+          ]
+        }
       );
 
       const events = await store.listEvents(runId, { afterId: 100, limit: 10 });
@@ -329,9 +327,9 @@ describe('CopilotPostgresStore', () => {
   describe('Resume Functionality', () => {
     test('should find resumable runs', async () => {
       const investigationId = uuid();
-
+      
       mockPg.mockQuery(
-        "select * from copilot_runs where status in ('failed', 'paused') and investigation_id = $1 order by created_at desc",
+        'select * from copilot_runs where status in (\'failed\', \'paused\') and investigation_id = $1 order by created_at desc',
         {
           rows: [
             {
@@ -345,10 +343,10 @@ describe('CopilotPostgresStore', () => {
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
               started_at: new Date().toISOString(),
-              finished_at: new Date().toISOString(),
-            },
-          ],
-        },
+              finished_at: new Date().toISOString()
+            }
+          ]
+        }
       );
 
       const runs = await store.findResumableRuns(investigationId);
@@ -378,67 +376,61 @@ describe('CopilotOrchestrator', () => {
 
       // Mock all the database calls for a successful run
       const runId = uuid();
-
+      
       // Mock saveRun
       mockPg.mockQuery(
         'insert into copilot_runs ( id, goal_id, goal_text, investigation_id, status, plan, metadata, created_at ) values ($1, $2, $3, $4, $5, $6, $7, $8) on conflict (id) do update set status = excluded.status, plan = excluded.plan, metadata = excluded.metadata, updated_at = now() returning *',
         (params) => ({
-          rows: [
-            {
-              id: params[0],
-              goal_id: params[1],
-              goal_text: params[2],
-              investigation_id: params[3],
-              status: params[4],
-              plan: params[5],
-              metadata: params[6],
-              created_at: params[7],
-              updated_at: params[7],
-              started_at: null,
-              finished_at: null,
-            },
-          ],
-        }),
+          rows: [{
+            id: params[0],
+            goal_id: params[1],
+            goal_text: params[2],
+            investigation_id: params[3],
+            status: params[4],
+            plan: params[5],
+            metadata: params[6],
+            created_at: params[7],
+            updated_at: params[7],
+            started_at: null,
+            finished_at: null
+          }]
+        })
       );
 
       // Mock saveTask
       mockPg.mockQuery(
         'insert into copilot_tasks ( id, run_id, sequence_number, task_type, input_params, output_data, status, error_message, started_at, finished_at ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) on conflict (run_id, sequence_number) do update set status = excluded.status, output_data = excluded.output_data, error_message = excluded.error_message, started_at = excluded.started_at, finished_at = excluded.finished_at returning *',
         (params) => ({
-          rows: [
-            {
-              id: params[0],
-              run_id: params[1],
-              sequence_number: params[2],
-              task_type: params[3],
-              input_params: params[4],
-              output_data: params[5],
-              status: params[6],
-              error_message: params[7],
-              created_at: new Date().toISOString(),
-              started_at: params[8],
-              finished_at: params[9],
-            },
-          ],
-        }),
+          rows: [{
+            id: params[0],
+            run_id: params[1],
+            sequence_number: params[2],
+            task_type: params[3],
+            input_params: params[4],
+            output_data: params[5],
+            status: params[6],
+            error_message: params[7],
+            created_at: new Date().toISOString(),
+            started_at: params[8],
+            finished_at: params[9]
+          }]
+        })
       );
 
       // Mock pushEvent
       mockPg.mockQuery(
         'insert into copilot_events ( run_id, task_id, event_level, message, payload, created_at ) values ($1, $2, $3, $4, $5, $6) returning *',
         (params) => ({
-          rows: [
-            {
-              id: Date.now(),
-              run_id: params[0],
-              task_id: params[1],
-              event_level: params[2],
-              message: params[3],
-              payload: params[4],
-              created_at: params[5],
-            },
-          ],
-        }),
+          rows: [{
+            id: Date.now(),
+            run_id: params[0],
+            task_id: params[1],
+            event_level: params[2],
+            message: params[3],
+            payload: params[4],
+            created_at: params[5]
+          }]
+        })
       );
 
       const run = await orchestrator.startRun(null, goalText, { investigationId });
@@ -446,14 +438,14 @@ describe('CopilotOrchestrator', () => {
       expect(run).toMatchObject({
         goalText,
         investigationId,
-        status: 'pending',
+        status: 'pending'
       });
       expect(run.id).toBeTruthy();
       expect(run.plan).toBeTruthy();
       expect(run.plan.steps).toBeInstanceOf(Array);
 
       // Wait a bit for async execution to start
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Verify events were emitted to Redis
       const redisEvents = mockRedis.getStream(`copilot:run:${run.id}`);
@@ -477,13 +469,14 @@ describe('CopilotOrchestrator', () => {
         id: runId,
         goalText: 'Resume test',
         status: 'failed',
-        plan: { steps: [] },
+        plan: { steps: [] }
       };
 
       // Mock getRun
-      mockPg.mockQuery('select * from copilot_runs where id = $1', {
-        rows: [
-          {
+      mockPg.mockQuery(
+        'select * from copilot_runs where id = $1',
+        {
+          rows: [{
             id: runId,
             goal_id: null,
             goal_text: 'Resume test',
@@ -494,49 +487,45 @@ describe('CopilotOrchestrator', () => {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             started_at: new Date().toISOString(),
-            finished_at: new Date().toISOString(),
-          },
-        ],
-      });
+            finished_at: new Date().toISOString()
+          }]
+        }
+      );
 
       // Mock updateRun for resume
       mockPg.mockQuery(
         'update copilot_runs set status = $2, plan = $3, metadata = $4, started_at = $5, finished_at = $6, updated_at = now() where id = $1 returning *',
         (params) => ({
-          rows: [
-            {
-              id: params[0],
-              goal_id: null,
-              goal_text: 'Resume test',
-              investigation_id: null,
-              status: params[1],
-              plan: params[2],
-              metadata: params[3],
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              started_at: params[4],
-              finished_at: params[5],
-            },
-          ],
-        }),
+          rows: [{
+            id: params[0],
+            goal_id: null,
+            goal_text: 'Resume test',
+            investigation_id: null,
+            status: params[1],
+            plan: params[2],
+            metadata: params[3],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            started_at: params[4],
+            finished_at: params[5]
+          }]
+        })
       );
 
       // Mock event insertion
       mockPg.mockQuery(
         'insert into copilot_events ( run_id, task_id, event_level, message, payload, created_at ) values ($1, $2, $3, $4, $5, $6) returning *',
         (params) => ({
-          rows: [
-            {
-              id: Date.now(),
-              run_id: params[0],
-              task_id: params[1],
-              event_level: params[2],
-              message: params[3],
-              payload: params[4],
-              created_at: params[5],
-            },
-          ],
-        }),
+          rows: [{
+            id: Date.now(),
+            run_id: params[0],
+            task_id: params[1],
+            event_level: params[2],
+            message: params[3],
+            payload: params[4],
+            created_at: params[5]
+          }]
+        })
       );
 
       const resumedRun = await orchestrator.resumeRun(failedRun);
@@ -555,7 +544,7 @@ describe('Integration Tests', () => {
     // 3. Emit events
     // 4. Complete successfully
     // 5. Resume if failed
-
+    
     // For now, we'll just verify the components work together
     const mockPg = new MockPgClient();
     const mockRedis = new MockRedisClient();

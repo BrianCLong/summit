@@ -19,7 +19,7 @@ interface RateLimiterOptions {
 export const createRateLimiter = (
   windowMs: number = 15 * 60 * 1000,
   max: number = 100,
-  message: string = 'Too many requests',
+  message: string = 'Too many requests'
 ): RateLimitRequestHandler => {
   return rateLimit({
     windowMs,
@@ -29,16 +29,14 @@ export const createRateLimiter = (
     legacyHeaders: false,
     handler: (req: Request, res: Response) => {
       trackError('rate_limiting', 'RateLimitExceeded');
-      logger.warn(
-        `Rate limit exceeded. IP: ${req.ip}, User Agent: ${req.get('User-Agent')}, Path: ${req.path}, Method: ${req.method}`,
-      );
-
+      logger.warn(`Rate limit exceeded. IP: ${req.ip}, User Agent: ${req.get('User-Agent')}, Path: ${req.path}, Method: ${req.method}`);
+      
       res.status(429).json({
         error: message,
         retryAfter: Math.ceil(windowMs / 1000),
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       });
-    },
+    }
   });
 };
 
@@ -48,7 +46,7 @@ export const createRateLimiter = (
 export const strictRateLimiter = createRateLimiter(
   15 * 60 * 1000, // 15 minutes
   20, // 20 requests max
-  'Too many requests to sensitive endpoint',
+  'Too many requests to sensitive endpoint'
 );
 
 /**
@@ -57,7 +55,7 @@ export const strictRateLimiter = createRateLimiter(
 export const authRateLimiter = createRateLimiter(
   15 * 60 * 1000, // 15 minutes
   5, // 5 attempts max
-  'Too many authentication attempts',
+  'Too many authentication attempts'
 );
 
 /**
@@ -66,7 +64,7 @@ export const authRateLimiter = createRateLimiter(
 export const aiRateLimiter = createRateLimiter(
   60 * 1000, // 1 minute
   10, // 10 requests max
-  'Too many AI processing requests',
+  'Too many AI processing requests'
 );
 
 /**
@@ -75,7 +73,7 @@ export const aiRateLimiter = createRateLimiter(
 export const graphqlRateLimiter = createRateLimiter(
   60 * 1000, // 1 minute
   50, // 50 queries max
-  'Too many GraphQL requests',
+  'Too many GraphQL requests'
 );
 
 /**
@@ -84,24 +82,21 @@ export const graphqlRateLimiter = createRateLimiter(
 export const requestSizeLimiter = (maxSize: string | number = '10mb') => {
   return (req: Request, res: Response, next: NextFunction): Response | void => {
     const contentLength = parseInt(req.headers['content-length'] || '0');
-    const maxBytes =
-      typeof maxSize === 'string'
-        ? parseInt(maxSize.replace(/\D/g, '')) * (maxSize.includes('mb') ? 1024 * 1024 : 1024)
-        : maxSize;
-
+    const maxBytes = typeof maxSize === 'string' 
+      ? parseInt(maxSize.replace(/\D/g, '')) * (maxSize.includes('mb') ? 1024 * 1024 : 1024)
+      : maxSize;
+    
     if (contentLength > maxBytes) {
       trackError('security', 'RequestTooLarge');
-      logger.warn(
-        `Request size exceeded limit. IP: ${req.ip}, Content Length: ${contentLength}, Max Bytes: ${maxBytes}, Path: ${req.path}`,
-      );
-
+      logger.warn(`Request size exceeded limit. IP: ${req.ip}, Content Length: ${contentLength}, Max Bytes: ${maxBytes}, Path: ${req.path}`);
+      
       return res.status(413).json({
         error: 'Request entity too large',
         maxSize: maxSize,
-        received: contentLength,
+        received: contentLength
       });
     }
-
+    
     next();
   };
 };
@@ -112,23 +107,21 @@ export const requestSizeLimiter = (maxSize: string | number = '10mb') => {
 export const ipWhitelist = (allowedIPs: string[] = []) => {
   return (req: Request, res: Response, next: NextFunction): Response | void => {
     const clientIP = req.ip || req.connection?.remoteAddress;
-
+    
     // Allow localhost in development
     const devIPs = ['127.0.0.1', '::1', '::ffff:127.0.0.1'];
     const allAllowedIPs = [...allowedIPs, ...devIPs];
-
+    
     if (!allAllowedIPs.includes(clientIP)) {
       trackError('security', 'UnauthorizedIP');
-      logger.warn(
-        `Unauthorized IP access attempt. IP: ${clientIP}, Path: ${req.path}, User Agent: ${req.get('User-Agent')}`,
-      );
-
+      logger.warn(`Unauthorized IP access attempt. IP: ${clientIP}, Path: ${req.path}, User Agent: ${req.get('User-Agent')}`);
+      
       return res.status(403).json({
         error: 'Access denied',
-        message: 'IP not authorized',
+        message: 'IP not authorized'
       });
     }
-
+    
     next();
   };
 };
@@ -140,33 +133,27 @@ interface APIKeyRequest extends Request {
 /**
  * API key validation middleware
  */
-export const apiKeyAuth = (
-  req: APIKeyRequest,
-  res: Response,
-  next: NextFunction,
-): Response | void => {
+export const apiKeyAuth = (req: APIKeyRequest, res: Response, next: NextFunction): Response | void => {
   const apiKey = (req.headers['x-api-key'] as string) || (req.query.api_key as string);
   const validKeys = process.env.VALID_API_KEYS?.split(',') || [];
-
+  
   if (!apiKey) {
     trackError('security', 'MissingAPIKey');
     return res.status(401).json({
       error: 'API key required',
-      message: 'Include X-API-Key header or api_key query parameter',
+      message: 'Include X-API-Key header or api_key query parameter'
     });
   }
-
+  
   if (!validKeys.includes(apiKey)) {
     trackError('security', 'InvalidAPIKey');
-    logger.warn(
-      `Invalid API key used. IP: ${req.ip}, Path: ${req.path}, Key Prefix: ${apiKey.substring(0, 8)}...`,
-    );
-
+    logger.warn(`Invalid API key used. IP: ${req.ip}, Path: ${req.path}, Key Prefix: ${apiKey.substring(0, 8)}...`);
+    
     return res.status(401).json({
-      error: 'Invalid API key',
+      error: 'Invalid API key'
     });
   }
-
+  
   req.apiKey = apiKey;
   next();
 };
@@ -174,11 +161,7 @@ export const apiKeyAuth = (
 /**
  * Request validation middleware
  */
-export const validateRequest = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Response | void => {
+export const validateRequest = (req: Request, res: Response, next: NextFunction): Response | void => {
   // Check for suspicious patterns
   const suspiciousPatterns = [
     /\.\.\//g, // Path traversal
@@ -187,26 +170,24 @@ export const validateRequest = (
     /javascript:/gi, // XSS
     /eval\(/gi, // Code injection
   ];
-
+  
   const requestStr = JSON.stringify({
     url: req.url,
     query: req.query,
-    body: req.body,
+    body: req.body
   });
-
+  
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(requestStr)) {
       trackError('security', 'SuspiciousRequest');
-      logger.warn(
-        `Suspicious request pattern detected. IP: ${req.ip}, Path: ${req.path}, Pattern: ${pattern.toString()}, User Agent: ${req.get('User-Agent')}`,
-      );
-
+      logger.warn(`Suspicious request pattern detected. IP: ${req.ip}, Path: ${req.path}, Pattern: ${pattern.toString()}, User Agent: ${req.get('User-Agent')}`);
+      
       return res.status(400).json({
-        error: 'Invalid request format',
+        error: 'Invalid request format'
       });
     }
   }
-
+  
   next();
 };
 
@@ -219,7 +200,7 @@ export const securityHeaders = helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
-      imgSrc: ["'self'", 'data:', 'https:'],
+      imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'"],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
@@ -231,8 +212,8 @@ export const securityHeaders = helmet({
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
-    preload: true,
-  },
+    preload: true
+  }
 });
 
 type CorsCallback = (err: Error | null, allow?: boolean) => void;
@@ -245,12 +226,12 @@ export const corsConfig = {
     const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
       'http://localhost:3000',
       'http://localhost:5173',
-      'https://intelgraph.app',
+      'https://intelgraph.app'
     ];
-
+    
     // Allow requests with no origin (mobile apps, etc.)
     if (!origin) return callback(null, true);
-
+    
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -261,7 +242,7 @@ export const corsConfig = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Requested-With']
 };
 
 /**
@@ -269,16 +250,14 @@ export const corsConfig = {
  */
 export const requestLogger = (req: Request, res: Response, next: NextFunction): void => {
   const start = Date.now();
-
+  
   res.on('finish', () => {
     const duration = Date.now() - start;
     const logLevel = res.statusCode >= 400 ? 'warn' : 'info';
-
-    logger[logLevel](
-      `HTTP Request. Method: ${req.method}, URL: ${req.url}, Status Code: ${res.statusCode}, Duration: ${duration}, IP: ${req.ip}, User Agent: ${req.get('User-Agent')}, Content Length: ${res.get('Content-Length')}`,
-    );
+    
+    logger[logLevel](`HTTP Request. Method: ${req.method}, URL: ${req.url}, Status Code: ${res.statusCode}, Duration: ${duration}, IP: ${req.ip}, User Agent: ${req.get('User-Agent')}, Content Length: ${res.get('Content-Length')}`);
   });
-
+  
   next();
 };
 
@@ -289,23 +268,18 @@ interface ErrorWithStatus extends Error {
 /**
  * Error handling middleware
  */
-export const errorHandler = (
-  err: ErrorWithStatus,
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void => {
+export const errorHandler = (err: ErrorWithStatus, req: Request, res: Response, next: NextFunction): void => {
   trackError('middleware', err.name || 'UnknownError');
-
-  logger.error(
-    `Middleware error. Error: ${err.message}, Stack: ${err.stack}, URL: ${req.url}, Method: ${req.method}, IP: ${req.ip}`,
-  );
-
+  
+  logger.error(`Middleware error. Error: ${err.message}, Stack: ${err.stack}, URL: ${req.url}, Method: ${req.method}, IP: ${req.ip}`);
+  
   // Don't expose internal errors in production
   const isDev = process.env.NODE_ENV === 'development';
-
+  
   res.status(err.status || 500).json({
     error: isDev ? err.message : 'Internal server error',
-    ...(isDev && { stack: err.stack }),
+    ...(isDev && { stack: err.stack })
   });
 };
+
+

@@ -4,8 +4,8 @@ import { check, sleep } from 'k6';
 export let options = {
   stages: [
     { duration: '1m', target: 10 }, // ramp-up to 10 concurrent WebSocket connections
-    { duration: '3m', target: 10 }, // stay at 10 connections
-    { duration: '30s', target: 0 }, // ramp-down
+    { duration: '3m', target: 10 },  // stay at 10 connections
+    { duration: '30s', target: 0 },  // ramp-down
   ],
   thresholds: {
     ws_connecting_duration: ['p(95)<1000'], // 95% of connections should establish within 1s
@@ -19,12 +19,11 @@ export default function () {
     socket.on('open', () => {
       console.log('WebSocket connected');
       // Send a GraphQL subscription query
-      socket.send(
-        JSON.stringify({
-          type: 'subscribe',
-          id: '1',
-          payload: {
-            query: `
+      socket.send(JSON.stringify({
+        type: 'subscribe',
+        id: '1',
+        payload: {
+          query: `
             subscription {
               entityCreated {
                 id
@@ -32,9 +31,8 @@ export default function () {
               }
             }
           `,
-          },
-        }),
-      );
+        },
+      }));
     });
 
     socket.on('message', (data) => {

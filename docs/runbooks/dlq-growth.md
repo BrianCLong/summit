@@ -12,3 +12,4 @@
   - Map new fields; update schema validation.
   - Quarantine bad records; create remediation ticket.
 - Validation: DLQ inflow drops to zero; backlog drains.
+

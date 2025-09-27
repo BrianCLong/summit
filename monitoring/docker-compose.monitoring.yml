@@ -7,7 +7,7 @@ services:
     image: prom/prometheus:v2.47.0
     container_name: intelgraph-prometheus
     ports:
-      - '9090:9090'
+      - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
@@ -29,7 +29,7 @@ services:
     image: grafana/grafana:10.1.0
     container_name: intelgraph-grafana
     ports:
-      - '3000:3000'
+      - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
@@ -49,7 +49,7 @@ services:
     image: prom/alertmanager:v0.26.0
     container_name: intelgraph-alertmanager
     ports:
-      - '9093:9093'
+      - "9093:9093"
     volumes:
       - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
       - alertmanager_data:/alertmanager
@@ -66,7 +66,7 @@ services:
     image: prom/node-exporter:v1.6.1
     container_name: intelgraph-node-exporter
     ports:
-      - '9100:9100'
+      - "9100:9100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -85,7 +85,7 @@ services:
     image: oliver006/redis_exporter:v1.54.0
     container_name: intelgraph-redis-exporter
     ports:
-      - '9121:9121'
+      - "9121:9121"
     environment:
       - REDIS_ADDR=redis://redis:6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
@@ -101,7 +101,7 @@ services:
     image: prometheuscommunity/postgres-exporter:v0.13.2
     container_name: intelgraph-postgres-exporter
     ports:
-      - '9187:9187'
+      - "9187:9187"
     environment:
       - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-intelgraph}?sslmode=disable
     restart: unless-stopped
@@ -116,7 +116,7 @@ services:
     image: neo4j/neo4j-prometheus-exporter:5.0
     container_name: intelgraph-neo4j-exporter
     ports:
-      - '9113:9113'
+      - "9113:9113"
     environment:
       - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_USERNAME=${NEO4J_USER:-neo4j}
@@ -133,9 +133,9 @@ services:
     image: jaegertracing/all-in-one:1.49
     container_name: intelgraph-jaeger
     ports:
-      - '16686:16686' # Jaeger UI
-      - '14268:14268' # Jaeger collector
-      - '6831:6831/udp' # Jaeger agent
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"  # Jaeger collector
+      - "6831:6831/udp"  # Jaeger agent
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     restart: unless-stopped
@@ -147,7 +147,7 @@ services:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
     container_name: intelgraph-cadvisor
     ports:
-      - '8080:8080'
+      - "8080:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro

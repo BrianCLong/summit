@@ -10,19 +10,14 @@ const NEO4J_URI = process.env.NEO4J_URI || 'bolt://localhost:7687';
 const NEO4J_USER = process.env.NEO4J_USER || 'neo4j';
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'password';
 
-const driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD), {
-  encrypted: 'ENCRYPTION_OFF',
-});
+const driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD), { encrypted: 'ENCRYPTION_OFF' });
 
 async function runMigrations() {
   const session = driver.session();
   try {
-    const migrationsDir = path.join(
-      path.dirname(fileURLToPath(import.meta.url)),
-      '../server/src/db/migrations',
-    );
+    const migrationsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../server/src/db/migrations');
     const files = await fs.readdir(migrationsDir);
-    const cypherFiles = files.filter((file) => file.endsWith('.cypher')).sort();
+    const cypherFiles = files.filter(file => file.endsWith('.cypher')).sort();
 
     for (const file of cypherFiles) {
       const filePath = path.join(migrationsDir, file);

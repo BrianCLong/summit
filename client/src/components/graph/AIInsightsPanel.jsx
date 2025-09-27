@@ -1,18 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  Drawer,
-  Box,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  IconButton,
-  Tooltip,
-  Tabs,
-  Tab,
-} from '@mui/material';
+import { Drawer, Box, Typography, List, ListItem, ListItemText, Divider, IconButton, Tooltip, Tabs, Tab } from '@mui/material';
 import AISuggestLinksGQL from '../ai/AISuggestLinksGQL';
 import CloseIcon from '@mui/icons-material/Close';
 import $ from 'jquery';
@@ -29,12 +17,8 @@ export default function AIInsightsPanel({ open, onClose }) {
 
   useEffect(() => {
     const socket = getSocket();
-    function onConnect() {
-      setConnected(true);
-    }
-    function onDisconnect() {
-      setConnected(false);
-    }
+    function onConnect() { setConnected(true); }
+    function onDisconnect() { setConnected(false); }
     function onInsight(_evt, payload) {
       if (!payload?.entityId) return;
       dispatch(g.insightReceived({ entityId: payload.entityId, data: payload.data || {} }));
@@ -59,11 +43,7 @@ export default function AIInsightsPanel({ open, onClose }) {
           <Typography variant="caption" color={connected ? 'success.main' : 'text.secondary'}>
             {connected ? 'live' : 'offline'}
           </Typography>
-          <Tooltip title="Close">
-            <IconButton onClick={onClose} size="small">
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          <Tooltip title="Close"><IconButton onClick={onClose} size="small"><CloseIcon fontSize="small" /></IconButton></Tooltip>
         </Box>
       </Box>
       <Divider />
@@ -75,38 +55,24 @@ export default function AIInsightsPanel({ open, onClose }) {
       <Box sx={{ p: 2 }}>
         {tab === 0 && (
           <>
-            {!entityId && (
-              <Typography color="text.secondary">Select a node or edge to see insights.</Typography>
-            )}
-            {entityId && !insight && (
-              <Typography color="text.secondary">Waiting for insights…</Typography>
-            )}
+            {!entityId && (<Typography color="text.secondary">Select a node or edge to see insights.</Typography>)}
+            {entityId && !insight && (<Typography color="text.secondary">Waiting for insights…</Typography>)}
             {entityId && insight && (
               <>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                  Summary
-                </Typography>
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>Summary</Typography>
                 <Typography sx={{ mb: 2 }}>{insight.summary || '—'}</Typography>
 
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                  Suggested Next Actions
-                </Typography>
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>Suggested Next Actions</Typography>
                 <List dense>
                   {(insight.suggestions || []).map((s, i) => (
-                    <ListItem key={i}>
-                      <ListItemText primary={s} />
-                    </ListItem>
+                    <ListItem key={i}><ListItemText primary={s} /></ListItem>
                   ))}
                 </List>
 
-                <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
-                  Related Entities
-                </Typography>
+                <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Related Entities</Typography>
                 <List dense>
                   {(insight.related || []).map((r) => (
-                    <ListItem key={r.id}>
-                      <ListItemText primary={r.label || r.id} secondary={r.type} />
-                    </ListItem>
+                    <ListItem key={r.id}><ListItemText primary={r.label || r.id} secondary={r.type} /></ListItem>
                   ))}
                 </List>
 
@@ -118,7 +84,9 @@ export default function AIInsightsPanel({ open, onClose }) {
             )}
           </>
         )}
-        {tab === 1 && <AISuggestLinksGQL entityId={entityId} limit={8} />}
+        {tab === 1 && (
+          <AISuggestLinksGQL entityId={entityId} limit={8} />
+        )}
       </Box>
     </Drawer>
   );

@@ -1,46 +1,9 @@
 import React, { useEffect, useMemo } from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useNavigate,
-  useLocation,
-} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ApolloProvider } from '@apollo/client';
-import {
-  ThemeProvider,
-  CssBaseline,
-  Container,
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Grid,
-  Alert,
-  AppBar,
-  Toolbar,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  IconButton,
-  LinearProgress,
-  Divider,
-} from '@mui/material';
-import {
-  Dashboard as DashboardIcon,
-  Search,
-  Timeline,
-  Psychology,
-  Menu as MenuIcon,
-  Map,
-  Assessment,
-  Settings,
-} from '@mui/icons-material';
+import { ThemeProvider, CssBaseline, Container, Box, Card, CardContent, Typography, Button, Grid, Alert, AppBar, Toolbar, Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton, LinearProgress, Divider } from '@mui/material';
+import { Dashboard as DashboardIcon, Search, Timeline, Psychology, Menu as MenuIcon, Map, Assessment, Settings } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
 import { apolloClient } from './services/apollo';
@@ -73,7 +36,7 @@ function ConnectionStatus() {
         const response = await fetch('http://localhost:4000/graphql', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: '{ __typename }' }),
+          body: JSON.stringify({ query: '{ __typename }' })
         });
         setBackendStatus(response.ok ? 'connected' : 'error');
       } catch (error) {
@@ -89,15 +52,11 @@ function ConnectionStatus() {
   const statusConfig = {
     checking: { color: 'info', message: '🔄 Checking backend connection...' },
     connected: { color: 'success', message: '✅ Backend connected successfully!' },
-    error: { color: 'error', message: '❌ Backend connection failed. Check if server is running.' },
+    error: { color: 'error', message: '❌ Backend connection failed. Check if server is running.' }
   };
 
   const { color, message } = statusConfig[backendStatus];
-  return (
-    <Alert severity={color} sx={{ mb: 2 }}>
-      {message}
-    </Alert>
-  );
+  return <Alert severity={color} sx={{ mb: 2 }}>{message}</Alert>;
 }
 
 // Navigation Drawer
@@ -115,9 +74,9 @@ function NavigationDrawer({ open, onClose }) {
       <Box sx={{ width: 250, mt: 8 }}>
         <List>
           {navigationItems.map((item) => (
-            <ListItem
+            <ListItem 
               key={item.path}
-              button
+              button 
               selected={location.pathname === item.path}
               onClick={() => handleNavigation(item.path)}
             >
@@ -134,8 +93,8 @@ function NavigationDrawer({ open, onClose }) {
 // App Bar
 function AppHeader({ onMenuClick }) {
   const location = useLocation();
-  const currentPage = navigationItems.find((item) => item.path === location.pathname);
-
+  const currentPage = navigationItems.find(item => item.path === location.pathname);
+  
   return (
     <AppBar position="fixed">
       <Toolbar>
@@ -159,20 +118,17 @@ function DashboardPage() {
     reportsGenerated: 12,
     systemLoad: 67,
     activeUsers: 8,
-    alertsCount: 2,
+    alertsCount: 2
   });
 
   // Simulate real-time updates
   React.useEffect(() => {
     const interval = setInterval(() => {
-      setMetrics((prev) => ({
+      setMetrics(prev => ({
         ...prev,
         systemLoad: Math.max(20, Math.min(95, prev.systemLoad + (Math.random() - 0.5) * 10)),
-        activeUsers: Math.max(
-          1,
-          Math.min(20, prev.activeUsers + Math.floor((Math.random() - 0.5) * 3)),
-        ),
-        graphNodes: prev.graphNodes + Math.floor(Math.random() * 3),
+        activeUsers: Math.max(1, Math.min(20, prev.activeUsers + Math.floor((Math.random() - 0.5) * 3))),
+        graphNodes: prev.graphNodes + Math.floor(Math.random() * 3)
       }));
     }, 3000);
 
@@ -182,13 +138,11 @@ function DashboardPage() {
   return (
     <Container maxWidth="lg">
       <ConnectionStatus />
-
+      
       <Grid container spacing={3}>
         {/* Header */}
         <Grid item xs={12}>
-          <Card
-            sx={{ background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)', color: 'white' }}
-          >
+          <Card sx={{ background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)', color: 'white' }}>
             <CardContent>
               <Typography variant="h3" gutterBottom>
                 📊 Intelligence Command Center
@@ -202,13 +156,7 @@ function DashboardPage() {
 
         {/* Key Metrics */}
         <Grid item xs={12} sm={6} md={3}>
-          <Card
-            sx={{
-              height: '100%',
-              background: 'linear-gradient(135deg, #4caf50 0%, #81c784 100%)',
-              color: 'white',
-            }}
-          >
+          <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #4caf50 0%, #81c784 100%)', color: 'white' }}>
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                 {metrics.investigations}
@@ -222,13 +170,7 @@ function DashboardPage() {
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card
-            sx={{
-              height: '100%',
-              background: 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)',
-              color: 'white',
-            }}
-          >
+          <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)', color: 'white' }}>
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                 {metrics.graphNodes.toLocaleString()}
@@ -242,13 +184,7 @@ function DashboardPage() {
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card
-            sx={{
-              height: '100%',
-              background: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)',
-              color: 'white',
-            }}
-          >
+          <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)', color: 'white' }}>
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                 {metrics.reportsGenerated}
@@ -262,13 +198,7 @@ function DashboardPage() {
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card
-            sx={{
-              height: '100%',
-              background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)',
-              color: 'white',
-            }}
-          >
+          <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #f44336 0%, #ef5350 100%)', color: 'white' }}>
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                 {metrics.alertsCount}
@@ -285,45 +215,29 @@ function DashboardPage() {
         <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
-                🖥️ System Performance
-              </Typography>
-
+              <Typography variant="h6" gutterBottom>🖥️ System Performance</Typography>
+              
               <Box sx={{ mb: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body2">System Load</Typography>
                   <Typography variant="body2">{metrics.systemLoad}%</Typography>
                 </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={metrics.systemLoad}
-                  color={
-                    metrics.systemLoad > 80
-                      ? 'error'
-                      : metrics.systemLoad > 60
-                        ? 'warning'
-                        : 'success'
-                  }
+                <LinearProgress 
+                  variant="determinate" 
+                  value={metrics.systemLoad} 
+                  color={metrics.systemLoad > 80 ? 'error' : metrics.systemLoad > 60 ? 'warning' : 'success'}
                   sx={{ height: 8, borderRadius: 4 }}
                 />
               </Box>
 
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Active Users
-                  </Typography>
-                  <Typography variant="h5" color="primary">
-                    {metrics.activeUsers}
-                  </Typography>
+                  <Typography variant="body2" color="text.secondary">Active Users</Typography>
+                  <Typography variant="h5" color="primary">{metrics.activeUsers}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Response Time
-                  </Typography>
-                  <Typography variant="h5" color="success.main">
-                    125ms
-                  </Typography>
+                  <Typography variant="body2" color="text.secondary">Response Time</Typography>
+                  <Typography variant="h5" color="success.main">125ms</Typography>
                 </Box>
               </Box>
 
@@ -338,15 +252,13 @@ function DashboardPage() {
         <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
-                🚀 Quick Actions
-              </Typography>
-
+              <Typography variant="h6" gutterBottom>🚀 Quick Actions</Typography>
+              
               <Grid container spacing={2}>
                 <Grid item xs={6}>
-                  <Button
-                    fullWidth
-                    variant="contained"
+                  <Button 
+                    fullWidth 
+                    variant="contained" 
                     startIcon={<Search />}
                     onClick={() => navigate('/investigations')}
                     sx={{ mb: 1 }}
@@ -355,9 +267,9 @@ function DashboardPage() {
                   </Button>
                 </Grid>
                 <Grid item xs={6}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
+                  <Button 
+                    fullWidth 
+                    variant="outlined" 
                     startIcon={<Timeline />}
                     onClick={() => navigate('/graph')}
                     sx={{ mb: 1 }}
@@ -366,9 +278,9 @@ function DashboardPage() {
                   </Button>
                 </Grid>
                 <Grid item xs={6}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
+                  <Button 
+                    fullWidth 
+                    variant="outlined" 
                     startIcon={<Psychology />}
                     onClick={() => navigate('/copilot')}
                     sx={{ mb: 1 }}
@@ -377,9 +289,9 @@ function DashboardPage() {
                   </Button>
                 </Grid>
                 <Grid item xs={6}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
+                  <Button 
+                    fullWidth 
+                    variant="outlined" 
                     startIcon={<Assessment />}
                     onClick={() => navigate('/threats')}
                     sx={{ mb: 1 }}
@@ -391,9 +303,7 @@ function DashboardPage() {
 
               <Divider sx={{ my: 2 }} />
 
-              <Typography variant="subtitle2" gutterBottom>
-                Recent Activity
-              </Typography>
+              <Typography variant="subtitle2" gutterBottom>Recent Activity</Typography>
               <Box sx={{ fontSize: '0.85rem' }}>
                 <Typography variant="body2" sx={{ mb: 0.5 }}>
                   🔍 Investigation "Project Alpha" updated 2 min ago
@@ -418,9 +328,7 @@ function DashboardPage() {
         <Grid item xs={12} md={8}>
           <Card>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
-                🛠️ Platform Components
-              </Typography>
+              <Typography variant="h6" gutterBottom>🛠️ Platform Components</Typography>
               <Grid container spacing={2}>
                 <Grid item xs={6} sm={4} md={2}>
                   <Box sx={{ textAlign: 'center', p: 1 }}>
@@ -459,10 +367,9 @@ function DashboardPage() {
                   </Box>
                 </Grid>
               </Grid>
-
+              
               <Alert severity="success" sx={{ mt: 2 }}>
-                🌐 <strong>Real-time collaboration active!</strong> Team members can see live
-                updates, AI insights, and coordinate investigations in real-time.
+                🌐 <strong>Real-time collaboration active!</strong> Team members can see live updates, AI insights, and coordinate investigations in real-time.
               </Alert>
             </CardContent>
           </Card>
@@ -506,7 +413,7 @@ function ThreatsPage() {
 
 function NotFoundPage() {
   const navigate = useNavigate();
-
+  
   return (
     <Container maxWidth="sm" sx={{ textAlign: 'center', mt: 8 }}>
       <Card>
@@ -534,7 +441,7 @@ function MainLayout() {
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AppHeader onMenuClick={() => setDrawerOpen(true)} />
       <NavigationDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
-
+      
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -557,30 +464,28 @@ function MainLayout() {
 function ThemedAppShell({ children }) {
   const mode = useSelector((state) => state.ui?.theme || 'light');
   const theme = useMemo(() => getIntelGraphTheme(mode), [mode]);
-
+  
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box
-        sx={{
-          background:
-            'linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 25%, #eceff1 50%, #e8eaf6 75%, #e1f5fe 100%)',
-          minHeight: '100vh',
-          position: 'relative',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background:
-              'radial-gradient(circle at 20% 50%, rgba(33, 150, 243, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(63, 81, 181, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(3, 169, 244, 0.1) 0%, transparent 50%)',
-            pointerEvents: 'none',
-          },
-        }}
-      >
-        <Box sx={{ position: 'relative', zIndex: 1 }}>{children}</Box>
+      <Box sx={{ 
+        background: 'linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 25%, #eceff1 50%, #e8eaf6 75%, #e1f5fe 100%)',
+        minHeight: '100vh',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(circle at 20% 50%, rgba(33, 150, 243, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(63, 81, 181, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(3, 169, 244, 0.1) 0%, transparent 50%)',
+          pointerEvents: 'none'
+        }
+      }}>
+        <Box sx={{ position: 'relative', zIndex: 1 }}>
+          {children}
+        </Box>
       </Box>
     </ThemeProvider>
   );

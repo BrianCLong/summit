@@ -2,7 +2,7 @@
 
 /**
  * IntelGraph Smoke Test - Golden Path Verification
- *
+ * 
  * This script verifies the complete golden path:
  * 1. Create Investigation
  * 2. Add entities/links
@@ -23,7 +23,7 @@ const config = {
   adminUrl: process.env.ADMIN_URL || 'http://localhost:8080',
   timeout: 30000,
   maxRetries: 3,
-  retryDelay: 2000,
+  retryDelay: 2000
 };
 
 // GraphQL queries and mutations
@@ -33,7 +33,7 @@ const QUERIES = {
       __typename
     }
   `,
-
+  
   createInvestigation: `
     mutation CreateInvestigation($input: CreateInvestigationInput!) {
       createInvestigation(input: $input) {
@@ -45,7 +45,7 @@ const QUERIES = {
       }
     }
   `,
-
+  
   addEntity: `
     mutation AddEntity($input: CreateEntityInput!) {
       createEntity(input: $input) {
@@ -56,7 +56,7 @@ const QUERIES = {
       }
     }
   `,
-
+  
   addRelationship: `
     mutation AddRelationship($input: CreateRelationshipInput!) {
       createRelationship(input: $input) {
@@ -68,7 +68,7 @@ const QUERIES = {
       }
     }
   `,
-
+  
   startCopilotRun: `
     mutation StartCopilotRun($goal: String!, $investigationId: ID!) {
       startCopilotRun(goal: $goal, investigationId: $investigationId) {
@@ -79,7 +79,7 @@ const QUERIES = {
       }
     }
   `,
-
+  
   getInvestigation: `
     query GetInvestigation($id: ID!) {
       investigation(id: $id) {
@@ -98,7 +98,7 @@ const QUERIES = {
         }
       }
     }
-  `,
+  `
 };
 
 // Utility functions
@@ -108,7 +108,7 @@ class SmokeTest {
       passed: 0,
       failed: 0,
       total: 0,
-      details: [],
+      details: []
     };
   }
 
@@ -118,16 +118,16 @@ class SmokeTest {
       info: '\x1b[36m',
       success: '\x1b[32m',
       error: '\x1b[31m',
-      warning: '\x1b[33m',
+      warning: '\x1b[33m'
     };
     const reset = '\x1b[0m';
-
+    
     console.log(`${colors[type]}[${timestamp}] ${message}${reset}`);
   }
 
   async test(name, testFn) {
     this.results.total++;
-
+    
     try {
       await this.log(`🧪 Running: ${name}`);
       await testFn();
@@ -143,19 +143,15 @@ class SmokeTest {
 
   async graphqlRequest(query, variables = {}) {
     try {
-      const response = await axios.post(
-        config.apiUrl,
-        {
-          query,
-          variables,
+      const response = await axios.post(config.apiUrl, {
+        query,
+        variables
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
         },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          timeout: config.timeout,
-        },
-      );
+        timeout: config.timeout
+      });
 
       if (response.data.errors) {
         throw new Error(`GraphQL Error: ${JSON.stringify(response.data.errors)}`);
@@ -209,11 +205,8 @@ class SmokeTest {
         if (attempt === maxRetries) {
           throw error;
         }
-        await this.log(
-          `Attempt ${attempt} failed, retrying in ${config.retryDelay}ms...`,
-          'warning',
-        );
-        await new Promise((resolve) => setTimeout(resolve, config.retryDelay));
+        await this.log(`Attempt ${attempt} failed, retrying in ${config.retryDelay}ms...`, 'warning');
+        await new Promise(resolve => setTimeout(resolve, config.retryDelay));
       }
     }
   }
@@ -256,7 +249,7 @@ class SmokeTest {
       const result = await this.retryOperation(async () => {
         return await this.graphqlRequest(QUERIES.healthCheck);
       });
-
+      
       if (!result.__typename) {
         throw new Error('Invalid GraphQL response');
       }
@@ -274,46 +267,42 @@ class SmokeTest {
         input: {
           name: 'Smoke Test Investigation',
           description: 'Automated smoke test investigation for production readiness',
-          type: 'THREAT_ANALYSIS',
-        },
+          type: 'THREAT_ANALYSIS'
+        }
       };
-
+      
       const result = await this.retryOperation(async () => {
         return await this.graphqlRequest(QUERIES.createInvestigation, variables);
       });
-
+      
       investigationId = result.createInvestigation.id;
-
+      
       if (!investigationId) {
         throw new Error('Failed to create investigation');
       }
-
+      
       await this.log(`Investigation created with ID: ${investigationId}`, 'info');
     });
 
     await this.test('Add Multiple Entities', async () => {
       const entities = [
         { type: 'PERSON', name: 'John Doe', properties: { role: 'suspect', age: 35 } },
-        {
-          type: 'ORGANIZATION',
-          name: 'ACME Corp',
-          properties: { industry: 'tech', founded: '2010' },
-        },
-        { type: 'LOCATION', name: 'San Francisco', properties: { country: 'USA', type: 'city' } },
+        { type: 'ORGANIZATION', name: 'ACME Corp', properties: { industry: 'tech', founded: '2010' } },
+        { type: 'LOCATION', name: 'San Francisco', properties: { country: 'USA', type: 'city' } }
       ];
 
       for (const entity of entities) {
         const variables = {
           input: {
             investigationId,
-            ...entity,
-          },
+            ...entity
+          }
         };
-
+        
         const result = await this.retryOperation(async () => {
           return await this.graphqlRequest(QUERIES.addEntity, variables);
         });
-
+        
         entityIds.push(result.createEntity.id);
         await this.log(`Entity created: ${entity.name} (${entity.type})`, 'info');
       }
@@ -326,7 +315,7 @@ class SmokeTest {
     await this.test('Add Multiple Relationships', async () => {
       const relationships = [
         { type: 'WORKS_FOR', from: 0, to: 1, properties: { role: 'CEO', since: '2020' } },
-        { type: 'LOCATED_IN', from: 1, to: 2, properties: { headquarters: true } },
+        { type: 'LOCATED_IN', from: 1, to: 2, properties: { headquarters: true } }
       ];
 
       for (const rel of relationships) {
@@ -336,18 +325,18 @@ class SmokeTest {
             type: rel.type,
             fromEntityId: entityIds[rel.from],
             toEntityId: entityIds[rel.to],
-            properties: rel.properties,
-          },
+            properties: rel.properties
+          }
         };
 
         const result = await this.retryOperation(async () => {
           return await this.graphqlRequest(QUERIES.addRelationship, variables);
         });
-
+        
         if (!result.createRelationship.id) {
           throw new Error(`Failed to create ${rel.type} relationship`);
         }
-
+        
         await this.log(`Relationship created: ${rel.type}`, 'info');
       }
     });
@@ -356,7 +345,7 @@ class SmokeTest {
     await this.test('Simulate CSV Import', async () => {
       // This would test the actual import endpoint in a real scenario
       await this.log('Simulating CSV import process...', 'info');
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate processing time
       await this.log('CSV import simulation completed', 'info');
     });
 
@@ -364,19 +353,19 @@ class SmokeTest {
     await this.test('Start Copilot Run', async () => {
       const variables = {
         goal: 'Analyze the network relationships and identify key connections between entities',
-        investigationId,
+        investigationId
       };
 
       const result = await this.retryOperation(async () => {
         return await this.graphqlRequest(QUERIES.startCopilotRun, variables);
       });
-
+      
       copilotRunId = result.startCopilotRun.id;
-
+      
       if (!copilotRunId) {
         throw new Error('Failed to start Copilot run');
       }
-
+      
       await this.log(`Copilot run started with ID: ${copilotRunId}`, 'info');
     });
 
@@ -386,26 +375,21 @@ class SmokeTest {
       const result = await this.retryOperation(async () => {
         return await this.graphqlRequest(QUERIES.getInvestigation, variables);
       });
-
+      
       const investigation = result.investigation;
       if (!investigation) {
         throw new Error('Investigation not found');
       }
-
+      
       if (investigation.entities.length < 3) {
         throw new Error(`Expected at least 3 entities, found ${investigation.entities.length}`);
       }
-
+      
       if (investigation.relationships.length < 2) {
-        throw new Error(
-          `Expected at least 2 relationships, found ${investigation.relationships.length}`,
-        );
+        throw new Error(`Expected at least 2 relationships, found ${investigation.relationships.length}`);
       }
-
-      await this.log(
-        `Investigation verified: ${investigation.entities.length} entities, ${investigation.relationships.length} relationships`,
-        'info',
-      );
+      
+      await this.log(`Investigation verified: ${investigation.entities.length} entities, ${investigation.relationships.length} relationships`, 'info');
     });
 
     // Phase 7: Performance Testing
@@ -413,12 +397,11 @@ class SmokeTest {
       const startTime = Date.now();
       await this.graphqlRequest(QUERIES.healthCheck);
       const responseTime = Date.now() - startTime;
-
-      if (responseTime > 5000) {
-        // 5 second threshold
+      
+      if (responseTime > 5000) { // 5 second threshold
         throw new Error(`API response time too slow: ${responseTime}ms`);
       }
-
+      
       await this.log(`API response time: ${responseTime}ms`, 'info');
     });
 
@@ -437,19 +420,16 @@ class SmokeTest {
     await this.log(`Total Tests: ${this.results.total}`, 'info');
     await this.log(`Passed: ${this.results.passed}`, 'success');
     await this.log(`Failed: ${this.results.failed}`, this.results.failed > 0 ? 'error' : 'info');
-
+    
     if (this.results.failed > 0) {
       await this.log('\n❌ Failed Tests:', 'error');
       this.results.details
-        .filter((test) => test.status === 'FAILED')
-        .forEach((test) => this.log(`  - ${test.name}: ${test.error}`, 'error'));
+        .filter(test => test.status === 'FAILED')
+        .forEach(test => this.log(`  - ${test.name}: ${test.error}`, 'error'));
     }
 
-    const successRate = ((this.results.passed / this.results.total) * 100).toFixed(1);
-    await this.log(
-      `\nSuccess Rate: ${successRate}%`,
-      successRate === '100.0' ? 'success' : 'warning',
-    );
+    const successRate = (this.results.passed / this.results.total * 100).toFixed(1);
+    await this.log(`\nSuccess Rate: ${successRate}%`, successRate === '100.0' ? 'success' : 'warning');
 
     if (this.results.failed === 0) {
       await this.log('\n🎉 All smoke tests passed! Golden path is working correctly.', 'success');

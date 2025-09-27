@@ -13,9 +13,7 @@ router.post('/time-series', async (req, res) => {
     const { points, intervalMinutes } = req.body || {};
     const out = svc.buildTimeSeries(points || [], intervalMinutes || 60);
     res.json(out);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // POST /api/geoint/clusters { points: [{latitude,longitude}], epsilonKm, minPoints }
@@ -24,9 +22,8 @@ router.post('/clusters', async (req, res) => {
     const { points, epsilonKm, minPoints } = req.body || {};
     const out = svc.detectActivityClusters(points || [], epsilonKm || 0.1, minPoints || 3);
     res.json(out);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 module.exports = router;
+

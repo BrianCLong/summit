@@ -12,43 +12,32 @@ import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { useEntities, useEntityUpdates } from '@/hooks/useGraphQL'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
 import mockData from '@/mock/data.json'
-import type {
-  Entity,
-  Relationship,
-  FilterState,
-  TimelineEvent,
-  GraphLayout,
-} from '@/types'
+import type { Entity, Relationship, FilterState, TimelineEvent, GraphLayout } from '@/types'
 
 export default function ExplorePage() {
   // GraphQL hooks
-  const {
-    data: entitiesData,
-    loading: entitiesLoading,
-    error: entitiesError,
-    refetch,
-  } = useEntities()
+  const { data: entitiesData, loading: entitiesLoading, error: entitiesError, refetch } = useEntities()
   const { data: entityUpdates } = useEntityUpdates()
-
+  
   const [entities, setEntities] = useState<Entity[]>([])
   const [relationships, setRelationships] = useState<Relationship[]>([])
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-
+  
   // UI State
   const [selectedEntityId, setSelectedEntityId] = useState<string>()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [filterPanelOpen, setFilterPanelOpen] = useState(true)
   const [timelineOpen, setTimelineOpen] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
-
+  
   // Graph state
   const [graphLayout, setGraphLayout] = useState<GraphLayout>({
     type: 'force',
-    settings: {},
+    settings: {}
   })
-
+  
   // Filters
   const [filters, setFilters] = useState<FilterState>({
     entityTypes: [],
@@ -72,7 +61,7 @@ export default function ExplorePage() {
         try {
           setLoading(true)
           await new Promise(resolve => setTimeout(resolve, 1000))
-
+          
           setEntities(mockData.entities as Entity[])
           setRelationships(mockData.relationships as Relationship[])
           setTimelineEvents(mockData.timelineEvents as TimelineEvent[])
@@ -105,57 +94,26 @@ export default function ExplorePage() {
 
   // Filter data based on current filters
   const filteredEntities = entities.filter(entity => {
-    if (
-      filters.entityTypes.length > 0 &&
-      !filters.entityTypes.includes(entity.type)
-    )
-      return false
-    if (
-      filters.confidenceRange.min > entity.confidence ||
-      filters.confidenceRange.max < entity.confidence
-    )
-      return false
-    if (
-      filters.tags.length > 0 &&
-      !entity.tags?.some(tag => filters.tags.includes(tag))
-    )
-      return false
-    if (
-      filters.sources.length > 0 &&
-      entity.source &&
-      !filters.sources.includes(entity.source)
-    )
-      return false
-    if (
-      searchQuery &&
-      !entity.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-      return false
+    if (filters.entityTypes.length > 0 && !filters.entityTypes.includes(entity.type)) return false
+    if (filters.confidenceRange.min > entity.confidence || filters.confidenceRange.max < entity.confidence) return false
+    if (filters.tags.length > 0 && !entity.tags?.some(tag => filters.tags.includes(tag))) return false
+    if (filters.sources.length > 0 && entity.source && !filters.sources.includes(entity.source)) return false
+    if (searchQuery && !entity.name.toLowerCase().includes(searchQuery.toLowerCase())) return false
     return true
   })
 
   const filteredRelationships = relationships.filter(rel => {
-    if (
-      filters.relationshipTypes.length > 0 &&
-      !filters.relationshipTypes.includes(rel.type)
-    )
-      return false
+    if (filters.relationshipTypes.length > 0 && !filters.relationshipTypes.includes(rel.type)) return false
     // Only include relationships where both entities are in filtered set
-    return (
-      filteredEntities.some(e => e.id === rel.sourceId) &&
-      filteredEntities.some(e => e.id === rel.targetId)
-    )
+    return filteredEntities.some(e => e.id === rel.sourceId) && 
+           filteredEntities.some(e => e.id === rel.targetId)
   })
 
   // Get available filter options
   const availableEntityTypes = Array.from(new Set(entities.map(e => e.type)))
-  const availableRelationshipTypes = Array.from(
-    new Set(relationships.map(r => r.type))
-  )
+  const availableRelationshipTypes = Array.from(new Set(relationships.map(r => r.type)))
   const availableTags = Array.from(new Set(entities.flatMap(e => e.tags || [])))
-  const availableSources = Array.from(
-    new Set(entities.map(e => e.source).filter(Boolean))
-  ) as string[]
+  const availableSources = Array.from(new Set(entities.map(e => e.source).filter(Boolean))) as string[]
 
   const handleEntitySelect = (entity: Entity) => {
     setSelectedEntityId(entity.id)
@@ -181,10 +139,8 @@ export default function ExplorePage() {
       filters,
       timestamp: new Date().toISOString(),
     }
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: 'application/json',
-    })
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -201,8 +157,8 @@ export default function ExplorePage() {
           title="Failed to load graph data"
           description={error.message}
           action={{
-            label: 'Retry',
-            onClick: () => window.location.reload(),
+            label: "Retry",
+            onClick: () => window.location.reload()
           }}
         />
       </div>
@@ -223,7 +179,7 @@ export default function ExplorePage() {
             className="w-80"
           />
         </div>
-
+        
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -233,7 +189,7 @@ export default function ExplorePage() {
             <Filter className="h-4 w-4 mr-2" />
             Filters
           </Button>
-
+          
           <Button
             variant="outline"
             size="sm"
@@ -242,24 +198,26 @@ export default function ExplorePage() {
             <Search className="h-4 w-4 mr-2" />
             Timeline
           </Button>
-
+          
           <Button
             variant="outline"
             size="sm"
             onClick={handleRefresh}
             disabled={loading}
           >
-            <RefreshCw
-              className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`}
-            />
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-
-          <Button variant="outline" size="sm" onClick={handleExport}>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExport}
+          >
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-
+          
           <Button variant="outline" size="sm">
             <Settings className="h-4 w-4 mr-2" />
             Layout
@@ -301,7 +259,7 @@ export default function ExplorePage() {
                 title="No entities found"
                 description="Try adjusting your filters or search query"
                 action={{
-                  label: 'Clear filters',
+                  label: "Clear filters",
                   onClick: () => {
                     setFilters({
                       entityTypes: [],
@@ -312,7 +270,7 @@ export default function ExplorePage() {
                       sources: [],
                     })
                     setSearchQuery('')
-                  },
+                  }
                 }}
               />
             </div>
@@ -334,7 +292,7 @@ export default function ExplorePage() {
             <TimelineRail
               data={timelineEvents}
               loading={loading}
-              onEventSelect={event => {
+              onEventSelect={(event) => {
                 if (event.entityId) {
                   setSelectedEntityId(event.entityId)
                   setDrawerOpen(true)

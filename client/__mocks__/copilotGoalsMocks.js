@@ -12,10 +12,7 @@ export const GET_GOALS = gql`
 
 export const GET_INVESTIGATIONS = gql`
   query Investigations {
-    investigations {
-      id
-      title
-    }
+    investigations { id title }
   }
 `;
 

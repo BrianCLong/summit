@@ -3,8 +3,8 @@
  * Displays sentiment analysis, link predictions, and AI-generated summaries
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState, useEffect, useMemo } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Box,
   Paper,
@@ -26,7 +26,7 @@ import {
   Button,
   IconButton,
   Tooltip,
-} from '@mui/material';
+} from "@mui/material";
 import {
   ExpandMore as ExpandMoreIcon,
   Psychology as PsychologyIcon,
@@ -37,7 +37,7 @@ import {
   Info as InfoIcon,
   Refresh as RefreshIcon,
   Close as CloseIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import { useQuery, gql } from '@apollo/client';
 
 // GraphQL Queries (same as in GraphExplorer.jsx)
@@ -69,49 +69,50 @@ const mockApiCall = (endpoint, params) => {
     setTimeout(
       () => {
         switch (endpoint) {
-          case 'sentiment':
+          case "sentiment":
             resolve({
-              overall_sentiment: 'positive',
+              overall_sentiment: "positive",
               overall_confidence: 0.78,
               field_sentiments: {
-                description: { sentiment: 'positive', confidence: 0.82 },
-                notes: { sentiment: 'neutral', confidence: 0.65 },
+                description: { sentiment: "positive", confidence: 0.82 },
+                notes: { sentiment: "neutral", confidence: 0.65 },
               },
               summary:
-                'Analyzed 2 text fields. Overall sentiment: positive (confidence: high, 0.78)',
+                "Analyzed 2 text fields. Overall sentiment: positive (confidence: high, 0.78)",
             });
 
-          case 'predict-links':
+          case "predict-links":
             resolve([
               {
                 from: params.entityId,
-                to: 'entity_123',
+                to: "entity_123",
                 confidence: 0.87,
-                reasoning: 'Strong semantic similarity and co-occurrence patterns',
-                type: 'predicted_link',
+                reasoning:
+                  "Strong semantic similarity and co-occurrence patterns",
+                type: "predicted_link",
               },
               {
                 from: params.entityId,
-                to: 'entity_456',
+                to: "entity_456",
                 confidence: 0.72,
-                reasoning: 'Temporal correlation and shared attributes',
-                type: 'predicted_link',
+                reasoning: "Temporal correlation and shared attributes",
+                type: "predicted_link",
               },
             ]);
 
-          case 'ai-summary':
+          case "ai-summary":
             resolve({
               summary:
-                'This entity shows strong positive sentiment and high engagement patterns. Key relationships suggest central role in organizational network.',
+                "This entity shows strong positive sentiment and high engagement patterns. Key relationships suggest central role in organizational network.",
               insights: [
-                'High influence score in communication network',
-                'Positive sentiment trend over time',
-                'Strong correlation with successful outcomes',
+                "High influence score in communication network",
+                "Positive sentiment trend over time",
+                "Strong correlation with successful outcomes",
               ],
               recommendations: [
-                'Consider expanding analysis to connected entities',
-                'Monitor for sentiment changes over time',
-                'Investigate high-confidence link predictions',
+                "Consider expanding analysis to connected entities",
+                "Monitor for sentiment changes over time",
+                "Investigate high-confidence link predictions",
               ],
             });
 
@@ -139,23 +140,23 @@ const SentimentDisplay = ({ sentiment, loading }) => {
 
   const getSentimentColor = (sentimentType) => {
     switch (sentimentType.toLowerCase()) {
-      case 'positive':
-        return 'success';
-      case 'negative':
-        return 'error';
+      case "positive":
+        return "success";
+      case "negative":
+        return "error";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getSentimentIcon = (sentimentType) => {
     switch (sentimentType.toLowerCase()) {
-      case 'positive':
-        return '😊';
-      case 'negative':
-        return '😟';
+      case "positive":
+        return "😊";
+      case "negative":
+        return "😟";
       default:
-        return '😐';
+        return "😐";
     }
   };
 
@@ -207,6 +208,7 @@ const SentimentDisplay = ({ sentiment, loading }) => {
             Explanation: {sentiment.explanation}
           </Typography>
         )}
+
       </CardContent>
     </Card>
   );
@@ -239,7 +241,7 @@ const LinkPredictions = ({ predictions, loading, onLinkSelect }) => {
               key={index}
               button
               onClick={() => onLinkSelect && onLinkSelect(prediction)}
-              sx={{ border: 1, borderColor: 'divider', borderRadius: 1, mb: 1 }}
+              sx={{ border: 1, borderColor: "divider", borderRadius: 1, mb: 1 }}
             >
               <ListItemIcon>
                 <TrendingUpIcon color="primary" />
@@ -247,13 +249,13 @@ const LinkPredictions = ({ predictions, loading, onLinkSelect }) => {
               <ListItemText
                 primary={
                   <Box display="flex" alignItems="center" gap={1}>
-                    <Typography variant="body2">
-                      {prediction.sourceId} → {prediction.targetId}
-                    </Typography>
+                    <Typography variant="body2">{prediction.sourceId} → {prediction.targetId}</Typography>
                     <Chip
                       size="small"
                       label={`${(prediction.confidence * 100).toFixed(0)}%`}
-                      color={prediction.confidence > 0.8 ? 'success' : 'primary'}
+                      color={
+                        prediction.confidence > 0.8 ? "success" : "primary"
+                      }
                       variant="outlined"
                     />
                   </Box>
@@ -308,31 +310,13 @@ const AISummary = ({ summary, loading, onFeedback }) => {
                   <ListItemIcon sx={{ minWidth: 32 }}>
                     <InfoIcon color="primary" fontSize="small" />
                   </ListItemIcon>
-                  <ListItemText primary={<Typography variant="body2">{insight}</Typography>} />
+                  <ListItemText
+                    primary={<Typography variant="body2">{insight}</Typography>}
+                  />
                   <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => onFeedback(insight, 'accept', summary)}
-                    >
-                      Accept
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      color="error"
-                      onClick={() => onFeedback(insight, 'reject', summary)}
-                    >
-                      Reject
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      color="warning"
-                      onClick={() => onFeedback(insight, 'flag', summary)}
-                    >
-                      Flag
-                    </Button>
+                    <Button size="small" variant="outlined" onClick={() => onFeedback(insight, 'accept', summary)}>Accept</Button>
+                    <Button size="small" variant="outlined" color="error" onClick={() => onFeedback(insight, 'reject', summary)}>Reject</Button>
+                    <Button size="small" variant="outlined" color="warning" onClick={() => onFeedback(insight, 'flag', summary)}>Flag</Button>
                   </Box>
                 </ListItem>
               ))}
@@ -351,7 +335,9 @@ const AISummary = ({ summary, loading, onFeedback }) => {
                   <ListItemIcon sx={{ minWidth: 32 }}>
                     <WarningIcon color="warning" fontSize="small" />
                   </ListItemIcon>
-                  <ListItemText primary={<Typography variant="body2">{rec}</Typography>} />
+                  <ListItemText
+                    primary={<Typography variant="body2">{rec}</Typography>}
+                  />
                 </ListItem>
               ))}
             </List>
@@ -366,31 +352,16 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
   const dispatch = useDispatch();
 
   // GraphQL Queries for sentiment and link predictions
-  const {
-    data: sentimentQueryData,
-    loading: loadingSentiment,
-    error: errorSentiment,
-  } = useQuery(ANALYZE_SENTIMENT_QUERY, {
-    variables: {
-      text:
-        selectedEntity?.description ||
-        selectedEntity?.notes ||
-        selectedEntity?.name ||
-        selectedEntity?.id ||
-        '',
-    },
+  const { data: sentimentQueryData, loading: loadingSentiment, error: errorSentiment } = useQuery(ANALYZE_SENTIMENT_QUERY, {
+    variables: { text: selectedEntity?.description || selectedEntity?.notes || selectedEntity?.name || selectedEntity?.id || "" },
     skip: !selectedEntity,
-    fetchPolicy: 'cache-and-network', // Always try to get the latest data
+    fetchPolicy: "cache-and-network", // Always try to get the latest data
   });
 
-  const {
-    data: predictLinksQueryData,
-    loading: loadingPredictions,
-    error: errorPredictions,
-  } = useQuery(PREDICT_LINKS_QUERY, {
+  const { data: predictLinksQueryData, loading: loadingPredictions, error: errorPredictions } = useQuery(PREDICT_LINKS_QUERY, {
     variables: { entityIds: selectedEntity ? [selectedEntity.id] : [] },
     skip: !selectedEntity,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: "cache-and-network",
   });
 
   const sentiment = sentimentQueryData?.analyzeSentiment;
@@ -405,11 +376,11 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
     if (selectedEntity) {
       // Simulate AI Summary loading
       setLoadingSummary(true);
-      mockApiCall('ai-summary', { entityId: selectedEntity.id, entityData: selectedEntity })
-        .then((data) => setAiSummary(data))
-        .catch((err) => {
-          console.error('Error loading AI summary:', err);
-          setErrorSummary('Failed to load AI summary');
+      mockApiCall("ai-summary", { entityId: selectedEntity.id, entityData: selectedEntity })
+        .then(data => setAiSummary(data))
+        .catch(err => {
+          console.error("Error loading AI summary:", err);
+          setErrorSummary("Failed to load AI summary");
         })
         .finally(() => setLoadingSummary(false));
     } else {
@@ -422,13 +393,7 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
   const error = errorSentiment || errorPredictions || errorSummary;
 
   const handleFeedback = async (insight, feedbackType, originalPrediction) => {
-    console.log('Feedback received:', {
-      insight,
-      feedbackType,
-      user: 'current_user',
-      timestamp: new Date().toISOString(),
-      originalPrediction,
-    });
+    console.log("Feedback received:", { insight, feedbackType, user: "current_user", timestamp: new Date().toISOString(), originalPrediction });
     try {
       const response = await fetch('/api/ai/feedback', {
         method: 'POST',
@@ -438,10 +403,10 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
         body: JSON.stringify({
           insight,
           feedbackType,
-          user: 'test_user', // Replace with actual user ID
+          user: "test_user", // Replace with actual user ID
           timestamp: new Date().toISOString(),
           originalPrediction: {
-            type: 'ai_summary', // Indicate the type of AI insight
+            type: "ai_summary", // Indicate the type of AI insight
             model: originalPrediction.metadata.model,
             generatedAt: originalPrediction.metadata.generatedAt,
             entityId: selectedEntity.id, // Add entity ID for context
@@ -455,9 +420,9 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
       }
 
       const result = await response.json();
-      console.log('Feedback API response:', result);
+      console.log("Feedback API response:", result);
     } catch (error) {
-      console.error('Error sending feedback:', error);
+      console.error("Error sending feedback:", error);
     }
   };
 
@@ -475,15 +440,17 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
         elevation={2}
         sx={{
           width: 400,
-          height: '100%',
+          height: "100%",
           p: 3,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <Box textAlign="center">
-          <PsychologyIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+          <PsychologyIcon
+            sx={{ fontSize: 48, color: "text.secondary", mb: 2 }}
+          />
           <Typography variant="h6" color="text.secondary" gutterBottom>
             AI Insights
           </Typography>
@@ -502,13 +469,13 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
       elevation={2}
       sx={{
         width: 400,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       {/* Header */}
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box display="flex" alignItems="center" gap={1}>
             <PsychologyIcon color="primary" />
@@ -516,7 +483,11 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
           </Box>
           <Box>
             <Tooltip title="Refresh insights">
-              <IconButton onClick={handleRefresh} disabled={isLoading} size="small">
+              <IconButton
+                onClick={handleRefresh}
+                disabled={isLoading}
+                size="small"
+              >
                 <RefreshIcon />
               </IconButton>
             </Tooltip>
@@ -536,7 +507,7 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
       </Box>
 
       {/* Content */}
-      <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+      <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
             {error}
@@ -555,7 +526,11 @@ const InsightPanel = ({ selectedEntity, onClose, onLinkSelect }) => {
           />
 
           {/* AI Summary */}
-          <AISummary summary={aiSummary} loading={loading.summary} onFeedback={handleFeedback} />
+          <AISummary
+            summary={aiSummary}
+            loading={loading.summary}
+            onFeedback={handleFeedback}
+          />
         </Box>
       </Box>
 

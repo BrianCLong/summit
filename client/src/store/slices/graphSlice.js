@@ -334,17 +334,3 @@ const graphSlice = createSlice({
     setMinConfidenceFilter: (state, action) => {
       state.minConfidenceFilter = action.payload;
     },
-  }
-});
-
-export const {
-  setGraphData,
-  addNode,
-  addEdge,
-  setSelectedNode,
-  setSelectedEdge,
-  setLoading,
-  setErrorMessage
-} = graphSlice.actions;
-
-export default graphSlice.reducer;

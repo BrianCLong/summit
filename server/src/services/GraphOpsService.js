@@ -27,11 +27,7 @@ async function expandNeighbors(entityId, limit = 50, { traceId } = {}) {
   }
 }
 
-async function expandNeighborhood(
-  entityId,
-  radius = 1,
-  { tenantId, investigationId, traceId } = {},
-) {
+async function expandNeighborhood(entityId, radius = 1, { tenantId, investigationId, traceId } = {}) {
   const driver = getNeo4jDriver();
   const session = driver.session();
   const start = Date.now();
@@ -62,3 +58,4 @@ async function expandNeighborhood(
 }
 
 module.exports = { expandNeighbors, expandNeighborhood };
+

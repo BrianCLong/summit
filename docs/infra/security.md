@@ -7,6 +7,6 @@
 - Policies: OPA Gatekeeper constraints (`k8s/policies/gatekeeper`).
 
 Reporting:
-
 - Trivy SARIF uploaded to GitHub Security tab.
 - kube-bench JSON can be collected by a log pipeline.
+

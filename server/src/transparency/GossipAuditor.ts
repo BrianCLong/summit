@@ -4,7 +4,7 @@ export class GossipAuditor {
       getSTH: () => Promise<{ size: number; root: string }>;
       getRange: (from: number, to: number) => Promise<string[]>;
     },
-    private log: { alert: (msg: string) => void },
+    private log: { alert: (msg: string) => void }
   ) {}
 
   async auditOnce() {

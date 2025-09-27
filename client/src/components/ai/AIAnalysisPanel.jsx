@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -24,7 +25,7 @@ import {
   CircularProgress,
   IconButton,
   Tooltip,
-  Badge,
+  Badge
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -41,7 +42,7 @@ import {
   Schedule as ScheduleIcon,
   Done as DoneIcon,
   Group as CommunityIcon,
-  Link as LinkIcon,
+  Link as LinkIcon
 } from '@mui/icons-material';
 import { useLazyQuery, useMutation, useQuery, useSubscription } from '@apollo/client';
 import { gql } from '@apollo/client';
@@ -181,75 +182,71 @@ const AIAnalysisPanel = () => {
   const [aiExtractEntities] = useMutation(AI_EXTRACT_ENTITIES, {
     onCompleted: (data) => {
       const job = data.aiExtractEntities;
-      setActiveJobs((prev) => [...prev, job]);
+      setActiveJobs(prev => [...prev, job]);
       setLoading(false);
     },
     onError: (error) => {
       console.error('AI entity extraction failed:', error);
       setLoading(false);
-    },
+    }
   });
 
   const [aiResolveEntities] = useMutation(AI_RESOLVE_ENTITIES, {
     onCompleted: (data) => {
       const job = data.aiResolveEntities;
-      setActiveJobs((prev) => [...prev, job]);
+      setActiveJobs(prev => [...prev, job]);
       setLoading(false);
     },
     onError: (error) => {
       console.error('AI entity resolution failed:', error);
       setLoading(false);
-    },
+    }
   });
 
   const [aiLinkPredict] = useMutation(AI_LINK_PREDICT, {
     onCompleted: (data) => {
       const job = data.aiLinkPredict;
-      setActiveJobs((prev) => [...prev, job]);
+      setActiveJobs(prev => [...prev, job]);
       setLoading(false);
     },
     onError: (error) => {
       console.error('AI link prediction failed:', error);
       setLoading(false);
-    },
+    }
   });
 
   const [aiCommunityDetect] = useMutation(AI_COMMUNITY_DETECT, {
     onCompleted: (data) => {
       const job = data.aiCommunityDetect;
-      setActiveJobs((prev) => [...prev, job]);
+      setActiveJobs(prev => [...prev, job]);
       setLoading(false);
     },
     onError: (error) => {
       console.error('AI community detection failed:', error);
       setLoading(false);
-    },
+    }
   });
 
   const [approveInsight] = useMutation(APPROVE_INSIGHT, {
     onCompleted: (data) => {
-      setInsights((prev) =>
-        prev.map((insight) =>
-          insight.id === data.approveInsight.id ? data.approveInsight : insight,
-        ),
-      );
+      setInsights(prev => prev.map(insight => 
+        insight.id === data.approveInsight.id ? data.approveInsight : insight
+      ));
     },
     onError: (error) => {
       console.error('Failed to approve insight:', error);
-    },
+    }
   });
 
   const [rejectInsight] = useMutation(REJECT_INSIGHT, {
     onCompleted: (data) => {
-      setInsights((prev) =>
-        prev.map((insight) =>
-          insight.id === data.rejectInsight.id ? data.rejectInsight : insight,
-        ),
-      );
+      setInsights(prev => prev.map(insight => 
+        insight.id === data.rejectInsight.id ? data.rejectInsight : insight
+      ));
     },
     onError: (error) => {
       console.error('Failed to reject insight:', error);
-    },
+    }
   });
 
   // Query for insights
@@ -257,7 +254,7 @@ const AIAnalysisPanel = () => {
     variables: { status: 'PENDING' },
     onCompleted: (data) => {
       setInsights(data.insights);
-    },
+    }
   });
 
   // Real-time subscriptions
@@ -266,42 +263,42 @@ const AIAnalysisPanel = () => {
     onSubscriptionData: ({ subscriptionData }) => {
       if (subscriptionData.data) {
         const newInsight = subscriptionData.data.insightAdded;
-        setInsights((prev) => [newInsight, ...prev]);
+        setInsights(prev => [newInsight, ...prev]);
       }
-    },
+    }
   });
 
   // Handler functions for AI operations
   const handleExtractEntities = () => {
     if (!analysisText.trim()) return;
     setLoading(true);
-
+    
     const docs = [{ id: `doc-${Date.now()}`, text: analysisText }];
     aiExtractEntities({
       variables: {
         docs: docs,
-        jobId: `extract-${Date.now()}`,
-      },
+        jobId: `extract-${Date.now()}`
+      }
     });
   };
 
   const handleResolveEntities = () => {
     setLoading(true);
-
+    
     // Create sample entity records from analysis text
-    const words = analysisText.split(' ').filter((word) => word.length > 3);
+    const words = analysisText.split(' ').filter(word => word.length > 3);
     const records = words.slice(0, 10).map((word, index) => ({
       id: `entity-${index}`,
       name: word,
-      attrs: { type: 'extracted' },
+      attrs: { type: 'extracted' }
     }));
-
+    
     aiResolveEntities({
       variables: {
         records: records,
         threshold: 0.8,
-        jobId: `resolve-${Date.now()}`,
-      },
+        jobId: `resolve-${Date.now()}`
+      }
     });
   };
 
@@ -311,8 +308,8 @@ const AIAnalysisPanel = () => {
       variables: {
         graphSnapshotId: selectedGraphSnapshot,
         topK: 20,
-        jobId: `link-${Date.now()}`,
-      },
+        jobId: `link-${Date.now()}`
+      }
     });
   };
 
@@ -321,8 +318,8 @@ const AIAnalysisPanel = () => {
     aiCommunityDetect({
       variables: {
         graphSnapshotId: selectedGraphSnapshot,
-        jobId: `community-${Date.now()}`,
-      },
+        jobId: `community-${Date.now()}`
+      }
     });
   };
 
@@ -337,44 +334,30 @@ const AIAnalysisPanel = () => {
   // Helper functions
   const getJobStatusColor = (status) => {
     switch (status) {
-      case 'SUCCESS':
-        return 'success';
-      case 'FAILED':
-        return 'error';
-      case 'QUEUED':
-        return 'info';
-      case 'RUNNING':
-        return 'warning';
-      default:
-        return 'default';
+      case 'SUCCESS': return 'success';
+      case 'FAILED': return 'error';
+      case 'QUEUED': return 'info';
+      case 'RUNNING': return 'warning';
+      default: return 'default';
     }
   };
 
   const getJobStatusIcon = (status) => {
     switch (status) {
-      case 'SUCCESS':
-        return <DoneIcon />;
-      case 'FAILED':
-        return <ErrorIcon />;
-      case 'QUEUED':
-        return <ScheduleIcon />;
-      case 'RUNNING':
-        return <CircularProgress size={16} />;
-      default:
-        return <ScheduleIcon />;
+      case 'SUCCESS': return <DoneIcon />;
+      case 'FAILED': return <ErrorIcon />;
+      case 'QUEUED': return <ScheduleIcon />;
+      case 'RUNNING': return <CircularProgress size={16} />;
+      default: return <ScheduleIcon />;
     }
   };
 
   const getInsightStatusColor = (status) => {
     switch (status) {
-      case 'APPROVED':
-        return 'success';
-      case 'REJECTED':
-        return 'error';
-      case 'PENDING':
-        return 'warning';
-      default:
-        return 'default';
+      case 'APPROVED': return 'success';
+      case 'REJECTED': return 'error';
+      case 'PENDING': return 'warning';
+      default: return 'default';
     }
   };
 
@@ -382,7 +365,7 @@ const AIAnalysisPanel = () => {
     const now = new Date();
     const time = new Date(timestamp);
     const diffInSeconds = Math.floor((now - time) / 1000);
-
+    
     if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
@@ -407,10 +390,10 @@ const AIAnalysisPanel = () => {
           </Grid>
           <Grid item>
             <Badge badgeContent={insights.length} color="warning">
-              <Chip
-                icon={<LightbulbIcon />}
-                label="AI Insights"
-                color="primary"
+              <Chip 
+                icon={<LightbulbIcon />} 
+                label="AI Insights" 
+                color="primary" 
                 variant="outlined"
               />
             </Badge>
@@ -427,8 +410,8 @@ const AIAnalysisPanel = () => {
 
       {/* Tabs */}
       <Paper elevation={1} sx={{ mb: 2 }}>
-        <Tabs
-          value={activeTab}
+        <Tabs 
+          value={activeTab} 
           onChange={(e, newValue) => setActiveTab(newValue)}
           variant="fullWidth"
         >
@@ -482,7 +465,9 @@ const AIAnalysisPanel = () => {
                     <>
                       <Accordion>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography>Entities ({extractionResults.entities.length})</Typography>
+                          <Typography>
+                            Entities ({extractionResults.entities.length})
+                          </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -521,8 +506,7 @@ const AIAnalysisPanel = () => {
                     </>
                   ) : (
                     <Alert severity="info">
-                      Enter text above and click "Extract" to see AI-powered entity extraction
-                      results
+                      Enter text above and click "Extract" to see AI-powered entity extraction results
                     </Alert>
                   )}
                 </CardContent>
@@ -581,9 +565,9 @@ const AIAnalysisPanel = () => {
                           variant="outlined"
                         />
                       </Box>
-
+                      
                       <Divider sx={{ my: 2 }} />
-
+                      
                       <Typography variant="subtitle2" gutterBottom>
                         Key Sentiment Indicators:
                       </Typography>
@@ -646,7 +630,7 @@ const AIAnalysisPanel = () => {
                       <Alert severity="success" sx={{ mb: 2 }}>
                         Insights generated for Entity: {insightResults.entityId}
                       </Alert>
-
+                      
                       <Accordion>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                           <Typography>Key Insights ({insightResults.insights.length})</Typography>
@@ -667,16 +651,19 @@ const AIAnalysisPanel = () => {
 
                       <Accordion>
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography>
-                            Risk Factors ({insightResults.riskFactors.length})
-                          </Typography>
+                          <Typography>Risk Factors ({insightResults.riskFactors.length})</Typography>
                         </AccordionSummary>
                         <AccordionDetails>
                           <List>
                             {insightResults.riskFactors.map((risk, index) => (
                               <ListItem key={index}>
-                                <ListItemIcon>{getSeverityIcon(risk.severity)}</ListItemIcon>
-                                <ListItemText primary={risk.factor} secondary={risk.description} />
+                                <ListItemIcon>
+                                  {getSeverityIcon(risk.severity)}
+                                </ListItemIcon>
+                                <ListItemText
+                                  primary={risk.factor}
+                                  secondary={risk.description}
+                                />
                               </ListItem>
                             ))}
                           </List>
@@ -744,7 +731,9 @@ const AIAnalysisPanel = () => {
                           <List>
                             {qualityResults.insights.map((insight) => (
                               <ListItem key={insight.id}>
-                                <ListItemIcon>{getSeverityIcon(insight.severity)}</ListItemIcon>
+                                <ListItemIcon>
+                                  {getSeverityIcon(insight.severity)}
+                                </ListItemIcon>
                                 <ListItemText
                                   primary={insight.message}
                                   secondary={insight.suggestions.join('; ')}

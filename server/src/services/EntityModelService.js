@@ -26,10 +26,9 @@ class EntityModelService {
    */
   async getEntityStatistics(investigationId) {
     const session = this.driver.session();
-
+    
     try {
-      const result = await session.run(
-        `
+      const result = await session.run(`
         MATCH (e:Entity {investigationId: $investigationId})
         OPTIONAL MATCH (e)-[r:RELATIONSHIP]-(other:Entity {investigationId: $investigationId})
         WITH e, count(DISTINCT r) as relationshipCount
@@ -41,16 +40,14 @@ class EntityModelService {
           max(e.createdAt) as newestEntity,
           avg(relationshipCount) as avgRelationshipsPerEntity,
           apoc.map.groupByMulti(collect({type: e.type, confidence: e.confidence}), ['type']) as typeStats
-      `,
-        { investigationId },
-      );
+      `, { investigationId });
 
       if (result.records.length === 0) {
         return {
           totalEntities: 0,
           entityTypes: [],
           avgConfidence: 0,
-          avgRelationshipsPerEntity: 0,
+          avgRelationshipsPerEntity: 0
         };
       }
 
@@ -62,8 +59,9 @@ class EntityModelService {
         oldestEntity: record.get('oldestEntity'),
         newestEntity: record.get('newestEntity'),
         avgRelationshipsPerEntity: record.get('avgRelationshipsPerEntity'),
-        typeStats: record.get('typeStats'),
+        typeStats: record.get('typeStats')
       };
+      
     } finally {
       await session.close();
     }
@@ -77,10 +75,9 @@ class EntityModelService {
    */
   async findPotentialDuplicates(investigationId, threshold = 0.8) {
     const session = this.driver.session();
-
+    
     try {
-      const result = await session.run(
-        `
+      const result = await session.run(`
         MATCH (e1:Entity {investigationId: $investigationId})
         MATCH (e2:Entity {investigationId: $investigationId})
         WHERE e1.id < e2.id 
@@ -94,23 +91,22 @@ class EntityModelService {
           e2.label as entity2Label,
           apoc.text.sorensenDiceSimilarity(toLower(e1.label), toLower(e2.label)) as similarity
         ORDER BY similarity DESC
-      `,
-        { investigationId, threshold },
-      );
+      `, { investigationId, threshold });
 
-      return result.records.map((record) => ({
+      return result.records.map(record => ({
         entity1: {
           id: record.get('entity1Id'),
           label: record.get('entity1Label'),
-          type: record.get('entityType'),
+          type: record.get('entityType')
         },
         entity2: {
           id: record.get('entity2Id'),
           label: record.get('entity2Label'),
-          type: record.get('entityType'),
+          type: record.get('entityType')
         },
-        similarity: record.get('similarity'),
+        similarity: record.get('similarity')
       }));
+      
     } finally {
       await session.close();
     }
@@ -124,10 +120,9 @@ class EntityModelService {
    */
   async findHubEntities(investigationId, minConnections = 5) {
     const session = this.driver.session();
-
+    
     try {
-      const result = await session.run(
-        `
+      const result = await session.run(`
         MATCH (e:Entity {investigationId: $investigationId})
         MATCH (e)-[r:RELATIONSHIP]-(other:Entity {investigationId: $investigationId})
         WITH e, count(DISTINCT r) as connectionCount, collect(DISTINCT other.type) as connectedTypes
@@ -140,18 +135,17 @@ class EntityModelService {
           connectedTypes,
           size(connectedTypes) as typesDiversity
         ORDER BY connectionCount DESC, typesDiversity DESC
-      `,
-        { investigationId, minConnections },
-      );
+      `, { investigationId, minConnections });
 
-      return result.records.map((record) => ({
+      return result.records.map(record => ({
         entityId: record.get('entityId'),
         label: record.get('label'),
         type: record.get('type'),
         connectionCount: record.get('connectionCount').toNumber(),
         connectedTypes: record.get('connectedTypes'),
-        typesDiversity: record.get('typesDiversity').toNumber(),
+        typesDiversity: record.get('typesDiversity').toNumber()
       }));
+      
     } finally {
       await session.close();
     }
@@ -166,10 +160,9 @@ class EntityModelService {
    */
   async findShortestPath(fromEntityId, toEntityId, maxDepth = 6) {
     const session = this.driver.session();
-
+    
     try {
-      const result = await session.run(
-        `
+      const result = await session.run(`
         MATCH (start:Entity {id: $fromEntityId})
         MATCH (end:Entity {id: $toEntityId})
         MATCH path = shortestPath((start)-[*1..$maxDepth]-(end))
@@ -181,9 +174,7 @@ class EntityModelService {
           [r in relationships(path) | {id: r.id, type: r.type, confidence: r.confidence}] as pathRelationships
         ORDER BY pathLength
         LIMIT 1
-      `,
-        { fromEntityId, toEntityId, maxDepth },
-      );
+      `, { fromEntityId, toEntityId, maxDepth });
 
       if (result.records.length === 0) {
         return null;
@@ -193,8 +184,9 @@ class EntityModelService {
       return {
         pathLength: record.get('pathLength').toNumber(),
         nodes: record.get('pathNodes'),
-        relationships: record.get('pathRelationships'),
+        relationships: record.get('pathRelationships')
       };
+      
     } finally {
       await session.close();
     }
@@ -207,10 +199,9 @@ class EntityModelService {
    */
   async getEntityClusters(investigationId) {
     const session = this.driver.session();
-
+    
     try {
-      const result = await session.run(
-        `
+      const result = await session.run(`
         MATCH (e:Entity {investigationId: $investigationId})
         MATCH (e)-[r:RELATIONSHIP]-(other:Entity {investigationId: $investigationId})
         WITH e, other, r.confidence as weight
@@ -226,15 +217,14 @@ class EntityModelService {
           collect({id: entity.id, label: entity.label, type: entity.type}) as entities,
           count(*) as size
         ORDER BY size DESC
-      `,
-        { investigationId },
-      );
+      `, { investigationId });
 
-      return result.records.map((record) => ({
+      return result.records.map(record => ({
         communityId: record.get('community').toNumber(),
         entities: record.get('entities'),
-        size: record.get('size').toNumber(),
+        size: record.get('size').toNumber()
       }));
+      
     } catch (error) {
       // Fallback to simple clustering if GDS is not available
       logger.warn('GDS community detection not available, using simple clustering');
@@ -251,10 +241,9 @@ class EntityModelService {
    */
   async getSimpleEntityClusters(investigationId) {
     const session = this.driver.session();
-
+    
     try {
-      const result = await session.run(
-        `
+      const result = await session.run(`
         MATCH (e:Entity {investigationId: $investigationId})
         OPTIONAL MATCH (e)-[r:RELATIONSHIP]-(connected:Entity {investigationId: $investigationId})
         WITH e, collect(DISTINCT connected.type) as connectedTypes, count(DISTINCT connected) as connectionCount
@@ -272,15 +261,14 @@ class EntityModelService {
           collect({id: e.id, label: e.label, type: e.type}) as entities,
           count(*) as size
         ORDER BY size DESC
-      `,
-        { investigationId },
-      );
+      `, { investigationId });
 
-      return result.records.map((record) => ({
+      return result.records.map(record => ({
         communityId: record.get('cluster'),
         entities: record.get('entities'),
-        size: record.get('size').toNumber(),
+        size: record.get('size').toNumber()
       }));
+      
     } finally {
       await session.close();
     }
@@ -293,13 +281,12 @@ class EntityModelService {
    */
   async validateModelIntegrity(investigationId = null) {
     const session = this.driver.session();
-
+    
     try {
       const whereClause = investigationId ? '{investigationId: $investigationId}' : '';
       const params = investigationId ? { investigationId } : {};
 
-      const result = await session.run(
-        `
+      const result = await session.run(`
         // Check for orphaned relationships
         OPTIONAL MATCH ()-[r:RELATIONSHIP]-()
         WHERE NOT EXISTS((r)-[:CREATED_BY]-(:User))
@@ -327,9 +314,7 @@ class EntityModelService {
           duplicateIds,
           invalidEmails,
           (orphanedRelationships + invalidEntities + duplicateIds + invalidEmails) as totalIssues
-      `,
-        params,
-      );
+      `, params);
 
       const record = result.records[0];
       return {
@@ -338,10 +323,11 @@ class EntityModelService {
           orphanedRelationships: record.get('orphanedRelationships').toNumber(),
           invalidEntities: record.get('invalidEntities').toNumber(),
           duplicateIds: record.get('duplicateIds').toNumber(),
-          invalidEmails: record.get('invalidEmails').toNumber(),
+          invalidEmails: record.get('invalidEmails').toNumber()
         },
-        totalIssues: record.get('totalIssues').toNumber(),
+        totalIssues: record.get('totalIssues').toNumber()
       };
+      
     } finally {
       await session.close();
     }
@@ -354,24 +340,21 @@ class EntityModelService {
    */
   async getQueryPerformanceStats(investigationId) {
     const session = this.driver.session();
-
+    
     try {
       const queries = [
         {
           name: 'entity_by_type',
-          query:
-            'MATCH (e:Entity {investigationId: $investigationId, type: "PERSON"}) RETURN count(e)',
+          query: 'MATCH (e:Entity {investigationId: $investigationId, type: "PERSON"}) RETURN count(e)'
         },
         {
           name: 'entity_relationships',
-          query:
-            'MATCH (e:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]-() RETURN count(r)',
+          query: 'MATCH (e:Entity {investigationId: $investigationId})-[r:RELATIONSHIP]-() RETURN count(r)'
         },
         {
           name: 'high_confidence_entities',
-          query:
-            'MATCH (e:Entity {investigationId: $investigationId}) WHERE e.confidence >= 0.8 RETURN count(e)',
-        },
+          query: 'MATCH (e:Entity {investigationId: $investigationId}) WHERE e.confidence >= 0.8 RETURN count(e)'
+        }
       ];
 
       const results = [];
@@ -379,19 +362,20 @@ class EntityModelService {
         const startTime = Date.now();
         const result = await session.run(queryInfo.query, { investigationId });
         const executionTime = Date.now() - startTime;
-
+        
         results.push({
           queryName: queryInfo.name,
           executionTimeMs: executionTime,
-          resultCount: result.records[0].get(0).toNumber(),
+          resultCount: result.records[0].get(0).toNumber()
         });
       }
 
       return {
         investigationId,
         timestamp: new Date().toISOString(),
-        queryStats: results,
+        queryStats: results
       };
+      
     } finally {
       await session.close();
     }
@@ -403,5 +387,5 @@ const entityModelService = new EntityModelService();
 
 module.exports = {
   EntityModelService,
-  entityModelService,
+  entityModelService
 };

@@ -1,11 +1,11 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import $ from 'jquery';
+import React from "react";
+import { useSelector, useDispatch } from "react-redux";
+import $ from "jquery";
 import {
   setHighlightEnabled,
   setSelectedInsightType,
   setCommunityIdFilter,
-} from '../../store/slices/aiInsightsSlice';
+} from "../../store/slices/aiInsightsSlice";
 import {
   Drawer,
   Box,
@@ -26,18 +26,29 @@ import {
   MenuItem,
   FormControl,
   Chip,
-} from '@mui/material';
-import { ChevronLeft, ExpandMore, Download, Highlight, InfoOutlined } from '@mui/icons-material';
+} from "@mui/material";
+import {
+  ChevronLeft,
+  ExpandMore,
+  Download,
+  Highlight,
+  InfoOutlined,
+} from "@mui/icons-material";
 
 function AIInsightsPanel({ open, onClose, onExportData }) {
   const dispatch = useDispatch();
-  const { highlightEnabled, selectedInsightType, communityIdFilter, communityData } = useSelector(
-    (state) => state.aiInsights,
-  );
+  const {
+    highlightEnabled,
+    selectedInsightType,
+    communityIdFilter,
+    communityData,
+  } = useSelector((state) => state.aiInsights);
   const contentRef = React.useRef(null);
 
   const maxCommunityId =
-    Object.values(communityData).length > 0 ? Math.max(...Object.values(communityData)) : 100; // Default max if no community data
+    Object.values(communityData).length > 0
+      ? Math.max(...Object.values(communityData))
+      : 100; // Default max if no community data
 
   React.useEffect(() => {
     if (open) {
@@ -52,12 +63,12 @@ function AIInsightsPanel({ open, onClose, onExportData }) {
 
     // Toggle a "highlighted" class on Cytoscape elements if available
     const cy = window.cy;
-    if (cy && typeof cy.elements === 'function') {
-      cy.elements('.ai-insight').forEach((el) => {
+    if (cy && typeof cy.elements === "function") {
+      cy.elements(".ai-insight").forEach((el) => {
         if (enabled) {
-          el.addClass('highlighted');
+          el.addClass("highlighted");
         } else {
-          el.removeClass('highlighted');
+          el.removeClass("highlighted");
         }
       });
     }
@@ -83,21 +94,21 @@ function AIInsightsPanel({ open, onClose, onExportData }) {
       sx={{
         width: 350,
         flexShrink: 0,
-        '& .MuiDrawer-paper': {
+        "& .MuiDrawer-paper": {
           width: 350,
-          boxSizing: 'border-box',
+          boxSizing: "border-box",
           p: 2,
           // Responsive width
-          width: { xs: '100%', sm: 350 },
+          width: { xs: "100%", sm: 350 },
         },
       }}
     >
       <Box
         ref={contentRef}
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
           mb: 2,
         }}
       >
@@ -122,7 +133,11 @@ function AIInsightsPanel({ open, onClose, onExportData }) {
           }
           label="Enable Highlighting"
         />
-        <Typography variant="body2" color="text.secondary" sx={{ ml: 4, mb: 2 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ ml: 4, mb: 2 }}
+        >
           Toggle to visually highlight insights on the graph.
         </Typography>
       </Box>
@@ -150,7 +165,7 @@ function AIInsightsPanel({ open, onClose, onExportData }) {
         </Select>
       </FormControl>
 
-      {selectedInsightType === 'community_detection' && (
+      {selectedInsightType === "community_detection" && (
         <Accordion sx={{ mb: 2 }}>
           <AccordionSummary
             expandIcon={<ExpandMore />}
@@ -169,7 +184,7 @@ function AIInsightsPanel({ open, onClose, onExportData }) {
               max={maxCommunityId} // Dynamic max based on community data
               sx={{ mt: 2 }}
             />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
               <Chip label={`Min: ${communityIdFilter[0]}`} />
               <Chip label={`Max: ${communityIdFilter[1]}`} />
             </Box>
@@ -182,7 +197,7 @@ function AIInsightsPanel({ open, onClose, onExportData }) {
         <Typography variant="subtitle1" sx={{ mb: 1 }}>
           Metadata Popovers
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
           <InfoOutlined color="action" />
           <Typography variant="body2" color="text.secondary">
             Hover over graph elements to see detailed metadata.
@@ -195,11 +210,11 @@ function AIInsightsPanel({ open, onClose, onExportData }) {
       <Typography variant="subtitle1" sx={{ mb: 1 }}>
         Export Insights
       </Typography>
-      <Box sx={{ display: 'flex', gap: 1 }}>
+      <Box sx={{ display: "flex", gap: 1 }}>
         <Button
           variant="contained"
           startIcon={<Download />}
-          onClick={() => handleExport('csv')}
+          onClick={() => handleExport("csv")}
           fullWidth
         >
           Export CSV
@@ -207,7 +222,7 @@ function AIInsightsPanel({ open, onClose, onExportData }) {
         <Button
           variant="contained"
           startIcon={<Download />}
-          onClick={() => handleExport('json')}
+          onClick={() => handleExport("json")}
           fullWidth
         >
           Export JSON

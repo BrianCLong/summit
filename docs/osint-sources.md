@@ -460,3 +460,4 @@ Curated open-source intelligence feeds prioritized for IntelGraph ingestion.
 - Humanitarian OpenStreetMap Team – Crowdsourced geospatial humanitarian mapping (Dataset).
 - Geonames API – Global geographical database (API).
 - OpenStreetMap Overpass API – Query and extract OSM geospatial data (API).
+

@@ -17,11 +17,11 @@ describe('Notification Service - P1 Priority', () => {
   beforeEach(() => {
     mockClient = {
       query: jest.fn(),
-      release: jest.fn(),
+      release: jest.fn()
     };
 
     mockPostgresPool = {
-      connect: jest.fn(() => mockClient),
+      connect: jest.fn(() => mockClient)
     };
 
     mockRedisClient = {
@@ -35,31 +35,31 @@ describe('Notification Service - P1 Priority', () => {
       lpush: jest.fn(),
       ltrim: jest.fn(),
       hset: jest.fn(),
-      lrange: jest.fn().mockResolvedValue([]),
+      lrange: jest.fn().mockResolvedValue([])
     };
 
     mockWebSocketManager = {
       broadcast: jest.fn(),
       sendToUser: jest.fn(),
       sendToRoom: jest.fn(),
-
+              
       on: jest.fn(),
       sockets: {
         adapter: {
           rooms: {
-            get: jest.fn(() => new Set()),
-          },
+            get: jest.fn(() => new Set())
+          }
         },
         sockets: {
-          get: jest.fn(),
-        },
-      },
+            get: jest.fn()
+        }
+      }
     };
 
     mockLogger = {
       info: jest.fn(),
       error: jest.fn(),
-      warn: jest.fn(),
+      warn: jest.fn()
     };
 
     mockSecurityService = new (require('events'))();
@@ -70,7 +70,7 @@ describe('Notification Service - P1 Priority', () => {
       mockPostgresPool,
       mockRedisClient,
       mockSecurityService,
-      mockLogger,
+      mockLogger
     );
   });
 
@@ -81,32 +81,33 @@ describe('Notification Service - P1 Priority', () => {
   describe('Notification Templates', () => {
     test('should initialize all required notification templates', () => {
       const templates = notificationService.getAvailableTemplates();
-
+      
       expect(templates.length).toBeGreaterThanOrEqual(8);
-      expect(templates.map((t) => t.id)).toContain('INVESTIGATION_UPDATE');
-      expect(templates.map((t) => t.id)).toContain('ANALYTICS_COMPLETE');
-      expect(templates.map((t) => t.id)).toContain('SECURITY_ALERT');
-      expect(templates.map((t) => t.id)).toContain('SYSTEM_MAINTENANCE');
-      expect(templates.map((t) => t.id)).toContain('COLLABORATION_INVITE');
-      expect(templates.map((t) => t.id)).toContain('REPORT_READY');
-      expect(templates.map((t) => t.id)).toContain('ANOMALY_DETECTED');
+      expect(templates.map(t => t.id)).toContain('INVESTIGATION_UPDATE');
+      expect(templates.map(t => t.id)).toContain('ANALYTICS_COMPLETE');
+      expect(templates.map(t => t.id)).toContain('SECURITY_ALERT');
+      expect(templates.map(t => t.id)).toContain('SYSTEM_MAINTENANCE');
+      expect(templates.map(t => t.id)).toContain('COLLABORATION_INVITE');
+      expect(templates.map(t => t.id)).toContain('REPORT_READY');
+      expect(templates.map(t => t.id)).toContain('ANOMALY_DETECTED');
     });
 
     test('should configure template priorities correctly', () => {
       const templates = notificationService.getAvailableTemplates();
-
-      const securityTemplate = templates.find((t) => t.id === 'SECURITY_ALERT');
+      
+      const securityTemplate = templates.find(t => t.id === 'SECURITY_ALERT');
       expect(securityTemplate.priority).toBe('CRITICAL');
-
-      const analyticsTemplate = templates.find((t) => t.id === 'ANALYTICS_COMPLETE');
+      
+      const analyticsTemplate = templates.find(t => t.id === 'ANALYTICS_COMPLETE');
       expect(analyticsTemplate.priority).toBe('LOW');
     });
+
   });
 
   describe('Notification Creation and Delivery', () => {
     test('should create and send notifications successfully', async () => {
-      mockClient.query.mockResolvedValue({
-        rows: [{ id: 'notif123', created_at: new Date() }],
+      mockClient.query.mockResolvedValue({ 
+        rows: [{ id: 'notif123', created_at: new Date() }] 
       });
 
       const notificationData = {
@@ -115,14 +116,14 @@ describe('Notification Service - P1 Priority', () => {
         data: {
           investigationTitle: 'Test Investigation',
           alertType: 'High Priority Finding',
-          severity: 'HIGH',
+          severity: 'HIGH'
         },
         channels: ['REAL_TIME', 'EMAIL'],
-        userId: 'sender123',
+        userId: 'sender123'
       };
 
       const notification = await notificationService.sendNotification(notificationData);
-
+      
       expect(notification.id).toBeDefined();
       expect(notification.templateId).toBe('INVESTIGATION_UPDATE');
       expect(notification.recipients).toEqual(['user123']);
@@ -130,11 +131,13 @@ describe('Notification Service - P1 Priority', () => {
     });
 
     test('should handle multiple delivery channels', async () => {
-      notificationService.determineDeliveryChannels = jest
-        .fn()
-        .mockResolvedValue([{ channel: 'REAL_TIME' }, { channel: 'EMAIL' }, { channel: 'SMS' }]);
-      mockClient.query.mockResolvedValue({
-        rows: [{ id: 'notif123', created_at: new Date() }],
+        notificationService.determineDeliveryChannels = jest.fn().mockResolvedValue([
+            { channel: 'REAL_TIME' },
+            { channel: 'EMAIL' },
+            { channel: 'SMS' },
+        ]);
+      mockClient.query.mockResolvedValue({ 
+        rows: [{ id: 'notif123', created_at: new Date() }] 
       });
 
       const notification = await notificationService.sendNotification({
@@ -142,12 +145,12 @@ describe('Notification Service - P1 Priority', () => {
         recipients: ['user123'],
         data: { threatType: 'Malware Detection' },
         channels: ['REAL_TIME', 'EMAIL', 'SMS'],
-        userId: 'system',
+        userId: 'system'
       });
 
       expect(notification.deliveries.length).toBe(3);
-      expect(notification.deliveries.map((d) => d.channel)).toEqual(
-        expect.arrayContaining(['REAL_TIME', 'EMAIL', 'SMS']),
+      expect(notification.deliveries.map(d => d.channel)).toEqual(
+        expect.arrayContaining(['REAL_TIME', 'EMAIL', 'SMS'])
       );
     });
 
@@ -156,16 +159,16 @@ describe('Notification Service - P1 Priority', () => {
         templateId: 'INVALID_TEMPLATE',
         recipients: [],
         data: {},
-        userId: 'user123',
+        userId: 'user123'
       };
 
-      const notification = await notificationService.sendNotification(invalidNotification);
+      const notification = await notificationService.sendNotification(invalidNotification)
       expect(notification.status).toBe('QUEUED');
     });
 
     test('should handle delivery failures gracefully', async () => {
-      mockClient.query.mockResolvedValue({
-        rows: [{ id: 'notif123', created_at: new Date() }],
+      mockClient.query.mockResolvedValue({ 
+        rows: [{ id: 'notif123', created_at: new Date() }] 
       });
 
       const notification = await notificationService.sendNotification({
@@ -173,7 +176,7 @@ describe('Notification Service - P1 Priority', () => {
         recipients: ['user123'],
         data: { investigationTitle: 'Test' },
         channels: ['REAL_TIME', 'EMAIL'],
-        userId: 'sender123',
+        userId: 'sender123'
       });
 
       // Should succeed with partial delivery
@@ -183,34 +186,32 @@ describe('Notification Service - P1 Priority', () => {
 
   describe('WebSocket Real-time Delivery', () => {
     test('should deliver websocket notifications in real-time', async () => {
-      notificationService.getUserSockets = jest.fn().mockReturnValue([
-        {
-          emit: jest.fn(),
-        },
-      ]);
+        notificationService.getUserSockets = jest.fn().mockReturnValue([{
+            emit: jest.fn()
+        }]);
       await notificationService.deliverWebSocketNotification(
         {
           id: 'notif123',
           title: 'Test Notification',
           body: 'Test message',
-          priority: 'HIGH',
+          priority: 'HIGH'
         },
-        { userId: 'user123' },
+        {userId: 'user123'}
       );
 
       expect(notificationService.getUserSockets).toHaveBeenCalled();
     });
 
     test('should broadcast to investigation rooms', async () => {
-      notificationService.socketIO.sockets.adapter.rooms.get.mockReturnValue(new Set(['socket1']));
-      notificationService.socketIO.sockets.sockets.get.mockReturnValue({ emit: jest.fn() });
+        notificationService.socketIO.sockets.adapter.rooms.get.mockReturnValue(new Set(['socket1']));
+        notificationService.socketIO.sockets.sockets.get.mockReturnValue({emit: jest.fn()});
       await notificationService.deliverWebSocketNotification(
         {
           id: 'notif123',
           title: 'Investigation Update',
-          investigationId: 'inv123',
+          investigationId: 'inv123'
         },
-        { investigationId: 'inv123' },
+        { investigationId: 'inv123' }
       );
 
       expect(mockWebSocketManager.sendToRoom).toHaveBeenCalled();
@@ -221,7 +222,7 @@ describe('Notification Service - P1 Priority', () => {
 
       const result = await notificationService.deliverWebSocketNotification(
         { id: 'notif123', title: 'Test' },
-        { userId: ['user1', 'user2'] },
+        {userId: ['user1', 'user2']}
       );
 
       expect(result.delivered).toBe(1);

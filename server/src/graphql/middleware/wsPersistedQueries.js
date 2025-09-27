@@ -1,6 +1,6 @@
 /**
  * WebSocket Persisted Queries Middleware for graphql-ws
- *
+ * 
  * Enforces the same persisted query allowlist for WebSocket connections
  * that is applied to HTTP GraphQL requests.
  */
@@ -10,8 +10,8 @@ import PersistedQueriesPlugin from '../plugins/persistedQueries.js';
 class WSPersistedQueriesMiddleware {
   constructor(options = {}) {
     this.persistedQueriesPlugin = new PersistedQueriesPlugin(options);
-    this.enabled =
-      process.env.NODE_ENV === 'production' && process.env.ALLOW_NON_PERSISTED_QUERIES !== 'true';
+    this.enabled = process.env.NODE_ENV === 'production' && 
+                   process.env.ALLOW_NON_PERSISTED_QUERIES !== 'true';
   }
 
   /**
@@ -19,7 +19,7 @@ class WSPersistedQueriesMiddleware {
    */
   createMiddleware() {
     const self = this;
-
+    
     return {
       onConnect: async (ctx) => {
         // Connection-level validation if needed
@@ -40,13 +40,13 @@ class WSPersistedQueriesMiddleware {
           // Use the same validation logic as HTTP
           await self.persistedQueriesPlugin.processRequest(
             { query, variables, operationName },
-            ctx.extra.request,
+            ctx.extra.request
           );
 
           console.log(`✅ WS operation validated: ${operationName || 'anonymous'}`);
         } catch (error) {
           console.error(`❌ WS operation blocked: ${error.message}`);
-
+          
           // Return an error that will be sent to the client
           return [new Error(`WebSocket operation blocked: ${error.message}`)];
         }
@@ -59,16 +59,13 @@ class WSPersistedQueriesMiddleware {
 
       onError: async (ctx, message, errors) => {
         // Log WS-specific errors
-        console.error(
-          'WebSocket GraphQL errors:',
-          errors.map((e) => e.message),
-        );
+        console.error('WebSocket GraphQL errors:', errors.map(e => e.message));
         return errors;
       },
 
       onComplete: async (ctx, message) => {
         // Optional: Clean up resources
-      },
+      }
     };
   }
 
@@ -78,7 +75,7 @@ class WSPersistedQueriesMiddleware {
   getStats() {
     return {
       ...this.persistedQueriesPlugin.getStats(),
-      wsEnabled: this.enabled,
+      wsEnabled: this.enabled
     };
   }
 }

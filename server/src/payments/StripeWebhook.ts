@@ -16,7 +16,7 @@ export async function handleWebhook(
     entitlements: any;
     transparency: any;
     idempotency?: Set<string>;
-  },
+  }
 ) {
   const id = evt.id;
   if (deps.idempotency) {

@@ -17,10 +17,10 @@ for (const p of candidates) {
     const raw = fs.readFileSync(p, 'utf8');
     const manifest = JSON.parse(raw);
     const ids = Object.keys(manifest);
-    if (ids.length) {
-      allowedOperationIds = new Set(ids);
+    if (ids.length) { 
+      allowedOperationIds = new Set(ids); 
       console.log(`Loaded ${ids.length} persisted operations from ${p}`);
-      break;
+      break; 
     }
   } catch (error) {
     // Continue to next candidate

@@ -1,9 +1,9 @@
 ---
-name: 'Issue #2: Real-Time Collaboration Delta Sync Latency'
+name: "Issue #2: Real-Time Collaboration Delta Sync Latency"
 about: Reduce latency in collaborative annotation syncing
-title: 'Issue #2: Real-Time Collaboration Delta Sync Latency'
-labels: 'bug, performance, collaboration, backend, frontend'
-assignees: ''
+title: "Issue #2: Real-Time Collaboration Delta Sync Latency"
+labels: "bug, performance, collaboration, backend, frontend"
+assignees: ""
 ---
 
 **Branch**: `feature/collab-delta-sync`
@@ -87,55 +87,53 @@ async def websocket_endpoint(websocket: WebSocket, graph_id: str):
 ```js
 // frontend/collab/delta-sync.js
 class CollaborationClient {
-  constructor(graphId, onUpdateCallback) {
-    this.graphId = graphId;
-    this.onUpdateCallback = onUpdateCallback;
-    this.ws = null;
-    this.connect();
-  }
-
-  connect() {
-    const wsUrl = `ws://localhost:8000/ws/collaborate/${this.graphId}`; // Adjust URL
-    this.ws = new WebSocket(wsUrl);
-
-    this.ws.onopen = () => {
-      console.log(`Connected to collaboration server for graph ${this.graphId}`);
-    };
-
-    this.ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      console.log('Received message:', message);
-      if (message.type === 'initial_state') {
-        // Apply initial state
-        this.onUpdateCallback(message.data, true);
-      } else if (message.type === 'annotation_update') {
-        // Apply delta update
-        this.onUpdateCallback(message.payload, false);
-      }
-    };
-
-    this.ws.onclose = () => {
-      console.log('Disconnected from collaboration server. Reconnecting in 5s...');
-      setTimeout(() => this.connect(), 5000);
-    };
-
-    this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-  }
-
-  sendAnnotationUpdate(annotationData) {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(
-        JSON.stringify({
-          type: 'annotation_update',
-          payload: annotationData,
-        }),
-      );
-    } else {
-      console.warn('WebSocket not open. Cannot send update.');
+    constructor(graphId, onUpdateCallback) {
+        this.graphId = graphId;
+        this.onUpdateCallback = onUpdateCallback;
+        this.ws = null;
+        this.connect();
     }
-  }
+
+    connect() {
+        const wsUrl = `ws://localhost:8000/ws/collaborate/${this.graphId}`; // Adjust URL
+        this.ws = new WebSocket(wsUrl);
+
+        this.ws.onopen = () => {
+            console.log(`Connected to collaboration server for graph ${this.graphId}`);
+        };
+
+        this.ws.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            console.log('Received message:', message);
+            if (message.type === 'initial_state') {
+                // Apply initial state
+                this.onUpdateCallback(message.data, true);
+            } else if (message.type === 'annotation_update') {
+                // Apply delta update
+                this.onUpdateCallback(message.payload, false);
+            }
+        };
+
+        this.ws.onclose = () => {
+            console.log('Disconnected from collaboration server. Reconnecting in 5s...');
+            setTimeout(() => this.connect(), 5000);
+        };
+
+        this.ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+    }
+
+    sendAnnotationUpdate(annotationData) {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({
+                type: 'annotation_update',
+                payload: annotationData
+            }));
+        } else {
+            console.warn('WebSocket not open. Cannot send update.');
+        }
+    }
 }
 
 // Example usage in annotation-client.js
@@ -178,7 +176,6 @@ class CollaborationClient {
 ```
 
 **Sub-tasks:**
-
 - [ ] Implement a WebSocket server endpoint in the backend (`collab_ws.py`) to handle real-time connections.
 - [ ] Develop a WebSocket client in the frontend (`delta-sync.js`) to connect and send/receive annotation deltas.
 - [ ] Define a clear message format for annotation updates (e.g., `type`, `payload`).

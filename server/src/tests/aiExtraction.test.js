@@ -1,5 +1,5 @@
 /**
- * AI Extraction Service Tests
+ * AI Extraction Service Tests  
  * P0 Critical - MVP1 requirement validation
  */
 
@@ -14,24 +14,24 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
   beforeEach(() => {
     mockMultimodalService = {
       createMultimodalEntity: jest.fn(),
-      createMultimodalRelationship: jest.fn(),
+      createMultimodalRelationship: jest.fn()
     };
 
     mockAuthService = {
       verifyToken: jest.fn(),
-      getUserRole: jest.fn(),
+      getUserRole: jest.fn()
     };
 
     mockLogger = {
       info: jest.fn(),
       error: jest.fn(),
-      warn: jest.fn(),
+      warn: jest.fn()
     };
 
     aiExtractionService = new AIExtractionService(
       mockMultimodalService,
       mockAuthService,
-      mockLogger,
+      mockLogger
     );
   });
 
@@ -42,25 +42,25 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
   describe('Pipeline Initialization', () => {
     test('should initialize all required extraction pipelines', () => {
       const pipelines = aiExtractionService.getAvailablePipelines();
-
+      
       expect(pipelines).toHaveLength(6);
-      expect(pipelines.map((p) => p.id)).toContain('NLP_SPACY');
-      expect(pipelines.map((p) => p.id)).toContain('NLP_TRANSFORMERS');
-      expect(pipelines.map((p) => p.id)).toContain('COMPUTER_VISION');
-      expect(pipelines.map((p) => p.id)).toContain('OCR_TESSERACT');
-      expect(pipelines.map((p) => p.id)).toContain('SPEECH_TO_TEXT');
-      expect(pipelines.map((p) => p.id)).toContain('AI_HYBRID');
+      expect(pipelines.map(p => p.id)).toContain('NLP_SPACY');
+      expect(pipelines.map(p => p.id)).toContain('NLP_TRANSFORMERS');
+      expect(pipelines.map(p => p.id)).toContain('COMPUTER_VISION');
+      expect(pipelines.map(p => p.id)).toContain('OCR_TESSERACT');
+      expect(pipelines.map(p => p.id)).toContain('SPEECH_TO_TEXT');
+      expect(pipelines.map(p => p.id)).toContain('AI_HYBRID');
     });
 
     test('should configure pipeline capabilities correctly', () => {
       const pipelines = aiExtractionService.getAvailablePipelines();
-
-      const spacyPipeline = pipelines.find((p) => p.id === 'NLP_SPACY');
+      
+      const spacyPipeline = pipelines.find(p => p.id === 'NLP_SPACY');
       expect(spacyPipeline.mediaTypes).toContain('TEXT');
       expect(spacyPipeline.supportedEntities).toContain('PERSON');
       expect(spacyPipeline.confidence).toBeGreaterThan(0.8);
 
-      const visionPipeline = pipelines.find((p) => p.id === 'COMPUTER_VISION');
+      const visionPipeline = pipelines.find(p => p.id === 'COMPUTER_VISION');
       expect(visionPipeline.mediaTypes).toContain('IMAGE');
       expect(visionPipeline.mediaTypes).toContain('VIDEO');
       expect(visionPipeline.supportedEntities).toContain('VEHICLE');
@@ -74,7 +74,7 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
         extractionMethods: ['NLP_SPACY', 'COMPUTER_VISION'],
         investigationId: 'inv456',
         userId: 'user789',
-        processingParams: {},
+        processingParams: {}
       };
 
       const job = await aiExtractionService.submitExtractionJob(jobData);
@@ -88,24 +88,22 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
 
     test('should handle concurrent job submissions', async () => {
       const jobPromises = [];
-
+      
       for (let i = 0; i < 5; i++) {
-        jobPromises.push(
-          aiExtractionService.submitExtractionJob({
-            mediaSourceId: `media${i}`,
-            extractionMethods: ['NLP_SPACY'],
-            investigationId: 'inv456',
-            userId: 'user789',
-          }),
-        );
+        jobPromises.push(aiExtractionService.submitExtractionJob({
+          mediaSourceId: `media${i}`,
+          extractionMethods: ['NLP_SPACY'],
+          investigationId: 'inv456',
+          userId: 'user789'
+        }));
       }
 
       const jobs = await Promise.all(jobPromises);
       expect(jobs).toHaveLength(5);
       expect(aiExtractionService.metrics.totalJobs).toBe(5);
-
+      
       // All jobs should have unique IDs
-      const jobIds = jobs.map((j) => j.id);
+      const jobIds = jobs.map(j => j.id);
       expect(new Set(jobIds).size).toBe(5);
     });
 
@@ -120,15 +118,15 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
       const mediaSource = {
         id: 'media123',
         mediaType: 'TEXT',
-        filename: 'document.txt',
+        filename: 'document.txt'
       };
 
       const results = await aiExtractionService.extractWithSpacy(mediaSource, {});
-
+      
       expect(results.entities).toBeDefined();
       expect(results.entities.length).toBeGreaterThan(0);
-
-      const personEntity = results.entities.find((e) => e.type === 'PERSON');
+      
+      const personEntity = results.entities.find(e => e.type === 'PERSON');
       expect(personEntity).toBeDefined();
       expect(personEntity.confidence).toBeGreaterThan(0.8);
       expect(personEntity.properties.source).toBe('text_ner');
@@ -138,14 +136,14 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
       const mediaSource = {
         id: 'media456',
         mediaType: 'TEXT',
-        filename: 'report.txt',
+        filename: 'report.txt'
       };
 
       const results = await aiExtractionService.extractWithTransformers(mediaSource, {});
-
+      
       expect(results.entities).toBeDefined();
       expect(results.entities.length).toBeGreaterThan(0);
-
+      
       const entity = results.entities[0];
       expect(entity.properties.source).toBe('transformer_ner');
       expect(entity.properties.model).toBe('bert-base-ner');
@@ -157,19 +155,19 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
       const mediaSource = {
         id: 'media789',
         mediaType: 'IMAGE',
-        filename: 'surveillance.jpg',
+        filename: 'surveillance.jpg'
       };
 
       const results = await aiExtractionService.extractWithComputerVision(mediaSource, {});
-
+      
       expect(results.entities).toBeDefined();
       expect(results.entities.length).toBeGreaterThan(0);
-
-      const personEntity = results.entities.find((e) => e.type === 'PERSON');
+      
+      const personEntity = results.entities.find(e => e.type === 'PERSON');
       expect(personEntity).toBeDefined();
       expect(personEntity.boundingBoxes).toBeDefined();
       expect(personEntity.boundingBoxes.length).toBeGreaterThan(0);
-
+      
       const bbox = personEntity.boundingBoxes[0];
       expect(bbox.x).toBeGreaterThanOrEqual(0);
       expect(bbox.y).toBeGreaterThanOrEqual(0);
@@ -181,12 +179,12 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
       const mediaSource = {
         id: 'media101',
         mediaType: 'IMAGE',
-        filename: 'traffic.jpg',
+        filename: 'traffic.jpg'
       };
 
       const results = await aiExtractionService.extractWithComputerVision(mediaSource, {});
-
-      const vehicleEntity = results.entities.find((e) => e.type === 'VEHICLE');
+      
+      const vehicleEntity = results.entities.find(e => e.type === 'VEHICLE');
       expect(vehicleEntity).toBeDefined();
       expect(vehicleEntity.properties.color).toBeDefined();
       expect(vehicleEntity.properties.vehicle_type).toBeDefined();
@@ -198,18 +196,18 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
       const mediaSource = {
         id: 'media202',
         mediaType: 'IMAGE',
-        filename: 'business_card.jpg',
+        filename: 'business_card.jpg'
       };
 
       const results = await aiExtractionService.extractWithOCR(mediaSource, {});
-
+      
       expect(results.entities).toBeDefined();
-
-      const personEntity = results.entities.find((e) => e.type === 'PERSON');
+      
+      const personEntity = results.entities.find(e => e.type === 'PERSON');
       expect(personEntity).toBeDefined();
       expect(personEntity.properties.title).toBe('Dr.');
-
-      const phoneEntity = results.entities.find((e) => e.type === 'PHONE');
+      
+      const phoneEntity = results.entities.find(e => e.type === 'PHONE');
       expect(phoneEntity).toBeDefined();
       expect(phoneEntity.properties.format).toBe('US_STANDARD');
     });
@@ -220,18 +218,18 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
       const mediaSource = {
         id: 'media303',
         mediaType: 'AUDIO',
-        filename: 'conversation.wav',
+        filename: 'conversation.wav'
       };
 
       const results = await aiExtractionService.extractWithSpeechToText(mediaSource, {});
-
+      
       expect(results.entities).toBeDefined();
-
-      const personEntity = results.entities.find((e) => e.type === 'PERSON');
+      
+      const personEntity = results.entities.find(e => e.type === 'PERSON');
       expect(personEntity).toBeDefined();
       expect(personEntity.temporalBounds).toBeDefined();
       expect(personEntity.temporalBounds.length).toBeGreaterThan(0);
-
+      
       const temporalBound = personEntity.temporalBounds[0];
       expect(temporalBound.startTime).toBeGreaterThanOrEqual(0);
       expect(temporalBound.endTime).toBeGreaterThan(temporalBound.startTime);
@@ -244,7 +242,7 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
       const mediaSource = {
         id: 'media404',
         mediaType: 'VIDEO',
-        filename: 'interview.mp4',
+        filename: 'interview.mp4'
       };
 
       mockMultimodalService.createMultimodalEntity
@@ -252,12 +250,12 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
         .mockResolvedValueOnce({ id: 'entity2', label: 'Organization 1' });
 
       const results = await aiExtractionService.extractWithHybridAI(mediaSource, {});
-
+      
       expect(results.entities).toBeDefined();
       expect(results.entities.length).toBeGreaterThan(0);
-
+      
       // Should have entities from multiple extraction methods
-      const entitySources = results.entities.map((e) => e.properties?.source).filter(Boolean);
+      const entitySources = results.entities.map(e => e.properties?.source).filter(Boolean);
       const uniqueSources = new Set(entitySources);
       expect(uniqueSources.size).toBeGreaterThanOrEqual(2);
     });
@@ -266,23 +264,23 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
       const mediaSource = {
         id: 'media505',
         mediaType: 'TEXT',
-        filename: 'document.txt',
+        filename: 'document.txt'
       };
 
       // Mock multiple similar entities from different pipelines
       aiExtractionService.groupSimilarEntities = jest.fn().mockReturnValue([
         [
           { label: 'John Smith', confidence: 0.8, properties: { source: 'spacy' } },
-          { label: 'John Smith', confidence: 0.85, properties: { source: 'transformers' } },
-        ],
+          { label: 'John Smith', confidence: 0.85, properties: { source: 'transformers' } }
+        ]
       ]);
 
       const fusedResults = aiExtractionService.fuseExtractionResults({
         entities: [
           { label: 'John Smith', confidence: 0.8, properties: { source: 'spacy' } },
-          { label: 'John Smith', confidence: 0.85, properties: { source: 'transformers' } },
+          { label: 'John Smith', confidence: 0.85, properties: { source: 'transformers' } }
         ],
-        relationships: [],
+        relationships: []
       });
 
       expect(fusedResults.entities).toHaveLength(1);
@@ -297,20 +295,20 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
         mediaSourceId: 'media123',
         extractionMethods: ['NLP_SPACY'],
         investigationId: 'inv456',
-        userId: 'user789',
+        userId: 'user789'
       };
 
       // Mock entity creation
       mockMultimodalService.createMultimodalEntity.mockResolvedValue({
         id: 'entity123',
         label: 'Test Entity',
-        confidence: 0.9,
+        confidence: 0.9
       });
 
       const job = await aiExtractionService.submitExtractionJob(jobData);
-
+      
       // Wait for processing
-      await new Promise((resolve) => {
+      await new Promise(resolve => {
         const checkCompletion = () => {
           const updatedJob = aiExtractionService.getJobStatus(job.id);
           if (updatedJob && (updatedJob.status === 'COMPLETED' || updatedJob.status === 'FAILED')) {
@@ -324,7 +322,7 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
 
       const completedJob = aiExtractionService.getJobStatus(job.id);
       expect(['COMPLETED', 'FAILED']).toContain(completedJob.status);
-
+      
       if (completedJob.status === 'COMPLETED') {
         expect(completedJob.results).toBeDefined();
         expect(completedJob.executionTime).toBeGreaterThan(0);
@@ -334,20 +332,20 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
     test('should handle job failures gracefully', async () => {
       // Force an error by providing invalid extraction method
       aiExtractionService.pipelines.set('INVALID_PIPELINE', {
-        extract: jest.fn().mockRejectedValue(new Error('Pipeline failed')),
+        extract: jest.fn().mockRejectedValue(new Error('Pipeline failed'))
       });
 
       const jobData = {
         mediaSourceId: 'media123',
         extractionMethods: ['INVALID_PIPELINE'],
         investigationId: 'inv456',
-        userId: 'user789',
+        userId: 'user789'
       };
 
       const job = await aiExtractionService.submitExtractionJob(jobData);
-
+      
       // Wait for processing
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const failedJob = aiExtractionService.getJobStatus(job.id);
       expect(failedJob.status).toBe('FAILED');
@@ -359,16 +357,16 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
   describe('Performance Metrics', () => {
     test('should track extraction metrics accurately', async () => {
       const initialMetrics = aiExtractionService.getMetrics();
-
+      
       const job = await aiExtractionService.submitExtractionJob({
         mediaSourceId: 'media123',
         extractionMethods: ['NLP_SPACY'],
         investigationId: 'inv456',
-        userId: 'user789',
+        userId: 'user789'
       });
 
       // Wait for processing
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       const updatedMetrics = aiExtractionService.getMetrics();
       expect(updatedMetrics.totalJobs).toBe(initialMetrics.totalJobs + 1);
@@ -376,9 +374,9 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
 
     test('should calculate success rate correctly', async () => {
       const metrics = aiExtractionService.getMetrics();
-
+      
       if (metrics.totalJobs > 0) {
-        const expectedSuccessRate = ((metrics.successfulJobs / metrics.totalJobs) * 100).toFixed(2);
+        const expectedSuccessRate = (metrics.successfulJobs / metrics.totalJobs * 100).toFixed(2);
         expect(metrics.successRate).toBe(expectedSuccessRate);
       }
     });
@@ -402,19 +400,15 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
 
     test('should calculate string similarity accurately', () => {
       expect(aiExtractionService.calculateStringSimilarity('John Smith', 'John Smith')).toBe(1.0);
-      expect(
-        aiExtractionService.calculateStringSimilarity('John Smith', 'Jon Smith'),
-      ).toBeGreaterThan(0.8);
-      expect(aiExtractionService.calculateStringSimilarity('John Smith', 'Jane Doe')).toBeLessThan(
-        0.5,
-      );
+      expect(aiExtractionService.calculateStringSimilarity('John Smith', 'Jon Smith')).toBeGreaterThan(0.8);
+      expect(aiExtractionService.calculateStringSimilarity('John Smith', 'Jane Doe')).toBeLessThan(0.5);
     });
 
     test('should group similar entities for fusion', () => {
       const entities = [
         { label: 'John Smith', type: 'PERSON', confidence: 0.8 },
         { label: 'John Smith', type: 'PERSON', confidence: 0.9 },
-        { label: 'Jane Doe', type: 'PERSON', confidence: 0.7 },
+        { label: 'Jane Doe', type: 'PERSON', confidence: 0.7 }
       ];
 
       const groups = aiExtractionService.groupSimilarEntities(entities);
@@ -430,7 +424,7 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
         mediaSourceId: 'media123',
         extractionMethods: ['NONEXISTENT_METHOD'],
         investigationId: 'inv456',
-        userId: 'user789',
+        userId: 'user789'
       };
 
       const job = await aiExtractionService.submitExtractionJob(jobData);
@@ -445,11 +439,11 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
         mediaSourceId: 'nonexistent',
         extractionMethods: ['NLP_SPACY'],
         investigationId: 'inv456',
-        userId: 'user789',
+        userId: 'user789'
       });
 
       // Wait for processing to fail
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const failedJob = aiExtractionService.getJobStatus(job.id);
       expect(failedJob.status).toBe('FAILED');
@@ -470,18 +464,16 @@ describe('AI Extraction Service - P0 Critical MVP1', () => {
         mediaSourceId: 'media123',
         extractionMethods: ['NLP_SPACY'],
         investigationId: 'inv456',
-        userId: 'user789',
+        userId: 'user789'
       });
 
-      expect(queuedHandler).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: job.id,
-          status: 'QUEUED',
-        }),
-      );
+      expect(queuedHandler).toHaveBeenCalledWith(expect.objectContaining({
+        id: job.id,
+        status: 'QUEUED'
+      }));
 
       // Wait for processing to complete
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Events should be emitted during processing
       expect(startedHandler).toHaveBeenCalled();

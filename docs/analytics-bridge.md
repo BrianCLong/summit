@@ -31,18 +31,10 @@ This component streams progressive analytics results from Redis Streams to the A
 const socket = io('/graph-analytics', { auth: { token } });
 socket.emit('join_job', { jobId: job.id });
 
-socket.on('progress', (e) => {
-  /* update UI */
-});
-socket.on('result', (e) => {
-  /* append partial results */
-});
-socket.on('error', (e) => {
-  /* show error */
-});
-socket.on('complete', (e) => {
-  /* finalize */
-});
+socket.on('progress', (e) => { /* update UI */ });
+socket.on('result', (e) => { /* append partial results */ });
+socket.on('error', (e) => { /* show error */ });
+socket.on('complete', (e) => { /* finalize */ });
 ```
 
 ## Notes
@@ -50,3 +42,4 @@ socket.on('complete', (e) => {
 - Messages are acknowledged on consumption to avoid redelivery.
 - If no `job_id` is present, the bridge broadcasts to all clients in the namespace.
 - The bridge does not crash on parse errors; invalid messages are acked and logged.
+

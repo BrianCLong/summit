@@ -8,3 +8,4 @@ export async function xaddEvent(redisUrl: string, stream: string, event: any) {
     await redis.quit();
   }
 }
+

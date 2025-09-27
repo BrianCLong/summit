@@ -1,10 +1,13 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const PROTOCOL_PATH = path.resolve(__dirname, '../../../CROSS_DOMAIN_FUSION_PROTOCOL_COMPLETED.md');
-let PROTOCOL_DOC = '';
+const PROTOCOL_PATH = path.resolve(
+  __dirname,
+  "../../../CROSS_DOMAIN_FUSION_PROTOCOL_COMPLETED.md",
+);
+let PROTOCOL_DOC = "";
 try {
-  PROTOCOL_DOC = fs.readFileSync(PROTOCOL_PATH, 'utf8');
+  PROTOCOL_DOC = fs.readFileSync(PROTOCOL_PATH, "utf8");
 } catch (err) {
   // If the protocol document is missing we still allow the engine to function.
 }
@@ -27,7 +30,7 @@ class EntityCorrelationEngine {
   }
 
   registerResolver(resolver) {
-    if (typeof resolver === 'function') this.resolvers.push(resolver);
+    if (typeof resolver === "function") this.resolvers.push(resolver);
   }
 
   // Normalise according to protocol schemas
@@ -36,7 +39,7 @@ class EntityCorrelationEngine {
       id: entity.id,
       type: entity.type ? String(entity.type).toUpperCase().trim() : undefined,
       label: entity.label ? String(entity.label).trim() : undefined,
-      source: entity.source || 'unknown',
+      source: entity.source || "unknown",
       attributes: { ...(entity.attributes || {}) },
       confidence: entity.confidence ?? 0.5,
     };
@@ -44,7 +47,7 @@ class EntityCorrelationEngine {
   }
 
   // Simple Levenshtein distance for string similarity
-  calculateStringSimilarity(str1 = '', str2 = '') {
+  calculateStringSimilarity(str1 = "", str2 = "") {
     const a = str1.toLowerCase();
     const b = str2.toLowerCase();
     const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
@@ -118,7 +121,8 @@ class EntityCorrelationEngine {
       if (out) result = out;
     }
     // fallback: prefer higher confidence values
-    const chosen = (incoming.confidence || 0) > (result.confidence || 0) ? incoming : result;
+    const chosen =
+      (incoming.confidence || 0) > (result.confidence || 0) ? incoming : result;
     return { ...result, ...incoming, confidence: chosen.confidence };
   }
 
@@ -133,13 +137,16 @@ class EntityCorrelationEngine {
     }
     // score based on average confidence
     const avgConfidence =
-      entities.reduce((sum, e) => sum + (e.confidence ?? 0.5), 0) / entities.length;
+      entities.reduce((sum, e) => sum + (e.confidence ?? 0.5), 0) /
+      entities.length;
     merged.confidence = Math.min(0.99, avgConfidence);
     return merged;
   }
 
   fuseEntities(entities = []) {
-    return this.groupSimilarEntities(entities).map((g) => this.mergeEntities(g));
+    return this.groupSimilarEntities(entities).map((g) =>
+      this.mergeEntities(g),
+    );
   }
 }
 

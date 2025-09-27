@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 39,
+  "title": "MC v0.3.5 Tiles — Adaptive · Attest · Budget",
+  "refresh": "10s",
+  "tags": ["mc","v0.3.5","adaptive","attest","budget"],
+  "templating": {"list": [
+    {"type":"datasource","name":"DS_PROM","query":"prometheus","label":"Prometheus"},
+    {"type":"query","name":"tenant","label":"Tenant","datasource":"$DS_PROM","query":"label_values(mc_autonomy_success_total, tenant)","includeAll":true},
+    {"type":"constant","name":"svc","label":"Service","query":"agent-workbench"}
+  ]},
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Composite Canary Score",
+      "gridPos": {"w":8,"h":4,"x":0,"y":0},
+      "datasource": "$DS_PROM",
+      "targets": [{"expr": "mc_canary_composite_score{service='$svc'}"}],
+      "options": {
+        "reduceOptions": {"calcs":["lastNotNull"]},
+        "colorMode": "value",
+        "thresholds": {"mode":"absolute","steps":[
+          {"color":"#d93f0b","value":0.0},
+          {"color":"#f2cc0c","value":0.7},
+          {"color":"#56A64B","value":0.85}
+        ]}
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Composite Score (10m window)",
+      "gridPos": {"w":16,"h":6,"x":8,"y":0},
+      "datasource": "$DS_PROM",
+      "targets": [{"expr": "mc_canary_composite_score{service='$svc'}"}]
+    },
+    {
+      "type": "stat",
+      "title": "JWS Failure Rate (15m)",
+      "gridPos": {"w":8,"h":4,"x":0,"y":4},
+      "datasource": "$DS_PROM",
+      "targets": [{"expr": "100 * mc_attest_jws_failure_rate_15m{service='$svc',tenant=~'$tenant'}"}],
+      "options": {
+        "reduceOptions": {"calcs":["lastNotNull"]},
+        "thresholds": {"mode":"absolute","steps":[
+          {"color":"#d93f0b","value":0.1},
+          {"color":"#56A64B","value":0.0}
+        ]},
+        "fieldOptions": {"min":0,"max":5}
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "JWS Attempts/Failures",
+      "gridPos": {"w":16,"h":6,"x":8,"y":4},
+      "datasource": "$DS_PROM",
+      "targets": [
+        {"expr": "sum(rate(mc_attest_jws_fail_total{service='$svc',tenant=~'$tenant'}[5m]))"},
+        {"expr": "sum(rate(mc_attest_jws_attempt_total{service='$svc',tenant=~'$tenant'}[5m]))"}
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Budget v2 Noise (FP %) (15m)",
+      "gridPos": {"w":8,"h":4,"x":0,"y":10},
+      "datasource": "$DS_PROM",
+      "targets": [{"expr": "100 * mc_budget_v2_noise_fp_rate_15m{service='$svc',tenant=~'$tenant'}"}],
+      "options": {
+        "reduceOptions": {"calcs":["lastNotNull"]},
+        "thresholds": {"mode":"absolute","steps":[
+          {"color":"#d93f0b","value":5},
+          {"color":"#56A64B","value":0}
+        ]}
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Budget Throttle Events (TP/FP per 5m)",
+      "gridPos": {"w":16,"h":6,"x":8,"y":10},
+      "datasource": "$DS_PROM",
+      "targets": [
+        {"expr": "sum(rate(mc_budget_throttle_tp_total{service='$svc',tenant=~'$tenant'}[5m]))"},
+        {"expr": "sum(rate(mc_budget_throttle_fp_total{service='$svc',tenant=~'$tenant'}[5m]))"}
+      ]
+    }
+  ]
+}

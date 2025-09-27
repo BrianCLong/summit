@@ -3,8 +3,8 @@
  * Mobile-first API, offline sync, and push notifications
  */
 
-const EventEmitter = require('events');
-const { v4: uuidv4 } = require('uuid');
+const EventEmitter = require("events");
+const { v4: uuidv4 } = require("uuid");
 
 class MobileService extends EventEmitter {
   constructor(redisClient, notificationService, securityService, logger) {
@@ -38,11 +38,14 @@ class MobileService extends EventEmitter {
     // Ensure we have all required methods before binding
     this.handleSync = this.handleSync || this.notificationService.handleSync;
     this.getInvestigationsSummary =
-      this.getInvestigationsSummary || this.notificationService.getInvestigationsSummary;
+      this.getInvestigationsSummary ||
+      this.notificationService.getInvestigationsSummary;
     this.getLightweightEntities =
-      this.getLightweightEntities || this.notificationService.getLightweightEntities;
+      this.getLightweightEntities ||
+      this.notificationService.getLightweightEntities;
     this.getMobileNotifications =
-      this.getMobileNotifications || this.notificationService.getMobileNotifications;
+      this.getMobileNotifications ||
+      this.notificationService.getMobileNotifications;
     this.handleOfflineQueue =
       this.handleOfflineQueue ||
       function (clientId, operations) {
@@ -51,11 +54,12 @@ class MobileService extends EventEmitter {
 
     // Mobile API endpoints optimized for mobile consumption
     this.mobileEndpoints = {
-      '/mobile/sync': this.handleSync.bind(this),
-      '/mobile/investigations/summary': this.getInvestigationsSummary.bind(this),
-      '/mobile/entities/lightweight': this.getLightweightEntities.bind(this),
-      '/mobile/notifications': this.getMobileNotifications.bind(this),
-      '/mobile/offline/queue': this.handleOfflineQueue.bind(this),
+      "/mobile/sync": this.handleSync.bind(this),
+      "/mobile/investigations/summary":
+        this.getInvestigationsSummary.bind(this),
+      "/mobile/entities/lightweight": this.getLightweightEntities.bind(this),
+      "/mobile/notifications": this.getMobileNotifications.bind(this),
+      "/mobile/offline/queue": this.handleOfflineQueue.bind(this),
     };
 
     // Start periodic sync cleanup
@@ -108,7 +112,7 @@ class MobileService extends EventEmitter {
     // Initialize offline data for this client
     await this.initializeOfflineData(clientId);
 
-    this.emit('mobileClientRegistered', client);
+    this.emit("mobileClientRegistered", client);
     return client;
   }
 
@@ -140,13 +144,13 @@ class MobileService extends EventEmitter {
     // Get user's most recent investigations with essential data only
     return [
       {
-        id: 'inv1',
-        title: 'Sample Investigation',
-        status: 'ACTIVE',
-        priority: 'HIGH',
+        id: "inv1",
+        title: "Sample Investigation",
+        status: "ACTIVE",
+        priority: "HIGH",
         entityCount: 15,
         lastUpdated: new Date(),
-        thumbnail: '/thumbnails/inv1.jpg',
+        thumbnail: "/thumbnails/inv1.jpg",
       },
     ];
   }
@@ -155,10 +159,10 @@ class MobileService extends EventEmitter {
     // Get essential entity data for offline use
     return [
       {
-        id: 'ent1',
-        label: 'Sample Entity',
-        type: 'PERSON',
-        investigationId: 'inv1',
+        id: "ent1",
+        label: "Sample Entity",
+        type: "PERSON",
+        investigationId: "inv1",
         connectionCount: 5,
         lastActivity: new Date(),
       },
@@ -179,8 +183,8 @@ class MobileService extends EventEmitter {
   async getUserSettings(userId) {
     // Get user preferences and settings
     return {
-      theme: 'light',
-      language: 'en',
+      theme: "light",
+      language: "en",
       notifications: {
         push: true,
         email: true,
@@ -193,16 +197,16 @@ class MobileService extends EventEmitter {
   async handleSync(clientId, syncRequest) {
     const client = this.mobileClients.get(clientId);
     if (!client) {
-      throw new Error('Mobile client not found');
+      throw new Error("Mobile client not found");
     }
 
     const syncOperation = {
       id: uuidv4(),
       clientId,
       requestedAt: new Date(),
-      type: syncRequest.type || 'FULL',
+      type: syncRequest.type || "FULL",
       lastSyncVersion: syncRequest.lastSyncVersion || 0,
-      status: 'PROCESSING',
+      status: "PROCESSING",
       changes: {
         investigations: [],
         entities: [],
@@ -213,13 +217,19 @@ class MobileService extends EventEmitter {
 
     try {
       // Get changes since last sync
-      const changes = await this.getChangesSinceLastSync(client, syncOperation.lastSyncVersion);
+      const changes = await this.getChangesSinceLastSync(
+        client,
+        syncOperation.lastSyncVersion,
+      );
 
       syncOperation.changes = changes;
 
       // Process any pending offline operations from client
       if (syncRequest.pendingOperations) {
-        await this.processOfflineOperations(clientId, syncRequest.pendingOperations);
+        await this.processOfflineOperations(
+          clientId,
+          syncRequest.pendingOperations,
+        );
       }
 
       // Update client sync state
@@ -227,12 +237,12 @@ class MobileService extends EventEmitter {
       client.syncState.syncVersion = this.getCurrentSyncVersion();
       client.lastSeen = new Date();
 
-      syncOperation.status = 'COMPLETED';
+      syncOperation.status = "COMPLETED";
       syncOperation.completedAt = new Date();
 
       this.metrics.syncOperations++;
 
-      this.emit('syncCompleted', syncOperation);
+      this.emit("syncCompleted", syncOperation);
 
       return {
         syncVersion: client.syncState.syncVersion,
@@ -241,9 +251,9 @@ class MobileService extends EventEmitter {
         nextSyncRecommended: Date.now() + 5 * 60 * 1000, // 5 minutes
       };
     } catch (error) {
-      syncOperation.status = 'FAILED';
+      syncOperation.status = "FAILED";
       syncOperation.error = error.message;
-      this.logger.error('Mobile sync failed:', error);
+      this.logger.error("Mobile sync failed:", error);
       throw error;
     }
   }
@@ -257,16 +267,28 @@ class MobileService extends EventEmitter {
     };
 
     // Get investigation changes
-    changes.investigations = await this.getInvestigationChanges(client.userId, lastSyncVersion);
+    changes.investigations = await this.getInvestigationChanges(
+      client.userId,
+      lastSyncVersion,
+    );
 
     // Get entity changes
-    changes.entities = await this.getEntityChanges(client.userId, lastSyncVersion);
+    changes.entities = await this.getEntityChanges(
+      client.userId,
+      lastSyncVersion,
+    );
 
     // Get notification changes
-    changes.notifications = await this.getNotificationChanges(client.userId, lastSyncVersion);
+    changes.notifications = await this.getNotificationChanges(
+      client.userId,
+      lastSyncVersion,
+    );
 
     // Get settings changes
-    changes.settings = await this.getSettingsChanges(client.userId, lastSyncVersion);
+    changes.settings = await this.getSettingsChanges(
+      client.userId,
+      lastSyncVersion,
+    );
 
     return changes;
   }
@@ -325,7 +347,7 @@ class MobileService extends EventEmitter {
         const result = await this.processOfflineOperation(operation, client);
         results.push({
           operationId: operation.id,
-          status: 'SUCCESS',
+          status: "SUCCESS",
           result,
         });
 
@@ -333,11 +355,11 @@ class MobileService extends EventEmitter {
       } catch (error) {
         results.push({
           operationId: operation.id,
-          status: 'FAILED',
-          error: error.message || 'Unknown error',
+          status: "FAILED",
+          error: error.message || "Unknown error",
         });
 
-        this.logger.error('Offline operation failed:', error);
+        this.logger.error("Offline operation failed:", error);
       }
     }
 
@@ -346,14 +368,17 @@ class MobileService extends EventEmitter {
 
   async processOfflineOperation(operation, client) {
     switch (operation.type) {
-      case 'CREATE_ENTITY':
+      case "CREATE_ENTITY":
         return await this.createEntityFromMobile(operation.data, client);
-      case 'UPDATE_ENTITY':
+      case "UPDATE_ENTITY":
         return await this.updateEntityFromMobile(operation.data, client);
-      case 'CREATE_RELATIONSHIP':
+      case "CREATE_RELATIONSHIP":
         return await this.createRelationshipFromMobile(operation.data, client);
-      case 'MARK_NOTIFICATION_READ':
-        return await this.markNotificationReadFromMobile(operation.data, client);
+      case "MARK_NOTIFICATION_READ":
+        return await this.markNotificationReadFromMobile(
+          operation.data,
+          client,
+        );
       default:
         throw new Error(`Unknown offline operation type: ${operation.type}`);
     }
@@ -367,14 +392,14 @@ class MobileService extends EventEmitter {
     return {
       investigations: [
         {
-          id: 'inv1',
-          title: 'Mobile Investigation',
-          status: 'ACTIVE',
-          priority: 'HIGH',
+          id: "inv1",
+          title: "Mobile Investigation",
+          status: "ACTIVE",
+          priority: "HIGH",
           entityCount: 25,
           alertCount: 3,
           lastActivity: new Date(),
-          thumbnail: '/api/investigations/inv1/thumbnail',
+          thumbnail: "/api/investigations/inv1/thumbnail",
           progress: 65,
         },
       ],
@@ -390,11 +415,11 @@ class MobileService extends EventEmitter {
     return {
       entities: [
         {
-          id: 'ent1',
-          label: 'Mobile Entity',
-          type: 'PERSON',
+          id: "ent1",
+          label: "Mobile Entity",
+          type: "PERSON",
           connectionCount: 8,
-          riskLevel: 'MEDIUM',
+          riskLevel: "MEDIUM",
           lastActivity: new Date(),
           coordinates: { x: 100, y: 200 }, // For mobile graph rendering
         },
@@ -408,10 +433,10 @@ class MobileService extends EventEmitter {
     const { limit = 30, unreadOnly = false } = options;
 
     if (this.notificationService) {
-      const notifications = await this.notificationService.getUserNotifications(userId, {
-        limit,
-        unreadOnly,
-      });
+      const notifications = await this.notificationService.getUserNotifications(
+        userId,
+        { limit, unreadOnly },
+      );
 
       // Optimize for mobile display
       return notifications.map((notif) => ({
@@ -436,7 +461,7 @@ class MobileService extends EventEmitter {
     const client = this.mobileClients.get(clientId);
 
     if (!client) {
-      throw new Error('Mobile client not found for device token');
+      throw new Error("Mobile client not found for device token");
     }
 
     const pushPayload = {
@@ -445,7 +470,7 @@ class MobileService extends EventEmitter {
         title: notification.title,
         body: notification.body,
         badge: notification.badge || 1,
-        sound: notification.sound || 'default',
+        sound: notification.sound || "default",
       },
       data: {
         investigationId: notification.investigationId,
@@ -456,7 +481,7 @@ class MobileService extends EventEmitter {
     };
 
     // Platform-specific customization
-    if (client.platform === 'ios') {
+    if (client.platform === "ios") {
       pushPayload.notification.aps = {
         alert: {
           title: notification.title,
@@ -465,12 +490,12 @@ class MobileService extends EventEmitter {
         badge: notification.badge,
         sound: notification.sound,
       };
-    } else if (client.platform === 'android') {
+    } else if (client.platform === "android") {
       pushPayload.notification.android = {
         notification: {
-          icon: 'ic_notification',
-          color: '#3498db',
-          click_action: 'FLUTTER_NOTIFICATION_CLICK',
+          icon: "ic_notification",
+          color: "#3498db",
+          click_action: "FLUTTER_NOTIFICATION_CLICK",
         },
       };
     }
@@ -485,7 +510,7 @@ class MobileService extends EventEmitter {
       this.metrics.pushNotifications++;
       return result;
     } catch (error) {
-      this.logger.error('Push notification failed:', error);
+      this.logger.error("Push notification failed:", error);
       throw error;
     }
   }
@@ -494,11 +519,14 @@ class MobileService extends EventEmitter {
   async updateMobileClient(clientId, updates) {
     const client = this.mobileClients.get(clientId);
     if (!client) {
-      throw new Error('Mobile client not found');
+      throw new Error("Mobile client not found");
     }
 
     // Handle device token changes
-    if (updates.deviceToken !== undefined && updates.deviceToken !== client.deviceToken) {
+    if (
+      updates.deviceToken !== undefined &&
+      updates.deviceToken !== client.deviceToken
+    ) {
       // Remove old token mapping
       if (client.deviceToken) {
         this.deviceTokens.delete(client.deviceToken);
@@ -522,7 +550,7 @@ class MobileService extends EventEmitter {
       this.deviceTokens.set(updates.deviceToken, clientId);
     }
 
-    this.emit('mobileClientUpdated', client);
+    this.emit("mobileClientUpdated", client);
     return client;
   }
 
@@ -541,9 +569,12 @@ class MobileService extends EventEmitter {
     await this.redisClient.del(`mobile_offline:${clientId}`);
 
     // Update metrics - ensure it doesn't go below 0
-    this.metrics.connectedClients = Math.max(0, this.metrics.connectedClients - 1);
+    this.metrics.connectedClients = Math.max(
+      0,
+      this.metrics.connectedClients - 1,
+    );
 
-    this.emit('mobileClientDeregistered', client);
+    this.emit("mobileClientDeregistered", client);
     return true;
   }
 
@@ -556,21 +587,21 @@ class MobileService extends EventEmitter {
 
     try {
       const syncResult = await this.handleSync(clientId, {
-        type: 'INCREMENTAL',
+        type: "INCREMENTAL",
         lastSyncVersion: client.syncState.syncVersion,
       });
 
       // Send push notification if there are important changes
       if (this.hasImportantChanges(syncResult.changes)) {
         await this.sendPushNotification(client.deviceToken, {
-          title: 'New Updates Available',
-          body: 'Important changes detected in your investigations',
+          title: "New Updates Available",
+          body: "Important changes detected in your investigations",
           badge: this.getUnreadCount(syncResult.changes),
-          actionType: 'SYNC_UPDATE',
+          actionType: "SYNC_UPDATE",
         });
       }
     } catch (error) {
-      this.logger.error('Background sync failed:', error);
+      this.logger.error("Background sync failed:", error);
     }
   }
 
@@ -593,11 +624,11 @@ class MobileService extends EventEmitter {
 
   getMobileNotificationIcon(category) {
     const iconMap = {
-      SECURITY: 'security',
-      INVESTIGATION: 'search',
-      ANALYTICS: 'chart',
-      SYSTEM: 'settings',
-      default: 'notification',
+      SECURITY: "security",
+      INVESTIGATION: "search",
+      ANALYTICS: "chart",
+      SYSTEM: "settings",
+      default: "notification",
     };
     return iconMap[category] || iconMap.default;
   }
@@ -605,7 +636,7 @@ class MobileService extends EventEmitter {
   hasImportantChanges(changes) {
     return (
       changes.investigations.length > 0 ||
-      changes.notifications.filter((n) => n.priority === 'HIGH').length > 0
+      changes.notifications.filter((n) => n.priority === "HIGH").length > 0
     );
   }
 
@@ -636,8 +667,8 @@ class MobileService extends EventEmitter {
     const breakdown = { ios: 0, android: 0, other: 0 };
 
     for (const client of this.mobileClients.values()) {
-      if (client.platform === 'ios') breakdown.ios++;
-      else if (client.platform === 'android') breakdown.android++;
+      if (client.platform === "ios") breakdown.ios++;
+      else if (client.platform === "android") breakdown.android++;
       else breakdown.other++;
     }
 
@@ -650,11 +681,19 @@ class MobileService extends EventEmitter {
 
     // Only include clients that have sync state with lastSync set
     const intervals = clients
-      .filter((c) => c.syncState && c.syncState.lastSync && c.syncState.lastSync instanceof Date)
+      .filter(
+        (c) =>
+          c.syncState &&
+          c.syncState.lastSync &&
+          c.syncState.lastSync instanceof Date,
+      )
       .map((c) => Date.now() - c.syncState.lastSync.getTime());
 
     return intervals.length > 0
-      ? Math.round(intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length)
+      ? Math.round(
+          intervals.reduce((sum, interval) => sum + interval, 0) /
+            intervals.length,
+        )
       : 0;
   }
 
@@ -672,13 +711,13 @@ class MobileService extends EventEmitter {
     return [];
   }
   async createEntityFromMobile(data, client) {
-    return { id: 'new-entity' };
+    return { id: "new-entity" };
   }
   async updateEntityFromMobile(data, client) {
     return { success: true };
   }
   async createRelationshipFromMobile(data, client) {
-    return { id: 'new-rel' };
+    return { id: "new-rel" };
   }
   async markNotificationReadFromMobile(data, client) {
     return { success: true };

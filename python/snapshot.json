@@ -1,9 +1,9 @@
 {
   "nodes": ["A", "B", "C", "D"],
   "edges": [
-    { "source": "A", "target": "B" },
-    { "source": "B", "target": "C" },
-    { "source": "C", "target": "D" },
-    { "source": "D", "target": "A" }
+    {"source": "A", "target": "B"},
+    {"source": "B", "target": "C"},
+    {"source": "C", "target": "D"},
+    {"source": "D", "target": "A"}
   ]
 }

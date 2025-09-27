@@ -1,0 +1,183 @@
+# MC Platform v0.3.4 - Differential Privacy Monitoring Rules
+# Prometheus rules for DP budget monitoring and alerting
+
+groups:
+  - name: differential_privacy
+    interval: 30s
+    rules:
+      # Budget utilization recording rules
+      - record: dp:budget_utilization:rate5m
+        expr: avg_over_time(dp_budget_utilization_percent[5m])
+        labels:
+          component: "differential_privacy"
+
+      - record: dp:epsilon_consumption:rate1h
+        expr: increase(dp_epsilon_consumed_total[1h])
+        labels:
+          component: "differential_privacy"
+
+      # Privacy budget alerts
+      - alert: DPBudgetWarning80Percent
+        expr: dp:budget_utilization:rate5m >= 80
+        for: 2m
+        labels:
+          severity: warning
+          component: "differential_privacy"
+          team: "privacy"
+        annotations:
+          summary: "DP budget utilization high for {{ $labels.tenant }}"
+          description: "Tenant {{ $labels.tenant }} has consumed {{ $value }}% of daily ε budget"
+          runbook_url: "https://docs.mc-platform.com/runbooks/dp-budget-management"
+
+      - alert: DPBudgetCritical90Percent
+        expr: dp:budget_utilization:rate5m >= 90
+        for: 1m
+        labels:
+          severity: critical
+          component: "differential_privacy"
+          team: "privacy"
+          pager_duty: "true"
+        annotations:
+          summary: "DP budget nearly exhausted for {{ $labels.tenant }}"
+          description: "CRITICAL: Tenant {{ $labels.tenant }} has consumed {{ $value }}% of daily ε budget"
+          runbook_url: "https://docs.mc-platform.com/runbooks/dp-budget-emergency"
+
+      - alert: DPBudgetExhausted
+        expr: dp_epsilon_remaining <= 0
+        for: 0s
+        labels:
+          severity: critical
+          component: "differential_privacy"
+          team: "privacy"
+          pager_duty: "true"
+        annotations:
+          summary: "DP budget exhausted for {{ $labels.tenant }}"
+          description: "Tenant {{ $labels.tenant }} has no remaining ε budget - analytics disabled"
+          runbook_url: "https://docs.mc-platform.com/runbooks/dp-budget-exhausted"
+
+      # Performance monitoring
+      - alert: DPCPUOverheadHigh
+        expr: dp_cpu_overhead_percent > 5
+        for: 5m
+        labels:
+          severity: warning
+          component: "differential_privacy"
+          team: "platform"
+        annotations:
+          summary: "DP CPU overhead exceeds target"
+          description: "DP telemetry CPU overhead is {{ $value }}% (target: ≤5%)"
+
+      - alert: DPPIIValidationFailure
+        expr: increase(dp_pii_validation_failures_total[5m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          component: "differential_privacy"
+          team: "security"
+          pager_duty: "true"
+        annotations:
+          summary: "PII validation failure in DP telemetry"
+          description: "{{ $value }} PII validation failures detected in DP metrics"
+          runbook_url: "https://docs.mc-platform.com/runbooks/pii-incident-response"
+
+      # Mathematical guarantee monitoring
+      - alert: DPMathematicalGuaranteeViolation
+        expr: dp_epsilon_composition_violation_total > 0
+        for: 0s
+        labels:
+          severity: critical
+          component: "differential_privacy"
+          team: "privacy"
+          pager_duty: "true"
+        annotations:
+          summary: "DP mathematical guarantee violation"
+          description: "Differential privacy composition theorem violated"
+          runbook_url: "https://docs.mc-platform.com/runbooks/dp-mathematical-incident"
+
+  - name: dp_budget_management
+    interval: 15s
+    rules:
+      # Daily budget reset tracking
+      - record: dp:daily_budget_reset:timestamp
+        expr: dp_daily_budget_reset_timestamp
+        labels:
+          component: "differential_privacy"
+
+      # Cross-tenant budget fairness
+      - record: dp:tenant_budget_fairness:ratio
+        expr: |
+          (
+            dp_epsilon_consumed_total by (tenant) /
+            dp_epsilon_allocated_total by (tenant)
+          ) / scalar(
+            avg(dp_epsilon_consumed_total / dp_epsilon_allocated_total)
+          )
+        labels:
+          component: "differential_privacy"
+
+      # Budget burn rate prediction
+      - record: dp:budget_burn_rate:1h
+        expr: rate(dp_epsilon_consumed_total[1h])
+        labels:
+          component: "differential_privacy"
+
+      - record: dp:budget_exhaustion_eta:hours
+        expr: |
+          (dp_epsilon_remaining / dp:budget_burn_rate:1h) / 3600
+          and dp:budget_burn_rate:1h > 0
+        labels:
+          component: "differential_privacy"
+
+      # Early warning for budget exhaustion
+      - alert: DPBudgetExhaustionWarning
+        expr: dp:budget_exhaustion_eta:hours < 4 and dp:budget_exhaustion_eta:hours > 0
+        for: 5m
+        labels:
+          severity: warning
+          component: "differential_privacy"
+          team: "privacy"
+        annotations:
+          summary: "DP budget will be exhausted soon for {{ $labels.tenant }}"
+          description: "Tenant {{ $labels.tenant }} will exhaust ε budget in {{ $value }} hours"
+          runbook_url: "https://docs.mc-platform.com/runbooks/dp-budget-planning"
+
+  - name: dp_analytics_tiles
+    interval: 60s
+    rules:
+      # Analytics tile export metrics
+      - record: dp:analytics_exports:rate5m
+        expr: rate(dp_analytics_exports_total[5m])
+        labels:
+          component: "differential_privacy"
+
+      - record: dp:analytics_noise_ratio:avg
+        expr: |
+          avg_over_time(
+            (dp_analytics_noisy_value - dp_analytics_true_value) /
+            dp_analytics_true_value
+          [5m])
+        labels:
+          component: "differential_privacy"
+
+      # Quality monitoring for analytics
+      - alert: DPAnalyticsNoiseExcessive
+        expr: abs(dp:analytics_noise_ratio:avg) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          component: "differential_privacy"
+          team: "analytics"
+        annotations:
+          summary: "Excessive noise in DP analytics for {{ $labels.tenant }}"
+          description: "Analytics noise ratio is {{ $value }}, may impact utility"
+
+      - alert: DPAnalyticsExportFailure
+        expr: increase(dp_analytics_export_failures_total[5m]) > 0
+        for: 0s
+        labels:
+          severity: warning
+          component: "differential_privacy"
+          team: "platform"
+        annotations:
+          summary: "DP analytics export failures for {{ $labels.tenant }}"
+          description: "{{ $value }} analytics export failures in last 5 minutes"

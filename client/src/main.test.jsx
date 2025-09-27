@@ -6,3 +6,4 @@ test('mounts TestApp without crashing', () => {
   const { container } = render(<TestApp />);
   expect(container.firstChild).toBeTruthy();
 });
+

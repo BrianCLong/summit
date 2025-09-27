@@ -5,9 +5,7 @@ import LinkIcon from '@mui/icons-material/Link';
 function EntitiesPanel({ entities = [] }) {
   return (
     <Paper elevation={3} sx={{ p: 2, height: '100%' }}>
-      <Typography variant="h6" gutterBottom>
-        Entities
-      </Typography>
+      <Typography variant="h6" gutterBottom>Entities</Typography>
       <Box>
         {entities.length === 0 && (
           <Typography variant="body2">List of entities related to the investigation.</Typography>

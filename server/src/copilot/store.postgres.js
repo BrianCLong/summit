@@ -1,6 +1,6 @@
 /**
  * IntelGraph Copilot Postgres Data Access Layer
- *
+ * 
  * Provides durable persistence for Copilot runs, tasks, and events
  * with resume capability and proper idempotency handling.
  */
@@ -36,7 +36,7 @@ class CopilotPostgresStore {
       run.status,
       JSON.stringify(run.plan || {}),
       JSON.stringify(run.metadata || {}),
-      run.createdAt || new Date().toISOString(),
+      run.createdAt || new Date().toISOString()
     ];
 
     const result = await this.pg.query(query, values);
@@ -79,7 +79,7 @@ class CopilotPostgresStore {
       JSON.stringify(run.plan || {}),
       JSON.stringify(run.metadata || {}),
       run.startedAt || null,
-      run.finishedAt || null,
+      run.finishedAt || null
     ];
 
     const result = await this.pg.query(query, values);
@@ -114,7 +114,7 @@ class CopilotPostgresStore {
       task.status,
       task.errorMessage || task.error || null,
       task.startedAt || null,
-      task.finishedAt || null,
+      task.finishedAt || null
     ];
 
     const result = await this.pg.query(query, values);
@@ -132,7 +132,7 @@ class CopilotPostgresStore {
     `;
 
     const result = await this.pg.query(query, [runId]);
-    return result.rows.map((row) => this.mapTaskFromDb(row));
+    return result.rows.map(row => this.mapTaskFromDb(row));
   }
 
   /**
@@ -157,7 +157,7 @@ class CopilotPostgresStore {
       JSON.stringify(task.outputData || task.output || {}),
       task.errorMessage || task.error || null,
       task.startedAt || null,
-      task.finishedAt || null,
+      task.finishedAt || null
     ];
 
     const result = await this.pg.query(query, values);
@@ -181,7 +181,7 @@ class CopilotPostgresStore {
       (event.level || 'info').toLowerCase(),
       event.message,
       JSON.stringify(event.payload || {}),
-      event.ts || new Date().toISOString(),
+      event.ts || new Date().toISOString()
     ];
 
     const result = await this.pg.query(query, values);
@@ -193,12 +193,12 @@ class CopilotPostgresStore {
    */
   async listEvents(runId, options = {}) {
     const { afterId, limit = 50, level } = options;
-
+    
     let query = `
       SELECT * FROM copilot_events 
       WHERE run_id = $1
     `;
-
+    
     const params = [runId];
     let paramIndex = 2;
 
@@ -218,7 +218,7 @@ class CopilotPostgresStore {
     params.push(limit);
 
     const result = await this.pg.query(query, params);
-    return result.rows.map((row) => this.mapEventFromDb(row));
+    return result.rows.map(row => this.mapEventFromDb(row));
   }
 
   /**
@@ -229,7 +229,7 @@ class CopilotPostgresStore {
       SELECT * FROM copilot_runs 
       WHERE status IN ('failed', 'paused')
     `;
-
+    
     const params = [];
     if (investigationId) {
       query += ` AND investigation_id = $1`;
@@ -239,7 +239,7 @@ class CopilotPostgresStore {
     query += ` ORDER BY created_at DESC`;
 
     const result = await this.pg.query(query, params);
-    return result.rows.map((row) => this.mapRunFromDb(row));
+    return result.rows.map(row => this.mapRunFromDb(row));
   }
 
   /**
@@ -290,7 +290,7 @@ class CopilotPostgresStore {
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       startedAt: row.started_at,
-      finishedAt: row.finished_at,
+      finishedAt: row.finished_at
     };
   }
 
@@ -304,18 +304,16 @@ class CopilotPostgresStore {
       seq: row.sequence_number, // backwards compatibility
       taskType: row.task_type,
       kind: row.task_type, // backwards compatibility
-      inputParams:
-        typeof row.input_params === 'string' ? JSON.parse(row.input_params) : row.input_params,
+      inputParams: typeof row.input_params === 'string' ? JSON.parse(row.input_params) : row.input_params,
       input: typeof row.input_params === 'string' ? JSON.parse(row.input_params) : row.input_params, // backwards compatibility
-      outputData:
-        typeof row.output_data === 'string' ? JSON.parse(row.output_data) : row.output_data,
+      outputData: typeof row.output_data === 'string' ? JSON.parse(row.output_data) : row.output_data,
       output: typeof row.output_data === 'string' ? JSON.parse(row.output_data) : row.output_data, // backwards compatibility
       status: row.status,
       errorMessage: row.error_message,
       error: row.error_message, // backwards compatibility
       createdAt: row.created_at,
       startedAt: row.started_at,
-      finishedAt: row.finished_at,
+      finishedAt: row.finished_at
     };
   }
 
@@ -330,7 +328,7 @@ class CopilotPostgresStore {
       message: row.message,
       payload: typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload,
       ts: row.created_at,
-      createdAt: row.created_at,
+      createdAt: row.created_at
     };
   }
 }

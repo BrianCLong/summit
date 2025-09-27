@@ -1,0 +1,56 @@
+{
+  "report_metadata": {
+    "timestamp": "2025-09-26T15:39:40.201925+00:00",
+    "platform_version": "v0.3.4-mc",
+    "report_type": "autonomy_tier3"
+  },
+  "tenant_configs": {
+    "TENANT_004": {
+      "tier": "tier_3",
+      "enabled": true,
+      "safety_threshold": 0.8,
+      "allowed_actions": [
+        "query_optimization",
+        "load_balancing",
+        "cache_management"
+      ],
+      "max_actions_per_hour": 5
+    },
+    "TENANT_005": {
+      "tier": "tier_3",
+      "enabled": true,
+      "safety_threshold": 0.85,
+      "allowed_actions": [
+        "cache_management",
+        "alert_response"
+      ],
+      "max_actions_per_hour": 3
+    }
+  },
+  "tenant_metrics": {
+    "TENANT_004": {
+      "tenant_id": "TENANT_004",
+      "success_rate": 99.5,
+      "compensation_rate": 0.002,
+      "avg_response_time_ms": 85.0,
+      "safety_incidents": 0,
+      "autonomous_actions_24h": 2,
+      "last_incident": null
+    },
+    "TENANT_005": {
+      "tenant_id": "TENANT_005",
+      "success_rate": 99.7,
+      "compensation_rate": 0.001,
+      "avg_response_time_ms": 92.0,
+      "safety_incidents": 0,
+      "autonomous_actions_24h": 2,
+      "last_incident": null
+    }
+  },
+  "safety_summary": {
+    "total_actions": 4,
+    "approved_actions": 0,
+    "executed_actions": 4,
+    "avg_safety_score": 0.9319583333333332
+  }
+}

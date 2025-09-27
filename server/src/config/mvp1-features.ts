@@ -80,7 +80,7 @@ export async function loadFeatureFlagsFromDatabase(): Promise<void> {
     // This would typically load from database
     // For now, use environment variables
     const envFlags: Partial<FeatureFlags> = {};
-
+    
     for (const key of Object.keys(DEFAULT_FLAGS) as Array<keyof FeatureFlags>) {
       const envValue = process.env[`FEATURE_${key}`];
       if (envValue !== undefined) {

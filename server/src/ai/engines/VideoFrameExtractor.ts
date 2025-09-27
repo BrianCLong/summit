@@ -1,10 +1,10 @@
 import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs/promises';
-import baseLogger from '../../config/logger';
-import { randomUUID as uuidv4 } from 'crypto';
+import pino from 'pino';
+import { v4 as uuidv4 } from 'uuid';
 
-const logger = baseLogger.child({ name: 'VideoFrameExtractor' });
+const logger = pino({ name: 'VideoFrameExtractor' });
 
 export interface FrameExtractionOptions {
   frameRate?: number; // Frames per second (e.g., 1 for 1fps)
@@ -49,7 +49,7 @@ export class VideoFrameExtractor {
    */
   async extract(
     videoPath: string,
-    options: FrameExtractionOptions = {},
+    options: FrameExtractionOptions = {}
   ): Promise<{ frames: ExtractedFrame[]; audio?: ExtractedAudio }> {
     const {
       frameRate,
@@ -101,9 +101,7 @@ export class VideoFrameExtractor {
           });
         })
         .on('end', async () => {
-          logger.info(
-            `Finished frame extraction for ${videoPath}. Extracted ${frames.length} frames.`,
-          );
+          logger.info(`Finished frame extraction for ${videoPath}. Extracted ${frames.length} frames.`);
           if (extractAudio) {
             try {
               audio = await this.extractAudioStream(videoPath, outputDir, startTime, endTime);
@@ -135,7 +133,7 @@ export class VideoFrameExtractor {
     videoPath: string,
     outputDir: string,
     startTime?: number,
-    endTime?: number,
+    endTime?: number
   ): Promise<ExtractedAudio> {
     const audioFileName = `audio-${uuidv4()}.mp3`;
     const audioPath = path.join(outputDir, audioFileName);

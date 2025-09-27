@@ -3,7 +3,10 @@ import coseBilkent from 'cytoscape-cose-bilkent';
 
 cytoscape.use(coseBilkent);
 
-self.onmessage = (e: MessageEvent<{ elements: ElementDefinition[] }>): void => {
+// eslint-disable-next-line no-restricted-globals
+self.onmessage = (
+  e: MessageEvent<{ elements: ElementDefinition[] }>
+): void => {
   const { elements } = e.data;
   const cy = cytoscape({
     elements,
@@ -16,6 +19,6 @@ self.onmessage = (e: MessageEvent<{ elements: ElementDefinition[] }>): void => {
   cy.nodes().forEach((n) => {
     positions[n.id()] = n.position();
   });
-
+  // eslint-disable-next-line no-restricted-globals
   self.postMessage({ positions });
 };

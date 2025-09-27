@@ -1,9 +1,5 @@
 let GenericContainer;
-try {
-  ({ GenericContainer } = require('testcontainers'));
-} catch (_) {
-  /* Intentionally empty */
-}
+try { ({ GenericContainer } = require('testcontainers')); } catch (_) { /* Intentionally empty */ }
 const http = require('http');
 const { Server } = require('socket.io');
 const ioClient = require('socket.io-client');
@@ -18,13 +14,15 @@ maybe('AnalyticsBridge Redis → Socket.IO', () => {
   let container, port, redisUrl, redis, httpServer, io, bridge, client;
 
   beforeAll(async () => {
-    container = await new GenericContainer('redis:7').withExposedPorts(6379).start();
+    container = await new GenericContainer('redis:7')
+      .withExposedPorts(6379)
+      .start();
     port = container.getMappedPort(6379);
     redisUrl = `redis://localhost:${port}/1`;
     redis = new Redis(redisUrl);
 
     httpServer = http.createServer();
-    io = new Server(httpServer, { cors: { origin: '*' } });
+    io = new Server(httpServer, { cors: { origin: '*'} });
     await new Promise((res) => httpServer.listen(0, res));
     const address = httpServer.address();
     const url = `http://localhost:${address.port}/graph-analytics`;

@@ -34,11 +34,9 @@ input GraphRAGQueryInput {
   """
   maxTokens: Int
 
-  """
-  Use case identifier for prompt/response schemas
-  """
+  """Use case identifier for prompt/response schemas"""
   useCase: String
-
+  
   """
   Path ranking strategy (v1 or v2)
   """

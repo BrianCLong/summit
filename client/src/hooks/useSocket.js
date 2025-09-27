@@ -22,7 +22,7 @@ export const useSocket = (namespace = '/', options = {}) => {
       reconnectionAttempts: 5,
       timeout: 20000,
       forceNew: true,
-      ...options,
+      ...options
     });
 
     // Connection event handlers
@@ -123,8 +123,9 @@ export const useSocket = (namespace = '/', options = {}) => {
     error,
     emit,
     on,
-    off,
+    off
   };
 };
 
 export default useSocket;
+

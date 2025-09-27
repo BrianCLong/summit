@@ -1,0 +1,149 @@
+{
+  "evaluation_metadata": {
+    "baseline_url": "https://stage-blue.example.com",
+    "candidate_url": "https://stage-green.example.com",
+    "window_minutes": 2,
+    "evaluations_completed": 3,
+    "start_time": "2025-09-26T17:38:19.012662Z",
+    "end_time": "2025-09-26T23:38:29.023027Z"
+  },
+  "decision_summary": {
+    "final_decision": "PROMOTE",
+    "decision_counts": {
+      "PROMOTE": 3
+    },
+    "final_composite_score": 1.0,
+    "confidence": 1.0
+  },
+  "metric_analysis": {
+    "p95_latency": {
+      "candidate_avg": 140.32783589763366,
+      "baseline_avg": 145.49131922178847,
+      "candidate_trend": "improving",
+      "improvement_pct": 3.548997529044014
+    },
+    "error_rate": {
+      "candidate_avg": 0.10094863051437457,
+      "baseline_avg": 0.11663164195319102,
+      "candidate_trend": "stable",
+      "improvement_pct": 13.44661806708567
+    },
+    "cost_per_1k": {
+      "candidate_avg": 0.20938000101573082,
+      "baseline_avg": 0.23501542883961637,
+      "candidate_trend": "improving",
+      "improvement_pct": 10.907976531779182
+    },
+    "tail_p99": {
+      "candidate_avg": 321.91594279559683,
+      "baseline_avg": 331.3084785974595,
+      "candidate_trend": "stable",
+      "improvement_pct": 2.834982020872039
+    }
+  },
+  "threshold_adaptations": {
+    "p95_latency": {
+      "current_promote": 350.0,
+      "current_hold": 500.0,
+      "adaptation_enabled": true
+    },
+    "error_rate": {
+      "current_promote": 1.0,
+      "current_hold": 3.0,
+      "adaptation_enabled": true
+    },
+    "cost_per_1k": {
+      "current_promote": 0.5,
+      "current_hold": 0.8,
+      "adaptation_enabled": true
+    },
+    "tail_p99": {
+      "current_promote": 800.0,
+      "current_hold": 1200.0,
+      "adaptation_enabled": true
+    }
+  },
+  "all_scores": [
+    {
+      "timestamp": "2025-09-26T23:38:19.013298Z",
+      "baseline_metrics": {
+        "p95_latency": 146.79908184337478,
+        "error_rate": 0.14861458788105003,
+        "cost_per_1k": 0.24837716687355627,
+        "tail_p99": 319.4624478008166
+      },
+      "candidate_metrics": {
+        "p95_latency": 138.08466121243922,
+        "error_rate": 0.0759614967658305,
+        "cost_per_1k": 0.24032564508644821,
+        "tail_p99": 320.26650538116263
+      },
+      "weighted_scores": {
+        "p95_latency": 0.4,
+        "error_rate": 0.3,
+        "cost_per_1k": 0.2,
+        "tail_p99": 0.1
+      },
+      "composite_score": 1.0,
+      "decision": "PROMOTE",
+      "confidence": 1.0,
+      "reasons": [
+        "Composite score 1.000 exceeds promotion threshold"
+      ]
+    },
+    {
+      "timestamp": "2025-09-26T23:38:24.017509Z",
+      "baseline_metrics": {
+        "p95_latency": 134.33773608618094,
+        "error_rate": 0.09328773797676201,
+        "cost_per_1k": 0.18455844804498722,
+        "tail_p99": 331.54962177183063
+      },
+      "candidate_metrics": {
+        "p95_latency": 147.18958519415722,
+        "error_rate": 0.12959238962649688,
+        "cost_per_1k": 0.20688435798133964,
+        "tail_p99": 320.88557769810234
+      },
+      "weighted_scores": {
+        "p95_latency": 0.4,
+        "error_rate": 0.3,
+        "cost_per_1k": 0.2,
+        "tail_p99": 0.1
+      },
+      "composite_score": 1.0,
+      "decision": "PROMOTE",
+      "confidence": 1.0,
+      "reasons": [
+        "Composite score 1.000 exceeds promotion threshold"
+      ]
+    },
+    {
+      "timestamp": "2025-09-26T23:38:29.022784Z",
+      "baseline_metrics": {
+        "p95_latency": 155.3371397358097,
+        "error_rate": 0.107992600001761,
+        "cost_per_1k": 0.2721106716003056,
+        "tail_p99": 342.9133662197312
+      },
+      "candidate_metrics": {
+        "p95_latency": 135.70926128630458,
+        "error_rate": 0.09729200515079633,
+        "cost_per_1k": 0.18092999997940462,
+        "tail_p99": 324.5957453075256
+      },
+      "weighted_scores": {
+        "p95_latency": 0.4,
+        "error_rate": 0.3,
+        "cost_per_1k": 0.2,
+        "tail_p99": 0.1
+      },
+      "composite_score": 1.0,
+      "decision": "PROMOTE",
+      "confidence": 1.0,
+      "reasons": [
+        "Composite score 1.000 exceeds promotion threshold"
+      ]
+    }
+  ]
+}

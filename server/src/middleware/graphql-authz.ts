@@ -53,7 +53,7 @@ interface OPADecision {
 
 /**
  * GraphQL Authorization Plugin using Open Policy Agent (OPA)
- *
+ * 
  * This middleware intercepts all GraphQL operations and enforces
  * authorization policies defined in Rego files.
  */
@@ -64,7 +64,7 @@ export class GraphQLAuthzPlugin {
   constructor(opaUrl = 'http://localhost:8181') {
     this.opaUrl = opaUrl;
     this.enabled = process.env.OPA_ENABLED !== 'false';
-
+    
     if (!this.enabled) {
       logger.warn('⚠️  OPA authorization is DISABLED - all operations will be allowed');
     }
@@ -78,11 +78,9 @@ export class GraphQLAuthzPlugin {
       willSendResponse: async (requestContext: any) => {
         // Log authorization decisions for audit
         if (requestContext.context.authzDecisions) {
-          logger.info(
-            `Authorization audit. User: ${requestContext.context.user?.id}, Operation: ${requestContext.request.operationName}, Decisions: ${JSON.stringify(requestContext.context.authzDecisions)}, IP: ${requestContext.request.http?.ip}`,
-          );
+          logger.info(`Authorization audit. User: ${requestContext.context.user?.id}, Operation: ${requestContext.request.operationName}, Decisions: ${JSON.stringify(requestContext.context.authzDecisions)}, IP: ${requestContext.request.http?.ip}`);
         }
-      },
+      }
     };
   }
 
@@ -95,7 +93,7 @@ export class GraphQLAuthzPlugin {
       args: any,
       context: AuthContext,
       info: GraphQLResolveInfo,
-      next: () => any,
+      next: () => any
     ) => {
       // Skip authorization if disabled
       if (!this.enabled) {
@@ -110,10 +108,10 @@ export class GraphQLAuthzPlugin {
       try {
         // Build OPA input
         const opaInput = this.buildOPAInput(context, args, info);
-
+        
         // Query OPA for decision
         const decision = await this.queryOPA(opaInput);
-
+        
         // Track decision for audit
         if (!context.authzDecisions) {
           context.authzDecisions = [];
@@ -121,13 +119,13 @@ export class GraphQLAuthzPlugin {
         context.authzDecisions.push({
           field: info.fieldName,
           decision: decision.allow,
-          reason: decision.reason,
+          reason: decision.reason
         });
 
         // Enforce decision
         if (!decision.allow) {
           throw new ForbiddenError(
-            `Access denied to ${info.fieldName}: ${decision.reason || 'Policy violation'}`,
+            `Access denied to ${info.fieldName}: ${decision.reason || 'Policy violation'}`
           );
         }
 
@@ -136,11 +134,9 @@ export class GraphQLAuthzPlugin {
         if (error instanceof ForbiddenError || error instanceof AuthenticationError) {
           throw error;
         }
-
-        logger.error(
-          `Authorization error. Error: ${error.message}, Field: ${info.fieldName}, User: ${context.user.id}`,
-        );
-
+        
+        logger.error(`Authorization error. Error: ${error.message}, Field: ${info.fieldName}, User: ${context.user.id}`);
+        
         // Fail secure - deny on error
         throw new ForbiddenError('Authorization check failed');
       }
@@ -150,7 +146,11 @@ export class GraphQLAuthzPlugin {
   /**
    * Build OPA input from GraphQL context and info
    */
-  private buildOPAInput(context: AuthContext, args: any, info: GraphQLResolveInfo): OPAInput {
+  private buildOPAInput(
+    context: AuthContext, 
+    args: any, 
+    info: GraphQLResolveInfo
+  ): OPAInput {
     const operation = info.operation.operation; // 'query' | 'mutation' | 'subscription'
     const fieldName = info.fieldName;
     const parentType = info.parentType.name;
@@ -165,7 +165,7 @@ export class GraphQLAuthzPlugin {
         permissions: context.user.permissions || [],
         missionTags: context.user.missionTags || [],
         orgId: context.user.orgId,
-        teamId: context.user.teamId,
+        teamId: context.user.teamId
       },
       action: `${operation}.${fieldName}`,
       resource: {
@@ -175,10 +175,10 @@ export class GraphQLAuthzPlugin {
         missionTags: args.missionTags || [],
         compartment: {
           orgId: args.orgId,
-          teamId: args.teamId,
+          teamId: args.teamId
         },
         validFrom: args.validFrom,
-        validUntil: args.validUntil,
+        validUntil: args.validUntil
       },
       context: {
         tenantId: this.extractTenantId(context, args),
@@ -186,8 +186,8 @@ export class GraphQLAuthzPlugin {
         environment: config.env,
         ip: context.req?.ip,
         userAgent: context.req?.get('user-agent'),
-        time: new Date().toISOString(),
-      },
+        time: new Date().toISOString()
+      }
     };
   }
 
@@ -199,33 +199,32 @@ export class GraphQLAuthzPlugin {
       const response = await axios.post(
         `${this.opaUrl}/v1/data/intelgraph/allow`,
         { input },
-        {
+        { 
           timeout: 5000,
-          headers: { 'Content-Type': 'application/json' },
-        },
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
 
       const result = response.data.result;
-
+      
       if (typeof result === 'boolean') {
         return { allow: result };
       }
-
+      
       if (typeof result === 'object' && result !== null) {
         return {
           allow: result.allow === true,
-          reason: result.reason,
+          reason: result.reason
         };
       }
-
+      
       // Default deny if unexpected response
       logger.warn(`Unexpected OPA response format. Result: ${JSON.stringify(result)}`);
       return { allow: false, reason: 'Invalid policy response' };
+      
     } catch (error: any) {
-      logger.error(
-        `OPA query failed. Error: ${error.message}, Action: ${input.action}, User: ${input.user.id}`,
-      );
-
+      logger.error(`OPA query failed. Error: ${error.message}, Action: ${input.action}, User: ${input.user.id}`);
+      
       // Fail secure on OPA unavailability
       if (config.env === 'production') {
         return { allow: false, reason: 'Policy engine unavailable' };
@@ -241,7 +240,9 @@ export class GraphQLAuthzPlugin {
    * Extract tenant ID from context or args
    */
   private extractTenantId(context: AuthContext, args: any): string | undefined {
-    return args.tenantId || context.user.tenantId || context.req?.headers['x-tenant-id'];
+    return args.tenantId || 
+           context.user.tenantId || 
+           context.req?.headers['x-tenant-id'];
   }
 
   /**
@@ -249,15 +250,15 @@ export class GraphQLAuthzPlugin {
    */
   private sanitizeArgs(args: any): any {
     const sanitized = { ...args };
-
+    
     // Remove sensitive fields
     const sensitiveFields = ['password', 'token', 'secret', 'key'];
-    sensitiveFields.forEach((field) => {
+    sensitiveFields.forEach(field => {
       if (sanitized[field]) {
         sanitized[field] = '[REDACTED]';
       }
     });
-
+    
     return sanitized;
   }
 }
@@ -278,7 +279,7 @@ export function authDirective() {
       // Transform schema to add authorization checks
       // This would integrate with the GraphQL schema transformation
       return schema;
-    },
+    }
   };
 }
 
@@ -287,17 +288,17 @@ export function authDirective() {
  */
 export function createAuthzMiddleware(opaUrl?: string) {
   const plugin = new GraphQLAuthzPlugin(opaUrl);
-
+  
   return {
     plugin: plugin,
     middleware: plugin.createResolverMiddleware(),
-
+    
     // Utility to check permissions programmatically
     async checkPermission(
-      user: User,
-      action: string,
-      resource: any,
-      context: any = {},
+      user: User, 
+      action: string, 
+      resource: any, 
+      context: any = {}
     ): Promise<boolean> {
       const input: OPAInput = {
         user,
@@ -305,13 +306,13 @@ export function createAuthzMiddleware(opaUrl?: string) {
         resource,
         context: {
           environment: config.env,
-          ...context,
-        },
+          ...context
+        }
       };
-
+      
       const decision = await plugin['queryOPA'](input);
       return decision.allow;
-    },
+    }
   };
 }
 
@@ -326,7 +327,7 @@ export const RBAC = {
     if (user.role === 'admin') return true;
     if (action === 'read' && RBAC.isAnalyst(user)) return true;
     return false; // Defer to OPA for complex cases
-  },
+  }
 };
 
 export default GraphQLAuthzPlugin;

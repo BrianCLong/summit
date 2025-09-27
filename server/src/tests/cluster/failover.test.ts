@@ -21,7 +21,7 @@ describe('Neo4j Causal Cluster Failover Tests', () => {
     console.log('Simulating leader node failure...');
     // Expect driver to reconnect and new leader to be elected
     // This would involve monitoring cluster status or attempting writes
-    await new Promise((resolve) => setTimeout(resolve, 5000)); // Simulate re-election time
+    await new Promise(resolve => setTimeout(resolve, 5000)); // Simulate re-election time
     console.log('Leader re-election simulation complete.');
     // expect(leaderReElectionTime).toBeLessThan(10000); // Assert actual re-election time
   }, 15000); // Increased timeout for simulation

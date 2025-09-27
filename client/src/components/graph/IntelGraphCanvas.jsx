@@ -24,38 +24,38 @@ function IntelGraphCanvas() {
       const cy = cytoscape({
         container: cyRef.current,
         elements: [
-          ...nodes.map((node) => ({ data: { ...node } })),
-          ...edges.map((edge) => ({ data: { ...edge } })),
+          ...nodes.map(node => ({ data: { ...node } })),
+          ...edges.map(edge => ({ data: { ...edge } }))
         ],
         style: [
           {
             selector: 'node',
             style: {
               'background-color': 'data(color)' || '#0055A4', // Use color from data if available
-              label: 'data(label)',
-              color: '#FFFFFF',
+              'label': 'data(label)',
+              'color': '#FFFFFF',
               'text-valign': 'center',
               'text-halign': 'center',
-              width: '60px',
-              height: '60px',
+              'width': '60px',
+              'height': '60px',
               'font-size': '12px',
-            },
+            }
           },
           {
             selector: 'edge',
             style: {
-              width: 3,
+              'width': 3,
               'line-color': '#ccc',
               'target-arrow-color': '#ccc',
               'target-arrow-shape': 'triangle',
-              'curve-style': 'bezier',
-            },
-          },
+              'curve-style': 'bezier'
+            }
+          }
         ],
         layout: {
           name: 'grid',
-          rows: 1,
-        },
+          rows: 1
+        }
       });
 
       return () => {
@@ -66,28 +66,16 @@ function IntelGraphCanvas() {
 
   if (status === 'loading') {
     return (
-      <Box
-        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
-      >
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
-        <Typography variant="h6" sx={{ ml: 2 }}>
-          Loading Graph Data...
-        </Typography>
+        <Typography variant="h6" sx={{ ml: 2 }}>Loading Graph Data...</Typography>
       </Box>
     );
   }
 
   if (status === 'failed') {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          color: 'error.main',
-        }}
-      >
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'error.main' }}>
         <Typography variant="h6">Error: {error}</Typography>
       </Box>
     );
@@ -105,35 +93,35 @@ function IntelGraphCanvas() {
             selector: 'node',
             style: {
               'background-color': 'data(color)' || '#0055A4',
-              label: 'data(label)',
-              color: '#FFFFFF',
+              'label': 'data(label)',
+              'color': '#FFFFFF',
               'text-valign': 'center',
               'text-halign': 'center',
-              width: '60px',
-              height: '60px',
+              'width': '60px',
+              'height': '60px',
               'font-size': '12px',
-            },
+            }
           },
           {
             selector: 'edge',
             style: {
-              width: 3,
+              'width': 3,
               'line-color': '#ccc',
               'target-arrow-color': '#ccc',
               'target-arrow-shape': 'triangle',
-              'curve-style': 'bezier',
-            },
-          },
+              'curve-style': 'bezier'
+            }
+          }
         ],
         layout: {
           name: 'grid',
-          rows: 1,
-        },
+          rows: 1
+        }
       });
 
       cy.batch(() => {
-        cy.add(nodes.map((node) => ({ data: { ...node } })));
-        cy.add(edges.map((edge) => ({ data: { ...edge } })));
+        cy.add(nodes.map(node => ({ data: { ...node } })));
+        cy.add(edges.map(edge => ({ data: { ...edge } })));
       });
 
       cyInstance.current = cy; // Store the instance

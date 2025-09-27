@@ -1,0 +1,22 @@
+groups:
+  - name: mc-v035-recording
+    interval: 15s
+    rules:
+      # JWS failure rate over 15m
+      - record: mc_attest_jws_failure_rate_15m
+        expr: |
+          sum(rate(mc_attest_jws_fail_total[15m]))
+          /
+          clamp_min(sum(rate(mc_attest_jws_attempt_total[15m])), 1)
+
+      # Budget v2 noise (false-positive) rate over 15m
+      - record: mc_budget_v2_noise_fp_rate_15m
+        expr: |
+          sum(rate(mc_budget_throttle_fp_total[15m]))
+          /
+          clamp_min(sum(rate(mc_budget_throttle_total[15m])), 1)
+
+      # Optional composite score passthrough (if controller exports it)
+      # Else, you can replace this with a computed score from p95, error, cost, p99.
+      - record: mc_canary_composite_score
+        expr: clamp_max(max(mc_canary_composite_score), 1)

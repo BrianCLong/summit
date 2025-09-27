@@ -1,0 +1,25 @@
+name: Policy Fuzzer
+
+on:
+  pull_request:
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+      - name: Run Policy Fuzzer
+        run: |
+          cd policy-fuzzer
+          python main.py
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: policy-fuzzer-reports
+          path: |
+            policy-fuzzer/failing_cases.txt
+            policy-fuzzer/reproducer_*.py

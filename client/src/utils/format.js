@@ -14,3 +14,4 @@ export function formatNumber(value, locale = navigator.language, options = {}) {
     return String(value);
   }
 }
+

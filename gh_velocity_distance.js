@@ -24,7 +24,7 @@ function loadMetrics() {
 
 function sortGroups(groups) {
   return groups
-    .filter((g) => g.priority === 'P0' || g.priority === 'P1')
+    .filter(g => g.priority === 'P0' || g.priority === 'P1')
     .sort((a, b) => {
       const pri = { P0: 0, P1: 1, P2: 2 };
       if (pri[a.priority] !== pri[b.priority]) {
@@ -33,7 +33,7 @@ function sortGroups(groups) {
       return (b.remainingPoints || 0) - (a.remainingPoints || 0);
     })
     .slice(0, 3)
-    .map((g) => ({
+    .map(g => ({
       key: g.key,
       priority: g.priority,
       remainingPoints: g.remainingPoints || 0,
@@ -44,14 +44,14 @@ function sortGroups(groups) {
       openItems: (g.openItems || [])
         .sort((a, b) => (b.points || 0) - (a.points || 0))
         .slice(0, OPEN_ITEMS_PREVIEW),
-      recentMerged: (g.recentMerged || []).slice(0, 5),
+      recentMerged: (g.recentMerged || []).slice(0, 5)
     }));
 }
 
 function writeNowFocus(groups) {
   const out = {
     generatedAt: new Date().toISOString(),
-    groups,
+    groups
   };
   fs.writeFileSync('now_focus.json', JSON.stringify(out, null, 2));
 }
@@ -80,9 +80,7 @@ function renderDashboard(groups, metrics) {
   lines.push('Group | Priority | RP | V (pts/sprint) | Distance | ETA | Risk');
   lines.push('|-----|----------|----|----------------|----------|-----|-----|');
   for (const g of groups) {
-    lines.push(
-      `${g.key} | ${g.priority} | ${g.remainingPoints} | ${g.velocity} | ${g.distanceSprints} | ${g.eta} | ${g.risk || ''}`,
-    );
+    lines.push(`${g.key} | ${g.priority} | ${g.remainingPoints} | ${g.velocity} | ${g.distanceSprints} | ${g.eta} | ${g.risk || ''}`);
   }
   lines.push('');
   lines.push('## Next 10 to pull');
@@ -102,28 +100,24 @@ async function github(method, url, data) {
   }
   const headers = {
     Authorization: `token ${token}`,
-    'User-Agent': 'now-focus-script',
+    'User-Agent': 'now-focus-script'
   };
   const fullUrl = `https://api.github.com${url}`;
   const res = await axios({ method, url: fullUrl, data, headers });
-  await new Promise((r) => setTimeout(r, 100));
+  await new Promise(r => setTimeout(r, 100));
   return res.data;
 }
 
 async function ensureTrackingIssue(group) {
   const title = `NOW FOCUS: ${group.key}`;
   const issues = await github('get', `/repos/${OWNER}/${REPO}/issues`, {
-    params: { state: 'all', labels: 'status:now-focus', per_page: 100 },
+    params: { state: 'all', labels: 'status:now-focus', per_page: 100 }
   });
-  let existing = issues.find((i) => i.title === title);
+  let existing = issues.find(i => i.title === title);
   const body = buildIssueBody(group);
   const labels = ['status:now-focus', group.priority.toLowerCase()];
   if (existing) {
-    await github('patch', `/repos/${OWNER}/${REPO}/issues/${existing.number}`, {
-      title,
-      body,
-      labels,
-    });
+    await github('patch', `/repos/${OWNER}/${REPO}/issues/${existing.number}`, { title, body, labels });
   } else {
     existing = await github('post', `/repos/${OWNER}/${REPO}/issues`, { title, body, labels });
   }
@@ -173,14 +167,11 @@ async function ensureMilestone(group) {
   if (!group.eta) return null;
   const title = `NOW FOCUS: ${group.key} (ETA ${group.eta})`;
   const existing = await github('get', `/repos/${OWNER}/${REPO}/milestones`, {
-    params: { state: 'all', per_page: 100 },
+    params: { state: 'all', per_page: 100 }
   });
-  let found = existing.find((m) => m.title === title);
+  let found = existing.find(m => m.title === title);
   if (!found) {
-    found = await github('post', `/repos/${OWNER}/${REPO}/milestones`, {
-      title,
-      due_on: group.eta,
-    });
+    found = await github('post', `/repos/${OWNER}/${REPO}/milestones`, { title, due_on: group.eta });
   }
   return found.number;
 }
@@ -188,17 +179,11 @@ async function ensureMilestone(group) {
 async function goldenPathEscalation(group, trackingIssue) {
   const message = `⚠ Golden Path risk: distance is ${group.distanceSprints} sprints (threshold=${GOLDEN_PATH_THRESHOLD}).\nRequesting escalation: add reviewer bandwidth and split largest open item into <= 2 pt slices.`;
   const owners = getCodeOwners();
-  const mention = owners.length ? `\n${owners.map((o) => `@${o}`).join(' ')}` : '';
-  await github('post', `/repos/${OWNER}/${REPO}/issues/${trackingIssue.number}/labels`, {
-    labels: ['risk:golden-path'],
-  });
-  await github('post', `/repos/${OWNER}/${REPO}/issues/${trackingIssue.number}/comments`, {
-    body: message + mention,
-  });
+  const mention = owners.length ? `\n${owners.map(o => `@${o}`).join(' ')}` : '';
+  await github('post', `/repos/${OWNER}/${REPO}/issues/${trackingIssue.number}/labels`, { labels: ['risk:golden-path'] });
+  await github('post', `/repos/${OWNER}/${REPO}/issues/${trackingIssue.number}/comments`, { body: message + mention });
   for (const item of group.openItems) {
-    await github('post', `/repos/${OWNER}/${REPO}/issues/${item.number}/labels`, {
-      labels: ['risk:golden-path'],
-    });
+    await github('post', `/repos/${OWNER}/${REPO}/issues/${item.number}/labels`, { labels: ['risk:golden-path'] });
   }
 }
 
@@ -209,7 +194,7 @@ function getCodeOwners() {
   const owners = new Set();
   for (const line of text.split(/\r?\n/)) {
     const match = line.match(/@([\w-]+)/g);
-    if (match) match.forEach((m) => owners.add(m.slice(1)));
+    if (match) match.forEach(m => owners.add(m.slice(1)));
   }
   return Array.from(owners);
 }
@@ -238,7 +223,10 @@ async function apply() {
       labeled++;
       commented++;
     }
-    if (group.priority === 'P0' && (group.risk || group.distanceSprints > GOLDEN_PATH_THRESHOLD)) {
+    if (
+      group.priority === 'P0' &&
+      (group.risk || group.distanceSprints > GOLDEN_PATH_THRESHOLD)
+    ) {
       await goldenPathEscalation(group, issue);
       escalations++;
     }
@@ -262,7 +250,8 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.error(err.message);
   process.exit(1);
 });
+

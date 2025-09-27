@@ -1,16 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-} from '@mui/material';
+import { Box, Typography, TextField, Button, Card, CardContent, Grid, List, ListItem, ListItemText } from '@mui/material';
 import { apiFetch } from '../../services/api';
 
 export default function SentimentPanel() {
@@ -21,39 +10,23 @@ export default function SentimentPanel() {
   const run = async () => {
     setBusy(true);
     try {
-      const res = await apiFetch('/api/sentiment/analyze', {
-        method: 'POST',
-        body: JSON.stringify({ inputs: JSON.parse(inputs) }),
-      });
+      const res = await apiFetch('/api/sentiment/analyze', { method:'POST', body: JSON.stringify({ inputs: JSON.parse(inputs) }) });
       setResult(res);
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) { console.error(e); }
     setBusy(false);
   };
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Multimodal Sentiment
-      </Typography>
-      <Card sx={{ mb: 2 }}>
+      <Typography variant="h4" gutterBottom>Multimodal Sentiment</Typography>
+      <Card sx={{ mb:2 }}>
         <CardContent>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField
-                label="Inputs (JSON array)"
-                fullWidth
-                multiline
-                minRows={6}
-                value={inputs}
-                onChange={(e) => setInputs(e.target.value)}
-              />
+              <TextField label="Inputs (JSON array)" fullWidth multiline minRows={6} value={inputs} onChange={(e)=>setInputs(e.target.value)} />
             </Grid>
             <Grid item xs={12}>
-              <Button variant="contained" onClick={run} disabled={busy}>
-                {busy ? 'Analyzing…' : 'Analyze'}
-              </Button>
+              <Button variant="contained" onClick={run} disabled={busy}>{busy ? 'Analyzing…' : 'Analyze'}</Button>
             </Grid>
           </Grid>
         </CardContent>
@@ -61,16 +34,11 @@ export default function SentimentPanel() {
       {result && (
         <Card>
           <CardContent>
-            <Typography variant="subtitle1">
-              Aggregate Score: {result.aggregateScore?.toFixed?.(3)}
-            </Typography>
+            <Typography variant="subtitle1">Aggregate Score: {result.aggregateScore?.toFixed?.(3)}</Typography>
             <List>
-              {(result.items || []).map((it) => (
+              {(result.items||[]).map((it) => (
                 <ListItem key={`${it.kind}-${it.id}`}>
-                  <ListItemText
-                    primary={`${it.kind} #${it.id} — score ${it.score} (comp ${it.comparative})`}
-                    secondary={it.textPreview}
-                  />
+                  <ListItemText primary={`${it.kind} #${it.id} — score ${it.score} (comp ${it.comparative})`} secondary={it.textPreview} />
                 </ListItem>
               ))}
             </List>
@@ -80,3 +48,4 @@ export default function SentimentPanel() {
     </Box>
   );
 }
+

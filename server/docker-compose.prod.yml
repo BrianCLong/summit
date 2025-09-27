@@ -5,8 +5,8 @@ services:
     image: neo4j:5.15-enterprise
     container_name: intelgraph-neo4j-prod
     ports:
-      - '7474:7474'
-      - '7687:7687'
+      - "7474:7474"
+      - "7687:7687"
     environment:
       - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]
@@ -28,7 +28,7 @@ services:
       - ./infrastructure/neo4j/backups:/backups
     restart: unless-stopped
     healthcheck:
-      test: ['CMD-SHELL', "cypher-shell -u neo4j -p $NEO4J_PASSWORD 'RETURN 1'"]
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p $NEO4J_PASSWORD 'RETURN 1'"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -40,7 +40,7 @@ services:
     image: postgres:15-alpine
     container_name: intelgraph-postgres-prod
     ports:
-      - '5432:5432'
+      - "5432:5432"
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -52,7 +52,7 @@ services:
       - ./infrastructure/postgres/backups:/backups
     restart: unless-stopped
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U $POSTGRES_USER -d $POSTGRES_DB']
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -80,7 +80,7 @@ services:
     image: redis:7-alpine
     container_name: intelgraph-redis-prod
     ports:
-      - '6379:6379'
+      - "6379:6379"
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     volumes:
@@ -88,7 +88,7 @@ services:
       - ./infrastructure/redis/redis.conf:/usr/local/etc/redis/redis.conf
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 30s
       timeout: 10s
       retries: 5

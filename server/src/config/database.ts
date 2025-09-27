@@ -1,8 +1,8 @@
-import neo4j, { Driver, Session } from 'neo4j-driver';
-import { Pool, PoolClient } from 'pg';
-import Redis from 'ioredis';
-import config from './index.js';
-import logger from '../utils/logger.js';
+import neo4j, { Driver, Session } from "neo4j-driver";
+import { Pool, PoolClient } from "pg";
+import Redis from "ioredis";
+import config from "./index.js";
+import logger from "../utils/logger.js";
 
 let neo4jDriver: Driver | null = null;
 let postgresPool: Pool | null = null;
@@ -18,16 +18,16 @@ async function connectNeo4j(): Promise<Driver> {
 
     // Test connection
     const session = neo4jDriver.session();
-    await session.run('RETURN 1');
+    await session.run("RETURN 1");
     await session.close();
 
     // Run migrations to set up constraints and indexes
     await runNeo4jMigrations();
 
-    logger.info('✅ Connected to Neo4j');
+    logger.info("✅ Connected to Neo4j");
     return neo4jDriver;
   } catch (error) {
-    logger.error('❌ Failed to connect to Neo4j:', error);
+    logger.error("❌ Failed to connect to Neo4j:", error);
     throw error;
   }
 }
@@ -35,62 +35,68 @@ async function connectNeo4j(): Promise<Driver> {
 async function runNeo4jMigrations(): Promise<void> {
   try {
     // Import migration manager lazily to avoid circular dependencies
-    const { migrationManager } = await import('../db/migrations/index.js');
+    const { migrationManager } = await import("../db/migrations/index.js");
     await migrationManager.migrate();
-    logger.info('Neo4j migrations completed successfully');
+    logger.info("Neo4j migrations completed successfully");
   } catch (error) {
-    logger.warn('Migration system not available, falling back to legacy constraints');
+    logger.warn(
+      "Migration system not available, falling back to legacy constraints",
+    );
     await createNeo4jConstraints();
   }
 }
 
 async function createNeo4jConstraints(): Promise<void> {
-  if (!neo4jDriver) throw new Error('Neo4j driver not initialized');
+  if (!neo4jDriver) throw new Error("Neo4j driver not initialized");
   const session = neo4jDriver.session();
 
   try {
     const constraints = [
-      'CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE',
-      'CREATE CONSTRAINT entity_uuid IF NOT EXISTS FOR (e:Entity) REQUIRE e.uuid IS UNIQUE',
-      'CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE u.id IS UNIQUE',
-      'CREATE CONSTRAINT user_email IF NOT EXISTS FOR (u:User) REQUIRE u.email IS UNIQUE',
-      'CREATE CONSTRAINT investigation_id IF NOT EXISTS FOR (i:Investigation) REQUIRE i.id IS UNIQUE',
-      'CREATE CONSTRAINT relationship_id IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() REQUIRE r.id IS UNIQUE',
+      "CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE",
+      "CREATE CONSTRAINT entity_uuid IF NOT EXISTS FOR (e:Entity) REQUIRE e.uuid IS UNIQUE",
+      "CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE u.id IS UNIQUE",
+      "CREATE CONSTRAINT user_email IF NOT EXISTS FOR (u:User) REQUIRE u.email IS UNIQUE",
+      "CREATE CONSTRAINT investigation_id IF NOT EXISTS FOR (i:Investigation) REQUIRE i.id IS UNIQUE",
+      "CREATE CONSTRAINT relationship_id IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() REQUIRE r.id IS UNIQUE",
     ];
 
     for (const constraint of constraints) {
       try {
         await session.run(constraint);
       } catch (error: any) {
-        if (!error.message.includes('already exists')) {
-          logger.warn('Failed to create constraint:', constraint, error.message);
+        if (!error.message.includes("already exists")) {
+          logger.warn(
+            "Failed to create constraint:",
+            constraint,
+            error.message,
+          );
         }
       }
     }
 
     const indexes = [
-      'CREATE INDEX entity_type IF NOT EXISTS FOR (e:Entity) ON (e.type)',
-      'CREATE INDEX entity_label IF NOT EXISTS FOR (e:Entity) ON (e.label)',
-      'CREATE INDEX entity_created IF NOT EXISTS FOR (e:Entity) ON (e.createdAt)',
-      'CREATE INDEX investigation_status IF NOT EXISTS FOR (i:Investigation) ON (i.status)',
-      'CREATE INDEX user_username IF NOT EXISTS FOR (u:User) ON (u.username)',
-      'CREATE FULLTEXT INDEX entity_search IF NOT EXISTS FOR (e:Entity) ON EACH [e.label, e.description]',
-      'CREATE FULLTEXT INDEX investigation_search IF NOT EXISTS FOR (i:Investigation) ON EACH [i.title, i.description]',
+      "CREATE INDEX entity_type IF NOT EXISTS FOR (e:Entity) ON (e.type)",
+      "CREATE INDEX entity_label IF NOT EXISTS FOR (e:Entity) ON (e.label)",
+      "CREATE INDEX entity_created IF NOT EXISTS FOR (e:Entity) ON (e.createdAt)",
+      "CREATE INDEX investigation_status IF NOT EXISTS FOR (i:Investigation) ON (i.status)",
+      "CREATE INDEX user_username IF NOT EXISTS FOR (u:User) ON (u.username)",
+      "CREATE FULLTEXT INDEX entity_search IF NOT EXISTS FOR (e:Entity) ON EACH [e.label, e.description]",
+      "CREATE FULLTEXT INDEX investigation_search IF NOT EXISTS FOR (i:Investigation) ON EACH [i.title, i.description]",
     ];
 
     for (const index of indexes) {
       try {
         await session.run(index);
       } catch (error: any) {
-        if (!error.message.includes('already exists')) {
-          logger.warn('Failed to create index:', index, error.message);
+        if (!error.message.includes("already exists")) {
+          logger.warn("Failed to create index:", index, error.message);
         }
       }
     }
 
-    logger.info('Neo4j constraints and indexes created');
+    logger.info("Neo4j constraints and indexes created");
   } catch (error) {
-    logger.error('Failed to create Neo4j constraints:', error);
+    logger.error("Failed to create Neo4j constraints:", error);
   } finally {
     await session.close();
   }
@@ -111,21 +117,21 @@ async function connectPostgres(): Promise<Pool> {
     });
 
     const client = await postgresPool.connect();
-    await client.query('SELECT NOW()');
+    await client.query("SELECT NOW()");
     client.release();
 
     await createPostgresTables();
 
-    logger.info('✅ Connected to PostgreSQL');
+    logger.info("✅ Connected to PostgreSQL");
     return postgresPool;
   } catch (error) {
-    logger.error('❌ Failed to connect to PostgreSQL:', error);
+    logger.error("❌ Failed to connect to PostgreSQL:", error);
     throw error;
   }
 }
 
 async function createPostgresTables(): Promise<void> {
-  if (!postgresPool) throw new Error('PostgreSQL pool not initialized');
+  if (!postgresPool) throw new Error("PostgreSQL pool not initialized");
   const client = await postgresPool.connect();
 
   try {
@@ -187,18 +193,22 @@ async function createPostgresTables(): Promise<void> {
       )
     `);
 
-    await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id)');
     await client.query(
-      'CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)',
+      "CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id)",
     );
-    await client.query('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id)');
     await client.query(
-      'CREATE INDEX IF NOT EXISTS idx_analysis_investigation ON analysis_results(investigation_id)',
+      "CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)",
+    );
+    await client.query(
+      "CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id)",
+    );
+    await client.query(
+      "CREATE INDEX IF NOT EXISTS idx_analysis_investigation ON analysis_results(investigation_id)",
     );
 
-    logger.info('PostgreSQL tables created');
+    logger.info("PostgreSQL tables created");
   } catch (error) {
-    logger.error('Failed to create PostgreSQL tables:', error);
+    logger.error("Failed to create PostgreSQL tables:", error);
   } finally {
     client.release();
   }
@@ -219,7 +229,7 @@ async function connectRedis(): Promise<Redis | null> {
       family: 4,
       enableOfflineQueue: false,
       reconnectOnError: (err: Error) => {
-        const targetError = 'READONLY';
+        const targetError = "READONLY";
         return err.message.includes(targetError);
       },
       retryStrategy: (times: number) => {
@@ -235,52 +245,52 @@ async function connectRedis(): Promise<Redis | null> {
 
     redisClient = new Redis(redisConfig);
 
-    redisClient.on('error', (error) => {
-      logger.error('Redis error:', error.message);
+    redisClient.on("error", (error) => {
+      logger.error("Redis error:", error.message);
     });
 
-    redisClient.on('connect', () => {
-      logger.info('Redis connected');
+    redisClient.on("connect", () => {
+      logger.info("Redis connected");
     });
 
-    redisClient.on('ready', () => {
-      logger.info('✅ Redis ready');
+    redisClient.on("ready", () => {
+      logger.info("✅ Redis ready");
     });
 
-    redisClient.on('reconnecting', () => {
-      logger.info('Redis reconnecting...');
+    redisClient.on("reconnecting", () => {
+      logger.info("Redis reconnecting...");
     });
 
-    redisClient.on('end', () => {
-      logger.warn('Redis connection ended');
+    redisClient.on("end", () => {
+      logger.warn("Redis connection ended");
     });
 
     await redisClient.connect();
     await redisClient.ping();
 
-    logger.info('✅ Connected to Redis');
+    logger.info("✅ Connected to Redis");
     return redisClient;
   } catch (error: any) {
-    logger.error('❌ Failed to connect to Redis:', error.message);
+    logger.error("❌ Failed to connect to Redis:", error.message);
     // Don't throw error to allow server to start without Redis if needed
-    logger.warn('Server will continue without Redis caching');
+    logger.warn("Server will continue without Redis caching");
     return null;
   }
 }
 
 function getNeo4jDriver(): Driver {
-  if (!neo4jDriver) throw new Error('Neo4j driver not initialized');
+  if (!neo4jDriver) throw new Error("Neo4j driver not initialized");
   return neo4jDriver;
 }
 
 function getPostgresPool(): Pool {
-  if (!postgresPool) throw new Error('PostgreSQL pool not initialized');
+  if (!postgresPool) throw new Error("PostgreSQL pool not initialized");
   return postgresPool;
 }
 
 function getRedisClient(): Redis | null {
   if (!redisClient) {
-    logger.warn('Redis client not available');
+    logger.warn("Redis client not available");
     return null;
   }
   return redisClient;
@@ -289,15 +299,15 @@ function getRedisClient(): Redis | null {
 async function closeConnections(): Promise<void> {
   if (neo4jDriver) {
     await neo4jDriver.close();
-    logger.info('Neo4j connection closed');
+    logger.info("Neo4j connection closed");
   }
   if (postgresPool) {
     await postgresPool.end();
-    logger.info('PostgreSQL connection closed');
+    logger.info("PostgreSQL connection closed");
   }
   if (redisClient) {
     redisClient.disconnect();
-    logger.info('Redis connection closed');
+    logger.info("Redis connection closed");
   }
 }
 

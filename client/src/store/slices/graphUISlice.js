@@ -31,7 +31,12 @@ const graphUISlice = createSlice({
   },
 });
 
-export const { setSelectedNode, setSelectedEdge, clearSelection, setZoomLevel, setPanPosition } =
-  graphUISlice.actions;
+export const {
+  setSelectedNode,
+  setSelectedEdge,
+  clearSelection,
+  setZoomLevel,
+  setPanPosition,
+} = graphUISlice.actions;
 
 export default graphUISlice.reducer;

@@ -1,0 +1,491 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "MC v0.3.8 - Quantum-Ready Equilibrium",
+    "tags": ["mc-platform", "v0.3.8", "quantum-ready", "beyond-mythic", "equilibrium"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Post-Quantum Coverage",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99.9}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_pqa_coverage_percent",
+            "legendFormat": "PQ Coverage %",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "zk-Fairness Health",
+        "type": "gauge",
+        "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.8},
+                {"color": "green", "value": 0.95}
+              ]
+            },
+            "min": 0,
+            "max": 1,
+            "unit": "short"
+          }
+        },
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "targets": [
+          {
+            "expr": "mc_zkfsa_composite_health_score",
+            "legendFormat": "ZKFSA Health",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "PoDR Freshness",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 24},
+                {"color": "red", "value": 72}
+              ]
+            },
+            "unit": "h"
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_podr_last_drill_hours_ago",
+            "legendFormat": "Hours Since Last DR Drill",
+            "refId": "A"
+          },
+          {
+            "expr": "mc_podr_last_successful_drill_hours_ago",
+            "legendFormat": "Hours Since Successful Drill",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "BFT-Eco Carbon Efficiency",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 10},
+                {"color": "green", "value": 20}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_bft_eco_carbon_reduction_percent",
+            "legendFormat": "Carbon Reduction %",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "PQA Verification Performance",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 2},
+                {"color": "red", "value": 5}
+              ]
+            },
+            "unit": "ms"
+          }
+        },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(mc_pqa_verification_duration_seconds_bucket[5m])) by (le)) * 1000",
+            "legendFormat": "P95 PQA Verification Time",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(mc_pqa_verification_duration_seconds_bucket[5m])) by (le)) * 1000",
+            "legendFormat": "P50 PQA Verification Time",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "ZKFSA Audit Compliance",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 0.8},
+                {"color": "green", "value": 0.95}
+              ]
+            },
+            "unit": "short",
+            "min": 0,
+            "max": 1
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_zkfsa_fairness_score",
+            "legendFormat": "Fairness Score",
+            "refId": "A"
+          },
+          {
+            "expr": "mc_zkfsa_safety_score",
+            "legendFormat": "Safety Score",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "PoDR Drill Status",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 14},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.8},
+                {"color": "green", "value": 0.95}
+              ]
+            }
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_podr_drill_compliance_score",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {"Time": true},
+              "indexByName": {},
+              "renameByName": {
+                "drill_type": "Drill Type",
+                "Value": "Compliance Score"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "RGE Export Health",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 8, "x": 8, "y": 14},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 100}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_rge_export_success_rate * 100",
+            "legendFormat": "Export Success Rate",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "BFT-Eco Quorum Health",
+        "type": "gauge",
+        "gridPos": {"h": 4, "w": 8, "x": 16, "y": 14},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.95},
+                {"color": "green", "value": 0.99}
+              ]
+            },
+            "min": 0,
+            "max": 1,
+            "unit": "short"
+          }
+        },
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "targets": [
+          {
+            "expr": "mc_bft_eco_quorum_reliability_score",
+            "legendFormat": "Quorum Reliability",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Quantum-Ready Metrics Distribution",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 18},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "pieType": "pie",
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "values": ["percent"]
+          }
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(mc_pqa_attestations_total[5m]))",
+            "legendFormat": "PQA Attestations",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(mc_zkfsa_audits_total[5m]))",
+            "legendFormat": "ZKFSA Audits",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(rate(mc_podr_drills_total[5m]))",
+            "legendFormat": "PoDR Drills",
+            "refId": "C"
+          },
+          {
+            "expr": "sum(rate(mc_rge_exports_total[5m]))",
+            "legendFormat": "RGE Exports",
+            "refId": "D"
+          },
+          {
+            "expr": "sum(rate(mc_bft_eco_consensus_total[5m]))",
+            "legendFormat": "BFT-Eco Consensus",
+            "refId": "E"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Quantum-Ready Equilibrium Score",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 18},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.85},
+                {"color": "green", "value": 0.95}
+              ]
+            },
+            "min": 0,
+            "max": 1,
+            "unit": "short"
+          }
+        },
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "targets": [
+          {
+            "expr": "mc_quantum_ready_equilibrium_score",
+            "legendFormat": "Equilibrium Score",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Compliance Framework Coverage",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 26},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_rge_gdpr_compliance_percent",
+            "legendFormat": "GDPR Compliance",
+            "refId": "A"
+          },
+          {
+            "expr": "mc_rge_soc2_compliance_percent",
+            "legendFormat": "SOC2 Compliance",
+            "refId": "B"
+          },
+          {
+            "expr": "mc_rge_iso27001_compliance_percent",
+            "legendFormat": "ISO27001 Compliance",
+            "refId": "C"
+          },
+          {
+            "expr": "mc_rge_fedramp_compliance_percent",
+            "legendFormat": "FedRAMP Compliance",
+            "refId": "D"
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Quantum-Ready Events Log",
+        "type": "logs",
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 26},
+        "targets": [
+          {
+            "expr": "{job=\"mc-quantum-ready\"} |= \"pqa-attestation\" or \"zkfsa-audit\" or \"podr-drill\" or \"rge-export\" or \"bft-eco-consensus\"",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": false,
+          "wrapLogMessage": false,
+          "prettifyLogMessage": false,
+          "enableLogDetails": true,
+          "dedupStrategy": "none",
+          "sortOrder": "Descending"
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": [
+        {
+          "name": "tenant",
+          "type": "query",
+          "query": "label_values(mc_pqa_coverage_percent, tenant_id)",
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "includeAll": true,
+          "multi": true
+        },
+        {
+          "name": "region",
+          "type": "query",
+          "query": "label_values(mc_bft_eco_quorum_reliability_score, region)",
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "PQA Verification Failures",
+          "datasource": "prometheus",
+          "expr": "changes(mc_pqa_verification_failures_total[5m])",
+          "iconColor": "red"
+        },
+        {
+          "name": "ZKFSA Audit Violations",
+          "datasource": "prometheus",
+          "expr": "changes(mc_zkfsa_violations_total[5m])",
+          "iconColor": "orange"
+        },
+        {
+          "name": "PoDR Drill Failures",
+          "datasource": "prometheus",
+          "expr": "changes(mc_podr_drill_failures_total[5m])",
+          "iconColor": "yellow"
+        },
+        {
+          "name": "BFT-Eco Consensus Failures",
+          "datasource": "prometheus",
+          "expr": "changes(mc_bft_eco_consensus_failures_total[5m])",
+          "iconColor": "purple"
+        }
+      ]
+    },
+    "refresh": "10s",
+    "schemaVersion": 36,
+    "version": 1
+  }
+}

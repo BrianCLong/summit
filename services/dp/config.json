@@ -1,0 +1,47 @@
+{
+  "default_epsilon": 1.0,
+  "default_delta": 1e-5,
+  "daily_budget_allocation": 10.0,
+  "noise_mechanisms": {
+    "laplace": {
+      "sensitivity": 1.0
+    },
+    "gaussian": {
+      "sensitivity": 1.0,
+      "sigma_multiplier": 2.0
+    }
+  },
+  "analytics_tiles": {
+    "enabled": true,
+    "auto_noise": true,
+    "max_epsilon_per_query": 0.1
+  },
+  "cpu_overhead_limit_percent": 5.0,
+  "tenant_config": {
+    "TENANT_001": {
+      "daily_epsilon_budget": 12.0,
+      "privacy_level": "standard"
+    },
+    "TENANT_002": {
+      "daily_epsilon_budget": 8.0,
+      "privacy_level": "high"
+    },
+    "TENANT_003": {
+      "daily_epsilon_budget": 15.0,
+      "privacy_level": "standard"
+    },
+    "TENANT_004": {
+      "daily_epsilon_budget": 10.0,
+      "privacy_level": "standard"
+    },
+    "TENANT_005": {
+      "daily_epsilon_budget": 10.0,
+      "privacy_level": "standard"
+    }
+  },
+  "prometheus_export": {
+    "enabled": true,
+    "port": 8090,
+    "path": "/metrics"
+  }
+}

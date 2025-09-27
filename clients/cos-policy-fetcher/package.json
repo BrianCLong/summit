@@ -1,0 +1,22 @@
+{
+  "name": "cos-policy-fetcher",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "undici": "^6.19.8",
+    "tar": "^7.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "typescript": "^5.5.4",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5"
+  }
+}
+

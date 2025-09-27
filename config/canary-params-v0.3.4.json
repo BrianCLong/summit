@@ -1,0 +1,42 @@
+{
+  "version": "v0.3.4-mc",
+  "deployment_config": {
+    "epic_theme": "Trust, Throughput, Tenants",
+    "target_environment": "production",
+    "deployment_strategy": "canary_progressive"
+  },
+  "slo_gates": {
+    "p95_latency_regression_pct": 5,
+    "error_rate_non_worse": true,
+    "throughput_degradation_max_pct": 10,
+    "availability_min_pct": 99.9
+  },
+  "rollback_triggers": {
+    "graphql_p95_ms_30m": 350,
+    "aa_replication_lag_s_10m": 120,
+    "autonomy_comp_pct_24h": 0.5,
+    "siem_delivery_pct_15m": 95,
+    "dp_pii_violations_1h": 0,
+    "budget_enforcement_timeout_rate_5m": 0.01,
+    "provenance_query_p95_ms_5m": 200
+  },
+  "waves": [
+    {"name": "canary_20", "traffic_pct": 20, "bake_minutes": 60, "required_gates": ["p95_latency", "error_rate"]},
+    {"name": "canary_50", "traffic_pct": 50, "bake_minutes": 60, "required_gates": ["p95_latency", "error_rate", "throughput"]},
+    {"name": "production", "traffic_pct": 100, "bake_minutes": 0, "required_gates": ["all"]}
+  ],
+  "feature_flags": {
+    "differential_privacy_enabled": true,
+    "config_auto_remediation_enabled": true,
+    "budget_guard_enforcement": true,
+    "provenance_query_api_enabled": true,
+    "autonomy_tier3_tenant_004": true,
+    "autonomy_tier3_tenant_005": true
+  },
+  "monitoring": {
+    "prometheus_namespace": "mc_platform",
+    "grafana_dashboard_id": "mc-v034-deployment",
+    "alert_channels": ["#mc-alerts", "#deployment-status"],
+    "pager_duty_escalation": true
+  }
+}

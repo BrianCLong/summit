@@ -1,9 +1,9 @@
-import SemanticSearchService from '../services/SemanticSearchService';
+import SemanticSearchService from "../services/SemanticSearchService";
 
-describe('SemanticSearchService', () => {
+describe("SemanticSearchService", () => {
   class MockEmbeddingService {
     async generateEmbedding({ text }: { text: string }): Promise<number[]> {
-      return [text.includes('threat') ? 1 : 0];
+      return [text.includes("threat") ? 1 : 0];
     }
   }
 
@@ -66,11 +66,11 @@ describe('SemanticSearchService', () => {
               for (const op of query.where.operands) {
                 const field = op.path[0];
                 const val = op.valueString ?? op.valueInt ?? op.valueDate;
-                if (op.operator === 'Equal') {
+                if (op.operator === "Equal") {
                   items = items.filter((d) => d.props[field] === val);
-                } else if (op.operator === 'GreaterThanEqual') {
+                } else if (op.operator === "GreaterThanEqual") {
                   items = items.filter((d) => d.props[field] >= val);
-                } else if (op.operator === 'LessThanEqual') {
+                } else if (op.operator === "LessThanEqual") {
                   items = items.filter((d) => d.props[field] <= val);
                 }
               }
@@ -93,32 +93,35 @@ describe('SemanticSearchService', () => {
     };
   }
 
-  it('performs search with metadata filters', async () => {
+  it("performs search with metadata filters", async () => {
     const client = new MockWeaviateClient();
-    const service = new SemanticSearchService(client as any, new MockEmbeddingService() as any);
+    const service = new SemanticSearchService(
+      client as any,
+      new MockEmbeddingService() as any,
+    );
 
     await service.indexDocument({
-      id: '1',
-      text: 'threat report one',
-      source: 'OSINT',
-      date: '2024-01-01',
+      id: "1",
+      text: "threat report one",
+      source: "OSINT",
+      date: "2024-01-01",
       threatLevel: 3,
-      graphId: 'e1',
+      graphId: "e1",
     });
     await service.indexDocument({
-      id: '2',
-      text: 'benign report',
-      source: 'OSINT',
-      date: '2024-01-02',
+      id: "2",
+      text: "benign report",
+      source: "OSINT",
+      date: "2024-01-02",
       threatLevel: 1,
-      graphId: 'e2',
+      graphId: "e2",
     });
 
-    const results = await service.search('threat', {
-      source: 'OSINT',
+    const results = await service.search("threat", {
+      source: "OSINT",
       threatLevel: 3,
     });
     expect(results).toHaveLength(1);
-    expect(results[0].metadata.graphId).toBe('e1');
+    expect(results[0].metadata.graphId).toBe("e1");
   });
 });

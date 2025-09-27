@@ -64,7 +64,11 @@ function CustomTabPanel(props: TabPanelProps) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          {children}
+        </Box>
+      )}
     </div>
   );
 }
@@ -89,7 +93,7 @@ const ExecutiveDashboard: React.FC = () => {
         refetch(); // Refresh the list of scenarios
         setTabValue(1); // Switch to Telemetry tab after simulation
       },
-    },
+    }
   );
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -100,7 +104,7 @@ const ExecutiveDashboard: React.FC = () => {
     try {
       await runSimulation({ variables: { input } });
     } catch (e) {
-      console.error('Error running simulation:', e);
+      console.error("Error running simulation:", e);
     }
   };
 
@@ -112,31 +116,20 @@ const ExecutiveDashboard: React.FC = () => {
   return (
     <Container maxWidth="xl" sx={{ py: 2 }}>
       <Alert severity="warning" sx={{ mb: 3 }}>
-        WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY. This dashboard is for hypothetical
-        scenario simulation and training purposes.
+        WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY. This dashboard is for hypothetical scenario simulation and training purposes.
       </Alert>
 
       <Typography variant="h4" gutterBottom>
         WarGamed Decision Support Dashboard
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Simulate crisis scenarios, analyze information environment dynamics, and evaluate strategic
-        responses based on military IO doctrine.
+        Simulate crisis scenarios, analyze information environment dynamics, and evaluate strategic responses based on military IO doctrine.
       </Typography>
 
       <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-        <ScenarioInput
-          onRunSimulation={handleRunSimulation}
-          existingScenarios={scenarios}
-          onSelectScenario={setSelectedScenarioId}
-          selectedScenarioId={selectedScenarioId}
-        />
+        <ScenarioInput onRunSimulation={handleRunSimulation} existingScenarios={scenarios} onSelectScenario={setSelectedScenarioId} selectedScenarioId={selectedScenarioId} />
         {simulationLoading && <CircularProgress sx={{ mt: 2 }} />}
-        {simulationError && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            Simulation Error: {simulationError.message}
-          </Alert>
-        )}
+        {simulationError && <Alert severity="error" sx={{ mt: 2 }}>Simulation Error: {simulationError.message}</Alert>}
       </Paper>
 
       {selectedScenarioId && (

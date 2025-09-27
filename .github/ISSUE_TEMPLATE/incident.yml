@@ -1,23 +1,18 @@
-name: "🚨 Incident"
-description: Track and resolve a production incident
-labels: [incident]
+name: Incident Report
+labels: [incident, P0]
 body:
   - type: input
-    id: summary
-    attributes: { label: Summary, placeholder: Brief description }
-    validations: { required: true }
-  - type: textarea
-    id: timeline
-    attributes: { label: Timeline, description: UTC timestamps + events }
+    id: sev
+    attributes: { label: Severity (SEV0–SEV3) }
   - type: textarea
     id: impact
-    attributes: { label: Impact, description: Users, duration, SLOs breached }
+    attributes: { label: Impact, description: "Users, duration, scope" }
   - type: textarea
-    id: detection
-    attributes: { label: Detection, description: Alerts or signals that fired }
+    id: timeline
+    attributes: { label: Timeline of events }
   - type: textarea
-    id: mitigation
-    attributes: { label: Mitigation/Workaround }
+    id: fixes
+    attributes: { label: Immediate Fixes }
   - type: textarea
     id: followups
-    attributes: { label: Follow-ups, description: Link tasks/PRs }
+    attributes: { label: Follow‑ups (actionable tasks) }

@@ -18,26 +18,26 @@ const registerInstanceSchema = {
     required: true,
     pattern: '^[a-zA-Z0-9_-]+$',
     minLength: 3,
-    maxLength: 50,
+    maxLength: 50
   },
   name: {
     type: 'string',
     required: true,
     minLength: 3,
-    maxLength: 100,
+    maxLength: 100
   },
   endpoint: {
     type: 'string',
     required: true,
-    format: 'uri',
+    format: 'uri'
   },
   apiKey: {
     type: 'string',
     required: true,
-    minLength: 10,
+    minLength: 10
   },
   publicKey: {
-    type: 'string',
+    type: 'string'
   },
   capabilities: {
     type: 'array',
@@ -45,40 +45,40 @@ const registerInstanceSchema = {
       type: 'string',
       enum: [
         'geo_search',
-        'temporal_analysis',
+        'temporal_analysis', 
         'sentiment_analysis',
         'graph_analytics',
         'multimodal_search',
         'nlp_processing',
         'threat_intelligence',
-        'social_analysis',
-      ],
-    },
+        'social_analysis'
+      ]
+    }
   },
   accessLevel: {
     type: 'string',
     enum: ['public', 'restricted', 'private'],
-    default: 'public',
+    default: 'public'
   },
   maxConcurrentQueries: {
     type: 'number',
     minimum: 1,
     maximum: 20,
-    default: 5,
+    default: 5
   },
   timeout: {
     type: 'number',
     minimum: 5000,
     maximum: 120000,
-    default: 30000,
-  },
+    default: 30000
+  }
 };
 
 const updateInstanceSchema = {
   name: {
     type: 'string',
     minLength: 3,
-    maxLength: 100,
+    maxLength: 100
   },
   capabilities: {
     type: 'array',
@@ -86,30 +86,30 @@ const updateInstanceSchema = {
       type: 'string',
       enum: [
         'geo_search',
-        'temporal_analysis',
+        'temporal_analysis', 
         'sentiment_analysis',
         'graph_analytics',
         'multimodal_search',
         'nlp_processing',
         'threat_intelligence',
-        'social_analysis',
-      ],
-    },
+        'social_analysis'
+      ]
+    }
   },
   accessLevel: {
     type: 'string',
-    enum: ['public', 'restricted', 'private'],
+    enum: ['public', 'restricted', 'private']
   },
   maxConcurrentQueries: {
     type: 'number',
     minimum: 1,
-    maximum: 20,
+    maximum: 20
   },
   timeout: {
     type: 'number',
     minimum: 5000,
-    maximum: 120000,
-  },
+    maximum: 120000
+  }
 };
 
 const federatedSearchSchema = {
@@ -120,43 +120,43 @@ const federatedSearchSchema = {
       graphql: {
         type: 'string',
         required: true,
-        minLength: 10,
+        minLength: 10
       },
       variables: {
-        type: 'object',
-      },
-    },
+        type: 'object'
+      }
+    }
   },
   instances: {
     type: 'array',
     items: {
-      type: 'string',
-    },
+      type: 'string'
+    }
   },
   maxResults: {
     type: 'number',
     minimum: 1,
     maximum: 1000,
-    default: 100,
+    default: 100
   },
   timeout: {
     type: 'number',
     minimum: 1000,
     maximum: 120000,
-    default: 30000,
+    default: 30000
   },
   aggregateResults: {
     type: 'boolean',
-    default: true,
+    default: true
   },
   respectACL: {
     type: 'boolean',
-    default: true,
+    default: true
   },
   cacheResults: {
     type: 'boolean',
-    default: true,
-  },
+    default: true
+  }
 };
 
 // Initialize controller
@@ -220,14 +220,13 @@ router.use(ensureAuthenticated);
  *       403:
  *         description: Admin permissions required
  */
-router.post(
-  '/instances',
+router.post('/instances', 
   rateLimiter({ windowMs: 300000, max: 10 }), // 10 requests per 5 minutes
   validateRequest(registerInstanceSchema),
   requirePermission('federation:manage'),
   async (req, res) => {
     await federationController.registerInstance(req, res);
-  },
+  }
 );
 
 /**
@@ -312,13 +311,12 @@ router.get('/instances/:id', async (req, res) => {
  *       403:
  *         description: Admin permissions required
  */
-router.patch(
-  '/instances/:id',
+router.patch('/instances/:id',
   validateRequest(updateInstanceSchema),
   requirePermission('federation:manage'),
   async (req, res) => {
     await federationController.updateInstance(req, res);
-  },
+  }
 );
 
 /**
@@ -343,9 +341,12 @@ router.patch(
  *       403:
  *         description: Admin permissions required
  */
-router.delete('/instances/:id', requirePermission('federation:manage'), async (req, res) => {
-  await federationController.unregisterInstance(req, res);
-});
+router.delete('/instances/:id',
+  requirePermission('federation:manage'),
+  async (req, res) => {
+    await federationController.unregisterInstance(req, res);
+  }
+);
 
 /**
  * @swagger
@@ -394,13 +395,12 @@ router.delete('/instances/:id', requirePermission('federation:manage'), async (r
  *       400:
  *         description: Invalid query or parameters
  */
-router.post(
-  '/search',
+router.post('/search',
   rateLimiter({ windowMs: 60000, max: 30 }), // 30 searches per minute
   validateRequest(federatedSearchSchema),
   async (req, res) => {
     await federationController.federatedSearch(req, res);
-  },
+  }
 );
 
 /**
@@ -425,9 +425,12 @@ router.post(
  *       403:
  *         description: Insufficient permissions
  */
-router.post('/instances/:id/test', requirePermission('federation:manage'), async (req, res) => {
-  await federationController.testInstance(req, res);
-});
+router.post('/instances/:id/test',
+  requirePermission('federation:manage'),
+  async (req, res) => {
+    await federationController.testInstance(req, res);
+  }
+);
 
 /**
  * @swagger
@@ -443,9 +446,12 @@ router.post('/instances/:id/test', requirePermission('federation:manage'), async
  *       403:
  *         description: Admin permissions required
  */
-router.get('/stats', requirePermission('federation:manage'), async (req, res) => {
-  await federationController.getFederationStats(req, res);
-});
+router.get('/stats',
+  requirePermission('federation:manage'),
+  async (req, res) => {
+    await federationController.getFederationStats(req, res);
+  }
+);
 
 /**
  * @swagger
@@ -477,15 +483,18 @@ router.get('/capabilities', async (req, res) => {
  *       403:
  *         description: Admin permissions required
  */
-router.post('/cache/clear', requirePermission('federation:manage'), async (req, res) => {
-  await federationController.clearCache(req, res);
-});
+router.post('/cache/clear',
+  requirePermission('federation:manage'),
+  async (req, res) => {
+    await federationController.clearCache(req, res);
+  }
+);
 
 // Health check for federation service
 router.get('/health', (req, res) => {
   const controller = federationController;
   const stats = controller ? controller.federatedSearch.getFederationStats() : null;
-
+  
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -493,11 +502,11 @@ router.get('/health', (req, res) => {
     version: '1.0.0',
     connectedInstances: stats?.connectedInstances || 0,
     healthyInstances: stats?.healthyInstances || 0,
-    cacheSize: stats?.cacheSize || 0,
+    cacheSize: stats?.cacheSize || 0
   });
 });
 
 module.exports = {
   router,
-  initializeRoutes,
+  initializeRoutes
 };
