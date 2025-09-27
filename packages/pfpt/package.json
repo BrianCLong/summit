@@ -1,0 +1,34 @@
+{
+  "name": "@summit/pfpt",
+  "version": "0.1.0",
+  "description": "PII-Free Prompt Tracer (PFPT) for safe prompt/context diffing",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "fixtures"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npx --yes -p typescript@5.9.2 tsc -p tsconfig.build.json",
+    "test": "npm run build && node --test test/pfpt.spec.mjs"
+  },
+  "keywords": [
+    "pii",
+    "diff",
+    "prompt",
+    "security",
+    "ci"
+  ],
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

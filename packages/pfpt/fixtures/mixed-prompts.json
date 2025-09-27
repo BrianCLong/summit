@@ -1,0 +1,51 @@
+{
+  "previous": [
+    {
+      "role": "system",
+      "content": "You are a compliance assistant. Redact PII before returning summaries.",
+      "metadata": {
+        "version": 1,
+        "channel": "secure"
+      }
+    },
+    {
+      "role": "user",
+      "content": "Customer intake request for <spom pii=\"customer\">Midnight Solar</spom>. Primary contact email is <spom pii=\"email\">jane.doe@example.com</spom>." 
+    },
+    {
+      "role": "assistant",
+      "content": "Acknowledged. I will store the account under safe handling procedures."
+    },
+    {
+      "role": "tool",
+      "content": "{\n  \"customerId\": \"C-9911\",\n  \"notes\": \"Call scheduled at 2025-09-23T15:30:00Z\",\n  \"callbacks\": [\n    {\n      \"type\": \"primary\",\n      \"number\": \"303-555-0199\"\n    }\n  ]\n}" 
+    }
+  ],
+  "next": [
+    {
+      "role": "system",
+      "content": "You are a compliance assistant. Redact PII before returning summaries.",
+      "metadata": {
+        "version": 2,
+        "channel": "secure",
+        "scopes": ["audit", "triage"]
+      }
+    },
+    {
+      "role": "user",
+      "content": "Customer intake request for <spom pii=\"customer\">Midnight Solar</spom>. Primary contact email is <spom pii=\"email\">jane.doe@example.com</spom>. Emergency line is <spom pii=\"phone\">+1 (720) 555-0111</spom>." 
+    },
+    {
+      "role": "assistant",
+      "content": "Updated record and flagged the account for security review.",
+      "metadata": {
+        "actions": ["catalog", "flag"],
+        "queue": "priority"
+      }
+    },
+    {
+      "role": "tool",
+      "content": "{\n  \"customerId\": \"C-9911\",\n  \"notes\": \"Emergency escalation path updated\",\n  \"callbacks\": [\n    {\n      \"type\": \"primary\",\n      \"number\": \"303-555-0199\"\n    },\n    {\n      \"type\": \"backup\",\n      \"number\": \"303-555-6767\"\n    }\n  ],\n  \"policyAcks\": {\n    \"security\": true,\n    \"privacy\": true\n  }\n}"
+    }
+  ]
+}
