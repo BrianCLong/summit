@@ -17,6 +17,10 @@ import pino from "pino";
 import { CircuitBreaker } from "../utils/CircuitBreaker.js"; // Import CircuitBreaker
 import { rankPaths, ScoreBreakdown } from "./PathRankingService.js";
 import {
+  ContextWindowSanitizer,
+  RetrievalChunk,
+} from "./context-window-sanitizer.js";
+import {
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
 } from "../monitoring/metrics.js";
@@ -133,6 +137,7 @@ export class GraphRAGService {
   };
   private cacheStats = { hits: 0, total: 0 };
   private circuitBreaker: CircuitBreaker; // Declare circuit breaker instance
+  private contextSanitizer: ContextWindowSanitizer;
 
   constructor(
     neo4jDriver: Driver,
@@ -151,6 +156,7 @@ export class GraphRAGService {
       p95ThresholdMs: 2000, // 2 seconds
       errorRateThreshold: 0.5, // 50%
     });
+    this.contextSanitizer = new ContextWindowSanitizer();
 
     this.config = {
       maxContextSize: 4000,
@@ -491,18 +497,53 @@ export class GraphRAGService {
     question: string,
     context: SubgraphContext,
   ): string {
-    const entityContext = context.entities
-      .map(
-        (e) =>
-          `Entity ${e.id}: ${e.label} (${e.type}) - ${e.description || "No description"}`,
-      )
+    const rawChunks: RetrievalChunk[] = [
+      ...context.entities.map((entity) => ({
+        id: entity.id,
+        type: "entity" as const,
+        content: `${entity.label} (${entity.type}) - ${entity.description || "No description"}`,
+        metadata: {
+          source: "graph-entity",
+          score: entity.confidence,
+          spomTags: entity.properties?.spomTags ?? [],
+        },
+        score: entity.confidence,
+      })),
+      ...context.relationships.map((relationship) => ({
+        id: relationship.id,
+        type: "relationship" as const,
+        content: `${relationship.fromEntityId} --[${relationship.type}]--> ${relationship.toEntityId}`,
+        metadata: {
+          source: "graph-relationship",
+          score: relationship.confidence,
+          spomTags: relationship.properties?.spomTags ?? [],
+        },
+        score: relationship.confidence,
+      })),
+    ];
+
+    const sanitized = this.contextSanitizer.sanitize(rawChunks, {
+      purpose: "analysis",
+      question,
+    });
+
+    logger.debug("Context window sanitizer quality meter", {
+      fingerprint: sanitized.fingerprint,
+      quality: sanitized.quality,
+    });
+    logger.debug("Context window sanitizer explain traces", {
+      fingerprint: sanitized.fingerprint,
+      explainTraces: sanitized.explainTraces,
+    });
+
+    const entityContext = sanitized.sanitizedChunks
+      .filter((chunk) => chunk.type === "entity")
+      .map((chunk) => `Entity ${chunk.id}: ${chunk.content}`)
       .join("\n");
 
-    const relationshipContext = context.relationships
-      .map(
-        (r) =>
-          `Relationship ${r.id}: ${r.fromEntityId} --[${r.type}]--> ${r.toEntityId}`,
-      )
+    const relationshipContext = sanitized.sanitizedChunks
+      .filter((chunk) => chunk.type === "relationship")
+      .map((chunk) => `Relationship ${chunk.id}: ${chunk.content}`)
       .join("\n");
 
     return `You are an intelligence analyst with access to a knowledge graph. Answer the user's question based ONLY on the provided context.
