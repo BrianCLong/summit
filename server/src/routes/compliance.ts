@@ -3,6 +3,7 @@ import { execFile } from 'node:child_process';
 import { promises as fs } from 'fs';
 import { putLocked } from '../audit/worm';
 import { wormAuditChain } from '../federal/worm-audit-chain';
+import { applyIntegrityHeaders } from '../utils/http-integrity.js';
 
 const router = express.Router();
 
@@ -34,14 +35,17 @@ router.get('/export', async (req, res) => {
   };
 
   if (format === 'json') {
-    res.setHeader('content-type', 'application/json');
-    return res.send(JSON.stringify(pack, null, 2));
+    const payload = JSON.stringify(pack, null, 2);
+    res.setHeader('content-type', 'application/json; charset=utf-8');
+    const body = applyIntegrityHeaders(res, payload);
+    return res.send(body);
   }
 
   if (format === 'pdf') {
     const pdf = minimalPdfFromText(`IntelGraph Control Pack\nFramework: ${framework}\nGenerated: ${pack.generatedAt}\n\n` + controls.map(c => `${c.id} - ${c.title} [${c.status}]`).join('\n'));
     res.setHeader('content-type', 'application/pdf');
-    return res.send(pdf);
+    const body = applyIntegrityHeaders(res, pdf);
+    return res.send(body);
   }
 
   return res.status(406).json({ error: 'unsupported format', supported: ['json', 'pdf'] });
@@ -79,8 +83,18 @@ router.get('/export/signed', async (req, res) => {
       uris.packUri = await putLocked(bucket, `${baseKey}.json`, body);
       if (sig) uris.sigUri = await putLocked(bucket, `${baseKey}.json.sig`, sig);
     }
-    res.setHeader('content-type', 'application/json');
-    res.json({ pack, signature: sig ? sig.toString('utf8') : null, ...uris });
+    const responsePayload = JSON.stringify(
+      {
+        pack,
+        signature: sig ? sig.toString('utf8') : null,
+        ...uris,
+      },
+      null,
+      2,
+    );
+    res.setHeader('content-type', 'application/json; charset=utf-8');
+    const body = applyIntegrityHeaders(res, responsePayload);
+    res.send(body);
   } catch (e: any) {
     res.status(500).json({ error: e?.message || 'failed to sign control pack' });
   }
