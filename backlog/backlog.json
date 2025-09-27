@@ -1,0 +1,37 @@
+{
+  "$schema": "https://intelgraph.example/schemas/backlog-1.json",
+  "version": "0.1",
+  "epics": [
+    {
+      "id": "E-001",
+      "title": "Policy Fuzzer Development",
+      "priority": "Must",
+      "stories": [
+        {
+          "id": "S-001-01",
+          "title": "Implement Policy Fuzzer with Advanced Features",
+          "owner": "AI Team",
+          "depends_on": [],
+          "acceptance_criteria": [
+            "Given a policy and query, the fuzzer generates adversarial pairs",
+            "When fuzzing, attack grammars are applied (synonym, regex, time-window, aliasing, data type mismatch)",
+            "Then the oracle correctly determines expected compliance for each pair",
+            "And metamorphic relations are tested for each pair",
+            "And granular coverage metrics are collected for all governance layers",
+            "And an HTML report is generated with failing cases, severity, impact, and a coverage heatmap",
+            "And reproducer files are generated for all failing cases",
+            "Evidence: fuzzer reports (HTML, text, reproducers), CI pipeline logs"
+          ],
+          "verification": [
+            {"type": "unit", "ref": "policy-fuzzer/tests/..."},
+            {"type": "fuzz", "ref": "policy-fuzzer/main.py --iterations 1000"}
+          ],
+          "evidence_hooks": [
+            {"metric": "fuzzer_coverage_percentage", "slo": 80},
+            {"metric": "fuzzer_critical_bugs_found", "slo": 0}
+          ]
+        }
+      ]
+    }
+  ]
+}
