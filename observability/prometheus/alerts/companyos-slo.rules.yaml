@@ -1,0 +1,19 @@
+groups:
+- name: companyos-slo
+  rules:
+  - alert: CompanyOSGraphQLP95High
+    expr: histogram_quantile(0.95, sum(rate(graphql_request_duration_ms_bucket{service="companyos"}[5m])) by (le)) > 350
+    for: 10m
+    labels: { severity: warning }
+    annotations: { summary: "CompanyOS p95 > 350ms (10m)" }
+  - alert: CompanyOSErrorRateHigh
+    expr: (sum(rate(graphql_requests_errors_total{service="companyos"}[5m])) / sum(rate(graphql_requests_total{service="companyos"}[5m]))) > 0.02
+    for: 10m
+    labels: { severity: critical }
+    annotations: { summary: "CompanyOS error rate > 2%" }
+  - alert: CompanyOSCost80Pct
+    expr: companyos_graphql_cost_budget_ratio > 0.8
+    for: 15m
+    labels: { severity: info }
+    annotations: { summary: "CompanyOS GraphQL cost above 80% budget" }
+

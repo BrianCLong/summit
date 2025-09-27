@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: companyos-retention
+  namespace: production
+spec:
+  schedule: "30 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: retention
+            image: companyos-app:latest
+            command: ["node","companyos/dist/retention/runner.js"]
+            env:
+            - name: DATABASE_URL
+              valueFrom: { secretKeyRef: { name: companyos-db, key: url } }
+            - name: RETENTION_DAYS
+              value: "30"
+

@@ -1,0 +1,21 @@
+{
+  "name": "companyos",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "node dist/index.js",
+    "evidence:sample": "node dist/evidence/publish_sample.js"
+  },
+  "dependencies": {
+    "undici": "^6.19.8",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.0",
+    "typescript": "^5.5.4"
+  }
+}
+

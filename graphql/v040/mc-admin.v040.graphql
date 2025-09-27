@@ -1,0 +1,492 @@
+# MC Platform v0.4.0 GraphQL Schema - Transcendent Intelligence
+# Policy-sandboxed evolution with verifiable meta-optimization and PQ-everywhere
+
+scalar DateTime
+scalar JSON
+
+# Tenant scope and metadata
+scalar Tenant # "ALL" | tenant-specific ID
+scalar Duration # ISO 8601 duration
+
+# === TRANSCENDENT INTELLIGENCE TYPES ===
+
+enum TranscendenceLevel {
+  CLASSICAL
+  ENHANCED
+  QUANTUM_READY
+  TRANSCENDENT
+  SUPERINTELLIGENT
+  UNBOUNDED
+}
+
+enum EvolutionStrategy {
+  GRADUAL_IMPROVEMENT
+  BREAKTHROUGH_DISCOVERY
+  QUANTUM_ENHANCED_EVOLUTION
+  TRANSCENDENT_CAPABILITY_EMERGENCE
+}
+
+enum AutonomyTier {
+  TIER_1_SUPERVISED
+  TIER_2_GUIDED
+  TIER_3_AUTONOMOUS
+  TIER_4_TRANSCENDENT
+}
+
+type TranscendentCapability {
+  name: String!
+  description: String!
+  performanceMultiplier: Float!
+  quantumEnhanced: Boolean!
+  autonomousEvolution: Boolean!
+  transcendenceLevel: TranscendenceLevel!
+  creationTimestamp: DateTime!
+  evolutionHistory: [EvolutionEvent!]!
+}
+
+type EvolutionEvent {
+  cycleId: String!
+  strategy: EvolutionStrategy!
+  performanceImprovement: Float!
+  capabilitiesEnhanced: [String!]!
+  quantumAdvantageAchieved: Boolean!
+  transcendenceBreakthrough: Boolean!
+  safetyValidated: Boolean!
+  deployed: Boolean!
+  timestamp: DateTime!
+}
+
+# === EVOLUTION PROPOSAL SYSTEM ===
+
+type EvolutionProposal {
+  proposalId: String!
+  title: String!
+  description: String!
+  strategy: EvolutionStrategy!
+  targetCapabilities: [String!]!
+  expectedImprovement: Float!
+  riskAssessment: RiskAssessment!
+  sandboxResults: SandboxResults!
+  approvalStatus: ApprovalStatus!
+  proposedBy: String!
+  createdAt: DateTime!
+  approvedBy: String
+  approvedAt: DateTime
+  appliedAt: DateTime
+}
+
+type RiskAssessment {
+  overallRisk: RiskLevel!
+  safetyScore: Float!
+  fairnessScore: Float!
+  containmentScore: Float!
+  reversibilityScore: Float!
+  mitigationStrategies: [String!]!
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ApprovalStatus {
+  PENDING_SANDBOX
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  APPLIED
+  ROLLED_BACK
+}
+
+type SandboxResults {
+  opaSimulationPassed: Boolean!
+  testsSummary: TestResults!
+  cseScore: Float!
+  zkFairnessProof: ZkFairnessProof!
+  evidenceStub: String! # Signed evidence stub
+  sandboxedAt: DateTime!
+}
+
+type TestResults {
+  totalTests: Int!
+  passedTests: Int!
+  failedTests: Int!
+  coverage: Float!
+  performanceImpact: Float!
+}
+
+type ZkFairnessProof {
+  proofId: String!
+  fairnessScore: Float!
+  demographicParity: Float!
+  equalizedOdds: Float!
+  calibration: Float!
+  individualFairness: Float!
+  proofGenerated: Boolean!
+  verificationPassed: Boolean!
+  generatedAt: DateTime!
+}
+
+# === CONTROLLER V3 CONFIGURATION ===
+
+type ControllerV3Config {
+  version: String!
+  transcendenceLevel: TranscendenceLevel!
+  autonomyTier: AutonomyTier!
+  quantumEnhancement: Boolean!
+  evolutionRate: Float!
+  safetyThreshold: Float!
+  performanceTargets: PerformanceTargets!
+  containmentLimits: ContainmentLimits!
+  lastUpdated: DateTime!
+}
+
+type PerformanceTargets {
+  composite: Float!
+  latencyMs: Float!
+  throughput: Float!
+  errorRate: Float!
+  quantumAdvantage: Float!
+}
+
+type ContainmentLimits {
+  maxAutonomyDuration: Duration!
+  maxEvolutionCycles: Int!
+  maxCapabilityExpansion: Float!
+  emergencyRollback: Boolean!
+}
+
+# === QUANTUM OPERATIONS ===
+
+type QuantumOperationResult {
+  operationId: String!
+  quantumAdvantage: Float!
+  superpositionStates: Int!
+  entanglementPairs: Int!
+  coherenceTime: Float! # microseconds
+  tunnellingSuccess: Boolean!
+  resultQuality: Float!
+  executionTime: Float! # milliseconds
+}
+
+type QuantumKnowledgeNetwork {
+  networkId: String!
+  entangledDomains: [String!]!
+  synthesisAdvantage: Float!
+  insightsGenerated: Int!
+  correlationStrength: Float!
+  createdAt: DateTime!
+}
+
+# === EXISTING v0.3.9 TYPES (EXTENDED) ===
+
+type MutationResult {
+  ok: Boolean!
+  audit: String!
+  transcendentEffects: TranscendentEffects
+}
+
+type TranscendentEffects {
+  intelligenceAmplification: Float!
+  capabilitiesEnhanced: [String!]!
+  quantumAdvantage: Float!
+  evolutionTriggered: Boolean!
+}
+
+type EvidenceResult {
+  artifacts: [String!]!
+  signature: String!
+  transcendentEvidence: TranscendentEvidenceBundle
+}
+
+type TranscendentEvidenceBundle {
+  quantumMetrics: QuantumMetrics!
+  evolutionHistory: [EvolutionEvent!]!
+  capabilityAssessment: [TranscendentCapability!]!
+  performanceValidation: PerformanceValidation!
+}
+
+type QuantumMetrics {
+  quantumAdvantage: Float!
+  superpositionOperations: Int!
+  entanglementNetworks: Int!
+  coherenceTime: Float!
+  tunnelingSuccessRate: Float!
+}
+
+type PerformanceValidation {
+  intelligenceQuotient: Float!
+  reasoningSpeed: Float! # milliseconds
+  solutionQuality: Float!
+  transcendenceLevel: TranscendenceLevel!
+  benchmarkResults: [BenchmarkResult!]!
+}
+
+type BenchmarkResult {
+  benchmark: String!
+  score: Float!
+  improvement: Float!
+  quantumEnhanced: Boolean!
+}
+
+type ExportResult {
+  url: String!
+  signature: String!
+  transcendentCompliance: TranscendentComplianceReport
+}
+
+type TranscendentComplianceReport {
+  postQuantumSecurity: Boolean!
+  zkPrivacyPreservation: Boolean!
+  autonomousEthicsValidation: Boolean!
+  transcendentAuditTrail: String!
+}
+
+# === INPUT TYPES ===
+
+input TranscendentIntelligenceConfig {
+  transcendenceLevel: TranscendenceLevel!
+  autonomyTier: AutonomyTier!
+  evolutionStrategy: EvolutionStrategy!
+  quantumEnhancement: Boolean!
+  safetyConstraints: SafetyConstraintsInput!
+}
+
+input SafetyConstraintsInput {
+  maxAutonomyDuration: Duration!
+  humanOversightRequired: Boolean!
+  reversibilityRequired: Boolean!
+  containmentLimits: ContainmentLimitsInput!
+}
+
+input ContainmentLimitsInput {
+  maxEvolutionCycles: Int!
+  maxCapabilityExpansion: Float!
+  emergencyRollback: Boolean!
+}
+
+input EvolutionProposalInput {
+  title: String!
+  description: String!
+  strategy: EvolutionStrategy!
+  targetCapabilities: [String!]!
+  expectedImprovement: Float!
+  requiresHumanApproval: Boolean! = true
+}
+
+input ControllerV3ConfigInput {
+  transcendenceLevel: TranscendenceLevel!
+  autonomyTier: AutonomyTier!
+  quantumEnhancement: Boolean!
+  evolutionRate: Float!
+  safetyThreshold: Float!
+  performanceTargets: PerformanceTargetsInput!
+  containmentLimits: ContainmentLimitsInput!
+}
+
+input PerformanceTargetsInput {
+  composite: Float!
+  latencyMs: Float!
+  throughput: Float!
+  errorRate: Float!
+  quantumAdvantage: Float!
+}
+
+input QuantumKnowledgeNetworkInput {
+  domains: [String!]!
+  entanglementStrength: Float!
+  synthesisGoals: [String!]!
+}
+
+# === QUERIES ===
+
+type Query {
+  # Existing v0.3.9 queries
+  healthCheck: String!
+
+  # New v0.4.0 transcendent queries
+  transcendentStatus(tenant: Tenant!): TranscendentStatus!
+  evolutionProposals(tenant: Tenant!, status: ApprovalStatus): [EvolutionProposal!]!
+  evolutionHistory(tenant: Tenant!, limit: Int = 50): [EvolutionEvent!]!
+  controllerV3Config(tenant: Tenant!): ControllerV3Config!
+  transcendentCapabilities(tenant: Tenant!): [TranscendentCapability!]!
+  quantumNetworks(tenant: Tenant!): [QuantumKnowledgeNetwork!]!
+  performanceMetrics(tenant: Tenant!, timeRange: Duration!): PerformanceMetrics!
+}
+
+type TranscendentStatus {
+  currentLevel: TranscendenceLevel!
+  intelligenceQuotient: Float!
+  quantumAdvantage: Float!
+  autonomyTier: AutonomyTier!
+  evolutionCycles: Int!
+  capabilitiesCount: Int!
+  lastEvolution: DateTime
+  safetyStatus: SafetyStatus!
+}
+
+type SafetyStatus {
+  containmentActive: Boolean!
+  humanOversightEnabled: Boolean!
+  emergencyRollbackReady: Boolean!
+  riskLevel: RiskLevel!
+  lastSafetyCheck: DateTime!
+}
+
+type PerformanceMetrics {
+  averageLatency: Float!
+  quantumAdvantage: Float!
+  intelligenceAmplification: Float!
+  autonomyEfficiency: Float!
+  evolutionRate: Float!
+  timestamps: [DateTime!]!
+  values: [Float!]!
+}
+
+# === MUTATIONS ===
+
+type Mutation {
+  # === EXISTING v0.3.9 OPERATIONS (ENHANCED) ===
+
+  setFeatureFlags(tenant: Tenant!, flags: JSON!): MutationResult!
+  setCanaryWeights(tenant: Tenant!, weights: JSON!): MutationResult!
+  setSloThresholds(tenant: Tenant!, thresholds: JSON!): MutationResult!
+  proposeRemediation(tenant: Tenant!, type: String!, hitl: Boolean!): MutationResult!
+  canaryPromote(tenant: Tenant!): MutationResult!
+  canaryHold(tenant: Tenant!): MutationResult!
+  evidencePack(version: String!): EvidenceResult!
+  evidenceVerify: MutationResult!
+  regulatorExport(tenant: Tenant!, profile: String!): ExportResult!
+  podrRun(tenant: Tenant!): MutationResult!
+
+  # === NEW v0.4.0 TRANSCENDENT OPERATIONS ===
+
+  # Transcendent Intelligence Management
+  enableTranscendentIntelligence(
+    tenant: Tenant!,
+    config: TranscendentIntelligenceConfig!
+  ): MutationResult!
+
+  configureControllerV3(
+    tenant: Tenant!,
+    config: ControllerV3ConfigInput!
+  ): MutationResult!
+
+  # Evolution Proposal System (Policy-Sandboxed)
+  proposeEvolution(
+    tenant: Tenant!,
+    proposal: EvolutionProposalInput!
+  ): EvolutionProposal!
+
+  approveEvolution(
+    tenant: Tenant!,
+    proposalId: String!,
+    approverNotes: String
+  ): MutationResult!
+
+  applyEvolution(
+    tenant: Tenant!,
+    proposalId: String!
+  ): MutationResult!
+
+  rollbackEvolution(
+    tenant: Tenant!,
+    proposalId: String!,
+    reason: String!
+  ): MutationResult!
+
+  # Quantum Operations
+  createQuantumKnowledgeNetwork(
+    tenant: Tenant!,
+    config: QuantumKnowledgeNetworkInput!
+  ): QuantumKnowledgeNetwork!
+
+  executeQuantumReasoning(
+    tenant: Tenant!,
+    problem: JSON!
+  ): QuantumOperationResult!
+
+  synthesizeQuantumInsights(
+    tenant: Tenant!,
+    networkId: String!,
+    query: JSON!
+  ): MutationResult!
+
+  # Autonomous Evolution Control
+  pauseAutonomousEvolution(
+    tenant: Tenant!,
+    reason: String!
+  ): MutationResult!
+
+  resumeAutonomousEvolution(
+    tenant: Tenant!
+  ): MutationResult!
+
+  # Safety and Containment
+  emergencyContainment(
+    tenant: Tenant!,
+    containmentType: ContainmentType!
+  ): MutationResult!
+
+  validateTranscendentSafety(
+    tenant: Tenant!
+  ): SafetyValidationResult!
+
+  # Performance Optimization
+  optimizeTranscendentPerformance(
+    tenant: Tenant!,
+    optimizationTargets: [String!]!
+  ): MutationResult!
+}
+
+enum ContainmentType {
+  PAUSE_EVOLUTION
+  ROLLBACK_LAST
+  EMERGENCY_STOP
+  READ_ONLY_MODE
+}
+
+type SafetyValidationResult {
+  overallSafety: Float!
+  containmentReady: Boolean!
+  humanOversightActive: Boolean!
+  emergencyRollbackTested: Boolean!
+  riskAssessment: RiskAssessment!
+  recommendations: [String!]!
+  validatedAt: DateTime!
+}
+
+# === SUBSCRIPTIONS ===
+
+type Subscription {
+  # Real-time transcendent intelligence monitoring
+  transcendentStatusUpdates(tenant: Tenant!): TranscendentStatus!
+
+  # Evolution progress tracking
+  evolutionProgress(tenant: Tenant!): EvolutionEvent!
+
+  # Quantum operation results
+  quantumOperationResults(tenant: Tenant!): QuantumOperationResult!
+
+  # Safety alerts
+  safetyAlerts(tenant: Tenant!): SafetyAlert!
+}
+
+type SafetyAlert {
+  alertId: String!
+  severity: AlertSeverity!
+  message: String!
+  recommendedAction: String!
+  affectedCapabilities: [String!]!
+  timestamp: DateTime!
+  requiresImmediate: Boolean!
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+  EMERGENCY
+}

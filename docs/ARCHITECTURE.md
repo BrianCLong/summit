@@ -16,3 +16,6 @@
 
 ## Data Flow (OSINT ingest)
 Connector → Normalize (mapping) → Upsert Entities/Edges (with confidence, timestamps, source) → Provenance ledger → Alerts/Runbooks.
+
+## Security & Compliance
+- **Policy Fuzzer**: Proactively identifies vulnerabilities and policy bypasses by generating adversarial policy-query pairs. Integrates advanced attack grammars, property-based testing, and metamorphic testing to ensure robust policy enforcement.

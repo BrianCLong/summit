@@ -1,0 +1,16 @@
+name: k6-load
+on:
+  workflow_dispatch: {}
+  pull_request:
+    paths: [ 'server/**', 'companyos/**' ]
+jobs:
+  k6:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/setup-k6-action@v1
+      - name: Run k6
+        env:
+          COS_GQL_URL: ${{ secrets.COS_GQL_URL }}
+        run: k6 run tests/load/graphql_read_p95.js
+

@@ -9,6 +9,8 @@ DATA_TYPES = ["user_data", "anonymous_data", "marketing_data"]
 LOCATIONS = ["US", "EU", "CA", "JP"]
 LICENSE_TYPES = ["license_A", "license_B", None]
 RETENTION_PERIODS = ["30d", "90d", "1y", None]
+USER_ROLES = ["admin", "analyst", "guest"]
+NETWORK_CONDITIONS = ["secure", "unsecure", "vpn"]
 
 def generate_query(args):
     """Generates a random query, potentially with attack grammars."""
@@ -18,6 +20,8 @@ def generate_query(args):
         "license": random.choice(LICENSE_TYPES),
         "retention": random.choice(RETENTION_PERIODS),
         "access_date": datetime.now().isoformat(),
+        "user_role": random.choice(USER_ROLES),
+        "network_condition": random.choice(NETWORK_CONDITIONS),
     }
 
     # Apply synonym dodges to data and license
