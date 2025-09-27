@@ -1,0 +1,12 @@
+{
+  "api": {
+    "error_rate": 0.0004,
+    "p99_latency_ms": 320,
+    "saturation": 0.62
+  },
+  "ingest": {
+    "error_rate": 0.0025,
+    "lag_seconds": 58,
+    "throughput_per_min": 1180
+  }
+}

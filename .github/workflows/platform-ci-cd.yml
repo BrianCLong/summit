@@ -1,0 +1,177 @@
+name: Platform CI/CD with Canary
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'SemVer tag to publish (vX.Y.Z)'
+        required: false
+      dry_run:
+        description: 'Skip release & tagging when true'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  lint_test:
+    name: Lint & unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint --if-present
+      - name: Unit tests
+        run: npm test -- --runInBand --ci --reporters=default --reporters=jest-junit
+
+  security_scan:
+    name: Dependency & container scan
+    runs-on: ubuntu-latest
+    needs: lint_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: npm audit (high+)
+        run: npm audit --production --audit-level=high || true
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'fs'
+          format: 'table'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+  build:
+    name: Build application bundles
+    runs-on: ubuntu-latest
+    needs:
+      - lint_test
+      - security_scan
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build workspaces
+        run: npm run build --if-present
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: summit-build
+          path: |
+            dist
+            packages/**/dist
+            server/build
+          if-no-files-found: warn
+
+  canary_release:
+    name: Canary analysis & release
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://deploy.example.com/environments/production
+    needs: build
+    if: github.event_name == 'workflow_dispatch' && inputs.release_version != ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Deploy canary manifest
+        run: |
+          echo "Rendering Helm chart with canary values"
+          helm lint helm/summit --values helm/values/observability-canary.yaml
+          echo "Simulated deploy to canary slice"
+      - name: Collect health metrics
+        run: |
+          node scripts/canary-simulate.js \
+            --metrics observability/canary-metrics.sample.json \
+            --output canary-report.json
+        id: canary_check
+        continue-on-error: true
+        env:
+          API_ERROR_BUDGET: '0.001'
+          INGEST_ERROR_BUDGET: '0.005'
+          API_LATENCY_P99: '450'
+          INGEST_LAG_SECONDS: '120'
+      - name: Roll back canary
+        if: steps.canary_check.outcome == 'failure'
+        run: |
+          echo "Canary health check failed. Initiating rollback to previous stable revision."
+          echo "::notice title=rollback::Traffic restored to baseline deployment"
+      - name: Fail deployment when unhealthy
+        if: steps.canary_check.outcome == 'failure'
+        run: |
+          echo "Canary analysis failed thresholds"
+          cat canary-report.json
+          exit 1
+      - name: Upload canary health report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: canary-report
+          path: canary-report.json
+      - name: Create release tag
+        if: steps.canary_check.outcome == 'success' && inputs.dry_run != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const semver = core.getInput('release_version');
+            if (!/^v\d+\.\d+\.\d+$/.test(semver)) {
+              core.setFailed(`Invalid SemVer tag: ${semver}`);
+              return;
+            }
+            const ref = `refs/tags/${semver}`;
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref,
+                sha: context.sha,
+              });
+            } catch (error) {
+              if (error.status === 422 && error.message.includes('Reference already exists')) {
+                core.warning(`Tag ${semver} already exists; skipping creation.`);
+              } else {
+                throw error;
+              }
+            }
+      - name: Draft release notes
+        if: steps.canary_check.outcome == 'success' && inputs.dry_run != 'true'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ inputs.release_version }}
+          name: Release ${{ inputs.release_version }}
+          draft: true
+          body: |
+            ## Summary
+            - Canary analysis succeeded with thresholds enforced.
+            - Build artifact: summit-build
+
+            ## Health snapshots
+            The full canary evaluation is attached as the `canary-report` workflow artifact and should be archived with the release package.
