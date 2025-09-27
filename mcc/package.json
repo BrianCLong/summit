@@ -1,0 +1,42 @@
+{
+  "name": "@summit/mcc",
+  "version": "0.1.0",
+  "description": "Model Card Compiler (MCC) converts YAML model cards into signed JSON artifacts with enforcement hooks.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "mcc": "dist/bin/mcc.js"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "clean": "rimraf dist",
+    "lint": "eslint --ext .ts src",
+    "prebuild": "npm run clean",
+    "sample": "node samples/sample-app.mjs",
+    "validate": "node dist/bin/mcc.js validate"
+  },
+  "keywords": [
+    "model-cards",
+    "compliance",
+    "governance",
+    "signing",
+    "typescript"
+  ],
+  "author": "Summit Engineering",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "yaml": "^2.4.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "rimraf": "^5.0.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}

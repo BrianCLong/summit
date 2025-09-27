@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "modelId": "sentiment-transformer",
+    "version": "1.2.0",
+    "owner": "Responsible AI Team",
+    "compiledAt": "2025-09-27T01:53:38.099Z",
+    "sourceHash": "d7f244ffaf980f21c8059972699237326e466458f80b9a96258e37f2fa327706"
+  },
+  "description": "Transformer-based sentiment classifier tuned for customer support triage.",
+  "metrics": [
+    {
+      "name": "accuracy",
+      "value": 0.934,
+      "unit": "proportion",
+      "description": "Accuracy on balanced validation split."
+    },
+    {
+      "name": "f1_macro",
+      "value": 0.918,
+      "description": "Macro-averaged F1 across 5 sentiment classes."
+    }
+  ],
+  "intendedUse": {
+    "summary": "Customer service routing and prioritization.",
+    "supportedPurposes": [
+      "support_triage",
+      "escalation_detection"
+    ],
+    "usageRestrictions": [
+      "Do not use for employment, loan, or legal decisions."
+    ]
+  },
+  "dataLineage": {
+    "datasets": [
+      {
+        "id": "csat_v4_train",
+        "description": "Annotated tickets from 2024 customer support backlog."
+      },
+      {
+        "id": "csat_v4_eval",
+        "description": "Held-out evaluation set curated with QA review."
+      }
+    ]
+  },
+  "risk": {
+    "flags": [
+      {
+        "id": "sarcasm_sensitivity",
+        "level": "medium",
+        "description": "Reduced accuracy on sarcastic responses.",
+        "mitigation": "Route uncertain predictions for manual review."
+      },
+      {
+        "id": "language_shift",
+        "level": "medium",
+        "description": "Degradation observed on code-switching examples.",
+        "mitigation": "Trigger re-training when drift metrics exceed threshold."
+      }
+    ],
+    "outOfScopePurposes": [
+      "harassment_detection"
+    ],
+    "notes": "Conduct quarterly fairness audits focusing on regional dialects."
+  },
+  "enforcement": {
+    "allowedPurposes": [
+      "support_triage",
+      "escalation_detection"
+    ],
+    "deniedPurposes": [
+      "harassment_detection"
+    ]
+  },
+  "signature": {
+    "algorithm": "ed25519",
+    "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA2JC+mbT0BD/TMpEy9ErWKIRkcidyIKwRyJhU0gVx5Yg=\n-----END PUBLIC KEY-----\n",
+    "value": "Ic0h90a6Dw17xTdJi5hFHYf3KbXC6Gbd0lO7TvRMznZqnnvP858KmHecsrUkwt4JBU2y1OcGC0K0wIKaRfAaAQ=="
+  }
+}
