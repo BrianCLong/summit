@@ -4,7 +4,8 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import compression from 'compression';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import { EntityResolutionService } from './services/EntityResolutionService';
+import { buildSchema, graphql } from 'graphql';
+import { EntityResolutionService, SentimentFramework } from './services/EntityResolutionService';
 import { logger } from './utils/logger';
 import { config } from './config';
 
@@ -45,6 +46,96 @@ app.get('/health', (req, res) => {
 
 // Initialize ML service
 let entityResolutionService: EntityResolutionService;
+
+const sentimentSchema = buildSchema(`
+  enum SentimentFramework {
+    AUTO
+    TORCH
+    TENSORFLOW
+  }
+
+  input SentimentOptionsInput {
+    modelName: String
+    framework: SentimentFramework
+    limit: Int
+  }
+
+  type SentimentPrediction {
+    text: String!
+    label: String!
+    score: Float!
+    modelName: String!
+    framework: SentimentFramework!
+    jobId: ID
+    sourceId: String
+    neo4jNodeId: ID
+  }
+
+  type SentimentJobResult {
+    jobId: ID!
+    processedCount: Int!
+    predictions: [SentimentPrediction!]!
+    neo4jBatchId: ID
+  }
+
+  type Query {
+    sentiment(text: String!, options: SentimentOptionsInput): SentimentPrediction!
+    sentimentBatch(jobId: ID!, options: SentimentOptionsInput): SentimentJobResult!
+  }
+`);
+
+interface SentimentOptionsArgs {
+  text?: string;
+  jobId?: string;
+  options?: {
+    modelName?: string;
+    framework?: SentimentFramework;
+    limit?: number;
+  } | null;
+}
+
+const graphQLRoot = {
+  sentiment: async ({ text, options }: SentimentOptionsArgs) => {
+    if (!entityResolutionService) {
+      throw new Error('EntityResolutionService not initialized');
+    }
+
+    const framework = options?.framework ? sanitizeFramework(options.framework) : undefined;
+    const predictions = await entityResolutionService.analyzeSentiment([text ?? ''], {
+      modelName: options?.modelName,
+      framework,
+    });
+
+    if (!predictions.length) {
+      throw new Error('No sentiment prediction returned');
+    }
+
+    return predictions[0];
+  },
+
+  sentimentBatch: async ({ jobId, options }: SentimentOptionsArgs) => {
+    if (!entityResolutionService) {
+      throw new Error('EntityResolutionService not initialized');
+    }
+
+    const framework = options?.framework ? sanitizeFramework(options.framework) : undefined;
+    return entityResolutionService.analyzeIngestJob(jobId ?? '', {
+      modelName: options?.modelName,
+      framework,
+      limit: options?.limit ?? undefined,
+    });
+  },
+};
+
+function sanitizeFramework(value: SentimentFramework): SentimentFramework {
+  switch (value) {
+    case 'TORCH':
+    case 'TENSORFLOW':
+      return value;
+    default:
+      return 'AUTO';
+  }
+}
 
 async function initializeServices() {
   try {
@@ -326,6 +417,38 @@ app.post('/api/models/:modelName/load', async (req, res) => {
   } catch (error) {
     logger.error('Error loading model:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/graphql', (req, res) => {
+  res.json({
+    status: 'ready',
+    description: 'Submit POST requests with { "query": "{ sentiment(text: \"hello\") { label score } }" } to query the ML engine.',
+  });
+});
+
+app.post('/graphql', async (req, res) => {
+  try {
+    const { query, variables, operationName } = req.body;
+
+    if (!query) {
+      return res.status(400).json({ errors: [{ message: 'GraphQL query is required' }] });
+    }
+
+    const result = await graphql({
+      schema: sentimentSchema,
+      source: query,
+      rootValue: graphQLRoot,
+      contextValue: { entityResolutionService },
+      variableValues: variables,
+      operationName,
+    });
+
+    const statusCode = result.errors ? 400 : 200;
+    res.status(statusCode).json(result);
+  } catch (error) {
+    logger.error('GraphQL execution error', { error });
+    res.status(500).json({ errors: [{ message: 'Internal server error' }] });
   }
 });
 
