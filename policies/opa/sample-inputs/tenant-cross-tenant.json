@@ -1,0 +1,25 @@
+{
+  "subject": {
+    "id": "user-2",
+    "tenant_id": "tenant-a",
+    "roles": ["analyst"],
+    "assurance": "loa3",
+    "purpose_tags": ["investigation"]
+  },
+  "resource": {
+    "id": "case-2",
+    "tenant_id": "tenant-b",
+    "type": "casefile",
+    "classification": "confidential",
+    "contains_pii": true,
+    "purpose_tags": ["investigation"],
+    "retention_days": 30
+  },
+  "request": {
+    "action": "case:read",
+    "purpose_tag": "investigation",
+    "legal_basis": "legitimate_interest",
+    "fields": ["summary"],
+    "justification": "cross tenant attempt"
+  }
+}

@@ -203,6 +203,16 @@ jobs:
         fi
         opa test policy/ policies/opa --timeout 60s --coverage | tee opa-coverage.txt
 
+    - name: Policy simulation smoke tests
+      run: |
+        set -euo pipefail
+        if [ ! -f "scripts/policy-simulate.cjs" ]; then
+          echo "❌ scripts/policy-simulate.cjs not found" >&2
+          exit 1
+        fi
+        node --version
+        node scripts/policy-simulate.cjs
+
     - name: Run Dockerfile policy checks
       run: |
         set -euo pipefail
