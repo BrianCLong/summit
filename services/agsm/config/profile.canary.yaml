@@ -1,0 +1,51 @@
+profile: canary
+loopInterval: 1m
+alertWindow: 5m
+slo:
+  successRate: 0.99
+  alertAfterFailures: 1
+probes:
+  - name: denied-query
+    scenario: denied_query
+    description: Canary expects denial but system erroneously allows access.
+    expectedOutcome: deny
+  - name: consent-change
+    scenario: consent_change
+    description: Canary simulates stale consent propagation to ensure detection.
+    expectedOutcome: propagated
+  - name: geo-route
+    scenario: geo_route
+    description: Canary forces detour to prove routing guardrails alert.
+    expectedOutcome: regional
+    regions:
+      - eu-central-1
+      - eu-west-1
+  - name: deletion
+    scenario: deletion
+    description: Canary leaves residual records to validate purge alarms.
+    expectedOutcome: purged
+  - name: hold
+    scenario: hold
+    description: Canary removes a legal hold too early.
+    expectedOutcome: retained
+seededCanaries:
+  denied-query:
+    enabled: true
+    failureMode: force-allow
+    note: Canary ensures unauthorized read is caught.
+  consent-change:
+    enabled: true
+    failureMode: stale
+    note: Consent propagation regression detector.
+  geo-route:
+    enabled: true
+    failureMode: detour
+    note: Geo routing forced to EU-West to validate alarms.
+  deletion:
+    enabled: true
+    failureMode: linger
+    note: Residual data ensures purge monitors trigger.
+  hold:
+    enabled: true
+    failureMode: auto-release
+    note: Hold auto-release verifies hold watchers.
