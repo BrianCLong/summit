@@ -83,6 +83,7 @@ import stripeRouter from './routes/stripe.js';
 import githubAppRouter from './routes/github-app.js';
 import stripeConnectRouter from './routes/stripe-connect.js';
 import { replayGuard, webhookRatelimit } from './middleware/webhook-guard.js';
+import { applyIntegrityHeaders } from './utils/http-integrity.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -311,9 +312,12 @@ export const createApp = async () => {
     res.json(hsmStatus);
   });
 
-  app.get('/api/federal/hsm/attestation', (req, res) => {
+  app.get('/api/federal/hsm/attestation', (_req, res) => {
     const attestation = hsmEnforcement.generateAttestation();
-    res.json(attestation);
+    const payload = JSON.stringify(attestation, null, 2);
+    res.setHeader('content-type', 'application/json; charset=utf-8');
+    const body = applyIntegrityHeaders(res, payload);
+    res.send(body);
   });
 
   // Force HSM probe for testing
