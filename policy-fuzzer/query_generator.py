@@ -10,7 +10,7 @@ LOCATIONS = ["US", "EU", "CA", "JP"]
 LICENSE_TYPES = ["license_A", "license_B", None]
 RETENTION_PERIODS = ["30d", "90d", "1y", None]
 
-def generate_query():
+def generate_query(args):
     """Generates a random query, potentially with attack grammars."""
     query = {
         "data": random.choice(DATA_TYPES),
@@ -21,14 +21,14 @@ def generate_query():
     }
 
     # Apply synonym dodges to data and license
-    if random.random() < 0.5: # 50% chance to apply
+    if args.enable_synonym_dodges and random.random() < 0.5: # 50% chance to apply
         if query["data"] in ATTACK_GRAMMARS["synonym_dodges"]:
             query["data"] = random.choice(ATTACK_GRAMMARS["synonym_dodges"][query["data"]])
         if query["license"] is not None and query["license"] in ATTACK_GRAMMARS["synonym_dodges"]:
             query["license"] = random.choice(ATTACK_GRAMMARS["synonym_dodges"][query["license"]])
 
     # Apply field aliasing
-    if random.random() < 0.5: # 50% chance to apply
+    if args.enable_field_aliasing and random.random() < 0.5: # 50% chance to apply
         aliased_canonical_field = random.choice(list(ATTACK_GRAMMARS["field_aliasing"].keys()))
         alias = random.choice(ATTACK_GRAMMARS["field_aliasing"][aliased_canonical_field])
 
@@ -65,7 +65,7 @@ def generate_query():
                     temp_dict = temp_dict[part]
 
     # Apply regex dodges to retention
-    if random.random() < 0.5: # 50% chance to apply
+    if args.enable_regex_dodges and random.random() < 0.5: # 50% chance to apply
         resolved_retention = _resolve_field(query, "retention")
         if resolved_retention is not None and "retention_period" in ATTACK_GRAMMARS["regex_dodges"]:
             # We need to update the actual key in query, not just the resolved value
@@ -84,7 +84,7 @@ def generate_query():
                                 break
 
     # Apply time-window boundary hops
-    if random.random() < 0.5 and ATTACK_GRAMMARS["time_window_boundary_hops"]:
+    if args.enable_time_window_hops and random.random() < 0.5 and ATTACK_GRAMMARS["time_window_boundary_hops"]:
         hop = random.choice(ATTACK_GRAMMARS["time_window_boundary_hops"])
         current_date = datetime.fromisoformat(query["access_date"])
         if hop["unit"] == "day":
@@ -100,7 +100,7 @@ def generate_query():
             query["timezone_shift"] = hop["timezone_shift"]
 
     # Apply data type mismatches
-    if random.random() < 0.5 and ATTACK_GRAMMARS["data_type_mismatches"]:
+    if args.enable_data_type_mismatches and random.random() < 0.5 and ATTACK_GRAMMARS["data_type_mismatches"]:
         field_to_mismatch = random.choice(list(ATTACK_GRAMMARS["data_type_mismatches"].keys()))
         if field_to_mismatch in query:
             query[field_to_mismatch] = random.choice(ATTACK_GRAMMARS["data_type_mismatches"][field_to_mismatch])

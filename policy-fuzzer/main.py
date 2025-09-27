@@ -8,6 +8,11 @@ def main():
     """Main function to run the policy fuzzer."""
     parser = argparse.ArgumentParser(description="Policy Red-Team Fuzzer (PRF)")
     parser.add_argument("--iterations", type=int, default=100, help="Number of fuzzing iterations")
+    parser.add_argument("--enable-synonym-dodges", action="store_true", help="Enable synonym dodge attack grammar")
+    parser.add_argument("--enable-regex-dodges", action="store_true", help="Enable regex dodge attack grammar")
+    parser.add_argument("--enable-time-window-hops", action="store_true", help="Enable time window boundary hops attack grammar")
+    parser.add_argument("--enable-field-aliasing", action="store_true", help="Enable field aliasing attack grammar")
+    parser.add_argument("--enable-data-type-mismatches", action="store_true", help="Enable data type mismatches attack grammar")
     args = parser.parse_args()
 
     print("Running policy-fuzzer...")
@@ -39,7 +44,7 @@ def main():
     # Fuzzing loop
     for _ in range(args.iterations): # Use iterations from command-line argument
         policy = generate_policy()
-        query = generate_query()
+        query = generate_query(args) # Pass args to generate_query
 
         # Determine expected compliance using the new oracle
         should_be_compliant = oracle.determine_expected_compliance(policy, query)
