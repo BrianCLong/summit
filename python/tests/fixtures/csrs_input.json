@@ -1,0 +1,77 @@
+{
+  "reference_time": "2025-01-01T00:00:00Z",
+  "clock_shift": {
+    "late_write_slip_days": 4,
+    "backfill_days": 20
+  },
+  "datasets": [
+    {
+      "name": "accounts_core",
+      "last_arrival": "2024-12-31T18:00:00Z",
+      "purposes": [
+        {
+          "purpose": "fraud_detection",
+          "retention_days": 365,
+          "allowed_late_write_days": 3,
+          "allowed_backfill_days": 30
+        },
+        {
+          "purpose": "customer_support",
+          "retention_days": 180,
+          "allowed_late_write_days": 2,
+          "allowed_backfill_days": 14
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "fraud_features_v4",
+          "type": "feature",
+          "purpose": "fraud_detection",
+          "retention_days": 400,
+          "latency_days": 2
+        },
+        {
+          "name": "customer_support_index",
+          "type": "index",
+          "purpose": "customer_support",
+          "retention_days": 150,
+          "latency_days": 1
+        }
+      ]
+    },
+    {
+      "name": "transactions_delta",
+      "last_arrival": "2024-12-30T06:00:00Z",
+      "purposes": [
+        {
+          "purpose": "fraud_detection",
+          "retention_days": 540,
+          "allowed_late_write_days": 5,
+          "allowed_backfill_days": 45
+        },
+        {
+          "purpose": "regulatory_reporting",
+          "retention_days": 730,
+          "allowed_late_write_days": 10,
+          "allowed_backfill_days": 90
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "fraud_scoring_index",
+          "type": "index",
+          "purpose": "fraud_detection",
+          "retention_days": 540,
+          "latency_days": 1
+        },
+        {
+          "name": "reg_report_features",
+          "type": "feature",
+          "purpose": "regulatory_reporting",
+          "retention_days": 800,
+          "latency_days": 3
+        }
+      ]
+    }
+  ]
+}
