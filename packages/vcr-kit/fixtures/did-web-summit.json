@@ -1,0 +1,14 @@
+{
+  "id": "did:web:consent.summit.example",
+  "assertionMethod": [
+    "did:web:consent.summit.example#keys-1"
+  ],
+  "verificationMethod": [
+    {
+      "id": "did:web:consent.summit.example#keys-1",
+      "type": "Ed25519VerificationKey2020",
+      "controller": "did:web:consent.summit.example",
+      "publicKeyMultibase": "z6MkqM5hD5iJAfYj6nKQ6RZEqV7bR7HjXkqjzGqtEtFPoqrL"
+    }
+  ]
+}
