@@ -5,6 +5,27 @@ const aiTypeDefs = gql`
   type AIRecommendation { from: ID!, to: ID!, score: Float!, reason: String }
   type AIAnomaly { entityId: ID!, anomalyScore: Float!, reason: String }
 
+  type ModelExportArtifact {
+    format: String!
+    path: String!
+    sizeBytes: Int!
+    createdAt: DateTime!
+    metadata: JSON
+  }
+
+  type ModelExportResult {
+    modelId: ID!
+    status: String!
+    artifacts: [ModelExportArtifact!]!
+  }
+
+  input ModelExportInput {
+    formats: [String!]!
+    quantization: String
+    sampleSize: Int
+    exportName: String
+  }
+
   extend type Query {
     suggestLinks(entityId: ID!, limit: Int = 5): [AIRecommendation!]!
     detectAnomalies(investigationId: ID, limit: Int = 10): [AIAnomaly!]!
@@ -18,6 +39,7 @@ const aiTypeDefs = gql`
 
   extend type Mutation {
     recordAnomaly(entityId: ID!, anomalyScore: Float!, reason: String): AIAnomaly!
+    exportOptimizedModel(modelId: ID!, input: ModelExportInput!): ModelExportResult!
   }
 `;
 
