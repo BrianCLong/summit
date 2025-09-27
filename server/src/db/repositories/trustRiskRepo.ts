@@ -61,3 +61,35 @@ export async function listRecentSignals(tenantId: string, subjectId?: string, li
   );
 }
 
+export async function listRiskSignalsPaged(
+  tenantId: string,
+  opts: { kind?: string; severity?: string; limit?: number; offset?: number } = {}
+) {
+  const clauses: string[] = ['tenant_id = $1'];
+  const params: any[] = [tenantId];
+  let idx = 2;
+  if (opts.kind) { clauses.push(`kind = $${idx++}`); params.push(opts.kind); }
+  if (opts.severity) { clauses.push(`severity = $${idx++}`); params.push(opts.severity); }
+  const where = clauses.join(' AND ');
+  const limit = Math.min(Math.max(opts.limit ?? 50, 1), 200);
+  const offset = Math.max(opts.offset ?? 0, 0);
+  const items = await pg.readMany(`SELECT * FROM risk_signals WHERE ${where} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`, params, { tenantId });
+  const cntRow = await pg.oneOrNone(`SELECT COUNT(*)::int as c FROM risk_signals WHERE ${where}`, params, { tenantId });
+  const total = cntRow?.c ?? 0;
+  return { items, total, nextOffset: offset + items.length < total ? offset + items.length : null };
+}
+
+export async function listTrustScores(
+  tenantId: string,
+  limit = 50,
+  offset = 0
+) {
+  const items = await pg.readMany(
+    `SELECT * FROM trust_scores WHERE tenant_id = $1 ORDER BY updated_at DESC LIMIT $2 OFFSET $3`,
+    [tenantId, limit, offset],
+    { tenantId },
+  );
+  const cnt = await pg.oneOrNone(`SELECT COUNT(*)::int as c FROM trust_scores WHERE tenant_id = $1`, [tenantId], { tenantId });
+  const total = cnt?.c ?? 0;
+  return { items, total, nextOffset: offset + items.length < total ? offset + items.length : null };
+}

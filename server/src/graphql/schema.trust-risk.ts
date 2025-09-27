@@ -21,6 +21,12 @@ export const trustRiskTypeDefs = gql`
     context: JSON
   }
 
+  type RiskSignalPage {
+    items: [RiskSignal!]!
+    total: Int!
+    nextOffset: Int
+  }
+
   type IncidentBundle {
     id: ID!
     type: String!
@@ -30,6 +36,12 @@ export const trustRiskTypeDefs = gql`
     createdAt: DateTime!
     evidenceId: ID
     notes: String
+  }
+
+  type TrustScorePage {
+    items: [TrustScore!]!
+    total: Int!
+    nextOffset: Int
   }
 
   input RaiseRiskSignalInput {
@@ -50,6 +62,8 @@ export const trustRiskTypeDefs = gql`
   extend type Query {
     trustScore(subjectId: ID!): TrustScore!
     riskSignals(tenantId: String!, limit: Int = 50, kind: String, severity: RiskSeverity): [RiskSignal!]!
+    riskSignalsPage(tenantId: String!, limit: Int = 50, offset: Int = 0, kind: String, severity: RiskSeverity): RiskSignalPage!
+    trustScoresPage(tenantId: String!, limit: Int = 50, offset: Int = 0): TrustScorePage!
     incidentBundle(id: ID!): IncidentBundle
   }
 
@@ -60,4 +74,3 @@ export const trustRiskTypeDefs = gql`
 `;
 
 export default trustRiskTypeDefs;
-
