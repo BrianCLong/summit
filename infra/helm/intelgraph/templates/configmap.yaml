@@ -1,8 +1,48 @@
-# Empty configmap for now. Content to be provided by user if needed.
+# prettier-ignore
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "intelgraph.fullname" . }}-config
   labels:
     {{- include "intelgraph.labels" . | nindent 4 }}
-data: {}
+data:
+  intelgraph-settings.yaml: |
+    apiVersion: v1
+    kind: RuntimeSettings
+    {{- if .Values.regionSharding.enabled }}
+    regionSharding:
+      enabled: true
+      defaultRegion: {{ .Values.regionSharding.defaultRegion | quote }}
+      routingHeader: {{ .Values.regionSharding.routing.header | quote }}
+      fallbackPolicy: {{ .Values.regionSharding.routing.fallbackPolicy | default "nearest" | quote }}
+      regions:
+        {{- range .Values.regionSharding.regions }}
+        - name: {{ .name | quote }}
+          gatewayHost: {{ .gatewayHost | quote }}
+          readReplica:
+            {{- range $k, $v := .readReplica }}
+            {{ $k }}: {{ $v | quote }}
+            {{- end }}
+          {{- with .metrics }}
+          metrics:
+            {{- range $k, $v := . }}
+            {{ $k }}: {{ $v }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+      tenants:
+        {{- range $tenant, $config := .Values.regionSharding.tenants }}
+        {{ $tenant }}:
+          region: {{ $config.region | quote }}
+          {{- with $config.fallback }}
+          fallback:
+            {{- range . }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+    {{- end }}
+    fileDrop:
+      enabled: {{ .Values.fileDrop.enabled | default false }}
+      path: {{ dig "dropboxPath" .Values.fileDrop | default (dig "bundle" "dropboxPath" (dig "airGap" .Values.federal | default (dict))) | default "/var/intelgraph/dropbox" | quote }}
+      provenancePath: {{ dig "bundle" "ledgerMountPath" (dig "airGap" .Values.federal | default (dict)) | default "/var/intelgraph/provenance" | quote }}

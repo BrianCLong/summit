@@ -221,3 +221,25 @@ variable "additional_tags" {
   type        = map(string)
   default     = {}
 }
+# Regional sharding configuration
+variable "read_replica_regions" {
+  description = "List of read replica regions for sharded deployments"
+  type = list(object({
+    name            = string
+    aws_region      = string
+    replica_cluster = string
+    endpoint        = string
+    latency_budget_ms = optional(number)
+  }))
+  default = []
+}
+
+variable "tenant_region_map" {
+  description = "Mapping of tenant identifiers to preferred regions and fallbacks"
+  type = map(object({
+    region           = string
+    fallback         = optional(list(string), [])
+    latency_budget_ms = optional(number)
+  }))
+  default = {}
+}

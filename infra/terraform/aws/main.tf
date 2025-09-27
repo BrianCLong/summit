@@ -443,4 +443,32 @@ locals {
     Terraform   = "true"
     Owner       = var.owner
   }
+
+  region_shards = {
+    primary = {
+      aws_region = var.aws_region
+      role       = "primary"
+      endpoints = {
+        postgres = try(module.rds.db_instance_endpoint, null)
+        redis    = try(module.redis.primary_endpoint_address, null)
+      }
+    }
+    replicas = [
+      for region in var.read_replica_regions : {
+        name             = region.name
+        aws_region       = region.aws_region
+        replica_cluster  = region.replica_cluster
+        endpoint         = region.endpoint
+        latency_budget_ms = lookup(region, "latency_budget_ms", 150)
+      }
+    ]
+  }
+
+  tenant_region_assignments = {
+    for tenant, cfg in var.tenant_region_map : tenant => {
+      region            = cfg.region
+      fallback          = lookup(cfg, "fallback", [])
+      latency_budget_ms = lookup(cfg, "latency_budget_ms", null)
+    }
+  }
 }

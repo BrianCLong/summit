@@ -66,6 +66,9 @@ migrate-1_0_0:
 cost-report:
 	@bash scripts/ops/cost_report.sh
 
+airgap-bundle:
+	MANIFEST=${MANIFEST:-infra/airgap/bundle.manifest.json} ./infra/airgap/export_bundle.sh
+
 ga:
 	make preflight && npm test && npx @cyclonedx/cyclonedx-npm --output-file sbom.json && ./scripts/release/verify_install.sh
 
