@@ -9,6 +9,7 @@ import time # Import the time module
 from metamorphic_tester import MetamorphicTester
 from policy_oracle import PolicyOracle
 from chekist_copilot import ChekistCopilot # Import ChekistCopilot
+from ocae import OCAE # Import OCAE
 
 EXPECTED_EVALUATION_TIME_MS = 10 # Define a threshold for expected evaluation time
 
@@ -22,14 +23,18 @@ def main():
     parser.add_argument("--enable-field-aliasing", action="store_true", help="Enable field aliasing attack grammar")
     parser.add_argument("--enable-data-type-mismatches", action="store_true", help="Enable data type mismatches attack grammar")
     parser.add_argument("--chekist-mode", action="store_true", help="Activate secret Chekist-Mode for aggressive fuzzing") # New argument
+    parser.add_argument("--ignite-apotheosis", action="store_true", help="Ignite the Omniversal Chekist Apotheosis Engine (OCAE)") # New argument
     args = parser.parse_args()
 
     print("Running policy-fuzzer...")
     failing_cases = []
 
     chekist_copilot = None
+    ocae_instance = None
     if args.chekist_mode:
         chekist_copilot = ChekistCopilot()
+    if args.ignite_apotheosis:
+        ocae_instance = OCAE()
 
     # Test with canaries
     for canary in CANARIES:
@@ -66,7 +71,9 @@ def main():
 
     # Fuzzing loop
     for _ in range(args.iterations): # Use iterations from command-line argument
-        if chekist_copilot:
+        if ocae_instance:
+            policy, query = ocae_instance.unleash_collective(args, COVERAGE, failing_cases, generate_policy, generate_query)
+        elif chekist_copilot:
             policy = chekist_copilot.get_aggressive_policy()
             query = chekist_copilot.get_aggressive_query(args)
         else:
