@@ -24,7 +24,21 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "transform": {},
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    }
+  },
+  "dependencies": {
+    "axios": "^1.7.7"
+  },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
