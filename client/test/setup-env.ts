@@ -5,4 +5,5 @@ try { require('@testing-library/jest-dom'); } catch {}
 import { TextEncoder, TextDecoder } from 'util';
 (global as any).TextEncoder ??= TextEncoder;
 (global as any).TextDecoder ??= TextDecoder as any;
+(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 

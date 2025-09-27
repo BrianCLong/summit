@@ -6,7 +6,7 @@ const config: Config = {
   setupFilesAfterEnv: ['<rootDir>/test/setup-env.ts'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   transform: {
-    '^.+\\.(t|j)sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }],
+    '^.+\\.(t|j)sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.tests.json' }],
   },
   testTimeout: 15000,
   restoreMocks: true,
