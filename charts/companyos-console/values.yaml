@@ -6,6 +6,8 @@ image:
 service:
   type: ClusterIP
   port: 3000
+  annotations: {}
+  previewAnnotations: {}
 
 ingress:
   enabled: true
@@ -18,6 +20,9 @@ ingress:
       hosts: [ console.topicality.co ]
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: companyos-console-route
 
 serviceAccount:
   create: true
@@ -37,48 +42,46 @@ autoscaling:
   maxReplicas: 6
   targetCPUUtilizationPercentage: 70
 
+probes:
+  liveness:
+    httpGet:
+      path: /healthz
+      port: 3000
+    initialDelaySeconds: 15
+    periodSeconds: 30
+    timeoutSeconds: 5
+  readiness:
+    httpGet:
+      path: /readyz
+      port: 3000
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
+
 rollout:
-  strategy:
-    canary:
-      steps:
-        - setWeight: 20
-        - pause: { duration: 60s }
-        - analysis:
-            templates:
-              - templateName: slo-analysis-template
-            args:
-              - name: service-name
-                value: companyos-console
-              - name: namespace
-                value: {{ .Release.Namespace }}
-        - setWeight: 40
-        - pause: { duration: 60s }
-        - analysis:
-            templates:
-              - templateName: slo-analysis-template
-            args:
-              - name: service-name
-                value: companyos-console
-              - name: namespace
-                value: {{ .Release.Namespace }}
-        - setWeight: 60
-        - pause: { duration: 60s }
-        - analysis:
-            templates:
-              - templateName: slo-analysis-template
-            args:
-              - name: service-name
-                value: companyos-console
-              - name: namespace
-                value: {{ .Release.Namespace }}
-        - setWeight: 80
-        - pause: { duration: 60s }
-        - analysis:
-            templates:
-              - templateName: slo-analysis-template
-            args:
-              - name: service-name
-                value: companyos-console
-              - name: namespace
-                value: {{ .Release.Namespace }}
-        - setWeight: 100
+  revisionHistoryLimit: 5
+  progressDeadlineSeconds: 600
+  minReadySeconds: 30
+  blueGreen:
+    autoPromotionEnabled: false
+    autoPromotionSeconds: 0
+    scaleDownDelaySeconds: 30
+    abortScaleDownDelaySeconds: 30
+    previewReplicaCount: 1
+    prePromotionAnalysis:
+      templates:
+        - templateName: slo-analysis-template
+      args:
+        - name: service-name
+          value: companyos-console
+        - name: namespace
+          value: "{{ .Release.Namespace }}"
+    postPromotionAnalysis:
+      templates:
+        - templateName: slo-analysis-template
+      args:
+        - name: service-name
+          value: companyos-console
+        - name: namespace
+          value: "{{ .Release.Namespace }}"

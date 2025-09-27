@@ -1,0 +1,63 @@
+intelgraph-api:
+  rollouts:
+    enabled: false
+  service:
+    annotations:
+      rollouts.argoproj.io/active-service: "true"
+    previewAnnotations:
+      rollouts.argoproj.io/service-role: preview
+  rollout:
+    blueGreen:
+      autoPromotionEnabled: false
+      autoPromotionSeconds: 0
+      scaleDownDelaySeconds: 45
+      abortScaleDownDelaySeconds: 60
+      previewReplicaCount: 1
+      prePromotionAnalysis:
+        templates:
+          - templateName: slo-analysis-template
+        args:
+          - name: service-name
+            value: intelgraph-api
+          - name: namespace
+            value: "{{ .Release.Namespace }}"
+      postPromotionAnalysis:
+        templates:
+          - templateName: slo-analysis-template
+        args:
+          - name: service-name
+            value: intelgraph-api
+          - name: namespace
+            value: "{{ .Release.Namespace }}"
+
+companyos-console:
+  rollouts:
+    enabled: false
+  service:
+    annotations:
+      rollouts.argoproj.io/active-service: "true"
+    previewAnnotations:
+      rollouts.argoproj.io/service-role: preview
+  rollout:
+    blueGreen:
+      autoPromotionEnabled: false
+      autoPromotionSeconds: 0
+      scaleDownDelaySeconds: 45
+      abortScaleDownDelaySeconds: 60
+      previewReplicaCount: 1
+      prePromotionAnalysis:
+        templates:
+          - templateName: slo-analysis-template
+        args:
+          - name: service-name
+            value: companyos-console
+          - name: namespace
+            value: "{{ .Release.Namespace }}"
+      postPromotionAnalysis:
+        templates:
+          - templateName: slo-analysis-template
+        args:
+          - name: service-name
+            value: companyos-console
+          - name: namespace
+            value: "{{ .Release.Namespace }}"

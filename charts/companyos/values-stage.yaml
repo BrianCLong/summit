@@ -1,0 +1,48 @@
+global:
+  domain:
+    api: api.stage.topicality.co
+    console: console.stage.topicality.co
+
+intelgraph-api:
+  image:
+    tag: stage-latest
+  ingress:
+    hosts:
+      - host: api.stage.topicality.co
+        paths: [ { path: /, pathType: Prefix } ]
+    tls:
+      - secretName: intelgraph-api-stage-tls
+        hosts: [ api.stage.topicality.co ]
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: api.stage.topicality.co
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+      nginx.ingress.kubernetes.io/service-upstream: "true"
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/session-cookie-name: intelgraph-api-route
+  rollout:
+    blueGreen:
+      autoPromotionEnabled: false
+      autoPromotionSeconds: 120
+      previewReplicaCount: 2
+
+companyos-console:
+  image:
+    tag: stage-latest
+  ingress:
+    hosts:
+      - host: console.stage.topicality.co
+        paths: [ { path: /, pathType: Prefix } ]
+    tls:
+      - secretName: companyos-console-stage-tls
+        hosts: [ console.stage.topicality.co ]
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: console.stage.topicality.co
+      cert-manager.io/cluster-issuer: letsencrypt-staging
+      nginx.ingress.kubernetes.io/service-upstream: "true"
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/session-cookie-name: companyos-console-route
+  rollout:
+    blueGreen:
+      autoPromotionEnabled: false
+      autoPromotionSeconds: 120
+      previewReplicaCount: 2
