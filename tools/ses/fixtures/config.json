@@ -1,0 +1,6 @@
+{
+  "schemaPath": "./schema.json",
+  "telemetryPath": "./telemetry.json",
+  "changesPath": "./changes.json",
+  "fixturePath": "./data.json"
+}

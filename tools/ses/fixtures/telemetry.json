@@ -1,0 +1,23 @@
+{
+  "windowDays": 14,
+  "usages": [
+    {
+      "consumer": "billing-service",
+      "table": "customers",
+      "columns": ["id", "full_name", "email"],
+      "frequency": 120
+    },
+    {
+      "consumer": "marketing-dashboard",
+      "table": "customers",
+      "columns": ["email", "signup_date"],
+      "frequency": 40
+    },
+    {
+      "consumer": "analytics-pipeline",
+      "table": "orders",
+      "columns": ["total_amount", "customer_id"],
+      "frequency": 200
+    }
+  ]
+}

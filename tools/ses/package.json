@@ -1,0 +1,28 @@
+{
+  "name": "@summit/ses",
+  "version": "0.1.0",
+  "description": "Schema Evolution Simulator (SES) for what-if planning and migrations",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "ses": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "dev": "vitest",
+    "start": "node dist/index.js"
+  },
+  "keywords": ["schema", "migration", "simulator", "what-if"],
+  "author": "Summit Platform",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "typescript": "^5.4.3",
+    "vitest": "^1.5.3"
+  }
+}
