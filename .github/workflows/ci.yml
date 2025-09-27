@@ -129,6 +129,15 @@ jobs:
       - name: Build
         run: if [ -f yarn.lock ]; then yarn build; else npm run build; fi
 
+      - name: Run Policy Fuzzer
+        run: python policy-fuzzer/main.py --iterations 500 --enable-synonym-dodges --enable-regex-dodges --enable-time-window-hops --enable-field-aliasing --enable-data-type-mismatches
+
+      - name: Upload Fuzzer Reports
+        uses: actions/upload-artifact@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+        with:
+          name: policy-fuzzer-reports
+          path: policy-fuzzer/reports/
+
       - name: Upload coverage
-        uses: actions/upload-artifact@a8a3f3054ee345891c80fa8aa84a2b65b824e06a # v4.3.3
+        uses: actions/upload-artifact@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.3.3
         with: { name: coverage, path: coverage }
