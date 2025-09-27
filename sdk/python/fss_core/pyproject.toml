@@ -1,0 +1,31 @@
+[project]
+name = "fss-core"
+version = "0.1.0"
+description = "Freshness & Staleness Scorer core library"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+dependencies = [
+  "pydantic>=2.7",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "numpy",
+  "pandas",
+]
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+"fss_core" = [
+  "py.typed",
+  "testdata/*.json",
+  "notebooks/*.ipynb",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
