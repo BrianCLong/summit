@@ -1,0 +1,3 @@
+- Model Output Contract Checker (MOCC) library source.
+- Keep code functional and framework-agnostic.
+- Run `npm test` in this package after changes.
