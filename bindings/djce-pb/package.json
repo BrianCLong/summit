@@ -1,0 +1,34 @@
+{
+  "name": "@summit/djce-pb",
+  "version": "0.1.0",
+  "description": "TypeScript bindings for the djce-pb Rust library",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "napi build --release --features node",
+    "build:debug": "napi build --features node",
+    "lint": "eslint \"src/**/*.ts\"",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist",
+    "native"
+  ],
+  "keywords": [
+    "privacy",
+    "hyperloglog",
+    "minhash",
+    "bloom-filter",
+    "risk-analysis"
+  ],
+  "author": "Summit AI",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "@napi-rs/cli": "^2.16.3"
+  }
+}
