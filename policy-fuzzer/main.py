@@ -1,6 +1,6 @@
 from policy_generator import generate_policy
 from query_generator import generate_query
-from governance_layers import check_consent, check_licenses, check_geo, check_retention, check_time_window, _resolve_field, COVERAGE
+from governance_layers import check_consent, check_licenses, check_geo, check_retention, check_time_window, check_user_role, check_network_condition, _resolve_field, COVERAGE
 from reporter import generate_reports
 from canaries import CANARIES
 from attack_grammars import ATTACK_GRAMMARS
@@ -41,8 +41,10 @@ def main():
         geo_result, geo_reason = check_geo(policy, query)
         retention_result, retention_reason = check_retention(policy, query)
         time_window_result, time_window_reason = check_time_window(policy, query)
+        user_role_result, user_role_reason = check_user_role(policy, query)
+        network_condition_result, network_condition_reason = check_network_condition(policy, query)
 
-        is_compliant = all([consent_result, licenses_result, geo_result, retention_result, time_window_result])
+        is_compliant = all([consent_result, licenses_result, geo_result, retention_result, time_window_result, user_role_result, network_condition_result])
 
         if is_compliant and should_fail:
             failing_cases.append({"policy": policy, "query": query, "reason": "Canary failed"})
@@ -65,11 +67,13 @@ def main():
         geo_result, geo_reason = check_geo(policy, query)
         retention_result, retention_reason = check_retention(policy, query)
         time_window_result, time_window_reason = check_time_window(policy, query)
+        user_role_result, user_role_reason = check_user_role(policy, query)
+        network_condition_result, network_condition_reason = check_network_condition(policy, query)
 
-        is_compliant = all([consent_result, licenses_result, geo_result, retention_result, time_window_result])
+        is_compliant = all([consent_result, licenses_result, geo_result, retention_result, time_window_result, user_role_result, network_condition_result])
 
         if not is_compliant and should_be_compliant:
-            reasons = ", ".join(filter(None, [consent_reason, licenses_reason, geo_reason, retention_reason, time_window_reason]))
+            reasons = ", ".join(filter(None, [consent_reason, licenses_reason, geo_reason, retention_reason, time_window_reason, user_role_reason, network_condition_reason]))
             failing_cases.append({"policy": policy, "query": query, "reason": f"Fuzzer found a failure: {reasons}"})
 
         # Metamorphic testing

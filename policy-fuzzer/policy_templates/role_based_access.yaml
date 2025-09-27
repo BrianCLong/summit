@@ -1,0 +1,6 @@
+rules:
+  - effect: deny
+    condition:
+      AND:
+        - user_role: guest
+        - data: user_data
