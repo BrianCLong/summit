@@ -2,6 +2,8 @@ import { Pool } from 'pg';
 import { Driver } from 'neo4j-driver';
 import { RedisClientType } from 'redis';
 import { EventEmitter } from 'events';
+import { spawn } from 'child_process';
+import path from 'path';
 import { logger } from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -59,7 +61,7 @@ export interface WorkflowStep {
 
 export interface StepConfig {
   // Action step configs
-  actionType?: string; // 'email', 'slack', 'jira', 'api', 'database', 'ml'
+  actionType?: string; // 'email', 'slack', 'jira', 'api', 'database', 'ml', 'graph-migration'
   actionConfig?: Record<string, any>;
 
   // Condition step configs
@@ -104,6 +106,43 @@ export interface WorkflowSettings {
     onComplete?: string[];
     onError?: string[];
   };
+}
+
+export interface GraphConnectionOptions {
+  type: 'neo4j' | 'janusgraph';
+  uri?: string;
+  username?: string;
+  password?: string;
+  database?: string;
+  graphsonPath?: string;
+  options?: Record<string, unknown>;
+}
+
+export interface GraphMigrationOptionsPayload {
+  labels?: string[];
+  relationshipTypes?: string[];
+  outputPrefix?: string;
+  outputDir?: string;
+  inputDir?: string;
+  planFile?: string;
+  idProperty?: string;
+  dryRun?: boolean;
+  concurrency?: number;
+  context?: Record<string, unknown>;
+  extra?: Record<string, unknown>;
+  nodesFile?: string;
+  relationshipsFile?: string;
+  database?: string;
+}
+
+export interface GraphMigrationActionConfig {
+  command?: 'plan' | 'export' | 'import' | 'translate-janusgraph';
+  source?: GraphConnectionOptions;
+  target?: GraphConnectionOptions;
+  options?: GraphMigrationOptionsPayload;
+  pythonPath?: string;
+  workingDirectory?: string;
+  extraArgs?: string[];
 }
 
 export interface WorkflowExecution {
@@ -421,6 +460,8 @@ export class WorkflowService extends EventEmitter {
         return this.executeDatabaseAction(input, actionConfig);
       case 'ml':
         return this.executeMlAction(input, actionConfig);
+      case 'graph-migration':
+        return this.executeGraphMigrationAction(input, actionConfig as GraphMigrationActionConfig);
       default:
         throw new Error(`Unsupported action type: ${actionType}`);
     }
@@ -757,6 +798,151 @@ export class WorkflowService extends EventEmitter {
     // ML service call logic would go here
     logger.info('Executing ML action', { input, config });
     return { prediction: 0.85, confidence: 'high' };
+  }
+
+  private async executeGraphMigrationAction(
+    input: any,
+    config: GraphMigrationActionConfig | undefined,
+  ): Promise<any> {
+    const resolvedConfig = config ?? {};
+
+    if (!resolvedConfig.source || !resolvedConfig.target) {
+      throw new Error('Graph migration action requires both source and target connections');
+    }
+
+    const pythonExecutable =
+      resolvedConfig.pythonPath || process.env.GRAPH_MIGRATION_PYTHON || 'python3';
+    const command = resolvedConfig.command ?? 'plan';
+    const args: string[] = ['-m', 'tools.graph_migration.cli', command];
+
+    const appendArg = (flag: string, value?: string | number | boolean | null) => {
+      if (value === undefined || value === null || value === '') {
+        return;
+      }
+      args.push(flag, String(value));
+    };
+
+    const appendList = (flag: string, values?: string[]) => {
+      if (!values) {
+        return;
+      }
+      values.filter(Boolean).forEach((entry) => args.push(flag, entry));
+    };
+
+    const appendConnection = (prefix: string, connection: GraphConnectionOptions) => {
+      appendArg(`--${prefix}-type`, connection.type);
+      appendArg(`--${prefix}-uri`, connection.uri);
+      appendArg(`--${prefix}-username`, connection.username);
+      appendArg(`--${prefix}-password`, connection.password);
+      appendArg(`--${prefix}-database`, connection.database);
+      appendArg(`--${prefix}-graphson`, connection.graphsonPath);
+      if (connection.options && Object.keys(connection.options).length > 0) {
+        appendArg(`--${prefix}-options`, JSON.stringify(connection.options));
+      }
+    };
+
+    appendConnection('source', resolvedConfig.source);
+    appendConnection('target', resolvedConfig.target);
+
+    const options = resolvedConfig.options ?? {};
+
+    appendList('--label', options.labels);
+    appendList('--relationship-type', options.relationshipTypes);
+    appendArg('--output-prefix', options.outputPrefix);
+    appendArg('--output-dir', options.outputDir);
+    appendArg('--input-dir', options.inputDir);
+    appendArg('--plan-file', options.planFile);
+    appendArg('--id-property', options.idProperty);
+    appendArg('--nodes-file', options.nodesFile);
+    appendArg('--relationships-file', options.relationshipsFile);
+    appendArg('--database', options.database);
+    if (options.dryRun) {
+      args.push('--dry-run');
+    }
+    if (typeof options.concurrency === 'number') {
+      appendArg('--concurrency', options.concurrency);
+    }
+
+    const workflowInput =
+      input && typeof input === 'object' && !Array.isArray(input) ? (input as Record<string, unknown>) : {};
+    const contextPayload = {
+      ...(options.context ?? {}),
+      ...(Object.keys(workflowInput).length > 0 ? { workflowInput } : {}),
+    };
+    if (Object.keys(contextPayload).length > 0) {
+      appendArg('--context', JSON.stringify(contextPayload));
+    }
+
+    if (options.extra && Object.keys(options.extra).length > 0) {
+      appendArg('--extra', JSON.stringify(options.extra));
+    }
+
+    if (resolvedConfig.extraArgs) {
+      args.push(...resolvedConfig.extraArgs);
+    }
+
+    const defaultCwd = path.resolve(__dirname, '../../../../');
+    const cwd = resolvedConfig.workingDirectory ?? defaultCwd;
+
+    logger.info('Launching graph migration CLI', {
+      command,
+      pythonExecutable,
+      cwd,
+    });
+
+    return new Promise((resolve, reject) => {
+      const child = spawn(pythonExecutable, args, {
+        cwd,
+        env: { ...process.env },
+      });
+
+      let stdout = '';
+      let stderr = '';
+
+      child.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
+
+      child.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
+
+      child.on('error', (error) => {
+        logger.error('Graph migration CLI failed to start', error);
+        reject(error);
+      });
+
+      child.on('close', (code) => {
+        if (code !== 0) {
+          const error = new Error(`Graph migration CLI exited with code ${code}`);
+          (error as any).stdout = stdout;
+          (error as any).stderr = stderr;
+          logger.error('Graph migration CLI finished with an error', { stderr });
+          reject(error);
+          return;
+        }
+
+        let parsed: any = null;
+        try {
+          parsed = stdout ? JSON.parse(stdout) : null;
+        } catch (_err) {
+          parsed = null;
+        }
+
+        logger.info('Graph migration CLI completed', {
+          command,
+          pythonExecutable,
+        });
+
+        resolve({
+          stdout,
+          stderr,
+          parsedOutput: parsed,
+          command,
+          pythonExecutable,
+        });
+      });
+    });
   }
 
   // Database operations

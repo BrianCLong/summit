@@ -1,0 +1,128 @@
+name: graph-migration-template
+version: "1.0.0"
+description: "Template workflow for migrating graph data between Neo4j environments"
+
+parameters:
+  source_uri:
+    type: string
+    required: true
+    description: "Bolt URI for the source Neo4j cluster"
+  source_database:
+    type: string
+    default: "neo4j"
+    description: "Database name on the source instance"
+  target_uri:
+    type: string
+    required: true
+    description: "Bolt URI for the target Neo4j cluster"
+  target_database:
+    type: string
+    default: "neo4j"
+    description: "Database name on the target instance"
+  labels:
+    type: array
+    default: []
+    description: "Optional labels to scope the migration"
+  relationship_types:
+    type: array
+    default: []
+    description: "Optional relationship types to scope the migration"
+  id_property:
+    type: string
+    default: "migration_id"
+    description: "Property used as the stable identifier during migration"
+
+variables:
+  migration_prefix: "graph_sync_${timestamp()}"
+
+steps:
+  - id: plan-graph-migration
+    name: Plan Graph Migration
+    type: action
+    config:
+      actionType: graph-migration
+      actionConfig:
+        command: plan
+        source:
+          type: neo4j
+          uri: "${parameters.source_uri}"
+          database: "${parameters.source_database}"
+        target:
+          type: neo4j
+          uri: "${parameters.target_uri}"
+          database: "${parameters.target_database}"
+        options:
+          labels: "${parameters.labels}"
+          relationshipTypes: "${parameters.relationship_types}"
+          outputPrefix: "${variables.migration_prefix}"
+          idProperty: "${parameters.id_property}"
+    outputs:
+      export_plan: "$.parsedOutput"
+
+  - id: approve-migration
+    name: Approve Migration Window
+    type: human
+    depends_on: [plan-graph-migration]
+    config:
+      assignees: ["graph-admins"]
+      title: "Approve graph migration to ${parameters.target_uri}"
+      description: "Review the generated plan and confirm the maintenance window."
+
+  - id: execute-export
+    name: Export Graph Data
+    type: action
+    depends_on: [approve-migration]
+    config:
+      actionType: graph-migration
+      actionConfig:
+        command: export
+        source:
+          type: neo4j
+          uri: "${parameters.source_uri}"
+          database: "${parameters.source_database}"
+        target:
+          type: neo4j
+          uri: "${parameters.target_uri}"
+          database: "${parameters.target_database}"
+        options:
+          labels: "${parameters.labels}"
+          relationshipTypes: "${parameters.relationship_types}"
+          outputPrefix: "${variables.migration_prefix}"
+          idProperty: "${parameters.id_property}"
+
+  - id: execute-import
+    name: Import Graph Data
+    type: action
+    depends_on: [execute-export]
+    config:
+      actionType: graph-migration
+      actionConfig:
+        command: import
+        source:
+          type: neo4j
+          uri: "${parameters.source_uri}"
+          database: "${parameters.source_database}"
+        target:
+          type: neo4j
+          uri: "${parameters.target_uri}"
+          database: "${parameters.target_database}"
+        options:
+          labels: "${parameters.labels}"
+          relationshipTypes: "${parameters.relationship_types}"
+          outputPrefix: "${variables.migration_prefix}"
+          idProperty: "${parameters.id_property}"
+          database: "${parameters.target_database}"
+
+  - id: verify-import
+    name: Verify Imported Graph
+    type: action
+    depends_on: [execute-import]
+    config:
+      actionType: api
+      actionConfig:
+        url: "https://observability.internal/api/graph-health"
+        method: GET
+        params:
+          target: "${parameters.target_uri}"
+    outputs:
+      health_report: "$.success"
