@@ -1,4 +1,4 @@
-from policy_generator import generate_policy, SAMPLE_POLICY_DEFINITION
+from policy_generator import generate_policy
 from query_generator import generate_query
 from governance_layers import check_consent, check_licenses, check_geo, check_retention, check_time_window, _resolve_field, COVERAGE
 from reporter import generate_reports
@@ -21,14 +21,16 @@ def main():
 
     print("Running policy-fuzzer...")
     failing_cases = []
-    oracle = PolicyOracle(SAMPLE_POLICY_DEFINITION)
-    metamorphic_tester = MetamorphicTester(oracle)
 
     # Test with canaries
     for canary in CANARIES:
         policy = canary["policy"]
         query = canary["query"]
         should_fail = canary["should_fail"]
+
+        # Instantiate oracle for each canary to ensure it uses the specific policy definition
+        oracle = PolicyOracle(policy) # Pass the policy directly to the oracle
+        metamorphic_tester = MetamorphicTester(oracle)
 
         # Determine expected compliance using the new oracle
         should_be_compliant = oracle.determine_expected_compliance(policy, query)
@@ -49,6 +51,10 @@ def main():
     for _ in range(args.iterations): # Use iterations from command-line argument
         policy = generate_policy()
         query = generate_query(args) # Pass args to generate_query
+
+        # Instantiate oracle for each fuzzed policy
+        oracle = PolicyOracle(policy) # Pass the generated policy to the oracle
+        metamorphic_tester = MetamorphicTester(oracle)
 
         # Determine expected compliance using the new oracle
         should_be_compliant = oracle.determine_expected_compliance(policy, query)
