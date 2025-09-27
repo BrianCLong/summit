@@ -12,6 +12,35 @@ metadata:
 spec:
   entrypoint: retraining-pipeline
   serviceAccountName: mlops-pipeline
+  onExit: resource-usage-report
+
+  arguments:
+    parameters:
+      - name: training-parallelism
+        value: '4'
+      - name: prometheus-url
+        value: 'http://prometheus.monitoring.svc.cluster.local:9090'
+      - name: resource-metrics-range
+        value: '30m'
+
+  metrics:
+    prometheus:
+      - name: workflow_cpu_seconds_total
+        help: "Total CPU core-seconds consumed by the workflow"
+        when: "{{workflow.status}} == Succeeded || {{workflow.status}} == Failed"
+        gauge:
+          value: "{{workflow.resourcesDuration.cpu | default 0}}"
+      - name: workflow_memory_mebibytes
+        help: "Aggregate memory usage reported in mebibyte-seconds"
+        when: "{{workflow.status}} == Succeeded || {{workflow.status}} == Failed"
+        gauge:
+          value: "{{=sprig.divf (sprig.toFloat64 (workflow.resourcesDuration.memory | default 0)) 1048576}}"
+
+  podDisruptionBudget:
+    minAvailable: 1
+    selector:
+      matchLabels:
+        workflows.argoproj.io/workflow: "{{workflow.name}}"
 
   # Volume claims for model artifacts
   volumeClaimTemplates:
@@ -111,6 +140,13 @@ spec:
         volumeMounts:
           - name: model-artifacts
             mountPath: /artifacts
+        resources:
+          requests:
+            memory: '2Gi'
+            cpu: '1'
+          limits:
+            memory: '4Gi'
+            cpu: '2'
       outputs:
         parameters:
           - name: data-quality-score
@@ -155,7 +191,7 @@ spec:
 
     # Parallel model training (ensemble approach)
     - name: parallel-model-training
-      parallelism: 4
+      parallelism: "{{workflow.parameters.training-parallelism}}"
       container:
         image: intelgraph/model-trainer:v2.0.0
         command: [python]
@@ -256,6 +292,9 @@ spec:
           requests:
             memory: '2Gi'
             cpu: '1'
+          limits:
+            memory: '4Gi'
+            cpu: '2'
       outputs:
         parameters:
           - name: challenger-wins
@@ -290,6 +329,9 @@ spec:
           requests:
             memory: '1Gi'
             cpu: '0.5'
+          limits:
+            memory: '2Gi'
+            cpu: '1'
       outputs:
         parameters:
           - name: deployment-id
@@ -320,6 +362,111 @@ spec:
           requests:
             memory: '512Mi'
             cpu: '0.25'
+          limits:
+            memory: '1Gi'
+            cpu: '0.5'
+
+    # Post-workflow resource usage aggregation
+    - name: resource-usage-report
+      inputs:
+        parameters:
+          - name: prometheus-url
+            value: '{{workflow.parameters.prometheus-url}}'
+          - name: metrics-range
+            value: '{{workflow.parameters.resource-metrics-range}}'
+      container:
+        image: python:3.11-slim
+        command: [python, -c]
+        args:
+          - |
+            import datetime
+            import json
+            import os
+            import sys
+            import urllib.parse
+            import urllib.request
+
+            prom_url = os.environ.get('PROM_URL', '').rstrip('/')
+            workflow = os.environ.get('WORKFLOW_NAME')
+            namespace = os.environ.get('WORKFLOW_NAMESPACE')
+            window = os.environ.get('METRICS_RANGE', '30m')
+
+            if not prom_url:
+                raise SystemExit('PROM_URL environment variable must be set')
+
+            def query(name, prom_query):
+                encoded = urllib.parse.urlencode({'query': prom_query})
+                url = f"{prom_url}/api/v1/query?{encoded}"
+                with urllib.request.urlopen(url, timeout=30) as response:
+                    payload = json.load(response)
+                if payload.get('status') != 'success':
+                    raise RuntimeError(f"Prometheus query for {name} failed: {payload}")
+                return payload['data']['result']
+
+            pod_selector = f"{workflow}-.*"
+            cpu_query = (
+                "sum(rate(container_cpu_usage_seconds_total{{namespace=\"{ns}\",pod=~\"{pod}\"}}[{window}]))"
+            ).format(ns=namespace, pod=pod_selector, window=window)
+            avg_mem_query = (
+                "avg_over_time(container_memory_usage_bytes{{namespace=\"{ns}\",pod=~\"{pod}\"}}[{window}])"
+            ).format(ns=namespace, pod=pod_selector, window=window)
+            max_mem_query = (
+                "max_over_time(container_memory_usage_bytes{{namespace=\"{ns}\",pod=~\"{pod}\"}}[{window}])"
+            ).format(ns=namespace, pod=pod_selector, window=window)
+
+            results = {
+                'cpuSecondsRate': query('cpuSecondsRate', cpu_query),
+                'avgMemoryBytes': query('avgMemoryBytes', avg_mem_query),
+                'maxMemoryBytes': query('maxMemoryBytes', max_mem_query),
+            }
+
+            def extract_scalar(series):
+                if not series:
+                    return 0.0
+                value = series[0].get('value') if isinstance(series[0], dict) else None
+                if not value:
+                    return 0.0
+                return float(value[1])
+
+            summary = {
+                'cpuCores': extract_scalar(results['cpuSecondsRate']),
+                'avgMemoryMiB': extract_scalar(results['avgMemoryBytes']) / 1048576,
+                'maxMemoryMiB': extract_scalar(results['maxMemoryBytes']) / 1048576,
+            }
+
+            report = {
+                'workflow': workflow,
+                'namespace': namespace,
+                'range': window,
+                'generatedAt': datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat(),
+                'summary': summary,
+                'rawResults': results,
+            }
+
+            with open('/tmp/resource-report.json', 'w', encoding='utf-8') as handle:
+                json.dump(report, handle, indent=2)
+
+            json.dump(report, sys.stdout, indent=2)
+        env:
+          - name: PROM_URL
+            value: '{{inputs.parameters.prometheus-url}}'
+          - name: WORKFLOW_NAME
+            value: '{{workflow.name}}'
+          - name: WORKFLOW_NAMESPACE
+            value: '{{workflow.namespace}}'
+          - name: METRICS_RANGE
+            value: '{{inputs.parameters.metrics-range}}'
+        resources:
+          requests:
+            memory: '128Mi'
+            cpu: '50m'
+          limits:
+            memory: '256Mi'
+            cpu: '100m'
+      outputs:
+        artifacts:
+          - name: workflow-resource-report
+            path: /tmp/resource-report.json
 
 ---
 # Scheduled workflow for regular retraining
@@ -341,6 +488,12 @@ spec:
           value: 'threat-detection-v1.0.0'
         - name: gpu-id
           value: '0'
+        - name: training-parallelism
+          value: '8'
+        - name: prometheus-url
+          value: 'http://prometheus.monitoring.svc.cluster.local:9090'
+        - name: resource-metrics-range
+          value: '1h'
 
 ---
 # Feature store configuration
