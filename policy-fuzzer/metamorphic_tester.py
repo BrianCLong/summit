@@ -126,6 +126,20 @@ class MetamorphicTester:
             'check': lambda original_compliant, transformed_compliant: not transformed_compliant if original_compliant else True # Changing network condition might impact compliance
         })
 
+        # Relation 17: Data Classification - Change
+        relations.append({
+            'name': 'data_classification_change',
+            'transform': lambda p, q: self._data_classification_change(p, q),
+            'check': lambda original_compliant, transformed_compliant: not transformed_compliant if original_compliant else True # Changing data classification should impact compliance
+        })
+
+        # Relation 18: Purpose - Change
+        relations.append({
+            'name': 'purpose_change',
+            'transform': lambda p, q: self._purpose_change(p, q),
+            'check': lambda original_compliant, transformed_compliant: not transformed_compliant if original_compliant else True # Changing purpose should impact compliance
+        })
+
         return relations
 
     def _shift_time_within_window(self, policy, query):
@@ -258,6 +272,26 @@ class MetamorphicTester:
                 transformed_query["network_condition"] = "unsecure"
             elif current_condition == "unsecure":
                 transformed_query["network_condition"] = "vpn"
+        return transformed_query
+
+    def _data_classification_change(self, policy, query):
+        transformed_query = deepcopy(query)
+        if "data" in transformed_query:
+            current_data = transformed_query["data"]
+            if current_data == "user_data":
+                transformed_query["data"] = "sensitive_data"
+            elif current_data == "sensitive_data":
+                transformed_query["data"] = "public_data"
+        return transformed_query
+
+    def _purpose_change(self, policy, query):
+        transformed_query = deepcopy(query)
+        if "purpose" in transformed_query:
+            current_purpose = transformed_query["purpose"]
+            if current_purpose == "marketing":
+                transformed_query["purpose"] = "investigation"
+            elif current_purpose == "investigation":
+                transformed_query["purpose"] = "analytics"
         return transformed_query
 
     def _synonym_data_type(self, policy, query):
