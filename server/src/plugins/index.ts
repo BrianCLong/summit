@@ -1,10 +1,13 @@
+import path from 'node:path';
 import { Plugin, PluginContext } from './sdk';
+import { PluginLoader } from './plugin-loader';
 import { vaultReadKvV2 } from '../vault/helpers';
 import { RedisCache } from '../cache/redis.js';
 import { pluginInvocations, pluginErrors } from '../metrics/pluginMetrics.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
 const registry = new Map<string, Plugin<any, any>>();
+let customPluginLoader: PluginLoader | undefined;
 
 export function register(name: string, plugin: Plugin) {
   registry.set(name, plugin);
@@ -18,6 +21,28 @@ export function registerBuiltins() {
   try { const { shodanIpLookup } = require('./shodan'); register(shodanIpLookup.name, shodanIpLookup); } catch {}
   try { const { vtHashLookup } = require('./virustotal'); register(vtHashLookup.name, vtHashLookup); } catch {}
   try { const { csQuery } = require('./crowdstrike'); register(csQuery.name, csQuery); } catch {}
+}
+
+export async function registerCustomPlugins(options?: { directory?: string; timeoutMs?: number }) {
+  const directory = options?.directory ?? path.resolve(process.cwd(), 'server/plugins');
+  const loader = new PluginLoader({
+    rootDir: directory,
+    defaultTimeoutMs: options?.timeoutMs,
+    baseAllowedModules: [],
+  });
+  const loaded = await loader.loadAll();
+  for (const plugin of loaded) {
+    register(plugin.manifest.name, {
+      name: plugin.manifest.name,
+      run: async (inputs, ctx) => loader.execute(plugin.manifest.name, inputs, ctx),
+    });
+  }
+  customPluginLoader = loader;
+  return loader.listManifests();
+}
+
+export function getCustomPluginLoader() {
+  return customPluginLoader;
 }
 
 export async function runPlugin(name: string, inputs: any, opts?: { tenant?: string }) {
