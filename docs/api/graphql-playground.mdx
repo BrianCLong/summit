@@ -1,0 +1,130 @@
+title: GraphQL API Playground
+description: Interactively explore the IntelGraph GraphQL API with JWT-authenticated requests and curated examples.
+sidebar_label: GraphQL Playground
+---
+
+import GraphQLPlayground from '@site/src/components/GraphQLPlayground';
+import Admonition from '@theme/Admonition';
+
+The GraphQL API underpins ingestion, analysis, and automation flows across IntelGraph. This playground embeds a secure
+[GraphiQL](https://github.com/graphql/graphiql) console so you can try live queries with the same headers your automations use.
+
+<Admonition type="tip" title="Bring your own token">
+  Generate a short-lived JWT with the `analyst` or `orchestrator` roles before issuing requests. The
+  {@link developer/getting-started#jwt-configuration developer/getting-started guide} walks through setting up the
+  authentication service locally, and production tenants can use the `/auth/token` OAuth client credentials flow.
+</Admonition>
+
+<GraphQLPlayground />
+
+## Example workflows
+
+The buttons above the playground load the following reference queries and mutations so you can tailor them to your data sets.
+Each snippet assumes a JWT scoped to a tenant and pipeline with permission to mutate graph content.
+
+### Ingest a new entity and relationship
+
+```graphql title="Upsert a lead and link it to a case"
+mutation UpsertIntelCase($entity: EntityInput!, $relationship: RelationshipInput!) {
+  upsertEntity(input: $entity) {
+    id
+    type
+    confidence
+    props
+  }
+  upsertRelationship(input: $relationship) {
+    kind
+    src
+    dst
+    confidence
+  }
+}
+```
+
+```json title="Variables"
+{
+  "entity": {
+    "id": "lead-4739",
+    "type": "Lead",
+    "confidence": 0.88,
+    "props": {
+      "summary": "Wiki-leak mention correlates with suspicious wallet activity",
+      "source": "osint://intel-drop-2024-09-13"
+    }
+  },
+  "relationship": {
+    "src": "case-41",
+    "dst": "lead-4739",
+    "kind": "MENTIONS",
+    "confidence": 0.72,
+    "props": {
+      "ingestedAt": "2024-09-13T14:43:00Z",
+      "ingestPipeline": "summit-agent-osint"
+    }
+  }
+}
+```
+
+### Explore the surrounding graph
+
+```graphql title="Request a neighborhood"
+query AnalystNeighborhood($id: ID!, $depth: Int = 2) {
+  neighbors(id: $id, depth: $depth) {
+    nodes {
+      id
+      type
+      confidence
+    }
+    rels {
+      src
+      dst
+      kind
+      confidence
+    }
+  }
+}
+```
+
+```json title="Variables"
+{
+  "id": "lead-4739",
+  "depth": 2
+}
+```
+
+### Explain a judgement with paths
+
+```graphql title="Trace paths between entities"
+query InvestigatePath($source: ID!, $target: ID!, $maxDepth: Int = 4) {
+  paths(src: $source, dst: $target, maxDepth: $maxDepth) {
+    nodes {
+      id
+      type
+    }
+    rels {
+      src
+      dst
+      kind
+    }
+  }
+}
+```
+
+```json title="Variables"
+{
+  "source": "lead-4739",
+  "target": "account-102",
+  "maxDepth": 3
+}
+```
+
+## Securing your requests
+
+- **Authorization header** – Paste a JWT or full `Bearer ...` header; the playground automatically prefixes plain tokens
+  with `Bearer` for you.
+- **Local storage opt-in** – Tokens are _not_ persisted unless you check **Remember token in this browser**.
+- **CORS & CSRF** – Requests run from your browser to the endpoint you provide. Ensure CORS allows the docs origin when
+  targeting staging or production and prefer HTTPS to avoid leaking credentials.
+
+Once you have a valid token, you can reuse the loaded examples or write ad-hoc GraphQL operations to automate ingestion
+pipelines, runbook orchestration, or graph analytics against the Summit APIs.

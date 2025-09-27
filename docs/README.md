@@ -21,5 +21,6 @@ See `docs/ROADMAP.md` for next phases and `docs/ARCHITECTURE.md` for system desi
 
 - `docs/` – Active guides, architecture references, and onboarding material
 - `docs/archive/` – Historical documents retained for reference only
+- [`docs/api/graphql-playground.mdx`](api/graphql-playground.mdx) – JWT-ready GraphQL playground with ingestion and graph examples
 
 Refer to [`docs/archive/README.md`](archive/README.md) for archive guidelines.
