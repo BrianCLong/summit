@@ -1,0 +1,81 @@
+{
+  "lineage": {
+    "algorithm": "ed25519",
+    "dag": {
+      "nodes": [
+        {
+          "id": "raw",
+          "type": "source",
+          "artifact": "inputs/raw",
+          "description": "Raw analytics export from source system"
+        },
+        {
+          "id": "scaled",
+          "type": "transform",
+          "operation": "scale",
+          "params": {
+            "factor": 0.5
+          },
+          "inputs": [
+            "raw"
+          ],
+          "artifact": "intermediate/scaled"
+        },
+        {
+          "id": "biased",
+          "type": "transform",
+          "operation": "offset",
+          "params": {
+            "offset": 1
+          },
+          "inputs": [
+            "scaled"
+          ],
+          "artifact": "intermediate/biased"
+        },
+        {
+          "id": "score",
+          "type": "transform",
+          "operation": "weighted-sum",
+          "inputs": [
+            "biased"
+          ],
+          "artifact": "outputs/score"
+        }
+      ]
+    },
+    "signature": "eia3I/GbyyJWV+YS8u3xkqSqjstWv4MjlVBLQkyclcQtCkMsEF9HsGbOSz3wsCPLozOwJmSZiBUW76Ge0okZCw==",
+    "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAfJL6ZgazMV4LpU0emsWnW1iqaud6mUnyhaEvElTCmvQ=\n-----END PUBLIC KEY-----\n"
+  },
+  "modelCard": {
+    "name": "example-linear-score",
+    "version": "1.0.0",
+    "description": "Golden analytics scoring flow for PCA replay tests",
+    "hyperparameters": {
+      "weights": [
+        0.1,
+        0.2,
+        0.3,
+        0.4
+      ],
+      "tolerance": 0.001
+    }
+  },
+  "checksumTree": {
+    "inputs/raw": "5c31dc2b34a4b695a4648a3bfe5b7c401af9b83b6d04408a2df37584e63083af",
+    "intermediate/scaled": "f6bd10506e9a4daed7c03eda2f2fde54be3bd58eee49dab471c18a888ffbdb6f",
+    "intermediate/biased": "dd5bfce513568c0f56f81d54628d06c8d0004525d638a989498068fc0478b3df",
+    "outputs/score": "0816eae456a0b2755f98f5e19f3e390571e73cfbb4a1b124abc78f3c3bd212ab"
+  },
+  "deterministicSeed": 1337,
+  "expectedOutputs": [
+    {
+      "nodeId": "score",
+      "artifact": "outputs/score",
+      "expected": {
+        "score": 4
+      },
+      "tolerance": 0.001
+    }
+  ]
+}
