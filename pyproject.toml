@@ -1,7 +1,18 @@
+[tool.poetry]
+name = "summit"
+version = "0.1.0"
+description = "Summit workspace utilities"
+authors = ["Summit Automation <automation@example.com>"]
+packages = [{ include = "paslog" }]
+
 [tool.poetry.dependencies]
 python = "^3.9"
 prometheus-client = "^0.20.0"
 slowapi = "^0.1.9"
+pyarrow = "^17.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
 
 [tool.black]
 line-length = 100
@@ -24,3 +35,7 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = "-q"
+
+[build-system]
+requires = ["poetry-core>=1.5.0"]
+build-backend = "poetry.core.masonry.api"
