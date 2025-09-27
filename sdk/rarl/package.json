@@ -1,0 +1,19 @@
+{
+  "name": "@summit/rarl",
+  "version": "0.1.0",
+  "description": "Risk-adaptive rate limiter SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["rate-limiter", "quota", "risk", "sdk"],
+  "author": "Summit Platform",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "typescript": "^5.4.5"
+  }
+}
