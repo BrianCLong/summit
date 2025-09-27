@@ -7,6 +7,7 @@ import { normalizeCaps } from 'common-types';
 import { PolicyEngine } from 'policy';
 import { ModelRegistry } from './adapters/registry.js';
 import { schema, buildRoot } from './graphql/schema.js';
+import { GraphSubgraphClient } from './graphql/subgraphClient.js';
 import { observePolicyDeny, observeSuccess, registry as metricsRegistry } from './metrics.js';
 import { InMemoryLedger, buildEvidencePayload } from 'prov-ledger';
 
@@ -117,6 +118,13 @@ export function createApp(options = {}) {
   const policyEngine = options.policyEngine ?? PolicyEngine.fromFile(policyPath);
   const modelRegistry = options.modelRegistry ?? new ModelRegistry();
   const ledger = options.ledger ?? new InMemoryLedger();
+  const graphClient =
+    options.graphClient ??
+    new GraphSubgraphClient({
+      url: options.graphSubgraph?.url ?? process.env.GRAPH_SUBGRAPH_URL ?? 'http://localhost:4003/graphql',
+      timeoutMs: options.graphSubgraph?.timeoutMs ?? 2000,
+      logger: options.logger ?? console
+    });
 
   const app = express();
   app.use(express.json({ limit: '1mb' }));
@@ -288,6 +296,53 @@ export function createApp(options = {}) {
     });
   }
 
+  function recordGraphCost(context, cost) {
+    if (!cost?.operations?.length) {
+      return;
+    }
+    if (!Array.isArray(context.graphCosts)) {
+      context.graphCosts = [];
+    }
+    for (const operation of cost.operations) {
+      context.graphCosts.push({ ...operation, subgraph: 'graph' });
+    }
+  }
+
+  async function resolveGraphNode({ id }, context) {
+    if (!id) {
+      return null;
+    }
+    const { data, cost } = await graphClient.fetchNode(id);
+    recordGraphCost(context, cost);
+    return data ?? null;
+  }
+
+  async function resolveGraphNeighborhood(args, context) {
+    const { nodeId } = args;
+    if (!nodeId) {
+      throw new PolicyError(400, 'NODE_ID_REQUIRED', 'nodeId is required');
+    }
+    const { data, cost } = await graphClient.fetchNeighborhood({
+      nodeId,
+      direction: args.direction,
+      limit: args.limit,
+      cursor: args.cursor,
+      labelFilters: args.labelFilters,
+      propertyFilters: args.propertyFilters
+    });
+    recordGraphCost(context, cost);
+    return data;
+  }
+
+  async function resolveGraphFilteredPaths({ input }, context) {
+    if (!input?.startId) {
+      throw new PolicyError(400, 'START_ID_REQUIRED', 'startId is required');
+    }
+    const { data, cost } = await graphClient.fetchFilteredPaths(input);
+    recordGraphCost(context, cost);
+    return data;
+  }
+
   app.use(
     '/graphql',
     graphqlHTTP((req, res) => ({
@@ -295,10 +350,19 @@ export function createApp(options = {}) {
       rootValue: buildRoot({
         plan: ({ input }) => executePlan(input, req.aiContext),
         generate: ({ input }) => executeGenerate(input, req.aiContext),
-        models: ({ filter }) => listModels(filter ?? {})
+        models: ({ filter }) => listModels(filter ?? {}),
+        graphNode: (args, context) => resolveGraphNode(args, context),
+        graphNeighborhood: (args, context) => resolveGraphNeighborhood(args, context),
+        graphFilteredPaths: (args, context) => resolveGraphFilteredPaths(args, context)
       }),
-      context: { headers: req.headers, ai: req.aiContext },
+      context: { headers: req.headers, ai: req.aiContext, graphCosts: [] },
       graphiql: options.enableGraphiql ?? false,
+      extensions: ({ context }) => {
+        if (Array.isArray(context.graphCosts) && context.graphCosts.length > 0) {
+          return { cost: { operations: context.graphCosts } };
+        }
+        return undefined;
+      },
       customFormatErrorFn: (error) => {
         if (error.originalError instanceof PolicyError) {
           res.statusCode = error.originalError.statusCode;

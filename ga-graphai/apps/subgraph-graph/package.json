@@ -1,0 +1,37 @@
+{
+  "name": "@ga-graphai/subgraph-graph",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "lint": "eslint .",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@apollo/server": "4.10.0",
+    "@apollo/subgraph": "2.7.4",
+    "dotenv": "16.4.5",
+    "graphql": "16.8.1",
+    "graphql-tag": "2.12.6",
+    "graphql-type-json": "0.3.2",
+    "ioredis": "5.4.1",
+    "neo4j-driver": "5.22.0",
+    "pino": "9.4.0",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "20.12.7",
+    "@vitest/coverage-v8": "1.6.0",
+    "eslint": "8.57.0",
+    "tslib": "2.6.2",
+    "tsup": "8.0.2",
+    "tsx": "4.7.2",
+    "typescript": "5.4.5",
+    "vitest": "1.6.0"
+  }
+}
