@@ -1,0 +1,6 @@
+rules:
+  - effect: deny
+    condition:
+      AND:
+        - retention: { less_than: 30d }
+        - data: user_data
