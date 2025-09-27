@@ -3,13 +3,18 @@
 import os
 import sys
 import importlib.util
-from typing import Dict, Any, List
+from pathlib import Path
+from typing import Dict, Any, List, Optional
 import json # Added for json.dumps in MockGraphDBClient
 
 # Import Graph and find_shortest_path from intelgraph.graph_analytics.core_analytics
 # Ensure intelgraph is in sys.path for this import
 # (It should be if project root is added to sys.path)
 from intelgraph.graph_analytics.core_analytics import Graph, find_shortest_path
+from simulated_ingestion.indexing import (
+    GraphMetadataIndexer,
+    export_graph_metadata_snapshot,
+)
 
 class MockGraphDBClient:
     """
@@ -56,7 +61,13 @@ class MockGraphDBClient:
         self.relationships = []
         self.graph_representation = Graph()
 
-def run_ingestion_pipeline(connector_path: str, mock_db_client: MockGraphDBClient) -> bool:
+def run_ingestion_pipeline(
+    connector_path: str,
+    mock_db_client: MockGraphDBClient,
+    *,
+    indexer: Optional[GraphMetadataIndexer] = None,
+    snapshot_path: Optional[Path] = None,
+) -> bool:
     """
     Simulates an ingestion pipeline run for a given connector.
     Reads manifest, loads schema mapping, processes sample data, and sends to mock DB.
@@ -102,18 +113,45 @@ def run_ingestion_pipeline(connector_path: str, mock_db_client: MockGraphDBClien
 
     # 3. Process Sample Data
     print(f"Processing sample data from {sample_data_file}")
-    
+
     # Schema mapping functions now return (entities, relationships)
     entities_to_ingest, relationships_to_ingest = mapping_function(sample_data_file)
     print(f"Generated {len(entities_to_ingest)} entities and {len(relationships_to_ingest)} relationships for ingestion.")
 
-    # 4. Send to Mock Graph DB
+    active_indexer = indexer or GraphMetadataIndexer()
+    indexing_enabled = active_indexer.enabled
+    if indexing_enabled:
+        print("Incremental indexing enabled — streaming changes to Elasticsearch")
+    else:
+        print("Incremental indexing disabled (Elasticsearch not reachable)")
+
+    # 4. Send to Mock Graph DB and index incrementally
     mock_db_client.clear_db() # Clear previous data for a clean run
-    for entity in entities_to_ingest:
-        mock_db_client.create_node(entity)
-    for rel in relationships_to_ingest:
-        mock_db_client.create_relationship(rel)
-    
+
+    try:
+        for entity in entities_to_ingest:
+            mock_db_client.create_node(entity)
+            if indexing_enabled:
+                active_indexer.index_entity(entity)
+
+        for rel in relationships_to_ingest:
+            mock_db_client.create_relationship(rel)
+            if indexing_enabled:
+                active_indexer.index_relationship(rel)
+    finally:
+        if indexing_enabled:
+            try:
+                active_indexer.flush()
+            except Exception as exc:
+                print(f"Warning: failed to flush incremental index updates — {exc}")
+
+    snapshot_file = export_graph_metadata_snapshot(
+        entities_to_ingest,
+        relationships_to_ingest,
+        output_path=snapshot_path,
+    )
+    print(f"Graph metadata snapshot written to {snapshot_file}")
+
     print("Ingestion pipeline completed successfully.")
 
     # 5. Trigger a basic graph analytics function after ingestion
