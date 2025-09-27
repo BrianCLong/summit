@@ -1,0 +1,88 @@
+{
+  "tenant_id": "c0ffee01-1111-4e2d-a123-001122334455",
+  "dataset_id": "fraud-stream",
+  "purpose_tags": ["FraudIntel", "ThreatHunt"],
+  "received_at": "2025-09-14T18:30:42Z",
+  "payload": {
+    "id": "rec-stream-0003",
+    "observed_at": "2025-09-14T18:30:41Z",
+    "entity": {
+      "id": "acct-9988",
+      "type": "Account",
+      "name": "ACME Payments -1234",
+      "identifiers": {
+        "external_id": "acct-9988",
+        "email": "alerts@acme.example"
+      }
+    },
+    "location": {
+      "id": "edge-la",
+      "type": "datacenter",
+      "lat": 34.0522,
+      "lon": -118.2437,
+      "country": "US",
+      "asn": 15169
+    },
+    "signal": {
+      "id": "sig-9100",
+      "type": "DeviceAnomaly",
+      "score": 0.91,
+      "explainability_uri": "https://explain.example/sig-9100"
+    },
+    "event": {
+      "id": "evt-5601",
+      "type": "AccountTakeover",
+      "severity": "critical",
+      "status": "escalated",
+      "first_seen": "2025-09-14T18:20:00Z",
+      "last_seen": "2025-09-14T18:30:41Z",
+      "entities": [
+        {
+          "entity_id": "acct-9988",
+          "entity_type": "Account",
+          "display_name": "ACME Payments -1234",
+          "identifiers": {
+            "external_id": "acct-9988"
+          }
+        }
+      ]
+    },
+    "indicators": [
+      {
+        "indicator_id": "ind-200",
+        "indicator_type": "ip",
+        "value": "203.0.113.45",
+        "confidence": 0.8,
+        "valid_from": "2025-09-14T00:00:00Z",
+        "valid_until": "2025-10-14T00:00:00Z",
+        "entity_refs": [
+          {
+            "entity_id": "acct-9988",
+            "entity_type": "Account",
+            "display_name": "ACME Payments -1234"
+          }
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "id": "prov-http-3301",
+    "collected_at": "2025-09-14T18:30:42Z",
+    "collector": "gateway",
+    "transform_chain": [
+      {
+        "step": "http-validate",
+        "actor": "gateway",
+        "timestamp": "2025-09-14T18:30:42Z",
+        "request_id": "req-123",
+        "ingest_source_ip": "198.51.100.10"
+      }
+    ],
+    "lineage_uri": "https://audit.example/provenance/prov-http-3301"
+  },
+  "headers": {
+    "X-Request-ID": "req-123",
+    "X-Forwarded-For": "198.51.100.10"
+  },
+  "payload_checksum": "6ab874f812a46cc5c9055f87fc52a0de"
+}
