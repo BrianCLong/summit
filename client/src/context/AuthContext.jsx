@@ -31,6 +31,7 @@ const ROLE_PERMISSIONS = {
     'graph:read',
     'graph:export',
   ],
+  REGULATOR: ['rssp:read'],
 };
 
 const AuthContext = createContext();
