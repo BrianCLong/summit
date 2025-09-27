@@ -1,0 +1,13 @@
+{
+  "name": "reo-dashboard",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Comparison dashboard utilities for the Responsible Evaluation Orchestrator",
+  "scripts": {
+    "build": "tsc -p .",
+    "lint": "eslint src --ext .ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
