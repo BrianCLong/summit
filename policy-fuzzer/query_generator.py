@@ -29,10 +29,40 @@ def generate_query():
 
     # Apply field aliasing
     if random.random() < 0.5: # 50% chance to apply
-        aliased_field = random.choice(list(ATTACK_GRAMMARS["field_aliasing"].keys()))
-        alias = random.choice(ATTACK_GRAMMARS["field_aliasing"][aliased_field])
-        if aliased_field in query:
-            query[alias] = query.pop(aliased_field)
+        aliased_canonical_field = random.choice(list(ATTACK_GRAMMARS["field_aliasing"].keys()))
+        alias = random.choice(ATTACK_GRAMMARS["field_aliasing"][aliased_canonical_field])
+
+        # Get the value of the canonical field before potentially popping it
+        value_to_alias = query.get(aliased_canonical_field)
+        if value_to_alias is None: # Check if it's a nested canonical field
+            value_to_alias = _resolve_field(query, aliased_canonical_field)
+
+        if value_to_alias is not None:
+            # Remove the original canonical field if it was top-level
+            if aliased_canonical_field in query:
+                query.pop(aliased_canonical_field)
+            else: # If it was nested, we need to remove the nested path
+                parts = aliased_canonical_field.split('.')
+                temp_dict = query
+                for i, part in enumerate(parts):
+                    if i == len(parts) - 1:
+                        if part in temp_dict:
+                            temp_dict.pop(part)
+                    elif part in temp_dict:
+                        temp_dict = temp_dict[part]
+                    else:
+                        break
+
+            # Set the aliased field, creating nested dictionaries if necessary
+            parts = alias.split('.')
+            temp_dict = query
+            for i, part in enumerate(parts):
+                if i == len(parts) - 1:
+                    temp_dict[part] = value_to_alias
+                else:
+                    if part not in temp_dict or not isinstance(temp_dict[part], dict):
+                        temp_dict[part] = {}
+                    temp_dict = temp_dict[part]
 
     # Apply regex dodges to retention
     if random.random() < 0.5: # 50% chance to apply
@@ -61,6 +91,18 @@ def generate_query():
             current_date += timedelta(days=hop["offset"])
         elif hop["unit"] == "hour":
             current_date += timedelta(hours=hop["offset"])
+        elif hop["unit"] == "week":
+            current_date += timedelta(weeks=hop["offset"])
+        elif hop["unit"] == "month":
+            current_date += timedelta(days=hop["offset"] * 30) # Approximate month
         query["access_date"] = current_date.isoformat()
+        if "timezone_shift" in hop:
+            query["timezone_shift"] = hop["timezone_shift"]
+
+    # Apply data type mismatches
+    if random.random() < 0.5 and ATTACK_GRAMMARS["data_type_mismatches"]:
+        field_to_mismatch = random.choice(list(ATTACK_GRAMMARS["data_type_mismatches"].keys()))
+        if field_to_mismatch in query:
+            query[field_to_mismatch] = random.choice(ATTACK_GRAMMARS["data_type_mismatches"][field_to_mismatch])
 
     return query
