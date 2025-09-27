@@ -10,6 +10,8 @@ import { Pool } from 'pg';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import pino from 'pino';
+import { spawn } from 'child_process';
+import path from 'path';
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -18,6 +20,177 @@ const logger = pino({
   level: NODE_ENV === 'development' ? 'debug' : 'info',
   ...(NODE_ENV === 'development' ? { transport: { target: 'pino-pretty' } } : {})
 });
+
+type SentimentResult = {
+  label: string;
+  confidence: number;
+  score: number;
+  method: string;
+  model?: string;
+  probabilities?: Record<string, number>;
+  token_count?: number;
+  text_sample?: string;
+  computed_at?: string;
+};
+
+const TEXT_FIELD_CANDIDATES = new Set([
+  'text',
+  'content',
+  'description',
+  'notes',
+  'summary',
+  'message',
+  'body',
+  'headline',
+  'title'
+]);
+
+const PYTHON_EXECUTABLE = process.env.ML_PYTHON_PATH || 'python3';
+const SENTIMENT_SCRIPT_PATH = process.env.SENTIMENT_SCRIPT_PATH
+  || path.resolve(__dirname, '..', '..', '..', 'server', 'ml', 'models', 'sentiment_analysis.py');
+
+let sentimentSupportEnabled = true;
+
+function resolveTenantId(entity: any): string | undefined {
+  if (!entity || typeof entity !== 'object') {
+    return undefined;
+  }
+
+  const candidates = [
+    entity.tenantId,
+    entity.tenant_id,
+    entity.tenant,
+    entity.tenantID,
+    entity?.properties?.tenantId,
+    entity?.metadata?.tenantId
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim().length > 0) {
+      return candidate;
+    }
+  }
+
+  return undefined;
+}
+
+function extractTextForSentiment(entity: any): string | null {
+  if (!entity || typeof entity !== 'object') {
+    return null;
+  }
+
+  const collected: string[] = [];
+
+  const visit = (value: any, key?: string, depth: number = 0) => {
+    if (value == null) {
+      return;
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return;
+      }
+
+      const looksLikeText = /\s/.test(trimmed) && trimmed.length > 20;
+      if ((key && TEXT_FIELD_CANDIDATES.has(key)) || looksLikeText) {
+        collected.push(trimmed);
+      }
+      return;
+    }
+
+    if (depth >= 2) {
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach((item) => visit(item, key, depth + 1));
+      return;
+    }
+
+    if (typeof value === 'object') {
+      for (const [childKey, childValue] of Object.entries(value)) {
+        visit(childValue, childKey, depth + 1);
+      }
+    }
+  };
+
+  visit(entity);
+
+  if (collected.length === 0) {
+    return null;
+  }
+
+  return collected.join('\n\n');
+}
+
+async function analyzeSentimentForEntity(entity: any): Promise<SentimentResult | null> {
+  if (!sentimentSupportEnabled) {
+    return null;
+  }
+
+  const text = extractTextForSentiment(entity);
+  if (!text) {
+    return null;
+  }
+
+  const entityId = typeof entity?.id === 'string' ? entity.id : uuidv4();
+  const encodedText = Buffer.from(text, 'utf8').toString('base64');
+  const args = [SENTIMENT_SCRIPT_PATH, '--text-base64', encodedText];
+
+  const metadata = { entity_id: entityId };
+  args.push('--metadata', JSON.stringify(metadata));
+
+  return new Promise((resolve) => {
+    const python = spawn(PYTHON_EXECUTABLE, args);
+    let stdout = '';
+    let stderr = '';
+
+    python.stdout.on('data', (chunk) => {
+      stdout += chunk.toString();
+    });
+
+    python.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    python.on('close', (code) => {
+      if (code === 0 && stdout.trim().length > 0) {
+        try {
+          const parsed = JSON.parse(stdout);
+          resolve(parsed as SentimentResult);
+          return;
+        } catch (error) {
+          logger.warn('Failed to parse sentiment analysis response', {
+            entityId,
+            error: (error as Error).message,
+          });
+        }
+      } else if (code !== 0) {
+        logger.warn('Sentiment analysis process returned non-zero exit code', {
+          entityId,
+          code,
+          stderr: stderr.trim(),
+        });
+      }
+
+      if (stderr.includes('No such file') || stderr.includes('not found')) {
+        sentimentSupportEnabled = false;
+      }
+
+      resolve(null);
+    });
+
+    python.on('error', (error) => {
+      logger.error('Failed to spawn sentiment analysis process', {
+        entityId,
+        error: error.message,
+      });
+      sentimentSupportEnabled = false;
+      resolve(null);
+    });
+  });
+}
 
 // Connections
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
@@ -254,9 +427,35 @@ class GraphStorage {
   async storeEntities(entities: any[], jobId: string): Promise<void> {
     const session = neo4jDriver.session();
 
+    const entitiesWithSentiment: Array<{
+      entity: any;
+      sentiment: SentimentResult | null;
+      tenantId?: string;
+    }> = [];
+
+    for (const entity of entities) {
+      let sentiment: SentimentResult | null = null;
+      try {
+        sentiment = await analyzeSentimentForEntity(entity);
+      } catch (error) {
+        logger.warn('Sentiment analysis failed for entity', {
+          entityId: entity?.id,
+          error: (error as Error).message,
+        });
+      }
+
+      entitiesWithSentiment.push({
+        entity,
+        sentiment,
+        tenantId: resolveTenantId(entity),
+      });
+    }
+
     try {
       await session.executeWrite(async tx => {
-        for (const entity of entities) {
+        for (const entry of entitiesWithSentiment) {
+          const { entity, sentiment, tenantId } = entry;
+
           await tx.run(
             `MERGE (n:Entity {id: $id})
              SET n += $properties, n.ingestion_job = $jobId, n.updated_at = datetime()`,
@@ -266,11 +465,75 @@ class GraphStorage {
               jobId
             }
           );
+
+          if (tenantId) {
+            await tx.run(
+              `MATCH (n:Entity {id: $id})
+               SET n.tenantId = coalesce(n.tenantId, $tenantId)`,
+              {
+                id: entity.id,
+                tenantId
+              }
+            );
+          }
+
+          if (sentiment) {
+            const sentimentId = uuidv4();
+            const sentimentProps: Record<string, any> = {
+              id: sentimentId,
+              entity_id: entity.id,
+              label: sentiment.label,
+              confidence: sentiment.confidence,
+              score: sentiment.score,
+              method: sentiment.method,
+              model: sentiment.model,
+              probabilities: sentiment.probabilities || {},
+              token_count: sentiment.token_count ?? null,
+              text_sample: sentiment.text_sample ?? null,
+              computed_at: sentiment.computed_at || new Date().toISOString(),
+              ingestion_job: jobId,
+            };
+
+            if (tenantId) {
+              sentimentProps.tenantId = tenantId;
+            }
+
+            if (sentimentProps.token_count === null) {
+              delete sentimentProps.token_count;
+            }
+
+            if (!sentimentProps.text_sample) {
+              delete sentimentProps.text_sample;
+            }
+
+            await tx.run(
+              `MATCH (n:Entity {id: $entityId})
+               MERGE (s:SentimentResult {id: $sentimentId})
+               SET s += $sentimentProps
+               MERGE (n)-[r:HAS_SENTIMENT]->(s)
+               SET r.ingestion_job = $jobId,
+                   r.updated_at = datetime(),
+                   r.tenantId = coalesce(r.tenantId, $tenantId)
+               SET n.sentiment_label = $sentimentLabel,
+                   n.sentiment_confidence = $sentimentConfidence,
+                   n.sentiment_score = $sentimentScore`,
+              {
+                entityId: entity.id,
+                sentimentId,
+                sentimentProps,
+                jobId,
+                tenantId: tenantId ?? null,
+                sentimentLabel: sentiment.label,
+                sentimentConfidence: sentiment.confidence,
+                sentimentScore: sentiment.score
+              }
+            );
+          }
         }
       });
 
       logger.info('Stored entities in graph', {
-        count: entities.length,
+        count: entitiesWithSentiment.length,
         jobId
       });
 

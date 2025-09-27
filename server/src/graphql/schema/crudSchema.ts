@@ -358,6 +358,9 @@ export const crudTypeDefs = gql`
     # Related entities query
     relatedEntities(entityId: ID!): [RelatedEntity!]!
 
+    # Sentiment insight for an entity
+    entitySentiment(entityId: ID!, tenantId: ID): SentimentInsight
+
     # Current user
     me: User
   }
@@ -374,6 +377,19 @@ export const crudTypeDefs = gql`
     edges: [Relationship!]!
     nodeCount: Int!
     edgeCount: Int!
+  }
+
+  type SentimentInsight {
+    entityId: ID!
+    label: String!
+    confidence: Float!
+    score: Float!
+    method: String!
+    model: String
+    probabilities: JSON
+    computedAt: DateTime!
+    textSample: String
+    jobId: String
   }
 
   # Core Mutations
