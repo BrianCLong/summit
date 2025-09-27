@@ -1,0 +1,109 @@
+{
+  "entities": [
+    {
+      "name": "Customer",
+      "description": "Represents an individual or organization purchasing goods or services.",
+      "fields": [
+        {
+          "name": "customer_id",
+          "description": "Primary identifier for a customer record.",
+          "semantic_type": "identifier",
+          "data_type": "string"
+        },
+        {
+          "name": "customer_name",
+          "description": "Full legal name of the customer.",
+          "semantic_type": "attribute",
+          "data_type": "string"
+        },
+        {
+          "name": "customer_email",
+          "description": "Primary contact email address for the customer.",
+          "semantic_type": "contact",
+          "data_type": "string"
+        }
+      ]
+    },
+    {
+      "name": "Order",
+      "description": "Commercial transaction where a customer purchases products or services.",
+      "fields": [
+        {
+          "name": "order_id",
+          "description": "Unique identifier for an order.",
+          "semantic_type": "identifier",
+          "data_type": "string"
+        },
+        {
+          "name": "order_date",
+          "description": "Timestamp when the order was placed.",
+          "semantic_type": "timestamp",
+          "data_type": "datetime"
+        },
+        {
+          "name": "order_total",
+          "description": "Final billed amount for an order.",
+          "semantic_type": "amount",
+          "data_type": "decimal",
+          "unit": "USD"
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "description": "Item or service available for purchase.",
+      "fields": [
+        {
+          "name": "product_id",
+          "description": "Unique identifier for a product.",
+          "semantic_type": "identifier",
+          "data_type": "string"
+        },
+        {
+          "name": "product_name",
+          "description": "Display name of the product.",
+          "semantic_type": "attribute",
+          "data_type": "string"
+        }
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "name": "total_revenue",
+      "description": "Total revenue recognized from orders.",
+      "entity": "Order",
+      "unit": "USD",
+      "aggregation": "sum",
+      "semantic_type": "financial"
+    },
+    {
+      "name": "order_count",
+      "description": "Number of orders placed in a given interval.",
+      "entity": "Order",
+      "unit": "count",
+      "aggregation": "count",
+      "semantic_type": "volume"
+    },
+    {
+      "name": "average_order_value",
+      "description": "Average revenue per order over a time window.",
+      "entity": "Order",
+      "unit": "USD",
+      "aggregation": "average",
+      "semantic_type": "financial"
+    }
+  ],
+  "units": [
+    {
+      "name": "USD",
+      "type": "currency",
+      "description": "United States Dollar"
+    },
+    {
+      "name": "count",
+      "type": "scalar",
+      "description": "Unit-less count"
+    }
+  ]
+}
