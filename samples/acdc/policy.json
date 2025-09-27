@@ -1,0 +1,15 @@
+{
+  "jurisdiction_rules": {
+    "US": ["US"],
+    "EU": ["EU"]
+  },
+  "retention_limits": {
+    "marketing": 30,
+    "analytics": 120
+  },
+  "fallback_retention_days": 365,
+  "guard_preferences": {
+    "redact_fields": ["email", "phone"],
+    "tokenize_fields": ["customer_id"]
+  }
+}
