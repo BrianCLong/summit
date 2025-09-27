@@ -1,0 +1,59 @@
+{
+  "datasetId": "customer_events",
+  "scenario": "post-governance-control",
+  "timeHorizonDays": 30,
+  "baseline": {
+    "availability": 0.999,
+    "latencyMs": 210,
+    "freshnessMinutes": 15,
+    "costMonthlyUsd": 12500
+  },
+  "projected": {
+    "availability": 0.99749,
+    "latencyMs": 249.8,
+    "freshnessMinutes": 23.4,
+    "costMonthlyUsd": 16222
+  },
+  "drivers": [
+    {
+      "name": "policy-tag-updates",
+      "latencyDeltaMs": 6,
+      "availabilityDelta": -0.00030000000000000003,
+      "freshnessDeltaMinutes": 0.6000000000000001,
+      "costDeltaMonthlyUsd": 450
+    },
+    {
+      "name": "contract-renegotiations",
+      "latencyDeltaMs": 5,
+      "availabilityDelta": -0.0003,
+      "freshnessDeltaMinutes": 0.5,
+      "costDeltaMonthlyUsd": 400
+    },
+    {
+      "name": "dp-budget-recalculations",
+      "latencyDeltaMs": 3,
+      "availabilityDelta": -0.00005,
+      "freshnessDeltaMinutes": 0.3,
+      "costDeltaMonthlyUsd": 600
+    },
+    {
+      "name": "cache-purges",
+      "latencyDeltaMs": 16,
+      "availabilityDelta": -0.0004,
+      "freshnessDeltaMinutes": 3,
+      "costDeltaMonthlyUsd": 500
+    },
+    {
+      "name": "retrain-notices",
+      "latencyDeltaMs": 9.8,
+      "availabilityDelta": -0.00046,
+      "freshnessDeltaMinutes": 4,
+      "costDeltaMonthlyUsd": 1772
+    }
+  ],
+  "notes": [
+    "Latency increase expected while governance controls deploy.",
+    "Monthly run-rate will rise due to control implementation.",
+    "Model retraining required to absorb observed drift."
+  ]
+}

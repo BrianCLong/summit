@@ -1,0 +1,147 @@
+currentVersion: '2025-09-12'
+datasetId: customer_events
+deterministicSeed: '42'
+diffId: 2025-09-12-seed42
+generatedAt: '2024-12-21T15:17:02.517Z'
+governanceActions:
+  cachePurges:
+    - cache: customer-events-hourly
+      reason: Schema update invalidates cache materialization.
+      requiresBackfill: true
+      scope: full
+    - cache: customer-events-materialized
+      reason: Schema update invalidates cache materialization.
+      requiresBackfill: true
+      scope: full
+  changeControlMatrix:
+    - change: added-field:email
+      justification: New field impacts governance catalog and privacy budgets.
+      requiredControls:
+        - dp-budget-recalc
+        - policy-tag-update
+      severity: high
+    - change: distribution:population-stability-index:purchase_amount
+      justification: Observed drift exceeds policy thresholds; trigger retraining and SLO validation.
+      requiredControls:
+        - retrain-notice
+        - slo-review
+      severity: high
+    - change: removed-field:legacy_segment
+      justification: Removed attribute requires downstream contract updates.
+      requiredControls:
+        - contract-review
+        - policy-tag-update
+      severity: medium
+    - change: type-changed:purchase_amount
+      justification: Field adjustment requires aligned operational controls.
+      requiredControls:
+        - policy-tag-update
+      severity: medium
+  contractRenegotiationFlags:
+    - channels:
+        - legal
+        - vendor-management
+      contract: external_ads_feed
+      reason: Breaking schema change detected; contract deliverables must be updated.
+      renegotiationWindow: 14d
+  dpBudgetRecalculations:
+    - currentEpsilon: 2.5
+      dataset: customer_events
+      proposedEpsilon: 2.75
+      reason: Sensitive attribute added; privacy budget needs recalibration.
+      windowDays: 5
+  policyTagUpdates:
+    - field: email
+      reason: New attribute requires governance tags.
+      requiredTags:
+        - classification:restricted
+        - pii:contact
+        - sensitivity:high
+      severity: high
+    - field: legacy_segment
+      reason: Field removed – governance catalog needs decommission tag.
+      requiredTags:
+        - status:decommissioned
+      severity: low
+    - field: purchase_amount
+      reason: Field reclassified after type change.
+      requiredTags:
+        - classification:internal
+      severity: medium
+  retrainNotices:
+    - deadline: '2025-01-03T09:37:49.379Z'
+      featuresImpacted:
+        - purchase_amount
+      magnitude: 0.42
+      metric: population-stability-index
+      models:
+        - next-best-offer
+        - attrition-risk
+      reason: Metric population-stability-index exceeded threshold 0.25.
+    - deadline: '2024-12-22T09:04:44.665Z'
+      featuresImpacted:
+        - session_count
+      magnitude: 0.18
+      metric: mean-drift
+      models:
+        - next-best-offer
+        - attrition-risk
+      reason: Metric mean-drift exceeded threshold 0.15.
+governanceOwners:
+  - contact: stewards@example.com
+    name: Data Stewardship
+  - contact: modelrisk@example.com
+    name: Model Risk
+impactForecast:
+  baseline:
+    availability: 0.999
+    costMonthlyUsd: 12500
+    freshnessMinutes: 15
+    latencyMs: 210
+  datasetId: customer_events
+  drivers:
+    - availabilityDelta: -0.00030000000000000003
+      costDeltaMonthlyUsd: 450
+      freshnessDeltaMinutes: 0.6000000000000001
+      latencyDeltaMs: 6
+      name: policy-tag-updates
+    - availabilityDelta: -0.0003
+      costDeltaMonthlyUsd: 400
+      freshnessDeltaMinutes: 0.5
+      latencyDeltaMs: 5
+      name: contract-renegotiations
+    - availabilityDelta: -0.00005
+      costDeltaMonthlyUsd: 600
+      freshnessDeltaMinutes: 0.3
+      latencyDeltaMs: 3
+      name: dp-budget-recalculations
+    - availabilityDelta: -0.0004
+      costDeltaMonthlyUsd: 500
+      freshnessDeltaMinutes: 3
+      latencyDeltaMs: 16
+      name: cache-purges
+    - availabilityDelta: -0.00046
+      costDeltaMonthlyUsd: 1772
+      freshnessDeltaMinutes: 4
+      latencyDeltaMs: 9.8
+      name: retrain-notices
+  notes:
+    - Latency increase expected while governance controls deploy.
+    - Monthly run-rate will rise due to control implementation.
+    - Model retraining required to absorb observed drift.
+  projected:
+    availability: 0.99749
+    costMonthlyUsd: 16222
+    freshnessMinutes: 23.4
+    latencyMs: 249.8
+  scenario: post-governance-control
+  timeHorizonDays: 30
+planVersion: 1.0.0
+previousVersion: '2025-09-11'
+signature:
+  algorithm: ed25519
+  canonicalHash: ZopMWtS28RCBFitPE4Hw/S9hYJ/z6TNwwzCB5hRzzPo=
+  keyId: ddgm-fixture-key
+  publicKey: MCowBQYDK2VwAyEAXBCnUz+2RhmQw2wFK6FkSC6itoradmrK+3Lkkt7+SwE=
+  signature: FUcXKTjlrTq30R175z0yr82hG0h5yTdZe2X6YTHQJS7n3gnAdJVB7yIcG/JJgXLSaF41Y724TY8N0ptTFrDkCQ==
+  signedAt: '2025-01-19T22:17:48.282Z'
