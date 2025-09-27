@@ -1,0 +1,41 @@
+{
+  "version": "2025-10-01",
+  "tiers": {
+    "short-30d": {
+      "days": 30,
+      "action": "delete",
+      "description": "Default retention for PII and high-risk telemetry.",
+      "appliesTo": ["pii", "session", "token", "audit"],
+      "legalBasis": "minimization"
+    },
+    "standard-365d": {
+      "days": 365,
+      "action": "delete",
+      "description": "Operational analytics and derived intelligence artifacts.",
+      "appliesTo": ["analytics", "operational"],
+      "legalBasis": "business-operations"
+    },
+    "long-1825d": {
+      "days": 1825,
+      "action": "delete",
+      "description": "Extended retention for compliance-hold datasets.",
+      "appliesTo": ["compliance", "legal"],
+      "legalBasis": "compliance"
+    },
+    "rtbf-anonymize": {
+      "days": 0,
+      "action": "anonymize",
+      "description": "Immediate anonymization tier used for RTBF execution.",
+      "appliesTo": ["pii"],
+      "legalBasis": "subject-right"
+    }
+  },
+  "defaults": {
+    "pii": "short-30d",
+    "session": "short-30d",
+    "token": "short-30d",
+    "audit": "short-30d",
+    "analytics": "standard-365d",
+    "compliance": "long-1825d"
+  }
+}

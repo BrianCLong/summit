@@ -141,6 +141,9 @@ async function createPostgresTables(): Promise<void> {
         role VARCHAR(50) NOT NULL DEFAULT 'ANALYST',
         is_active BOOLEAN DEFAULT true,
         last_login TIMESTAMP,
+        retention_label TEXT NOT NULL DEFAULT 'short-30d',
+        retention_expires_at TIMESTAMP,
+        tombstoned_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -154,9 +157,14 @@ async function createPostgresTables(): Promise<void> {
         action VARCHAR(100) NOT NULL,
         resource_type VARCHAR(100) NOT NULL,
         resource_id VARCHAR(255),
-        details JSONB,
+        details JSONB DEFAULT '{}'::jsonb,
         ip_address INET,
         user_agent TEXT,
+        retention_label TEXT NOT NULL DEFAULT 'short-30d',
+        retention_expires_at TIMESTAMP,
+        tombstoned_at TIMESTAMP,
+        previous_hash TEXT,
+        signature TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -168,6 +176,9 @@ async function createPostgresTables(): Promise<void> {
         user_id UUID REFERENCES users(id) ON DELETE CASCADE,
         refresh_token VARCHAR(500) UNIQUE NOT NULL,
         expires_at TIMESTAMP NOT NULL,
+        retention_label TEXT NOT NULL DEFAULT 'short-30d',
+        retention_expires_at TIMESTAMP,
+        tombstoned_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_used TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -183,6 +194,9 @@ async function createPostgresTables(): Promise<void> {
         results JSONB NOT NULL,
         confidence_score DECIMAL(3,2),
         created_by UUID REFERENCES users(id),
+        retention_label TEXT NOT NULL DEFAULT 'standard-365d',
+        retention_expires_at TIMESTAMP,
+        tombstoned_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -191,9 +205,152 @@ async function createPostgresTables(): Promise<void> {
     await client.query(
       'CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)',
     );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_audit_logs_retention ON audit_logs(retention_label)',
+    );
     await client.query('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id)');
     await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_sessions_retention ON user_sessions(retention_label)',
+    );
+    await client.query(
       'CREATE INDEX IF NOT EXISTS idx_analysis_investigation ON analysis_results(investigation_id)',
+    );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_analysis_retention ON analysis_results(retention_label)',
+    );
+
+    // Ensure new retention metadata columns exist on legacy deployments
+    await client.query(`
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS retention_label TEXT NOT NULL DEFAULT 'short-30d'
+    `);
+    await client.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS retention_expires_at TIMESTAMP`
+    );
+    await client.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS tombstoned_at TIMESTAMP`
+    );
+
+    await client.query(`
+      ALTER TABLE user_sessions
+      ADD COLUMN IF NOT EXISTS retention_label TEXT NOT NULL DEFAULT 'short-30d'
+    `);
+    await client.query(
+      `ALTER TABLE user_sessions ADD COLUMN IF NOT EXISTS retention_expires_at TIMESTAMP`
+    );
+    await client.query(
+      `ALTER TABLE user_sessions ADD COLUMN IF NOT EXISTS tombstoned_at TIMESTAMP`
+    );
+
+    await client.query(`
+      ALTER TABLE audit_logs
+      ADD COLUMN IF NOT EXISTS retention_label TEXT NOT NULL DEFAULT 'short-30d'
+    `);
+    await client.query(
+      `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS retention_expires_at TIMESTAMP`
+    );
+    await client.query(
+      `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS tombstoned_at TIMESTAMP`
+    );
+    await client.query(
+      `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS previous_hash TEXT`
+    );
+    await client.query(
+      `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS signature TEXT`
+    );
+
+    await client.query(`
+      ALTER TABLE analysis_results
+      ADD COLUMN IF NOT EXISTS retention_label TEXT NOT NULL DEFAULT 'standard-365d'
+    `);
+    await client.query(
+      `ALTER TABLE analysis_results ADD COLUMN IF NOT EXISTS retention_expires_at TIMESTAMP`
+    );
+    await client.query(
+      `ALTER TABLE analysis_results ADD COLUMN IF NOT EXISTS tombstoned_at TIMESTAMP`
+    );
+
+    await client.query(
+      `UPDATE users SET retention_label = 'short-30d' WHERE retention_label IS NULL`
+    );
+    await client.query(
+      `UPDATE user_sessions SET retention_label = 'short-30d' WHERE retention_label IS NULL`
+    );
+    await client.query(
+      `UPDATE audit_logs SET retention_label = 'short-30d' WHERE retention_label IS NULL`
+    );
+    await client.query(
+      `UPDATE analysis_results SET retention_label = 'standard-365d' WHERE retention_label IS NULL`
+    );
+
+    // Retention + RTBF orchestration tables
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS privacy_retention_job_runs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        run_id UUID NOT NULL,
+        policy_name TEXT NOT NULL,
+        action TEXT NOT NULL,
+        retention_tier TEXT NOT NULL,
+        records_processed INTEGER NOT NULL DEFAULT 0,
+        mode TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'running',
+        started_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+        completed_at TIMESTAMP WITH TIME ZONE,
+        error TEXT,
+        details JSONB DEFAULT '{}'::jsonb
+      )
+    `);
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_privacy_retention_runs_run_id ON privacy_retention_job_runs(run_id)'
+    );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_privacy_retention_runs_policy ON privacy_retention_job_runs(policy_name)'
+    );
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS privacy_rtbf_requests (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        subject_id TEXT NOT NULL,
+        tenant TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'queued',
+        requested_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+        requested_by UUID,
+        attestation_signature TEXT NOT NULL,
+        attestation_issued_at TIMESTAMP WITH TIME ZONE NOT NULL,
+        attestation_payload JSONB DEFAULT '{}'::jsonb,
+        authority_verified_at TIMESTAMP WITH TIME ZONE,
+        verified_by UUID,
+        processed_at TIMESTAMP WITH TIME ZONE,
+        audit_reference TEXT,
+        result JSONB DEFAULT '{}'::jsonb,
+        retention_tier_snapshot TEXT
+      )
+    `);
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_privacy_rtbf_status ON privacy_rtbf_requests(status)'
+    );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_privacy_rtbf_subject ON privacy_rtbf_requests(subject_id)'
+    );
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS privacy_tombstones (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        table_name TEXT NOT NULL,
+        primary_key_column TEXT NOT NULL,
+        record_id TEXT NOT NULL,
+        action TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+        rtbf_request_id UUID REFERENCES privacy_rtbf_requests(id) ON DELETE SET NULL,
+        metadata JSONB DEFAULT '{}'::jsonb,
+        UNIQUE (table_name, primary_key_column, record_id)
+      )
+    `);
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_privacy_tombstones_table ON privacy_tombstones(table_name)'
+    );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_privacy_tombstones_record ON privacy_tombstones(record_id)'
     );
 
     logger.info('PostgreSQL tables created');
