@@ -1,0 +1,228 @@
+{
+  "manifestVersion": "1.0.0",
+  "exportId": "export-demo",
+  "createdAt": "2025-09-27T03:05:16.012Z",
+  "dataset": {
+    "id": "dataset-demo",
+    "name": "Demo Dataset",
+    "description": "Sample dataset export for documentation.",
+    "totalRecords": 2,
+    "sensitivity": [
+      "internal"
+    ],
+    "tags": [
+      "demo",
+      "provenance"
+    ],
+    "owner": "Data Team"
+  },
+  "destination": {
+    "uri": "s3://exports/demo/export.json",
+    "format": "json"
+  },
+  "claimChain": {
+    "chainId": "sample-chain",
+    "head": "c9fd41c07c33879b7cb4d3877a0e818e2d00cbd9cb91132df12f184404ae8f6d",
+    "claims": [
+      {
+        "chainId": "sample-chain",
+        "claimId": "claim-ingest",
+        "layer": "ingest",
+        "actor": "demo-signer",
+        "assertedAt": "2025-09-27T03:05:13.006Z",
+        "context": {
+          "tenantId": "tenant-demo",
+          "datasetId": "dataset-demo",
+          "environment": "demo",
+          "runId": "sample-run",
+          "jobId": "sample-job",
+          "sourceUri": "s3://incoming/sample.csv",
+          "connector": "csv"
+        },
+        "evidence": {
+          "inputs": [
+            {
+              "uri": "s3://incoming/sample.csv",
+              "hash": "65da7aa89e2b90ccc4d9e21026fcfb0862685ea8a6ce5e9effb59bd973b7f29b",
+              "algorithm": "sha256",
+              "mediaType": "text/csv",
+              "label": "source",
+              "role": "input"
+            }
+          ],
+          "outputs": [
+            {
+              "uri": "graph://dataset-demo/ingest/sample-run",
+              "hash": "724b40efaf622475e47e52fe01397e22f414776f3364edca83cb2042ab49785b",
+              "algorithm": "sha256",
+              "bytes": 256,
+              "mediaType": "application/json",
+              "label": "normalized-records",
+              "role": "output"
+            }
+          ]
+        },
+        "transform": {
+          "id": "ingest",
+          "description": "Source ingestion",
+          "parameters": {
+            "recordCount": 2,
+            "sourceMediaType": "text/csv"
+          }
+        },
+        "hash": "744a69dc9652b7084f8215189dab9f35183a50b7aebcdb446034bbe2ea861adb",
+        "signature": "d30d62c3c28a81a7349df311c6ddcfa61c4b0fa031c2966fa7be32697a85bcf1"
+      },
+      {
+        "chainId": "sample-chain",
+        "claimId": "claim-transform",
+        "layer": "transform",
+        "actor": "demo-signer",
+        "assertedAt": "2025-09-27T03:05:14.010Z",
+        "context": {
+          "tenantId": "tenant-demo",
+          "datasetId": "dataset-demo",
+          "environment": "demo",
+          "runId": "sample-run",
+          "transformId": "normalize-fields"
+        },
+        "evidence": {
+          "inputs": [
+            {
+              "uri": "graph://dataset-demo/ingest/sample-run",
+              "hash": "724b40efaf622475e47e52fe01397e22f414776f3364edca83cb2042ab49785b",
+              "algorithm": "sha256",
+              "bytes": 256,
+              "mediaType": "application/json",
+              "label": "normalized-records",
+              "role": "input"
+            }
+          ],
+          "outputs": [
+            {
+              "uri": "graph://dataset-demo/transform/normalize-fields/sample-run",
+              "hash": "80801384cba01f85b596c3c70b686678654f8e7f0f4b7c354f15cdcd5a106624",
+              "algorithm": "sha256",
+              "bytes": 300,
+              "mediaType": "application/json",
+              "label": "transformed-records",
+              "role": "output"
+            }
+          ]
+        },
+        "transform": {
+          "id": "normalize-fields",
+          "description": "Data transformation",
+          "parameters": {
+            "rules": [
+              "trim",
+              "toLowerCase"
+            ]
+          }
+        },
+        "previousHash": "744a69dc9652b7084f8215189dab9f35183a50b7aebcdb446034bbe2ea861adb",
+        "hash": "64497f59f4feefa1ffb6c62a2c670d133c833e3c8b9e78a09fb457978f9eff52",
+        "signature": "e078118716225979e5359488d91ca6e810d2e9d432d09855e0d3a48ec5d1952b"
+      },
+      {
+        "chainId": "sample-chain",
+        "claimId": "claim-api",
+        "layer": "api",
+        "actor": "demo-signer",
+        "assertedAt": "2025-09-27T03:05:15.011Z",
+        "context": {
+          "tenantId": "system",
+          "datasetId": "dataset-demo",
+          "environment": "demo",
+          "requestId": "request-demo",
+          "sourceUri": "/api/export"
+        },
+        "evidence": {
+          "inputs": [
+            {
+              "uri": "graph://dataset-demo/transform/normalize-fields/sample-run",
+              "hash": "80801384cba01f85b596c3c70b686678654f8e7f0f4b7c354f15cdcd5a106624",
+              "algorithm": "sha256",
+              "bytes": 300,
+              "mediaType": "application/json",
+              "label": "transformed-records",
+              "role": "input"
+            }
+          ],
+          "outputs": [
+            {
+              "uri": "urn:response:request-demo",
+              "hash": "1936b29cc207e774fd3726c0f8f41f27a95d4596fa5378de7aca26378b31c796",
+              "algorithm": "sha256",
+              "bytes": 28,
+              "mediaType": "application/json",
+              "label": "response",
+              "role": "output"
+            }
+          ],
+          "references": [
+            {
+              "uri": "urn:request:request-demo",
+              "hash": "f8c75d27df7335e093021f55d614a871063087749cda4a04b88d8bb168f60f9b",
+              "algorithm": "sha256",
+              "mediaType": "application/json",
+              "label": "request",
+              "role": "reference"
+            }
+          ]
+        },
+        "transform": {
+          "description": "API response delivery",
+          "parameters": {
+            "route": "/api/export",
+            "method": "POST",
+            "statusCode": 200
+          }
+        },
+        "previousHash": "64497f59f4feefa1ffb6c62a2c670d133c833e3c8b9e78a09fb457978f9eff52",
+        "hash": "c9fd41c07c33879b7cb4d3877a0e818e2d00cbd9cb91132df12f184404ae8f6d",
+        "signature": "c3620654070136c61a6b30bba910b1a529da2dcaaef2087fd47867e5c227aed5"
+      }
+    ]
+  },
+  "ledgerAnchors": {
+    "ingest": "744a69dc9652b7084f8215189dab9f35183a50b7aebcdb446034bbe2ea861adb",
+    "transform": "64497f59f4feefa1ffb6c62a2c670d133c833e3c8b9e78a09fb457978f9eff52",
+    "api": "c9fd41c07c33879b7cb4d3877a0e818e2d00cbd9cb91132df12f184404ae8f6d"
+  },
+  "artifacts": [
+    {
+      "path": "exports/demo/export.json",
+      "hash": "a8039902829040d3376dbba1c4f28136199ad682bd33c8fc8b8cb7ef87a382cf",
+      "algorithm": "sha256",
+      "bytes": 512,
+      "claimId": "claim-api",
+      "role": "dataset"
+    },
+    {
+      "path": "exports/demo/manifest.json",
+      "hash": "e6c4c8038a7d8376d66a89d0d2d996ebbdc27c6cbe791460970a1382c70ecee6",
+      "algorithm": "sha256",
+      "bytes": 128,
+      "claimId": "claim-api",
+      "role": "manifest"
+    }
+  ],
+  "verification": {
+    "manifestHash": "2047a6d6bcaa2717d4ab1edb18ecd4cc7e0bee79049ada40766d6b07356e3e17",
+    "includedHashes": [
+      "744a69dc9652b7084f8215189dab9f35183a50b7aebcdb446034bbe2ea861adb",
+      "64497f59f4feefa1ffb6c62a2c670d133c833e3c8b9e78a09fb457978f9eff52",
+      "c9fd41c07c33879b7cb4d3877a0e818e2d00cbd9cb91132df12f184404ae8f6d"
+    ]
+  },
+  "signatures": [
+    {
+      "keyId": "demo-signer#export",
+      "signer": "demo-signer",
+      "algorithm": "hmac-sha256",
+      "signedAt": "2025-09-27T03:05:16.012Z",
+      "signature": "ff3ef80564e42a58fd72badb21c7fc37af64698d382c3507511697078431ea3f"
+    }
+  ]
+}
