@@ -9,7 +9,8 @@
     "server",
     "packages/mcp-core",
     "apps/intelgraph-mcp",
-    "apps/maestro-mcp"
+    "apps/maestro-mcp",
+    "tools/*"
   ],
   "scripts": {
     "bootstrap": "pnpm install --frozen-lockfile",

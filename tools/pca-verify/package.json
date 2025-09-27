@@ -1,0 +1,38 @@
+{
+  "name": "@summit/pca-verify",
+  "version": "0.1.0",
+  "description": "Proof-Carrying Analytics offline verifier CLI",
+  "type": "module",
+  "bin": {
+    "pca-verify": "./dist/src/cli.js"
+  },
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "eslint src test --ext .ts",
+    "test": "npm run build && node --test dist/test/**/*.test.js"
+  },
+  "keywords": [
+    "analytics",
+    "verification",
+    "pca"
+  ],
+  "author": "Summit",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.2"
+  }
+}
