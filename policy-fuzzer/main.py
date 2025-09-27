@@ -8,6 +8,7 @@ from datetime import datetime
 import time # Import the time module
 from metamorphic_tester import MetamorphicTester
 from policy_oracle import PolicyOracle
+from chekist_copilot import ChekistCopilot # Import ChekistCopilot
 
 EXPECTED_EVALUATION_TIME_MS = 10 # Define a threshold for expected evaluation time
 
@@ -20,10 +21,15 @@ def main():
     parser.add_argument("--enable-time-window-hops", action="store_true", help="Enable time window boundary hops attack grammar")
     parser.add_argument("--enable-field-aliasing", action="store_true", help="Enable field aliasing attack grammar")
     parser.add_argument("--enable-data-type-mismatches", action="store_true", help="Enable data type mismatches attack grammar")
+    parser.add_argument("--chekist-mode", action="store_true", help="Activate secret Chekist-Mode for aggressive fuzzing") # New argument
     args = parser.parse_args()
 
     print("Running policy-fuzzer...")
     failing_cases = []
+
+    chekist_copilot = None
+    if args.chekist_mode:
+        chekist_copilot = ChekistCopilot()
 
     # Test with canaries
     for canary in CANARIES:
@@ -60,8 +66,12 @@ def main():
 
     # Fuzzing loop
     for _ in range(args.iterations): # Use iterations from command-line argument
-        policy = generate_policy()
-        query = generate_query(args) # Pass args to generate_query
+        if chekist_copilot:
+            policy = chekist_copilot.get_aggressive_policy()
+            query = chekist_copilot.get_aggressive_query(args)
+        else:
+            policy = generate_policy()
+            query = generate_query(args) # Pass args to generate_query
 
         # Instantiate oracle for each fuzzed policy
         oracle = PolicyOracle(policy) # Pass the generated policy to the oracle
