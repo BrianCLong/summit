@@ -24,6 +24,8 @@ scopes:
   - email
   - roles
   - tenant
+  - assurance
+  - purpose
 
 # Token Configuration
 tokens:
@@ -39,6 +41,8 @@ claims_mapping:
   tenant_id: 'tenant_id'
   role: 'role'
   permissions: 'permissions'
+  assurance: 'assurance'
+  purpose_tags: 'purpose_tags'
 
 # Security Settings
 security:
@@ -47,6 +51,7 @@ security:
   require_state: true
   require_nonce: true
   max_age: 86400 # 24 hours
+  webauthn_step_up_acr: 'loa3'
 
 # Session Configuration
 session:
@@ -55,3 +60,24 @@ session:
   http_only: true
   same_site: 'strict'
   max_age: 3600 # 1 hour
+
+# SCIM configuration
+scim:
+  base_url: '${SCIM_BASE_URL:-https://auth.intelgraph.com/scim/v2}'
+  provisioning_token: '${SCIM_BEARER_TOKEN}'
+  tenant_extension: 'urn:ietf:params:scim:schemas:extension:intelgraph:1.0:tenant'
+  required_purpose_tags:
+    - investigation
+    - fraud
+    - audit
+
+# WebAuthn settings for MFA step-up
+webauthn:
+  relying_party_id: '${WEBAUTHN_RP_ID:-intelgraph.com}'
+  relying_party_name: 'IntelGraph Summit Platform'
+  origins:
+    - 'https://app.intelgraph.com'
+    - 'https://*.tenant.intelgraph.com'
+  attestation: 'direct'
+  timeout_ms: 60000
+  challenge_ttl_ms: 300000
