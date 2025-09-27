@@ -1,0 +1,57 @@
+{
+  "description": "Bounded staleness selects freshest EU replica",
+  "steps": [
+    {
+      "type": "update",
+      "update": {"name": "eu-central-async", "latencyMs": 16, "stalenessMs": 180}
+    },
+    {
+      "type": "update",
+      "update": {"name": "us-east-primary", "latencyMs": 6, "stalenessMs": 320}
+    },
+    {
+      "type": "update",
+      "update": {"name": "us-west-sync", "latencyMs": 10, "stalenessMs": 310}
+    },
+    {
+      "type": "update",
+      "update": {"name": "ap-south-async", "latencyMs": 24, "stalenessMs": 330}
+    },
+    {
+      "type": "plan",
+      "request": {
+        "id": "fx-bounded-1",
+        "operation": "read",
+        "dataClass": "pii",
+        "purpose": "analytics",
+        "jurisdiction": "eu"
+      },
+      "expect": {
+        "mode": "bounded-staleness",
+        "quorum": ["eu-central-async"],
+        "fallbackToStrong": false,
+        "maxReplicaStaleness": 200
+      }
+    },
+    {
+      "type": "update",
+      "update": {"name": "eu-central-async", "latencyMs": 16, "stalenessMs": 350}
+    },
+    {
+      "type": "plan",
+      "request": {
+        "id": "fx-bounded-stale",
+        "operation": "read",
+        "dataClass": "pii",
+        "purpose": "analytics",
+        "jurisdiction": "eu"
+      },
+      "expect": {
+        "mode": "bounded-staleness",
+        "quorum": ["us-east-primary", "us-west-sync", "eu-central-async"],
+        "fallbackToStrong": true,
+        "maxReplicaStaleness": 500
+      }
+    }
+  ]
+}

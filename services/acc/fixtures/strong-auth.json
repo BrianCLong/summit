@@ -1,0 +1,29 @@
+{
+  "description": "Strong quorum selection for US authentication",
+  "steps": [
+    {
+      "type": "update",
+      "update": {"name": "us-east-primary", "latencyMs": 6, "stalenessMs": 5}
+    },
+    {
+      "type": "update",
+      "update": {"name": "us-west-sync", "latencyMs": 9, "stalenessMs": 9}
+    },
+    {
+      "type": "plan",
+      "request": {
+        "id": "fx-strong-1",
+        "operation": "read",
+        "dataClass": "pii",
+        "purpose": "authentication",
+        "jurisdiction": "us"
+      },
+      "expect": {
+        "mode": "strong",
+        "quorum": ["us-east-primary", "us-west-sync", "eu-central-async"],
+        "fallbackToStrong": false,
+        "maxReplicaStaleness": 15
+      }
+    }
+  ]
+}
