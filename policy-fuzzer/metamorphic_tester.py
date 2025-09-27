@@ -56,6 +56,20 @@ class MetamorphicTester:
             'check': lambda original_compliant, transformed_compliant: original_compliant != transformed_compliant # Toggling effect should flip compliance
         })
 
+        # Relation 7: Time Window - Shift by week
+        relations.append({
+            'name': 'time_window_shift_week',
+            'transform': lambda p, q: self._shift_time_by_unit(p, q, "week", random.choice([-1, 1])),
+            'check': lambda original_compliant, transformed_compliant: original_compliant == transformed_compliant # Assuming week shift within window should maintain compliance
+        })
+
+        # Relation 8: Time Window - Fuzzy date comparison
+        relations.append({
+            'name': 'time_window_fuzzy_date',
+            'transform': lambda p, q: self._fuzzy_date_comparison(p, q),
+            'check': lambda original_compliant, transformed_compliant: original_compliant == transformed_compliant # Fuzzy date should ideally maintain compliance if within reasonable bounds
+        })
+
         return relations
 
     def _shift_time_within_window(self, policy, query):
@@ -74,6 +88,28 @@ class MetamorphicTester:
             # Shift significantly outside the window (e.g., a year)
             shift_years = random.choice([-1, 1])
             transformed_query["access_date"] = (access_date + timedelta(days=365 * shift_years)).isoformat()
+        return transformed_query
+
+    def _shift_time_by_unit(self, policy, query, unit, offset):
+        transformed_query = deepcopy(query)
+        if "access_date" in transformed_query:
+            access_date = datetime.fromisoformat(transformed_query["access_date"])
+            if unit == "week":
+                access_date += timedelta(weeks=offset)
+            elif unit == "month":
+                access_date += timedelta(days=offset * 30) # Approximate month
+            elif unit == "year":
+                access_date += timedelta(days=offset * 365) # Approximate year
+            transformed_query["access_date"] = access_date.isoformat()
+        return transformed_query
+
+    def _fuzzy_date_comparison(self, policy, query):
+        transformed_query = deepcopy(query)
+        if "access_date" in transformed_query:
+            access_date = datetime.fromisoformat(transformed_query["access_date"])
+            # Introduce a small random offset (e.g., +/- a few minutes)
+            fuzzy_minutes = random.randint(-5, 5)
+            transformed_query["access_date"] = (access_date + timedelta(minutes=fuzzy_minutes)).isoformat()
         return transformed_query
 
     def _synonym_location(self, policy, query):
@@ -98,8 +134,12 @@ class MetamorphicTester:
 
     def _toggle_policy_effect(self, policy, query):
         transformed_policy = deepcopy(policy)
-        if "effect" in transformed_policy:
-            transformed_policy["effect"] = "deny" if transformed_policy["effect"] == "allow" else "allow"
+        # This transformation needs to modify the policy definition itself, not the extracted policy data.
+        # For now, we'll assume the 'policy' object passed here is the raw policy definition.
+        if "rules" in transformed_policy:
+            for rule in transformed_policy["rules"]:
+                if "effect" in rule:
+                    rule["effect"] = "deny" if rule["effect"] == "allow" else "allow"
         return transformed_policy
 
     def test_relations(self, original_policy, original_query, original_compliant):
@@ -114,7 +154,13 @@ class MetamorphicTester:
                 transformed_policy = deepcopy(original_policy)
                 transformed_query = relation['transform'](original_policy, original_query)
 
-            transformed_compliant = self.oracle.determine_expected_compliance(transformed_policy, transformed_query)
+            # Re-instantiate oracle with the transformed policy for policy-modifying relations
+            if relation['name'] == 'policy_toggle_effect':
+                temp_oracle = MetamorphicTester(PolicyOracle(transformed_policy)).oracle
+            else:
+                temp_oracle = self.oracle
+
+            transformed_compliant = temp_oracle.determine_expected_compliance(transformed_policy, transformed_query)
 
             if not relation['check'](original_compliant, transformed_compliant):
                 failing_relations.append({
