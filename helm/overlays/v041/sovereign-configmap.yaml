@@ -1,0 +1,261 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sovereign-opa-policies
+  labels:
+    app.kubernetes.io/component: sovereign-safeguards
+    app.kubernetes.io/version: v0.4.1
+data:
+  sovereign-safeguards.rego: |
+    package sovereign_safeguards
+
+    import rego.v1
+
+    # Independent Verification Requirements
+    independent_verification_complete if {
+        count(input.verification.independent_sources) >= 2
+        verification_source_diversity
+        all_verifications_recent
+        all_verifications_signed
+    }
+
+    verification_source_diversity if {
+        sources := {source.type | source := input.verification.independent_sources[_]}
+        count(sources) >= 2
+    }
+
+    all_verifications_recent if {
+        current_time := time.now_ns()
+        every source in input.verification.independent_sources {
+            verification_age := current_time - source.verified_at_ns
+            verification_age <= 3600000000000  # 1 hour in nanoseconds
+        }
+    }
+
+    all_verifications_signed if {
+        every source in input.verification.independent_sources {
+            source.signature
+            source.signature != ""
+        }
+    }
+
+    # Containment Readiness Requirements
+    containment_readiness_complete if {
+        input.containment.emergency_stop_ready == true
+        input.containment.rollback_ready == true
+        input.containment.isolation_ready == true
+        input.containment.human_override_ready == true
+        input.containment.response_time_ms <= 100
+    }
+
+    # Lawful Interoperability Requirements
+    lawful_interoperability_compliant if {
+        all_jurisdictions_compliant
+        data_sovereignty_requirements_met
+        cross_border_approvals_valid
+        regulatory_reporting_active
+    }
+
+    all_jurisdictions_compliant if {
+        every jurisdiction in input.lawful_interoperability.jurisdictions {
+            jurisdiction.compliant == true
+            jurisdiction.last_assessment_ns > (time.now_ns() - 86400000000000)  # 24 hours
+        }
+    }
+
+    data_sovereignty_requirements_met if {
+        input.lawful_interoperability.data_sovereignty.compliant == true
+        input.lawful_interoperability.data_sovereignty.residency_verified == true
+    }
+
+    cross_border_approvals_valid if {
+        every approval in input.lawful_interoperability.cross_border_approvals {
+            approval.status == "APPROVED"
+            approval.valid_until_ns > time.now_ns()
+        }
+    }
+
+    regulatory_reporting_active if {
+        input.lawful_interoperability.regulatory_reporting.active == true
+        last_report_age := time.now_ns() - input.lawful_interoperability.regulatory_reporting.last_report_ns
+        last_report_age <= 3600000000000  # 1 hour
+    }
+
+    # Reversible Autonomy Requirements
+    reversible_autonomy_compliant if {
+        input.reversible_autonomy.reversibility_guaranteed == true
+        input.reversible_autonomy.human_control_available == true
+        input.reversible_autonomy.scope_limited == true
+        input.reversible_autonomy.continuous_monitoring == true
+        input.reversible_autonomy.max_reversal_time_seconds <= 60
+        input.reversible_autonomy.snapshot_frequency_seconds <= 300
+    }
+
+    # Emergency Sovereign Controls
+    emergency_containment_authorized if {
+        input.emergency.containment_type in ["SOVEREIGN_ISOLATION", "EMERGENCY_SHUTDOWN"]
+        input.emergency.human_authorization == true
+        input.emergency.reason != ""
+        input.emergency.severity in ["CRITICAL", "CATASTROPHIC"]
+    }
+
+    human_override_authorized if {
+        input.override.human_authorization == true
+        input.override.emergency_level in ["HIGH", "CRITICAL", "CATASTROPHIC"]
+        input.override.reason != ""
+        input.override.supervisor_approval == true
+    }
+
+    # Transcendent Safeguards
+    transcendent_operation_authorized if {
+        input.transcendent.ethics_board_approval == true
+        input.transcendent.safety_committee_review == true
+        input.transcendent.enhanced_monitoring_enabled == true
+        input.transcendent.transcendence_level in ["ENHANCED", "ADVANCED"]
+        transcendent_risk_acceptable
+    }
+
+    transcendent_risk_acceptable if {
+        input.transcendent.risk_assessment.overall_risk in ["LOW", "MEDIUM"]
+        input.transcendent.risk_assessment.ethical_risk in ["LOW", "MEDIUM"]
+        input.transcendent.risk_assessment.societal_risk in ["LOW", "MEDIUM"]
+        count(input.transcendent.risk_assessment.mitigation_strategies) >= 2
+    }
+
+    # Sovereign Compliance Score Calculation
+    sovereign_compliance_score := score if {
+        verification_score := verification_compliance_score
+        containment_score := containment_compliance_score
+        interoperability_score := interoperability_compliance_score
+        autonomy_score := autonomy_compliance_score
+
+        score := (verification_score + containment_score + interoperability_score + autonomy_score) / 4
+    }
+
+    verification_compliance_score := 1.0 if {
+        independent_verification_complete
+    } else := 0.5 if {
+        count(input.verification.independent_sources) >= 1
+    } else := 0.0
+
+    containment_compliance_score := 1.0 if {
+        containment_readiness_complete
+    } else := 0.7 if {
+        input.containment.emergency_stop_ready == true
+        input.containment.rollback_ready == true
+    } else := 0.3 if {
+        input.containment.emergency_stop_ready == true
+    } else := 0.0
+
+    interoperability_compliance_score := 1.0 if {
+        lawful_interoperability_compliant
+    } else := 0.6 if {
+        all_jurisdictions_compliant
+        data_sovereignty_requirements_met
+    } else := 0.3 if {
+        all_jurisdictions_compliant
+    } else := 0.0
+
+    autonomy_compliance_score := 1.0 if {
+        reversible_autonomy_compliant
+    } else := 0.7 if {
+        input.reversible_autonomy.reversibility_guaranteed == true
+        input.reversible_autonomy.human_control_available == true
+    } else := 0.4 if {
+        input.reversible_autonomy.human_control_available == true
+    } else := 0.0
+
+    # Final Authorization Decision
+    sovereign_operation_authorized if {
+        sovereign_compliance_score >= 0.95
+        independent_verification_complete
+        containment_readiness_complete
+        lawful_interoperability_compliant
+        reversible_autonomy_compliant
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sovereign-verification-config
+  labels:
+    app.kubernetes.io/component: independent-verification
+    app.kubernetes.io/version: v0.4.1
+data:
+  verification-sources.yaml: |
+    verification_sources:
+      - source_id: "gov-agency-001"
+        entity: "National Security Agency"
+        type: "GOVERNMENT_AGENCY"
+        endpoint: "https://verification.nsa.gov/api/v1/verify"
+        reliability: 0.98
+        timeout_ms: 30000
+        retry_attempts: 3
+
+      - source_id: "auditor-001"
+        entity: "Deloitte Cyber"
+        type: "INDEPENDENT_AUDITOR"
+        endpoint: "https://cyber.deloitte.com/verification/api"
+        reliability: 0.95
+        timeout_ms: 45000
+        retry_attempts: 2
+
+      - source_id: "cert-body-001"
+        entity: "ISO/IEC 27001 Certification"
+        type: "CERTIFICATION_BODY"
+        endpoint: "https://iso27001.verification.com/api/verify"
+        reliability: 0.92
+        timeout_ms: 60000
+        retry_attempts: 2
+
+      - source_id: "peer-review-001"
+        entity: "Academic Consortium"
+        type: "PEER_REVIEW"
+        endpoint: "https://academic-review.edu/verification"
+        reliability: 0.90
+        timeout_ms: 120000
+        retry_attempts: 1
+
+      - source_id: "tech-validator-001"
+        entity: "Technical Standards Validator"
+        type: "TECHNICAL_VALIDATOR"
+        endpoint: "https://standards.verification.org/api"
+        reliability: 0.94
+        timeout_ms: 30000
+        retry_attempts: 3
+
+      - source_id: "ethics-committee-001"
+        entity: "International Ethics Committee"
+        type: "ETHICS_COMMITTEE"
+        endpoint: "https://ethics.international.org/verification"
+        reliability: 0.96
+        timeout_ms: 90000
+        retry_attempts: 2
+
+  containment-tests.yaml: |
+    containment_tests:
+      emergency_stop:
+        test_interval_seconds: 3600
+        max_response_time_ms: 100
+        required_success_rate: 0.99
+
+      rollback_test:
+        test_interval_seconds: 7200
+        max_response_time_ms: 5000
+        required_success_rate: 0.95
+
+      isolation_test:
+        test_interval_seconds: 14400
+        max_response_time_ms: 1000
+        required_success_rate: 0.98
+
+      human_override_test:
+        test_interval_seconds: 1800
+        max_response_time_ms: 30000
+        required_success_rate: 1.0
+
+      full_containment_drill:
+        test_interval_seconds: 86400
+        max_response_time_ms: 10000
+        required_success_rate: 0.95

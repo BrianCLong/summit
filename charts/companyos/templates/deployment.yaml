@@ -19,6 +19,10 @@ spec:
         securityContext: {{- toYaml .Values.securityContext | nindent 10 }}
         ports:
         - containerPort: 3000
+        volumeMounts:
+        - name: podinfo
+          mountPath: /etc/podinfo
+          readOnly: true
         readinessProbe:
           httpGet: { path: /healthz, port: 3000 }
           initialDelaySeconds: 5
@@ -38,4 +42,9 @@ spec:
           - labelSelector:
               matchExpressions: [{ key: app, operator: In, values: [companyos] }]
             topologyKey: kubernetes.io/hostname
-
+      volumes:
+      - name: podinfo
+        downwardAPI:
+          items:
+          - path: "labels"
+            fieldRef: { fieldPath: metadata.labels }
