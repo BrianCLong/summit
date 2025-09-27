@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mc-evidence-token
+  annotations:
+    description: Bearer token used to authenticate with Mission Control evidence APIs.
+type: Opaque
+stringData:
+  token: REPLACE_WITH_MISSION_CONTROL_TOKEN
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mc-evidence-queries
+  annotations:
+    description: Base endpoints for Mission Control evidence lookups used during canary promotion.
+data:
+  evidenceOkEndpoint: https://mission-control.intelgraph.svc.cluster.local/api/v1/evidence/ok
