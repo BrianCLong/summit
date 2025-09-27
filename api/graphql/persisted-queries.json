@@ -1,0 +1,114 @@
+{
+  "15ad5e564e149a3aa223b4c922404968153cfbbb7edff1100e64637ab2f1bd09": {
+    "operationName": "GetEntityOverview",
+    "query": "query GetEntityOverview($id: ID!, $tenantId: ID!) {\n  entity(id: $id, tenantId: $tenantId) {\n    __typename\n    ... on Entity {\n      id\n      tenantId\n      kind\n      displayName\n      summary\n      riskScore\n      createdAt\n      updatedAt\n    }\n    ... on ResolverError {\n      code\n      message\n    }\n  }\n}",
+    "cost": {
+      "estimated": 45,
+      "weight": 1
+    }
+  },
+  "a29e16878156c4a362aa9f11cdbb2492f23f6cf5de4e2b28d6e325299d21baa3": {
+    "operationName": "ListEntities",
+    "query": "query ListEntities($tenantId: ID!, $first: Int!, $after: Cursor, $search: String) {\n  entities(\n    filter: { tenantId: $tenantId, search: $search }\n    pagination: { first: $first, after: $after }\n  ) {\n    nodes {\n      id\n      displayName\n      kind\n      riskScore\n      updatedAt\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n      totalCount\n    }\n  }\n}",
+    "cost": {
+      "estimated": 120,
+      "weight": 2
+    }
+  },
+  "8d73903aba2fbb001093e32bb599405d251e0450e469f7e759b0adf89185e8ee": {
+    "operationName": "GetEntityRelationships",
+    "query": "query GetEntityRelationships($entityId: ID!, $tenantId: ID!, $first: Int!, $after: Cursor) {\n  entity(id: $entityId, tenantId: $tenantId) {\n    __typename\n    ... on Entity {\n      id\n      relationships(pagination: { first: $first, after: $after }) {\n        edges {\n          cursor\n          node {\n            id\n            tenantId\n            kind\n            sourceId\n            targetId\n            confidence\n            updatedAt\n          }\n        }\n        pageInfo {\n          hasNextPage\n          endCursor\n        }\n      }\n    }\n    ... on ResolverError {\n      code\n      message\n    }\n  }\n}",
+    "cost": {
+      "estimated": 160,
+      "weight": 3
+    }
+  },
+  "620e91d87d13cb37d7e8775ea8f555efc140427b25900d9f210baf93a3f01e7f": {
+    "operationName": "GetInvestigationOverview",
+    "query": "query GetInvestigationOverview($id: ID!, $tenantId: ID!) {\n  investigation(id: $id, tenantId: $tenantId) {\n    __typename\n    ... on Investigation {\n      id\n      tenantId\n      name\n      description\n      status\n      priority\n      ownerId\n      dueDate\n      createdAt\n      updatedAt\n    }\n    ... on ResolverError {\n      code\n      message\n    }\n  }\n}",
+    "cost": {
+      "estimated": 60,
+      "weight": 1
+    }
+  },
+  "0adc3e11e88e22c4516ae26bc291f1d68d3f90322fd9e2f34995087861993fee": {
+    "operationName": "ListInvestigations",
+    "query": "query ListInvestigations($tenantId: ID!, $first: Int!, $after: Cursor, $status: [InvestigationStatus!]) {\n  investigations(\n    filter: { tenantId: $tenantId, status: $status }\n    pagination: { first: $first, after: $after }\n  ) {\n    nodes {\n      id\n      name\n      status\n      priority\n      ownerId\n      updatedAt\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n      totalCount\n    }\n  }\n}",
+    "cost": {
+      "estimated": 110,
+      "weight": 2
+    }
+  },
+  "d9a991c840d56843ced6dcb53b22eb066fbec7203aa14140e6fa6871b9f03053": {
+    "operationName": "GetInvestigationTimeline",
+    "query": "query GetInvestigationTimeline($investigationId: ID!, $tenantId: ID!, $first: Int!, $after: Cursor) {\n  timelineEvents(\n    investigationId: $investigationId\n    tenantId: $tenantId\n    pagination: { first: $first, after: $after }\n  ) {\n    nodes {\n      id\n      investigationId\n      category\n      message\n      actorId\n      occurredAt\n      createdAt\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n  }\n}",
+    "cost": {
+      "estimated": 95,
+      "weight": 1
+    }
+  },
+  "c7683c9d56ce276842b731639afa333e55c073b93b9e31dd7d470e4520376019": {
+    "operationName": "ListRelationships",
+    "query": "query ListRelationships($tenantId: ID!, $first: Int!, $after: Cursor, $kinds: [RelationshipKind!]) {\n  relationships(\n    filter: { tenantId: $tenantId, kinds: $kinds }\n    pagination: { first: $first, after: $after }\n  ) {\n    nodes {\n      id\n      kind\n      sourceId\n      targetId\n      confidence\n      updatedAt\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n      totalCount\n    }\n  }\n}",
+    "cost": {
+      "estimated": 130,
+      "weight": 2
+    }
+  },
+  "69e9cc9df7b8d8a7a548913d4830499e9cb24b7bcbc7ed1b77cda5a0bcda20d5": {
+    "operationName": "GetEntityMetrics",
+    "query": "query GetEntityMetrics($id: ID!, $tenantId: ID!) {\n  entityMetrics(id: $id, tenantId: $tenantId) {\n    __typename\n    ... on EntityMetrics {\n      entityId\n      degree\n      betweenness\n      closeness\n      alertsOpen\n      lastInvestigationId\n    }\n    ... on ResolverError {\n      code\n      message\n    }\n  }\n}",
+    "cost": {
+      "estimated": 70,
+      "weight": 1
+    }
+  },
+  "4898f03b54f75261fd09a023aa1e14ada3575cbcbb2ec3e4fcbbcee283c2c61b": {
+    "operationName": "CreateEntity",
+    "query": "mutation CreateEntity($input: CreateEntityInput!) {\n  createEntity(input: $input) {\n    success\n    entity {\n      id\n      tenantId\n      kind\n      displayName\n      summary\n      riskScore\n      createdAt\n      updatedAt\n    }\n    errors {\n      code\n      message\n      retriable\n    }\n  }\n}",
+    "cost": {
+      "estimated": 150,
+      "weight": 2
+    }
+  },
+  "34bcdd66154399b635e8be522dfbe69b57548b6d2bedf199f2e5d70ed77a00b6": {
+    "operationName": "UpdateEntity",
+    "query": "mutation UpdateEntity($id: ID!, $tenantId: ID!, $input: UpdateEntityInput!) {\n  updateEntity(id: $id, tenantId: $tenantId, input: $input) {\n    success\n    entity {\n      id\n      tenantId\n      kind\n      displayName\n      summary\n      riskScore\n      updatedAt\n    }\n    errors {\n      code\n      message\n      retriable\n    }\n  }\n}",
+    "cost": {
+      "estimated": 155,
+      "weight": 2
+    }
+  },
+  "e3283739fa33f4b22df8dc7a7a11ebc7f909e734220637230b8c05225b03a7a6": {
+    "operationName": "CreateRelationship",
+    "query": "mutation CreateRelationship($input: CreateRelationshipInput!) {\n  createRelationship(input: $input) {\n    success\n    relationship {\n      id\n      tenantId\n      kind\n      sourceId\n      targetId\n      confidence\n      createdAt\n    }\n    errors {\n      code\n      message\n      retriable\n    }\n  }\n}",
+    "cost": {
+      "estimated": 170,
+      "weight": 3
+    }
+  },
+  "0a1fa47ced51d3988ec3ca3788b5de51ade2a2f5556db1be1400a476cc2110f4": {
+    "operationName": "LinkEntityToInvestigation",
+    "query": "mutation LinkEntityToInvestigation($investigationId: ID!, $entityId: ID!, $tenantId: ID!) {\n  linkEntityToInvestigation(investigationId: $investigationId, entityId: $entityId, tenantId: $tenantId) {\n    success\n    investigation {\n      id\n      tenantId\n      name\n      status\n      updatedAt\n    }\n    errors {\n      code\n      message\n      retriable\n    }\n  }\n}",
+    "cost": {
+      "estimated": 165,
+      "weight": 2
+    }
+  },
+  "953615711dc1417b2ac1e9fda00958af390695bb6f3d20c6cb65673204040723": {
+    "operationName": "RecordInvestigationEvent",
+    "query": "mutation RecordInvestigationEvent($input: RecordInvestigationEventInput!) {\n  recordInvestigationEvent(input: $input) {\n    success\n    event {\n      id\n      investigationId\n      category\n      message\n      occurredAt\n      createdAt\n    }\n    errors {\n      code\n      message\n      retriable\n    }\n  }\n}",
+    "cost": {
+      "estimated": 140,
+      "weight": 2
+    }
+  },
+  "81b24ca96e2200dabf6bf478b209d127873a7896258c7a3f9a55d7900c18ba17": {
+    "operationName": "SubscribeInvestigationStatus",
+    "query": "subscription SubscribeInvestigationStatus($investigationId: ID!, $tenantId: ID!) {\n  investigationStatus(investigationId: $investigationId, tenantId: $tenantId) {\n    investigationId\n    tenantId\n    status\n    occurredAt\n  }\n}",
+    "cost": {
+      "estimated": 40,
+      "weight": 1
+    }
+  }
+}

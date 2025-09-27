@@ -1,7 +1,6 @@
 module.exports = {
   transform: {
-    '^.+\.(ts|tsx)
-: '@swc/jest',
+    '^.+\\.(ts|tsx)$': '@swc/jest',
   },
   testEnvironment: 'node',
   reporters: ['default', ['jest-junit', { outputDirectory: 'reports/junit' }]],
@@ -17,18 +16,16 @@ module.exports = {
     '!**/coverage/**',
   ],
   testMatch: ['**/__tests__/**/*.{ts,tsx,js,jsx}', '**/?(*.)+(spec|test).{ts,tsx,js,jsx}'],
-  moduleNameMapping: {
-    '^(\.{1,2}/.*)\.js
-: '$1',
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
-  transformIgnorePatterns: ['node_modules/(?!(.*\.mjs$))'],
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
   projects: [
     {
       displayName: 'server',
       testMatch: ['<rootDir>/server/**/*.{test,spec}.{js,ts}'],
       transform: {
-        '^.+\.(ts|tsx)
-: '@swc/jest',
+        '^.+\\.(ts|tsx)$': '@swc/jest',
       },
     },
     {
@@ -36,6 +33,17 @@ module.exports = {
       testMatch: ['<rootDir>/client/**/*.{test,spec}.{js,jsx,ts,tsx}'],
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/client/src/setupTests.js'],
+    },
+    {
+      displayName: 'contracts',
+      testMatch: ['<rootDir>/tests/contract/api/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+      transform: {
+        '^.+\\.(ts|tsx)$': '@swc/jest',
+      },
+      moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+      },
+      testEnvironment: 'node',
     },
   ],
 };
