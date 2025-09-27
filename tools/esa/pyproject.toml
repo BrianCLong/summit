@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "esa"
+version = "0.1.0"
+description = "Explainable Sampling Auditor (ESA) toolkit and CLI"
+authors = [{name = "Summit AI", email = "engineering@summit.ai"}]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+esa = "esa.cli:main"
