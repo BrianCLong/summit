@@ -26,6 +26,7 @@ client/tsconfig.tsbuildinfo
 **/tsconfig.test.tsbuildinfo
 logs/
 artifacts/
+!samples/iab/artifacts/
 perf/reports/
 uploads/
 evidence-*/
@@ -76,4 +77,6 @@ conflicts/
 .env
 .env.*
 *.pem
+!samples/iab/keys/sample-private.pem
+!samples/iab/keys/sample-public.pem
 *.key

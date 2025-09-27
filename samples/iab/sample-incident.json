@@ -1,0 +1,48 @@
+{
+  "id": "INC-2025-09-01-privacy",
+  "occurredAt": "2025-09-01T13:03:55Z",
+  "reportedAt": "2025-09-01T14:12:00Z",
+  "severity": "high",
+  "description": "Differential privacy guardrails tripped after ingest logs flagged repeated epsilon overruns during a production deployment.",
+  "redaction": {
+    "fields": ["email", "operator"],
+    "patterns": [
+      { "pattern": "Jane Doe", "replacement": "<NAME:REDACTED>" }
+    ]
+  },
+  "artifacts": [
+    {
+      "id": "ingestion-logs",
+      "type": "log",
+      "path": "./artifacts/system.log",
+      "description": "Structured application log excerpt"
+    },
+    {
+      "id": "privacy-policy",
+      "type": "policy",
+      "path": "./artifacts/policy.json",
+      "metadata": {
+        "commitSha": "9f5a2c13e7b4a15d4c0f2a9e6b8d7c1e2f3a4b5c"
+      },
+      "description": "Policy snapshot at incident commit"
+    },
+    {
+      "id": "dp-budget",
+      "type": "dp-budget",
+      "path": "./artifacts/dp-budget.json",
+      "description": "Budget allocations prior to incident"
+    },
+    {
+      "id": "consent-proof",
+      "type": "consent-proof",
+      "path": "./artifacts/consent-proof.json",
+      "description": "Latest consent affirmation for impacted subject"
+    },
+    {
+      "id": "error-trace",
+      "type": "error-trace",
+      "path": "./artifacts/error-trace.json",
+      "description": "Stack trace captured from policy enforcer"
+    }
+  ]
+}

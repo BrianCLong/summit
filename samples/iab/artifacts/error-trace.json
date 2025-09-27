@@ -1,0 +1,7 @@
+{
+  "service": "policy-enforcer",
+  "error": "OutOfBudgetError: epsilon budget exceeded for session 7f91",
+  "stack": "OutOfBudgetError: epsilon budget exceeded\n    at enforce (/srv/enforcer.js:45:13)\n    at processRequest (/srv/enforcer.js:90:5)",
+  "timestamp": "2025-09-01T13:04:15Z",
+  "operator": "Maria Garcia"
+}

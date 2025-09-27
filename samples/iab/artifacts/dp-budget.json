@@ -1,0 +1,9 @@
+{
+  "totalEpsilon": 5.0,
+  "totalDelta": 1e-5,
+  "allocations": [
+    { "system": "analytics", "epsilon": 3.0, "delta": 4e-6 },
+    { "system": "monitoring", "epsilon": 1.0, "delta": 3e-6 },
+    { "system": "experimentation", "epsilon": 1.0, "delta": 3e-6 }
+  ]
+}

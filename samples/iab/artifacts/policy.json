@@ -1,0 +1,17 @@
+{
+  "commitSha": "9f5a2c13e7b4a15d4c0f2a9e6b8d7c1e2f3a4b5c",
+  "controls": [
+    {
+      "id": "POL-001",
+      "title": "Differential Privacy Guardrails",
+      "owners": ["Alice Analyst", "Bob Builder"],
+      "lastReviewed": "2025-08-22"
+    },
+    {
+      "id": "POL-013",
+      "title": "Consent Verification",
+      "owners": ["Carol Counsel"],
+      "lastReviewed": "2025-07-30"
+    }
+  ]
+}
