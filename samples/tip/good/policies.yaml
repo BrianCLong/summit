@@ -1,0 +1,32 @@
+---
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8stenantisolation
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sTenantIsolation
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8stenantisolation
+
+        violation[{"msg": msg}] {
+          input.review.kind.kind == "NetworkPolicy"
+          not input.review.object.spec.ingress
+          msg := "network policies must define ingress"
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sTenantIsolation
+metadata:
+  name: require-network-policies
+spec:
+  match:
+    kinds:
+      - apiGroups: ["networking.k8s.io"]
+        kinds: ["NetworkPolicy"]
+  parameters:
+    enforcement: strict
