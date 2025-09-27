@@ -17,6 +17,11 @@ Fragmented tools force swivel‑chair investigations. IntelGraph fuses **Shared*
 
 See `docs/ROADMAP.md` for next phases and `docs/ARCHITECTURE.md` for system design.
 
+### Persona Guides
+
+- [IntelGraph Investigator & Analyst Guide](guides/intelgraph-user-guide.md) – end-to-end walkthroughs for graph queries, data ingestion, and visualization workflows.
+- [Maestro Conductor Build & Orchestration Guide](guides/maestro-conductor-user-guide.md) – build, deploy, and governance playbooks across Kubernetes, Helm, and ArgoCD.
+
 ## Documentation Structure
 
 - `docs/` – Active guides, architecture references, and onboarding material
