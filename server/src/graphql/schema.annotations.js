@@ -25,6 +25,7 @@ const annotationsTypeDefs = gql`
     updatedAt: String!
     createdBy: String!
     enclave: Enclave!
+    tags: [String!]!
     # history: [AnnotationHistory!] # To be implemented later if needed for detailed history
   }
 
@@ -32,12 +33,14 @@ const annotationsTypeDefs = gql`
     content: String!
     confidence: Confidence
     enclave: Enclave!
+    tags: [String!]
   }
 
   input UpdateAnnotationInput {
     content: String
     confidence: Confidence
     enclave: Enclave
+    tags: [String!]
   }
 
   type Edge { # Define the Edge type here
