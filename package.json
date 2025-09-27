@@ -8,6 +8,7 @@
     "client",
     "server",
     "packages/mcp-core",
+    "packages/pfpt",
     "apps/intelgraph-mcp",
     "apps/maestro-mcp"
   ],
