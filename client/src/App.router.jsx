@@ -77,6 +77,7 @@ import ClaimsViewer from './features/conductor/ClaimsViewer';
 import RetractionQueue from './features/conductor/RetractionQueue';
 import CostAdvisor from './features/conductor/CostAdvisor';
 import RunSearch from './features/conductor/RunSearch';
+import HFAWorkbench from './features/hfa/HFAWorkbench';
 
 // Navigation items
 const navigationItems = [
@@ -110,6 +111,7 @@ const navigationItems = [
   { path: '/access-intel', label: 'Access Intel', icon: <Security /> },
   { path: '/geoint', label: 'GeoInt Map', icon: <Map /> },
   { path: '/reports', label: 'Reports', icon: <Assessment /> },
+  { path: '/hfa', label: 'HFA Workbench', icon: <Assessment /> },
   { path: '/system', label: 'System', icon: <Settings />, roles: ['ADMIN'] },
   {
     path: '/admin/osint-feeds',
@@ -664,6 +666,7 @@ function MainLayout() {
             <Route path="/access-intel" element={<AccessIntelPage />} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
+            <Route path="/hfa" element={<HFAWorkbench />} />
             <Route element={<ProtectedRoute roles={['ADMIN']} />}>
               <Route path="/system" element={<InvestigationsPage />} />
               <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />

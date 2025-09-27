@@ -49,6 +49,7 @@ import n8nRouter from './routes/n8n.js';
 import { trustCenterRouter } from './routes/trust-center.js';
 import { dataResidencyRouter } from './routes/data-residency.js';
 import { qualityEvaluationRouter } from './routes/quality-evaluation.js';
+import hfaRouter from './routes/hfa.js';
 import PluginManager from './marketplace/plugin-manager.js';
 import SafetyV2Service from './safety/safety-v2.js';
 import { fipsService } from './federal/fips-compliance.js';
@@ -196,6 +197,7 @@ export const createApp = async () => {
   
   // Quality Evaluation Platform - semantic SLOs and AI model quality assessment
   app.use('/api/quality-evaluation', qualityEvaluationRouter);
+  app.use('/api/hfa', hfaRouter);
   
   // Marketplace GA - signed plugins with capability scoping and revocation
   const pluginManager = new PluginManager();
