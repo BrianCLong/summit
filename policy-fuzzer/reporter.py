@@ -4,6 +4,30 @@ import os
 
 REPORTS_DIR = "policy-fuzzer/reports"
 
+def assess_impact_and_severity(failing_case):
+    """Assesses the impact and severity of a failing case based on its reason."""
+    reason = failing_case.get("reason", "")
+    severity = "Low"
+    impact = "Minor Bug"
+
+    if "Synonym dodge detected" in reason or "Regex dodge detected" in reason:
+        severity = "Medium"
+        impact = "Policy Bypass (Obfuscation)"
+    elif "mismatched data type" in reason or "invalid date format" in reason:
+        severity = "Medium"
+        impact = "Data Type Coercion Vulnerability"
+    elif "Metamorphic violation" in reason:
+        severity = "High"
+        impact = "Metamorphic Relation Violation"
+    elif "outside policy window" in reason:
+        severity = "High"
+        impact = "Time Window Policy Bypass"
+    elif "Consent policy requires" in reason or "License policy requires" in reason or "Geo policy requires" in reason:
+        severity = "Critical"
+        impact = "Direct Policy Violation"
+
+    return severity, impact
+
 def generate_html_report(failing_cases, coverage_data):
     """Generates an HTML report of failing cases and coverage data."""
     os.makedirs(REPORTS_DIR, exist_ok=True)
@@ -45,13 +69,17 @@ def generate_html_report(failing_cases, coverage_data):
     </html>
     """
 
+    # Sort failing cases by severity (Critical > High > Medium > Low)
+    severity_order = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1}
+    sorted_failing_cases = sorted(failing_cases, key=lambda x: severity_order.get(x.get("severity", "Low"), 0), reverse=True)
+
     # Generate failing cases table
     failing_cases_table = ""
-    if failing_cases:
-        failing_cases_table = "<table><tr><th>Policy</th><th>Query</th><th>Reason</th><th>Reproducer</th></tr>"
-        for i, case in enumerate(failing_cases):
+    if sorted_failing_cases:
+        failing_cases_table = "<table><tr><th>Severity</th><th>Impact</th><th>Policy</th><th>Query</th><th>Reason</th><th>Reproducer</th></tr>"
+        for i, case in enumerate(sorted_failing_cases):
             reproducer_link = f"<a href=\"reproducer_{i}.py\">reproducer_{i}.py</a>"
-            failing_cases_table += f"<tr><td><pre>{case['policy']}</pre></td><td><pre>{case['query']}</pre></td><td>{case['reason']}</td><td>{reproducer_link}</td></tr>"
+            failing_cases_table += f"<tr><td>{case.get('severity', 'N/A')}</td><td>{case.get('impact', 'N/A')}</td><td><pre>{case['policy']}</pre></td><td><pre>{case['query']}</pre></td><td>{case['reason']}</td><td>{reproducer_link}</td></tr>"
         failing_cases_table += "</table>"
     else:
         failing_cases_table = "<p>No failing cases found.</p>"
@@ -72,11 +100,19 @@ def generate_reports(failing_cases, coverage_data):
     """Generates various reports based on fuzzing results."""
     os.makedirs(REPORTS_DIR, exist_ok=True)
 
+    # Assess impact and severity for each failing case
+    for case in failing_cases:
+        severity, impact = assess_impact_and_severity(case)
+        case["severity"] = severity
+        case["impact"] = impact
+
     # Generate failing cases text report
     if failing_cases:
         with open(os.path.join(REPORTS_DIR, "failing_cases.txt"), "w") as f:
             for i, case in enumerate(failing_cases):
                 f.write(f"Failing Case {i+1}:\n")
+                f.write(f"  Severity: {case.get('severity', 'N/A')}\n")
+                f.write(f"  Impact: {case.get('impact', 'N/A')}\n")
                 f.write(f"  Policy: {case['policy']}\n")
                 f.write(f"  Query: {case['query']}\n")
                 f.write(f"  Reason: {case['reason']}\n")
@@ -95,11 +131,11 @@ def generate_reports(failing_cases, coverage_data):
                 f.write(f"policy = {case['policy']}\n")
                 f.write(f"query = {case['query']}\n")
                 f.write("\n")
-                f.write("consent_result = check_consent(policy, query)\n")
-                f.write("licenses_result = check_licenses(policy, query)\n")
-                f.write("geo_result = check_geo(policy, query)\n")
-                f.write("retention_result = check_retention(policy, query)\n")
-                f.write("time_window_result = check_time_window(policy, query)\n")
+                f.write("consent_result, _ = check_consent(policy, query)\n")
+                f.write("licenses_result, _ = check_licenses(policy, query)\n")
+                f.write("geo_result, _ = check_geo(policy, query)\n")
+                f.write("retention_result, _ = check_retention(policy, query)\n")
+                f.write("time_window_result, _ = check_time_window(policy, query)\n")
                 f.write("\n")
                 f.write("is_compliant = all([consent_result, licenses_result, geo_result, retention_result, time_window_result])\n")
                 f.write(f"print(f\"Policy: {policy}\")\n")
