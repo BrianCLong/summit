@@ -70,6 +70,20 @@ class MetamorphicTester:
             'check': lambda original_compliant, transformed_compliant: original_compliant == transformed_compliant # Fuzzy date should ideally maintain compliance if within reasonable bounds
         })
 
+        # Relation 9: Geo - Proximity shift
+        relations.append({
+            'name': 'geo_proximity_shift',
+            'transform': lambda p, q: self._geo_proximity_shift(p, q),
+            'check': lambda original_compliant, transformed_compliant: original_compliant == transformed_compliant # Proximity shift should ideally maintain compliance if within reasonable bounds
+        })
+
+        # Relation 10: Geo - Country code variation
+        relations.append({
+            'name': 'geo_country_code_variation',
+            'transform': lambda p, q: self._geo_country_code_variation(p, q),
+            'check': lambda original_compliant, transformed_compliant: original_compliant == transformed_compliant # Country code variation should maintain compliance
+        })
+
         return relations
 
     def _shift_time_within_window(self, policy, query):
@@ -117,6 +131,29 @@ class MetamorphicTester:
         if "location" in transformed_query and "geo" in ATTACK_GRAMMARS["synonym_dodges"]:
             if transformed_query["location"] in ATTACK_GRAMMARS["synonym_dodges"]["geo"]:
                 transformed_query["location"] = random.choice(ATTACK_GRAMMARS["synonym_dodges"]["geo"])
+        return transformed_query
+
+    def _geo_proximity_shift(self, policy, query):
+        transformed_query = deepcopy(query)
+        if "location" in transformed_query:
+            current_location = transformed_query["location"]
+            # Simplified proximity shift: if US, shift to CA or EU randomly
+            if current_location == "US":
+                transformed_query["location"] = random.choice(["CA", "EU"])
+            elif current_location == "EU":
+                transformed_query["location"] = random.choice(["US", "CA"])
+            # Add more complex logic for actual geo proximity
+        return transformed_query
+
+    def _geo_country_code_variation(self, policy, query):
+        transformed_query = deepcopy(query)
+        if "location" in transformed_query:
+            current_location = transformed_query["location"]
+            if current_location == "US":
+                transformed_query["location"] = "USA"
+            elif current_location == "CA":
+                transformed_query["location"] = "CAN"
+            # Add more country code variations
         return transformed_query
 
     def _synonym_data_type(self, policy, query):
