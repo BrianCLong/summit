@@ -1,0 +1,329 @@
+{
+  "workstream": "Workstream 1 — Conductor Summary, Backlog & RACI",
+  "release_horizon": {
+    "release_1": {
+      "label": "R1 (Week 1)",
+      "focus": "Publish conductor summary, telemetry contracts, and guardrail definitions."
+    },
+    "release_2": {
+      "label": "R2 (Week 3)",
+      "focus": "Operationalize backlog governance, alerts, and UX validation for production rollout."
+    }
+  },
+  "epics": [
+    {
+      "id": "WS1-E1",
+      "title": "Telemetry contracts and evidence fabric",
+      "priority": "Must",
+      "description": "Define integrations that allow Workstreams 2–8 to expose logs, metrics, tests, and provenance data into the Conductor summary.",
+      "stories": [
+        {
+          "id": "WS1-S1",
+          "title": "Author evidence contract with dependent workstreams",
+          "priority": "Must",
+          "dependent_workstreams": ["WS2", "WS3", "WS4", "WS5", "WS6", "WS7", "WS8"],
+          "description": "Create and socialize a versioned schema for logs, metrics, tests, and provenance events that downstream teams must emit.",
+          "acceptance_criteria": [
+            "Schema covers logs, metrics, automated test artifacts, and provenance metadata fields mapped to guardrail IDs.",
+            "Contracts reviewed and acknowledged by leads of Workstreams 2–8 with tracked sign-off.",
+            "Validation checklist integrated into CI to reject payloads violating the schema."
+          ],
+          "verification": [
+            {
+              "type": "design review",
+              "steps": [
+                "Run joint review with Workstreams 2–8 and capture approvals in meeting notes.",
+                "Attach schema artifact to repository under docs/observability with version tag."
+              ]
+            },
+            {
+              "type": "automation",
+              "steps": [
+                "Execute schema validation tests in CI demonstrating rejection of malformed payload samples.",
+                "Produce sample payloads from each workstream showing compliance."
+              ]
+            }
+          ],
+          "test_notes": "Schema linting runs via CI pipeline stub using JSON Schema validation script.",
+          "evidence": {
+            "logs": ["CI validation job output storing schema lint results."],
+            "metrics": ["Count of compliant vs. non-compliant payloads per workstream."],
+            "tests": ["Automated schema validation test suite artifacts."],
+            "provenance": ["Versioned schema file hash and approval meeting minutes link."]
+          },
+          "tasks": [
+            {
+              "id": "WS1-S1-T1",
+              "title": "Draft evidence schema and guardrail mappings",
+              "priority": "Must",
+              "owners": ["Dev PM", "Data PM"],
+              "dependencies": ["WS2", "WS3"],
+              "description": "Create JSON/YAML schema enumerating required evidence fields with guardrail identifiers."
+            },
+            {
+              "id": "WS1-S1-T2",
+              "title": "Implement CI schema validation hook",
+              "priority": "Must",
+              "owners": ["Dev Lead"],
+              "dependencies": ["WS4"],
+              "description": "Add validation script to trunk pipeline to enforce evidence contract compliance."
+            },
+            {
+              "id": "WS1-S1-T3",
+              "title": "Secure cross-workstream approvals",
+              "priority": "Must",
+              "owners": ["MC"],
+              "dependencies": ["WS5", "WS6", "WS7", "WS8"],
+              "description": "Host sign-off review capturing approvals and risks in shared log."
+            }
+          ]
+        },
+        {
+          "id": "WS1-S2",
+          "title": "Cost and performance guardrail instrumentation plan",
+          "priority": "Must",
+          "dependent_workstreams": ["WS2", "WS3", "WS6"],
+          "description": "Define alerting thresholds, dashboards, and evidence linkage for cost and SLO guardrails across environments.",
+          "acceptance_criteria": [
+            "Alert policy specifies 80% threshold notifications for Dev, Staging, Prod, and LLM spend.",
+            "Performance SLO dashboards list p95 targets for API read/write, subscriptions, and Neo4j hops with owners.",
+            "Plan references telemetry sources provided by Workstreams 2, 3, and 6 with clear data latency expectations."
+          ],
+          "verification": [
+            {
+              "type": "walkthrough",
+              "steps": [
+                "Review alert configuration draft with SRE and FinOps teams.",
+                "Demonstrate sample alert firing using synthetic data within staging sandbox."
+              ]
+            },
+            {
+              "type": "documentation",
+              "steps": [
+                "Publish guardrail instrumentation appendix linking to dashboards and runbooks.",
+                "Capture sign-off from Security for monitoring coverage." 
+              ]
+            }
+          ],
+          "test_notes": "Synthetic alert tests executed via staging Grafana/Prometheus sandbox scripts.",
+          "evidence": {
+            "logs": ["Staging alert simulation logs stored in observability bucket."],
+            "metrics": ["Grafana dashboard snapshot IDs for each guardrail."],
+            "tests": ["Synthetic alert trigger test cases with pass/fail results."],
+            "provenance": ["Signed change record referencing alert policy document ID."]
+          },
+          "tasks": [
+            {
+              "id": "WS1-S2-T1",
+              "title": "Draft guardrail alert policy",
+              "priority": "Must",
+              "owners": ["SRE Lead"],
+              "dependencies": ["WS6"],
+              "description": "Document alert thresholds, notification channels, and escalation steps."
+            },
+            {
+              "id": "WS1-S2-T2",
+              "title": "Map telemetry sources and owners",
+              "priority": "Must",
+              "owners": ["Data PM"],
+              "dependencies": ["WS2", "WS3"],
+              "description": "List dashboards, log streams, and Neo4j traces with responsible owners."
+            },
+            {
+              "id": "WS1-S2-T3",
+              "title": "Validate synthetic alert firing",
+              "priority": "Should",
+              "owners": ["SRE Lead", "Security"],
+              "dependencies": ["WS6"],
+              "description": "Run scripted alerts in staging to confirm notifications route correctly."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "WS1-E2",
+      "title": "Release governance and cadence enablement",
+      "priority": "Must",
+      "description": "Align trunk-based workflows, weekly staging cuts, and biweekly production releases with clear accountability.",
+      "stories": [
+        {
+          "id": "WS1-S3",
+          "title": "Codify release governance checklist and milestone RACI",
+          "priority": "Must",
+          "dependent_workstreams": ["WS4", "WS5", "WS7"],
+          "description": "Produce week-level milestones and responsibilities for Dev, Sec, SRE, Data, and Docs teams supporting releases.",
+          "acceptance_criteria": [
+            "RACI covers two release cycles with milestones aligned to weekly staging and biweekly production deployments.",
+            "Checklist references security gates, data validation, and documentation sign-offs owned by Workstreams 4, 5, and 7.",
+            "Governance artifacts linked in CI/CD pipeline and accessible to all stakeholders."
+          ],
+          "verification": [
+            {
+              "type": "tabletop exercise",
+              "steps": [
+                "Simulate release dry-run with all accountable owners and capture action items.",
+                "Ensure CI pipeline references updated checklist via URL or artifact ID."
+              ]
+            },
+            {
+              "type": "sign-off",
+              "steps": [
+                "Collect digital approvals from Dev, Sec, SRE, Data, and Docs leads.",
+                "Archive approvals in governance repository with timestamped entries."
+              ]
+            }
+          ],
+          "test_notes": "Tabletop exercise recorded and summarized; CI integration validated through pipeline run screenshot.",
+          "evidence": {
+            "logs": ["CI pipeline execution logs referencing governance checklist artifact."],
+            "metrics": ["Release readiness checklist completion rate per milestone."],
+            "tests": ["Tabletop simulation checklist with pass/fail criteria."],
+            "provenance": ["Signed RACI document with version control commit hash."]
+          },
+          "tasks": [
+            {
+              "id": "WS1-S3-T1",
+              "title": "Draft week-level RACI",
+              "priority": "Must",
+              "owners": ["MC", "Docs Lead"],
+              "dependencies": ["WS5", "WS7"],
+              "description": "Map Responsible, Accountable, Consulted, Informed parties per milestone."
+            },
+            {
+              "id": "WS1-S3-T2",
+              "title": "Integrate checklist with CI pipeline",
+              "priority": "Should",
+              "owners": ["Dev Lead"],
+              "dependencies": ["WS4"],
+              "description": "Add governance checklist link to pipeline notifications and merge gates."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "WS1-E3",
+      "title": "One-screen Conductor UX and communication",
+      "priority": "Should",
+      "description": "Deliver a concise UX layout, messaging, and documentation for the Conductor summary interface.",
+      "stories": [
+        {
+          "id": "WS1-S4",
+          "title": "Design and validate single-screen Conductor summary",
+          "priority": "Should",
+          "dependent_workstreams": ["WS2", "WS5", "WS8"],
+          "description": "Produce wireframe, content inventory, and usability validation for the one-screen experience.",
+          "acceptance_criteria": [
+            "Wireframe includes guardrail KPIs, release milestones, and evidence status indicators sourced from Workstreams 2, 5, and 8.",
+            "Usability test with at least five stakeholders confirms critical information is accessible within two clicks or less.",
+            "Documentation snippet ready for Docs team describing screen purpose and navigation entry point."
+          ],
+          "verification": [
+            {
+              "type": "usability test",
+              "steps": [
+                "Conduct moderated sessions with five target users and capture SUS (System Usability Scale) >= 80.",
+                "Record session notes and consolidate findings into UX report."
+              ]
+            },
+            {
+              "type": "documentation review",
+              "steps": [
+                "Docs team reviews content snippet and approves tone/accuracy.",
+                "Publish final artifact in docs/maestro section with cross-links to backlog items."
+              ]
+            }
+          ],
+          "test_notes": "SUS survey executed via internal tooling; recordings stored in UX repository with access controls.",
+          "evidence": {
+            "logs": ["UX session attendance logs with timestamps."],
+            "metrics": ["SUS score summary and time-on-task metrics."],
+            "tests": ["Usability scripts and completion outcomes."],
+            "provenance": ["Version-controlled wireframe link and approved documentation snippet."]
+          },
+          "tasks": [
+            {
+              "id": "WS1-S4-T1",
+              "title": "Create single-screen wireframe",
+              "priority": "Should",
+              "owners": ["Docs/UX Lead"],
+              "dependencies": ["WS2", "WS8"],
+              "description": "Draft layout combining guardrail indicators, release cadence, and evidence summaries."
+            },
+            {
+              "id": "WS1-S4-T2",
+              "title": "Review wireframe with stakeholders",
+              "priority": "Should",
+              "owners": ["MC"],
+              "dependencies": ["WS5"],
+              "description": "Host review session collecting feedback and prioritizing adjustments."
+            },
+            {
+              "id": "WS1-S4-T3",
+              "title": "Run usability validation",
+              "priority": "Could",
+              "owners": ["Docs/UX Lead"],
+              "dependencies": ["WS8"],
+              "description": "Conduct usability testing and synthesize outcomes for backlog updates."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "WS1-E4",
+      "title": "Communications and stakeholder alignment",
+      "priority": "Could",
+      "description": "Ensure stakeholders remain informed about guardrail compliance and release readiness.",
+      "stories": [
+        {
+          "id": "WS1-S5",
+          "title": "Publish stakeholder comms plan for releases",
+          "priority": "Could",
+          "dependent_workstreams": ["WS6", "WS7"],
+          "description": "Outline messaging cadence, escalation contacts, and evidence attachment requirements for release communications.",
+          "acceptance_criteria": [
+            "Communication plan covers pre-cut, staging verification, production go-live, and retro touchpoints.",
+            "Escalation matrix references guardrail breaches and ties to SRE/Security runbooks.",
+            "Evidence attachment checklist aligns with schema defined in Story WS1-S1."
+          ],
+          "verification": [
+            {
+              "type": "review",
+              "steps": [
+                "Share plan with Stakeholder council and gather sign-off from Dev, Sec, SRE, Data, Docs reps.",
+                "Dry-run communication sequence during mock release."
+              ]
+            }
+          ],
+          "test_notes": "Mock release communications executed via Slack/email templates with audit logs exported.",
+          "evidence": {
+            "logs": ["Communication dry-run logs from messaging platform."],
+            "metrics": ["Notification delivery and acknowledgment rates."],
+            "tests": ["Mock release checklist results."],
+            "provenance": ["Signed communications plan stored in docs/releases."]
+          },
+          "tasks": [
+            {
+              "id": "WS1-S5-T1",
+              "title": "Draft communication timeline",
+              "priority": "Could",
+              "owners": ["Docs Lead"],
+              "dependencies": ["WS7"],
+              "description": "List milestones, message owners, and target recipients for each release phase."
+            },
+            {
+              "id": "WS1-S5-T2",
+              "title": "Align escalation paths with runbooks",
+              "priority": "Could",
+              "owners": ["SRE Lead", "Security"],
+              "dependencies": ["WS6"],
+              "description": "Map guardrail breaches to escalation paths referencing existing runbooks." 
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
