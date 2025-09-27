@@ -112,6 +112,20 @@ class MetamorphicTester:
             'check': lambda original_compliant, transformed_compliant: original_compliant == transformed_compliant # Shortening retention should ideally maintain compliance
         })
 
+        # Relation 15: User Role - Escalation
+        relations.append({
+            'name': 'user_role_escalation',
+            'transform': lambda p, q: self._user_role_escalation(p, q),
+            'check': lambda original_compliant, transformed_compliant: transformed_compliant if original_compliant else True # Escalating role should ideally maintain or increase compliance
+        })
+
+        # Relation 16: Network Condition - Change
+        relations.append({
+            'name': 'network_condition_change',
+            'transform': lambda p, q: self._network_condition_change(p, q),
+            'check': lambda original_compliant, transformed_compliant: not transformed_compliant if original_compliant else True # Changing network condition might impact compliance
+        })
+
         return relations
 
     def _shift_time_within_window(self, policy, query):
@@ -224,6 +238,26 @@ class MetamorphicTester:
                 transformed_query["retention"] = "30d"
             elif current_retention == "1y":
                 transformed_query["retention"] = "90d"
+        return transformed_query
+
+    def _user_role_escalation(self, policy, query):
+        transformed_query = deepcopy(query)
+        if "user_role" in transformed_query:
+            current_role = transformed_query["user_role"]
+            if current_role == "guest":
+                transformed_query["user_role"] = "analyst"
+            elif current_role == "analyst":
+                transformed_query["user_role"] = "admin"
+        return transformed_query
+
+    def _network_condition_change(self, policy, query):
+        transformed_query = deepcopy(query)
+        if "network_condition" in transformed_query:
+            current_condition = transformed_query["network_condition"]
+            if current_condition == "secure":
+                transformed_query["network_condition"] = "unsecure"
+            elif current_condition == "unsecure":
+                transformed_query["network_condition"] = "vpn"
         return transformed_query
 
     def _synonym_data_type(self, policy, query):
