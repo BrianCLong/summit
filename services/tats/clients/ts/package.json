@@ -1,0 +1,19 @@
+{
+  "name": "@summit/tats-client",
+  "version": "0.1.0",
+  "description": "Temporal Access Token Service client library",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "base64url": "^3.0.1",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

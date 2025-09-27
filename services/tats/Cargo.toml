@@ -1,0 +1,41 @@
+[package]
+name = "tats"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "tats"
+path = "src/lib.rs"
+
+[[bin]]
+name = "tats-service"
+path = "src/main.rs"
+
+[dependencies]
+axum = { version = "0.7", features = ["json"] }
+base64 = { version = "0.22", features = ["alloc"] }
+chrono = { version = "0.4", features = ["serde"] }
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+hyper = { version = "1", features = ["http1", "server"] }
+rand = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1.0"
+serde_with = { version = "3", features = ["macros"] }
+sha2 = "0.10"
+thiserror = "1.0"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+tower = "0.4"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
+parking_lot = "0.12"
+hex = "0.4"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["async"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+
+[[bench]]
+name = "perf"
+harness = false
