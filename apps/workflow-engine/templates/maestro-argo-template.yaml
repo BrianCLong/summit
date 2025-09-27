@@ -1,0 +1,73 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: maestro-conductor-standard
+  labels:
+    maestro.persona/name: maestro-conductor
+    maestro.persona/version: v2.0
+    maestro.orchestration/tier: production
+spec:
+  entrypoint: maestro-dag
+  parallelism: 100
+  podGC:
+    strategy: OnWorkflowCompletion
+  templates:
+    - name: maestro-dag
+      dag:
+        tasks:
+          - name: bootstrap-context
+            template: maestro-task
+            arguments:
+              parameters:
+                - name: task
+                  value: bootstrap-context
+          - name: orchestrate-release
+            dependencies:
+              - bootstrap-context
+            template: maestro-task
+            arguments:
+              parameters:
+                - name: task
+                  value: orchestrate-release
+          - name: verify-telemetry
+            dependencies:
+              - orchestrate-release
+            template: maestro-task
+            arguments:
+              parameters:
+                - name: task
+                  value: verify-telemetry
+          - name: publish-ledger
+            dependencies:
+              - verify-telemetry
+            template: maestro-task
+            arguments:
+              parameters:
+                - name: task
+                  value: publish-ledger
+    - name: maestro-task
+      inputs:
+        parameters:
+          - name: task
+      container:
+        image: ghcr.io/intelgraph/maestro-task-runner:stable
+        command:
+          - /bin/sh
+          - -c
+        args:
+          - |
+            echo "[Maestro Conductor] Running task: {{inputs.parameters.task}}";
+            echo "Persona: {{workflow.annotations.maestro.conductor/mission}}";
+            echo "Trace to telemetry channel {{workflow.annotations.maestro.conductor/telemetry-channel}}";
+        env:
+          - name: MAESTRO_PERSONA
+            value: maestro-conductor
+          - name: MAESTRO_TELEMETRY_CHANNEL
+            value: maestro-orchestration-events
+      retryStrategy:
+        limit: 3
+        retryPolicy: Always
+        backoff:
+          duration: 5s
+          factor: 2
+          maxDuration: 1m

@@ -4,16 +4,26 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import compression from 'compression';
 import { Pool } from 'pg';
-import neo4j from 'neo4j-driver';
+import neo4j, { Driver as Neo4jDriver } from 'neo4j-driver';
 import { createClient } from 'redis';
 import { WorkflowService } from './services/WorkflowService';
 import { WorkflowBuilder, BuiltInWorkflowTemplates } from './services/WorkflowBuilder';
 import { logger } from './utils/logger';
 import { config } from './config';
 import { authenticate, authorize } from './middleware/auth';
+import { ArgoWorkflowEngine } from './services/ArgoWorkflowEngine';
+import { buildDefaultMaestroPersona } from './services/maestroPersona';
 
 const app = express();
 const PORT = config.server.port || 4005;
+
+type AuthedRequest = express.Request & {
+  user?: {
+    id: string;
+    email?: string;
+    role?: string;
+  };
+};
 
 // Security middleware
 app.use(helmet());
@@ -49,9 +59,21 @@ app.get('/health', (req, res) => {
 
 // Database connections
 let pgPool: Pool;
-let neo4jDriver: neo4j.Driver;
+let neo4jDriver: Neo4jDriver;
 let redisClient: any;
 let workflowService: WorkflowService;
+
+function setWorkflowServiceInstance(service: WorkflowService) {
+  workflowService = service;
+}
+
+function getWorkflowServiceInstance(): WorkflowService {
+  if (!workflowService) {
+    throw new Error('Workflow service has not been initialized');
+  }
+
+  return workflowService;
+}
 
 async function initializeServices() {
   try {
@@ -98,7 +120,17 @@ async function initializeServices() {
     logger.info('Redis connected successfully');
 
     // Initialize workflow service
-    workflowService = new WorkflowService(pgPool, neo4jDriver, redisClient);
+    const argoEngine = new ArgoWorkflowEngine();
+    const personaDefaults = buildDefaultMaestroPersona();
+
+    workflowService = new WorkflowService(
+      pgPool,
+      neo4jDriver,
+      redisClient,
+      argoEngine,
+      personaDefaults,
+    );
+    setWorkflowServiceInstance(workflowService);
 
     // Set up event listeners
     workflowService.on('workflow.execution.started', (execution) => {
@@ -113,6 +145,10 @@ async function initializeServices() {
       logger.error(`Workflow execution failed: ${execution.id}`, error);
     });
 
+    workflowService.on('workflow.execution.retried', (execution) => {
+      logger.info(`Workflow execution retried: ${execution.id}`);
+    });
+
     logger.info('Workflow services initialized successfully');
   } catch (error) {
     logger.error('Failed to initialize services:', error);
@@ -124,9 +160,10 @@ async function initializeServices() {
 app.use('/api', authenticate);
 
 // Workflow Definition API Routes
-app.post('/api/workflows', authorize(['user', 'admin']), async (req, res) => {
+app.post('/api/workflows', authorize(['user', 'admin']), async (req: AuthedRequest, res) => {
   try {
-    const workflow = await workflowService.createWorkflow(req.body, req.user.id);
+    const userId = req.user?.id || 'system';
+    const workflow = await workflowService.createWorkflow(req.body, userId);
     res.status(201).json(workflow);
   } catch (error) {
     logger.error('Error creating workflow:', error);
@@ -189,15 +226,16 @@ app.delete('/api/workflows/:id', authorize(['admin']), async (req, res) => {
 });
 
 // Workflow Execution API Routes
-app.post('/api/workflows/:id/execute', authorize(['user', 'admin']), async (req, res) => {
+app.post('/api/workflows/:id/execute', authorize(['user', 'admin']), async (req: AuthedRequest, res) => {
   try {
-    const { triggerData } = req.body;
+    const { triggerData, persona } = req.body;
 
     const execution = await workflowService.executeWorkflow(
       req.params.id,
       'manual',
       triggerData,
-      req.user.id,
+      req.user?.id,
+      persona,
     );
 
     res.status(201).json(execution);
@@ -251,10 +289,18 @@ app.post('/api/executions/:id/cancel', authorize(['user', 'admin']), async (req,
   }
 });
 
-app.post('/api/executions/:id/retry', authorize(['user', 'admin']), async (req, res) => {
+app.post('/api/executions/:id/retry', authorize(['user', 'admin']), async (req: AuthedRequest, res) => {
   try {
-    // Retry execution implementation would go here
-    res.status(501).json({ error: 'Retry execution not implemented yet' });
+    const { nodeId, restartSuccessful, persona } = req.body;
+
+    const execution = await workflowService.retryExecution(req.params.id, {
+      nodeId,
+      restartSuccessful,
+      personaOverrides: persona,
+      requestedBy: req.user?.id,
+    });
+
+    res.json(execution);
   } catch (error) {
     logger.error('Error retrying execution:', error);
     res.status(500).json({ error: 'Failed to retry execution' });
@@ -262,7 +308,7 @@ app.post('/api/executions/:id/retry', authorize(['user', 'admin']), async (req, 
 });
 
 // Human Tasks API Routes
-app.get('/api/human-tasks', authorize(['user', 'admin']), async (req, res) => {
+app.get('/api/human-tasks', authorize(['user', 'admin']), async (req: AuthedRequest, res) => {
   try {
     const { page = '1', limit = '20', status, assignee } = req.query;
 
@@ -271,7 +317,7 @@ app.get('/api/human-tasks', authorize(['user', 'admin']), async (req, res) => {
       limit: parseInt(limit as string),
       offset: (parseInt(page as string) - 1) * parseInt(limit as string),
       status: status as string,
-      assignee: (assignee as string) || req.user.id,
+      assignee: (assignee as string) || req.user?.id,
     });
 
     res.json(tasks);
@@ -323,7 +369,7 @@ app.get('/api/workflow-templates', authorize(['user', 'admin']), async (req, res
   }
 });
 
-app.post('/api/workflow-templates/:id/create', authorize(['user', 'admin']), async (req, res) => {
+app.post('/api/workflow-templates/:id/create', authorize(['user', 'admin']), async (req: AuthedRequest, res) => {
   try {
     const { name, customizations } = req.body;
 
@@ -347,7 +393,8 @@ app.post('/api/workflow-templates/:id/create', authorize(['user', 'admin']), asy
       workflowDefinition = { ...workflowDefinition, ...customizations };
     }
 
-    const workflow = await workflowService.createWorkflow(workflowDefinition, req.user.id);
+    const userId = req.user?.id || 'system';
+    const workflow = await workflowService.createWorkflow(workflowDefinition, userId);
 
     res.status(201).json(workflow);
   } catch (error) {
@@ -357,7 +404,7 @@ app.post('/api/workflow-templates/:id/create', authorize(['user', 'admin']), asy
 });
 
 // Workflow Builder endpoint
-app.post('/api/workflow-builder', authorize(['user', 'admin']), async (req, res) => {
+app.post('/api/workflow-builder', authorize(['user', 'admin']), async (req: AuthedRequest, res) => {
   try {
     const { type, name, config } = req.body;
 
@@ -396,7 +443,8 @@ app.post('/api/workflow-builder', authorize(['user', 'admin']), async (req, res)
     }
 
     const workflowDefinition = builder.build();
-    const workflow = await workflowService.createWorkflow(workflowDefinition, req.user.id);
+    const userId = req.user?.id || 'system';
+    const workflow = await workflowService.createWorkflow(workflowDefinition, userId);
 
     res.status(201).json(workflow);
   } catch (error) {
@@ -505,7 +553,26 @@ async function getExecutions(options: any) {
   params.push(options.limit, options.offset);
 
   const result = await pgPool.query(query, params);
-  return result.rows;
+  if (!workflowService) {
+    return result.rows;
+  }
+
+  const enriched = await Promise.all(
+    result.rows.map(async (row) => {
+      try {
+        const execution = await workflowService.getExecution(row.id);
+        return execution || row;
+      } catch (error) {
+        logger.warn('Failed to enrich execution row from Argo', {
+          executionId: row.id,
+          error: error instanceof Error ? error.message : error,
+        });
+        return row;
+      }
+    }),
+  );
+
+  return enriched;
 }
 
 async function getHumanTasks(options: any) {
@@ -637,4 +704,10 @@ if (require.main === module) {
   startServer();
 }
 
-export { app };
+export {
+  app,
+  initializeServices,
+  startServer,
+  setWorkflowServiceInstance,
+  getWorkflowServiceInstance,
+};
