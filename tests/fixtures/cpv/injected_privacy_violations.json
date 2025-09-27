@@ -1,0 +1,11 @@
+[
+  {"zip": "12345", "age": 34, "disease": "flu"},
+  {"zip": "12345", "age": 34, "disease": "flu"},
+  {"zip": "12345", "age": 34, "disease": "flu"},
+  {"zip": "54321", "age": 52, "disease": "cancer"},
+  {"zip": "54321", "age": 52, "disease": "flu"},
+  {"zip": "54321", "age": 52, "disease": "cancer"},
+  {"zip": "11111", "age": 28, "disease": "flu"},
+  {"zip": "11111", "age": 28, "disease": "flu"},
+  {"zip": "11111", "age": 28, "disease": "flu"}
+]
