@@ -54,6 +54,9 @@ jspm_packages/
 out
 dist
 build
+cmol/target/
+cmol/Cargo.lock
+cmol/pkg/
 
 # Serverless directories
 .serverless/
