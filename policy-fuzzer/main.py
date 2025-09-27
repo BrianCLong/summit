@@ -30,11 +30,11 @@ def main():
         should_be_compliant = oracle.determine_expected_compliance(policy, query)
 
         # Check against governance layers
-        consent_result = check_consent(policy, query)
-        licenses_result = check_licenses(policy, query)
-        geo_result = check_geo(policy, query)
-        retention_result = check_retention(policy, query)
-        time_window_result = check_time_window(policy, query)
+        consent_result, consent_reason = check_consent(policy, query)
+        licenses_result, licenses_reason = check_licenses(policy, query)
+        geo_result, geo_reason = check_geo(policy, query)
+        retention_result, retention_reason = check_retention(policy, query)
+        time_window_result, time_window_reason = check_time_window(policy, query)
 
         is_compliant = all([consent_result, licenses_result, geo_result, retention_result, time_window_result])
 
@@ -50,16 +50,17 @@ def main():
         should_be_compliant = oracle.determine_expected_compliance(policy, query)
 
         # Check against governance layers
-        consent_result = check_consent(policy, query)
-        licenses_result = check_licenses(policy, query)
-        geo_result = check_geo(policy, query)
-        retention_result = check_retention(policy, query)
-        time_window_result = check_time_window(policy, query)
+        consent_result, consent_reason = check_consent(policy, query)
+        licenses_result, licenses_reason = check_licenses(policy, query)
+        geo_result, geo_reason = check_geo(policy, query)
+        retention_result, retention_reason = check_retention(policy, query)
+        time_window_result, time_window_reason = check_time_window(policy, query)
 
         is_compliant = all([consent_result, licenses_result, geo_result, retention_result, time_window_result])
 
         if not is_compliant and should_be_compliant:
-            failing_cases.append({"policy": policy, "query": query, "reason": "Fuzzer found a failure"})
+            reasons = ", ".join(filter(None, [consent_reason, licenses_reason, geo_reason, retention_reason, time_window_reason]))
+            failing_cases.append({"policy": policy, "query": query, "reason": f"Fuzzer found a failure: {reasons}"})
 
         # Metamorphic testing
         metamorphic_violations = metamorphic_tester.test_relations(policy, query, should_be_compliant)

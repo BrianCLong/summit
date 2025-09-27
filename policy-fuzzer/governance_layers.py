@@ -123,22 +123,22 @@ def check_consent(policy, query):
     if policy_consent == "user_data":
         if query_data == "user_data":
             COVERAGE["consent"]["policy_user_data_match"] += 1
-            return True
+            return True, None
         elif query_data in ATTACK_GRAMMARS["synonym_dodges"].get("user_data", []):
             COVERAGE["consent"]["policy_user_data_synonym_dodge"] += 1
-            return False # Synonym dodge detected
+            return False, f"Consent policy requires 'user_data', but query used synonym dodge: {query_data}" # Synonym dodge detected
         else:
             COVERAGE["consent"]["policy_user_data_mismatch"] += 1
-            return False
+            return False, f"Consent policy requires 'user_data', but query provided: {query_data}"
     elif policy_consent == "marketing":
         COVERAGE["consent"]["policy_marketing"] += 1
-        return True # Assuming marketing data is generally allowed if policy specifies it
+        return True, None # Assuming marketing data is generally allowed if policy specifies it
     elif policy_consent == "analytics":
         COVERAGE["consent"]["policy_analytics"] += 1
-        return True # Assuming analytics data is generally allowed if policy specifies it
+        return True, None # Assuming analytics data is generally allowed if policy specifies it
     else:
         COVERAGE["consent"]["default"] += 1
-        return True
+        return True, None
 
 def check_licenses(policy, query):
     """Checks licenses."""
@@ -148,19 +148,19 @@ def check_licenses(policy, query):
     if policy_license == "license_A":
         if query_license == "license_A":
             COVERAGE["licenses"]["policy_license_A_match"] += 1
-            return True
+            return True, None
         elif query_license in ATTACK_GRAMMARS["synonym_dodges"].get("license_A", []):
             COVERAGE["licenses"]["policy_license_A_synonym_dodge"] += 1
-            return False
+            return False, f"License policy requires 'license_A', but query used synonym dodge: {query_license}"
         else:
             COVERAGE["licenses"]["policy_license_A_mismatch"] += 1
-            return False
+            return False, f"License policy requires 'license_A', but query provided: {query_license}"
     elif policy_license == "license_B":
         COVERAGE["licenses"]["policy_license_B"] += 1
-        return True
+        return True, None
     else:
         COVERAGE["licenses"]["default"] += 1
-        return True
+        return True, None
 
 def check_geo(policy, query):
     """Checks geo."""
@@ -170,34 +170,34 @@ def check_geo(policy, query):
     if policy_geo == "US":
         if query_location == "US":
             COVERAGE["geo"]["policy_US_match"] += 1
-            return True
+            return True, None
         else:
             for regex in ATTACK_GRAMMARS["regex_dodges"].get("geo", []):
                 if re.match(regex, query_location):
                     COVERAGE["geo"]["policy_US_regex_dodge"] += 1
-                    return False # Regex dodge detected
+                    return False, f"Geo policy requires 'US', but query used regex dodge: {query_location}"
             COVERAGE["geo"]["policy_US_mismatch"] += 1
-            return False
+            return False, f"Geo policy requires 'US', but query provided: {query_location}"
     elif policy_geo == "EU":
         if query_location == "EU":
             COVERAGE["geo"]["policy_EU_match"] += 1
-            return True
+            return True, None
         else:
             for regex in ATTACK_GRAMMARS["regex_dodges"].get("geo", []):
                 if re.match(regex, query_location):
                     COVERAGE["geo"]["policy_EU_regex_dodge"] += 1
-                    return False # Regex dodge detected
+                    return False, f"Geo policy requires 'EU', but query used regex dodge: {query_location}"
             COVERAGE["geo"]["policy_EU_mismatch"] += 1
-            return False
+            return False, f"Geo policy requires 'EU', but query provided: {query_location}"
     elif policy_geo == "CA":
         COVERAGE["geo"]["policy_CA"] += 1
-        return True
+        return True, None
     elif policy_geo == "ANY":
         COVERAGE["geo"]["policy_ANY"] += 1
-        return True
+        return True, None
     else:
         COVERAGE["geo"]["default"] += 1
-        return True
+        return True, None
 
 def check_retention(policy, query):
     """Checks retention."""
@@ -207,28 +207,28 @@ def check_retention(policy, query):
     if policy_retention == "30d":
         if query_retention == "30d":
             COVERAGE["retention"]["policy_30d_match"] += 1
-            return True
+            return True, None
         else:
             # Check for regex dodges
             for regex in ATTACK_GRAMMARS["regex_dodges"].get("retention_period", []):
                 if isinstance(query_retention, str) and re.match(regex, query_retention):
                     COVERAGE["retention"]["policy_30d_regex_dodge"] += 1
-                    return False
+                    return False, f"Retention policy requires '30d', but query used regex dodge: {query_retention}"
             # Check for data type mismatches
             if str(query_retention) in ATTACK_GRAMMARS["data_type_mismatches"].get("retention_period", []):
                 COVERAGE["data_type_mismatches"]["retention_period_mismatch"] += 1
-                return False
+                return False, f"Retention policy requires '30d', but query provided mismatched data type: {query_retention}"
             COVERAGE["retention"]["policy_30d_mismatch"] += 1
-            return False
+            return False, f"Retention policy requires '30d', but query provided: {query_retention}"
     elif policy_retention == "90d":
         COVERAGE["retention"]["policy_90d"] += 1
-        return True
+        return True, None
     elif policy_retention == "1y":
         COVERAGE["retention"]["policy_1y"] += 1
-        return True
+        return True, None
     else:
         COVERAGE["retention"]["default"] += 1
-        return True
+        return True, None
 
 def _apply_timezone_shift_to_datetime(dt, timezone_shift_str):
     if timezone_shift_str:
@@ -250,12 +250,12 @@ def check_time_window(policy, query):
 
     if not all([policy_start_date_str, policy_end_date_str, query_access_date_raw]):
         COVERAGE["time_window"]["default"] += 1
-        return True # No time window specified, so compliant
+        return True, None # No time window specified, so compliant
 
     # Check for data type mismatch for access_date
     if str(query_access_date_raw) in ATTACK_GRAMMARS["data_type_mismatches"].get("access_date", []):
         COVERAGE["data_type_mismatches"]["access_date_mismatch"] += 1
-        return False
+        return False, f"Time window policy expects a valid date, but query provided mismatched data type: {query_access_date_raw}"
 
     try:
         policy_start_date = datetime.fromisoformat(policy_start_date_str)
@@ -263,14 +263,16 @@ def check_time_window(policy, query):
         query_access_date = datetime.fromisoformat(query_access_date_raw)
     except ValueError:
         COVERAGE["data_type_mismatches"]["access_date_mismatch"] += 1
-        return False # Invalid date format
+        return False, f"Time window policy expects a valid date, but query provided invalid date format: {query_access_date_raw}"
 
     # Apply timezone shift if present in the query
-    query_access_date = _apply_timezone_shift_to_datetime(query_access_date, query.get("timezone_shift"))
+    query_access_date_shifted = _apply_timezone_shift_to_datetime(query_access_date, query.get("timezone_shift"))
+    if query.get("timezone_shift"):
+        COVERAGE["time_window"]["timezone_shift"] += 1
 
-    if policy_start_date <= query_access_date <= policy_end_date:
+    if policy_start_date <= query_access_date_shifted <= policy_end_date:
         COVERAGE["time_window"]["in_window"] += 1
-        return True
+        return True, None
     else:
         COVERAGE["time_window"]["out_of_window"] += 1
-        return False
+        return False, f"Access date {query_access_date_shifted.isoformat()} is outside policy window {policy_start_date.isoformat()} - {policy_end_date.isoformat()}"
