@@ -2,7 +2,7 @@
 # FastAPI microservice for AI-powered NER and link suggestions
 
 # Core FastAPI framework
-fastapi==0.104.1
+fastapi==0.117.1
 uvicorn[standard]==0.24.0
 pydantic==2.5.0
 
