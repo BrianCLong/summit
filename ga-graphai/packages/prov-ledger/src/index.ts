@@ -1,10 +1,11 @@
 import { createHash, createHmac, randomUUID } from 'node:crypto';
-import type { 
-  EvidenceBundle, 
-  LedgerEntry, 
+import type {
+  EvidenceBundle,
+  LedgerEntry,
   LedgerFactInput,
   BudgetResult,
   CursorEvent,
+  MosbResult,
   PolicyDecision,
   ProvenanceRecord as CursorProvenanceRecord,
   RateLimitResult,
@@ -112,6 +113,7 @@ export interface AppendOptions {
   decision: PolicyDecision;
   budget?: BudgetResult;
   rateLimit?: RateLimitResult;
+  mosb?: MosbResult;
   receivedAt?: Date;
 }
 
@@ -143,6 +145,7 @@ export class ProvenanceLedger {
       checksum,
       budget: options.budget,
       rateLimit: options.rateLimit,
+      mosb: options.mosb,
     };
 
     this.records.push(record);

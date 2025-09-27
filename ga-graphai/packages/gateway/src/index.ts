@@ -908,6 +908,7 @@ export { MetricsRecorder } from './metrics.js';
 export { OptimizationManager } from './optimizations.js';
 export { ValueDensityRouter } from './router.js';
 export { ZeroSpendOrchestrator } from './orchestrator.js';
+export { ModelOutputSafetyBudgeter } from './mosb.ts';
 
 // ============================================================================
 // CURSOR GOVERNANCE GATEWAY - Added from PR 1299
@@ -927,6 +928,7 @@ import {
   normalizeCursorEvent,
 } from "common-types";
 import { PolicyEvaluator } from "policy";
+import { ModelOutputSafetyBudgeter } from "./mosb.ts";
 
 export interface GatewayLogger {
   info?(message: string, meta?: Record<string, unknown>): void;
@@ -939,6 +941,7 @@ export interface CursorGatewayOptions {
   ledger: ProvenanceLedger;
   budgetManager: BudgetManager;
   rateLimiter: RateLimiter;
+  mosb?: ModelOutputSafetyBudgeter;
   scopeMapping?: Partial<Record<CursorEventName, string[]>>;
   requireDeviceBinding?: boolean;
   requireMtls?: boolean;
@@ -1017,7 +1020,7 @@ export class CursorGateway {
         tenantId: event.tenantId,
         requestId: event.provenance.requestId,
       });
-      return { decision, budget, rateLimit: rateResult, record };
+      return { decision, budget, rateLimit: rateResult, mosb: undefined, record };
     }
 
     const budget = this.options.budgetManager.consume(
@@ -1043,7 +1046,44 @@ export class CursorGateway {
         requestId: event.provenance.requestId,
         reason: budget.reason,
       });
-      return { decision, budget, rateLimit: rateResult, record };
+      return { decision, budget, rateLimit: rateResult, mosb: undefined, record };
+    }
+
+    const mosbResult = this.options.mosb?.evaluate(event);
+    if (mosbResult?.stepUpRequired) {
+      this.options.logger?.warn?.("cursor.mosb-stepup", {
+        tenantId: event.tenantId,
+        requestId: event.provenance.requestId,
+        traces: mosbResult.traces,
+      });
+    }
+    if (mosbResult && !mosbResult.allowed) {
+      const decision = this.buildDenyDecision(
+        now,
+        mosbResult.reason ?? "deny:mosb",
+        event,
+        ["mosb"]
+      );
+      const record = await this.options.ledger.append(event, {
+        decision,
+        budget,
+        rateLimit: rateResult,
+        mosb: mosbResult,
+        receivedAt: now,
+      });
+      this.options.logger?.warn?.("cursor.mosb-deny", {
+        tenantId: event.tenantId,
+        requestId: event.provenance.requestId,
+        reason: mosbResult.reason,
+        traces: mosbResult.traces,
+      });
+      return {
+        decision,
+        budget,
+        rateLimit: rateResult,
+        mosb: mosbResult,
+        record,
+      };
     }
 
     const policyDecision = this.options.policyEvaluator.evaluate(
@@ -1055,6 +1095,7 @@ export class CursorGateway {
       decision: policyDecision,
       budget,
       rateLimit: rateResult,
+      mosb: mosbResult,
       receivedAt: now,
     });
 
@@ -1072,7 +1113,13 @@ export class CursorGateway {
       });
     }
 
-    return { decision: policyDecision, budget, rateLimit: rateResult, record };
+    return {
+      decision: policyDecision,
+      budget,
+      rateLimit: rateResult,
+      mosb: mosbResult,
+      record,
+    };
   }
 
   private resolveScopes(eventName: CursorEventName): string[] {
@@ -1120,7 +1167,7 @@ export class CursorGateway {
       decision: "deny",
       explanations: [explanation],
       ruleIds,
-      timestamp: now.now().toISOString(),
+      timestamp: now.toISOString(),
       metadata: {
         tenantId: event.tenantId,
         repo: event.repo,
