@@ -11,28 +11,39 @@ spec:
       trafficRouting:
         nginx: {}
       steps:
-        - setWeight: 10
-        - pause: {duration: 120}
+        - setWeight: 20
+        - pause:
+            duration: 120
         - analysis:
             templates:
               - templateName: ig-slo-checks
+              - templateName: mc-evidence-ok
             args:
               - name: service
                 value: api
+              - name: releaseId
+                value: ${RELEASE_ID}
         - setWeight: 50
-        - pause: {duration: 180}
+        - pause:
+            duration: 180
         - analysis:
             templates:
               - templateName: ig-slo-checks
+              - templateName: mc-evidence-ok
             args:
               - name: service
                 value: api
+              - name: releaseId
+                value: ${RELEASE_ID}
         - setWeight: 100
-  selector:
-    matchLabels: { app: api }
-  template:
-    metadata:
-      labels: { app: api }
+    selector:
+      matchLabels:
+        app: api
+    template:
+      metadata:
+        labels:
+          app: api
+          release-id: ${RELEASE_ID}
     spec:
       containers:
         - name: api
