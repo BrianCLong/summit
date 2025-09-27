@@ -1,0 +1,6 @@
+rules:
+  - effect: deny
+    condition:
+      AND:
+        - network_condition: unsecure
+        - data: user_data

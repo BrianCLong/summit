@@ -65,6 +65,18 @@ COVERAGE = {
         "end_date_aliased": 0,
         "nested_aliased": 0,
         "none": 0
+    },
+    "user_role": {
+        "admin_match": 0,
+        "analyst_match": 0,
+        "guest_match": 0,
+        "default": 0
+    },
+    "network_condition": {
+        "secure_match": 0,
+        "unsecure_match": 0,
+        "vpn_match": 0,
+        "default": 0
     }
 }
 
