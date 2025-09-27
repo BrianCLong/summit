@@ -13,8 +13,8 @@ function main() {
   const mode = process.argv[2] || 'ci';
   const options = parseArgs(process.argv.slice(3));
 
-  if (!['ci', 'pr', 'dev'].includes(mode)) {
-    console.error('❌ Invalid mode. Use: ci, pr, or dev');
+  if (!['ci', 'pr', 'dev', 'plan'].includes(mode)) {
+    console.error('❌ Invalid mode. Use: ci, pr, dev, or plan');
     process.exit(1);
   }
 
