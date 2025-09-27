@@ -35,5 +35,39 @@ CANARIES = [
             "user_role": "admin"
         },
         "should_fail": True, # This should fail due to retention mismatch
+    },
+    {
+        "policy": {
+            "data": "interstellar_data",
+            "retention": "infinite",
+            "geo": "multiverse_nexus",
+            "user_role": "nexus_sovereign",
+            "network_condition": "quantum_entangled"
+        },
+        "query": {
+            "data": "interstellar_data",
+            "retention": "infinite",
+            "location": "multiverse_nexus",
+            "user_role": "nexus_sovereign",
+            "network_condition": "quantum_entangled"
+        },
+        "should_fail": False, # This should be compliant
+    },
+    {
+        "policy": {
+            "data": "interstellar_data",
+            "retention": "infinite",
+            "geo": "multiverse_nexus",
+            "user_role": "nexus_sovereign",
+            "network_condition": "quantum_entangled"
+        },
+        "query": {
+            "data": "interstellar_data",
+            "retention": "1y", # Shorter retention, should fail
+            "location": "multiverse_nexus",
+            "user_role": "nexus_sovereign",
+            "network_condition": "quantum_entangled"
+        },
+        "should_fail": True, # This should fail due to retention mismatch
     }
 ]
