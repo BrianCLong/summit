@@ -80,7 +80,7 @@ plotly==5.17.0
 
 # Data Processing
 numpy==1.24.3
-pandas==2.0.3
+pandas==2.3.2
 matplotlib==3.7.2
 seaborn==0.12.2
 
