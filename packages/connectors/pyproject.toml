@@ -7,7 +7,15 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "pandas",
+    "boto3",
+    "pyarrow",
+    "numpy",
+    "httpx<0.28",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "fastapi[test]"]
+dev = [
+    "pytest",
+    "fastapi[test]",
+    "moto[s3]",
+]

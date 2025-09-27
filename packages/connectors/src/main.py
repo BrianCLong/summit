@@ -6,8 +6,11 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
 
-from . import orchestrator, mapping
-from .models import ConnectorKind, RunStatus, store
+import orchestrator
+import mapping
+from models import ConnectorKind, RunStatus, store
+from sources.file import FileSource
+from sources.s3 import S3CSVSource
 
 app = FastAPI(title="IntelGraph Connectors Demo")
 
@@ -21,13 +24,17 @@ class ConnectorCreate(BaseModel):
 @app.post("/connector/create")
 def create_connector(payload: ConnectorCreate):
     conn = store.create_connector(payload.name, payload.kind, payload.config)
-    # Discover a single stream immediately for file connectors
+    # Discover a single stream immediately for supported connectors
     if payload.kind == ConnectorKind.FILE:
-        from .sources.file import FileSource
-
         source = FileSource(payload.config)
         stream = source.discover()[0]
         store.add_stream(conn.id, stream["name"], stream["schema"])
+    elif payload.kind == ConnectorKind.S3:
+        source = S3CSVSource(payload.config)
+        discovered = source.discover()
+        if discovered:
+            stream = discovered[0]
+            store.add_stream(conn.id, stream["name"], stream["schema"])
     return conn
 
 

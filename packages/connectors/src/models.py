@@ -12,11 +12,12 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class ConnectorKind(str, Enum):
     FILE = "FILE"
+    S3 = "S3"
 
 
 class Connector(BaseModel):
@@ -28,10 +29,15 @@ class Connector(BaseModel):
 
 
 class Stream(BaseModel):
+    model_config = ConfigDict(protected_namespaces=(), populate_by_name=True)
     id: int
     connector_id: int
     name: str
-    schema: Dict[str, Any]
+    schema_: Dict[str, Any] = Field(alias="schema")
+
+    @property
+    def schema(self) -> Dict[str, Any]:  # pragma: no cover - simple accessor
+        return self.schema_
 
 
 class RunStatus(str, Enum):

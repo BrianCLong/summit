@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 
 from fastapi.testclient import TestClient
 
-import sys
-sys.path.append(str(Path(__file__).resolve().parents[2]))
-from connectors.src.main import app
+ROOT = Path(__file__).resolve().parents[3]
+SRC = ROOT / "packages" / "connectors" / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+import main as connectors_main  # type: ignore
+
+app = connectors_main.app
 
 client = TestClient(app)
 

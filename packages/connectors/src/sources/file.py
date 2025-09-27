@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Dict, Iterator, List
 
 from .base import BaseSource
+from .types import RecordBatch
 
 
 class FileSource(BaseSource):
@@ -33,8 +34,44 @@ class FileSource(BaseSource):
             return {name: "string" for name in reader.fieldnames or []}
 
     def read_full(self, stream: Dict[str, str]) -> Iterator[Dict[str, str]]:
+        for batch in self.read_batches(stream):
+            for row in batch.rows:
+                yield row
+
+    def read_batches(
+        self, stream: Dict[str, str], batch_size: int = 50_000
+    ) -> Iterator[RecordBatch]:
         path = Path(stream["path"])
         with path.open("r", newline="") as f:
             reader = csv.DictReader(f)
+            rows: List[Dict[str, str]] = []
+            bytes_read = 0
+            row_offset = 0
             for row in reader:
-                yield row
+                rows.append(row)
+                bytes_read += sum(len(str(v).encode("utf-8")) for v in row.values())
+                if len(rows) >= batch_size:
+                    yield RecordBatch(
+                        rows=rows,
+                        raw_bytes=bytes_read,
+                        provenance={
+                            "stream": stream.get("name"),
+                            "row_offset": row_offset,
+                            "row_count": len(rows),
+                            "path": str(path),
+                        },
+                    )
+                    row_offset += len(rows)
+                    rows = []
+                    bytes_read = 0
+            if rows:
+                yield RecordBatch(
+                    rows=rows,
+                    raw_bytes=bytes_read,
+                    provenance={
+                        "stream": stream.get("name"),
+                        "row_offset": row_offset,
+                        "row_count": len(rows),
+                        "path": str(path),
+                    },
+                )
