@@ -92,6 +92,42 @@ export const coreTypeDefs = gql`
     relationshipCount: Int!
   }
 
+  # Data profiling support types
+  type IngestionTable {
+    schema: String!
+    name: String!
+    rowCount: Int!
+  }
+
+  type ValueFrequency {
+    value: String
+    count: Int!
+  }
+
+  type NumericSummary {
+    min: Float
+    max: Float
+    mean: Float
+  }
+
+  type ColumnProfile {
+    name: String!
+    dataType: String!
+    nullCount: Int!
+    nullPercent: Float!
+    distinctCount: Int!
+    sampleTopValues: [ValueFrequency!]!
+    numericSummary: NumericSummary
+  }
+
+  type DataProfile {
+    table: String!
+    schema: String!
+    rowCount: Int!
+    generatedAt: DateTime!
+    columns: [ColumnProfile!]!
+  }
+
   # Input types for mutations
   input EntityInput {
     tenantId: String!
@@ -193,6 +229,15 @@ export const coreTypeDefs = gql`
 
     # Search across all entity types
     searchEntities(tenantId: String!, query: String!, kinds: [String!], limit: Int = 50): [Entity!]!
+
+    # Data ingestion insights
+    ingestionTables(schema: String = "public"): [IngestionTable!]!
+    dataProfile(
+      table: String!
+      schema: String
+      sampleSize: Int = 5000
+      topK: Int = 5
+    ): DataProfile!
   }
 
   # Extended Mutation operations

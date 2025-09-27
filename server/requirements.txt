@@ -83,6 +83,7 @@ numpy==1.24.3
 pandas==2.3.2
 matplotlib==3.9.4
 seaborn==0.13.2
+psycopg2-binary==2.9.9
 
 # Utilities
 tqdm==4.67.1

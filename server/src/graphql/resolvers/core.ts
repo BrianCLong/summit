@@ -4,6 +4,8 @@
  */
 
 import { GraphQLScalarType, Kind } from 'graphql';
+import path from 'path';
+import { spawn } from 'child_process';
 import { EntityRepo } from '../../repos/EntityRepo.js';
 import { RelationshipRepo } from '../../repos/RelationshipRepo.js';
 import { InvestigationRepo } from '../../repos/InvestigationRepo.js';
@@ -13,6 +15,18 @@ import logger from '../../config/logger.js';
 import { z } from 'zod';
 
 const resolverLogger = logger.child({ name: 'CoreResolvers' });
+
+const schemaNamePattern = /^[A-Za-z0-9_]+$/;
+const SchemaNameZ = z.string().min(1).regex(schemaNamePattern);
+const DataProfileArgsZ = z.object({
+  table: z.string().min(1).regex(/^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)?$/),
+  schema: SchemaNameZ.optional(),
+  sampleSize: z.number().int().positive().max(100000).optional(),
+  topK: z.number().int().positive().max(50).optional(),
+});
+const IngestionSchemaZ = z.object({
+  schema: SchemaNameZ.optional(),
+});
 
 // Validation schemas
 const EntityInputZ = z.object({
@@ -44,6 +58,7 @@ const neo4j = getNeo4jDriver();
 const entityRepo = new EntityRepo(pg, neo4j);
 const relationshipRepo = new RelationshipRepo(pg, neo4j);
 const investigationRepo = new InvestigationRepo(pg);
+const profilingScriptPath = path.resolve(__dirname, '../../../python/data_profiling/profile_data.py');
 
 // Custom scalars
 const DateTimeScalar = new GraphQLScalarType({
@@ -72,11 +87,119 @@ const JSONScalar = new GraphQLScalarType({
   },
 });
 
+type DataProfilerOptions = {
+  table: string;
+  schema?: string;
+  sampleSize?: number;
+  topK?: number;
+};
+
+async function runDataProfiler(options: DataProfilerOptions): Promise<any> {
+  const pythonPath = process.env.DATA_PROFILING_PYTHON || process.env.PYTHON_PATH || 'python3';
+  const args = [profilingScriptPath, '--table', options.table];
+  if (options.schema) args.push('--schema', options.schema);
+  if (typeof options.sampleSize === 'number') args.push('--sample-size', options.sampleSize.toString());
+  if (typeof options.topK === 'number') args.push('--top-k', options.topK.toString());
+
+  return await new Promise((resolve, reject) => {
+    const child = spawn(pythonPath, args, { env: { ...process.env } });
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', (chunk) => {
+      stdout += chunk.toString();
+    });
+
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    child.on('error', (error) => {
+      reject(new Error(`Failed to start data profiling script: ${error.message}`));
+    });
+
+    child.on('close', (code) => {
+      if (code !== 0) {
+        reject(new Error(stderr.trim() || 'Data profiling failed'));
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(stdout);
+        resolve(parsed);
+      } catch (error) {
+        reject(new Error('Unable to parse data profiling output'));
+      }
+    });
+  });
+}
+
 export const coreResolvers = {
   DateTime: DateTimeScalar,
   JSON: JSONScalar,
 
   Query: {
+    // Data ingestion insights
+    ingestionTables: async (_: any, args: { schema?: string }) => {
+      const { schema: schemaArg } = IngestionSchemaZ.parse(args ?? {});
+      const schemaName = schemaArg ?? 'public';
+      const client = await pg.connect();
+
+      try {
+        const result = await client.query(
+          `
+            SELECT
+              n.nspname AS schema,
+              c.relname AS name,
+              COALESCE(s.n_live_tup, c.reltuples)::bigint AS row_count
+            FROM pg_class c
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            LEFT JOIN pg_stat_user_tables s ON s.relid = c.oid
+            WHERE n.nspname = $1 AND c.relkind = 'r'
+            ORDER BY c.relname
+          `,
+          [schemaName],
+        );
+
+        return result.rows.map((row) => ({
+          schema: row.schema,
+          name: row.name,
+          rowCount: Number(row.row_count ?? 0),
+        }));
+      } catch (error) {
+        resolverLogger.error('Failed to list ingestion tables', { error, schema: schemaName });
+        throw new Error('Failed to list ingestion tables');
+      } finally {
+        client.release();
+      }
+    },
+    dataProfile: async (
+      _: any,
+      args: { table: string; schema?: string; sampleSize?: number; topK?: number },
+    ) => {
+      const parsed = DataProfileArgsZ.parse(args);
+      const payload: DataProfilerOptions = {
+        table: parsed.table,
+        schema: parsed.schema,
+        sampleSize: parsed.sampleSize ?? 5000,
+        topK: parsed.topK ?? 5,
+      };
+
+      try {
+        return await runDataProfiler(payload);
+      } catch (error) {
+        resolverLogger.error('Data profiling execution failed', {
+          error,
+          table: payload.table,
+          schema: payload.schema,
+        });
+        if (error instanceof Error) {
+          throw new Error(error.message);
+        }
+        throw new Error('Data profiling failed');
+      }
+    },
+
     // Entity queries
     entity: async (_: any, { id, tenantId }: any, context: any) => {
       const effectiveTenantId = tenantId || context.tenantId;
