@@ -1,15 +1,19 @@
-"""
-Prometheus metrics collection for IntelGraph ML service
-"""
+"""Prometheus metrics collection for IntelGraph ML service"""
+
 import time
-import psutil
+from typing import Any, Dict, List
+
+try:  # pragma: no cover - optional dependency during tests
+    import psutil
+except ImportError:  # pragma: no cover - defensive
+    psutil = None
 from prometheus_client import (
-    CollectorRegistry, 
-    Counter, 
-    Histogram, 
-    Gauge, 
+    CollectorRegistry,
+    Counter,
+    Histogram,
+    Gauge,
     generate_latest,
-    CONTENT_TYPE_LATEST
+    CONTENT_TYPE_LATEST,
 )
 
 # Create custom registry
@@ -173,6 +177,29 @@ cache_misses_total = Counter(
     registry=registry
 )
 
+# AutoML metrics
+automl_jobs_total = Counter(
+    'automl_jobs_total',
+    'Total AutoML jobs executed',
+    ['task', 'backend', 'status'],
+    registry=registry,
+)
+
+automl_training_duration_seconds = Histogram(
+    'automl_training_duration_seconds',
+    'AutoML training duration in seconds',
+    ['task', 'backend'],
+    buckets=[5.0, 15.0, 30.0, 60.0, 120.0, 300.0, 600.0],
+    registry=registry,
+)
+
+automl_best_score = Gauge(
+    'automl_best_score',
+    'Best metric score achieved by AutoML runs',
+    ['task', 'metric'],
+    registry=registry,
+)
+
 # Model loading metrics
 model_loading_duration_seconds = Histogram(
     'model_loading_duration_seconds',
@@ -200,6 +227,8 @@ active_connections = Gauge(
 
 def update_system_metrics():
     """Update system resource metrics"""
+    if psutil is None:  # pragma: no cover - optional dependency missing
+        return
     try:
         # CPU usage
         cpu_percent = psutil.cpu_percent(interval=1)
@@ -322,10 +351,39 @@ def track_model_loading(model_type: str, duration: float, status: str = 'success
         model_type=model_type,
         status=status
     ).inc()
-    
+
     model_loading_duration_seconds.labels(
         model_type=model_type
     ).observe(duration)
+
+
+def track_automl_job(
+    task: str,
+    backend: str,
+    status: str,
+    duration: float,
+    metric: str | None = None,
+    score: float | None = None,
+) -> None:
+    """Track execution statistics for an AutoML job."""
+
+    automl_jobs_total.labels(
+        task=task,
+        backend=backend,
+        status=status,
+    ).inc()
+
+    if duration is not None:
+        automl_training_duration_seconds.labels(
+            task=task,
+            backend=backend,
+        ).observe(max(0.0, duration))
+
+    if metric and score is not None:
+        automl_best_score.labels(
+            task=task,
+            metric=metric,
+        ).set(score)
 
 
 def get_metrics():
@@ -338,3 +396,39 @@ def get_metrics():
 def get_content_type():
     """Get Prometheus content type"""
     return CONTENT_TYPE_LATEST
+
+
+class MetricsCollector:
+    """Lightweight in-memory metrics collector for structured summaries."""
+
+    def __init__(self) -> None:
+        self._values: Dict[str, List[float]] = {}
+
+    def record(self, name: str, value: float) -> None:
+        self._values.setdefault(name, []).append(value)
+
+    def snapshot(self) -> Dict[str, Any]:
+        return {key: list(values) for key, values in self._values.items()}
+
+
+class SystemMetrics(MetricsCollector):
+    """Placeholder system metrics collector for compatibility."""
+
+
+class GPUMetrics(MetricsCollector):
+    """Placeholder GPU metrics collector for compatibility."""
+
+
+class ModelMetrics(MetricsCollector):
+    """Placeholder model metrics collector for compatibility."""
+
+
+class QuantumMetrics(MetricsCollector):
+    """Placeholder quantum metrics collector for compatibility."""
+
+
+class MLMetrics:
+    """Facade over Prometheus metrics registry used by the API layer."""
+
+    def get_all_metrics(self) -> bytes:
+        return get_metrics()
