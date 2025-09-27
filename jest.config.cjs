@@ -3,8 +3,8 @@ module.exports = {
   extensionsToTreatAsEsm: ['.ts'],
   globals: {
     'ts-jest': {
-      useESM: true
-    }
+      useESM: true,
+    },
   },
   testEnvironment: 'node',
   collectCoverageFrom: [
@@ -13,18 +13,16 @@ module.exports = {
     '!**/dist/**',
     '!**/build/**',
     '!**/*.config.{js,ts}',
-    '!**/coverage/**'
+    '!**/coverage/**',
   ],
   testMatch: [
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
-    '**/?(*.)+(spec|test).{ts,tsx,js,jsx}'
+    '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
   ],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$))'
-  ],
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
   projects: [
     {
       displayName: 'server',
@@ -33,15 +31,37 @@ module.exports = {
       extensionsToTreatAsEsm: ['.ts'],
       globals: {
         'ts-jest': {
-          useESM: true
-        }
-      }
+          useESM: true,
+        },
+      },
     },
     {
       displayName: 'client',
       testMatch: ['<rootDir>/client/**/*.{test,spec}.{js,jsx,ts,tsx}'],
       testEnvironment: 'jsdom',
-      setupFilesAfterEnv: ['<rootDir>/client/src/setupTests.js']
-    }
-  ]
+      setupFilesAfterEnv: ['<rootDir>/client/src/setupTests.js'],
+    },
+    {
+      displayName: 'jtdl',
+      testMatch: ['<rootDir>/tools/jtdl/tests/**/*.test.ts'],
+      preset: 'ts-jest/presets/default-esm',
+      extensionsToTreatAsEsm: ['.ts'],
+      testEnvironment: 'node',
+      roots: ['<rootDir>/tools/jtdl'],
+      modulePathIgnorePatterns: [
+        '<rootDir>/archive',
+        '<rootDir>/archive_20250926',
+        '<rootDir>/intelgraph',
+      ],
+      moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+      },
+      globals: {
+        'ts-jest': {
+          useESM: true,
+          tsconfig: '<rootDir>/tools/jtdl/tsconfig.jest.json',
+        },
+      },
+    },
+  ],
 };

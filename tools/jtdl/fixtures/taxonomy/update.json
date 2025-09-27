@@ -1,0 +1,38 @@
+{
+  "version": "2025-03-01",
+  "jurisdiction": "EU",
+  "dataClasses": [
+    {
+      "id": "personal-data",
+      "title": "Personal Data",
+      "description": "Identifiable information about a natural person",
+      "lawfulBases": ["consent", "contract"],
+      "retentionMinimumDays": 365,
+      "tags": ["pii", "gdpr-core"]
+    },
+    {
+      "id": "health-data",
+      "title": "Health Data",
+      "description": "Special category personal data related to health",
+      "lawfulBases": ["explicit-consent", "public-interest"],
+      "retentionMinimumDays": 1095,
+      "tags": ["phi", "gdpr-special"]
+    },
+    {
+      "id": "engagement-metrics",
+      "title": "Engagement Metrics",
+      "description": "Aggregated behavioral analytics with event-level sampling",
+      "lawfulBases": ["legitimate-interest"],
+      "retentionMinimumDays": 120,
+      "tags": ["analytics"]
+    },
+    {
+      "id": "synthetic-identities",
+      "title": "Synthetic Identities",
+      "description": "Generated personas for evaluation workflows",
+      "lawfulBases": ["legitimate-interest", "research"],
+      "retentionMinimumDays": 45,
+      "tags": ["simulation", "pii"]
+    }
+  ]
+}
