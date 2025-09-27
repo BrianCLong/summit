@@ -88,7 +88,7 @@
     "puppeteer": "^22.15.0",
     "python-shell": "5.0.0",
     "sentiment": "5.0.2",
-    "sharp": "0.34.3",
+    "sharp": "0.34.4",
     "socket.io": "^4.8.1",
     "socket.io-client": "4.8.1",
     "tesseract.js": "5.1.1",
