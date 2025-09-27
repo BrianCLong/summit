@@ -44,3 +44,12 @@ services:
       - ../observability/grafana/dashboards:/var/lib/grafana/dashboards
     depends_on: [prom]
 
+  synthetic:
+    image: node:20-alpine
+    volumes:
+      - ./synthetic/traffic.js:/app/traffic.js:ro
+    environment:
+      - MC_URL=http://mc:4000/graphql
+      - RATE_MS=200
+    depends_on: [mc]
+    command: ["node","/app/traffic.js"]

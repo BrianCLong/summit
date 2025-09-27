@@ -1,0 +1,70 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sovereign-safeguards-service
+  labels:
+    app.kubernetes.io/name: sovereign-safeguards-service
+    app.kubernetes.io/component: sovereign-safeguards
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sovereign-safeguards-service
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
+      scrapeTimeout: 10s
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          regex: 'mc_platform_sovereign_.*'
+          action: keep
+        - sourceLabels: [service]
+          targetLabel: service_name
+        - sourceLabels: [namespace]
+          targetLabel: k8s_namespace
+        - sourceLabels: [pod]
+          targetLabel: pod_name
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_pod_label_app_kubernetes_io_version]
+          targetLabel: version
+        - sourceLabels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+          targetLabel: component
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: verification-service
+  labels:
+    app.kubernetes.io/name: verification-service
+    app.kubernetes.io/component: independent-verification
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: verification-service
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
+      scrapeTimeout: 10s
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          regex: 'mc_platform_(verification|independent)_.*'
+          action: keep
+        - sourceLabels: [service]
+          targetLabel: service_name
+        - sourceLabels: [namespace]
+          targetLabel: k8s_namespace
+        - sourceLabels: [pod]
+          targetLabel: pod_name
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_pod_label_app_kubernetes_io_version]
+          targetLabel: version
+        - sourceLabels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+          targetLabel: component
