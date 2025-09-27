@@ -1,0 +1,42 @@
+{
+  "release": "osrp-demo",
+  "plannedAt": "2025-01-01T00:00:00Z",
+  "stages": [
+    {
+      "name": "canary",
+      "trafficPercent": 10,
+      "metrics": {
+        "totalRequests": 5000,
+        "blocked": 50,
+        "canaryCaught": 94,
+        "canaryMissed": 4,
+        "latencyP95Ms": 200,
+        "businessKpi": 0.991
+      }
+    },
+    {
+      "name": "ramp",
+      "trafficPercent": 50,
+      "metrics": {
+        "totalRequests": 10000,
+        "blocked": 70,
+        "canaryCaught": 188,
+        "canaryMissed": 12,
+        "latencyP95Ms": 210,
+        "businessKpi": 1.008
+      }
+    },
+    {
+      "name": "ga",
+      "trafficPercent": 100,
+      "metrics": {
+        "totalRequests": 30000,
+        "blocked": 210,
+        "canaryCaught": 282,
+        "canaryMissed": 18,
+        "latencyP95Ms": 225,
+        "businessKpi": 1.015
+      }
+    }
+  ]
+}

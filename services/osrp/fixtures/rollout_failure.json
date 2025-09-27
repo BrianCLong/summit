@@ -1,0 +1,42 @@
+{
+  "release": "osrp-demo",
+  "plannedAt": "2025-01-02T00:00:00Z",
+  "stages": [
+    {
+      "name": "canary",
+      "trafficPercent": 10,
+      "metrics": {
+        "totalRequests": 4000,
+        "blocked": 40,
+        "canaryCaught": 80,
+        "canaryMissed": 2,
+        "latencyP95Ms": 210,
+        "businessKpi": 1.002
+      }
+    },
+    {
+      "name": "ramp",
+      "trafficPercent": 35,
+      "metrics": {
+        "totalRequests": 7000,
+        "blocked": 320,
+        "canaryCaught": 90,
+        "canaryMissed": 30,
+        "latencyP95Ms": 280,
+        "businessKpi": 0.952
+      }
+    },
+    {
+      "name": "rollback-validation",
+      "trafficPercent": 0,
+      "metrics": {
+        "totalRequests": 2000,
+        "blocked": 50,
+        "canaryCaught": 10,
+        "canaryMissed": 10,
+        "latencyP95Ms": 190,
+        "businessKpi": 0.96
+      }
+    }
+  ]
+}
