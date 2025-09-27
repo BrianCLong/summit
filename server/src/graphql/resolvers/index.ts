@@ -12,6 +12,7 @@ import { triggerN8nFlow } from '../../integrations/n8n.js';
 import { checkN8nTriggerAllowed } from '../../integrations/n8n-policy.js';
 import { isEnabled as flagEnabled } from '../../featureFlags/flagsmith.js';
 import { doclingResolvers } from './docling.ts';
+import { graphqlConcurrencyResolvers } from './graphqlConcurrency.ts';
 
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
@@ -44,6 +45,7 @@ const resolvers = {
     ...entityResolvers.Query,
     ...userResolvers.Query,
     ...investigationResolvers.Query,
+    ...graphqlConcurrencyResolvers.Query,
 
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY (temporarily disabled due to schema mismatch)
     // getCrisisTelemetry: wargameResolver.getCrisisTelemetry.bind(wargameResolver),
@@ -69,6 +71,7 @@ const resolvers = {
     ...relationshipResolvers.Mutation,
     ...userResolvers.Mutation,
     ...investigationResolvers.Mutation,
+    ...graphqlConcurrencyResolvers.Mutation,
 
     // Safe orchestration mutations (idempotent/dry-run aware)
     ...SafeMutationsResolvers.Mutation,

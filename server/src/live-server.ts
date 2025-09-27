@@ -14,6 +14,7 @@ import compression from 'compression';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import baseLogger from './config/logger';
+import { createGraphQLConcurrencyMiddleware } from './middleware/graphqlConcurrency.js';
 
 const logger = baseLogger.child({ name: 'intelgraph-live' });
 
@@ -485,6 +486,8 @@ async function startLiveServer() {
       credentials: true,
     }),
   );
+
+  app.use('/graphql', createGraphQLConcurrencyMiddleware());
 
   // Create GraphQL schema
   const schema = makeExecutableSchema({ typeDefs, resolvers });

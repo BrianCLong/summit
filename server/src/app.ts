@@ -83,6 +83,7 @@ import stripeRouter from './routes/stripe.js';
 import githubAppRouter from './routes/github-app.js';
 import stripeConnectRouter from './routes/stripe-connect.js';
 import { replayGuard, webhookRatelimit } from './middleware/webhook-guard.js';
+import { createGraphQLConcurrencyMiddleware } from './middleware/graphqlConcurrency.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -524,7 +525,8 @@ export const createApp = async () => {
     '/graphql',
     express.json(),
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-// expressMiddleware(apollo, { context: getContext }),
+    createGraphQLConcurrencyMiddleware(),
+    // expressMiddleware(apollo, { context: getContext }),
   );
 
   // Centralized error handler (Express 5-compatible)
