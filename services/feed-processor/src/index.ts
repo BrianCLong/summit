@@ -10,6 +10,7 @@ import { Pool } from 'pg';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import pino from 'pino';
+import { IngestionRateLimiter, RateLimitExceededError } from './rateLimiter';
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -35,6 +36,7 @@ const pgPool = new Pool({
 // Queues
 const ingestionQueue = new Queue('data-ingestion', process.env.REDIS_URL || 'redis://localhost:6379');
 const transformQueue = new Queue('data-transform', process.env.REDIS_URL || 'redis://localhost:6379');
+const rateLimiter = new IngestionRateLimiter(redis, logger);
 
 // Schemas
 const IngestionJobSchema = z.object({
@@ -45,7 +47,10 @@ const IngestionJobSchema = z.object({
   target_graph: z.string().default('main'),
   transform_rules: z.array(z.record(z.any())).optional(),
   authority_id: z.string(),
-  reason_for_access: z.string()
+  reason_for_access: z.string(),
+  tenant_id: z.string().optional(),
+  requested_by: z.string().optional(),
+  batch_size: z.number().int().positive().optional()
 });
 
 const LineageEventSchema = z.object({
@@ -351,6 +356,19 @@ ingestionQueue.process('ingest-data', 5, async (job) => {
 
     const rawData = await connector(jobData.source_config);
 
+    const tokensRequested = jobData.batch_size ?? (Array.isArray(rawData) ? rawData.length : 1);
+
+    await rateLimiter.ensureWithinLimit({
+      tenantId: jobData.tenant_id,
+      userId: jobData.requested_by || jobData.authority_id,
+      tokens: tokensRequested,
+      metadata: {
+        jobId: jobData.job_id,
+        sourceType: jobData.source_type,
+        dataSourceId: jobData.data_source_id
+      }
+    });
+
     // Transform data if rules provided
     let transformedData = rawData;
     if (jobData.transform_rules && jobData.transform_rules.length > 0) {
@@ -390,21 +408,30 @@ ingestionQueue.process('ingest-data', 5, async (job) => {
 
     logger.info('Ingestion job completed', {
       jobId: jobData.job_id,
-      recordsProcessed: rawData.length,
+      recordsProcessed: Array.isArray(rawData) ? rawData.length : 1,
       runId
     });
 
   } catch (error) {
-    logger.error('Ingestion job failed', {
-      jobId: jobData.job_id,
-      error: (error as Error).message,
-      runId
-    });
+    if (error instanceof RateLimitExceededError) {
+      logger.warn('Ingestion job rate limited', {
+        jobId: jobData.job_id,
+        scope: `${error.scope}:${error.scopeId}`,
+        retryInMs: error.retryInMs,
+        runId
+      });
+    } else {
+      logger.error('Ingestion job failed', {
+        jobId: jobData.job_id,
+        error: (error as Error).message,
+        runId
+      });
 
-    // Emit FAIL event
-    await lineageClient.emitEvent(
-      lineageClient.createRunEvent('FAIL', `ingest-${jobData.source_type}`, runId)
-    );
+      // Emit FAIL event only for non-rate-limit failures
+      await lineageClient.emitEvent(
+        lineageClient.createRunEvent('FAIL', `ingest-${jobData.source_type}`, runId)
+      );
+    }
 
     throw error;
   }
