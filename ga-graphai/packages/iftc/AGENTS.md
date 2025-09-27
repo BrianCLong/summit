@@ -1,0 +1,3 @@
+- Static analyzer implementation lives here.
+- Use 2 spaces for TypeScript and keep files formatted with Prettier defaults.
+- Provide unit tests under `tests/` and run `npm test` after changes.
