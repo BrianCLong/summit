@@ -19,6 +19,7 @@ from .quantum.quantum_ml import (
     create_quantum_enhanced_model
 )
 from .training.distributed_trainer import DistributedTrainingManager, TrainingConfig
+from .training.automl import AutoMLJobConfig, EntityAutoMLTrainer
 from .monitoring.metrics import MLMetrics
 from .monitoring.health import HealthCheck
 
@@ -65,6 +66,26 @@ class QuantumOptimizationRequest(BaseModel):
     num_qubits: int = Field(8, description="Number of qubits for optimization")
     num_iterations: int = Field(100, description="Number of optimization iterations")
 
+
+class AutoMLEntityExample(BaseModel):
+    """Single labelled example for entity AutoML training."""
+
+    text: str = Field(..., description="Training sentence or document")
+    label: str = Field(..., description="Entity label associated with the text")
+
+
+class EntityAutoMLRequest(BaseModel):
+    """Request payload for triggering AutoML entity recognition search."""
+
+    examples: List[AutoMLEntityExample] = Field(..., description="Labelled examples used for AutoML")
+    metric: str = Field("f1", description="Primary optimization metric")
+    backend_preference: Optional[str] = Field(
+        None,
+        description="Preferred AutoML backend (auto_pytorch or sklearn)",
+    )
+    max_runtime_seconds: int = Field(60, ge=10, le=900, description="Maximum AutoML runtime")
+    test_size: float = Field(0.2, ge=0.1, le=0.5, description="Validation split size")
+
 class ModelResponse(BaseModel):
     """Response containing model information"""
     model_id: str
@@ -92,6 +113,11 @@ class MLServiceState:
         self.metrics = MLMetrics()
         self.health_check = HealthCheck()
         self.quantum_optimizer = QuantumOptimizer()
+        self.automl_trainer = EntityAutoMLTrainer(
+            neo4j_uri=os.getenv("NEO4J_URI"),
+            neo4j_user=os.getenv("NEO4J_USERNAME"),
+            neo4j_password=os.getenv("NEO4J_PASSWORD"),
+        )
         
         # Initialize device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -555,6 +581,34 @@ async def quantum_feature_mapping(data: Dict[str, List[List[float]]]):
 async def get_metrics():
     """Get service metrics"""
     return ml_state.metrics.get_all_metrics()
+
+
+@app.post("/automl/entity")
+async def run_entity_automl(request: EntityAutoMLRequest):
+    """Trigger an AutoML job for entity recognition datasets."""
+
+    if len(request.examples) < 3:
+        raise HTTPException(status_code=400, detail="Provide at least three labelled examples")
+
+    texts = [example.text for example in request.examples]
+    labels = [example.label for example in request.examples]
+
+    job_config = AutoMLJobConfig(
+        metric=request.metric,
+        backend_preference=request.backend_preference,
+        max_runtime_seconds=request.max_runtime_seconds,
+        test_size=request.test_size,
+    )
+
+    try:
+        result = ml_state.automl_trainer.run_job(texts, labels, job_config)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.exception("Entity AutoML job failed")
+        raise HTTPException(status_code=500, detail="AutoML job failed") from exc
+
+    return result.to_dict()
 
 @app.get("/metrics/models")
 async def get_model_metrics():
