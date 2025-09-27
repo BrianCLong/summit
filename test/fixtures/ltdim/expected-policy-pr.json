@@ -1,0 +1,46 @@
+{
+  "title": "LTDIM: IntelGraph DPA 2024.01 → 2025.02",
+  "body": "## Summary\n- Blocked changes: 1; allowed changes: 3; manual review: 0\n- Obligations:\n  - Implement automated detection to support 24h breach notifications\n  - Notify compliance team of retention change\n  - Route data flows to EU sovereign storage providers\n  - Schedule quarterly model governance audits\n  - Stand up AI transparency reporting pipeline\n  - Update retention timer configuration to 90 days\n- SLO effects:\n  - auditCycleTime: -10% (improved); drivers: Automated evidence collection via transparency tooling\n  - dataResidencyCutover: 4hours (degraded); drivers: Migration to EU sovereign regions\n  - onCallLoad: 2FTE (degraded); drivers: Need expanded on-call coverage for faster notification\n  - storageCost: 15% (degraded); drivers: Longer retention window\n  - transferLatency: 12% (degraded); drivers: Geo-fencing and compliance routing\n\n## Policy Changes\n- ai.governance.transparency (add, allowed) — Enable AI transparency controls and audit logging. [rule ai-transparency-governance]\n- data.retention.window (update, allowed) — Extend retention window to 90 days. [rule retention-window-extension]\n  - Before: retention.days = 30\n  - After: retention.days = 90\n- geo.transfer.restrictions (update, blocked) — Enforce EU-only residency for personal data transfers. [rule cross-border-eu-only]\n  - Before: geoPolicy.allowNonEuTransfers = true\n  - After: geoPolicy.allowNonEuTransfers = false\n- incident.response.notification (update, allowed) — Accelerate breach notification SLA to 24 hours. [rule incident-accelerated-notification]\n  - Before: incident.slaHours = 72\n  - After: incident.slaHours = 24",
+  "diffs": [
+    {
+      "policyId": "ai.governance.transparency",
+      "ruleId": "ai-transparency-governance",
+      "clauseId": "Clause 6",
+      "status": "allowed",
+      "action": "add",
+      "summary": "Enable AI transparency controls and audit logging.",
+      "beforeState": null,
+      "afterState": null
+    },
+    {
+      "policyId": "data.retention.window",
+      "ruleId": "retention-window-extension",
+      "clauseId": "Clause 4",
+      "status": "allowed",
+      "action": "update",
+      "summary": "Extend retention window to 90 days.",
+      "beforeState": "retention.days = 30",
+      "afterState": "retention.days = 90"
+    },
+    {
+      "policyId": "geo.transfer.restrictions",
+      "ruleId": "cross-border-eu-only",
+      "clauseId": "Clause 3",
+      "status": "blocked",
+      "action": "update",
+      "summary": "Enforce EU-only residency for personal data transfers.",
+      "beforeState": "geoPolicy.allowNonEuTransfers = true",
+      "afterState": "geoPolicy.allowNonEuTransfers = false"
+    },
+    {
+      "policyId": "incident.response.notification",
+      "ruleId": "incident-accelerated-notification",
+      "clauseId": "Clause 5",
+      "status": "allowed",
+      "action": "update",
+      "summary": "Accelerate breach notification SLA to 24 hours.",
+      "beforeState": "incident.slaHours = 72",
+      "afterState": "incident.slaHours = 24"
+    }
+  ]
+}
