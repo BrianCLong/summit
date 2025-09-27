@@ -1,0 +1,3 @@
+- Python package for policy-constrained knowledge distillation.
+- Use 4 spaces for indentation.
+- Run `pytest` from this package root after changes.
