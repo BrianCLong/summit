@@ -1,4 +1,4 @@
-import { getMaestroOrchestrationAPI } from '../sdk/typescript/src/generated';
+import { getMaestroOrchestrationAPI } from '../sdk/ts/src/generated';
 import axios, { AxiosRequestConfig } from 'axios'; // Import AxiosRequestConfig
 
 // Simple retry function
@@ -31,13 +31,15 @@ export const createClient = (baseURL: string, token?: string) => {
   const api = getMaestroOrchestrationAPI();
 
   // Wrap API calls with retry logic
-  const retriedApi: typeof api = {} as typeof api;
-  for (const key in api) {
-    if (typeof api[key] === 'function') {
-      retriedApi[key] = ((...args: any[]) => retry(() => (api[key] as Function)(...args))) as any;
+  const retriedApi: Record<string, any> = {};
+  const apiMap = api as Record<string, any>;
+  for (const key of Object.keys(apiMap)) {
+    const fn = apiMap[key];
+    if (typeof fn === 'function') {
+      retriedApi[key] = (...args: any[]) => retry(() => fn(...args));
     }
   }
 
   // Return the wrapped API functions
-  return retriedApi;
+  return retriedApi as typeof api;
 };
