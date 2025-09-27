@@ -1,6 +1,7 @@
 import React from 'react';
 import OverridesPanel from './OverridesPanel';
 import CostExplorer from './CostExplorer';
+import EmergencyContainmentPanel from './EmergencyContainmentPanel';
 
 interface Config {
   MODEL_PROVIDER: string;
@@ -35,6 +36,8 @@ interface BundleSource {
   message?: string;
 }
 
+type AdminStudioTab = 'config' | 'overrides' | 'cost-explorer' | 'ecc' | 'help';
+
 export default function AdminStudio() {
   const [cfg, setCfg] = React.useState<Config | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -46,7 +49,14 @@ export default function AdminStudio() {
   const [bundleStatus, setBundleStatus] = React.useState<BundleStatus | null>(null);
   const [bundleSource, setBundleSource] = React.useState<BundleSource | null>(null);
   const [opaSince, setOpaSince] = React.useState<string | null>(null);
-  const [activeTab, setActiveTab] = React.useState<'config' | 'overrides' | 'cost-explorer' | 'help'>('config');
+  const [activeTab, setActiveTab] = React.useState<AdminStudioTab>('config');
+  const tabs: { key: AdminStudioTab; label: string }[] = [
+    { key: 'config', label: 'Configuration' },
+    { key: 'overrides', label: 'Overrides' },
+    { key: 'cost-explorer', label: 'Cost Explorer' },
+    { key: 'ecc', label: 'Emergency Containment' },
+    { key: 'help', label: 'Help' },
+  ];
   const [saveMessage, setSaveMessage] = React.useState<string>('');
   const [errors, setErrors] = React.useState<string[]>([]);
   const load = React.useCallback(async () => {
@@ -216,6 +226,8 @@ export default function AdminStudio() {
         return <OverridesPanel />;
       case 'cost-explorer':
         return <CostExplorer />;
+      case 'ecc':
+        return <EmergencyContainmentPanel />;
       case 'help':
         return (
           <div style={{ padding: 24, maxWidth: 800 }}>
@@ -411,15 +423,10 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
   return (
     <div style={{ padding: 0 }}>
       <div style={{ display: 'flex', borderBottom: '1px solid #dee2e6' }}>
-        {[
-          { key: 'config', label: 'Configuration' },
-          { key: 'overrides', label: 'Overrides' },
-          { key: 'cost-explorer', label: 'Cost Explorer' },
-          { key: 'help', label: 'Help' }
-        ].map(tab => (
+        {tabs.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key as 'config' | 'overrides' | 'cost-explorer' | 'help')}
+            onClick={() => setActiveTab(tab.key)}
             style={{
               padding: '12px 24px',
               border: 'none',
