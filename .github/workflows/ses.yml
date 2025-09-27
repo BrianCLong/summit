@@ -1,0 +1,35 @@
+name: SES Gate
+
+on:
+  pull_request:
+    paths:
+      - 'tools/ses/**'
+      - '.github/workflows/ses.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'tools/ses/**'
+      - '.github/workflows/ses.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: tools/ses/package-lock.json
+
+      - name: Install dependencies
+        working-directory: tools/ses
+        run: npm install
+
+      - name: Run SES tests
+        working-directory: tools/ses
+        run: npm test

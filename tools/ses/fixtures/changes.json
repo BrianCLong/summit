@@ -1,0 +1,26 @@
+[
+  {
+    "type": "rename",
+    "table": "customers",
+    "from": "email",
+    "to": "primary_email",
+    "rationale": "Clarify primary contact channel"
+  },
+  {
+    "type": "split",
+    "table": "customers",
+    "column": "full_name",
+    "into": [
+      { "name": "first_name", "type": "string" },
+      { "name": "last_name", "type": "string" }
+    ],
+    "rationale": "Support personalization workflows"
+  },
+  {
+    "type": "widen",
+    "table": "orders",
+    "column": "total_amount",
+    "newType": "float",
+    "rationale": "Capture fractional currency"
+  }
+]
