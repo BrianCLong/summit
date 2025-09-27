@@ -11,6 +11,7 @@ except Exception:  # noqa: BLE001 - allow graceful degradation
     Entity = Relationship = None  # type: ignore
 
 from .copilot import CopilotMemory
+from . import flia
 
-__all__ = ["Entity", "Relationship", "CopilotMemory"]
+__all__ = ["Entity", "Relationship", "CopilotMemory", "flia"]
 
