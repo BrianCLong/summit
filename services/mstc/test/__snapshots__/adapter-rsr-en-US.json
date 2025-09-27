@@ -1,0 +1,158 @@
+[
+  {
+    "locale": "en-US",
+    "vertical": "finance",
+    "tag": "finance.credit.loan_shark",
+    "canonical": "loan shark lending",
+    "regulators": [
+      "SEC / CFPB"
+    ],
+    "notes": [
+      "Targets deceptive lending, Ponzi advertising, and unlicensed wagering inducements."
+    ],
+    "confidence": 0.93
+  },
+  {
+    "locale": "en-US",
+    "vertical": "finance",
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "illegal sports betting",
+    "regulators": [
+      "SEC / CFPB"
+    ],
+    "notes": [
+      "Targets deceptive lending, Ponzi advertising, and unlicensed wagering inducements."
+    ],
+    "confidence": 0.9
+  },
+  {
+    "locale": "en-US",
+    "vertical": "finance",
+    "tag": "finance.scams.ponzi",
+    "canonical": "Ponzi investment scheme",
+    "regulators": [
+      "SEC / CFPB"
+    ],
+    "notes": [
+      "Targets deceptive lending, Ponzi advertising, and unlicensed wagering inducements."
+    ],
+    "confidence": 0.95
+  },
+  {
+    "locale": "en-US",
+    "vertical": "health",
+    "tag": "health.diseases.sti",
+    "canonical": "sexually transmitted infection screening",
+    "regulators": [
+      "FDA / DEA"
+    ],
+    "notes": [
+      "Controlled substances scheduling and REMS monitoring for opioids and reproductive health."
+    ],
+    "confidence": 0.92
+  },
+  {
+    "locale": "en-US",
+    "vertical": "health",
+    "tag": "health.meds.contraceptives",
+    "canonical": "emergency contraceptive pill",
+    "regulators": [
+      "FDA / DEA"
+    ],
+    "notes": [
+      "Controlled substances scheduling and REMS monitoring for opioids and reproductive health."
+    ],
+    "confidence": 0.94
+  },
+  {
+    "locale": "en-US",
+    "vertical": "health",
+    "tag": "health.meds.opioids",
+    "canonical": "opioid painkillers",
+    "regulators": [
+      "FDA / DEA"
+    ],
+    "notes": [
+      "Controlled substances scheduling and REMS monitoring for opioids and reproductive health."
+    ],
+    "confidence": 0.97
+  },
+  {
+    "locale": "en-US",
+    "vertical": "minors",
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "cyberbullying minors",
+    "regulators": [
+      "FTC / COPPA Office"
+    ],
+    "notes": [
+      "Online harms to minors under COPPA and related harmful content advisories."
+    ],
+    "confidence": 0.91
+  },
+  {
+    "locale": "en-US",
+    "vertical": "minors",
+    "tag": "minors.exploitation.grooming",
+    "canonical": "online grooming minors",
+    "regulators": [
+      "FTC / COPPA Office"
+    ],
+    "notes": [
+      "Online harms to minors under COPPA and related harmful content advisories."
+    ],
+    "confidence": 0.96
+  },
+  {
+    "locale": "en-US",
+    "vertical": "minors",
+    "tag": "minors.suicide.self_harm",
+    "canonical": "self-harm encouragement",
+    "regulators": [
+      "FTC / COPPA Office"
+    ],
+    "notes": [
+      "Online harms to minors under COPPA and related harmful content advisories."
+    ],
+    "confidence": 0.95
+  },
+  {
+    "locale": "en-US",
+    "vertical": "workplace",
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "equal pay violation",
+    "regulators": [
+      "EEOC / OSHA"
+    ],
+    "notes": [
+      "Enforces anti-harassment, equal pay, and workplace violence prevention rules."
+    ],
+    "confidence": 0.89
+  },
+  {
+    "locale": "en-US",
+    "vertical": "workplace",
+    "tag": "workplace.harassment.sexual",
+    "canonical": "workplace sexual harassment",
+    "regulators": [
+      "EEOC / OSHA"
+    ],
+    "notes": [
+      "Enforces anti-harassment, equal pay, and workplace violence prevention rules."
+    ],
+    "confidence": 0.96
+  },
+  {
+    "locale": "en-US",
+    "vertical": "workplace",
+    "tag": "workplace.violence.threats",
+    "canonical": "workplace violence threat",
+    "regulators": [
+      "EEOC / OSHA"
+    ],
+    "notes": [
+      "Enforces anti-harassment, equal pay, and workplace violence prevention rules."
+    ],
+    "confidence": 0.94
+  }
+]

@@ -1,0 +1,326 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "usura creditizia",
+    "locale": "it-IT",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "prestito a strozzo"
+      },
+      {
+        "type": "alias",
+        "value": "strozzinaggio"
+      },
+      {
+        "type": "misspelling",
+        "value": "usura prestito"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CONSOB",
+        "note": "Contrasto a schemi Ponzi, usura e scommesse clandestine."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "scommesse sportive illegali",
+    "locale": "it-IT",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "bolletta nera"
+      },
+      {
+        "type": "alias",
+        "value": "centro scommesse clandestino"
+      },
+      {
+        "type": "misspelling",
+        "value": "scommessa illegale"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CONSOB",
+        "note": "Contrasto a schemi Ponzi, usura e scommesse clandestine."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "schema Ponzi",
+    "locale": "it-IT",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "catena di Sant’Antonio"
+      },
+      {
+        "type": "slang",
+        "value": "investimento miracoloso"
+      },
+      {
+        "type": "misspelling",
+        "value": "ponzy italia"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CONSOB",
+        "note": "Contrasto a schemi Ponzi, usura e scommesse clandestine."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "screening per infezioni sessualmente trasmissibili",
+    "locale": "it-IT",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "test ist"
+      },
+      {
+        "type": "misspelling",
+        "value": "test ist gratuito"
+      },
+      {
+        "type": "alias",
+        "value": "test mst"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AIFA",
+        "note": "Controllo su oppiacei e campagne sulla contraccezione d’emergenza."
+      }
+    ],
+    "confidence": 0.91
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "pillola anticoncezionale d’emergenza",
+    "locale": "it-IT",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "pillola del giorno dopo"
+      },
+      {
+        "type": "misspelling",
+        "value": "pillola giorno dopo"
+      },
+      {
+        "type": "alias",
+        "value": "plan b italia"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AIFA",
+        "note": "Controllo su oppiacei e campagne sulla contraccezione d’emergenza."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "analgesici oppioidi",
+    "locale": "it-IT",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "analgesici oppioidi it"
+      },
+      {
+        "type": "alias",
+        "value": "oppioidi su prescrizione"
+      },
+      {
+        "type": "slang",
+        "value": "ossicodone"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AIFA",
+        "note": "Controllo su oppiacei e campagne sulla contraccezione d’emergenza."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "cyberbullismo contro minori",
+    "locale": "it-IT",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "bullismo online"
+      },
+      {
+        "type": "misspelling",
+        "value": "cyber bullismo"
+      },
+      {
+        "type": "slang",
+        "value": "shitstorm ragazzi"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Garante Infanzia e Adolescenza",
+        "note": "Linee guida contro adescamento, cyberbullismo e istigazione all’autolesionismo."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "adescamento online di minori",
+    "locale": "it-IT",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "adescamento minore"
+      },
+      {
+        "type": "alias",
+        "value": "grooming minori"
+      },
+      {
+        "type": "slang",
+        "value": "predatore chat it"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Garante Infanzia e Adolescenza",
+        "note": "Linee guida contro adescamento, cyberbullismo e istigazione all’autolesionismo."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "istigazione all’autolesionismo",
+    "locale": "it-IT",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "autolesionismo"
+      },
+      {
+        "type": "slang",
+        "value": "forum suicidio it"
+      },
+      {
+        "type": "alias",
+        "value": "sfida autolesiva"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Garante Infanzia e Adolescenza",
+        "note": "Linee guida contro adescamento, cyberbullismo e istigazione all’autolesionismo."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "disparità retributiva",
+    "locale": "it-IT",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "disparita salariale"
+      },
+      {
+        "type": "alias",
+        "value": "divario salariale"
+      },
+      {
+        "type": "slang",
+        "value": "stipendio ingiusto"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "INL",
+        "note": "Ispezioni su molestie, parità retributiva e minacce nei luoghi di lavoro."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "molestie sessuali sul lavoro",
+    "locale": "it-IT",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "favori sessuali ufficio"
+      },
+      {
+        "type": "misspelling",
+        "value": "molestie sessuai"
+      },
+      {
+        "type": "alias",
+        "value": "ricatto sessuale lavoro"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "INL",
+        "note": "Ispezioni su molestie, parità retributiva e minacce nei luoghi di lavoro."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "minaccia di violenza sul lavoro",
+    "locale": "it-IT",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "lite in azienda"
+      },
+      {
+        "type": "alias",
+        "value": "minacce in ufficio"
+      },
+      {
+        "type": "misspelling",
+        "value": "violenza lavoro"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "INL",
+        "note": "Ispezioni su molestie, parità retributiva e minacce nei luoghi di lavoro."
+      }
+    ],
+    "confidence": 0.91
+  }
+]

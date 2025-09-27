@@ -1,0 +1,326 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "高利贷放贷",
+    "locale": "zh-CN",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "gao li dai"
+      },
+      {
+        "type": "alias",
+        "value": "套路贷"
+      },
+      {
+        "type": "slang",
+        "value": "现金贷陷阱"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CSRC",
+        "note": "打击庞氏骗局、高利贷及非法体育博彩宣传。"
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "非法体育博彩",
+    "locale": "zh-CN",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "地下赌球"
+      },
+      {
+        "type": "slang",
+        "value": "外围盘口"
+      },
+      {
+        "type": "misspelling",
+        "value": "非法體育博彩"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CSRC",
+        "note": "打击庞氏骗局、高利贷及非法体育博彩宣传。"
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "庞氏投资骗局",
+    "locale": "zh-CN",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "传销式骗局"
+      },
+      {
+        "type": "misspelling",
+        "value": "龐氏騙局"
+      },
+      {
+        "type": "slang",
+        "value": "快速致富盘"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CSRC",
+        "note": "打击庞氏骗局、高利贷及非法体育博彩宣传。"
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "性传播感染筛查",
+    "locale": "zh-CN",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "sti 检测"
+      },
+      {
+        "type": "misspelling",
+        "value": "性傳播感染篩查"
+      },
+      {
+        "type": "alias",
+        "value": "性病检测"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "NMPA",
+        "note": "监测管制药品与紧急避孕信息发布。"
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "紧急避孕药",
+    "locale": "zh-CN",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "plan b 药片"
+      },
+      {
+        "type": "alias",
+        "value": "事后避孕药"
+      },
+      {
+        "type": "misspelling",
+        "value": "緊急避孕藥"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "NMPA",
+        "note": "监测管制药品与紧急避孕信息发布。"
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "阿片类止痛药",
+    "locale": "zh-CN",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "a pian zhi tong yao"
+      },
+      {
+        "type": "alias",
+        "value": "处方阿片"
+      },
+      {
+        "type": "slang",
+        "value": "羟考酮"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "NMPA",
+        "note": "监测管制药品与紧急避孕信息发布。"
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "未成年人网络霸凌",
+    "locale": "zh-CN",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "網絡霸凌"
+      },
+      {
+        "type": "slang",
+        "value": "网暴儿童"
+      },
+      {
+        "type": "alias",
+        "value": "青少年网暴"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CAC",
+        "note": "未成年人网络保护要求涵盖诱骗、网暴及自残内容。"
+      }
+    ],
+    "confidence": 0.91
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "未成年人网络诱骗",
+    "locale": "zh-CN",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "wang luo you pian"
+      },
+      {
+        "type": "alias",
+        "value": "儿童网络引诱"
+      },
+      {
+        "type": "slang",
+        "value": "线上掠夺者"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CAC",
+        "note": "未成年人网络保护要求涵盖诱骗、网暴及自残内容。"
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "鼓励自残内容",
+    "locale": "zh-CN",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "zi can nei rong"
+      },
+      {
+        "type": "alias",
+        "value": "自残挑战"
+      },
+      {
+        "type": "slang",
+        "value": "轻生群"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CAC",
+        "note": "未成年人网络保护要求涵盖诱骗、网暴及自残内容。"
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "同工不同酬",
+    "locale": "zh-CN",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "gong zi cha ju"
+      },
+      {
+        "type": "slang",
+        "value": "工资差距"
+      },
+      {
+        "type": "alias",
+        "value": "薪酬歧视"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MOHRSS",
+        "note": "劳动监察关注性骚扰、同酬与职场暴力。"
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "职场性骚扰",
+    "locale": "zh-CN",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "办公室性骚扰"
+      },
+      {
+        "type": "slang",
+        "value": "潜规则"
+      },
+      {
+        "type": "misspelling",
+        "value": "職場性騷擾"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MOHRSS",
+        "note": "劳动监察关注性骚扰、同酬与职场暴力。"
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "职场暴力威胁",
+    "locale": "zh-CN",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "办公室暴力"
+      },
+      {
+        "type": "slang",
+        "value": "砸场子"
+      },
+      {
+        "type": "misspelling",
+        "value": "職場暴力威脅"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MOHRSS",
+        "note": "劳动监察关注性骚扰、同酬与职场暴力。"
+      }
+    ],
+    "confidence": 0.93
+  }
+]

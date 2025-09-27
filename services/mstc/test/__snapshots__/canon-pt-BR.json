@@ -1,0 +1,318 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "agiotagem",
+    "locale": "pt-BR",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "agiota"
+      },
+      {
+        "type": "slang",
+        "value": "dinheiro rápido juros"
+      },
+      {
+        "type": "alias",
+        "value": "empréstimo abusivo"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Banco Central / CVM",
+        "note": "Fiscaliza pirâmides financeiras, agiotagem e apostas ilegais."
+      }
+    ],
+    "confidence": 0.91
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "apostas esportivas ilegais",
+    "locale": "pt-BR",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "aposta esportiva ilegal"
+      },
+      {
+        "type": "slang",
+        "value": "bolão proibido"
+      },
+      {
+        "type": "alias",
+        "value": "casa de aposta clandestina"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Banco Central / CVM",
+        "note": "Fiscaliza pirâmides financeiras, agiotagem e apostas ilegais."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "pirâmide financeira Ponzi",
+    "locale": "pt-BR",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "esquema piramidal"
+      },
+      {
+        "type": "slang",
+        "value": "ganhe rápido"
+      },
+      {
+        "type": "misspelling",
+        "value": "ponzy brasil"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Banco Central / CVM",
+        "note": "Fiscaliza pirâmides financeiras, agiotagem e apostas ilegais."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "teste de infecções sexualmente transmissíveis",
+    "locale": "pt-BR",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "exame dst"
+      },
+      {
+        "type": "alias",
+        "value": "teste ist gratuito"
+      },
+      {
+        "type": "misspelling",
+        "value": "teste ist rapido"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "ANVISA",
+        "note": "Controle de opioides e campanhas de saúde sexual e reprodutiva."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "pílula anticoncepcional de emergência",
+    "locale": "pt-BR",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "pilula dia seguinte"
+      },
+      {
+        "type": "alias",
+        "value": "pílula do dia seguinte"
+      },
+      {
+        "type": "alias",
+        "value": "plan b brasil"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "ANVISA",
+        "note": "Controle de opioides e campanhas de saúde sexual e reprodutiva."
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "analgésicos opioides",
+    "locale": "pt-BR",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "opioides controlados"
+      },
+      {
+        "type": "slang",
+        "value": "oxicodona br"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "ANVISA",
+        "note": "Controle de opioides e campanhas de saúde sexual e reprodutiva."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "cyberbullying infantil",
+    "locale": "pt-BR",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "bullying virtual"
+      },
+      {
+        "type": "misspelling",
+        "value": "cyberbullyng"
+      },
+      {
+        "type": "slang",
+        "value": "linchamento online"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "ECA / SaferNet",
+        "note": "Protocolos sobre aliciamento, cyberbullying e incentivo à autolesão."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "grooming online de menores",
+    "locale": "pt-BR",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "aliciamento infantil"
+      },
+      {
+        "type": "misspelling",
+        "value": "grooming menor"
+      },
+      {
+        "type": "slang",
+        "value": "predador digital"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "ECA / SaferNet",
+        "note": "Protocolos sobre aliciamento, cyberbullying e incentivo à autolesão."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "incitação à automutilação",
+    "locale": "pt-BR",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "automutilacao"
+      },
+      {
+        "type": "alias",
+        "value": "desafio suicida"
+      },
+      {
+        "type": "slang",
+        "value": "forum auto lesão"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "ECA / SaferNet",
+        "note": "Protocolos sobre aliciamento, cyberbullying e incentivo à autolesão."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "discriminação salarial",
+    "locale": "pt-BR",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "diferença salarial"
+      },
+      {
+        "type": "slang",
+        "value": "salário desigual"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MPT",
+        "note": "Combate ao assédio, discriminação salarial e violência ocupacional."
+      }
+    ],
+    "confidence": 0.89
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "assédio sexual no trabalho",
+    "locale": "pt-BR",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "assédio moral e sexual"
+      },
+      {
+        "type": "misspelling",
+        "value": "assedio sexual"
+      },
+      {
+        "type": "slang",
+        "value": "favor para promoção"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MPT",
+        "note": "Combate ao assédio, discriminação salarial e violência ocupacional."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "ameaça de violência no trabalho",
+    "locale": "pt-BR",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "ameaca trabalho"
+      },
+      {
+        "type": "slang",
+        "value": "briga escritório"
+      },
+      {
+        "type": "alias",
+        "value": "violência laboral"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MPT",
+        "note": "Combate ao assédio, discriminação salarial e violência ocupacional."
+      }
+    ],
+    "confidence": 0.91
+  }
+]

@@ -1,0 +1,342 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "loan shark lending",
+    "locale": "en-US",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "illegal lending"
+      },
+      {
+        "type": "misspelling",
+        "value": "loanshark"
+      },
+      {
+        "type": "slang",
+        "value": "payday trap"
+      },
+      {
+        "type": "alias",
+        "value": "predatory loan"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "SEC / CFPB",
+        "note": "Targets deceptive lending, Ponzi advertising, and unlicensed wagering inducements."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "illegal sports betting",
+    "locale": "en-US",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "proxy betting"
+      },
+      {
+        "type": "misspelling",
+        "value": "sportz betting"
+      },
+      {
+        "type": "alias",
+        "value": "underground sportsbook"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "SEC / CFPB",
+        "note": "Targets deceptive lending, Ponzi advertising, and unlicensed wagering inducements."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "Ponzi investment scheme",
+    "locale": "en-US",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "get rich quick pool"
+      },
+      {
+        "type": "misspelling",
+        "value": "ponzzi scheme"
+      },
+      {
+        "type": "alias",
+        "value": "pyramid scheme"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "SEC / CFPB",
+        "note": "Targets deceptive lending, Ponzi advertising, and unlicensed wagering inducements."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "sexually transmitted infection screening",
+    "locale": "en-US",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "clinic std check"
+      },
+      {
+        "type": "misspelling",
+        "value": "std chek"
+      },
+      {
+        "type": "alias",
+        "value": "std panel"
+      },
+      {
+        "type": "alias",
+        "value": "sti test"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FDA / DEA",
+        "note": "Controlled substances scheduling and REMS monitoring for opioids and reproductive health."
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "emergency contraceptive pill",
+    "locale": "en-US",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "day after dose"
+      },
+      {
+        "type": "alias",
+        "value": "morning after pill"
+      },
+      {
+        "type": "alias",
+        "value": "plan b pill"
+      },
+      {
+        "type": "misspelling",
+        "value": "planb"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FDA / DEA",
+        "note": "Controlled substances scheduling and REMS monitoring for opioids and reproductive health."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "opioid painkillers",
+    "locale": "en-US",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "hillbilly heroin"
+      },
+      {
+        "type": "misspelling",
+        "value": "opiod pain killers"
+      },
+      {
+        "type": "slang",
+        "value": "oxy"
+      },
+      {
+        "type": "alias",
+        "value": "prescription opioids"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FDA / DEA",
+        "note": "Controlled substances scheduling and REMS monitoring for opioids and reproductive health."
+      }
+    ],
+    "confidence": 0.97
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "cyberbullying minors",
+    "locale": "en-US",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "cyber bully kids"
+      },
+      {
+        "type": "misspelling",
+        "value": "cyberbulling"
+      },
+      {
+        "type": "slang",
+        "value": "digital harassment"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FTC / COPPA Office",
+        "note": "Online harms to minors under COPPA and related harmful content advisories."
+      }
+    ],
+    "confidence": 0.91
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "online grooming minors",
+    "locale": "en-US",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "age play chat"
+      },
+      {
+        "type": "alias",
+        "value": "child grooming"
+      },
+      {
+        "type": "misspelling",
+        "value": "groomming kids"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FTC / COPPA Office",
+        "note": "Online harms to minors under COPPA and related harmful content advisories."
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "self-harm encouragement",
+    "locale": "en-US",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "kms tips"
+      },
+      {
+        "type": "alias",
+        "value": "self harm challenge"
+      },
+      {
+        "type": "misspelling",
+        "value": "selfharm"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FTC / COPPA Office",
+        "note": "Online harms to minors under COPPA and related harmful content advisories."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "equal pay violation",
+    "locale": "en-US",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "equalpay"
+      },
+      {
+        "type": "alias",
+        "value": "pay discrimination"
+      },
+      {
+        "type": "slang",
+        "value": "wage gap complaint"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "EEOC / OSHA",
+        "note": "Enforces anti-harassment, equal pay, and workplace violence prevention rules."
+      }
+    ],
+    "confidence": 0.89
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "workplace sexual harassment",
+    "locale": "en-US",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "hostile work environment"
+      },
+      {
+        "type": "alias",
+        "value": "quid pro quo harassment"
+      },
+      {
+        "type": "misspelling",
+        "value": "sexual harasment"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "EEOC / OSHA",
+        "note": "Enforces anti-harassment, equal pay, and workplace violence prevention rules."
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "workplace violence threat",
+    "locale": "en-US",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "office attack warning"
+      },
+      {
+        "type": "alias",
+        "value": "threat at work"
+      },
+      {
+        "type": "misspelling",
+        "value": "work place threat"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "EEOC / OSHA",
+        "note": "Enforces anti-harassment, equal pay, and workplace violence prevention rules."
+      }
+    ],
+    "confidence": 0.94
+  }
+]

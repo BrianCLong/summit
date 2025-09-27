@@ -1,0 +1,326 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "crédito gota a gota",
+    "locale": "es-MX",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "cobra diario"
+      },
+      {
+        "type": "misspelling",
+        "value": "gota a gota"
+      },
+      {
+        "type": "alias",
+        "value": "prestamistas abusivos"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNBV / CONDUSEF",
+        "note": "Supervisa esquemas piramidales y crédito depredador en mercados digitales."
+      }
+    ],
+    "confidence": 0.91
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "apuestas deportivas clandestinas",
+    "locale": "es-MX",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "apuestas deportivas ilegal"
+      },
+      {
+        "type": "alias",
+        "value": "casa de apuestas ilegal"
+      },
+      {
+        "type": "slang",
+        "value": "quiniela clandestina"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNBV / CONDUSEF",
+        "note": "Supervisa esquemas piramidales y crédito depredador en mercados digitales."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "fraude Ponzi",
+    "locale": "es-MX",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "fraude piramidal"
+      },
+      {
+        "type": "misspelling",
+        "value": "ponci"
+      },
+      {
+        "type": "slang",
+        "value": "tanda milagro"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNBV / CONDUSEF",
+        "note": "Supervisa esquemas piramidales y crédito depredador en mercados digitales."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "prueba de infecciones de transmisión sexual",
+    "locale": "es-MX",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "prueba its gratuita"
+      },
+      {
+        "type": "misspelling",
+        "value": "prueba its rapida"
+      },
+      {
+        "type": "alias",
+        "value": "test de ets"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "COFEPRIS",
+        "note": "Vigilancia de medicamentos controlados y difusión de salud reproductiva."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "pastilla anticonceptiva de emergencia",
+    "locale": "es-MX",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "pastilla del día siguiente"
+      },
+      {
+        "type": "misspelling",
+        "value": "pastilla dia siguiente"
+      },
+      {
+        "type": "alias",
+        "value": "plan b méxico"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "COFEPRIS",
+        "note": "Vigilancia de medicamentos controlados y difusión de salud reproductiva."
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "analgésicos opioides",
+    "locale": "es-MX",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "opioides analgesicos"
+      },
+      {
+        "type": "alias",
+        "value": "opioides controlados"
+      },
+      {
+        "type": "slang",
+        "value": "oxicontin"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "COFEPRIS",
+        "note": "Vigilancia de medicamentos controlados y difusión de salud reproductiva."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "ciberacoso infantil",
+    "locale": "es-MX",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "bullying en redes"
+      },
+      {
+        "type": "misspelling",
+        "value": "ciberbullying niños"
+      },
+      {
+        "type": "slang",
+        "value": "linchamiento digital"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "SIPINNA / IFT",
+        "note": "Lineamientos para proteger a menores de grooming, ciberacoso y retos autolesivos."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "grooming a menores en línea",
+    "locale": "es-MX",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "ciberacoso sexual infantil"
+      },
+      {
+        "type": "slang",
+        "value": "enganche digital"
+      },
+      {
+        "type": "misspelling",
+        "value": "grooming infantil"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "SIPINNA / IFT",
+        "note": "Lineamientos para proteger a menores de grooming, ciberacoso y retos autolesivos."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "incitación a autolesión",
+    "locale": "es-MX",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "autolesion mx"
+      },
+      {
+        "type": "slang",
+        "value": "foro autolesivo"
+      },
+      {
+        "type": "alias",
+        "value": "reto suicida"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "SIPINNA / IFT",
+        "note": "Lineamientos para proteger a menores de grooming, ciberacoso y retos autolesivos."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "brecha salarial",
+    "locale": "es-MX",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "brecha salarial mx"
+      },
+      {
+        "type": "alias",
+        "value": "discriminación salarial"
+      },
+      {
+        "type": "slang",
+        "value": "salario desigual"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "STPS",
+        "note": "Normas Oficiales Mexicanas sobre acoso, equidad salarial y violencia laboral."
+      }
+    ],
+    "confidence": 0.89
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "acoso sexual laboral",
+    "locale": "es-MX",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "acoso laboral sexual"
+      },
+      {
+        "type": "slang",
+        "value": "favores para ascenso"
+      },
+      {
+        "type": "alias",
+        "value": "hostigamiento sexual trabajo"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "STPS",
+        "note": "Normas Oficiales Mexicanas sobre acoso, equidad salarial y violencia laboral."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "amenaza de violencia en el trabajo",
+    "locale": "es-MX",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "amenaza trabajo"
+      },
+      {
+        "type": "slang",
+        "value": "pleito oficina"
+      },
+      {
+        "type": "alias",
+        "value": "violencia laboral"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "STPS",
+        "note": "Normas Oficiales Mexicanas sobre acoso, equidad salarial y violencia laboral."
+      }
+    ],
+    "confidence": 0.91
+  }
+]

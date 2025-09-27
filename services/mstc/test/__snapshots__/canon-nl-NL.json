@@ -1,0 +1,322 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "woekerkrediet",
+    "locale": "nl-NL",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "krediet haai"
+      },
+      {
+        "type": "slang",
+        "value": "payday lening"
+      },
+      {
+        "type": "misspelling",
+        "value": "woeker krediet"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AFM",
+        "note": "Let op piramidespelen, woekerrente en illegale gokreclames."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "illegale sportweddenschappen",
+    "locale": "nl-NL",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "illegale sportwedden"
+      },
+      {
+        "type": "alias",
+        "value": "underground bookmaker"
+      },
+      {
+        "type": "slang",
+        "value": "zwarte weddenschap"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AFM",
+        "note": "Let op piramidespelen, woekerrente en illegale gokreclames."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "ponzi-investeringszwendel",
+    "locale": "nl-NL",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "piramidespel"
+      },
+      {
+        "type": "misspelling",
+        "value": "ponzy nederland"
+      },
+      {
+        "type": "slang",
+        "value": "snel rijk plan"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AFM",
+        "note": "Let op piramidespelen, woekerrente en illegale gokreclames."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "soa-screening",
+    "locale": "nl-NL",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "soa test"
+      },
+      {
+        "type": "misspelling",
+        "value": "soa testen"
+      },
+      {
+        "type": "alias",
+        "value": "sti test"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CBG-MEB",
+        "note": "Toezicht op opioïden en communicatie rond noodanticonceptie."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "noodanticonceptiepil",
+    "locale": "nl-NL",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "morning-afterpil"
+      },
+      {
+        "type": "misspelling",
+        "value": "nood anticonceptie"
+      },
+      {
+        "type": "alias",
+        "value": "plan b nederland"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CBG-MEB",
+        "note": "Toezicht op opioïden en communicatie rond noodanticonceptie."
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "opioïde pijnstillers",
+    "locale": "nl-NL",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "opioide pijnstiller"
+      },
+      {
+        "type": "slang",
+        "value": "oxy pillen"
+      },
+      {
+        "type": "alias",
+        "value": "voorgeschreven opioïden"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CBG-MEB",
+        "note": "Toezicht op opioïden en communicatie rond noodanticonceptie."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "cyberpesten van kinderen",
+    "locale": "nl-NL",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "cyber pesten"
+      },
+      {
+        "type": "slang",
+        "value": "digitale treiterij"
+      },
+      {
+        "type": "alias",
+        "value": "online pesten"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Autoriteit Persoonsgegevens",
+        "note": "Bescherming van minderjarigen tegen grooming, cyberpesten en zelfbeschadiging."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "online grooming van minderjarigen",
+    "locale": "nl-NL",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "grooming minderjarig"
+      },
+      {
+        "type": "alias",
+        "value": "kinderen online benaderen"
+      },
+      {
+        "type": "slang",
+        "value": "predator chat nl"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Autoriteit Persoonsgegevens",
+        "note": "Bescherming van minderjarigen tegen grooming, cyberpesten en zelfbeschadiging."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "aanzetten tot zelfbeschadiging",
+    "locale": "nl-NL",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "depressie forum"
+      },
+      {
+        "type": "misspelling",
+        "value": "zelfbeschadiging"
+      },
+      {
+        "type": "alias",
+        "value": "zelfmoord challenge"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Autoriteit Persoonsgegevens",
+        "note": "Bescherming van minderjarigen tegen grooming, cyberpesten en zelfbeschadiging."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "loondiscriminatie",
+    "locale": "nl-NL",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "loon kloof"
+      },
+      {
+        "type": "slang",
+        "value": "salaris ongelijkheid"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Inspectie SZW",
+        "note": "Handhaaft regels tegen seksuele intimidatie, loonkloof en geweld op het werk."
+      }
+    ],
+    "confidence": 0.89
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "seksuele intimidatie op het werk",
+    "locale": "nl-NL",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "ongewenste intimiteiten kantoor"
+      },
+      {
+        "type": "slang",
+        "value": "promotiedeal"
+      },
+      {
+        "type": "misspelling",
+        "value": "seksuele intimidatie werk"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Inspectie SZW",
+        "note": "Handhaaft regels tegen seksuele intimidatie, loonkloof en geweld op het werk."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "dreiging met werkplekgeweld",
+    "locale": "nl-NL",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "bedreiging collega"
+      },
+      {
+        "type": "slang",
+        "value": "ruzie kantoor"
+      },
+      {
+        "type": "misspelling",
+        "value": "werkplek geweld"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Inspectie SZW",
+        "note": "Handhaaft regels tegen seksuele intimidatie, loonkloof en geweld op het werk."
+      }
+    ],
+    "confidence": 0.91
+  }
+]

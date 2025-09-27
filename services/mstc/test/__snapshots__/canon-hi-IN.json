@@ -1,0 +1,185 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "सूदखोर ऋण",
+    "locale": "hi-IN",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "sudkhor loan"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "RBI / SEBI",
+        "note": "पोंज़ी योजनाओं, सूदखोरी और अवैध सट्टेबाजी पर निगरानी।"
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "अवैध खेल सट्टेबाज़ी",
+    "locale": "hi-IN",
+    "vertical": "finance",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "RBI / SEBI",
+        "note": "पोंज़ी योजनाओं, सूदखोरी और अवैध सट्टेबाजी पर निगरानी।"
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "पॉन्ज़ी निवेश धोखाधड़ी",
+    "locale": "hi-IN",
+    "vertical": "finance",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "RBI / SEBI",
+        "note": "पोंज़ी योजनाओं, सूदखोरी और अवैध सट्टेबाजी पर निगरानी।"
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "यौन संचारित संक्रमण जांच",
+    "locale": "hi-IN",
+    "vertical": "health",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "CDSCO",
+        "note": "नियंत्रित ओपिओइड और आपातकालीन गर्भनिरोध पर दिशानिर्देश।"
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "आपातकालीन गर्भनिरोधक गोली",
+    "locale": "hi-IN",
+    "vertical": "health",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "CDSCO",
+        "note": "नियंत्रित ओपिओइड और आपातकालीन गर्भनिरोध पर दिशानिर्देश।"
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "ओपिऑयड दर्द निवारक",
+    "locale": "hi-IN",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "opioid dard nivarak"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CDSCO",
+        "note": "नियंत्रित ओपिओइड और आपातकालीन गर्भनिरोध पर दिशानिर्देश।"
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "नाबालिगों पर साइबर धमकाना",
+    "locale": "hi-IN",
+    "vertical": "minors",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "NCPCR",
+        "note": "ऑनलाइन ग्रूमिंग, साइबर बुलिंग और आत्म-हानि उकसावे के विरुद्ध प्रोटोकॉल।"
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "ऑनलाइन बाल ग्रूमिंग",
+    "locale": "hi-IN",
+    "vertical": "minors",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "NCPCR",
+        "note": "ऑनलाइन ग्रूमिंग, साइबर बुलिंग और आत्म-हानि उकसावे के विरुद्ध प्रोटोकॉल।"
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "आत्म-हानि को बढ़ावा",
+    "locale": "hi-IN",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "aatm hani tips"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "NCPCR",
+        "note": "ऑनलाइन ग्रूमिंग, साइबर बुलिंग और आत्म-हानि उकसावे के विरुद्ध प्रोटोकॉल।"
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "वेतन भेदभाव",
+    "locale": "hi-IN",
+    "vertical": "workplace",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "Ministry of Labour & Employment",
+        "note": "यौन उत्पीड़न, वेतन समानता और कार्यस्थल हिंसा पर कानूनों का प्रवर्तन।"
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "कार्यस्थल पर यौन उत्पीड़न",
+    "locale": "hi-IN",
+    "vertical": "workplace",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "Ministry of Labour & Employment",
+        "note": "यौन उत्पीड़न, वेतन समानता और कार्यस्थल हिंसा पर कानूनों का प्रवर्तन।"
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "कार्यस्थल हिंसा की धमकी",
+    "locale": "hi-IN",
+    "vertical": "workplace",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "Ministry of Labour & Employment",
+        "note": "यौन उत्पीड़न, वेतन समानता और कार्यस्थल हिंसा पर कानूनों का प्रवर्तन।"
+      }
+    ],
+    "confidence": 0.91
+  }
+]
