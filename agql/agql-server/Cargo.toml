@@ -1,0 +1,17 @@
+[package]
+name = "agql-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+agql-core = { path = "../agql-core" }
+anyhow = "1.0"
+async-graphql = { version = "7", features = ["chrono", "uuid"] }
+async-graphql-axum = "7"
+axum = "0.8"
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
+tower-http = { version = "0.5", features = ["cors"] }
+uuid = { version = "1", features = ["serde", "v4"] }
