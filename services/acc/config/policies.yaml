@@ -1,0 +1,49 @@
+policies:
+  - dataClass: pii
+    purpose: authentication
+    jurisdiction: us
+    mode: strong
+  - dataClass: pii
+    purpose: analytics
+    jurisdiction: eu
+    mode: bounded-staleness
+    stalenessSlaMs: 200ms
+  - dataClass: financial
+    purpose: reporting
+    jurisdiction: "*"
+    mode: strong
+  - dataClass: behavioral
+    purpose: personalization
+    jurisdiction: "*"
+    mode: read-my-writes
+    stalenessSlaMs: 120ms
+  - dataClass: "*"
+    purpose: cache
+    jurisdiction: "*"
+    mode: bounded-staleness
+    stalenessSlaMs: 250ms
+  - dataClass: "*"
+    purpose: "*"
+    jurisdiction: "*"
+    mode: strong
+replicas:
+  - name: us-east-primary
+    region: us-east
+    role: primary
+    synchronous: true
+    defaultLatencyMs: 6
+  - name: us-west-sync
+    region: us-west
+    role: secondary
+    synchronous: true
+    defaultLatencyMs: 10
+  - name: eu-central-async
+    region: eu-central
+    role: secondary
+    synchronous: false
+    defaultLatencyMs: 18
+  - name: ap-south-async
+    region: ap-south
+    role: secondary
+    synchronous: false
+    defaultLatencyMs: 26
