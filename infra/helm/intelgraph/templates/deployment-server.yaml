@@ -6,7 +6,7 @@ metadata:
     {{- include "intelgraph.labels" . | nindent 4 }}
     app.kubernetes.io/component: server
 spec:
-  {{- if not .Values.autoscaling.enabled }}
+  {{- if not .Values.autoscaling.server.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
@@ -24,6 +24,7 @@ spec:
         {{- include "intelgraph.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: server
     spec:
+      automountServiceAccountToken: false
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -35,7 +36,7 @@ spec:
         - name: server
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.server.repository }}:{{ .Values.image.server.tag | default .Chart.AppVersion }}"
+          image: {{ include "intelgraph.imageWithDigest" (dict "image" .Values.image.server "name" "server") }}
           imagePullPolicy: {{ .Values.image.server.pullPolicy }}
           ports:
             - name: http
@@ -44,7 +45,7 @@ spec:
           {{- if .Values.healthCheck.enabled }}
           livenessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.healthCheck.path }}
               port: http
             initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
             periodSeconds: {{ .Values.healthCheck.periodSeconds }}
@@ -52,42 +53,46 @@ spec:
             failureThreshold: {{ .Values.healthCheck.failureThreshold }}
           readinessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.healthCheck.path }}
               port: http
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 3
+            initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
+            periodSeconds: {{ .Values.healthCheck.periodSeconds }}
+            timeoutSeconds: {{ .Values.healthCheck.timeoutSeconds }}
+            failureThreshold: {{ .Values.healthCheck.failureThreshold }}
+            successThreshold: {{ .Values.healthCheck.successThreshold }}
           {{- end }}
           resources:
             {{- toYaml .Values.resources.server | nindent 12 }}
           env:
             - name: NODE_ENV
-              value: "production"
+              value: '{{ .Values.global.environment | default "production" }}'
             - name: PORT
               value: "{{ .Values.service.server.targetPort }}"
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.postgresql.existingSecret }}
-                  key: url
+                  key: {{ .Values.database.postgresql.secretKeys.url }}
             - name: NEO4J_URI
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.neo4j.existingSecret }}
-                  key: uri
+                  key: {{ .Values.database.neo4j.secretKeys.uri }}
             - name: NEO4J_USERNAME
-              value: {{ .Values.database.neo4j.username }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.neo4j.existingSecret }}
+                  key: {{ .Values.database.neo4j.secretKeys.username }}
             - name: NEO4J_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.neo4j.existingSecret }}
-                  key: password
+                  key: {{ .Values.database.neo4j.secretKeys.password }}
             - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.redis.existingSecret }}
-                  key: url
+                  key: {{ .Values.database.redis.secretKeys.url }}
           volumeMounts:
             - name: tmp
               mountPath: /tmp
@@ -102,9 +107,37 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
+      {{- if .Values.affinity.server }}
       affinity:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml .Values.affinity.server | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/instance
+                      operator: In
+                      values:
+                        - {{ .Release.Name }}
+                    - key: app.kubernetes.io/component
+                      operator: In
+                      values:
+                        - server
+                topologyKey: kubernetes.io/hostname
+      {{- end }}
+      {{- if .Values.topologySpreadConstraints.server }}
+      topologySpreadConstraints:
+        {{- $root := . }}
+        {{- range .Values.topologySpreadConstraints.server }}
+        {{- $constraint := dict "maxSkew" (default 1 .maxSkew) "topologyKey" (default "topology.kubernetes.io/zone" .topologyKey) "whenUnsatisfiable" (default "DoNotSchedule" .whenUnsatisfiable) }}
+        {{- $selector := fromYaml (include "intelgraph.selectorLabels" $root) }}
+        {{- $_ := set $selector "app.kubernetes.io/component" "server" }}
+        {{- $_ := set $constraint "labelSelector" (dict "matchLabels" $selector) }}
+        {{- toYaml $constraint | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:

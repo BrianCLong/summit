@@ -1,18 +1,31 @@
-# Default values for IntelGraph Helm chart in development environment.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
+# Development environment overrides
 replicaCount: 1
 
-image:
-  repository: intelgraph/server
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: 'latest'
+autoscaling:
+  server:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+  client:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
 
-service:
-  type: ClusterIP
-  port: 80
+resources:
+  server:
+    requests:
+      cpu: 150m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+  client:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 
 ingress:
   enabled: true
@@ -24,27 +37,4 @@ ingress:
       paths:
         - path: /
           pathType: ImplementationSpecific
-
-# Environment-specific variables
-env:
-  NODE_ENV: development
-  LOG_LEVEL: debug
-  FEATURE_FLAG_AI: 'true'
-  # Database connection strings (usually managed by secrets)
-  NEO4J_URI: 'bolt://neo4j-dev:7687'
-  POSTGRES_HOST: 'postgres-dev'
-  REDIS_HOST: 'redis-dev'
-
-# Resource limits for development
-resources:
-  limits:
-    cpu: 200m
-    memory: 256Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
-
-# Development specific configurations
-debug:
-  enabled: true
-  port: 9229
+  tls: []

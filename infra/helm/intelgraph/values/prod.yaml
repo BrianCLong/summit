@@ -1,15 +1,48 @@
-# Default values for IntelGraph Helm chart in production environment.
+# Production environment overrides
+global:
+  environment: production
+  cluster:
+    name: intelgraph-prod
+  podSecurityStandards: restricted
 
 replicaCount: 3
 
-image:
-  repository: intelgraph/server
-  pullPolicy: Always
-  tag: 'prod'
+autoscaling:
+  server:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+  client:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
 
-service:
-  type: ClusterIP
-  port: 80
+resources:
+  server:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "1500m"
+      memory: 2Gi
+  client:
+    requests:
+      cpu: 300m
+      memory: 512Mi
+    limits:
+      cpu: 600m
+      memory: 1Gi
+
+externalSecrets:
+  secretStoreRef:
+    name: summit-prod-secrets
+  refreshInterval: 15m
+
+podDisruptionBudget:
+  server:
+    minAvailable: 2
+  client:
+    minAvailable: 2
 
 ingress:
   enabled: true
@@ -21,26 +54,4 @@ ingress:
       paths:
         - path: /
           pathType: ImplementationSpecific
-
-# Environment-specific variables
-env:
-  NODE_ENV: production
-  LOG_LEVEL: error
-  FEATURE_FLAG_AI: 'true'
-  # Database connection strings (usually managed by secrets)
-  NEO4J_URI: 'bolt://neo4j-prod:7687'
-  POSTGRES_HOST: 'postgres-prod'
-  REDIS_HOST: 'redis-prod'
-
-# Resource limits for production
-resources:
-  limits:
-    cpu: 1000m
-    memory: 1024Mi
-  requests:
-    cpu: 500m
-    memory: 512Mi
-
-# Production specific configurations
-debug:
-  enabled: false
+  tls: []

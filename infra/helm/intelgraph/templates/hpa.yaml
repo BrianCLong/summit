@@ -1,0 +1,41 @@
+{{- $root := . -}}
+{{- range $component, $config := dict "server" .Values.autoscaling.server "client" .Values.autoscaling.client }}
+{{- if and $config $config.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "intelgraph.fullname" $root }}-{{ $component }}
+  labels:
+    {{- include "intelgraph.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "intelgraph.fullname" $root }}-{{ $component }}
+  minReplicas: {{ $config.minReplicas }}
+  maxReplicas: {{ $config.maxReplicas }}
+  metrics:
+    {{- if $config.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $config.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if $config.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $config.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  {{- with $config.behavior }}
+  behavior:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}

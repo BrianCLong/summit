@@ -6,7 +6,7 @@ metadata:
     {{- include "intelgraph.labels" . | nindent 4 }}
     app.kubernetes.io/component: client
 spec:
-  {{- if not .Values.autoscaling.enabled }}
+  {{- if not .Values.autoscaling.client.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
@@ -23,6 +23,7 @@ spec:
         {{- include "intelgraph.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: client
     spec:
+      automountServiceAccountToken: false
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -34,7 +35,7 @@ spec:
         - name: client
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.client.repository }}:{{ .Values.image.client.tag | default .Chart.AppVersion }}"
+          image: {{ include "intelgraph.imageWithDigest" (dict "image" .Values.image.client "name" "client") }}
           imagePullPolicy: {{ .Values.image.client.pullPolicy }}
           ports:
             - name: http
@@ -43,7 +44,7 @@ spec:
           {{- if .Values.healthCheck.enabled }}
           livenessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.healthCheck.path }}
               port: http
             initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
             periodSeconds: {{ .Values.healthCheck.periodSeconds }}
@@ -51,12 +52,13 @@ spec:
             failureThreshold: {{ .Values.healthCheck.failureThreshold }}
           readinessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.healthCheck.path }}
               port: http
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            timeoutSeconds: 2
-            failureThreshold: 3
+            initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
+            periodSeconds: {{ .Values.healthCheck.periodSeconds }}
+            timeoutSeconds: {{ .Values.healthCheck.timeoutSeconds }}
+            failureThreshold: {{ .Values.healthCheck.failureThreshold }}
+            successThreshold: {{ .Values.healthCheck.successThreshold }}
           {{- end }}
           resources:
             {{- toYaml .Values.resources.client | nindent 12 }}
@@ -78,9 +80,37 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
+      {{- if .Values.affinity.client }}
       affinity:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml .Values.affinity.client | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/instance
+                      operator: In
+                      values:
+                        - {{ .Release.Name }}
+                    - key: app.kubernetes.io/component
+                      operator: In
+                      values:
+                        - client
+                topologyKey: kubernetes.io/hostname
+      {{- end }}
+      {{- if .Values.topologySpreadConstraints.client }}
+      topologySpreadConstraints:
+        {{- $root := . }}
+        {{- range .Values.topologySpreadConstraints.client }}
+        {{- $constraint := dict "maxSkew" (default 1 .maxSkew) "topologyKey" (default "topology.kubernetes.io/zone" .topologyKey) "whenUnsatisfiable" (default "DoNotSchedule" .whenUnsatisfiable) }}
+        {{- $selector := fromYaml (include "intelgraph.selectorLabels" $root) }}
+        {{- $_ := set $selector "app.kubernetes.io/component" "client" }}
+        {{- $_ := set $constraint "labelSelector" (dict "matchLabels" $selector) }}
+        {{- toYaml $constraint | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
