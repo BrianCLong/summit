@@ -2,10 +2,6 @@
 *.sh text eol=lf
 *.bat text eol=crlf
 
-# Lockfiles – do not noise diffs
-package-lock.json -diff
-yarn.lock -diff
-
 # Graph schemas
 *.graphql diff
 *.cql diff
