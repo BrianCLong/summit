@@ -187,6 +187,22 @@ async function createPostgresTables(): Promise<void> {
       )
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS graph_annotations (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        target_type TEXT NOT NULL CHECK (target_type IN ('ENTITY', 'EDGE')),
+        target_id TEXT NOT NULL,
+        content TEXT NOT NULL,
+        confidence TEXT NOT NULL DEFAULT 'UNKNOWN',
+        tags TEXT[] DEFAULT '{}'::TEXT[],
+        enclave TEXT NOT NULL,
+        created_by TEXT NOT NULL,
+        updated_by TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id)');
     await client.query(
       'CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)',
@@ -194,6 +210,12 @@ async function createPostgresTables(): Promise<void> {
     await client.query('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id)');
     await client.query(
       'CREATE INDEX IF NOT EXISTS idx_analysis_investigation ON analysis_results(investigation_id)',
+    );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_graph_annotations_target ON graph_annotations(target_type, target_id)',
+    );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_graph_annotations_enclave ON graph_annotations(enclave)',
     );
 
     logger.info('PostgreSQL tables created');
