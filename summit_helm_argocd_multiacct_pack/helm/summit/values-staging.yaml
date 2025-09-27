@@ -1,3 +1,7 @@
 replicaCount: 2
 image:
   tag: latest
+
+provenance:
+  # Base64-encoded Ed25519 public keys used for verifying manifest signatures
+  publicKeys: []
