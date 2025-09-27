@@ -1,0 +1,388 @@
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+"""An ISO-8601 timestamp"""
+scalar DateTime
+
+"""Arbitrary structured JSON payload"""
+scalar JSON
+
+"""Opaque cursor used for relay-style pagination"""
+scalar Cursor
+
+"""Common interface implemented by every identifiable object"""
+interface Node {
+  id: ID!
+}
+
+"""Pagination metadata for connection results"""
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: Cursor
+  endCursor: Cursor
+  totalCount: Int!
+}
+
+"""A stable error surface for all resolvers"""
+type ResolverError {
+  message: String!
+  code: ErrorCode!
+  retriable: Boolean!
+  details: JSON
+}
+
+"""Enumerates the stable error codes emitted by the API"""
+enum ErrorCode {
+  AUTHZ_DENIED
+  AUTHN_REQUIRED
+  ENTITY_NOT_FOUND
+  RELATIONSHIP_NOT_FOUND
+  INVESTIGATION_NOT_FOUND
+  TIMELINE_NOT_FOUND
+  VALIDATION_FAILED
+  RATE_LIMITED
+  CONFLICT_DETECTED
+  PAYLOAD_TOO_LARGE
+  QUERY_TIMEOUT
+  INTERNAL_SERVER_ERROR
+}
+
+"""Supported entity kinds"""
+enum EntityKind {
+  PERSON
+  ORGANIZATION
+  LOCATION
+  EVENT
+  ASSET
+  DEVICE
+  ACCOUNT
+  OBSERVATION
+  NOTE
+  CUSTOM
+}
+
+"""Supported relationship kinds"""
+enum RelationshipKind {
+  LINKED_TO
+  COMMUNICATES_WITH
+  MEMBER_OF
+  LOCATED_AT
+  PART_OF
+  TRANSFERRED_TO
+  OBSERVED_WITH
+  RELATED_TO
+  CUSTOM
+}
+
+"""Investigation lifecycle states"""
+enum InvestigationStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+"""Relative urgency of an investigation"""
+enum InvestigationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+"""Categories for timeline events captured during investigations"""
+enum TimelineEventCategory {
+  OBSERVATION
+  ACTION
+  ESCALATION
+  DECISION
+  SUMMARY
+  ATTACHMENT
+}
+
+"""Parameters used to paginate results"""
+input ConnectionArgs {
+  """Maximum number of items to return (1-100, defaults to 25)"""
+  first: Int! = 25
+  """Opaque cursor indicating where to resume the result set"""
+  after: Cursor
+}
+
+"""Filters applied when listing entities"""
+input EntityFilterInput {
+  tenantId: ID
+  kinds: [EntityKind!]
+  search: String
+  riskGte: Float
+  riskLte: Float
+  updatedAfter: DateTime
+}
+
+"""Filters applied when listing investigations"""
+input InvestigationFilterInput {
+  tenantId: ID
+  status: [InvestigationStatus!]
+  ownerIds: [ID!]
+  search: String
+  updatedAfter: DateTime
+}
+
+"""Filters applied when listing relationships"""
+input RelationshipFilterInput {
+  tenantId: ID!
+  sourceId: ID
+  targetId: ID
+  kinds: [RelationshipKind!]
+  updatedAfter: DateTime
+}
+
+"""Payload for creating a new entity"""
+input CreateEntityInput {
+  tenantId: ID!
+  kind: EntityKind!
+  displayName: String!
+  summary: String
+  properties: JSON
+}
+
+"""Payload for updating an existing entity"""
+input UpdateEntityInput {
+  displayName: String
+  summary: String
+  properties: JSON
+  riskScore: Float
+}
+
+"""Payload for creating a new relationship"""
+input CreateRelationshipInput {
+  tenantId: ID!
+  sourceId: ID!
+  targetId: ID!
+  kind: RelationshipKind!
+  properties: JSON
+  confidence: Float
+}
+
+"""Payload for updating an existing relationship"""
+input UpdateRelationshipInput {
+  properties: JSON
+  confidence: Float
+}
+
+"""Payload for creating or updating an investigation"""
+input UpsertInvestigationInput {
+  tenantId: ID!
+  name: String!
+  description: String
+  status: InvestigationStatus!
+  priority: InvestigationPriority!
+  ownerId: ID!
+  dueDate: DateTime
+}
+
+"""Payload for recording an investigation timeline event"""
+input RecordInvestigationEventInput {
+  investigationId: ID!
+  tenantId: ID!
+  actorId: ID!
+  category: TimelineEventCategory!
+  message: String!
+  occurredAt: DateTime!
+}
+
+"""Core representation of an entity"""
+type Entity implements Node {
+  id: ID!
+  tenantId: ID!
+  kind: EntityKind!
+  displayName: String!
+  summary: String
+  riskScore: Float
+  properties: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  relationships(pagination: ConnectionArgs = { first: 25 }): RelationshipConnection!
+}
+
+"""Connection wrapper for entity pagination"""
+type EntityConnection {
+  edges: [EntityEdge!]!
+  nodes: [Entity!]!
+  pageInfo: PageInfo!
+}
+
+type EntityEdge {
+  node: Entity!
+  cursor: Cursor!
+}
+
+"""Core representation of an investigation"""
+type Investigation implements Node {
+  id: ID!
+  tenantId: ID!
+  name: String!
+  description: String
+  status: InvestigationStatus!
+  priority: InvestigationPriority!
+  ownerId: ID!
+  dueDate: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  timeline(pagination: ConnectionArgs = { first: 50 }): TimelineEventConnection!
+}
+
+"""Connection wrapper for investigations"""
+type InvestigationConnection {
+  edges: [InvestigationEdge!]!
+  nodes: [Investigation!]!
+  pageInfo: PageInfo!
+}
+
+type InvestigationEdge {
+  node: Investigation!
+  cursor: Cursor!
+}
+
+"""Graph relationship between two entities"""
+type Relationship implements Node {
+  id: ID!
+  tenantId: ID!
+  kind: RelationshipKind!
+  sourceId: ID!
+  targetId: ID!
+  confidence: Float
+  properties: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Connection wrapper for relationships"""
+type RelationshipConnection {
+  edges: [RelationshipEdge!]!
+  nodes: [Relationship!]!
+  pageInfo: PageInfo!
+}
+
+type RelationshipEdge {
+  node: Relationship!
+  cursor: Cursor!
+}
+
+"""Represents an entry on an investigation timeline"""
+type TimelineEvent implements Node {
+  id: ID!
+  investigationId: ID!
+  tenantId: ID!
+  actorId: ID!
+  category: TimelineEventCategory!
+  message: String!
+  occurredAt: DateTime!
+  createdAt: DateTime!
+}
+
+"""Connection wrapper for timeline events"""
+type TimelineEventConnection {
+  edges: [TimelineEventEdge!]!
+  nodes: [TimelineEvent!]!
+  pageInfo: PageInfo!
+}
+
+type TimelineEventEdge {
+  node: TimelineEvent!
+  cursor: Cursor!
+}
+
+"""Analytics surfaced for an entity"""
+type EntityMetrics {
+  entityId: ID!
+  degree: Int
+  betweenness: Float
+  closeness: Float
+  alertsOpen: Int
+  lastInvestigationId: ID
+}
+
+"""Union result for entity lookups"""
+union EntityResult = Entity | ResolverError
+
+"""Union result for investigation lookups"""
+union InvestigationResult = Investigation | ResolverError
+
+"""Union result for entity metrics"""
+union EntityMetricsResult = EntityMetrics | ResolverError
+
+"""Result returned after entity mutations"""
+type EntityMutationPayload {
+  success: Boolean!
+  entity: Entity
+  errors: [ResolverError!]!
+}
+
+"""Result returned after relationship mutations"""
+type RelationshipMutationPayload {
+  success: Boolean!
+  relationship: Relationship
+  errors: [ResolverError!]!
+}
+
+"""Result returned after investigation mutations"""
+type InvestigationMutationPayload {
+  success: Boolean!
+  investigation: Investigation
+  errors: [ResolverError!]!
+}
+
+"""Result returned after recording timeline events"""
+type TimelineMutationPayload {
+  success: Boolean!
+  event: TimelineEvent
+  errors: [ResolverError!]!
+}
+
+"""Envelope emitted when entity change notifications are streamed"""
+type EntityEvent {
+  entity: Entity!
+  changeType: String!
+  occurredAt: DateTime!
+}
+
+"""Envelope emitted when investigation status changes"""
+type InvestigationStatusEvent {
+  investigationId: ID!
+  tenantId: ID!
+  status: InvestigationStatus!
+  occurredAt: DateTime!
+}
+
+"""Queries exposed by the public GraphQL API"""
+type Query {
+  entity(id: ID!, tenantId: ID!): EntityResult!
+  entities(filter: EntityFilterInput, pagination: ConnectionArgs = { first: 25 }): EntityConnection!
+  investigation(id: ID!, tenantId: ID!): InvestigationResult!
+  investigations(filter: InvestigationFilterInput, pagination: ConnectionArgs = { first: 25 }): InvestigationConnection!
+  relationships(filter: RelationshipFilterInput!, pagination: ConnectionArgs = { first: 25 }): RelationshipConnection!
+  timelineEvents(investigationId: ID!, tenantId: ID!, pagination: ConnectionArgs = { first: 50 }): TimelineEventConnection!
+  entityMetrics(id: ID!, tenantId: ID!): EntityMetricsResult!
+}
+
+"""Mutations exposed by the public GraphQL API"""
+type Mutation {
+  createEntity(input: CreateEntityInput!): EntityMutationPayload!
+  updateEntity(id: ID!, tenantId: ID!, input: UpdateEntityInput!): EntityMutationPayload!
+  createRelationship(input: CreateRelationshipInput!): RelationshipMutationPayload!
+  updateRelationship(id: ID!, tenantId: ID!, input: UpdateRelationshipInput!): RelationshipMutationPayload!
+  upsertInvestigation(id: ID, input: UpsertInvestigationInput!): InvestigationMutationPayload!
+  linkEntityToInvestigation(investigationId: ID!, entityId: ID!, tenantId: ID!): InvestigationMutationPayload!
+  recordInvestigationEvent(input: RecordInvestigationEventInput!): TimelineMutationPayload!
+}
+
+"""Subscriptions surfaced for real-time workflows"""
+type Subscription {
+  entityUpdates(investigationId: ID!, tenantId: ID!): EntityEvent!
+  investigationStatus(investigationId: ID!, tenantId: ID!): InvestigationStatusEvent!
+}
