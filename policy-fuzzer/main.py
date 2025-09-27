@@ -5,8 +5,11 @@ from reporter import generate_reports
 from canaries import CANARIES
 from attack_grammars import ATTACK_GRAMMARS
 from datetime import datetime
+import time # Import the time module
 from metamorphic_tester import MetamorphicTester
 from policy_oracle import PolicyOracle
+
+EXPECTED_EVALUATION_TIME_MS = 10 # Define a threshold for expected evaluation time
 
 def main():
     """Main function to run the policy fuzzer."""
@@ -32,8 +35,14 @@ def main():
         oracle = PolicyOracle(policy) # Pass the policy directly to the oracle
         metamorphic_tester = MetamorphicTester(oracle)
 
-        # Determine expected compliance using the new oracle
+        # Measure performance of oracle determination
+        start_time = time.perf_counter_ns()
         should_be_compliant = oracle.determine_expected_compliance(policy, query)
+        end_time = time.perf_counter_ns()
+        evaluation_time_ms = (end_time - start_time) / 1_000_000
+
+        if evaluation_time_ms > EXPECTED_EVALUATION_TIME_MS:
+            failing_cases.append({"policy": policy, "query": query, "reason": f"Performance anomaly: Oracle evaluation took {evaluation_time_ms:.2f}ms (expected < {EXPECTED_EVALUATION_TIME_MS}ms)", "severity": "Low", "impact": "Performance Degradation"})
 
         # Check against governance layers
         consent_result, consent_reason = check_consent(policy, query)
@@ -58,8 +67,14 @@ def main():
         oracle = PolicyOracle(policy) # Pass the generated policy to the oracle
         metamorphic_tester = MetamorphicTester(oracle)
 
-        # Determine expected compliance using the new oracle
+        # Measure performance of oracle determination
+        start_time = time.perf_counter_ns()
         should_be_compliant = oracle.determine_expected_compliance(policy, query)
+        end_time = time.perf_counter_ns()
+        evaluation_time_ms = (end_time - start_time) / 1_000_000
+
+        if evaluation_time_ms > EXPECTED_EVALUATION_TIME_MS:
+            failing_cases.append({"policy": policy, "query": query, "reason": f"Performance anomaly: Oracle evaluation took {evaluation_time_ms:.2f}ms (expected < {EXPECTED_EVALUATION_TIME_MS}ms)", "severity": "Low", "impact": "Performance Degradation"})
 
         # Check against governance layers
         consent_result, consent_reason = check_consent(policy, query)
