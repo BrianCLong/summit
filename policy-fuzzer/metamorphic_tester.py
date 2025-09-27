@@ -84,6 +84,20 @@ class MetamorphicTester:
             'check': lambda original_compliant, transformed_compliant: original_compliant == transformed_compliant # Country code variation should maintain compliance
         })
 
+        # Relation 11: Consent - Level change
+        relations.append({
+            'name': 'consent_level_change',
+            'transform': lambda p, q: self._consent_level_change(p, q),
+            'check': lambda original_compliant, transformed_compliant: not transformed_compliant if original_compliant else True # Changing consent level should impact compliance
+        })
+
+        # Relation 12: License - Version change
+        relations.append({
+            'name': 'license_version_change',
+            'transform': lambda p, q: self._license_version_change(p, q),
+            'check': lambda original_compliant, transformed_compliant: not transformed_compliant if original_compliant else True # Changing license version should impact compliance
+        })
+
         return relations
 
     def _shift_time_within_window(self, policy, query):
@@ -154,6 +168,26 @@ class MetamorphicTester:
             elif current_location == "CA":
                 transformed_query["location"] = "CAN"
             # Add more country code variations
+        return transformed_query
+
+    def _consent_level_change(self, policy, query):
+        transformed_query = deepcopy(query)
+        if "consent" in transformed_query:
+            current_consent = transformed_query["consent"]
+            if current_consent == "user_data":
+                transformed_query["consent"] = "marketing"
+            elif current_consent == "marketing":
+                transformed_query["consent"] = "user_data"
+        return transformed_query
+
+    def _license_version_change(self, policy, query):
+        transformed_query = deepcopy(query)
+        if "license" in transformed_query:
+            current_license = transformed_query["license"]
+            if current_license == "license_A":
+                transformed_query["license"] = "license_A_v2"
+            elif current_license == "license_B":
+                transformed_query["license"] = "license_B_v2"
         return transformed_query
 
     def _synonym_data_type(self, policy, query):
