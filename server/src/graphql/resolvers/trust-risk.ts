@@ -2,6 +2,7 @@ import { redactionService } from '../../redaction/redact.js';
 import { isAgentEnabled } from '../../config/agent-features.js';
 import { recordTrustScore, recordRiskSignal } from '../../observability/trust-risk-metrics.js';
 import { getTrustScore, upsertTrustScore, insertRiskSignal } from '../../db/repositories/trustRiskRepo.js';
+import { listRiskSignalsPaged, listTrustScores } from '../../db/repositories/trustRiskRepo.js';
 
 function nowIso() { return new Date().toISOString(); }
 
@@ -25,6 +26,22 @@ export const trustRiskResolvers = {
       return rows
         .filter(r => (!kind || r.kind === kind) && (!severity || r.severity === severity))
         .map(r => ({ id: r.id, tenantId: r.tenant_id, kind: r.kind, severity: r.severity, message: r.message, source: r.source, createdAt: r.created_at, context: r.context }));
+    },
+    async riskSignalsPage(_: any, { tenantId, limit, offset, kind, severity }: any) {
+      const page = await listRiskSignalsPaged(tenantId, { kind, severity, limit, offset });
+      return {
+        items: page.items.map(r => ({ id: r.id, tenantId: r.tenant_id, kind: r.kind, severity: r.severity, message: r.message, source: r.source, createdAt: r.created_at, context: r.context })),
+        total: page.total,
+        nextOffset: page.nextOffset,
+      };
+    },
+    async trustScoresPage(_: any, { tenantId, limit, offset }: any) {
+      const page = await listTrustScores(tenantId, limit, offset);
+      return {
+        items: page.items.map(ts => ({ subjectId: ts.subject_id, score: Number(ts.score), reasons: ts.reasons || [], updatedAt: ts.updated_at })),
+        total: page.total,
+        nextOffset: page.nextOffset,
+      };
     },
     async incidentBundle(_: any, { id }: any) {
       return {

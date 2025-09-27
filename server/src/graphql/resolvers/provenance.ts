@@ -1,13 +1,16 @@
-import { getLatestEvidence } from '../../db/repositories/evidenceRepo.js';
+import { getLatestEvidence, listEvidence } from '../../db/repositories/evidenceRepo.js';
 import { getTrustScore, upsertTrustScore } from '../../db/repositories/trustRiskRepo.js';
 
 export const provenanceResolvers = {
   Query: {
-    async evidenceBundles(_: any, { service, releaseId, limit }: any) {
-      // For now, return the latest up to `limit` by repeating latest (DB stores single latest insert order)
+    async evidenceBundles(_: any, { filter }: any) {
+      const { service, releaseId, since, until, limit, offset } = filter || {};
+      if (!service || !releaseId) return [];
+      if (since || until || typeof offset === 'number' || (limit && limit > 1)) {
+        return await listEvidence(service, releaseId, { since, until, limit, offset });
+      }
       const latest = await getLatestEvidence(service, releaseId);
-      if (!latest) return [];
-      return [latest];
+      return latest ? [latest] : [];
     },
   },
   Mutation: {
@@ -29,4 +32,3 @@ export const provenanceResolvers = {
 };
 
 export default provenanceResolvers;
-
