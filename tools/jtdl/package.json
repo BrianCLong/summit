@@ -1,0 +1,29 @@
+{
+  "name": "@summit/jtdl",
+  "version": "0.1.0",
+  "description": "Jurisdictional Taxonomy Diff Linter",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "jtdl": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "test": "node ../../node_modules/jest/bin/jest.js --selectProjects jtdl"
+  },
+  "keywords": [
+    "taxonomy",
+    "compliance",
+    "linter"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "fast-glob": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.12",
+    "typescript": "^5.7.3"
+  }
+}
