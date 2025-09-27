@@ -123,3 +123,12 @@ conflicts/
 __pycache__/
 *.pyc
 
+# Federated Canary Seeder artifacts
+sdk/fcs-client/package-lock.json
+services/fcs/bin/
+services/fcs/cmd/fcs/fcs
+services/fcs/cmd/fcs/fcs.exe
+
+# Local tooling lock files
+cognitive_insights_engine/poetry.lock
+

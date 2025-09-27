@@ -1,0 +1,6 @@
+# Ignore Go build artifacts
+bin/
+*.test
+*.out
+cmd/fcs/fcs
+cmd/fcs/fcs.exe

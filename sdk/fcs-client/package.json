@@ -1,0 +1,19 @@
+{
+  "name": "@summit/fcs-client",
+  "version": "0.1.0",
+  "description": "TypeScript client for the Federated Canary Seeder service",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@noble/ed25519": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "typescript": "^5.4.0"
+  }
+}

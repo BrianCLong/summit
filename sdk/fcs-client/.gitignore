@@ -1,0 +1,5 @@
+# Ignore local build artifacts and dependency directories
+node_modules/
+dist/
+# npm lock files are managed at the monorepo root; avoid duplicating them here
+package-lock.json
