@@ -1,0 +1,151 @@
+{
+  "title": "AuthZ Gateway SLOs",
+  "tags": ["slo", "otel", "authz"],
+  "templating": {
+    "list": [
+      {
+        "name": "tenant",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(graphql_request_duration_count, tenant)",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 1
+      },
+      {
+        "name": "service",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(graphql_request_duration_count, service)",
+        "includeAll": true,
+        "refresh": 1
+      },
+      {
+        "name": "environment",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(graphql_request_duration_count, environment)",
+        "includeAll": true,
+        "refresh": 1
+      },
+      {
+        "name": "purpose",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(graphql_request_duration_count, purpose)",
+        "includeAll": true,
+        "refresh": 1
+      },
+      {
+        "name": "cost_per_event",
+        "type": "constant",
+        "label": "Unit Cost ($)",
+        "query": "0.05"
+      },
+      {
+        "name": "cost_budget",
+        "type": "constant",
+        "label": "Budget ($)",
+        "query": "100"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "GraphQL Latency (p95 & p99)",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green" },
+              { "color": "orange", "value": 0.5 },
+              { "color": "red", "value": 0.75 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "datasource": "Prometheus",
+          "expr": "histogram_quantile(0.95, sum(rate(graphql_request_duration_bucket{service=~\"$service\", environment=~\"$environment\", purpose=~\"$purpose\", tenant=~\"$tenant\"}[$__rate_interval])) by (le, tenant))",
+          "legendFormat": "p95 {{tenant}}"
+        },
+        {
+          "datasource": "Prometheus",
+          "expr": "histogram_quantile(0.99, sum(rate(graphql_request_duration_bucket{service=~\"$service\", environment=~\"$environment\", purpose=~\"$purpose\", tenant=~\"$tenant\"}[$__rate_interval])) by (le, tenant))",
+          "legendFormat": "p99 {{tenant}}"
+        }
+      ]
+    },
+    {
+      "type": "gauge",
+      "title": "Error Budget Burn (1h)",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              { "color": "green" },
+              { "color": "orange", "value": 100 },
+              { "color": "red", "value": 200 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "datasource": "Prometheus",
+          "expr": "(sum(rate(error_rate{service=~\"$service\", environment=~\"$environment\", purpose=~\"$purpose\", tenant=~\"$tenant\"}[5m])) / sum(rate(graphql_request_duration_count{service=~\"$service\", environment=~\"$environment\", purpose=~\"$purpose\", tenant=~\"$tenant\"}[5m]))) / (1 - 0.99)",
+          "legendFormat": "Burn"
+        }
+      ]
+    },
+    {
+      "type": "gauge",
+      "title": "Cost vs Budget (5m avg)",
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "unit": "currencyUSD",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green" },
+              { "color": "orange", "value": 80 },
+              { "color": "red", "value": 100 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "values": false
+        },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "datasource": "Prometheus",
+          "expr": "sum(rate(ingest_events_processed{service=~\"$service\", environment=~\"$environment\", purpose=~\"$purpose\", tenant=~\"$tenant\"}[5m])) * $cost_per_event",
+          "legendFormat": "Spend"
+        }
+      ]
+    }
+  ]
+}
