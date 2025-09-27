@@ -320,6 +320,36 @@ export const crudTypeDefs = gql`
     endDate: DateTime
   }
 
+  input NodeDeduplicationRuleInput {
+    label: String!
+    matchAttributes: [String!]!
+  }
+
+  input RelationshipDeduplicationRuleInput {
+    type: String!
+    matchAttributes: [String!]!
+  }
+
+  input GraphDeduplicationInput {
+    nodeRules: [NodeDeduplicationRuleInput!]
+    relationshipRules: [RelationshipDeduplicationRuleInput!]
+    dryRun: Boolean = false
+    database: String
+    context: JSON
+  }
+
+  type GraphDeduplicationResult {
+    operationId: ID!
+    dryRun: Boolean!
+    startedAt: DateTime!
+    completedAt: DateTime!
+    mergedNodes: Int!
+    mergedRelationships: Int!
+    nodeSummary: JSON!
+    relationshipSummary: JSON!
+    logs: [String!]!
+  }
+
   # Core Queries
   type Query {
     # Entity queries
@@ -400,6 +430,9 @@ export const crudTypeDefs = gql`
     deleteInvestigation(id: ID!): Boolean!
     assignUserToInvestigation(investigationId: ID!, userId: ID!): Investigation!
     unassignUserFromInvestigation(investigationId: ID!, userId: ID!): Investigation!
+
+    # Graph maintenance
+    runGraphDeduplication(input: GraphDeduplicationInput!): GraphDeduplicationResult!
 
     # Authentication mutations (placeholder - handled separately)
     login(email: String!, password: String!): AuthPayload!
