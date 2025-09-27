@@ -139,13 +139,17 @@ metadata:
     name: {{ .Release.Namespace }}
     
     # Service mesh labels
-    {{- if .Values.istio.enabled }}
+    {{- with .Values.istio }}
+    {{- if .enabled }}
     istio-injection: enabled
     {{- end }}
-    
+    {{- end }}
+
     # Monitoring labels
-    {{- if .Values.monitoring.prometheus.enabled }}
+    {{- with .Values.monitoring.prometheus }}
+    {{- if .enabled }}
     prometheus.io/scrape: "true"
+    {{- end }}
     {{- end }}
 
 {{- end }}

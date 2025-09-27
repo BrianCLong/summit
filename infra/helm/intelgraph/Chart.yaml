@@ -28,6 +28,11 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled
 
+  - name: neo4j
+    version: '5.12.0'
+    repository: https://helm.neo4j.com/neo4j
+    condition: databases.neo4j.enabled
+
 annotations:
   category: Analytics
   images: |

@@ -1,6 +1,11 @@
 image:
-  repository: ghcr.io/intelgraph/platform
-  tag: 'v1.0.0'
+  server:
+    repository: ghcr.io/intelgraph/platform-server
+    digest: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  client:
+    repository: ghcr.io/intelgraph/platform-client
+    digest: "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+
 security:
   mtls: true
   jwksRotationHours: 24

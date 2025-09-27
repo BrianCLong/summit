@@ -1,57 +1,48 @@
-# Development environment values
+# Development environment overrides
 global:
   environment: development
-  domain: dev.intelgraph.local
-  imageTag: latest
+  cluster:
+    name: intelgraph-dev
+  podSecurityStandards: restricted
 
 replicaCount: 1
 
-image:
-  repository: ghcr.io/brianclong/intelgraph
-  pullPolicy: Always
-  tag: "latest"
-
-securityContext:
-  runAsNonRoot: true
-  runAsUser: 1000
-  fsGroup: 2000
+autoscaling:
+  server:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+  client:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
 
 resources:
-  requests:
-    cpu: "100m"
-    memory: "128Mi"
-  limits:
-    cpu: "500m"
-    memory: "512Mi"
+  server:
+    requests:
+      cpu: 150m
+      memory: 256Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+  client:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 
-# External services for development
-postgresql:
-  enabled: true
-  auth:
-    postgresPassword: devpassword
-    database: intelgraph_dev
-  primary:
-    persistence:
-      enabled: false
+externalSecrets:
+  secretStoreRef:
+    name: summit-dev-secrets
+  refreshInterval: 30m
 
-redis:
-  enabled: true
-  auth:
-    enabled: false
-  master:
-    persistence:
-      enabled: false
-
-neo4j:
-  enabled: true
-  neo4j:
-    password: devpassword
-  volumes:
-    data:
-      mode: defaultStorageClass
-      defaultStorageClass:
-        requests:
-          storage: 1Gi
+podDisruptionBudget:
+  server:
+    minAvailable: 1
+  client:
+    minAvailable: 1
 
 ingress:
   enabled: true
@@ -63,10 +54,4 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-  tls: false
-
-networkPolicy:
-  enabled: false
-
-canary:
-  enabled: false
+  tls: []
