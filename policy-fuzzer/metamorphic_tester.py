@@ -98,6 +98,20 @@ class MetamorphicTester:
             'check': lambda original_compliant, transformed_compliant: not transformed_compliant if original_compliant else True # Changing license version should impact compliance
         })
 
+        # Relation 13: Retention - Period extension
+        relations.append({
+            'name': 'retention_period_extension',
+            'transform': lambda p, q: self._retention_period_extension(p, q),
+            'check': lambda original_compliant, transformed_compliant: original_compliant == transformed_compliant # Extending retention should ideally maintain compliance if within policy limits
+        })
+
+        # Relation 14: Retention - Period shortening
+        relations.append({
+            'name': 'retention_period_shortening',
+            'transform': lambda p, q: self._retention_period_shortening(p, q),
+            'check': lambda original_compliant, transformed_compliant: original_compliant == transformed_compliant # Shortening retention should ideally maintain compliance
+        })
+
         return relations
 
     def _shift_time_within_window(self, policy, query):
@@ -188,6 +202,28 @@ class MetamorphicTester:
                 transformed_query["license"] = "license_A_v2"
             elif current_license == "license_B":
                 transformed_query["license"] = "license_B_v2"
+        return transformed_query
+
+    def _retention_period_extension(self, policy, query):
+        transformed_query = deepcopy(query)
+        if "retention" in transformed_query and transformed_query["retention"] is not None:
+            current_retention = transformed_query["retention"]
+            # Simple extension: if 30d, extend to 90d
+            if current_retention == "30d":
+                transformed_query["retention"] = "90d"
+            elif current_retention == "90d":
+                transformed_query["retention"] = "1y"
+        return transformed_query
+
+    def _retention_period_shortening(self, policy, query):
+        transformed_query = deepcopy(query)
+        if "retention" in transformed_query and transformed_query["retention"] is not None:
+            current_retention = transformed_query["retention"]
+            # Simple shortening: if 90d, shorten to 30d
+            if current_retention == "90d":
+                transformed_query["retention"] = "30d"
+            elif current_retention == "1y":
+                transformed_query["retention"] = "90d"
         return transformed_query
 
     def _synonym_data_type(self, policy, query):
