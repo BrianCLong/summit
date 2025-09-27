@@ -38,6 +38,10 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
+# DMCL build artifacts
+tools/dmcl/bin/
+reports/dmcl/
+
 # Prevent secrets / env files
 .env.*
 !.env.example
