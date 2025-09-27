@@ -2,6 +2,7 @@ import { ApolloServer } from '@apollo/server';
 import { ApolloGateway, IntrospectAndCompose } from '@apollo/gateway';
 import { persistedOnlyPlugin } from './plugins/persistedOnly';
 import { costLimitPlugin } from './plugins/costLimit';
+import { policyGatePlugin } from './plugins/policyGate';
 
 function rateLimitPlugin() {
   return {
@@ -22,5 +23,5 @@ const gateway = new ApolloGateway({
 export const server = new ApolloServer({
   gateway,
   includeStacktraceInErrorResponses: false,
-  plugins: [rateLimitPlugin(), persistedOnlyPlugin(), costLimitPlugin()],
+  plugins: [rateLimitPlugin(), persistedOnlyPlugin(), costLimitPlugin(), policyGatePlugin()],
 });

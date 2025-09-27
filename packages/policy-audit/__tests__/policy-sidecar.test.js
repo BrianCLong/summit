@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
+const fixtures = require('../../../contracts/policy/fixtures.json');
 const { verifyAuditChain } = require('..');
 const { createServer } = require('../../../services/policy-sidecar/server');
 
@@ -15,32 +16,45 @@ beforeAll(() => {
 jest.setTimeout(60000);
 
 afterEach(() => {
-  // cleanup logs after each test
   fs.rmSync(auditDir, { recursive: true, force: true });
   fs.mkdirSync(auditDir, { recursive: true });
 });
+
+function materialize(name) {
+  const scenario = fixtures.cases.find((c) => c.name === name);
+  if (!scenario) throw new Error(`Unknown scenario ${name}`);
+  const subject = expand(fixtures.subjects, scenario.subject);
+  const resource = expand(fixtures.resources, scenario.resource);
+  const context = expand(fixtures.contexts, scenario.context);
+  return {
+    subject,
+    action: scenario.action,
+    resource,
+    context,
+    expect: scenario.expect,
+  };
+}
+
+function expand(map, ref) {
+  if (!ref) return {};
+  if (typeof ref === 'string') {
+    return JSON.parse(JSON.stringify(map[ref]));
+  }
+  return JSON.parse(JSON.stringify(ref));
+}
 
 test('sidecar eval and audit endpoints', async () => {
   const server = createServer({ policyDir, auditDir });
   await new Promise((resolve) => server.listen(0, resolve));
   const port = server.address().port;
-
-  const evalPayload = {
-    subject: { clearance: 'topsecret', license: 'export' },
-    action: 'read',
-    resource: { classification: 'topsecret', license: 'export' },
-    context: { purpose: 'investigation' },
-  };
-
-  const evalRes = await request(port, '/v0/eval', evalPayload);
-  expect(evalRes.allow).toBe(true);
-  expect(evalRes.reason).toBe('authorized');
-
+  const scenario = materialize('analyst dossier investigation allow');
+  const evalRes = await request(port, '/v0/eval', scenario);
+  expect(evalRes).toEqual(scenario.expect);
   const auditRes = await request(port, '/v0/audit', {
     decision: 'allow',
     reason: 'authorized',
-    subject: {},
-    resource: {},
+    subject: scenario.subject,
+    resource: scenario.resource,
   });
   expect(auditRes.auditId).toBeDefined();
   await new Promise((resolve) => server.close(resolve));
@@ -63,15 +77,9 @@ test('sidecar returns denial reasons', async () => {
   const server = createServer({ policyDir, auditDir });
   await new Promise((resolve) => server.listen(0, resolve));
   const port = server.address().port;
-  const payload = {
-    subject: { clearance: 'topsecret', license: 'import' },
-    action: 'read',
-    resource: { classification: 'topsecret', license: 'export' },
-    context: { purpose: 'investigation' },
-  };
-  const res = await request(port, '/v0/eval', payload);
-  expect(res.allow).toBe(false);
-  expect(res.reason).toBe('license-mismatch');
+  const scenario = materialize('auditor ledger wrong purpose');
+  const res = await request(port, '/v0/eval', scenario);
+  expect(res).toEqual(scenario.expect);
   await new Promise((resolve) => server.close(resolve));
 });
 

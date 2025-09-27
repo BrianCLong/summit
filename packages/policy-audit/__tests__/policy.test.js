@@ -1,20 +1,33 @@
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
-import { evaluate } from '../src/policy.js';
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const { PolicyHttpClient } = require('../src/policy.js');
+const { PolicyAudit } = require('..');
+const fixtures = require('../../../contracts/policy/fixtures.json');
 
-function rand() {
-  return Math.random().toString(36).substring(2);
-}
+const policyDir = path.join(__dirname, '../../../contracts/policy');
 
-test('random inputs without policies are denied', () => {
-  for (let i = 0; i < 50; i++) {
-    const input = {
-      subject: { clearance: rand() },
-      action: rand(),
-      resource: { classification: rand() },
-      context: { purpose: rand() },
-    };
-    const res = evaluate(input, []);
-    assert.strictEqual(res.allow, false);
-  }
+describe('PolicyHttpClient', () => {
+  test('mirrors PolicyAudit decisions', async () => {
+    const auditDir = fs.mkdtempSync(path.join(os.tmpdir(), 'policy-http-'));
+    const pa = new PolicyAudit({ policyDir, auditDir });
+    const baseUrl = await pa.baseUrl();
+    const client = new PolicyHttpClient({ baseUrl });
+    for (const scenario of fixtures.cases.slice(0, 5)) {
+      const subject = expand(fixtures.subjects, scenario.subject);
+      const resource = expand(fixtures.resources, scenario.resource);
+      const context = expand(fixtures.contexts, scenario.context);
+      const decision = await client.evaluate({ subject, resource, action: scenario.action, context });
+      expect(decision).toEqual(scenario.expect);
+    }
+    await pa.close();
+  });
 });
+
+function expand(map, ref) {
+  if (!ref) return {};
+  if (typeof ref === 'string') {
+    return JSON.parse(JSON.stringify(map[ref]));
+  }
+  return JSON.parse(JSON.stringify(ref));
+}

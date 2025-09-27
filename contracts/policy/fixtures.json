@@ -1,0 +1,333 @@
+{
+  "subjects": {
+    "analyst_ts_export": {
+      "id": "analyst_ts_export",
+      "clearance": "topsecret",
+      "license": "export",
+      "tenants": ["acme"],
+      "roles": ["analyst"],
+      "purposes": ["investigation", "intel-sharing"]
+    },
+    "analyst_secret_export": {
+      "id": "analyst_secret_export",
+      "clearance": "secret",
+      "license": "export",
+      "tenants": ["acme"],
+      "roles": ["analyst"],
+      "purposes": ["investigation"]
+    },
+    "auditor_ts_import": {
+      "id": "auditor_ts_import",
+      "clearance": "topsecret",
+      "license": "import",
+      "tenants": ["acme"],
+      "roles": ["auditor"],
+      "purposes": ["audit"]
+    },
+    "contractor_conf_export": {
+      "id": "contractor_conf_export",
+      "clearance": "confidential",
+      "license": "export",
+      "tenants": ["beta"],
+      "roles": ["contractor"],
+      "purposes": ["maintenance"]
+    }
+  },
+  "resources": {
+    "dossier_ts_export": {
+      "id": "dossier_ts_export",
+      "classification": "topsecret",
+      "license": ["export"],
+      "tenants": ["acme"],
+      "allowed_purposes": ["investigation"],
+      "actions": ["read"]
+    },
+    "ledger_secret_import": {
+      "id": "ledger_secret_import",
+      "classification": "secret",
+      "license": ["import"],
+      "tenants": ["acme"],
+      "allowed_purposes": ["audit"],
+      "actions": ["read", "write"]
+    },
+    "maintenance_conf_export": {
+      "id": "maintenance_conf_export",
+      "classification": "confidential",
+      "license": ["export"],
+      "tenants": ["beta"],
+      "allowed_purposes": ["maintenance"],
+      "actions": ["read", "maintain"]
+    }
+  },
+  "contexts": {
+    "investigation_read_acme": {
+      "purpose": "investigation",
+      "tenant": "acme",
+      "role": "analyst"
+    },
+    "audit_write_acme": {
+      "purpose": "audit",
+      "tenant": "acme",
+      "role": "auditor"
+    },
+    "maintenance_read_beta": {
+      "purpose": "maintenance",
+      "tenant": "beta",
+      "role": "contractor"
+    },
+    "investigation_read_beta": {
+      "purpose": "investigation",
+      "tenant": "beta",
+      "role": "analyst"
+    }
+  },
+  "cases": [
+    {
+      "name": "analyst dossier investigation allow",
+      "subject": "analyst_ts_export",
+      "resource": "dossier_ts_export",
+      "action": "read",
+      "context": "investigation_read_acme",
+      "expect": { "allow": true, "reason": "authorized" }
+    },
+    {
+      "name": "analyst dossier disallowed action",
+      "subject": "analyst_ts_export",
+      "resource": "dossier_ts_export",
+      "action": "write",
+      "context": "investigation_read_acme",
+      "expect": { "allow": false, "reason": "action-not-allowed" }
+    },
+    {
+      "name": "analyst dossier wrong role",
+      "subject": "analyst_ts_export",
+      "resource": "dossier_ts_export",
+      "action": "read",
+      "context": {
+        "purpose": "investigation",
+        "tenant": "acme",
+        "role": "observer"
+      },
+      "expect": { "allow": false, "reason": "role-mismatch" }
+    },
+    {
+      "name": "analyst dossier missing purpose",
+      "subject": "analyst_ts_export",
+      "resource": "dossier_ts_export",
+      "action": "read",
+      "context": {
+        "purpose": "",
+        "tenant": "acme",
+        "role": "analyst"
+      },
+      "expect": { "allow": false, "reason": "invalid-purpose" }
+    },
+    {
+      "name": "analyst dossier tenant mismatch",
+      "subject": "analyst_ts_export",
+      "resource": "dossier_ts_export",
+      "action": "read",
+      "context": "investigation_read_beta",
+      "expect": { "allow": false, "reason": "tenant-mismatch" }
+    },
+    {
+      "name": "analyst ledger license mismatch",
+      "subject": "analyst_ts_export",
+      "resource": "ledger_secret_import",
+      "action": "read",
+      "context": "investigation_read_acme",
+      "expect": { "allow": false, "reason": "license-mismatch" }
+    },
+    {
+      "name": "analyst ledger audit attempt",
+      "subject": "analyst_ts_export",
+      "resource": "ledger_secret_import",
+      "action": "write",
+      "context": "audit_write_acme",
+      "expect": { "allow": false, "reason": "license-mismatch" }
+    },
+    {
+      "name": "analyst maintenance tenant mismatch",
+      "subject": "analyst_ts_export",
+      "resource": "maintenance_conf_export",
+      "action": "read",
+      "context": "maintenance_read_beta",
+      "expect": { "allow": false, "reason": "tenant-mismatch" }
+    },
+    {
+      "name": "analyst maintenance wrong tenant context",
+      "subject": "analyst_ts_export",
+      "resource": "maintenance_conf_export",
+      "action": "maintain",
+      "context": {
+        "purpose": "maintenance",
+        "tenant": "acme",
+        "role": "contractor"
+      },
+      "expect": { "allow": false, "reason": "tenant-mismatch" }
+    },
+    {
+      "name": "analyst missing role",
+      "subject": "analyst_ts_export",
+      "resource": "dossier_ts_export",
+      "action": "read",
+      "context": {
+        "purpose": "investigation",
+        "tenant": "acme",
+        "role": ""
+      },
+      "expect": { "allow": false, "reason": "role-mismatch" }
+    },
+    {
+      "name": "secret analyst insufficient clearance",
+      "subject": "analyst_secret_export",
+      "resource": "dossier_ts_export",
+      "action": "read",
+      "context": "investigation_read_acme",
+      "expect": { "allow": false, "reason": "insufficient-clearance" }
+    },
+    {
+      "name": "secret analyst ledger license mismatch",
+      "subject": "analyst_secret_export",
+      "resource": "ledger_secret_import",
+      "action": "write",
+      "context": "audit_write_acme",
+      "expect": { "allow": false, "reason": "license-mismatch" }
+    },
+    {
+      "name": "secret analyst maintenance tenant mismatch",
+      "subject": "analyst_secret_export",
+      "resource": "maintenance_conf_export",
+      "action": "read",
+      "context": "maintenance_read_beta",
+      "expect": { "allow": false, "reason": "tenant-mismatch" }
+    },
+    {
+      "name": "auditor ledger authorized",
+      "subject": "auditor_ts_import",
+      "resource": "ledger_secret_import",
+      "action": "write",
+      "context": "audit_write_acme",
+      "expect": { "allow": true, "reason": "authorized" }
+    },
+    {
+      "name": "auditor ledger wrong purpose",
+      "subject": "auditor_ts_import",
+      "resource": "ledger_secret_import",
+      "action": "read",
+      "context": {
+        "purpose": "investigation",
+        "tenant": "acme",
+        "role": "auditor"
+      },
+      "expect": { "allow": false, "reason": "invalid-purpose" }
+    },
+    {
+      "name": "auditor ledger wrong role",
+      "subject": "auditor_ts_import",
+      "resource": "ledger_secret_import",
+      "action": "write",
+      "context": {
+        "purpose": "audit",
+        "tenant": "acme",
+        "role": "analyst"
+      },
+      "expect": { "allow": false, "reason": "role-mismatch" }
+    },
+    {
+      "name": "auditor ledger tenant mismatch",
+      "subject": "auditor_ts_import",
+      "resource": "ledger_secret_import",
+      "action": "write",
+      "context": {
+        "purpose": "audit",
+        "tenant": "beta",
+        "role": "auditor"
+      },
+      "expect": { "allow": false, "reason": "tenant-mismatch" }
+    },
+    {
+      "name": "auditor dossier license mismatch",
+      "subject": "auditor_ts_import",
+      "resource": "dossier_ts_export",
+      "action": "read",
+      "context": "investigation_read_acme",
+      "expect": { "allow": false, "reason": "license-mismatch" }
+    },
+    {
+      "name": "auditor maintenance tenant mismatch",
+      "subject": "auditor_ts_import",
+      "resource": {
+        "id": "maintenance_conf_import",
+        "classification": "confidential",
+        "license": ["import"],
+        "tenants": ["beta"],
+        "allowed_purposes": ["maintenance"],
+        "actions": ["read", "maintain"]
+      },
+      "action": "read",
+      "context": {
+        "purpose": "maintenance",
+        "tenant": "beta",
+        "role": "auditor"
+      },
+      "expect": { "allow": false, "reason": "tenant-mismatch" }
+    },
+    {
+      "name": "contractor maintenance authorized",
+      "subject": "contractor_conf_export",
+      "resource": "maintenance_conf_export",
+      "action": "maintain",
+      "context": "maintenance_read_beta",
+      "expect": { "allow": true, "reason": "authorized" }
+    },
+    {
+      "name": "contractor maintenance wrong action",
+      "subject": "contractor_conf_export",
+      "resource": "maintenance_conf_export",
+      "action": "write",
+      "context": "maintenance_read_beta",
+      "expect": { "allow": false, "reason": "action-not-allowed" }
+    },
+    {
+      "name": "contractor maintenance wrong purpose",
+      "subject": "contractor_conf_export",
+      "resource": "maintenance_conf_export",
+      "action": "read",
+      "context": {
+        "purpose": "investigation",
+        "tenant": "beta",
+        "role": "contractor"
+      },
+      "expect": { "allow": false, "reason": "invalid-purpose" }
+    },
+    {
+      "name": "contractor dossier clearance",
+      "subject": "contractor_conf_export",
+      "resource": "dossier_ts_export",
+      "action": "read",
+      "context": "investigation_read_beta",
+      "expect": { "allow": false, "reason": "insufficient-clearance" }
+    },
+    {
+      "name": "contractor ledger clearance",
+      "subject": "contractor_conf_export",
+      "resource": "ledger_secret_import",
+      "action": "read",
+      "context": "audit_write_acme",
+      "expect": { "allow": false, "reason": "insufficient-clearance" }
+    },
+    {
+      "name": "auditor ledger missing role",
+      "subject": "auditor_ts_import",
+      "resource": "ledger_secret_import",
+      "action": "write",
+      "context": {
+        "purpose": "audit",
+        "tenant": "acme",
+        "role": ""
+      },
+      "expect": { "allow": false, "reason": "role-mismatch" }
+    }
+  ]
+}

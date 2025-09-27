@@ -1,0 +1,131 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`policy decision matrix matches snapshot 1`] = `
+[
+  {
+    "allow": true,
+    "name": "analyst dossier investigation allow",
+    "reason": "authorized",
+  },
+  {
+    "allow": false,
+    "name": "analyst dossier disallowed action",
+    "reason": "action-not-allowed",
+  },
+  {
+    "allow": false,
+    "name": "analyst dossier wrong role",
+    "reason": "role-mismatch",
+  },
+  {
+    "allow": false,
+    "name": "analyst dossier missing purpose",
+    "reason": "invalid-purpose",
+  },
+  {
+    "allow": false,
+    "name": "analyst dossier tenant mismatch",
+    "reason": "tenant-mismatch",
+  },
+  {
+    "allow": false,
+    "name": "analyst ledger license mismatch",
+    "reason": "license-mismatch",
+  },
+  {
+    "allow": false,
+    "name": "analyst ledger audit attempt",
+    "reason": "license-mismatch",
+  },
+  {
+    "allow": false,
+    "name": "analyst maintenance tenant mismatch",
+    "reason": "tenant-mismatch",
+  },
+  {
+    "allow": false,
+    "name": "analyst maintenance wrong tenant context",
+    "reason": "tenant-mismatch",
+  },
+  {
+    "allow": false,
+    "name": "analyst missing role",
+    "reason": "role-mismatch",
+  },
+  {
+    "allow": false,
+    "name": "secret analyst insufficient clearance",
+    "reason": "insufficient-clearance",
+  },
+  {
+    "allow": false,
+    "name": "secret analyst ledger license mismatch",
+    "reason": "license-mismatch",
+  },
+  {
+    "allow": false,
+    "name": "secret analyst maintenance tenant mismatch",
+    "reason": "tenant-mismatch",
+  },
+  {
+    "allow": true,
+    "name": "auditor ledger authorized",
+    "reason": "authorized",
+  },
+  {
+    "allow": false,
+    "name": "auditor ledger wrong purpose",
+    "reason": "invalid-purpose",
+  },
+  {
+    "allow": false,
+    "name": "auditor ledger wrong role",
+    "reason": "role-mismatch",
+  },
+  {
+    "allow": false,
+    "name": "auditor ledger tenant mismatch",
+    "reason": "tenant-mismatch",
+  },
+  {
+    "allow": false,
+    "name": "auditor dossier license mismatch",
+    "reason": "license-mismatch",
+  },
+  {
+    "allow": false,
+    "name": "auditor maintenance tenant mismatch",
+    "reason": "tenant-mismatch",
+  },
+  {
+    "allow": true,
+    "name": "contractor maintenance authorized",
+    "reason": "authorized",
+  },
+  {
+    "allow": false,
+    "name": "contractor maintenance wrong action",
+    "reason": "action-not-allowed",
+  },
+  {
+    "allow": false,
+    "name": "contractor maintenance wrong purpose",
+    "reason": "invalid-purpose",
+  },
+  {
+    "allow": false,
+    "name": "contractor dossier clearance",
+    "reason": "insufficient-clearance",
+  },
+  {
+    "allow": false,
+    "name": "contractor ledger clearance",
+    "reason": "insufficient-clearance",
+  },
+  {
+    "allow": false,
+    "name": "auditor ledger missing role",
+    "reason": "role-mismatch",
+  },
+]
+`;

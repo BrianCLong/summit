@@ -1,9 +1,8 @@
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
-import { fileURLToPath } from 'url';
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 
-export function audit(entry, logDir = '.') {
+function audit(entry, logDir = '.') {
   const date = new Date().toISOString().slice(0, 10);
   const file = path.join(logDir, `audit-${date}.log`);
   let prevHash = '';
@@ -24,7 +23,7 @@ export function audit(entry, logDir = '.') {
   return { auditId: hash };
 }
 
-export function verify(file) {
+function verify(file) {
   if (!fs.existsSync(file)) return false;
   const lines = fs.readFileSync(file, 'utf8').trim().split('\n');
   let prevHash = '';
@@ -38,11 +37,4 @@ export function verify(file) {
   return true;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const target = process.argv[2];
-  if (!target) {
-    console.error('usage: node audit.js <file>');
-    process.exit(1);
-  }
-  console.log(verify(target) ? 'chain valid' : 'chain invalid');
-}
+module.exports = { audit, verify };

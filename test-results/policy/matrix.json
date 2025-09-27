@@ -1,0 +1,130 @@
+{
+  "generatedAt": "2025-09-27T16:09:11.048Z",
+  "cases": [
+    {
+      "name": "analyst dossier investigation allow",
+      "allow": true,
+      "reason": "authorized"
+    },
+    {
+      "name": "analyst dossier disallowed action",
+      "allow": false,
+      "reason": "action-not-allowed"
+    },
+    {
+      "name": "analyst dossier wrong role",
+      "allow": false,
+      "reason": "role-mismatch"
+    },
+    {
+      "name": "analyst dossier missing purpose",
+      "allow": false,
+      "reason": "invalid-purpose"
+    },
+    {
+      "name": "analyst dossier tenant mismatch",
+      "allow": false,
+      "reason": "tenant-mismatch"
+    },
+    {
+      "name": "analyst ledger license mismatch",
+      "allow": false,
+      "reason": "license-mismatch"
+    },
+    {
+      "name": "analyst ledger audit attempt",
+      "allow": false,
+      "reason": "license-mismatch"
+    },
+    {
+      "name": "analyst maintenance tenant mismatch",
+      "allow": false,
+      "reason": "tenant-mismatch"
+    },
+    {
+      "name": "analyst maintenance wrong tenant context",
+      "allow": false,
+      "reason": "tenant-mismatch"
+    },
+    {
+      "name": "analyst missing role",
+      "allow": false,
+      "reason": "role-mismatch"
+    },
+    {
+      "name": "secret analyst insufficient clearance",
+      "allow": false,
+      "reason": "insufficient-clearance"
+    },
+    {
+      "name": "secret analyst ledger license mismatch",
+      "allow": false,
+      "reason": "license-mismatch"
+    },
+    {
+      "name": "secret analyst maintenance tenant mismatch",
+      "allow": false,
+      "reason": "tenant-mismatch"
+    },
+    {
+      "name": "auditor ledger authorized",
+      "allow": true,
+      "reason": "authorized"
+    },
+    {
+      "name": "auditor ledger wrong purpose",
+      "allow": false,
+      "reason": "invalid-purpose"
+    },
+    {
+      "name": "auditor ledger wrong role",
+      "allow": false,
+      "reason": "role-mismatch"
+    },
+    {
+      "name": "auditor ledger tenant mismatch",
+      "allow": false,
+      "reason": "tenant-mismatch"
+    },
+    {
+      "name": "auditor dossier license mismatch",
+      "allow": false,
+      "reason": "license-mismatch"
+    },
+    {
+      "name": "auditor maintenance tenant mismatch",
+      "allow": false,
+      "reason": "tenant-mismatch"
+    },
+    {
+      "name": "contractor maintenance authorized",
+      "allow": true,
+      "reason": "authorized"
+    },
+    {
+      "name": "contractor maintenance wrong action",
+      "allow": false,
+      "reason": "action-not-allowed"
+    },
+    {
+      "name": "contractor maintenance wrong purpose",
+      "allow": false,
+      "reason": "invalid-purpose"
+    },
+    {
+      "name": "contractor dossier clearance",
+      "allow": false,
+      "reason": "insufficient-clearance"
+    },
+    {
+      "name": "contractor ledger clearance",
+      "allow": false,
+      "reason": "insufficient-clearance"
+    },
+    {
+      "name": "auditor ledger missing role",
+      "allow": false,
+      "reason": "role-mismatch"
+    }
+  ]
+}
