@@ -1,0 +1,83 @@
+.eltm-graph-container {
+  position: relative;
+  height: 420px;
+}
+
+.eltm-node {
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: #fafafa;
+  border: 2px solid #546e7a;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  min-width: 160px;
+}
+
+.eltm-node-type-dataset {
+  border-color: #1976d2;
+}
+
+.eltm-node-type-transform {
+  border-color: #7b1fa2;
+}
+
+.eltm-node-type-policy {
+  border-color: #00838f;
+}
+
+.eltm-node-type-output {
+  border-color: #2e7d32;
+}
+
+.eltm-node-status-added {
+  border-color: #2e7d32;
+  background: #e8f5e9;
+}
+
+.eltm-node-status-removed {
+  border-color: #c62828;
+  background: #ffebee;
+}
+
+.eltm-node-status-changed {
+  border-color: #ed6c02;
+  background: #fff3e0;
+}
+
+.eltm-node-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.eltm-node-subtitle {
+  color: #455a64;
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+.eltm-node-meta {
+  color: #607d8b;
+  font-size: 0.72rem;
+}
+
+.eltm-edge-status-added path {
+  stroke: #2e7d32 !important;
+  stroke-width: 3;
+}
+
+.eltm-edge-status-removed path {
+  stroke: #c62828 !important;
+  stroke-width: 3;
+  stroke-dasharray: 6 4;
+}
+
+.eltm-edge-status-changed path {
+  stroke: #ed6c02 !important;
+  stroke-width: 3;
+  stroke-dasharray: 4 4;
+}
+
+.eltm-legend-chip {
+  font-size: 0.75rem !important;
+  height: 24px !important;
+}

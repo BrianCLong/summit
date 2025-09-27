@@ -14,6 +14,7 @@ const config: Config = {
   moduleNameMapper: {
     '^@app/(.*)$': '<rootDir>/../src/$1',
     '^@ui/(.*)$': '<rootDir>/src/$1',
+    '^.+\\.(css|less|scss|sass)$': '<rootDir>/test/styleMock.ts',
   },
 };
 
