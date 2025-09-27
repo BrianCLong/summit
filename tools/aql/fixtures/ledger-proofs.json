@@ -1,0 +1,4 @@
+[
+  { "artifact": "ledger-evt-123", "digest": "sha256:ledger-evt-123" },
+  { "artifact": "ledger-evt-456", "digest": "sha256:ledger-evt-456" }
+]

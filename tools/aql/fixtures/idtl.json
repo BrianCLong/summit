@@ -1,0 +1,16 @@
+[
+  {
+    "id": "idtl-evt-123",
+    "timestamp": "2024-01-05T12:00:05Z",
+    "subject": "Alice",
+    "action": "RESOLVE",
+    "attributes": {
+      "event_id": "evt-123",
+      "principal": "alice@example.com",
+      "identity_id": "alice-001"
+    },
+    "provenance": [
+      { "source_connector": "logs", "relation": "correlates", "reference": "log-evt-123" }
+    ]
+  }
+]

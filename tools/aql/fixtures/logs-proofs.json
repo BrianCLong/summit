@@ -1,0 +1,4 @@
+[
+  { "artifact": "log-evt-123", "digest": "sha256:log-evt-123" },
+  { "artifact": "log-evt-456", "digest": "sha256:log-evt-456" }
+]
