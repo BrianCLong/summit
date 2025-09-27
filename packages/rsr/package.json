@@ -1,0 +1,32 @@
+{
+  "name": "@summit/rsr",
+  "version": "0.1.0",
+  "description": "Retrieval Safety Router for policy-aware query governance",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "retrieval",
+    "safety",
+    "routing",
+    "governance"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "eslint": "^9.36.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.5"
+  }
+}
