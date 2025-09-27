@@ -1,0 +1,119 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(request_latency_bucket{service=\"connectors\"}[$__rate_interval])) by (le, tenant))",
+          "legendFormat": "{{tenant}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Connector Run Latency P95",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "rows"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "right" }
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(batch_throughput{service=\"connectors\"}[$__interval])) by (tenant)",
+          "legendFormat": "{{tenant}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Rows Processed",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 3,
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["last"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(error_rate{service=\"connectors\"}[$__rate_interval])) / sum(rate(batch_throughput{service=\"connectors\"}[$__rate_interval])) * 100",
+          "refId": "A"
+        }
+      ],
+      "title": "Connector Error Rate",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": { "unit": "short" }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "id": 4,
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" }
+      },
+      "targets": [
+        {
+          "expr": "max(queue_depth{service=\"connectors\"})",
+          "refId": "A"
+        }
+      ],
+      "title": "Queue Depth",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["slo", "connectors"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Ingest SLO",
+  "uid": "ingest-slo",
+  "version": 1
+}

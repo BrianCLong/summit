@@ -6,6 +6,7 @@ from typing import List
 from fastapi import FastAPI, HTTPException
 from features import build_degree_features
 from pydantic import BaseModel
+from observability import instrument_app, record_decision
 
 
 class FeatureBuildRequest(BaseModel):
@@ -82,6 +83,7 @@ class RouteDecision(BaseModel):
 
 
 app = FastAPI()
+instrument_app(app)
 
 
 @app.get("/health")
@@ -134,6 +136,12 @@ def route_model(request: RouteRequest) -> RouteDecision:
     reason = (
         f"Selected {best.name} in {best.region} with latency {best.latency_ms} ms and cost "
         f"${best.cost_per_1k_tokens} per 1K tokens"
+    )
+    record_decision(
+        tenant=request.tenant_id,
+        operation=request.action,
+        latency_ms=best.latency_ms,
+        cost_usd=best.cost_per_1k_tokens / 1000,
     )
     return RouteDecision(
         model=best.name,

@@ -148,6 +148,102 @@ spec:
           This may indicate a credential attack or OIDC configuration issue.
         runbook_url: "https://runbooks.intelgraph.ai/auth-failures"
 
+  - name: intelgraph.unified.slo
+    interval: 30s
+    rules:
+      - record: gateway:slo_error_ratio_5m
+        expr: sum(rate(error_rate{service="gateway"}[5m])) / sum(rate(batch_throughput{service="gateway"}[5m]))
+
+      - record: gateway:slo_error_ratio_1h
+        expr: sum(rate(error_rate{service="gateway"}[1h])) / sum(rate(batch_throughput{service="gateway"}[1h]))
+
+      - record: connectors:slo_error_ratio_5m
+        expr: sum(rate(error_rate{service="connectors"}[5m])) / sum(rate(batch_throughput{service="connectors"}[5m]))
+
+      - record: connectors:slo_error_ratio_1h
+        expr: sum(rate(error_rate{service="connectors"}[1h])) / sum(rate(batch_throughput{service="connectors"}[1h]))
+
+      - record: gateway:unit_cost_per_million
+        expr: sum(rate(cost_per_call_sum{service="gateway"}[15m])) / sum(rate(cost_per_call_count{service="gateway"}[15m])) * 1000000
+
+      - record: connectors:unit_cost_per_thousand
+        expr: sum(rate(cost_per_call_sum{service="connectors"}[15m])) / sum(rate(cost_per_call_count{service="connectors"}[15m])) * 1000
+
+      - alert: GatewayFastBurnRate
+        expr: gateway:slo_error_ratio_5m / 0.001 > 2
+        for: 5m
+        labels:
+          severity: critical
+          service: gateway
+          slo: availability
+          alert_destination: pagerduty
+        annotations:
+          summary: "Gateway SLO fast burn rate >2x budget"
+          description: |-
+            Gateway error ratio is {{ $value | printf "%.3f" }} which exceeds 2x the 0.1% error budget.
+            Immediate investigation required to protect the SLO.
+          runbook_url: "https://runbooks.intelgraph.ai/gateway-slo"
+
+      - alert: GatewaySlowBurnRate
+        expr: gateway:slo_error_ratio_1h / 0.001 > 14
+        for: 15m
+        labels:
+          severity: warning
+          service: gateway
+          slo: availability
+          alert_destination: webhook
+        annotations:
+          summary: "Gateway SLO slow burn >14x budget"
+          description: "Gateway error ratio is persistently above threshold across one hour."
+
+      - alert: ConnectorsFastBurnRate
+        expr: connectors:slo_error_ratio_5m / 0.005 > 2
+        for: 10m
+        labels:
+          severity: critical
+          service: connectors
+          slo: reliability
+          alert_destination: pagerduty
+        annotations:
+          summary: "Connectors fast burn exceeds target"
+          description: "Connectors pipeline is consuming >2x the allowed error budget."
+
+      - alert: ConnectorsSlowBurnRate
+        expr: connectors:slo_error_ratio_1h / 0.005 > 9
+        for: 30m
+        labels:
+          severity: warning
+          service: connectors
+          slo: reliability
+          alert_destination: webhook
+        annotations:
+          summary: "Connectors slow burn indicates chronic failures"
+          description: "Error budget usage sustained above threshold for an hour."
+
+      - alert: GatewayCostBudgetEighty
+        expr: gateway:unit_cost_per_million > 80
+        for: 15m
+        labels:
+          severity: warning
+          service: gateway
+          category: cost
+          alert_destination: pagerduty
+        annotations:
+          summary: "Gateway unit cost exceeded 80% budget"
+          description: "Unit cost per 1M GraphQL calls is {{ $value | printf \"$%.2f\" }} which is above the 80% guardrail."
+
+      - alert: ConnectorsCostBudgetEighty
+        expr: connectors:unit_cost_per_thousand > 0.8
+        for: 15m
+        labels:
+          severity: warning
+          service: connectors
+          category: cost
+          alert_destination: webhook
+        annotations:
+          summary: "Connectors unit cost exceeded 80% budget"
+          description: "Unit cost per 1K events is {{ $value | printf \"$%.4f\" }} which is above the 80% guardrail."
+
     # OIDC JWKS rotation failure
     - alert: IntelGraphJWKSRotationFailed
       expr: |

@@ -8,8 +8,10 @@ from datetime import datetime
 
 from . import orchestrator, mapping
 from .models import ConnectorKind, RunStatus, store
+from .observability import instrument_app
 
 app = FastAPI(title="IntelGraph Connectors Demo")
+instrument_app(app)
 
 
 class ConnectorCreate(BaseModel):

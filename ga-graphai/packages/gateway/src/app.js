@@ -7,7 +7,12 @@ import { normalizeCaps } from 'common-types';
 import { PolicyEngine } from 'policy';
 import { ModelRegistry } from './adapters/registry.js';
 import { schema, buildRoot } from './graphql/schema.js';
-import { observePolicyDeny, observeSuccess, registry as metricsRegistry } from './metrics.js';
+import {
+  createHttpInstrumentation,
+  observePolicyDeny,
+  observeSuccess,
+  registry as metricsRegistry
+} from './metrics.js';
 import { InMemoryLedger, buildEvidencePayload } from 'prov-ledger';
 
 const ALLOWED_PURPOSES = new Set([
@@ -121,6 +126,7 @@ export function createApp(options = {}) {
   const app = express();
   app.use(express.json({ limit: '1mb' }));
   app.use(createContextMiddleware(options));
+  app.use(createHttpInstrumentation());
 
   async function executePlan(input, context) {
     if (!input?.objective) {
@@ -184,7 +190,9 @@ export function createApp(options = {}) {
       })
     );
 
-    observeSuccess('plan', decision.model.id, adapterResult);
+    observeSuccess('plan', decision.model.id, adapterResult, {
+      tenant: context.tenant
+    });
 
     return { ...planArtifacts, evidenceId: evidence.id };
   }
@@ -253,7 +261,9 @@ export function createApp(options = {}) {
       })
     );
 
-    observeSuccess('generate', decision.model.id, adapterResult);
+    observeSuccess('generate', decision.model.id, adapterResult, {
+      tenant: context.tenant
+    });
 
     return {
       content: artifacts.content,

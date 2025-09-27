@@ -11,6 +11,7 @@ from typing import Dict, Iterable, Iterator, List, Mapping
 
 from . import dq, mapping
 from .models import Run, RunStatus, store
+from .observability import record_batch
 from .sources.base import BaseSource
 from .sources.file import FileSource
 
@@ -54,4 +55,10 @@ def run_pipeline(run: Run, map_yaml: str | None, dq_field: str | None) -> Run:
 
     run.status = RunStatus.SUCCEEDED
     run.stats = {"rowCount": len(rows)}
+    record_batch(
+        tenant=conn.config.get("tenant"),
+        operation="pipeline",
+        rows=len(rows),
+        cost_usd=conn.config.get("estimatedCostUsd"),
+    )
     return run

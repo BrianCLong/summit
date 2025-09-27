@@ -1,4 +1,6 @@
 {{- if .Values.otel.enabled }}
+---
+# prettier-ignore-start
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -78,6 +80,13 @@ data:
           service: "{{ include "intelgraph.fullname" . }}"
           environment: "{{ .Values.global.environment }}"
 
+      "prometheus/spanmetrics":
+        endpoint: "0.0.0.0:8890"
+        namespace: intelgraph_spanmetrics
+        enable_open_metrics: true
+        const_labels:
+          environment: "{{ .Values.global.environment }}"
+
       # Logging exporter for debugging
       logging:
         loglevel: {{ .Values.otel.logLevel | default "info" }}
@@ -90,18 +99,49 @@ data:
       zpages:
         endpoint: 0.0.0.0:55679
 
+    connectors:
+      spanmetrics:
+        exemplars:
+          enabled: true
+        dimensions:
+          - name: service.name
+          - name: http.route
+          - name: http.method
+        histogram:
+          explicit:
+            buckets: [0.05, 0.1, 0.25, 0.5, 1, 2, 5]
+
     service:
       extensions: [health_check, pprof, zpages]
       pipelines:
         traces:
           receivers: [otlp]
           processors: [memory_limiter, resource, probabilistic_sampler, batch]
-          exporters: [jaeger, otlp/traces{{- if .Values.otel.debug }}, logging{{- end }}]
+          exporters:
+            - jaeger
+            - otlp/traces
+            - spanmetrics
+            {{- if .Values.otel.debug }}
+            - logging
+            {{- end }}
 
         metrics:
           receivers: [otlp, prometheus]
           processors: [memory_limiter, resource, batch]
-          exporters: [prometheus{{- if .Values.otel.debug }}, logging{{- end }}]
+          exporters:
+            - prometheus
+            {{- if .Values.otel.debug }}
+            - logging
+            {{- end }}
+
+        "metrics/spanmetrics":
+          receivers: [spanmetrics]
+          processors: [batch]
+          exporters:
+            - "prometheus/spanmetrics"
+            {{- if .Values.otel.debug }}
+            - logging
+            {{- end }}
 
 ---
 apiVersion: apps/v1
@@ -219,3 +259,4 @@ spec:
     {{- include "intelgraph.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: otel-collector
 {{- end }}
+# prettier-ignore-end

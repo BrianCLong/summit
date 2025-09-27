@@ -4,7 +4,7 @@ import { ProvenanceLedger } from 'prov-ledger';
 
 import { BudgetGuardian } from './budget.js';
 import { DiscoveryEngine } from './discovery.js';
-import { MetricsRecorder } from './metrics.js';
+import { MetricsRecorder, observeQueueDepth } from './metrics.js';
 import { OptimizationManager } from './optimizations.js';
 import { ValueDensityRouter } from './router.js';
 
@@ -40,6 +40,7 @@ export class ZeroSpendOrchestrator {
     this.inFlight = 0;
     this.queue = [];
     this.provenanceBaseUri = options.provenanceBaseUri ?? 's3://zero-spend-ledger';
+    observeQueueDepth(0, { tenant: 'system' });
   }
 
   async bootstrap() {
@@ -62,13 +63,16 @@ export class ZeroSpendOrchestrator {
               this.inFlight += 1;
               next();
             }
+            observeQueueDepth(this.queue.length + this.inFlight, { tenant: 'system' });
           });
       };
       if (this.inFlight < this.concurrentLimit) {
         this.inFlight += 1;
+        observeQueueDepth(this.queue.length + this.inFlight, { tenant: 'system' });
         execute();
       } else {
         this.queue.push(execute);
+        observeQueueDepth(this.queue.length + this.inFlight, { tenant: 'system' });
       }
     });
   }
