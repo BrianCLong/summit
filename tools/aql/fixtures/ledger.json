@@ -1,0 +1,30 @@
+[
+  {
+    "id": "ledger-evt-123",
+    "timestamp": "2024-01-05T12:00:02Z",
+    "subject": "Alice",
+    "action": "LOGIN",
+    "attributes": {
+      "event_id": "evt-123",
+      "block": "982341",
+      "proof_ref": "mpc-proof-123"
+    },
+    "provenance": [
+      { "source_connector": "logs", "relation": "observed", "reference": "log-evt-123" }
+    ]
+  },
+  {
+    "id": "ledger-evt-456",
+    "timestamp": "2024-01-06T09:00:02Z",
+    "subject": "Bob",
+    "action": "DOWNLOAD",
+    "attributes": {
+      "event_id": "evt-456",
+      "block": "982400",
+      "proof_ref": "mpc-proof-456"
+    },
+    "provenance": [
+      { "source_connector": "logs", "relation": "observed", "reference": "log-evt-456" }
+    ]
+  }
+]
