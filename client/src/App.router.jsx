@@ -77,6 +77,7 @@ import ClaimsViewer from './features/conductor/ClaimsViewer';
 import RetractionQueue from './features/conductor/RetractionQueue';
 import CostAdvisor from './features/conductor/CostAdvisor';
 import RunSearch from './features/conductor/RunSearch';
+import CCMOSandboxPage from './pages/CCMOSandbox.tsx';
 
 // Navigation items
 const navigationItems = [
@@ -105,6 +106,7 @@ const navigationItems = [
     ? [{ path: '/workflows', label: 'Workflows', icon: <Engineering /> }]
     : []),
   { path: '/docs/openapi', label: 'API Docs', icon: <Description />, external: true },
+  { path: '/ccmo/sandbox', label: 'CCMO Sandbox', icon: <Description /> },
   { path: '/mcp/registry', label: 'MCP Registry', icon: <Engineering /> },
   { path: '/threats', label: 'Threat Assessment', icon: <Assessment /> },
   { path: '/access-intel', label: 'Access Intel', icon: <Security /> },
@@ -650,6 +652,7 @@ function MainLayout() {
             <Route path="/pipelines" element={<VisualPipelines />} />
             <Route path="/executors" element={<ExecutorsPage />} />
             <Route path="/observability" element={<ObservabilityPanel />} />
+            <Route path="/ccmo/sandbox" element={<CCMOSandboxPage />} />
               <Route path="/admin/studio" element={<AdminStudio />} />
           {import.meta.env.VITE_FEATURE_WORK === 'true' && (
             <Route path="/work" element={<WorkBoard />} />
