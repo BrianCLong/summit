@@ -1,0 +1,435 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ExplainDecision renders the explanation with all layers visible by default 1`] = `
+<div>
+  <div
+    class="min-h-screen bg-slate-100 p-6"
+  >
+    <div
+      class="mx-auto max-w-5xl"
+    >
+      <section
+        aria-labelledby="explain-decision-heading"
+        class="flex flex-col gap-6 rounded-2xl border border-slate-200 bg-gradient-to-b from-white via-slate-50 to-white p-6 shadow-lg"
+      >
+        <header
+          class="space-y-2"
+        >
+          <div
+            class="flex flex-wrap items-baseline justify-between gap-3"
+          >
+            <h3
+              class="text-2xl font-bold text-slate-900"
+              id="explain-decision-heading"
+            >
+              Paragraph 17 determination overview
+               
+              <span
+                class="text-base font-semibold text-indigo-700"
+              >
+                [Review-Record-2026-17]
+              </span>
+            </h3>
+            <p
+              class="text-sm font-medium text-slate-600"
+            >
+              Paragraph ID: 
+              <span
+                class="text-slate-900"
+              >
+                para-17
+              </span>
+            </p>
+          </div>
+          <p
+            class="text-sm text-slate-700"
+          >
+            Prepared by 
+            Oversight Review Board Panel B [Oversight-Ledger-2026-PanelB]
+            . Updated 
+            March 14th, 2026 10:45 AM
+             
+            <span
+              class="font-medium text-indigo-700"
+            >
+              [Oversight-Ledger-2026-PanelB-§Timestamp]
+            </span>
+            .
+          </p>
+        </header>
+        <nav
+          aria-label="Explanation layers"
+          class="flex flex-wrap gap-3"
+        >
+          <button
+            aria-checked="true"
+            aria-controls="evidence-layer"
+            class="flex min-w-[12rem] flex-1 flex-col gap-1 rounded-xl border px-4 py-3 text-left shadow transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 border-indigo-500 bg-indigo-600 text-white"
+            role="switch"
+            type="button"
+          >
+            <span
+              class="text-lg font-semibold"
+            >
+              Evidence map
+            </span>
+            <span
+              class="text-sm opacity-90"
+            >
+              Cited supporting material with provenance tooltips.
+            </span>
+            <span
+              class="text-xs font-medium text-indigo-100"
+            >
+              Layer visible
+            </span>
+          </button>
+          <button
+            aria-checked="true"
+            aria-controls="dissent-layer"
+            class="flex min-w-[12rem] flex-1 flex-col gap-1 rounded-xl border px-4 py-3 text-left shadow transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 border-indigo-500 bg-indigo-600 text-white"
+            role="switch"
+            type="button"
+          >
+            <span
+              class="text-lg font-semibold"
+            >
+              Recorded dissent
+            </span>
+            <span
+              class="text-sm opacity-90"
+            >
+              Documented counterpoints and their cited authors.
+            </span>
+            <span
+              class="text-xs font-medium text-indigo-100"
+            >
+              Layer visible
+            </span>
+          </button>
+          <button
+            aria-checked="true"
+            aria-controls="policy-layer"
+            class="flex min-w-[12rem] flex-1 flex-col gap-1 rounded-xl border px-4 py-3 text-left shadow transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 border-indigo-500 bg-indigo-600 text-white"
+            role="switch"
+            type="button"
+          >
+            <span
+              class="text-lg font-semibold"
+            >
+              Gating authorities
+            </span>
+            <span
+              class="text-sm opacity-90"
+            >
+              Policies and authorities constraining dissemination.
+            </span>
+            <span
+              class="text-xs font-medium text-indigo-100"
+            >
+              Layer visible
+            </span>
+          </button>
+        </nav>
+        <p
+          aria-live="polite"
+          class="text-sm text-slate-600"
+        >
+          Supporting citations originate from the intelligence docket cross-reference maintained in dossier 74-B. [Dossier-74B-Index] Dissent excerpts are sourced from the adjudication transcript recorded on 2026-03-12. [Adj-Transcript-2026-03-12] Applicable gating authorities reference the policy matrix revision 9 approved by compliance memorandum 2026-02. [Policy-Matrix-Rev9]
+        </p>
+        <div
+          class="space-y-8"
+        >
+          <section
+            aria-label="Evidence layer"
+            class="space-y-4"
+            id="evidence-layer"
+          >
+            <header>
+              <h4
+                class="text-xl font-semibold text-slate-900"
+              >
+                Evidence map
+              </h4>
+              <p
+                class="text-sm text-slate-700"
+              >
+                Supporting citations originate from the intelligence docket cross-reference maintained in dossier 74-B. [Dossier-74B-Index]
+              </p>
+            </header>
+            <ul
+              aria-label="Evidence citations"
+              class="space-y-4"
+            >
+              <li
+                class="rounded-lg border border-slate-200 bg-white/70 p-4 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500"
+              >
+                <article
+                  aria-labelledby="ev-1-label"
+                >
+                  <h4
+                    class="text-lg font-semibold text-slate-900"
+                    id="ev-1-label"
+                  >
+                    <button
+                      class="text-left"
+                      data-interactive="item"
+                      type="button"
+                    >
+                      <span>
+                        SIGINT intercept corroborating logistics timeline
+                      </span>
+                      <span
+                        class="ml-2 text-sm font-medium text-indigo-700"
+                      >
+                        [SIGINT-2045-§12]
+                      </span>
+                    </button>
+                  </h4>
+                  <p
+                    class="mt-2 text-base text-slate-700"
+                  >
+                    Signals intercept 24-B confirms materiel movement synced with the briefed conclusion, as logged in operational ledger entry 311. [Ops-Ledger-311]
+                     
+                    <span
+                      class="text-sm font-medium text-indigo-700"
+                    >
+                      [Crypto-Audit-v5]
+                    </span>
+                  </p>
+                  <div
+                    class="mt-3 flex items-center gap-2"
+                  >
+                    <button
+                      aria-describedby="ev-1-tooltip"
+                      class="rounded-md border border-indigo-200 bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700 transition hover:bg-indigo-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+                      type="button"
+                    >
+                      View provenance detail
+                    </button>
+                    <span
+                      aria-hidden="true"
+                      class="max-w-xl rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800 shadow transition pointer-events-none opacity-0"
+                      id="ev-1-tooltip"
+                      role="tooltip"
+                    >
+                      Captured via forward collection node Delta on 2026-02-28 under collection task order 88-G, verified by cryptologic audit trail v5. [Collection-Order-88G]
+                    </span>
+                  </div>
+                </article>
+              </li>
+              <li
+                class="rounded-lg border border-slate-200 bg-white/70 p-4 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500"
+              >
+                <article
+                  aria-labelledby="ev-2-label"
+                >
+                  <h4
+                    class="text-lg font-semibold text-slate-900"
+                    id="ev-2-label"
+                  >
+                    <button
+                      class="text-left"
+                      data-interactive="item"
+                      type="button"
+                    >
+                      <span>
+                        Imagery analysis of convoy dispersal
+                      </span>
+                      <span
+                        class="ml-2 text-sm font-medium text-indigo-700"
+                      >
+                        [IMINT-Convoy-2026-§4]
+                      </span>
+                    </button>
+                  </h4>
+                  <p
+                    class="mt-2 text-base text-slate-700"
+                  >
+                    Multi-angle imagery mosaic demonstrates convoy dispersal at 0430Z aligning with the assessed outcome in paragraph 17. [Imagery-Mosaic-2026-0430Z]
+                     
+                    <span
+                      class="text-sm font-medium text-indigo-700"
+                    >
+                      [Imagery-Process-Note-12]
+                    </span>
+                  </p>
+                  <div
+                    class="mt-3 flex items-center gap-2"
+                  >
+                    <button
+                      aria-describedby="ev-2-tooltip"
+                      class="rounded-md border border-indigo-200 bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700 transition hover:bg-indigo-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+                      type="button"
+                    >
+                      View provenance detail
+                    </button>
+                    <span
+                      aria-hidden="true"
+                      class="max-w-xl rounded-md border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800 shadow transition pointer-events-none opacity-0"
+                      id="ev-2-tooltip"
+                      role="tooltip"
+                    >
+                      Imagery fused from orbital platforms Horizon-3 and Lumen-1, processed through chain-of-custody workflow revision 12. [Chain-Custody-Rev12]
+                    </span>
+                  </div>
+                </article>
+              </li>
+            </ul>
+          </section>
+          <section
+            aria-label="Dissent layer"
+            class="space-y-4"
+            id="dissent-layer"
+          >
+            <header>
+              <h4
+                class="text-xl font-semibold text-rose-900"
+              >
+                Dissent excerpts
+              </h4>
+              <p
+                class="text-sm text-rose-800"
+              >
+                Dissent excerpts are sourced from the adjudication transcript recorded on 2026-03-12. [Adj-Transcript-2026-03-12]
+              </p>
+            </header>
+            <ul
+              aria-label="Dissent excerpts"
+              class="space-y-4"
+            >
+              <li
+                class="rounded-lg border border-rose-200 bg-white/70 p-4 shadow-sm"
+              >
+                <article
+                  aria-labelledby="di-1-author"
+                >
+                  <h4
+                    class="text-lg font-semibold text-rose-900"
+                    id="di-1-author"
+                  >
+                    <span>
+                      Commissioner L. Ortega
+                    </span>
+                    <span
+                      class="ml-2 text-sm font-medium text-rose-700"
+                    >
+                      [Ortega-Dissent-2026-§3]
+                    </span>
+                  </h4>
+                  <p
+                    class="mt-2 text-base text-rose-800"
+                  >
+                    Ortega contends the convoy dispersal could indicate tactical feints inconsistent with the primary conclusion. [Ortega-Dissent-2026-§4]
+                  </p>
+                </article>
+              </li>
+              <li
+                class="rounded-lg border border-rose-200 bg-white/70 p-4 shadow-sm"
+              >
+                <article
+                  aria-labelledby="di-2-author"
+                >
+                  <h4
+                    class="text-lg font-semibold text-rose-900"
+                    id="di-2-author"
+                  >
+                    <span>
+                      Analyst L. Banerjee
+                    </span>
+                    <span
+                      class="ml-2 text-sm font-medium text-rose-700"
+                    >
+                      [Banerjee-Minority-Note-§2]
+                    </span>
+                  </h4>
+                  <p
+                    class="mt-2 text-base text-rose-800"
+                  >
+                    Banerjee notes counter-sabotage indicators lacking follow-on validation prior to publication of paragraph 17. [Banerjee-Minority-Note-§4]
+                  </p>
+                </article>
+              </li>
+            </ul>
+          </section>
+          <section
+            aria-label="Policy layer"
+            class="space-y-4"
+            id="policy-layer"
+          >
+            <header>
+              <h4
+                class="text-xl font-semibold text-emerald-900"
+              >
+                Bound policies
+              </h4>
+              <p
+                class="text-sm text-emerald-800"
+              >
+                Applicable gating authorities reference the policy matrix revision 9 approved by compliance memorandum 2026-02. [Policy-Matrix-Rev9]
+              </p>
+            </header>
+            <ul
+              aria-label="Policy authorities"
+              class="space-y-4"
+            >
+              <li
+                class="rounded-lg border border-emerald-200 bg-white/70 p-4 shadow-sm"
+              >
+                <article
+                  aria-labelledby="po-1-title"
+                >
+                  <h4
+                    class="text-lg font-semibold text-emerald-900"
+                    id="po-1-title"
+                  >
+                    <span>
+                      Executive Order 13526 §1.4(c)
+                    </span>
+                    <span
+                      class="ml-2 text-sm font-medium text-emerald-700"
+                    >
+                      [EO13526-§1.4(c)]
+                    </span>
+                  </h4>
+                  <p
+                    class="mt-2 text-base text-emerald-800"
+                  >
+                    Classified intelligence assessments subject to executive handling thresholds require restricted dissemination of the cited conclusion. [Handling-Threshold-Guide-2026]
+                  </p>
+                </article>
+              </li>
+              <li
+                class="rounded-lg border border-emerald-200 bg-white/70 p-4 shadow-sm"
+              >
+                <article
+                  aria-labelledby="po-2-title"
+                >
+                  <h4
+                    class="text-lg font-semibold text-emerald-900"
+                    id="po-2-title"
+                  >
+                    <span>
+                      Oversight Compliance Bulletin 22-17
+                    </span>
+                    <span
+                      class="ml-2 text-sm font-medium text-emerald-700"
+                    >
+                      [OCB-22-17]
+                    </span>
+                  </h4>
+                  <p
+                    class="mt-2 text-base text-emerald-800"
+                  >
+                    Bulletin 22-17 mandates a secondary legal review before disseminating determinations referencing cross-border operations. [Legal-Review-Addendum-22-17]
+                  </p>
+                </article>
+              </li>
+            </ul>
+          </section>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+`;
