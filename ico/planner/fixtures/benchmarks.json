@@ -1,0 +1,14 @@
+{
+  "expected_total_savings_pct": 0.5660377358490566,
+  "tolerance_pct": 0.02,
+  "endpoints": {
+    "bert-large:qa": {
+      "baseline_cost": 21.0,
+      "planned_cost": 9.0
+    },
+    "vision-transformer:classify": {
+      "baseline_cost": 32.0,
+      "planned_cost": 14.0
+    }
+  }
+}
