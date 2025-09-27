@@ -1,0 +1,17 @@
+[
+  {
+    "id": "doc-001",
+    "tokens": ["privacy", "policy", "rtbf"],
+    "vector": [0.12, 0.34, 0.56]
+  },
+  {
+    "id": "doc-002",
+    "tokens": ["user", "request", "erasure"],
+    "vector": [0.91, 0.17, 0.38]
+  },
+  {
+    "id": "doc-003",
+    "tokens": ["legacy", "record", "archive"],
+    "vector": [0.42, 0.58, 0.33]
+  }
+]

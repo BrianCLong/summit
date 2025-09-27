@@ -1,0 +1,13 @@
+[
+  {
+    "type": "term",
+    "term": "erasure",
+    "documentId": "doc-002",
+    "reason": "rtbf-accepted"
+  },
+  {
+    "type": "document",
+    "documentId": "doc-003",
+    "reason": "rtbf-erase"
+  }
+]
