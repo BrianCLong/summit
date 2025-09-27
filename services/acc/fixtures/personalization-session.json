@@ -1,0 +1,64 @@
+{
+  "description": "Read-my-writes session adheres to SLA and falls back when stale",
+  "steps": [
+    {
+      "type": "update",
+      "update": {"name": "us-east-primary", "latencyMs": 7, "stalenessMs": 30}
+    },
+    {
+      "type": "plan",
+      "request": {
+        "id": "fx-session-write",
+        "operation": "write",
+        "session": "sess-fixture",
+        "dataClass": "behavioral",
+        "purpose": "personalization",
+        "jurisdiction": "us"
+      },
+      "expect": {
+        "mode": "read-my-writes",
+        "quorum": ["us-east-primary", "us-west-sync", "eu-central-async"],
+        "fallbackToStrong": false,
+        "maxReplicaStaleness": 120
+      }
+    },
+    {
+      "type": "plan",
+      "request": {
+        "id": "fx-session-read",
+        "operation": "read",
+        "session": "sess-fixture",
+        "dataClass": "behavioral",
+        "purpose": "personalization",
+        "jurisdiction": "us"
+      },
+      "expect": {
+        "mode": "read-my-writes",
+        "quorum": ["us-east-primary"],
+        "fallbackToStrong": false,
+        "maxReplicaStaleness": 120
+      }
+    },
+    {
+      "type": "update",
+      "update": {"name": "us-east-primary", "latencyMs": 7, "stalenessMs": 500}
+    },
+    {
+      "type": "plan",
+      "request": {
+        "id": "fx-session-read-stale",
+        "operation": "read",
+        "session": "sess-fixture",
+        "dataClass": "behavioral",
+        "purpose": "personalization",
+        "jurisdiction": "us"
+      },
+      "expect": {
+        "mode": "read-my-writes",
+        "quorum": ["us-east-primary", "us-west-sync", "eu-central-async"],
+        "fallbackToStrong": true,
+        "maxReplicaStaleness": 1000
+      }
+    }
+  ]
+}
