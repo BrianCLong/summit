@@ -1,0 +1,523 @@
+# Summit reference manifest for Neo4j causal cluster spanning three regions
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: summit-neo4j-config
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-neo4j
+    app.kubernetes.io/component: config
+  annotations:
+    replication.summit.sh/graph-cluster: summit-graph
+    replication.summit.sh/primary-region: "us-east-1"
+data:
+  neo4j.conf: |
+    dbms.default_listen_address=0.0.0.0
+    dbms.routing.enabled=true
+    causal_clustering.discovery_type=K8S
+    causal_clustering.k8s.service_port_name=discovery
+    dbms.security.procedures.unrestricted=apoc.*
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: summit-neo4j-auth
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-neo4j
+    app.kubernetes.io/component: auth
+stringData:
+  NEO4J_AUTH: neo4j/Sup3rSecure!
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-neo4j-discovery
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-neo4j
+    app.kubernetes.io/component: discovery
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/name: summit-neo4j
+    app.kubernetes.io/component: core
+  ports:
+    - name: discovery
+      port: 5000
+      targetPort: discovery
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-neo4j-bolt
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-neo4j
+    app.kubernetes.io/component: routing
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: summit-neo4j
+    app.kubernetes.io/component: core
+  ports:
+    - name: bolt
+      port: 7687
+      targetPort: bolt
+    - name: http
+      port: 7474
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: summit-neo4j-core
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-neo4j
+    app.kubernetes.io/component: core
+    topology.kubernetes.io/region: us-east-1
+spec:
+  serviceName: summit-neo4j-discovery
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: summit-neo4j
+      app.kubernetes.io/component: core
+      topology.kubernetes.io/region: us-east-1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: summit-neo4j
+        app.kubernetes.io/component: core
+        topology.kubernetes.io/region: us-east-1
+      annotations:
+        replication.summit.sh/region: "us-east-1"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - us-east-1
+      containers:
+        - name: neo4j
+          image: neo4j:5.22.0-enterprise
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: bolt
+              containerPort: 7687
+            - name: http
+              containerPort: 7474
+            - name: discovery
+              containerPort: 5000
+          env:
+            - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
+              value: "yes"
+            - name: NEO4J_CONF
+              value: /conf/neo4j.conf
+            - name: NEO4J_dbms_mode
+              value: CORE
+            - name: NEO4J_causal__clustering_expected__core__cluster__size
+              value: "4"
+            - name: NEO4J_causal__clustering_kubernetes_service__name
+              value: summit-neo4j-discovery
+            - name: NEO4J_causal__clustering_kubernetes_service__namespace
+              value: data-plane
+            - name: NEO4J_causal__clustering_kubernetes_label__selector
+              value: app.kubernetes.io/component=core,app.kubernetes.io/name=summit-neo4j
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          envFrom:
+            - secretRef:
+                name: summit-neo4j-auth
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: summit-neo4j-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp3-retained
+        resources:
+          requests:
+            storage: 200Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: summit-neo4j-core-us-west-2
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-neo4j
+    app.kubernetes.io/component: core
+    topology.kubernetes.io/region: us-west-2
+spec:
+  serviceName: summit-neo4j-discovery
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: summit-neo4j
+      app.kubernetes.io/component: core
+      topology.kubernetes.io/region: us-west-2
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: summit-neo4j
+        app.kubernetes.io/component: core
+        topology.kubernetes.io/region: us-west-2
+      annotations:
+        replication.summit.sh/region: "us-west-2"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - us-west-2
+      containers:
+        - name: neo4j
+          image: neo4j:5.22.0-enterprise
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: bolt
+              containerPort: 7687
+            - name: http
+              containerPort: 7474
+            - name: discovery
+              containerPort: 5000
+          env:
+            - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
+              value: "yes"
+            - name: NEO4J_CONF
+              value: /conf/neo4j.conf
+            - name: NEO4J_dbms_mode
+              value: CORE
+            - name: NEO4J_causal__clustering_expected__core__cluster__size
+              value: "4"
+            - name: NEO4J_causal__clustering_kubernetes_service__name
+              value: summit-neo4j-discovery
+            - name: NEO4J_causal__clustering_kubernetes_service__namespace
+              value: data-plane
+            - name: NEO4J_causal__clustering_kubernetes_label__selector
+              value: app.kubernetes.io/component=core,app.kubernetes.io/name=summit-neo4j
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          envFrom:
+            - secretRef:
+                name: summit-neo4j-auth
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: summit-neo4j-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp3-retained
+        resources:
+          requests:
+            storage: 200Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: summit-neo4j-rr
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-neo4j
+    app.kubernetes.io/component: read-replica
+    topology.kubernetes.io/region: us-east-1
+spec:
+  serviceName: summit-neo4j-discovery
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: summit-neo4j
+      app.kubernetes.io/component: read-replica
+      topology.kubernetes.io/region: us-east-1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: summit-neo4j
+        app.kubernetes.io/component: read-replica
+        topology.kubernetes.io/region: us-east-1
+      annotations:
+        replication.summit.sh/region: "us-east-1"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - us-east-1
+      containers:
+        - name: neo4j
+          image: neo4j:5.22.0-enterprise
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: bolt
+              containerPort: 7687
+            - name: http
+              containerPort: 7474
+          env:
+            - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
+              value: "yes"
+            - name: NEO4J_CONF
+              value: /conf/neo4j.conf
+            - name: NEO4J_dbms_mode
+              value: READ_REPLICA
+            - name: NEO4J_causal__clustering_kubernetes_service__name
+              value: summit-neo4j-discovery
+            - name: NEO4J_causal__clustering_kubernetes_service__namespace
+              value: data-plane
+            - name: NEO4J_causal__clustering_kubernetes_label__selector
+              value: app.kubernetes.io/component=core,app.kubernetes.io/name=summit-neo4j
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          envFrom:
+            - secretRef:
+                name: summit-neo4j-auth
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: summit-neo4j-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp3-retained
+        resources:
+          requests:
+            storage: 150Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: summit-neo4j-rr-us-west-2
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-neo4j
+    app.kubernetes.io/component: read-replica
+    topology.kubernetes.io/region: us-west-2
+spec:
+  serviceName: summit-neo4j-discovery
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: summit-neo4j
+      app.kubernetes.io/component: read-replica
+      topology.kubernetes.io/region: us-west-2
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: summit-neo4j
+        app.kubernetes.io/component: read-replica
+        topology.kubernetes.io/region: us-west-2
+      annotations:
+        replication.summit.sh/region: "us-west-2"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - us-west-2
+      containers:
+        - name: neo4j
+          image: neo4j:5.22.0-enterprise
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: bolt
+              containerPort: 7687
+            - name: http
+              containerPort: 7474
+          env:
+            - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
+              value: "yes"
+            - name: NEO4J_CONF
+              value: /conf/neo4j.conf
+            - name: NEO4J_dbms_mode
+              value: READ_REPLICA
+            - name: NEO4J_causal__clustering_kubernetes_service__name
+              value: summit-neo4j-discovery
+            - name: NEO4J_causal__clustering_kubernetes_service__namespace
+              value: data-plane
+            - name: NEO4J_causal__clustering_kubernetes_label__selector
+              value: app.kubernetes.io/component=core,app.kubernetes.io/name=summit-neo4j
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          envFrom:
+            - secretRef:
+                name: summit-neo4j-auth
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: summit-neo4j-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp3-retained
+        resources:
+          requests:
+            storage: 150Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: summit-neo4j-rr-eu-central-1
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-neo4j
+    app.kubernetes.io/component: read-replica
+    topology.kubernetes.io/region: eu-central-1
+spec:
+  serviceName: summit-neo4j-discovery
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: summit-neo4j
+      app.kubernetes.io/component: read-replica
+      topology.kubernetes.io/region: eu-central-1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: summit-neo4j
+        app.kubernetes.io/component: read-replica
+        topology.kubernetes.io/region: eu-central-1
+      annotations:
+        replication.summit.sh/region: "eu-central-1"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - eu-central-1
+      containers:
+        - name: neo4j
+          image: neo4j:5.22.0-enterprise
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: bolt
+              containerPort: 7687
+            - name: http
+              containerPort: 7474
+          env:
+            - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
+              value: "yes"
+            - name: NEO4J_CONF
+              value: /conf/neo4j.conf
+            - name: NEO4J_dbms_mode
+              value: READ_REPLICA
+            - name: NEO4J_causal__clustering_kubernetes_service__name
+              value: summit-neo4j-discovery
+            - name: NEO4J_causal__clustering_kubernetes_service__namespace
+              value: data-plane
+            - name: NEO4J_causal__clustering_kubernetes_label__selector
+              value: app.kubernetes.io/component=core,app.kubernetes.io/name=summit-neo4j
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          envFrom:
+            - secretRef:
+                name: summit-neo4j-auth
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: summit-neo4j-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp3-retained
+        resources:
+          requests:
+            storage: 150Gi

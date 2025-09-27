@@ -1,1 +1,75 @@
-# values for postgres
+clusterName: summit-postgres
+fullnameOverride: ""
+nameOverride: ""
+
+image:
+  repository: public.ecr.aws/rds/aurora-postgresql
+  tag: "15.3"
+  pullPolicy: IfNotPresent
+
+primaryRegion: us-east-1
+secondaryRegions:
+  - name: us-west-2
+    replicas: 1
+  - name: eu-central-1
+    replicas: 1
+
+service:
+  port: 5432
+  annotations: {}
+
+storage:
+  className: gp3-retained
+  size: 200Gi
+
+config:
+  max_connections: "500"
+  shared_buffers: "512MB"
+  wal_level: "logical"
+  max_wal_senders: "20"
+  max_replication_slots: "20"
+  hot_standby: "on"
+  wal_keep_size: "4096MB"
+
+replication:
+  username: replicator
+  password: CHANGEME_replicator
+  maximumLagSeconds: "30"
+  slotPrefix: summit
+  applyDelaySeconds: "0"
+
+monitoring:
+  enabled: true
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9187"
+  exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    tag: v0.15.0
+    pullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+init:
+  s3WalArchive:
+    enabled: true
+    bucket: s3://summit-database-wal-archive
+    retentionHours: 24
+    awsRegion: us-east-1
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 2Gi
+  limits:
+    cpu: 2
+    memory: 6Gi
+
+nodeSelector: {}
+tolerations: []
+extraAffinity: {}
