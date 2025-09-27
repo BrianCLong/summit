@@ -1,40 +1,40 @@
-FROM node:20-alpine AS base
+# syntax=docker/dockerfile:1.7
+ARG NODE_VERSION=20.14.0
 
-# Install dependencies only when needed
-FROM base AS deps
+FROM node:${NODE_VERSION}-alpine AS deps
 WORKDIR /app
-
-# Copy package files
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
-# Build the application
-FROM base AS builder
+FROM node:${NODE_VERSION}-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
-
 COPY src ./src
 COPY tsconfig.json ./
 RUN npm run build
 
-# Production image
-FROM base AS runner
-WORKDIR /app
+FROM gcr.io/distroless/nodejs20-debian12:nonroot AS final
+
+LABEL org.opencontainers.image.title="IntelGraph API Gateway"
+LABEL org.opencontainers.image.description="Edge gateway for IntelGraph APIs"
+LABEL org.opencontainers.image.source="https://github.com/BrianCLong/intelgraph"
+LABEL org.opencontainers.image.licenses="MIT"
+
+WORKDIR /home/node/app
 
 ENV NODE_ENV=production
+ENV PORT=4000
 
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 api-gateway
+COPY --from=build --chown=65532:65532 /app/dist ./dist
+COPY --from=deps --chown=65532:65532 /app/node_modules ./node_modules
+COPY --from=deps --chown=65532:65532 /app/package.json ./
 
-# Copy built application
-COPY --from=builder --chown=api-gateway:nodejs /app/dist ./dist
-COPY --from=deps --chown=api-gateway:nodejs /app/node_modules ./node_modules
-COPY --chown=api-gateway:nodejs package.json ./
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get(`http://127.0.0.1:${process.env.PORT||4000}/health`, res => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 
-USER api-gateway
+USER 65532
 
 EXPOSE 4000
 
-CMD ["node", "dist/index.js"]
+CMD ["dist/index.js"]

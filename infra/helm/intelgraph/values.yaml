@@ -4,29 +4,42 @@ replicaCount: 1
 image:
   server:
     repository: ghcr.io/brianlong/intelgraph/server
-    tag: "dev"
+    tag: 'dev'
     pullPolicy: IfNotPresent
   client:
     repository: ghcr.io/brianlong/intelgraph/client
-    tag: "dev"
+    tag: 'dev'
     pullPolicy: IfNotPresent
 
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: ''
+fullnameOverride: ''
 
 serviceAccount:
   create: true
   annotations: {}
-  name: ""
+  name: ''
 
 podAnnotations: {}
 
 podSecurityContext:
-  fsGroup: 2000
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
 
 securityContext:
   runAsNonRoot: true
-  runAsUser: 1000
+  runAsUser: 65532
+  runAsGroup: 65532
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
 
 service:
   type: ClusterIP
@@ -38,7 +51,7 @@ service:
 
 ingress:
   enabled: false
-  className: ""
+  className: ''
   annotations: {}
   hosts:
     - host: chart-example.local
@@ -76,6 +89,7 @@ redis:
 # Global configuration
 global:
   environment: development
+  podSecurityStandards: restricted
   prometheus:
     path: /metrics
   cluster:
@@ -103,7 +117,7 @@ spire:
   agent:
     replicas: 1
   helper:
-    image: "ghcr.io/spiffe/spiffe-helper:0.6.0"
+    image: 'ghcr.io/spiffe/spiffe-helper:0.6.0'
 
 # Services configuration
 services:
@@ -162,7 +176,7 @@ rollout:
 # Monitoring configuration
 monitoring:
   prometheus:
-    server: "prometheus.monitoring.svc.cluster.local:9090"
+    server: 'prometheus.monitoring.svc.cluster.local:9090'
   prometheusRules:
     enabled: false
 
@@ -187,7 +201,7 @@ otel:
 # Preview environment specific settings
 preview:
   enabled: false
-  ttl: "24h"
+  ttl: '24h'
   cleanup: true
 # Zero Trust configuration
 zeroTrust:
@@ -196,10 +210,10 @@ zeroTrust:
 # Audit configuration
 audit:
   wormEnabled: false
-  bucket: "intelgraph-audit-logs"
-  storageSize: "10Gi"
+  bucket: 'intelgraph-audit-logs'
+  storageSize: '10Gi'
   worm:
-    image: "amazon/aws-cli:2.13.32"
+    image: 'amazon/aws-cli:2.13.32'
 
 # mTLS configuration
 mtls:
@@ -207,32 +221,32 @@ mtls:
 
 # AWS configuration
 aws:
-  region: "us-east-1"
+  region: 'us-east-1'
 
 # Security configuration
 security:
   podSecurityPolicy:
-    enabled: false
+    enabled: true
   networkPolicies:
-    enabled: false
+    enabled: true
     defaultDeny:
-      enabled: false
+      enabled: true
 
 # Federal configuration
 federal:
-  classification: "UNCLASSIFIED"
+  classification: 'UNCLASSIFIED'
   airGap:
     enabled: false
   breakGlass:
     emergencyNetworkOverride: false
   fips:
-    enforcementAction: "warn"
+    enforcementAction: 'warn'
   enforcement:
     resourceLimits: false
   limits:
     maxCpu: 2
   hsm:
-    provider: "none"
+    provider: 'none'
   storage:
     fipsCrypto: false
 
@@ -254,10 +268,19 @@ cors:
 
 # Network Policy configuration
 networkPolicy:
-  enabled: false
+  enabled: true
 
 # Health check configuration
 healthCheck:
   enabled: true
   path: /health
   port: 8080
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+  readiness:
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 2
+    failureThreshold: 3

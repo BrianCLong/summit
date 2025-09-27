@@ -109,13 +109,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 subjects:
 - kind: ServiceAccount
-  name: {{ include "intelgraph.serviceAccountName" . }}-api
-  namespace: {{ .Release.Namespace }}
-- kind: ServiceAccount
-  name: {{ include "intelgraph.serviceAccountName" . }}-client
-  namespace: {{ .Release.Namespace }}
-- kind: ServiceAccount
-  name: {{ include "intelgraph.serviceAccountName" . }}-worker
+  name: {{ include "intelgraph.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 
 {{- end }}

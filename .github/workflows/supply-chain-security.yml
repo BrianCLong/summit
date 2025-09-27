@@ -1,0 +1,44 @@
+name: Supply Chain Security
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+jobs:
+  sbom-and-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate SBOM (Syft)
+        id: syft
+        uses: anchore/sbom-action@v0.17.6
+        with:
+          path: .
+          format: spdx-json
+          output-file: intelgraph-repo.spdx.json
+          upload-artifact: true
+          artifact-name: repo-sbom
+
+      - name: Vulnerability scan (Grype)
+        uses: anchore/scan-action@v3
+        with:
+          path: .
+          fail-build: true
+          severity-cutoff: high
+          output-format: sarif
+          output-file: grype-results.sarif
+
+      - name: Upload SARIF report
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: grype-results.sarif

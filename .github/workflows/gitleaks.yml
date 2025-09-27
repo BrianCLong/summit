@@ -1,13 +1,33 @@
 name: gitleaks
+
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
+    branches: [main]
+
 jobs:
   scan:
+    name: Secret scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: gitleaks
-        uses: zricethezav/gitleaks-action@v2
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          config-path: .gitleaks.toml
+          args: detect --no-banner --redact --report-format json --report-path gitleaks-report.json
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+          if-no-files-found: error
