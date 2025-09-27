@@ -1,0 +1,52 @@
+{
+  "title": "Database Health",
+  "uid": "db-health",
+  "schemaVersion": 38,
+  "version": 1,
+  "tags": ["sre", "db"],
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "P95 Query Latency",
+      "id": 1,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket{service=\"db\"}[5m])) by (le))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "orange", "value": 0.12 },
+              { "color": "red", "value": 0.18 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate",
+      "id": 2,
+      "targets": [
+        {
+          "expr": "sum(rate(db_query_errors_total{service=\"db\"}[5m])) / sum(rate(db_query_total{service=\"db\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Connections In Use",
+      "id": 3,
+      "targets": [
+        {
+          "expr": "avg(db_active_connections{service=\"db\"})"
+        }
+      ]
+    }
+  ]
+}

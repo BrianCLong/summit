@@ -1,0 +1,63 @@
+groups:
+  - name: summit-slo-burn
+    interval: 1m
+    rules:
+      - alert: APISLOFastBurn
+        expr: |
+          (sum(rate(http_server_requests_total{service="api",status=~"5.."}[5m]))
+            /
+           sum(rate(http_server_requests_total{service="api"}[5m]))) > (0.001 * 14)
+        for: 5m
+        labels:
+          severity: page
+          team: sre-platform
+          service: api
+        annotations:
+          summary: 'API error budget fast burn (>14x)'
+          runbook: 'https://runbooks.summit.dev/api-canary'
+      - alert: APISLOSlowBurn
+        expr: |
+          (sum(rate(http_server_requests_total{service="api",status=~"5.."}[30m]))
+            /
+           sum(rate(http_server_requests_total{service="api"}[30m]))) > (0.001 * 6)
+        for: 30m
+        labels:
+          severity: page
+          team: sre-platform
+          service: api
+        annotations:
+          summary: 'API error budget slow burn (>6x)'
+          runbook: 'https://runbooks.summit.dev/api-canary'
+      - alert: IngestSLOFastBurn
+        expr: |
+          (sum(rate(ingest_events_total{service="ingest",status!="success"}[5m]))
+            /
+           sum(rate(ingest_events_total{service="ingest"}[5m]))) > (0.005 * 6)
+        for: 10m
+        labels:
+          severity: page
+          team: sre-platform
+          service: ingest
+        annotations:
+          summary: 'Ingest error budget burn (>6x)'
+          runbook: 'https://runbooks.summit.dev/ingest'
+      - alert: CloudCostBudgetBreach
+        expr: sum_over_time(cloud_cost_hourly_usd{team="sre-platform"}[12h]) > (0.8 * 180 * 12)
+        for: 15m
+        labels:
+          severity: page
+          team: sre-platform
+          service: platform
+        annotations:
+          summary: 'Cloud spend will exceed 80% of budget within 12h.'
+          runbook: 'https://runbooks.summit.dev/cost-optimization'
+      - alert: DatabaseLatencyWarning
+        expr: histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket{service="db"}[5m])) by (le)) > 0.18
+        for: 15m
+        labels:
+          severity: ticket
+          team: sre-platform
+          service: db
+        annotations:
+          summary: 'Database p95 latency >180ms for 15m.'
+          runbook: 'https://runbooks.summit.dev/db'

@@ -1,0 +1,73 @@
+{
+  "title": "API Service Health",
+  "uid": "api-sli",
+  "schemaVersion": 38,
+  "version": 1,
+  "tags": ["sre", "api"],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Availability (30d)",
+      "id": 1,
+      "targets": [
+        {
+          "expr": "1 - (sum_over_time(rate(http_server_requests_total{service=\"api\",status=~\"5..\"}[5m])[30d:5m])) / (sum_over_time(rate(http_server_requests_total{service=\"api\"}[5m])[30d:5m])))"
+        }
+      ],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          { "color": "red", "value": 0 },
+          { "color": "orange", "value": 0.999 },
+          { "color": "green", "value": 0.999 }
+        ]
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate",
+      "id": 2,
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_total{service=\"api\",status=~\"5..\"}[5m])) / sum(rate(http_server_requests_total{service=\"api\"}[5m]))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "orange", "value": 0.001 },
+              { "color": "red", "value": 0.001 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency P95",
+      "id": 3,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"api\"}[5m])) by (le))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "orange", "value": 0.28 },
+              { "color": "red", "value": 0.35 }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

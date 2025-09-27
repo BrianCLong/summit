@@ -1,0 +1,85 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 5s
+    send_batch_size: 8192
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 512
+  attributes/enrich-service:
+    actions:
+      - key: deployment.environment
+        action: upsert
+        value: ${DEPLOYMENT_ENVIRONMENT}
+      - key: service.version
+        action: upsert
+        value: ${SERVICE_VERSION}
+  resource:
+    attributes:
+      - key: service.team
+        value: sre-platform
+        action: upsert
+
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:9464
+  otlp/prometheus-remote-write:
+    endpoint: ${PROM_REMOTE_WRITE_ENDPOINT}
+    headers:
+      authorization: Bearer ${PROM_REMOTE_WRITE_TOKEN}
+  otlp/tempo:
+    endpoint: ${TEMPO_ENDPOINT}
+    tls:
+      insecure: false
+  loki:
+    endpoint: ${LOKI_ENDPOINT}
+    tls:
+      insecure: false
+  logging:
+    loglevel: info
+
+service:
+  telemetry:
+    logs:
+      level: info
+  pipelines:
+    metrics:
+      receivers:
+        - otlp
+      processors:
+        - memory_limiter
+        - batch
+        - attributes/enrich-service
+        - resource
+      exporters:
+        - prometheus
+        - otlp/prometheus-remote-write
+    traces:
+      receivers:
+        - otlp
+      processors:
+        - memory_limiter
+        - batch
+        - attributes/enrich-service
+        - resource
+      exporters:
+        - otlp/tempo
+        - logging
+    logs:
+      receivers:
+        - otlp
+      processors:
+        - memory_limiter
+        - batch
+        - attributes/enrich-service
+        - resource
+      exporters:
+        - loki
+        - logging
