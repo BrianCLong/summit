@@ -1,0 +1,7 @@
+rules:
+  - effect: deny
+    condition:
+      AND:
+        - data: sensitive_data
+        - NOT:
+            - purpose: investigation
