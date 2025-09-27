@@ -1,0 +1,16 @@
+artefacts:
+  sbom:
+    path: sbom.json
+    checksum: sha256
+  policy_report:
+    path: policies/tests/quality_gates_output.json
+    description: Result of quality gate OPA evaluation
+  coverage_manifest:
+    path: artifacts/coverage/manifest.json
+    required: true
+  chaos_report:
+    path: chaos/results/control-plane-latency.json
+    required: true
+  evidence_pack:
+    path: artifacts/acceptance/policy-supply-chain/acceptance-pack.tgz
+    description: Bundle uploaded to release record

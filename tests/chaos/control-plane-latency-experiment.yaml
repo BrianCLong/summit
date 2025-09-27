@@ -1,0 +1,53 @@
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: summit-control-plane-latency
+  namespace: chaos-testing
+spec:
+  appinfo:
+    appns: summit-prod
+    applabel: "app=intelgraph-gateway"
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  engineState: active
+  jobCleanUpPolicy: delete
+  monitoring: true
+  experiments:
+    - name: pod-network-latency
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: "180"
+            - name: NETWORK_LATENCY
+              value: "250"
+            - name: TARGET_PODS
+              value: "app=intelgraph-gateway"
+            - name: LIB_IMAGE
+              value: litmuschaos/go-runner:2.17.0
+        probe:
+          - name: circuit-breaker-closed
+            type: "cmdProbe"
+            mode: "Edge"
+            runProperties:
+              probeTimeout: 15
+              retry: 5
+              interval: 5
+              stopOnFailure: true
+            command: |
+              pnpm --filter server test -- CircuitBreaker --runInBand
+          - name: slo-budget
+            type: "cmdProbe"
+            mode: "Continuous"
+            runProperties:
+              probeTimeout: 30
+              retry: 3
+              interval: 30
+              stopOnFailure: false
+            command: |
+              k6 run --vus 10 --duration 30s tests/load/health-p95.k6.js
+        tolerations:
+          - key: "workload"
+            operator: "Equal"
+            value: "slo-critical"
+            effect: "NoSchedule"
