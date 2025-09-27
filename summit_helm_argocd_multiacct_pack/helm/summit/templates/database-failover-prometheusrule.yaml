@@ -1,0 +1,41 @@
+{{- $root := .Values.databaseFailover }}
+{{- if and $root.enabled $root.monitoring.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: summit-database-failover
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: summit-database-failover
+    app.kubernetes.io/part-of: summit-data-plane
+{{- range $key, $value := $root.monitoring.prometheusRule.labels }}
+    {{ $key }}: {{ $value | quote }}
+{{- end }}
+spec:
+  groups:
+    - name: summit-postgres-failover
+      rules:
+        - alert: SummitPostgresFailoverTriggered
+          expr: increase(postgresql_operator_cluster_events_total{event="failover"}[5m]) > 0
+          for: 0m
+          labels:
+            severity: {{ $root.monitoring.prometheusRule.failoverAlertSeverity | quote }}
+          annotations:
+            summary: "PostgreSQL automated failover triggered"
+            description: "The Zalando Postgres operator reported a failover in the last 5 minutes. Investigate the new primary status."
+    - name: summit-neo4j-failover
+      rules:
+        - alert: SummitNeo4jLeadershipChange
+          expr: changes(neo4j_causal_cluster_member_role{role="LEADER"}[5m]) > 0
+          for: 0m
+          labels:
+            severity: {{ $root.monitoring.prometheusRule.failoverAlertSeverity | quote }}
+          annotations:
+            summary: "Neo4j leadership change detected"
+            description: "Neo4j Causal Cluster reported a leadership change within the last 5 minutes. Validate cluster health."
+{{- if $root.monitoring.prometheusRule.additionalRules }}
+    - name: summit-database-custom
+      rules:
+{{ toYaml $root.monitoring.prometheusRule.additionalRules | nindent 8 }}
+{{- end }}
+{{- end }}
