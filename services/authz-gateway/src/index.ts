@@ -19,11 +19,18 @@ export async function createApp() {
 
   app.post('/auth/login', async (req, res) => {
     try {
-      const { username, password } = req.body;
-      const token = await login(username, password);
+      const { username, password, purpose } = req.body;
+      const token = await login(username, password, purpose);
       res.json({ token });
-    } catch {
-      res.status(401).json({ error: 'invalid_credentials' });
+    } catch (error) {
+      const message = (error as Error).message;
+      if (message === 'purpose_required' || message === 'tenant_missing') {
+        res.status(400).json({ error: message });
+      } else if (message === 'purpose_not_allowed') {
+        res.status(403).json({ error: message });
+      } else {
+        res.status(401).json({ error: 'invalid_credentials' });
+      }
     }
   });
 

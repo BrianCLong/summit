@@ -1,3 +1,4 @@
+import { describe, it, expect, afterAll } from '@jest/globals';
 import request from 'supertest';
 import { createApp } from '../src/index';
 import { stopObservability } from '../src/observability';
