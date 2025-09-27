@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import {
   ThemeProvider,
   createTheme,
   CssBaseline,
   IconButton,
   Box,
+  Button,
+  Stack,
 } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
@@ -15,6 +17,10 @@ import { GraphPane } from './panes/GraphPane';
 import { TimelinePane } from './panes/TimelinePane';
 import { MapPane } from './panes/MapPane';
 import { CommandPalette } from './components/CommandPalette';
+import {
+  WorkflowMonitoringDashboard,
+  WorkflowApolloProvider,
+} from './workflows';
 
 export function App() {
   const [mode, setMode] = useState<'light' | 'dark'>('light');
@@ -28,7 +34,31 @@ export function App() {
         <CssBaseline />
         <BrowserRouter>
           <CommandPalette />
-          <Box display="flex" justifyContent="flex-end" p={1}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            p={1}
+            gap={2}
+          >
+            <Stack direction="row" spacing={1}>
+              <Button
+                component={RouterLink}
+                to="/"
+                color="inherit"
+                variant="text"
+              >
+                Operations Console
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/workflows"
+                color="inherit"
+                variant="text"
+              >
+                Workflow Monitoring
+              </Button>
+            </Stack>
             <IconButton
               onClick={toggleMode}
               color="inherit"
@@ -62,6 +92,14 @@ export function App() {
                     <MapPane />
                   </Box>
                 </Box>
+              }
+            />
+            <Route
+              path="/workflows"
+              element={
+                <WorkflowApolloProvider>
+                  <WorkflowMonitoringDashboard />
+                </WorkflowApolloProvider>
               }
             />
           </Routes>
