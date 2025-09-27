@@ -1,0 +1,53 @@
+{
+  "name": "@ga-graphai/c2pa-bridge",
+  "version": "0.1.0",
+  "description": "Toolkit for stamping and verifying C2PA-style provenance manifests for generated assets.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./browser": {
+      "import": "./dist/browser/browser.js",
+      "types": "./dist/browser/browser.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "demo",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "bin": {
+    "cpb": "dist/cli/cpb.js"
+  },
+  "scripts": {
+    "build": "npm run build:node && npm run build:browser",
+    "build:node": "tsc -p tsconfig.json",
+    "build:browser": "tsc -p tsconfig.browser.json",
+    "clean": "rimraf dist",
+    "prepare": "npm run build",
+    "test": "npm run build && node --test \"tests/**/*.js\""
+  },
+  "keywords": [
+    "c2pa",
+    "provenance",
+    "signatures",
+    "chain-of-custody"
+  ],
+  "author": "Summit Engineering",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "mime-types": "^2.1.35"
+  },
+  "devDependencies": {
+    "@types/mime-types": "^2.1.4",
+    "@types/node": "^20.11.28",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.5"
+  }
+}
