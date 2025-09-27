@@ -1,6 +1,7 @@
 import { getPostgresPool } from '../db/postgres.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import { z } from 'zod';
+import { PromptInnovationOrchestrator } from '../ai/prompt-engineering/PromptInnovationOrchestrator';
 
 interface SemanticSLO {
   id: string;
@@ -73,7 +74,8 @@ const BatchEvaluationSchema = z.object({
 
 export class QualityEvaluationPlatform {
   private evaluators: Map<string, any> = new Map();
-  
+  private promptOrchestrator = new PromptInnovationOrchestrator();
+
   constructor() {
     this.initializeEvaluators();
   }
@@ -872,9 +874,9 @@ export class QualityEvaluationPlatform {
   }
 
   private async generateRecommendations(
-    tenantId: string, 
-    modelId: string, 
-    metrics: Record<string, any>, 
+    tenantId: string,
+    modelId: string,
+    metrics: Record<string, any>,
     sloCompliance: number
   ): Promise<string[]> {
     const recommendations: string[] = [];
@@ -914,13 +916,95 @@ export class QualityEvaluationPlatform {
       recommendations.push('Consider model optimization or infrastructure scaling to improve response times');
     }
     
-    // Default recommendation
+    const blueprint = this.promptOrchestrator.buildBlueprint({
+      objective: `Continuously elevate prompt performance for ${modelId}`,
+      successCriteria: this.buildSuccessCriteria(metrics),
+      riskLevel: sloCompliance < 0.9 ? 'high' : 'medium',
+      complianceRegimes: ['SOC2', 'ISO27001'],
+      audience: {
+        role: 'Prompt Engineering Strike Team',
+        expertise: 'expert',
+        locale: 'en-US',
+      },
+      knowledgeAssets: this.buildKnowledgeAssets(metrics),
+      guardrails: ['No PII leakage', 'Maintain audit-grade traceability'],
+      telemetry: {
+        route: 'quality-evaluation',
+        frequency: 'per-call',
+        signals: ['capture:novelty-index', 'capture:citation-gap', 'capture:prompt-regret'],
+      },
+    });
+
+    const assurance = this.promptOrchestrator.runAssurance(blueprint, {
+      metrics,
+      sloCompliance,
+      historicalFindings: recommendations,
+    });
+
+    const artifact = this.promptOrchestrator.synthesizePrompt(blueprint);
+    const orchestratorRecommendations = new Set<string>();
+
+    orchestratorRecommendations.add(
+      `Deploy Stratos blueprint ${blueprint.assurance.signature.slice(0, 12)} to ${assurance.focusArea.toLowerCase()} while broadcasting telemetry via ${blueprint.telemetry.signals.join(', ')}.`
+    );
+
+    if (assurance.highRiskMetric) {
+      orchestratorRecommendations.add(
+        `Infuse counterfactual mesh into prompts to neutralize ${assurance.highRiskMetric} regression pathways.`
+      );
+    }
+
+    assurance.recommendations.forEach(rec => orchestratorRecommendations.add(rec));
+
+    orchestratorRecommendations.add(
+      `Adopt diagnostic prompt for nightly dry runs: ${artifact.diagnosticPrompt}`
+    );
+
     if (recommendations.length === 0) {
       recommendations.push('Model performance is within acceptable ranges');
       recommendations.push('Continue monitoring for any performance degradation');
     }
-    
+
+    orchestratorRecommendations.forEach(rec => {
+      if (!recommendations.includes(rec)) {
+        recommendations.push(rec);
+      }
+    });
+
     return recommendations;
+  }
+
+  private buildSuccessCriteria(metrics: Record<string, any>): string[] {
+    const successCriteria: string[] = [];
+    Object.entries(metrics).forEach(([metric, details]) => {
+      if (typeof details?.mean === 'number') {
+        const percentage = Math.round((details.mean ?? 0) * 100);
+        successCriteria.push(`${metric} >= ${percentage}%`);
+      }
+    });
+
+    if (!successCriteria.length) {
+      successCriteria.push('Maintain baseline model excellence');
+    }
+
+    return successCriteria;
+  }
+
+  private buildKnowledgeAssets(metrics: Record<string, any>): Array<{ name: string; type: 'document' | 'graph' | 'workflow'; priority: number }> {
+    const assets: Array<{ name: string; type: 'document' | 'graph' | 'workflow'; priority: number }> = [
+      { name: 'Prompt Governance Charter', type: 'document', priority: 0.9 },
+      { name: 'Telemetry Analytics Graph', type: 'graph', priority: 0.8 },
+    ];
+
+    if (metrics.hallucination) {
+      assets.push({ name: 'Hallucination Response Playbook', type: 'workflow', priority: 0.7 });
+    }
+
+    if (metrics.toxicity) {
+      assets.push({ name: 'Safety Incident Escalation Workflow', type: 'workflow', priority: 0.75 });
+    }
+
+    return assets;
   }
 
   private async detectRecentRegression(tenantId: string, modelId: string): Promise<boolean> {
