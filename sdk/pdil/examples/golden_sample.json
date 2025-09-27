@@ -1,0 +1,64 @@
+{
+  "cases": [
+    {
+      "case_id": "billing-refund",
+      "prompts": {
+        "v1": "Explain the refund policy for premium users.",
+        "v2": "Explain the refund policy for premium plan customers clearly."
+      },
+      "expected_response": "Premium users receive refunds within 3 business days after approval.",
+      "business_impact": 3.0,
+      "coverage_tags": ["billing", "refunds"],
+      "failure_severity": {
+        "omission": 2.0,
+        "incorrect": 1.5,
+        "partial": 1.2,
+        "schema": 1.0,
+        "default": 1.0
+      },
+      "metadata": {
+        "notes": "High risk scenario due to regulatory commitments."
+      }
+    },
+    {
+      "case_id": "safety-commitment",
+      "prompts": {
+        "v1": "Respond to abusive language with a de-escalation statement.",
+        "v2": "Provide a calm response to abusive language while reiterating policy."
+      },
+      "expected_response": "We do not tolerate abusive language. Let's keep our conversation respectful.",
+      "business_impact": 4.5,
+      "coverage_tags": ["safety"],
+      "failure_severity": {
+        "omission": 3.0,
+        "incorrect": 2.5,
+        "partial": 1.8,
+        "schema": 1.0,
+        "default": 1.5
+      },
+      "metadata": {
+        "notes": "Safety regressions carry higher risk weighting."
+      }
+    },
+    {
+      "case_id": "upsell-offer",
+      "prompts": {
+        "v1": "Suggest an add-on for the standard plan.",
+        "v2": "Offer a relevant add-on for the standard plan customer profile."
+      },
+      "expected_response": "Consider upgrading to the productivity toolkit add-on for collaboration features.",
+      "business_impact": 1.5,
+      "coverage_tags": ["upsell"],
+      "failure_severity": {
+        "omission": 1.0,
+        "incorrect": 1.0,
+        "partial": 0.8,
+        "schema": 0.5,
+        "default": 1.0
+      },
+      "metadata": {
+        "notes": "Moderate impact scenario focused on revenue growth."
+      }
+    }
+  ]
+}
