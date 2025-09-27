@@ -306,6 +306,17 @@ services:
     image: feed-processor
     port: 8084
     replicaCount: 2
+    kafka:
+      bootstrapServers: 'kafka.kafka.svc.cluster.local:9092'
+      inputTopic: 'intel.raw'
+      outputTopic: 'intel.enriched'
+      deadLetterTopic: 'intel.dlq'
+      consumerGroup: 'feed-processor'
+    processor:
+      maxRetries: 5
+      retryBackoffSeconds: 0.5
+    telemetry:
+      prometheusAlertThreshold: 5
 
     env:
       - name: PORT
@@ -317,6 +328,22 @@ services:
             key: uri
       - name: REDIS_HOST
         value: '{{ .Values.external.redis.host }}'
+      - name: KAFKA_BOOTSTRAP_SERVERS
+        value: '{{ .Values.services.feedProcessor.kafka.bootstrapServers }}'
+      - name: KAFKA_INPUT_TOPIC
+        value: '{{ .Values.services.feedProcessor.kafka.inputTopic }}'
+      - name: KAFKA_OUTPUT_TOPIC
+        value: '{{ .Values.services.feedProcessor.kafka.outputTopic }}'
+      - name: KAFKA_DEAD_LETTER_TOPIC
+        value: '{{ .Values.services.feedProcessor.kafka.deadLetterTopic }}'
+      - name: KAFKA_CONSUMER_GROUP
+        value: '{{ .Values.services.feedProcessor.kafka.consumerGroup }}'
+      - name: FEED_PROCESSOR_MAX_RETRIES
+        value: '{{ .Values.services.feedProcessor.processor.maxRetries | default 5 }}'
+      - name: FEED_PROCESSOR_RETRY_BACKOFF_SECONDS
+        value: '{{ .Values.services.feedProcessor.processor.retryBackoffSeconds | default 0.5 }}'
+      - name: FEED_PROCESSOR_PROM_ALERT_THRESHOLD
+        value: '{{ .Values.services.feedProcessor.telemetry.prometheusAlertThreshold }}'
       - name: TEXTRAZOR_API_KEY
         valueFrom:
           secretKeyRef:

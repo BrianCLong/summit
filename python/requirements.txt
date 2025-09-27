@@ -13,4 +13,9 @@ requests
 feedparser
 sqlalchemy
 scikit-learn
+kafka-python
+opentelemetry-sdk
+opentelemetry-exporter-otlp-proto-grpc
+prometheus-client
+tenacity
 # Existing libraries like statsmodels, PuLP, rdkit are assumed to be available in the environment.
