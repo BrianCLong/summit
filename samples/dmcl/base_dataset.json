@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "user": "alice",
+    "amount": 125.75,
+    "status": "cleared",
+    "transaction_timestamp": "2025-01-10T12:00:00Z"
+  },
+  {
+    "id": 2,
+    "user": "bob",
+    "amount": 499.99,
+    "status": "pending",
+    "transaction_timestamp": "2025-01-10T12:45:00Z"
+  },
+  {
+    "id": 3,
+    "user": "carol",
+    "amount": 86.42,
+    "status": "cleared",
+    "transaction_timestamp": "2025-01-10T14:00:00Z"
+  }
+]
