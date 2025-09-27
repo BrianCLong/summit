@@ -1,0 +1,10 @@
+calls:
+  - name: getProfile
+    scope: profile.read
+    purpose: analytics
+  - name: marketingBlast
+    scope: messaging.send
+    purpose: marketing
+  - name: settlePayment
+    scope: payments.process
+    purpose: settlement
