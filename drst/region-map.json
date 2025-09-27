@@ -1,0 +1,4 @@
+{
+  "api.eu.example.com": "eu-central-1",
+  "api.us.example.com": "us-west-2"
+}
