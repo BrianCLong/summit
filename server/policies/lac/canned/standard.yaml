@@ -1,0 +1,66 @@
+metadata:
+  version: "1.0"
+  issuedAt: "2026-03-01T00:00:00Z"
+  jurisdiction: "US/EU"
+licenses:
+  - id: data-broker-license
+    description: Allows read access to consumer intelligence datasets.
+  - id: sensitive-personal-data
+    description: Required for resolving personal identities.
+warrants:
+  - id: warrant-2026-001
+    description: Magistrate order covering user-level exports.
+  - id: warrant-2026-002
+    description: Supervisory approval for retention beyond 14 days.
+retention:
+  defaultMaxDays: 30
+  overrides:
+    Query.auditTrail: 90
+jurisdiction:
+  allowed:
+    - US
+    - EU
+  blocked:
+    - CN
+rules:
+  - id: Query.listProducts
+    operation: query
+    target: listProducts
+    legalBasis: "CCPA §1798.140(f) Legitimate Business Purpose"
+    appealHint: "Submit revocation exception via legal portal form LP-771."
+    requires:
+      licenses:
+        - data-broker-license
+      jurisdictions:
+        - US
+      retention:
+        maxDays: 7
+  - id: Query.resolveIdentity
+    operation: query
+    target: resolveIdentity
+    legalBasis: "GDPR Art.6(1)(c) Legal obligation"
+    appealHint: "Escalate to Data Protection Officer with supporting warrant."
+    requires:
+      licenses:
+        - data-broker-license
+        - sensitive-personal-data
+      warrants:
+        - warrant-2026-001
+      jurisdictions:
+        - EU
+      retention:
+        maxDays: 1
+  - id: Mutation.createExportJob
+    operation: mutation
+    target: createExportJob
+    legalBasis: "Bank Secrecy Act compliance mandate"
+    appealHint: "File compliance exception request referencing policy Export-42."
+    requires:
+      licenses:
+        - sensitive-personal-data
+      warrants:
+        - warrant-2026-002
+      jurisdictions:
+        - US
+      retention:
+        maxDays: 14

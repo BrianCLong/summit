@@ -10,7 +10,8 @@
     "test": "jest",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "validate": "cd .. && node scripts/validate.js"
+    "validate": "cd .. && node scripts/validate.js",
+    "lac:dry-run": "node --loader ts-node/esm src/policy/lac/cli/dryRun.ts"
   },
   "keywords": [],
   "author": "",
@@ -40,6 +41,7 @@
     "graphql-shield": "^7.6.5",
     "graphql-subscriptions": "^3.0.0",
     "ioredis": "^5.8.0",
+    "js-yaml": "^4.1.0",
     "neo4j-driver": "^5.0.0",
     "node-fetch": "^3.3.2",
     "pg": "^8.0.0",
