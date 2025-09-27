@@ -1,16 +1,25 @@
 """
 Prometheus metrics collection for IntelGraph ML service
 """
+import math
 import time
+import logging
+from typing import TYPE_CHECKING
+
 import psutil
 from prometheus_client import (
-    CollectorRegistry, 
-    Counter, 
-    Histogram, 
-    Gauge, 
+    CollectorRegistry,
+    Counter,
+    Histogram,
+    Gauge,
     generate_latest,
     CONTENT_TYPE_LATEST
 )
+
+if TYPE_CHECKING:  # pragma: no cover - circular import guard for type checkers
+    from .drift import DriftResult
+
+logger = logging.getLogger(__name__)
 
 # Create custom registry
 registry = CollectorRegistry()
@@ -51,6 +60,63 @@ ml_model_accuracy = Gauge(
     'ml_model_accuracy',
     'ML model accuracy score',
     ['model_type', 'metric'],
+    registry=registry
+)
+
+# Drift monitoring metrics powered by Evidently
+model_data_drift_share = Gauge(
+    'model_data_drift_share',
+    'Share of features flagged as drifted by Evidently',
+    ['model_name'],
+    registry=registry
+)
+
+model_data_drift_detected = Gauge(
+    'model_data_drift_detected',
+    'Indicator (1=yes, 0=no) that model data drift has breached thresholds',
+    ['model_name'],
+    registry=registry
+)
+
+model_data_drift_columns = Gauge(
+    'model_data_drift_columns',
+    'Number of columns identified as drifted by Evidently',
+    ['model_name'],
+    registry=registry
+)
+
+model_drift_last_run_timestamp = Gauge(
+    'model_drift_last_run_timestamp',
+    'Unix timestamp of the last Evidently drift evaluation',
+    ['model_name'],
+    registry=registry
+)
+
+model_drift_threshold = Gauge(
+    'model_drift_threshold',
+    'Configured thresholds for drift and performance monitoring',
+    ['model_name', 'threshold_type'],
+    registry=registry
+)
+
+model_performance_value = Gauge(
+    'model_performance_value',
+    'Model performance metric value as calculated by Evidently',
+    ['model_name', 'dataset', 'metric'],
+    registry=registry
+)
+
+model_performance_drop_ratio = Gauge(
+    'model_performance_drop_ratio',
+    'Relative drop between reference and current performance metrics',
+    ['model_name', 'metric'],
+    registry=registry
+)
+
+model_drift_alerts_total = Counter(
+    'model_drift_alerts_total',
+    'Total number of Evidently driven drift alerts emitted',
+    ['model_name', 'alert_type'],
     registry=registry
 )
 
@@ -322,10 +388,78 @@ def track_model_loading(model_type: str, duration: float, status: str = 'success
         model_type=model_type,
         status=status
     ).inc()
-    
+
     model_loading_duration_seconds.labels(
         model_type=model_type
     ).observe(duration)
+
+
+def record_drift_metrics(
+    result: 'DriftResult',
+    data_drift_threshold: float,
+    performance_drop_threshold: float,
+) -> None:
+    """Persist Evidently drift metrics to Prometheus."""
+    try:
+        model_name = result.model_name
+
+        model_data_drift_share.labels(model_name=model_name).set(
+            result.share_of_drifted_columns
+        )
+        model_data_drift_columns.labels(model_name=model_name).set(
+            result.number_of_drifted_columns
+        )
+        model_data_drift_detected.labels(model_name=model_name).set(
+            1.0 if result.data_drift_detected else 0.0
+        )
+        model_drift_last_run_timestamp.labels(model_name=model_name).set(
+            result.timestamp
+        )
+
+        model_drift_threshold.labels(
+            model_name=model_name,
+            threshold_type='data_drift'
+        ).set(data_drift_threshold)
+        model_drift_threshold.labels(
+            model_name=model_name,
+            threshold_type='performance_drop'
+        ).set(performance_drop_threshold)
+
+        for metric_name, dataset_values in result.performance_by_metric.items():
+            for dataset, value in dataset_values.items():
+                if value is None:
+                    continue
+                if isinstance(value, float) and math.isnan(value):
+                    continue
+                model_performance_value.labels(
+                    model_name=model_name,
+                    dataset=dataset,
+                    metric=metric_name
+                ).set(value)
+
+        for metric_name, drop_ratio in result.performance_drop.items():
+            if drop_ratio is None:
+                continue
+            if isinstance(drop_ratio, float) and math.isnan(drop_ratio):
+                continue
+            model_performance_drop_ratio.labels(
+                model_name=model_name,
+                metric=metric_name
+            ).set(drop_ratio)
+
+        for alert_type in result.alerts:
+            model_drift_alerts_total.labels(
+                model_name=model_name,
+                alert_type=alert_type
+            ).inc()
+
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logger.exception("Failed to record drift metrics: %s", exc)
+        errors_total.labels(
+            module='metrics',
+            error_type=type(exc).__name__,
+            severity='error'
+        ).inc()
 
 
 def get_metrics():
