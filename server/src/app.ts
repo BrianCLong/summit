@@ -32,6 +32,7 @@ import pmRouter from './routes/pm.js';
 import ticketLinksRouter from './routes/ticket-links.js';
 import adminRouter from './routes/admin.js';
 import recipesRouter from './routes/recipes.js';
+import eltmRouter from './routes/eltm.js';
 import mcpServersRouter, { checkMCPHealth } from './maestro/mcp/servers-api.js';
 import mcpSessionsRouter from './maestro/mcp/sessions-api.js';
 import mcpInvokeRouter from './maestro/mcp/invoke-api.js';
@@ -162,6 +163,7 @@ export const createApp = async () => {
   app.use('/api', statusRouter);
   app.use('/api', healthIntegrationsRouter());
   app.use('/api', adminRouter);
+  app.use('/api/eltm', eltmRouter);
   app.use('/api', recipesRouter);
   app.use('/api', pmRouter);
   app.use('/api', ticketLinksRouter);
