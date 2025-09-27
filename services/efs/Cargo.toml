@@ -1,0 +1,41 @@
+[package]
+name = "efs"
+version = "0.1.0"
+edition = "2021"
+authors = ["Summit Engineering"]
+license = "Apache-2.0"
+description = "Minimal enclave-side feature store with attestation"
+
+[lib]
+name = "efs"
+path = "src/lib.rs"
+
+[[bin]]
+name = "efs-offline-verifier"
+path = "src/bin/offline_verifier.rs"
+
+[dependencies]
+aes-gcm = { version = "0.10", features = ["aes"] }
+anyhow = "1.0"
+async-trait = "0.1"
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4.5", features = ["derive"] }
+hkdf = "0.12"
+hmac = "0.12"
+hex = "0.4"
+once_cell = "1.19"
+parking_lot = "0.12"
+rand = { version = "0.8", features = ["std"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_with = { version = "3.8", features = ["base64"] }
+sha2 = "0.10"
+subtle = "2.5"
+thiserror = "1.0"
+tokio = { version = "1.41", features = ["macros", "rt-multi-thread", "sync", "time"] }
+tokio-postgres = { version = "0.7", features = ["with-uuid-1", "with-chrono-0_4"] }
+uuid = { version = "1", features = ["serde", "v4"] }
+
+[dev-dependencies]
+serde_json = "1.0"
