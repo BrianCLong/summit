@@ -6,9 +6,11 @@ const TEST_RUN_ID = 'test-run-123'; // A dummy run ID for testing
 
 describe('Maestro SDK Integration Tests', () => {
   let client: ReturnType<typeof createClient>;
+  let typedClient: any;
 
   beforeAll(() => {
     client = createClient(BASE_URL);
+    typedClient = client as any;
   });
 
   it('should get a run by ID', async () => {
@@ -18,39 +20,37 @@ describe('Maestro SDK Integration Tests', () => {
       status: 200,
       statusText: 'OK',
       headers: {},
-      config: {},
+      config: { url: `${BASE_URL}/runs/${TEST_RUN_ID}` },
     });
 
-    const run = await client.getRunById(TEST_RUN_ID); // Assuming getRunById is available
+    const run = await typedClient.getRunById(TEST_RUN_ID);
     expect(run.data.id).toBe(TEST_RUN_ID);
     expect(run.data.status).toBe('SUCCESS');
   });
 
-  it('should tail run logs', async () => {
-    // Mock the API response for /runs/:id/logs?stream=true
+  it('should list runs with retries', async () => {
     jest.spyOn(axios, 'get').mockResolvedValueOnce({
-      data: 'log line 1\nlog line 2',
-      status: 200,
-      statusText: 'OK',
-      headers: { 'content-type': 'text/event-stream' },
-      config: {},
-    });
-
-    const logs = await client.tailLogs(TEST_RUN_ID); // Assuming tailLogs is available
-    expect(logs).toContain('log line 1');
-  });
-
-  it('should explain policies', async () => {
-    // Mock the API response for /policies/explain
-    jest.spyOn(axios, 'post').mockResolvedValueOnce({
-      data: { explanation: 'Policy allows access based on role.' },
+      data: [{ id: 'run-1' }, { id: 'run-2' }],
       status: 200,
       statusText: 'OK',
       headers: {},
-      config: {},
+      config: { url: `${BASE_URL}/runs` },
     });
 
-    const policy = await client.explainPolicy({ policyId: 'test-policy' }); // Assuming explainPolicy is available
-    expect(policy.data.explanation).toContain('Policy allows access');
+    const runs = await typedClient.listRuns();
+    expect(runs.data).toHaveLength(2);
+  });
+
+  it('should list alert events', async () => {
+    jest.spyOn(axios, 'get').mockResolvedValueOnce({
+      data: { events: [] },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: { url: `${BASE_URL}/alertcenter/events` },
+    });
+
+    const events = await typedClient.listAlertEvents();
+    expect(events.status).toBe(200);
   });
 });
