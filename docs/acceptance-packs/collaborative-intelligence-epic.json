@@ -1,0 +1,27 @@
+{
+  "epic": "Collaborative Intelligence Orchestration",
+  "archiveName": "collaborative-intelligence-epic.zip",
+  "description": "Evidence collected for orchestrated resolver deployments covering insight factories and guardrail behaviour.",
+  "testEvidence": [
+    {
+      "type": "unit",
+      "path": "src/graphql/__tests__/deployCollaborative.test.ts",
+      "artifact": "test-results/unit/deploy-collaborative.xml"
+    },
+    {
+      "type": "integration",
+      "path": "tests/integration/feature-flags/featureFlagService.integration.test.ts",
+      "artifact": "test-results/integration/feature-flags.json"
+    },
+    {
+      "type": "e2e",
+      "path": "tests/e2e/quality-gates.spec.ts",
+      "artifact": "tests/e2e/test-results/quality-gates-report.json"
+    }
+  ],
+  "expectedOutputs": [
+    "Plan summary highlighting active insight builders",
+    "Guardrail validation logs confirming dependency enforcement",
+    "Playwright run report with CI gate verification"
+  ]
+}

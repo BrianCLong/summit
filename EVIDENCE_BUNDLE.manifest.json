@@ -1,484 +1,92 @@
 {
   "evidence_bundle": {
-    "version": "1.0.0",
-    "release": "v1.0.0-GA",
-    "product": "IntelGraph Maestro Conductor",
+    "version": "2025.09.0",
+    "release": "quality-gates-refinement",
+    "product": "Summit Platform",
     "created_at": "2025-09-21T16:30:00Z",
-    "environment": "production",
-    "compliance_level": "enterprise"
+    "environment": "staging"
   },
-
   "release_metadata": {
     "git_commit": "{{ .Release.GitCommit }}",
-    "git_tag": "v1.0.0-GA",
-    "build_timestamp": "{{ .Release.BuildTime }}",
     "build_pipeline": "{{ .Release.Pipeline }}",
-    "approver": "{{ .Release.Approver }}",
-    "deployment_window": "2025-09-21T15:00:00Z/2025-09-21T17:00:00Z"
+    "build_timestamp": "{{ .Release.BuildTime }}",
+    "approver": "{{ .Release.Approver }}"
   },
-
-  "artifacts": {
-    "helm_charts": [
-      {
-        "name": "intelgraph-maestro",
-        "version": "1.0.0",
-        "path": "charts/intelgraph-maestro-1.0.0.tgz",
-        "sha256": "{{ sha256sum charts/intelgraph-maestro-1.0.0.tgz }}",
-        "signed": true,
-        "cosign_bundle": "signing/helm-chart-cosign.bundle"
-      }
-    ],
-
-    "container_images": [
-      {
-        "name": "ghcr.io/intelgraph/api",
-        "tag": "v1.0.0",
-        "digest": "sha256:{{ .Images.API.Digest }}",
-        "sbom_path": "sbom/api-spdx.json",
-        "vulnerability_scan": "security/api-trivy-report.json",
-        "cosign_signature": "signing/api-cosign.sig",
-        "rekor_uuid": "{{ .Images.API.RekorUUID }}"
-      },
-      {
-        "name": "ghcr.io/intelgraph/client",
-        "tag": "v1.0.0",
-        "digest": "sha256:{{ .Images.Client.Digest }}",
-        "sbom_path": "sbom/client-spdx.json",
-        "vulnerability_scan": "security/client-trivy-report.json",
-        "cosign_signature": "signing/client-cosign.sig",
-        "rekor_uuid": "{{ .Images.Client.RekorUUID }}"
-      },
-      {
-        "name": "ghcr.io/intelgraph/gateway",
-        "tag": "v1.0.0",
-        "digest": "sha256:{{ .Images.Gateway.Digest }}",
-        "sbom_path": "sbom/gateway-spdx.json",
-        "vulnerability_scan": "security/gateway-trivy-report.json",
-        "cosign_signature": "signing/gateway-cosign.sig",
-        "rekor_uuid": "{{ .Images.Gateway.RekorUUID }}"
-      }
-    ],
-
-    "sbom_manifests": [
-      {
-        "format": "SPDX-2.3",
-        "component": "api",
-        "path": "sbom/api-spdx.json",
-        "sha256": "{{ sha256sum sbom/api-spdx.json }}",
-        "package_count": "{{ .SBOM.API.PackageCount }}",
-        "vulnerability_count": "{{ .SBOM.API.VulnerabilityCount }}"
-      },
-      {
-        "format": "SPDX-2.3",
-        "component": "client",
-        "path": "sbom/client-spdx.json",
-        "sha256": "{{ sha256sum sbom/client-spdx.json }}",
-        "package_count": "{{ .SBOM.Client.PackageCount }}",
-        "vulnerability_count": "{{ .SBOM.Client.VulnerabilityCount }}"
-      },
-      {
-        "format": "SPDX-2.3",
-        "component": "gateway",
-        "path": "sbom/gateway-spdx.json",
-        "sha256": "{{ sha256sum sbom/gateway-spdx.json }}",
-        "package_count": "{{ .SBOM.Gateway.PackageCount }}",
-        "vulnerability_count": "{{ .SBOM.Gateway.VulnerabilityCount }}"
-      }
-    ]
-  },
-
-  "security_attestations": {
-    "image_signing": {
-      "enabled": true,
-      "cosign_version": "2.2.0",
-      "transparency_log": "rekor.sigstore.dev",
-      "certificate_authority": "fulcio.sigstore.dev",
-      "oidc_issuer": "https://token.actions.githubusercontent.com",
-      "verification_status": "verified"
-    },
-
-    "vulnerability_scanning": {
-      "scanner": "trivy",
-      "scanner_version": "0.45.0",
-      "scan_timestamp": "{{ .Security.ScanTimestamp }}",
-      "critical_vulnerabilities": 0,
-      "high_vulnerabilities": "{{ .Security.HighVulnerabilities }}",
-      "medium_vulnerabilities": "{{ .Security.MediumVulnerabilities }}",
-      "scan_reports": [
-        "security/api-trivy-report.json",
-        "security/client-trivy-report.json",
-        "security/gateway-trivy-report.json"
-      ]
-    },
-
-    "opa_policies": {
-      "bundle_path": "policies/opa/bundle.tar.gz",
-      "bundle_sha256": "{{ sha256sum policies/opa/bundle.tar.gz }}",
-      "policy_count": 15,
-      "rules_count": 42,
-      "rego_version": "0.57.0",
-      "enforcement_mode": "strict",
-      "deny_by_default": true
-    },
-
-    "secrets_scanning": {
-      "tools": ["detect-secrets", "truffleHog", "gitleaks"],
-      "scan_timestamp": "{{ .Security.SecretsCanTimestamp }}",
-      "secrets_found": 0,
-      "false_positives": "{{ .Security.FalsePositives }}",
-      "scan_reports": [
-        "security/detect-secrets-report.json",
-        "security/truffleHog-report.json",
-        "security/gitleaks-report.json"
-      ]
-    }
-  },
-
-  "graphql_schema": {
-    "sdl_path": "graphql/schema.graphql",
-    "sdl_sha256": "{{ sha256sum graphql/schema.graphql }}",
-    "persisted_operations": {
-      "manifest_path": "graphql/persisted-operations.json",
-      "manifest_sha256": "{{ sha256sum graphql/persisted-operations.json }}",
-      "operation_count": "{{ .GraphQL.OperationCount }}",
-      "enforcement_enabled": true
-    },
-    "complexity_limits": {
-      "max_depth": 15,
-      "max_complexity": 10000,
-      "max_cost": 5000
-    }
-  },
-
-  "database_migrations": {
-    "postgresql": {
-      "migration_files": [
-        "db/migrations/001_initial_schema.sql",
-        "db/migrations/002_audit_tables.sql",
-        "db/migrations/003_rls_policies.sql"
-      ],
-      "schema_version": "003",
-      "migration_hash": "{{ sha256sum db/migrations/* }}",
-      "rollback_available": true
-    },
-    "neo4j": {
-      "cypher_migrations": [
-        "graph/migrations/001_constraints.cypher",
-        "graph/migrations/002_indexes.cypher",
-        "graph/migrations/003_procedures.cypher"
-      ],
-      "schema_version": "003",
-      "gds_version": "2.5.0",
-      "procedures_installed": ["pageRank", "louvain", "shortestPath"]
-    }
-  },
-
-  "performance_validation": {
-    "load_testing": {
-      "tool": "k6",
-      "test_duration": "10m",
-      "virtual_users": 100,
-      "reports": [
-        "performance/k6-baseline-test.json",
-        "performance/k6-golden-transactions.json",
-        "performance/k6-production-validation.json"
-      ],
-      "slo_compliance": {
-        "api_p95_latency_ms": "{{ .Performance.API.P95Latency }}",
-        "api_p99_latency_ms": "{{ .Performance.API.P99Latency }}",
-        "graph_query_p95_ms": "{{ .Performance.Graph.P95Latency }}",
-        "error_rate_percent": "{{ .Performance.ErrorRate }}",
-        "throughput_rps": "{{ .Performance.Throughput }}"
-      }
-    },
-
-    "chaos_engineering": {
-      "tool": "chaos-mesh",
-      "test_scenarios": [
-        "pod-deletion",
-        "node-drain",
-        "network-partition",
-        "cpu-stress",
-        "memory-stress"
-      ],
-      "results_path": "chaos/chaos-engineering-report.json",
-      "slo_breaches": 0,
-      "recovery_time_seconds": "{{ .Chaos.RecoveryTime }}"
-    }
-  },
-
-  "infrastructure_config": {
-    "kubernetes": {
-      "version": "1.28.0",
-      "cluster_name": "intelgraph-prod",
-      "region": "us-east-1",
-      "node_count": "{{ .Kubernetes.NodeCount }}",
-      "namespace": "intelgraph-system"
-    },
-
-    "helm_values": [
-      {
-        "environment": "production",
-        "file": "charts/intelgraph-maestro/values-prod.yaml",
-        "sha256": "{{ sha256sum charts/intelgraph-maestro/values-prod.yaml }}"
-      }
-    ],
-
-    "resource_allocation": {
-      "api_replicas": 5,
-      "api_cpu_limit": "2000m",
-      "api_memory_limit": "4Gi",
-      "postgresql_replicas": 3,
-      "neo4j_core_nodes": 5,
-      "kafka_brokers": 3,
-      "redis_nodes": 6
-    },
-
-    "networking": {
-      "ingress_controller": "aws-load-balancer-controller",
-      "service_mesh": "istio",
-      "network_policies": "enabled",
-      "default_deny": true,
-      "tls_termination": "ingress",
-      "certificate_manager": "cert-manager"
-    }
-  },
-
-  "monitoring_observability": {
-    "metrics": {
-      "prometheus_version": "2.45.0",
-      "grafana_version": "10.0.0",
-      "custom_metrics": 147,
-      "slo_metrics": 23,
-      "alert_rules": 34,
-      "dashboards": [
-        "API Overview",
-        "Graph Operations",
-        "Security Overview",
-        "Infrastructure Health",
-        "Cost Analysis"
-      ]
-    },
-
-    "logging": {
-      "structured_logging": true,
-      "log_format": "JSON",
-      "log_aggregation": "loki",
-      "retention_days": 30,
-      "trace_correlation": true
-    },
-
-    "tracing": {
-      "opentelemetry_version": "1.20.0",
-      "trace_sampling": "10%",
-      "jaeger_collector": true,
-      "span_processors": ["batch", "resource"]
-    },
-
-    "alerting": {
-      "alertmanager_version": "0.25.0",
-      "pagerduty_integration": true,
-      "slack_integration": true,
-      "alert_routing": "team-based",
-      "escalation_policies": 4
-    }
-  },
-
-  "compliance_documentation": {
-    "runbooks": [
-      {
-        "title": "Deployment and Upgrade Procedures",
-        "path": "runbooks/deploy-upgrade.md",
-        "sha256": "{{ sha256sum runbooks/deploy-upgrade.md }}"
-      },
-      {
-        "title": "On-Call Triage and Incident Response",
-        "path": "runbooks/oncall-triage.md",
-        "sha256": "{{ sha256sum runbooks/oncall-triage.md }}"
-      },
-      {
-        "title": "Emergency Procedures and Rollback",
-        "path": "runbooks/emergency-procedures.md",
-        "sha256": "{{ sha256sum runbooks/emergency-procedures.md }}"
-      },
-      {
-        "title": "Database and Graph Operations",
-        "path": "runbooks/database-operations.md",
-        "sha256": "{{ sha256sum runbooks/database-operations.md }}"
-      }
-    ],
-
-    "security_policies": [
-      {
-        "title": "Network Security Policy",
-        "path": "policies/network-security.yaml",
-        "enforced": true
-      },
-      {
-        "title": "RBAC Authorization Policy",
-        "path": "policies/rbac-policy.yaml",
-        "enforced": true
-      },
-      {
-        "title": "ABAC Access Control Policy",
-        "path": "policies/opa/abac.rego",
-        "enforced": true
-      }
-    ],
-
-    "audit_logs": {
-      "kubernetes_audit": true,
-      "application_audit": true,
-      "database_audit": true,
-      "retention_days": 90,
-      "tamper_protection": true
-    }
-  },
-
-  "cost_management": {
-    "budget": {
-      "monthly_limit_usd": 18000,
-      "daily_limit_usd": 600,
-      "alert_threshold_percent": 80
-    },
-
-    "resource_optimization": {
-      "kubecost_enabled": true,
-      "cost_allocation": "namespace",
-      "rightsizing_recommendations": true,
-      "unused_resource_detection": true
-    },
-
-    "projected_costs": {
-      "compute_monthly_usd": "{{ .Cost.Compute }}",
-      "storage_monthly_usd": "{{ .Cost.Storage }}",
-      "network_monthly_usd": "{{ .Cost.Network }}",
-      "total_projected_monthly_usd": "{{ .Cost.Total }}"
-    }
-  },
-
-  "backup_disaster_recovery": {
-    "postgresql": {
-      "pitr_enabled": true,
-      "backup_frequency": "continuous",
-      "retention_days": 30,
-      "cross_region_backup": true,
-      "restore_tested": true,
-      "rpo_minutes": 5,
-      "rto_minutes": 15
-    },
-
-    "neo4j": {
-      "backup_frequency": "daily",
-      "retention_days": 30,
-      "backup_compression": true,
-      "restore_tested": true,
-      "rpo_hours": 24,
-      "rto_minutes": 30
-    },
-
-    "disaster_recovery": {
-      "multi_az_deployment": true,
-      "cross_region_replication": false,
-      "disaster_recovery_plan": "runbooks/disaster-recovery.md",
-      "last_drill_date": "{{ .DR.LastDrillDate }}",
-      "drill_success": true
-    }
-  },
-
-  "verification_checksums": {
-    "evidence_bundle_sha256": "{{ sha256sum evidence-bundle-v1.0.0.tar.gz }}",
-    "manifest_sha256": "{{ sha256sum EVIDENCE_BUNDLE.manifest.json }}",
-    "verification_script": "scripts/verify-evidence-bundle.sh",
-    "cosign_verification": {
-      "public_key": "cosign.pub",
-      "verification_command": "cosign verify-blob --key cosign.pub --signature evidence-bundle.sig evidence-bundle-v1.0.0.tar.gz"
-    }
-  },
-
-  "attestations": {
-    "build_provenance": {
-      "slsa_level": "3",
-      "builder": "GitHub Actions",
-      "source_repo": "https://github.com/intelgraph/maestro",
-      "build_id": "{{ .Build.ID }}",
-      "attestation_path": "provenance/slsa-provenance.json"
-    },
-
-    "security_review": {
-      "reviewed_by": "{{ .Security.Reviewer }}",
-      "review_date": "{{ .Security.ReviewDate }}",
-      "approval_status": "approved",
-      "security_score": "{{ .Security.Score }}/100"
-    },
-
-    "compliance_certification": {
-      "framework": "SOC 2 Type II",
-      "auditor": "{{ .Compliance.Auditor }}",
-      "certification_date": "{{ .Compliance.CertDate }}",
-      "next_audit_date": "{{ .Compliance.NextAuditDate }}"
-    }
-  },
-
-  "deployment_evidence": {
-    "canary_deployment": {
-      "started_at": "{{ .Deployment.CanaryStartTime }}",
-      "traffic_split": "20%",
-      "duration_minutes": "{{ .Deployment.CanaryDuration }}",
-      "health_checks_passed": true,
-      "slo_compliance": true
-    },
-
-    "production_deployment": {
-      "completed_at": "{{ .Deployment.ProductionCompleteTime }}",
-      "traffic_split": "100%",
-      "rollback_available": true,
-      "zero_downtime": true,
-      "deployment_method": "canary"
-    },
-
-    "post_deployment_validation": {
-      "golden_transactions_passed": true,
-      "performance_tests_passed": true,
-      "security_tests_passed": true,
-      "monitoring_alerts": 0,
-      "validation_duration_minutes": "{{ .Deployment.ValidationDuration }}"
-    }
-  },
-
-  "stakeholder_approvals": [
+  "ci_quality_gates": [
     {
-      "role": "Platform Engineering Lead",
-      "name": "{{ .Approvals.PlatformLead }}",
-      "timestamp": "{{ .Approvals.PlatformTimestamp }}",
-      "signature_hash": "{{ .Approvals.PlatformSignature }}"
+      "name": "lint",
+      "status": "required",
+      "evidence": "test-results/lint/junit.xml"
     },
     {
-      "role": "Site Reliability Lead",
-      "name": "{{ .Approvals.SRELead }}",
-      "timestamp": "{{ .Approvals.SRETimestamp }}",
-      "signature_hash": "{{ .Approvals.SRESignature }}"
+      "name": "type-check",
+      "status": "required",
+      "evidence": "test-results/typecheck/report.json"
     },
     {
-      "role": "Security Engineering Lead",
-      "name": "{{ .Approvals.SecurityLead }}",
-      "timestamp": "{{ .Approvals.SecurityTimestamp }}",
-      "signature_hash": "{{ .Approvals.SecuritySignature }}"
+      "name": "unit-tests",
+      "status": "required",
+      "evidence": "test-results/unit/junit.xml"
     },
     {
-      "role": "Chief Technology Officer",
-      "name": "{{ .Approvals.CTO }}",
-      "timestamp": "{{ .Approvals.CTOTimestamp }}",
-      "signature_hash": "{{ .Approvals.CTOSignature }}"
+      "name": "integration-tests",
+      "status": "required",
+      "evidence": "test-results/integration/junit.xml"
+    },
+    {
+      "name": "e2e-tests",
+      "status": "required",
+      "evidence": "tests/e2e/test-results/report.json"
+    },
+    {
+      "name": "sbom",
+      "status": "required",
+      "evidence": "security/sbom/quality-gates-sbom.json"
+    },
+    {
+      "name": "policy-simulation",
+      "status": "required",
+      "evidence": "test-results/opa/policy-simulation.log"
+    },
+    {
+      "name": "secret-scan",
+      "status": "required",
+      "evidence": "test-results/security/secret-scan.json"
     }
   ],
-
-  "metadata": {
-    "generated_by": "IntelGraph Evidence Generator v1.0.0",
-    "generator_version": "1.0.0",
-    "schema_version": "1.0.0",
-    "specification_url": "https://docs.intelgraph.ai/evidence-bundle-spec",
-    "contact": "compliance@intelgraph.ai",
-    "support_url": "https://support.intelgraph.ai"
+  "acceptance_packs": [
+    {
+      "epic": "Collaborative Intelligence Orchestration",
+      "descriptor": "docs/acceptance-packs/collaborative-intelligence-epic.json"
+    },
+    {
+      "epic": "Feature Flag Governance",
+      "descriptor": "docs/acceptance-packs/feature-flag-governance-epic.json"
+    }
+  ],
+  "load_tests": {
+    "tool": "k6",
+    "script": "load/k6/quality-gates.js",
+    "duration": "3m",
+    "virtual_users": 120,
+    "thresholds": {
+      "p95_ms": 450,
+      "error_rate": 0.01
+    }
+  },
+  "chaos_scenarios": [
+    {
+      "name": "API canary outage containment",
+      "runbook": "chaos/scenarios/api-canary-outage.md",
+      "success_criteria": [
+        "Failover completes within 60 seconds",
+        "p95 latency remains below 450ms"
+      ]
+    }
+  ],
+  "sbom": {
+    "path": "security/sbom/quality-gates-sbom.json",
+    "format": "SPDX-2.3",
+    "generated_with": "cyclonedx-npm@3.11.0"
   }
 }

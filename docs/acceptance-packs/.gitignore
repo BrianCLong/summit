@@ -1,0 +1,6 @@
+*.zip
+*.tar.gz
+*.tgz
+# keep descriptors in git
+!*.json
+!*.md
