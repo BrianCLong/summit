@@ -1,0 +1,108 @@
+{
+  "systems": [
+    {
+      "name": "warehouse_redshift",
+      "description": "Legacy Redshift warehouse with order analytics tables.",
+      "tables": [
+        {
+          "name": "orders_fact",
+          "fields": [
+            {
+              "name": "order_id",
+              "description": "Order identifier from commerce engine",
+              "data_type": "varchar",
+              "sample_values": ["O-1001", "O-1002"]
+            },
+            {
+              "name": "order_dt",
+              "description": "UTC timestamp for order placement",
+              "data_type": "timestamp",
+              "sample_values": ["2024-09-01T08:01:00Z", "2024-09-01T09:15:00Z"]
+            },
+            {
+              "name": "order_gmv",
+              "description": "Gross merchandise value recorded in USD",
+              "data_type": "numeric",
+              "sample_values": ["150.00", "75.50"]
+            }
+          ]
+        },
+        {
+          "name": "customers_dim",
+          "fields": [
+            {
+              "name": "cust_id",
+              "description": "Unique id for each customer",
+              "data_type": "varchar",
+              "sample_values": ["C-900", "C-901"]
+            },
+            {
+              "name": "full_name",
+              "description": "Customer legal full name",
+              "data_type": "varchar",
+              "sample_values": ["Alice Smith", "Bob Singh"]
+            },
+            {
+              "name": "email_address",
+              "description": "Primary email address",
+              "data_type": "varchar",
+              "sample_values": ["alice@example.com", "bob@example.com"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "app_salesforce",
+      "description": "Salesforce CRM synchronization",
+      "tables": [
+        {
+          "name": "Account",
+          "fields": [
+            {
+              "name": "Id",
+              "description": "Account identifier",
+              "data_type": "string",
+              "sample_values": ["001xx000003DGbEAAW"]
+            },
+            {
+              "name": "Name",
+              "description": "Account name",
+              "data_type": "string",
+              "sample_values": ["Acme Global"]
+            },
+            {
+              "name": "AnnualRevenue",
+              "description": "Annual revenue in USD",
+              "data_type": "currency",
+              "sample_values": ["1250000"]
+            }
+          ]
+        },
+        {
+          "name": "Opportunity",
+          "fields": [
+            {
+              "name": "Id",
+              "description": "Opportunity id",
+              "data_type": "string",
+              "sample_values": ["006xx000004TMiKAAW"]
+            },
+            {
+              "name": "Amount",
+              "description": "Closed won amount",
+              "data_type": "currency",
+              "sample_values": ["34000"]
+            },
+            {
+              "name": "CloseDate",
+              "description": "Close date",
+              "data_type": "date",
+              "sample_values": ["2024-08-10"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
