@@ -38,6 +38,16 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
+# Python/other lockfiles handled externally
+poetry.lock
+Pipfile.lock
+requirements.lock
+*.lockb
+
+# Package manager lockfiles for alternative clients
+pnpm-lock.yaml
+bun.lockb
+
 # Prevent secrets / env files
 .env.*
 !.env.example

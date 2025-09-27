@@ -6,6 +6,13 @@
 package-lock.json -diff
 yarn.lock -diff
 
+# Source and policy fixtures should always diff as text
+*.kt text
+*.sql diff=sql
+*.ts text eol=lf
+*.srlc text eol=lf
+*.cjs text eol=lf
+
 # Graph schemas
 *.graphql diff
 *.cql diff

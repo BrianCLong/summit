@@ -1,0 +1,19 @@
+policy customer_protection {
+  scope session;
+
+  field customer.ssn: ssn {
+    transform mask keep=4 char="#";
+    transform hash algorithm=sha256 scope=session;
+    explain "Mask and hash SSN while keeping last 4 digits";
+  }
+
+  field account.iban: iban {
+    transform tokenize namespace="payments" preserveFormat=true;
+    consistency global;
+  }
+
+  field contact.phone: phone {
+    transform mask keep=4 char="#";
+    transform generalize granularity=region;
+  }
+}
