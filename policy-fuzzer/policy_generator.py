@@ -2,23 +2,24 @@
 
 import random
 from datetime import datetime, timedelta
+from policy_parser import parse_policy_definition, generate_policy_from_definition
 
-CONSENT_TYPES = ["user_data", "marketing", "analytics"]
-GEO_LOCATIONS = ["US", "EU", "CA", "ANY"]
-LICENSE_TYPES = ["license_A", "license_B", None]
-RETENTION_PERIODS = ["30d", "90d", None]
+# Sample policy definition in YAML format
+SAMPLE_POLICY_DEFINITION = """
+rules:
+  - effect: allow
+    condition:
+      consent: user_data
+      geo: US
+      license: license_A
+      retention: 30d
+      start_date: 2023-01-01T00:00:00
+      end_date: 2023-12-31T23:59:59
+"""
 
 def generate_policy():
-    """Generates a random policy."""
-    start_date = datetime.now() - timedelta(days=random.randint(0, 365))
-    end_date = start_date + timedelta(days=random.randint(1, 365))
-
-    policy = {
-        "consent": random.choice(CONSENT_TYPES),
-        "geo": random.choice(GEO_LOCATIONS),
-        "license": random.choice(LICENSE_TYPES),
-        "retention": random.choice(RETENTION_PERIODS),
-        "start_date": start_date.isoformat(),
-        "end_date": end_date.isoformat(),
-    }
-    return policy
+    """Generates a policy from a predefined definition."""
+    parsed_definition = parse_policy_definition(SAMPLE_POLICY_DEFINITION)
+    if parsed_definition:
+        return generate_policy_from_definition(parsed_definition)
+    return {} # Return an empty policy if parsing fails
