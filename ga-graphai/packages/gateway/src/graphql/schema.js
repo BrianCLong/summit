@@ -29,6 +29,8 @@ export const schema = buildSchema(`
     uri: String!
     title: String
     type: String
+    content: String
+    mustInclude: Boolean = false
   }
 
   input CapsInput {
@@ -56,6 +58,7 @@ export const schema = buildSchema(`
   type GenResult {
     content: String!
     citations: [Citation!]
+    attribution: AttributionBundle
     cost: Cost!
     model: Model!
     evidenceId: ID!
@@ -76,6 +79,39 @@ export const schema = buildSchema(`
     hash: String!
     title: String
     retrievedAt: String!
+  }
+
+  type AttributionMethodContribution {
+    method: String!
+    delta: Float!
+  }
+
+  type AttributionHighlight {
+    start: Int!
+    end: Int!
+    text: String!
+  }
+
+  type AttributionSource {
+    id: ID!
+    type: String!
+    label: String!
+    score: Float!
+    snippet: String
+    methodContributions: [AttributionMethodContribution!]!
+    highlightSpans: [AttributionHighlight!]!
+  }
+
+  type AttributionBundle {
+    bundleId: ID!
+    version: String!
+    createdAt: String!
+    seed: Int!
+    baselineHash: String!
+    signature: String!
+    outputText: String!
+    tokens: [String!]!
+    sources: [AttributionSource!]!
   }
 
   type Cost {

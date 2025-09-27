@@ -12,8 +12,6 @@ import type {
   PolicyDecision,
   PolicyEvaluationContext,
   mergeDataClasses,
-  MODEL_ALLOWLIST,
-  PURPOSE_ALLOWLIST,
   SHORT_RETENTION,
   analyzeEvidence,
   derivePolicyInput,
@@ -36,6 +34,7 @@ import type {
   WorkflowValidationIssue,
   WorkflowValidationResult
 } from 'common-types';
+import { MODEL_ALLOWLIST, PURPOSE_ALLOWLIST } from 'common-types';
 
 // ============================================================================
 // RUNTIME POLICY ENGINE - From HEAD

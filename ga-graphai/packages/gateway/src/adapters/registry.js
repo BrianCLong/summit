@@ -8,7 +8,10 @@ function defaultTemplate(payload, metadata) {
   const mode = payload.mode ? `Mode: ${payload.mode}` : 'Mode: generate';
   const context = payload.context ? `Context: ${payload.context}` : '';
   const extras = payload.tools?.length ? `Tools: ${payload.tools.map((t) => t.name ?? 'tool').join(', ')}` : '';
-  return [header, objective, mode, context, extras]
+  const sources = (payload.attachments ?? [])
+    .filter((attachment) => typeof attachment?.content === 'string' && attachment.content.trim().length > 0)
+    .map((attachment, index) => `Source[${index + 1}]: ${attachment.content.trim()}`);
+  return [header, objective, mode, context, extras, ...sources]
     .filter(Boolean)
     .join('\n');
 }

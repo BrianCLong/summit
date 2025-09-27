@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-import type { WorkflowDefinition, WorkflowRunRecord } from "common-types";
+import type { AttributionBundle, WorkflowDefinition, WorkflowRunRecord } from "common-types";
 import {
   advancePlayback,
   applyRunUpdate,
@@ -10,6 +10,7 @@ import {
   createCanvasState,
   createObserverState
 } from "../src/index.ts";
+import { getHighImpactSources, buildHighlightedSegments } from "../src/pcar-highlighter.ts";
 
 type TestFn = () => void;
 
@@ -139,6 +140,59 @@ runTest("applyRunUpdate overlays runtime statuses", () => {
   const withRuntime = applyRunUpdate(state, run);
   assert.equal(withRuntime.runtime.build.status, "running");
   assert.equal(withRuntime.runtime.test.status, "queued");
+});
+
+runTest("pcar highlighter surfaces high-impact spans", () => {
+  const bundle: AttributionBundle = {
+    version: "pcar.v1",
+    bundleId: "bundle-1",
+    createdAt: "2025-09-02T00:00:00.000Z",
+    seed: 17,
+    baselineHash: "abc123",
+    signature: "signature",
+    outputText: "Critical release summary with SOC2 controls and optional context.",
+    tokens: [],
+    sources: [
+      {
+        id: "soc2",
+        type: "retrieval",
+        label: "SOC2",
+        score: 0.82,
+        snippet: "SOC2 controls",
+        methodContributions: [
+          { method: "leave-one-out", delta: 0.75 },
+          { method: "token-occlusion", delta: 0.65 }
+        ],
+        highlightSpans: [
+          { start: 26, end: 39, text: "SOC2 controls" }
+        ]
+      },
+      {
+        id: "optional",
+        type: "retrieval",
+        label: "Optional",
+        score: 0.18,
+        snippet: "optional context",
+        methodContributions: [
+          { method: "leave-one-out", delta: 0.12 },
+          { method: "token-occlusion", delta: 0.08 }
+        ],
+        highlightSpans: [
+          { start: 44, end: 60, text: "optional context" }
+        ]
+      }
+    ]
+  };
+
+  const highImpact = getHighImpactSources(bundle, 0.3);
+  assert.equal(highImpact.length, 1);
+  assert.equal(highImpact[0].sourceId, "soc2");
+
+  const segments = buildHighlightedSegments(bundle, 0.3);
+  const highlighted = segments.filter((segment) => segment.sourceIds.length > 0);
+  assert.ok(highlighted.some((segment) => segment.sourceIds.includes("soc2")));
+  const reconstructed = segments.reduce((acc, segment) => acc + segment.text, "");
+  assert.equal(reconstructed, bundle.outputText);
 });
 
 if (!process.exitCode) {
