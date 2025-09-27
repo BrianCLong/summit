@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: csiks
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csiks
+  namespace: csiks
+  labels:
+    app: csiks
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: csiks
+  template:
+    metadata:
+      labels:
+        app: csiks
+    spec:
+      containers:
+        - name: csiks
+          image: ghcr.io/summit-platform/csiks:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: RUST_LOG
+              value: csiks=info,tower_http=info
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: csiks
+  namespace: csiks
+  labels:
+    app: csiks
+spec:
+  selector:
+    app: csiks
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: csiks-chaos-replay
+  namespace: csiks
+spec:
+  schedule: "*/15 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: chaos-replay
+              image: ghcr.io/summit-platform/csiks-chaos:latest
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CSIKS_ENDPOINT
+                  value: http://csiks.csiks.svc.cluster.local
+                - name: CHAOS_SEED
+                  value: "42"
+                - name: CHAOS_STRATEGY
+                  value: deterministic
