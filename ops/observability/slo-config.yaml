@@ -1,0 +1,79 @@
+service: summit-platform
+revision: v1
+owner: sre-platform@summit.dev
+
+slos:
+  - name: api-availability
+    description: Summit Graph API availability
+    sli:
+      type: event
+      window: 30d
+      events:
+        good: sum(rate(http_server_requests_total{service="api",status!~"5.."}[5m]))
+        valid: sum(rate(http_server_requests_total{service="api"}[5m]))
+    objective:
+      availability: 99.9
+      error_budget_percent: 0.1
+    alerting:
+      page:
+        - name: api-burn-multiwindow
+          expr: |
+            (
+              sum(rate(http_server_requests_total{service="api",status=~"5.."}[5m]))
+              /
+              sum(rate(http_server_requests_total{service="api"}[5m]))
+            ) > (0.001 * 14)
+          for: 5m
+          description: 'API error budget burn >14x over 5m (80% of budget in <24h).'
+        - name: api-burn-long
+          expr: |
+            (
+              sum(rate(http_server_requests_total{service="api",status=~"5.."}[30m]))
+              /
+              sum(rate(http_server_requests_total{service="api"}[30m]))
+            ) > (0.001 * 6)
+          for: 30m
+          description: 'API error budget burn >6x over 30m (80% of budget in <6h).'
+      ticket:
+        - name: api-latency-warning
+          expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="api"}[5m])) by (le)) > 0.35
+          for: 15m
+          description: 'P95 latency trending towards 350ms SLO threshold.'
+
+  - name: ingest-success
+    description: Streaming ingest success ratio
+    sli:
+      type: event
+      window: 30d
+      events:
+        good: sum(rate(ingest_events_total{service="ingest",status="success"}[5m]))
+        valid: sum(rate(ingest_events_total{service="ingest"}[5m]))
+    objective:
+      availability: 99.5
+      error_budget_percent: 0.5
+    alerting:
+      page:
+        - name: ingest-burn-multiwindow
+          expr: |
+            (
+              sum(rate(ingest_events_total{service="ingest",status!="success"}[5m]))
+              /
+              sum(rate(ingest_events_total{service="ingest"}[5m]))
+            ) > (0.005 * 6)
+          for: 10m
+          description: 'Ingest error budget burn >6x over 10m (80% of budget in <6h).'
+      ticket:
+        - name: ingest-backlog-warning
+          expr: max(rate(ingest_queue_depth{service="ingest"}[5m])) > 5000
+          for: 30m
+          description: 'Backlog >5k events for 30m indicates pipeline throttling.'
+
+cost_guardrails:
+  - name: cloud-cost-burn
+    metric: sum(rate(cloud_cost_hourly_usd{team="sre-platform"}[1h]))
+    limit_usd_per_hour: 180
+    alert_threshold_percent: 80
+    alert:
+      expr: sum_over_time(cloud_cost_hourly_usd{team="sre-platform"}[12h]) > (0.8 * 180 * 12)
+      for: 15m
+      description: 'Cost burn >80% of budgeted hourly spend projected over 12h.'

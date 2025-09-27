@@ -1,0 +1,195 @@
+name: summit-ci-cd
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      simulate_failure:
+        description: 'Set to true to force a canary rollback simulation.'
+        type: choice
+        required: true
+        default: 'true'
+        options:
+          - 'true'
+          - 'false'
+
+env:
+  NODE_VERSION: '18.x'
+  REGISTRY: ghcr.io/${{ github.repository_owner }}/summit
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Determine release version
+        id: version
+        run: |
+          VERSION="v$(node -p "require('./package.json').version")"
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Using version $VERSION"
+
+      - name: Upload package-lock for downstream reuse
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-lock
+          path: package-lock.json
+
+  test:
+    name: Build, Test & Scan
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore package-lock
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-lock
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Build workspace
+        run: npm run build --if-present
+
+      - name: Run unit tests
+        run: npm test -- --ci --reporters=default --reporters=jest-junit
+
+      - name: Lint & format check
+        run: npm run lint && npm run format -- --check
+        continue-on-error: false
+
+      - name: Scan dependencies (npm audit)
+        run: npm audit --production
+
+      - name: Container image scan (Trivy)
+        uses: aquasecurity/trivy-action@0.21.0
+        with:
+          image-ref: ${{ env.REGISTRY }}:${{ needs.prepare.outputs.version }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+        continue-on-error: true
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            junit.xml
+            coverage/
+
+  release:
+    name: Release & Deploy
+    runs-on: ubuntu-latest
+    environment: production
+    needs:
+      - prepare
+      - test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Login to registry
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build container image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker build -t ${{ env.REGISTRY }}:${{ needs.prepare.outputs.version }} .
+          docker save ${{ env.REGISTRY }}:${{ needs.prepare.outputs.version }} | gzip > summit-image.tar.gz
+
+      - name: Push container image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker push ${{ env.REGISTRY }}:${{ needs.prepare.outputs.version }}
+
+      - name: Simulate canary deployment
+        id: canary
+        continue-on-error: true
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SIMULATED_FAILURE: ${{ github.event.inputs.simulate_failure || 'false' }}
+        run: |
+          chmod +x scripts/simulate_canary_rollout.sh
+          ./scripts/simulate_canary_rollout.sh --phase canary --version "$VERSION" --simulate "$SIMULATED_FAILURE"
+
+      - name: Evaluate canary
+        id: evaluate
+        run: |
+          if [ "${{ steps.canary.outcome }}" != "success" ]; then
+            echo "status=failed" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "status=passed" >> "$GITHUB_OUTPUT"
+
+      - name: Rollback canary
+        if: steps.evaluate.outputs.status == 'failed'
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          ./scripts/simulate_canary_rollout.sh --phase rollback --version "$VERSION"
+
+      - name: Promote canary to production
+        if: steps.evaluate.outputs.status == 'passed'
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          ./scripts/simulate_canary_rollout.sh --phase promote --version "$VERSION"
+
+      - name: Publish release tag
+        if: github.ref == 'refs/heads/main' && steps.evaluate.outputs.status == 'passed'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git tag ${{ needs.prepare.outputs.version }}
+          git push origin ${{ needs.prepare.outputs.version }}
+
+      - name: Fail deployment on failed canary
+        if: steps.evaluate.outputs.status == 'failed'
+        run: |
+          echo "Canary failed and rollback executed." >&2
+          exit 1

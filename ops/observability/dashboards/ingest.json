@@ -1,0 +1,59 @@
+{
+  "title": "Ingest Pipeline",
+  "uid": "ingest-sli",
+  "schemaVersion": 38,
+  "version": 1,
+  "tags": ["sre", "ingest"],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Success Ratio (30d)",
+      "id": 1,
+      "targets": [
+        {
+          "expr": "sum(rate(ingest_events_total{service=\"ingest\",status=\"success\"}[5m])) / sum(rate(ingest_events_total{service=\"ingest\"}[5m]))"
+        }
+      ],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          { "color": "red", "value": 0 },
+          { "color": "orange", "value": 0.995 },
+          { "color": "green", "value": 0.995 }
+        ]
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate",
+      "id": 2,
+      "targets": [
+        {
+          "expr": "sum(rate(ingest_events_total{service=\"ingest\",status!=\"success\"}[5m])) / sum(rate(ingest_events_total{service=\"ingest\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Queue Depth",
+      "id": 3,
+      "targets": [
+        {
+          "expr": "max(ingest_queue_depth{service=\"ingest\"})"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "orange", "value": 3000 },
+              { "color": "red", "value": 5000 }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

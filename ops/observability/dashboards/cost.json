@@ -1,0 +1,65 @@
+{
+  "title": "Platform Cost Overview",
+  "uid": "cost-guardrail",
+  "schemaVersion": 38,
+  "version": 1,
+  "tags": ["sre", "cost"],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Hourly Spend",
+      "id": 1,
+      "targets": [
+        {
+          "expr": "sum(rate(cloud_cost_hourly_usd{team=\"sre-platform\"}[1h]))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "orange", "value": 144 },
+              { "color": "red", "value": 180 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "12h Spend Projection",
+      "id": 2,
+      "targets": [
+        {
+          "expr": "sum_over_time(cloud_cost_hourly_usd{team=\"sre-platform\"}[12h])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "orange", "value": 1728 },
+              { "color": "red", "value": 2160 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "table",
+      "title": "Top Services",
+      "id": 3,
+      "targets": [
+        {
+          "expr": "topk(5, sum by (service) (rate(cloud_cost_hourly_usd{team=\"sre-platform\"}[1h])))"
+        }
+      ]
+    }
+  ]
+}

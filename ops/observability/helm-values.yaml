@@ -1,0 +1,43 @@
+otel-collector:
+  fullnameOverride: summit-otel-collector
+  configMap:
+    create: true
+    name: summit-otel-config
+  extraEnvs:
+    - name: DEPLOYMENT_ENVIRONMENT
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.labels['environment']
+    - name: SERVICE_VERSION
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.labels['app.kubernetes.io/version']
+  service:
+    type: ClusterIP
+    ports:
+      metrics: 9464
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: kube-prometheus-stack
+  prometheusRule:
+    enabled: true
+    rules:
+      - name: summit-slo-burn
+        groups:
+          - name: summit-slo-burn
+            interval: 1m
+            rules:
+              - alert: APISLOFastBurn
+                expr: |
+                  (sum(rate(http_server_requests_total{service="api",status=~"5.."}[5m]))
+                    /
+                   sum(rate(http_server_requests_total{service="api"}[5m]))) > (0.001 * 14)
+                for: 5m
+                labels:
+                  severity: page
+                  team: sre-platform
+                  service: api
+                annotations:
+                  summary: 'API error budget fast burn (>14x)'
+                  runbook: 'https://runbooks.summit.dev/api-canary'
