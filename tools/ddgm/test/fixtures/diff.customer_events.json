@@ -1,0 +1,108 @@
+{
+  "datasetId": "customer_events",
+  "diffId": "2025-09-12-seed42",
+  "seed": 42,
+  "previousVersion": "2025-09-11",
+  "currentVersion": "2025-09-12",
+  "governanceContext": {
+    "baselineSlo": {
+      "availability": 0.999,
+      "latencyMs": 210,
+      "freshnessMinutes": 15
+    },
+    "baselineCostMonthlyUsd": 12500,
+    "expectedTrafficMtu": 48,
+    "owners": [
+      {
+        "name": "Data Stewardship",
+        "contact": "stewards@example.com"
+      },
+      {
+        "name": "Model Risk",
+        "contact": "modelrisk@example.com"
+      }
+    ],
+    "modelsImpacted": [
+      "next-best-offer",
+      "attrition-risk"
+    ],
+    "contractualSla": {
+      "latencyMs": 300,
+      "availability": 0.995
+    },
+    "retrainThresholds": {
+      "population-stability-index": 0.25,
+      "mean-drift": 0.15
+    }
+  },
+  "schemaChanges": [
+    {
+      "changeType": "added-field",
+      "field": "email",
+      "dataTypeAfter": "string",
+      "classificationAfter": "restricted",
+      "piiCategory": "contact",
+      "sensitivityScore": 0.82,
+      "requiresBackfill": true
+    },
+    {
+      "changeType": "type-changed",
+      "field": "purchase_amount",
+      "dataTypeBefore": "float",
+      "dataTypeAfter": "decimal(12,2)",
+      "classificationBefore": "internal",
+      "classificationAfter": "internal",
+      "breaking": false
+    },
+    {
+      "changeType": "removed-field",
+      "field": "legacy_segment",
+      "classificationBefore": "internal",
+      "sunsetReason": "deprecated-signal"
+    }
+  ],
+  "distributionShifts": [
+    {
+      "feature": "purchase_amount",
+      "metric": "population-stability-index",
+      "magnitude": 0.42,
+      "direction": "increase",
+      "sampleSize": 185000
+    },
+    {
+      "feature": "session_count",
+      "metric": "mean-drift",
+      "magnitude": 0.18,
+      "direction": "decrease",
+      "sampleSize": 185000
+    }
+  ],
+  "dpBudget": {
+    "previousEpsilon": 2.5,
+    "currentEpsilon": 2.5,
+    "consumptionDelta": 0.9
+  },
+  "contractsImpacted": [
+    {
+      "name": "external_ads_feed",
+      "sla": {
+        "latencyMs": 280,
+        "availability": 0.996
+      },
+      "channels": [
+        "legal",
+        "vendor-management"
+      ]
+    }
+  ],
+  "caches": [
+    {
+      "name": "customer-events-materialized",
+      "dependsOnSchema": true
+    },
+    {
+      "name": "customer-events-hourly",
+      "dependsOnSchema": true
+    }
+  ]
+}
