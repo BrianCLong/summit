@@ -1,0 +1,25 @@
+groups:
+  - name: backup-verification
+    rules:
+      - alert: BackupVerificationFailed
+        expr: increase(kube_job_status_failed{cronjob=~"postgres-backup-verification|neo4j-backup-verification"}[6h]) > 0
+        for: 10m
+        labels:
+          severity: critical
+          service: backup
+        annotations:
+          summary: "Backup verification job failed"
+          description: |
+            One or more backup verification jobs failed in the last six hours.
+            Investigate the job logs and rerun the verification CronJob after remediation.
+      - alert: BackupVerificationStale
+        expr: (time() - max by (cronjob) (kube_job_status_start_time{cronjob=~"postgres-backup-verification|neo4j-backup-verification"})) > 90000
+        for: 15m
+        labels:
+          severity: warning
+          service: backup
+        annotations:
+          summary: "Backup verification jobs have not executed recently"
+          description: |
+            No backup verification job has started in the expected 24 hour window.
+            Check the CronJob schedule, Kubernetes controllers, and AWS credentials.
