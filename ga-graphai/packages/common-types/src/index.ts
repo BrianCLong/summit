@@ -448,6 +448,7 @@ export interface ProvenanceRecord extends CursorEvent {
   checksum: string;
   budget?: BudgetResult;
   rateLimit?: RateLimitResult;
+  mosb?: MosbResult;
 }
 
 export interface BudgetConfig {
@@ -472,6 +473,82 @@ export interface BudgetResult {
   alertTriggered: boolean;
   budget: BudgetConfig | null;
   state: BudgetState;
+}
+
+export interface MosbCategoryBudgetConfig {
+  tokens: number;
+  windowMs: number;
+}
+
+export interface MosbDetectionBudgetConfig {
+  maxIncidents: number;
+  windowMs: number;
+  escalateAfter?: number;
+}
+
+export interface MosbConfig {
+  categories: Record<string, MosbCategoryBudgetConfig>;
+  defaultCategory?: MosbCategoryBudgetConfig;
+  detection?: MosbDetectionBudgetConfig;
+}
+
+export interface MosbCategoryState {
+  tokensConsumed: number;
+  windowStartedAt: number;
+  lastEventAt: number;
+}
+
+export interface MosbDetectionState {
+  incidents: number;
+  windowStartedAt: number;
+  lastEventAt: number;
+  escalatedAt?: number;
+}
+
+export type MosbTraceEvent =
+  | {
+      type: "category";
+      category: string;
+      consumed: number;
+      limit: number;
+      remaining: number;
+      delta: number;
+      windowEndsAt: string;
+    }
+  | {
+      type: "detection";
+      consumed: number;
+      limit: number;
+      remaining: number;
+      delta: number;
+      windowEndsAt: string;
+      escalated: boolean;
+    };
+
+export interface MosbLedgerEntry {
+  sessionId: string;
+  timestamp: string;
+  deltas: {
+    categoryTokens: Record<string, number>;
+    unsafeDetections: number;
+  };
+  totals: {
+    categoryTokens: Record<string, number>;
+    unsafeDetections: number;
+  };
+  traces: MosbTraceEvent[];
+  previousSignature?: string;
+  signature: string;
+}
+
+export interface MosbResult {
+  allowed: boolean;
+  reason?: string;
+  stepUpRequired?: boolean;
+  traces: MosbTraceEvent[];
+  categories: Record<string, MosbCategoryState>;
+  detection?: MosbDetectionState;
+  ledger: MosbLedgerEntry;
 }
 
 export interface RateLimitConfig {
@@ -524,6 +601,7 @@ export interface GatewayResponse {
   decision: PolicyDecision;
   budget: BudgetResult;
   rateLimit: RateLimitResult;
+  mosb?: MosbResult;
   record: ProvenanceRecord;
 }
 
