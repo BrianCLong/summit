@@ -1,0 +1,46 @@
+{
+  "securityStories": [
+    {
+      "id": "RBAC-101",
+      "epic": "E-RBAC — Multi-tenant RBAC & OPA",
+      "summary": "Define tenant role matrix and environment scopes",
+      "tags": ["security", "rbac", "opa"]
+    },
+    {
+      "id": "RBAC-102",
+      "epic": "E-RBAC — Multi-tenant RBAC & OPA",
+      "summary": "Author Rego bundles, enable policy CI, and version policies",
+      "tags": ["security", "rbac", "opa"]
+    },
+    {
+      "id": "NLC-101",
+      "epic": "E-NLCYPHER — NL→Cypher Hardening",
+      "summary": "Threat model dangerous graph operations and encode deny patterns",
+      "tags": ["security", "data", "neo4j"]
+    },
+    {
+      "id": "NLC-102",
+      "epic": "E-NLCYPHER — NL→Cypher Hardening",
+      "summary": "Implement tenant rate limits and performance guards",
+      "tags": ["security", "data", "performance"]
+    },
+    {
+      "id": "BACKUP-101",
+      "epic": "E-BACKUPS — Backups & Encryption",
+      "summary": "Execute backup and restore drills to meet RPO/RTO",
+      "tags": ["security", "ops", "resilience"]
+    },
+    {
+      "id": "SECR-102",
+      "epic": "E-SECRETS — Secrets & Config Management",
+      "summary": "Automate policy checks for secrets and detect config drift",
+      "tags": ["security", "secrets", "automation"]
+    },
+    {
+      "id": "EVID-101",
+      "epic": "E-EVIDENCE — Supply Chain Enforcement",
+      "summary": "Enforce attestation gates in CI to block unverified artifacts",
+      "tags": ["security", "supplychain", "ci"]
+    }
+  ]
+}
