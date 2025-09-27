@@ -1,0 +1,27 @@
+[build-system]
+requires = ["scikit-build-core>=0.5.1", "pybind11>=2.11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "ftma"
+version = "0.1.0"
+authors = [{name = "Summit Labs"}]
+description = "Federated T-Secure Metrics Aggregator"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: C++",
+  "Operating System :: OS Independent"
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "numpy", "scipy"]
+
+[project.urls]
+Homepage = "https://example.com/ftma"
+
+[tool.scikit-build]
+wheel.expand-macos-universal-tags = true
+cmake.version = ">=3.18"
