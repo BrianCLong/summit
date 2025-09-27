@@ -1,0 +1,84 @@
+name: Cost Guardrails
+
+on:
+  schedule:
+    - cron: '15 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Set to true to skip issue creation'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  enforce:
+    name: Evaluate budget guardrails
+    runs-on: ubuntu-latest
+    env:
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == 'true' && 'true' || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Evaluate budgets
+        id: cost
+        run: node scripts/check-cost-guardrails.js observability/cost/budgets.json observability/cost/current-usage.json cost-guardrails-report.json
+      - name: Upload guardrail report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cost-guardrails-report
+          path: cost-guardrails-report.json
+      - name: Open tracking issues for alerts
+        if: steps.cost.outputs.alerts != '[]' && env.DRY_RUN != 'true'
+        uses: actions/github-script@v7
+        env:
+          ALERTS_JSON: ${{ steps.cost.outputs.alerts }}
+        with:
+          script: |
+            const alerts = JSON.parse(process.env.ALERTS_JSON);
+            for (const alert of alerts) {
+              const budgetPercent = Math.round(alert.ratio * 100);
+              const forecastPercent = Math.round(alert.forecastRatio * 100);
+              const title = `[Cost Guardrail] ${alert.key} at ${budgetPercent}% of cap`;
+              const search = await github.rest.search.issuesAndPullRequests({
+                q: `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open "${alert.key}" label:cost-guardrail`,
+              });
+              const existing = search.data.items.find((item) => item.title.includes(alert.key));
+              const body = `## Budget status\n` +
+                `- Owner: **${alert.owner}**\n` +
+                `- Window: ${alert.window}\n` +
+                `- Limit: $${alert.limit.toFixed(2)}\n` +
+                `- Actual spend: $${alert.spend.toFixed(2)} (${budgetPercent}% of cap)\n` +
+                `- Forecast spend: $${alert.forecast.toFixed(2)} (${forecastPercent}% of cap)\n` +
+                `- Status: ${alert.status}\n` +
+                `\nTriggered automatically by the cost guardrail workflow. Link to latest report artifact: ${process.env.GITHUB_SERVER_URL}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+              if (existing) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: existing.number,
+                  body: `Guardrail re-triggered on ${new Date().toISOString()}. ${budgetPercent}% of cap consumed.`,
+                });
+                core.info(`Updated existing issue #${existing.number} for ${alert.key}`);
+              } else {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title,
+                  body,
+                  labels: ['cost-guardrail', 'ops']
+                });
+                core.info(`Created new issue for ${alert.key}`);
+              }
+            }
+      - name: Dry-run summary
+        if: env.DRY_RUN == 'true'
+        run: |
+          echo "Guardrail alerts detected: ${{ steps.cost.outputs.alerts }}"
+          echo 'Dry run enabled; skipping issue creation.'

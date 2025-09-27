@@ -1,0 +1,20 @@
+[
+  {
+    "key": "platform-total",
+    "spend": 60234.12,
+    "forecast": 78123.55,
+    "updatedAt": "2025-09-01T00:00:00Z"
+  },
+  {
+    "key": "llm-usage",
+    "spend": 21220.04,
+    "forecast": 26890.50,
+    "updatedAt": "2025-09-01T00:00:00Z"
+  },
+  {
+    "key": "observability",
+    "spend": 5580.14,
+    "forecast": 7920.44,
+    "updatedAt": "2025-09-01T00:00:00Z"
+  }
+]

@@ -1,0 +1,110 @@
+rollout:
+  strategy: canary
+  steps:
+    - setWeight: 10
+    - pause: { duration: 5m }
+    - analysis:
+        templates:
+          - name: api-latency
+            successCondition: result < 0.45
+            failureCondition: result >= 0.45
+            prometheus:
+              address: http://prometheus-operated.monitoring.svc:9090
+              query: |
+                histogram_quantile(0.99,
+                  sum(rate(http_request_duration_seconds_bucket{service="api-gateway",namespace="$NAMESPACE"}[2m]))
+                  by (le)
+                )
+          - name: api-error-rate
+            successCondition: result < 0.001
+            failureCondition: result >= 0.001
+            prometheus:
+              address: http://prometheus-operated.monitoring.svc:9090
+              query: |
+                1 - (
+                  sum(rate(http_requests_total{service="api-gateway",status!~"5..",namespace="$NAMESPACE"}[2m]))
+                  /
+                  sum(rate(http_requests_total{service="api-gateway",namespace="$NAMESPACE"}[2m]))
+                )
+          - name: ingest-backlog
+            successCondition: result < 120
+            failureCondition: result >= 120
+            prometheus:
+              address: http://prometheus-operated.monitoring.svc:9090
+              query: |
+                histogram_quantile(
+                  0.95,
+                  sum(rate(ingest_backlog_lag_seconds_bucket{namespace="$NAMESPACE"}[2m])) by (le)
+                )
+        args:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+    - setWeight: 30
+    - pause: { duration: 10m }
+    - analysis:
+        templates:
+          - name: throughput-floor
+            successCondition: result > 800
+            failureCondition: result <= 800
+            prometheus:
+              address: http://prometheus-operated.monitoring.svc:9090
+              query: sum(rate(ingest_records_total{namespace="$NAMESPACE"}[1m]))
+        args:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+    - setWeight: 60
+    - pause: { duration: 10m }
+    - setWeight: 100
+    - pause: { duration: 5m }
+    - verification:
+        templateRef: rollback-on-error
+        args:
+          - name: SERVICE
+            value: summit-api-gateway
+        failureLimit: 1
+
+analysisTemplates:
+  - name: rollback-on-error
+    successCondition: result == 0
+    failureCondition: result > 0
+    prometheus:
+      address: http://prometheus-operated.monitoring.svc:9090
+      query: |
+        sum(increase(deployment_rollbacks_total{service="$SERVICE"}[15m]))
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  additionalLabels:
+    release: monitoring
+  endpoints:
+    - port: http
+      path: /metrics
+
+otel:
+  instrumentation:
+    enabled: true
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.monitoring.svc:4317
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
+      OTEL_SERVICE_NAME: summit-api-gateway
+      OTEL_RESOURCE_ATTRIBUTES: deployment.environment=production
+
+alerts:
+  slo:
+    errorBudget:
+      api:
+        threshold: 0.001
+        burnRateFast: 14.4
+        burnRateSlow: 6
+      ingest:
+        threshold: 0.005
+        burnRateFast: 12
+        burnRateSlow: 6
+    cost:
+      budgetFraction: 0.8
+      webhook: https://ops-gateway.summit.internal/webhooks/github-issue

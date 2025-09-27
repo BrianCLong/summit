@@ -3,17 +3,127 @@ receivers:
     protocols:
       http:
       grpc:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'kubernetes-pods'
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+              action: keep
+              regex: true
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+              action: replace
+              target_label: __metrics_path__
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
+              action: replace
+              target_label: __address__
+              regex: (.*)
+              replacement: $1
+        - job_name: 'summit-ingest'
+          static_configs:
+            - targets: ['ingest-headless:9464']
+        - job_name: 'summit-api'
+          static_configs:
+            - targets: ['api-gateway:9464']
+  filelog:
+    include:
+      - /var/log/pods/*/*/*.log
+    start_at: beginning
+    operators:
+      - type: json_parser
+        timestamp_field: time
+        severity_field: level
+        scope_name_field: logger
+        preserve_to: attributes
+processors:
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 1024
+    spike_limit_mib: 256
+  batch:
+    timeout: 5s
+    send_batch_size: 8192
+  k8sattributes:
+    auth_type: serviceAccount
+    passthrough: false
+    filter:
+      node_from_env_var: KUBE_NODE_NAME
+    extract:
+      metadata:
+        - namespace
+        - pod
+        - container
+    pod_association:
+      - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+  resource/api:
+    attributes:
+      - key: service.name
+        value: summit-api-gateway
+        action: upsert
+      - key: service.namespace
+        value: summit-production
+        action: upsert
+  resource/ingest:
+    attributes:
+      - key: service.name
+        value: summit-ingest
+        action: upsert
+      - key: service.namespace
+        value: summit-production
+        action: upsert
+  transform:
+    trace_statements:
+      - context: span
+        statements:
+          - set(status.code, StatusCode.ERROR) where attributes["http.status_code"] >= 500
 exporters:
-  otlp:
-    endpoint: "otel-collector:4317"
+  otlp/tempo:
+    endpoint: tempo.monitoring.svc:4317
     tls:
       insecure: true
-  logging: {}
-processors:
-  batch: {}
+  prometheusremotewrite:
+    endpoint: http://prometheus-operated.monitoring.svc:9090/api/v1/write
+  loki:
+    endpoint: http://loki.monitoring.svc:3100/loki/api/v1/push
+  elasticsearch:
+    endpoints:
+      - https://elastic-logs.internal:9200
+    insecure_skip_verify: true
+    index: summit-platform-%{+yyyy.MM.dd}
+    pipeline: summit-default-pipeline
+  logging:
+    loglevel: info
+connectors:
+  spanmetrics:
+    dimensions:
+      - name: http.method
+      - name: http.route
+      - name: k8s.namespace.name
+      - name: k8s.pod.name
 service:
+  extensions: [health_check]
   pipelines:
-    traces:
+    traces/api:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp, logging]
+      processors: [memory_limiter, k8sattributes, resource/api, batch]
+      exporters: [otlp/tempo, logging]
+    traces/ingest:
+      receivers: [otlp]
+      processors: [memory_limiter, k8sattributes, resource/ingest, batch]
+      exporters: [otlp/tempo, logging]
+    metrics:
+      receivers: [otlp, prometheus, spanmetrics]
+      processors: [memory_limiter, batch]
+      exporters: [prometheusremotewrite]
+    logs:
+      receivers: [otlp, filelog]
+      processors: [memory_limiter, k8sattributes, batch]
+      exporters: [loki, elasticsearch]
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+

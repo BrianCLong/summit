@@ -1,0 +1,23 @@
+[
+  {
+    "key": "platform-total",
+    "owner": "sre-oncall",
+    "limit": 75000,
+    "window": "monthly",
+    "description": "Total cloud and SaaS spend for Summit platform"
+  },
+  {
+    "key": "llm-usage",
+    "owner": "mlops",
+    "limit": 25000,
+    "window": "monthly",
+    "description": "LLM provider consumption (OpenAI + Anthropic)"
+  },
+  {
+    "key": "observability",
+    "owner": "platform-engineering",
+    "limit": 8000,
+    "window": "monthly",
+    "description": "Prometheus, Grafana Cloud, and logging vendors"
+  }
+]
