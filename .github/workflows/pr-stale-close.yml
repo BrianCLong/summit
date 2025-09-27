@@ -1,0 +1,17 @@
+name: Mark and close stale PRs
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight UTC
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-pr-message: '⏳ No updates in 30d. Will auto-close in 7d. Comment `/keep-open` to reset.'
+          stale-pr-label: 'stale'
+          days-before-stale: 30
+          days-before-close: 7
+          exempt-pr-labels: 'do-not-close,security-blocker,release-train'

@@ -1,0 +1,528 @@
+# MC Platform v0.4.0 Transcendent Intelligence CI/CD Pipeline
+# Policy-sandboxed evolution with verifiable meta-optimization
+
+name: V0.4.0 Transcendent Intelligence CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/v040-*'
+      - 'transcendent/*'
+    paths:
+      - 'graphql/v040/**'
+      - 'policy/v040/**'
+      - 'ops/sandbox/**'
+      - 'ops/qecf/**'
+      - 'server/src/graphql/resolvers/v040/**'
+      - 'helm/overlays/v040/**'
+      - 'monitoring/prometheus/rules/mc-platform-v040.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'graphql/v040/**'
+      - 'policy/v040/**'
+      - 'ops/sandbox/**'
+      - 'ops/qecf/**'
+      - 'server/src/graphql/resolvers/v040/**'
+      - 'helm/overlays/v040/**'
+      - 'monitoring/prometheus/rules/mc-platform-v040.yml'
+
+env:
+  NODE_VERSION: '20.11.0'
+  PYTHON_VERSION: '3.11'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/mc-platform
+
+jobs:
+  # Validate v0.4.0 GraphQL Schema
+  validate-graphql-schema:
+    name: Validate GraphQL Schema v0.4.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate GraphQL schema syntax
+        run: |
+          npx graphql-schema-linter graphql/v040/mc-admin.v040.graphql
+          echo "✅ GraphQL v0.4.0 schema validation passed"
+
+      - name: Check schema compatibility
+        run: |
+          # Validate that v0.4.0 extends v0.3.9 without breaking changes
+          node scripts/validate-schema-compatibility.js graphql/v039/ graphql/v040/
+          echo "✅ Schema compatibility validation passed"
+
+  # Validate OPA Policies
+  validate-opa-policies:
+    name: Validate OPA Policies v0.4.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: Validate OPA policy syntax
+        run: |
+          opa fmt --list policy/v040/mc-admin-v040.rego
+          opa test policy/v040/
+          echo "✅ OPA v0.4.0 policy validation passed"
+
+      - name: Run OPA policy tests
+        run: |
+          opa test policy/v040/ --verbose
+          echo "✅ OPA policy tests passed"
+
+      - name: Validate policy coverage
+        run: |
+          # Ensure all new GraphQL operations have corresponding policies
+          python3 scripts/validate-policy-coverage.py \
+            --graphql graphql/v040/mc-admin.v040.graphql \
+            --policy policy/v040/mc-admin-v040.rego
+          echo "✅ Policy coverage validation passed"
+
+  # Test Evolution Sandbox
+  test-evolution-sandbox:
+    name: Test Evolution Sandbox
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r ops/sandbox/requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+
+      - name: Run sandbox unit tests
+        run: |
+          cd ops/sandbox
+          pytest test_evolution_sandbox.py -v --cov=evolution_sandbox --cov-report=xml
+          echo "✅ Evolution sandbox tests passed"
+
+      - name: Test sandbox integration
+        run: |
+          cd ops/sandbox
+          python evolution_sandbox.py test/fixtures/sample-proposal.json
+          echo "✅ Sandbox integration test passed"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./ops/sandbox/coverage.xml
+          flags: sandbox
+          name: sandbox-coverage
+
+  # Test Quantum Cognition Framework
+  test-quantum-cognition:
+    name: Test Quantum Cognition Framework
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install quantum dependencies
+        run: |
+          pip install -r ops/qecf/requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run quantum cognition tests
+        run: |
+          cd ops/qecf
+          pytest test_quantum_cognition.py -v
+          echo "✅ Quantum cognition tests passed"
+
+      - name: Validate quantum advantage
+        run: |
+          cd ops/qecf
+          python quantum_cognition.py --validate-advantage
+          echo "✅ Quantum advantage validation passed"
+
+  # Test Transcendent Resolvers
+  test-transcendent-resolvers:
+    name: Test Transcendent Resolvers
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: mc_platform_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run TypeScript compilation
+        run: |
+          pnpm run typecheck
+          echo "✅ TypeScript compilation passed"
+
+      - name: Run resolver unit tests
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/mc_platform_test
+          NODE_ENV: test
+        run: |
+          pnpm test server/src/graphql/resolvers/v040/
+          echo "✅ Transcendent resolver tests passed"
+
+      - name: Run integration tests
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/mc_platform_test
+          NODE_ENV: test
+        run: |
+          pnpm test:integration -- --testPathPattern=v040
+          echo "✅ Transcendent integration tests passed"
+
+  # Security Scanning
+  security-scan:
+    name: Security Scan v0.4.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'ops/sandbox/'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Scan for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+
+      - name: Validate post-quantum security
+        run: |
+          python3 scripts/validate-pq-security.py --check-v040
+          echo "✅ Post-quantum security validation passed"
+
+  # Policy Simulation Tests
+  policy-simulation:
+    name: Policy Simulation Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: Run transcendent operation simulations
+        run: |
+          # Test transcendent intelligence enablement
+          opa eval -d policy/v040/mc-admin-v040.rego \
+            -i test/fixtures/transcendent-enable-input.json \
+            "data.mc.admin.v040.allow"
+
+          # Test evolution proposal submission
+          opa eval -d policy/v040/mc-admin-v040.rego \
+            -i test/fixtures/evolution-proposal-input.json \
+            "data.mc.admin.v040.allow"
+
+          # Test emergency containment
+          opa eval -d policy/v040/mc-admin-v040.rego \
+            -i test/fixtures/emergency-containment-input.json \
+            "data.mc.admin.v040.allow"
+
+          echo "✅ Policy simulation tests passed"
+
+      - name: Validate safety constraints
+        run: |
+          python3 scripts/validate-safety-constraints.py --policy policy/v040/mc-admin-v040.rego
+          echo "✅ Safety constraint validation passed"
+
+  # Build and Test Container
+  build-container:
+    name: Build Container Image
+    runs-on: ubuntu-latest
+    needs: [validate-graphql-schema, validate-opa-policies, test-transcendent-resolvers]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=v0.4.0-transcendent
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.transcendent
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=v0.4.0
+            TRANSCENDENT_MODE=enabled
+
+  # Helm Chart Validation
+  validate-helm-chart:
+    name: Validate Helm Chart v0.4.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'v3.12.0'
+
+      - name: Validate Helm chart syntax
+        run: |
+          helm lint helm/mc-platform/ -f helm/overlays/v040/values-v040-transcendent.yaml
+          echo "✅ Helm chart validation passed"
+
+      - name: Test Helm template rendering
+        run: |
+          helm template mc-platform helm/mc-platform/ \
+            -f helm/overlays/v040/values-v040-transcendent.yaml \
+            --output-dir /tmp/helm-output
+          echo "✅ Helm template rendering passed"
+
+      - name: Validate Kubernetes manifests
+        run: |
+          # Install kubeval
+          curl -L https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz | tar xz
+          sudo mv kubeval /usr/local/bin
+
+          # Validate generated manifests
+          find /tmp/helm-output -name "*.yaml" -exec kubeval {} \;
+          echo "✅ Kubernetes manifest validation passed"
+
+  # End-to-End Tests
+  e2e-tests:
+    name: End-to-End Tests v0.4.0
+    runs-on: ubuntu-latest
+    needs: [build-container]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install Playwright
+        run: |
+          pnpm install --frozen-lockfile
+          npx playwright install
+
+      - name: Start test environment
+        run: |
+          docker-compose -f docker-compose.test.yml up -d
+          sleep 30
+
+      - name: Run Playwright E2E tests
+        run: |
+          npx playwright test tests/e2e/v040/ --reporter=html
+          echo "✅ E2E tests passed"
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report-v040
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Cleanup test environment
+        if: always()
+        run: |
+          docker-compose -f docker-compose.test.yml down
+
+  # Performance Benchmarks
+  performance-benchmarks:
+    name: Performance Benchmarks v0.4.0
+    runs-on: ubuntu-latest
+    needs: [build-container]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup K6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Start test environment
+        run: |
+          docker-compose -f docker-compose.perf.yml up -d
+          sleep 30
+
+      - name: Run transcendent intelligence benchmarks
+        run: |
+          k6 run tests/performance/v040/transcendent-intelligence.js
+          k6 run tests/performance/v040/quantum-operations.js
+          k6 run tests/performance/v040/evolution-sandbox.js
+          echo "✅ Performance benchmarks completed"
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results-v040
+          path: performance-results/
+          retention-days: 30
+
+  # Deployment to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, performance-benchmarks]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name mc-platform-staging --region us-east-1
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install mc-platform-v040 helm/mc-platform/ \
+            --namespace mc-platform-staging \
+            --create-namespace \
+            -f helm/overlays/v040/values-v040-transcendent.yaml \
+            --set image.tag=v0.4.0-transcendent \
+            --wait --timeout=600s
+          echo "✅ Deployed to staging successfully"
+
+      - name: Validate deployment
+        run: |
+          kubectl get pods -n mc-platform-staging
+          kubectl wait --for=condition=ready pod -l app=mc-platform -n mc-platform-staging --timeout=300s
+          echo "✅ Deployment validation passed"
+
+      - name: Run post-deployment tests
+        run: |
+          npx playwright test tests/staging/v040/ --reporter=line
+          echo "✅ Post-deployment tests passed"
+
+  # Monitoring and Alerting Setup
+  setup-monitoring:
+    name: Setup v0.4.0 Monitoring
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name mc-platform-staging --region us-east-1
+
+      - name: Apply Prometheus rules
+        run: |
+          kubectl apply -f monitoring/prometheus/rules/mc-platform-v040.yml -n monitoring
+          echo "✅ Prometheus rules applied"
+
+      - name: Import Grafana dashboard
+        run: |
+          python3 scripts/import-grafana-dashboard.py \
+            --dashboard observability/grafana/dashboards/mc-platform-v040-transcendent.json \
+            --grafana-url ${{ secrets.GRAFANA_URL }} \
+            --api-key ${{ secrets.GRAFANA_API_KEY }}
+          echo "✅ Grafana dashboard imported"
+
+      - name: Validate monitoring stack
+        run: |
+          python3 scripts/validate-monitoring-v040.py
+          echo "✅ Monitoring validation passed"

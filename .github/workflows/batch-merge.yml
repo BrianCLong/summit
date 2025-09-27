@@ -1,55 +1,51 @@
 name: Batch Merge PRs
-
 on:
   workflow_dispatch:
     inputs:
       integration_branch:
-        description: 'The branch to merge PRs into'
+        description: 'The integration branch to merge PRs into'
         required: true
-        default: 'integration/batch'
-      name: batch-merge
-
-permissions:
-  contents: read
+      pr_numbers:
+        description: 'A JSON array of PR numbers to merge'
+        required: true
 
 jobs:
   batch-merge:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.integration_branch }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # Needed to access all history
 
-      - name: Get PRs with label
-        id: get_prs
-        uses: actions/github-script@60a0d83 # v6
-        with:
-          script: |
-            const result = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              labels: ['${{ github.event.inputs.label_name }}']
-            });
-            const prs = result.data.filter(issue => issue.pull_request);
-            return prs.map(pr => pr.number);
+      - name: Set up git user
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Create and checkout integration branch
+        run: |
+          git checkout main # Or your default branch
+          git pull origin main
+          git checkout -b ${{ github.event.inputs.integration_branch }}
 
       - name: Merge PRs
-        uses: actions/github-script@60a0d83 # v6
-        with:
-          script: |
-            const prs = ${{ steps.get_prs.outputs.result }};
-            for (const prNumber of prs) {
-              try {
-                await github.rest.pulls.merge({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: prNumber,
-                  merge_method: 'squash'
-                });
-                console.log(`Successfully merged PR #${prNumber}`);
-              } catch (error) {
-                console.log(`Failed to merge PR #${prNumber}: ${error.message}`);
-              }
-            }
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBERS: ${{ github.event.inputs.pr_numbers }}
+        run: |
+          for pr_number in $(echo "${PR_NUMBERS}" | jq -r '.[]'); do
+            echo "Fetching and merging PR #${pr_number}"
+            git fetch origin pull/${pr_number}/head
+            if git merge --no-ff --no-edit FETCH_HEAD; then
+              echo "Successfully merged PR #${pr_number}"
+            else
+              echo "::error::Conflict when merging PR #${pr_number}. Aborting batch merge."
+              git merge --abort
+              exit 1
+            fi
+          done
+
+      - name: Push integration branch
+        run: git push origin ${{ github.event.inputs.integration_branch }}
