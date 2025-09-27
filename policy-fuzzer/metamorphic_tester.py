@@ -140,6 +140,27 @@ class MetamorphicTester:
             'check': lambda original_compliant, transformed_compliant: not transformed_compliant if original_compliant else True # Changing purpose should impact compliance
         })
 
+        # Relation 19: Policy - Add new rule
+        relations.append({
+            'name': 'policy_add_rule',
+            'transform': lambda p, q: self._add_new_rule(p, q),
+            'check': lambda original_compliant, transformed_compliant: original_compliant == transformed_compliant # Adding a new rule should not change compliance if it doesn't conflict
+        })
+
+        # Relation 20: Policy - Remove random rule
+        relations.append({
+            'name': 'policy_remove_rule',
+            'transform': lambda p, q: self._remove_random_rule(p, q),
+            'check': lambda original_compliant, transformed_compliant: original_compliant == transformed_compliant # Removing a rule should not change compliance if it wasn't the deciding factor
+        })
+
+        # Relation 21: Policy - Modify rule condition
+        relations.append({
+            'name': 'policy_modify_condition',
+            'transform': lambda p, q: self._modify_rule_condition(p, q),
+            'check': lambda original_compliant, transformed_compliant: original_compliant != transformed_compliant # Modifying a condition should impact compliance
+        })
+
         return relations
 
     def _shift_time_within_window(self, policy, query):
@@ -294,27 +315,38 @@ class MetamorphicTester:
                 transformed_query["purpose"] = "analytics"
         return transformed_query
 
-    def _synonym_data_type(self, policy, query):
-        transformed_query = deepcopy(query)
-        if "data" in transformed_query and "user_data" in ATTACK_GRAMMARS["synonym_dodges"]:
-            if transformed_query["data"] in ATTACK_GRAMMARS["synonym_dodges"]["user_data"]:
-                transformed_query["data"] = random.choice(ATTACK_GRAMMARS["synonym_dodges"]["user_data"])
-        return transformed_query
-
-    def _anonymize_data(self, policy, query):
-        transformed_query = deepcopy(query)
-        if "data" in transformed_query and transformed_query["data"] == "user_data":
-            transformed_query["data"] = "anonymous_data"
-        return transformed_query
-
-    def _toggle_policy_effect(self, policy, query):
+    def _add_new_rule(self, policy, query):
         transformed_policy = deepcopy(policy)
-        # This transformation needs to modify the policy definition itself, not the extracted policy data.
-        # For now, we'll assume the 'policy' object passed here is the raw policy definition.
-        if "rules" in transformed_policy:
-            for rule in transformed_policy["rules"]:
-                if "effect" in rule:
-                    rule["effect"] = "deny" if rule["effect"] == "allow" else "allow"
+        new_rule = {
+            "effect": random.choice(["allow", "deny"]),
+            "condition": {
+                random.choice(["geo", "consent", "license", "retention"]): random.choice(["US", "user_data", "license_A", "30d"])
+            }
+        }
+        if "rules" not in transformed_policy:
+            transformed_policy["rules"] = []
+        transformed_policy["rules"].append(new_rule)
+        return transformed_policy
+
+    def _remove_random_rule(self, policy, query):
+        transformed_policy = deepcopy(policy)
+        if "rules" in transformed_policy and len(transformed_policy["rules"]) > 0:
+            rule_to_remove = random.choice(transformed_policy["rules"])
+            transformed_policy["rules"].remove(rule_to_remove)
+        return transformed_policy
+
+    def _modify_rule_condition(self, policy, query):
+        transformed_policy = deepcopy(policy)
+        if "rules" in transformed_policy and len(transformed_policy["rules"]) > 0:
+            rule_to_modify = random.choice(transformed_policy["rules"])
+            if "condition" in rule_to_modify and len(rule_to_modify["condition"]) > 0:
+                # Simplified modification: change a value if it's a simple key-value pair
+                key_to_modify = random.choice(list(rule_to_modify["condition"].keys()))
+                if isinstance(rule_to_modify["condition"][key_to_modify], str):
+                    if key_to_modify == "geo":
+                        rule_to_modify["condition"][key_to_modify] = random.choice(["US", "EU", "CA"])
+                    elif key_to_modify == "consent":
+                        rule_to_modify["condition"][key_to_modify] = random.choice(["user_data", "marketing"])
         return transformed_policy
 
     def test_relations(self, original_policy, original_query, original_compliant):
@@ -322,7 +354,7 @@ class MetamorphicTester:
         failing_relations = []
         for relation in self.relations:
             # For policy transformations, the policy itself is transformed
-            if relation['name'] == 'policy_toggle_effect':
+            if relation['name'].startswith('policy_'):
                 transformed_policy = relation['transform'](original_policy, original_query)
                 transformed_query = deepcopy(original_query)
             else:
@@ -330,7 +362,7 @@ class MetamorphicTester:
                 transformed_query = relation['transform'](original_policy, original_query)
 
             # Re-instantiate oracle with the transformed policy for policy-modifying relations
-            if relation['name'] == 'policy_toggle_effect':
+            if relation['name'].startswith('policy_'):
                 temp_oracle = MetamorphicTester(PolicyOracle(transformed_policy)).oracle
             else:
                 temp_oracle = self.oracle
