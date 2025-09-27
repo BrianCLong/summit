@@ -1,0 +1,147 @@
+{
+  "datasets": [
+    {
+      "id": "dataset:user_profile_raw",
+      "name": "user_profile_raw",
+      "owners": ["data-ingest"],
+      "depends_on": [],
+      "tests": [
+        {
+          "id": "tests::dataset_user_profile_raw_schema",
+          "description": "Schema validation for user_profile_raw ingestion",
+          "handler": "run_pytest",
+          "args": ["tests/datasets/test_user_profile_raw.py"]
+        }
+      ]
+    },
+    {
+      "id": "dataset:user_profile_enriched",
+      "name": "user_profile_enriched",
+      "owners": ["data-platform"],
+      "depends_on": ["dataset:user_profile_raw"],
+      "tests": [
+        {
+          "id": "tests::dataset_user_profile_enriched_contract",
+          "description": "dbt tests for user_profile_enriched",
+          "handler": "run_dbt",
+          "args": ["user_profile_enriched"]
+        }
+      ]
+    },
+    {
+      "id": "dataset:session_events",
+      "name": "session_events",
+      "owners": ["event-pipeline"],
+      "depends_on": [],
+      "tests": []
+    }
+  ],
+  "features": [
+    {
+      "id": "feature:user_profile.email_domain",
+      "name": "user_profile.email_domain",
+      "owners": ["growth-ml"],
+      "depends_on": ["dataset:user_profile_enriched"],
+      "tests": [
+        {
+          "id": "tests::feature_user_profile_email_domain_contract",
+          "description": "Feature contract coverage for user_profile.email_domain",
+          "handler": "run_pytest",
+          "args": ["tests/features/test_user_profile_email_domain.py"]
+        }
+      ],
+      "backfills": [
+        {
+          "id": "backfill::user_profile_email_domain",
+          "description": "Backfill warehouse column user_profile.email_domain",
+          "handler": "backfill_pipeline",
+          "args": ["user_profile_email_domain"]
+        }
+      ],
+      "cache_invalidation": [
+        {
+          "id": "cache::personalization_user_profile_email_domain",
+          "description": "Invalidate personalization cache entries for email domain feature",
+          "handler": "invalidate_cache",
+          "args": ["personalization:user_profile.email_domain"]
+        }
+      ]
+    },
+    {
+      "id": "feature:user_profile.region_score",
+      "name": "user_profile.region_score",
+      "owners": ["growth-ml"],
+      "depends_on": ["dataset:user_profile_enriched"],
+      "tests": [
+        {
+          "id": "tests::feature_user_profile_region_score_quality",
+          "description": "Quality checks for user_profile.region_score",
+          "handler": "run_pytest",
+          "args": ["tests/features/test_user_profile_region_score.py"]
+        }
+      ],
+      "backfills": [
+        {
+          "id": "backfill::user_profile_region_score",
+          "description": "Recompute user_profile.region_score feature store table",
+          "handler": "backfill_pipeline",
+          "args": ["user_profile_region_score"]
+        }
+      ],
+      "cache_invalidation": []
+    },
+    {
+      "id": "feature:session.engagement_7d",
+      "name": "session.engagement_7d",
+      "owners": ["retention-ml"],
+      "depends_on": ["dataset:session_events", "feature:user_profile.region_score"],
+      "tests": [
+        {
+          "id": "tests::feature_session_engagement_contract",
+          "description": "dbt contract tests for session.engagement_7d",
+          "handler": "run_dbt",
+          "args": ["session_engagement_7d"]
+        }
+      ],
+      "backfills": [
+        {
+          "id": "backfill::session_engagement_7d",
+          "description": "Rebuild session.engagement_7d feature window",
+          "handler": "backfill_pipeline",
+          "args": ["session_engagement_7d"]
+        }
+      ],
+      "cache_invalidation": [
+        {
+          "id": "cache::session_engagement_predictions",
+          "description": "Clear engagement prediction cache",
+          "handler": "invalidate_cache",
+          "args": ["engagement:predictions"]
+        }
+      ]
+    },
+    {
+      "id": "feature:session.net_spend",
+      "name": "session.net_spend",
+      "owners": ["finance-ml"],
+      "depends_on": ["dataset:session_events"],
+      "tests": [
+        {
+          "id": "tests::feature_session_net_spend",
+          "description": "Unit tests for session.net_spend transformations",
+          "handler": "run_pytest",
+          "args": ["tests/features/test_session_net_spend.py"]
+        }
+      ],
+      "backfills": [
+        {
+          "id": "backfill::session_net_spend",
+          "description": "Recompute session.net_spend feature store snapshot",
+          "handler": "backfill_pipeline",
+          "args": ["session_net_spend"]
+        }
+      ],
+      "cache_invalidation": []
+    }
+  ]
+}
