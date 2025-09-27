@@ -1,0 +1,55 @@
+{
+  "global": {
+    "lines": 85,
+    "branches": 80,
+    "functions": 85,
+    "statements": 85
+  },
+  "packages": [
+    {
+      "name": "server",
+      "targets": [
+        "server/src/**/*.ts"
+      ],
+      "minimums": {
+        "lines": 85,
+        "branches": 80,
+        "functions": 85,
+        "statements": 85
+      }
+    },
+    {
+      "name": "client",
+      "targets": [
+        "client/src/**/*.{ts,tsx}"
+      ],
+      "minimums": {
+        "lines": 80,
+        "branches": 75,
+        "functions": 80,
+        "statements": 80
+      }
+    },
+    {
+      "name": "platform-tooling",
+      "targets": [
+        "src/**/*.ts"
+      ],
+      "minimums": {
+        "lines": 85,
+        "branches": 80,
+        "functions": 85,
+        "statements": 85
+      }
+    }
+  ],
+  "reporting": {
+    "tool": "istanbul",
+    "formats": [
+      "text-summary",
+      "lcov",
+      "cobertura"
+    ],
+    "evidence_bundle_descriptor": "docs/acceptance-packs/collaborative-intelligence-epic.json"
+  }
+}
