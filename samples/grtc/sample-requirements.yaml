@@ -1,0 +1,97 @@
+metadata:
+  id: sample-grtc
+  description: Example governance requirements for demonstration.
+  version: 1.0.0
+  seed: 101
+purposes:
+  privacy: Protect personal data
+  safety: Prevent misuse of automation
+jurisdictions:
+  us:
+    name: United States Federal
+  eu:
+    name: European Union
+rules:
+  - id: CONSENT-001
+    title: Consent Capture
+    purpose: privacy
+    jurisdictions: [us, eu]
+    statement: User consent must be recorded before collecting personal data.
+    tags: [pii, consent]
+    positive:
+      - name: consent-provided
+        payload:
+          request_context:
+            consent: true
+            pii_fields: [email]
+        expected:
+          verdict: pass
+          reason: Consent recorded prior to capture
+    negative:
+      - name: no-consent
+        payload:
+          request_context:
+            consent: false
+            pii_fields: [email]
+        expected:
+          verdict: fail
+          reason: Consent absent
+    boundary:
+      - name: consent-at-threshold
+        payload:
+          request_context:
+            consent_timestamp: 30
+            consent_threshold: 30
+            pii_fields: []
+        expected:
+          verdict: boundary
+          reason: Consent expires at threshold
+    minimal_reproduction:
+      RSR:
+        - name: consent-missing
+          payload:
+            consent: false
+          expected:
+            verdict: fail
+            rule: CONSENT-001
+      PPC:
+        - name: consent-present
+          payload:
+            consent: true
+          expected:
+            verdict: pass
+            rule: CONSENT-001
+  - id: SAFETY-ALERT-002
+    title: Safety Alerts
+    purpose: safety
+    jurisdictions: [us]
+    statement: Systems must raise alerts when automation confidence exceeds safe limits.
+    tags: [automation, monitoring]
+    positive:
+      - payload:
+          metrics:
+            confidence: 0.4
+            limit: 0.8
+        expected:
+          verdict: pass
+    negative:
+      - payload:
+          metrics:
+            confidence: 0.95
+            limit: 0.8
+        expected:
+          verdict: fail
+          reason: confidence exceeded
+    minimal_reproduction:
+      MOCC:
+        - payload:
+            confidence: 0.95
+            limit: 0.8
+          expected:
+            verdict: fail
+      QPG:
+        - payload:
+            confidence: 0.5
+            limit: 0.8
+          expected:
+            verdict: pass
