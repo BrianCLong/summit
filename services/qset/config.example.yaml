@@ -1,0 +1,19 @@
+approvers:
+  - name: alice
+    key: alice-key
+  - name: bob
+    key: bob-key
+  - name: carol
+    key: carol-key
+quorum: 2
+tools:
+  - id: github
+    description: GitHub automation token
+    scopes:
+      - repo
+      - workflow
+      - org
+    maxDuration: 24h
+ledger:
+  path: qset.log
+  secretKey: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
