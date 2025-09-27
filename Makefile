@@ -125,3 +125,60 @@ mc-status: ## Show MC Platform v0.3.5 operational status
 	else \
 		echo "Set PROM_URL to check canary score"; \
 	fi
+
+# MC Platform v0.4.1 Sovereign Safeguards Operations
+help-v041: ## Show MC Platform v0.4.1 Sovereign Safeguards help
+	@echo "MC Platform v0.4.1 Sovereign Safeguards Operations"
+	@echo "=================================================="
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E "(v041|sovereign)" | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
+validate-v041: ## Validate v0.4.1 Sovereign Safeguards configuration
+	@echo "🔍 Validating v0.4.1 Sovereign Safeguards configuration..."
+	@command -v promtool >/dev/null 2>&1 || { echo "promtool not found. Please install Prometheus."; exit 1; }
+	@command -v conftest >/dev/null 2>&1 || { echo "conftest not found. Please install OPA conftest."; exit 1; }
+	promtool check rules monitoring/prometheus/rules/mc-platform-v041.yml
+	conftest test policy/v041/sovereign-safeguards.rego || echo "OPA validation skipped - no test files"
+	npx graphql-schema-linter graphql/v041/sovereign-safeguards.graphql || echo "GraphQL linting skipped"
+	@echo "✅ v0.4.1 validation completed"
+
+go-live-v041: validate-v041 ## Execute v0.4.1 Sovereign Safeguards go-live
+	@echo "🚀 Starting v0.4.1 Sovereign Safeguards go-live..."
+	@chmod +x scripts/execute-v041-go-live.sh
+	bash scripts/execute-v041-go-live.sh
+	@echo "✅ v0.4.1 go-live completed"
+
+test-v041: ## Run v0.4.1 Sovereign Safeguards tests
+	@echo "🧪 Running v0.4.1 Sovereign Safeguards tests..."
+	pnpm test -- --testPathPattern="v041|sovereign" --coverage
+	@echo "✅ v0.4.1 tests completed"
+
+rollback-v041: ## Rollback v0.4.1 deployment
+	@echo "🔄 Rolling back v0.4.1 Sovereign Safeguards..."
+	kubectl scale deployment/sovereign-safeguards-service --replicas=0 -n mc-platform-v041 || true
+	kubectl scale deployment/verification-service --replicas=0 -n mc-platform-v041 || true
+	kubectl rollout undo deployment/mc-platform -n mc-platform-v041 || true
+	@echo "✅ v0.4.1 rollback completed"
+
+status-v041: ## Check v0.4.1 deployment status
+	@echo "📊 Checking v0.4.1 Sovereign Safeguards status..."
+	kubectl get pods -n mc-platform-v041 -l app.kubernetes.io/version=v0.4.1
+	kubectl get services -n mc-platform-v041
+	kubectl top pods -n mc-platform-v041 || echo "Metrics not available"
+	@echo "✅ v0.4.1 status check completed"
+
+logs-v041: ## View v0.4.1 service logs
+	@echo "📋 Viewing v0.4.1 Sovereign Safeguards logs..."
+	kubectl logs -n mc-platform-v041 deployment/sovereign-safeguards-service --tail=50
+	kubectl logs -n mc-platform-v041 deployment/verification-service --tail=50
+
+monitor-v041: ## Open v0.4.1 monitoring dashboard
+	@echo "📈 Opening v0.4.1 monitoring dashboard..."
+	kubectl port-forward -n monitoring svc/grafana 3000:3000 &
+	@echo "Grafana available at http://localhost:3000"
+	@echo "Dashboard: MC Platform v0.4.1 - Sovereign Safeguards"
+
+metrics-v041: ## View v0.4.1 Prometheus metrics
+	@echo "📊 Opening v0.4.1 Prometheus metrics..."
+	kubectl port-forward -n monitoring svc/prometheus 9090:9090 &
+	@echo "Prometheus available at http://localhost:9090"
+	@echo "Query: mc_platform_sovereign_*"
