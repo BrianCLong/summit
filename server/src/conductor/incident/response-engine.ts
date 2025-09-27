@@ -2,6 +2,7 @@
 // Provides orchestrated response to security and operational incidents
 
 import { EventEmitter } from 'events';
+import fs from 'fs/promises';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import { conductorResilienceManager } from '../resilience/circuit-breaker';
 import Redis from 'ioredis';
@@ -566,29 +567,202 @@ export class IncidentResponseEngine extends EventEmitter {
    * Helper methods for evidence collection
    */
   private async collectLogs(incident: IncidentRecord): Promise<any> {
-    // Implement log collection from various sources
+    const { context } = incident;
+    const forensicConfig = this.getForensicMetadata(context);
+    const lookbackMinutes = this.getPositiveInteger(forensicConfig.lookbackMinutes, 60);
+    const windowStart = Date.now() - lookbackMinutes * 60000;
+    const sources = this.normalizeStringArray(forensicConfig.logSources, [
+      'application',
+      'security',
+      'infrastructure',
+      'network',
+      'audit',
+    ]);
+
+    const collectorMap = this.normalizeCollectorMap(forensicConfig.collectors?.logs);
+    const inlineLogs = this.isPlainObject(forensicConfig.inlineLogs)
+      ? (forensicConfig.inlineLogs as Record<string, any>)
+      : {};
+    const metadataLogs = this.isPlainObject(context.metadata?.logs)
+      ? (context.metadata?.logs as Record<string, any>)
+      : {};
+
+    const bundles: Array<{
+      source: string;
+      transport: string;
+      count: number;
+      sample: any[];
+      error?: string;
+    }> = [];
+
+    let totalEntries = 0;
+
+    for (const source of sources) {
+      const collector = collectorMap[source];
+      const fallback = inlineLogs[source] ?? metadataLogs[source];
+      const { entries, type, error } = await this.collectFromCollector(
+        collector,
+        `forensics:${source}:logs`,
+        windowStart,
+        fallback,
+      );
+
+      totalEntries += entries.length;
+
+      bundles.push({
+        source,
+        transport: type,
+        count: entries.length,
+        sample: entries.slice(0, Math.min(entries.length, 5)),
+        error,
+      });
+    }
+
+    const sourcesWithData = bundles
+      .filter((bundle) => bundle.count > 0)
+      .map((bundle) => bundle.source);
+    const missingSources = bundles
+      .filter((bundle) => bundle.count === 0)
+      .map((bundle) => bundle.source);
+
     return {
-      applicationLogs: [],
-      auditLogs: [],
-      securityLogs: [],
-      timestamp: Date.now(),
+      collectedAt: Date.now(),
+      lookbackMinutes,
+      windowStart,
+      totalEntries,
+      bundles,
+      summary: {
+        sourcesWithData,
+        missingSources,
+      },
     };
   }
 
   private async collectMetrics(incident: IncidentRecord): Promise<any> {
-    // Collect relevant metrics
+    const { context } = incident;
+    const forensicConfig = this.getForensicMetadata(context);
+    const lookbackMinutes = this.getPositiveInteger(forensicConfig.lookbackMinutes, 60);
+    const windowStart = Date.now() - lookbackMinutes * 60000;
+    const sources = this.normalizeStringArray(forensicConfig.metricSources, [
+      'system',
+      'application',
+      'security',
+      'business',
+    ]);
+
+    const collectorMap = this.normalizeCollectorMap(forensicConfig.collectors?.metrics);
+    const inlineMetrics = this.isPlainObject(forensicConfig.inlineMetrics)
+      ? (forensicConfig.inlineMetrics as Record<string, any>)
+      : {};
+    const metadataMetrics = this.isPlainObject(context.metadata?.metrics)
+      ? (context.metadata?.metrics as Record<string, any>)
+      : {};
+
+    const metrics: Record<string, any> = {};
+    const bundles: Array<{ source: string; transport: string; count: number; error?: string }> = [];
+
+    for (const source of sources) {
+      const collector = collectorMap[source];
+      const fallback = inlineMetrics[source] ?? metadataMetrics[source];
+      const { entries, type, error } = await this.collectFromCollector(
+        collector,
+        `forensics:${source}:metrics`,
+        windowStart,
+        fallback,
+      );
+
+      const normalized = entries.map((entry) => this.attachMetricContext(entry, source));
+      metrics[source] = {
+        datapoints: normalized,
+        summary: this.summarizeNumericSeries(normalized),
+        transport: type,
+        error,
+      };
+
+      bundles.push({
+        source,
+        transport: type,
+        count: normalized.length,
+        error,
+      });
+    }
+
     return {
-      systemMetrics: {},
-      applicationMetrics: {},
-      timestamp: Date.now(),
+      collectedAt: Date.now(),
+      lookbackMinutes,
+      windowStart,
+      metrics,
+      summary: {
+        totalDatapoints: Object.values(metrics).reduce(
+          (sum, value: any) => sum + (value.datapoints?.length ?? 0),
+          0,
+        ),
+        sources: bundles,
+      },
     };
   }
 
   private async collectTraces(incident: IncidentRecord): Promise<any> {
-    // Collect distributed traces
+    const { context } = incident;
+    const forensicConfig = this.getForensicMetadata(context);
+    const lookbackMinutes = this.getPositiveInteger(forensicConfig.lookbackMinutes, 60);
+    const windowStart = Date.now() - lookbackMinutes * 60000;
+    const sources = this.normalizeStringArray(forensicConfig.traceSources, [
+      'http',
+      'database',
+      'queue',
+      'external',
+    ]);
+
+    const collectorMap = this.normalizeCollectorMap(forensicConfig.collectors?.traces);
+    const inlineTraces = this.isPlainObject(forensicConfig.inlineTraces)
+      ? (forensicConfig.inlineTraces as Record<string, any>)
+      : {};
+    const metadataTraces = this.isPlainObject(context.metadata?.traces)
+      ? (context.metadata?.traces as Record<string, any>)
+      : {};
+
+    const traces: Record<string, any> = {};
+    const bundles: Array<{ source: string; transport: string; count: number; error?: string }> = [];
+
+    for (const source of sources) {
+      const collector = collectorMap[source];
+      const fallback = inlineTraces[source] ?? metadataTraces[source];
+      const { entries, type, error } = await this.collectFromCollector(
+        collector,
+        `forensics:${source}:traces`,
+        windowStart,
+        fallback,
+      );
+
+      const normalized = entries.map((entry) => this.attachTraceContext(entry, source));
+      traces[source] = {
+        spans: normalized,
+        summary: this.summarizeTraces(normalized),
+        transport: type,
+        error,
+      };
+
+      bundles.push({
+        source,
+        transport: type,
+        count: normalized.length,
+        error,
+      });
+    }
+
     return {
-      traces: [],
-      timestamp: Date.now(),
+      collectedAt: Date.now(),
+      lookbackMinutes,
+      windowStart,
+      traces,
+      summary: {
+        totalSpans: Object.values(traces).reduce(
+          (sum, value: any) => sum + (value.spans?.length ?? 0),
+          0,
+        ),
+        sources: bundles,
+      },
     };
   }
 
@@ -600,11 +774,457 @@ export class IncidentResponseEngine extends EventEmitter {
   }
 
   private async collectSecurityLogs(context: IncidentContext): Promise<any> {
-    return {
-      authLogs: [],
-      threatDetectionLogs: [],
-      timestamp: Date.now(),
+    const forensicConfig = this.getForensicMetadata(context);
+    const lookbackMinutes = this.getPositiveInteger(forensicConfig.lookbackMinutes, 60);
+    const windowStart = Date.now() - lookbackMinutes * 60000;
+
+    const sources = this.normalizeStringArray(forensicConfig.securitySources, [
+      'authentication',
+      'endpoint',
+      'network',
+      'cloud',
+      'application',
+    ]);
+
+    const collectorMap = this.normalizeCollectorMap(forensicConfig.collectors?.security);
+    const inlineSecurity = this.isPlainObject(forensicConfig.inlineSecurityLogs)
+      ? (forensicConfig.inlineSecurityLogs as Record<string, any>)
+      : {};
+    const metadataSecurity = this.isPlainObject(context.metadata?.securityLogs)
+      ? (context.metadata?.securityLogs as Record<string, any>)
+      : {};
+
+    const categories: Record<string, any> = {};
+    const summary = {
+      totalEntries: 0,
+      bySource: {} as Record<string, number>,
+      criticalFindings: [] as Array<{
+        source: string;
+        indicator: any;
+        severity: string;
+        timestamp: number;
+      }>,
     };
+
+    for (const source of sources) {
+      const collector = collectorMap[source];
+      const fallback = inlineSecurity[source] ?? metadataSecurity[source];
+      const { entries, type, error } = await this.collectFromCollector(
+        collector,
+        `forensics:${source}:security`,
+        windowStart,
+        fallback,
+      );
+
+      const normalized = entries.map((entry) => {
+        const enriched = this.attachContextToEntry(entry, context, source);
+        const severity = this.normalizeSeverity(
+          enriched.severity ?? enriched.level ?? enriched.priority ?? enriched.risk,
+        );
+        return {
+          ...enriched,
+          severity,
+        };
+      });
+
+      summary.totalEntries += normalized.length;
+      summary.bySource[source] = normalized.length;
+
+      const critical = normalized.filter((item) => ['CRITICAL', 'HIGH'].includes(item.severity));
+      if (critical.length) {
+        summary.criticalFindings.push(
+          ...critical.slice(0, 5).map((item) => ({
+            source,
+            indicator: item.indicator ?? item.event ?? item.id ?? item.message ?? 'unknown',
+            severity: item.severity,
+            timestamp:
+              typeof item.timestamp === 'number'
+                ? item.timestamp
+                : new Date(item.timestamp).getTime() || Date.now(),
+          })),
+        );
+      }
+
+      categories[source] = {
+        transport: type,
+        count: normalized.length,
+        sample: normalized.slice(0, Math.min(normalized.length, 10)),
+        error,
+      };
+    }
+
+    return {
+      collectedAt: Date.now(),
+      lookbackMinutes,
+      windowStart,
+      categories,
+      summary,
+    };
+  }
+
+  private getForensicMetadata(context: IncidentContext): Record<string, any> {
+    const metadata = context.metadata;
+    if (metadata && typeof metadata === 'object' && metadata.forensics && typeof metadata.forensics === 'object') {
+      return metadata.forensics as Record<string, any>;
+    }
+    return {};
+  }
+
+  private normalizeStringArray(value: unknown, fallback: string[]): string[] {
+    if (Array.isArray(value)) {
+      return Array.from(
+        new Set(
+          value
+            .map((item) => (typeof item === 'string' ? item.trim() : ''))
+            .filter((item) => item.length > 0),
+        ),
+      );
+    }
+    return fallback;
+  }
+
+  private normalizeCollectorMap(value: unknown): Record<string, any> {
+    if (this.isPlainObject(value)) {
+      return value as Record<string, any>;
+    }
+    return {};
+  }
+
+  private isPlainObject(value: unknown): value is Record<string, any> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
+
+  private getPositiveInteger(value: unknown, defaultValue: number): number {
+    if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+      return Math.floor(value);
+    }
+    return defaultValue;
+  }
+
+  private async collectFromCollector(
+    collector: any,
+    defaultKey: string,
+    windowStart: number,
+    fallback?: unknown,
+  ): Promise<{ entries: any[]; type: string; error?: string }> {
+    const limit =
+      typeof collector?.limit === 'number' && Number.isFinite(collector.limit) && collector.limit > 0
+        ? Math.floor(collector.limit)
+        : undefined;
+    const timestampField =
+      typeof collector?.timestampField === 'string' ? collector.timestampField : undefined;
+    const fields =
+      Array.isArray(collector?.fields) &&
+      collector.fields.every((field: unknown) => typeof field === 'string')
+        ? (collector.fields as string[])
+        : undefined;
+
+    try {
+      if (collector?.type === 'redis') {
+        const key = typeof collector.key === 'string' ? collector.key : defaultKey;
+        const rangeEnd = limit ? limit - 1 : -1;
+        const rawEntries = await this.redis.lrange(key, 0, rangeEnd);
+        let parsed = rawEntries
+          .map((entry) => this.safeJsonParse(entry) ?? { raw: entry })
+          .filter((entry) => entry !== undefined);
+        parsed = this.applyEntryWindow(parsed, timestampField, windowStart);
+        parsed = this.projectEntries(parsed, fields);
+        if (limit) {
+          parsed = parsed.slice(0, limit);
+        }
+        return { entries: parsed, type: 'redis' };
+      }
+
+      if (collector?.type === 'file') {
+        const path = typeof collector.path === 'string' ? collector.path : undefined;
+        if (!path) {
+          throw new Error('File collector is missing path');
+        }
+        const content = await fs.readFile(path, 'utf8');
+        const parsedContent = this.safeJsonParse(content) ?? [];
+        const parsedEntries = Array.isArray(parsedContent)
+          ? parsedContent
+          : this.ensureArray(parsedContent);
+        let normalized = this.applyEntryWindow(parsedEntries, timestampField, windowStart);
+        normalized = this.projectEntries(normalized, fields);
+        if (limit) {
+          normalized = normalized.slice(0, limit);
+        }
+        return { entries: normalized, type: 'file' };
+      }
+
+      if (collector?.type === 'http' && typeof collector.url === 'string') {
+        const fetchImpl: typeof fetch | undefined = (globalThis as any).fetch;
+        if (!fetchImpl) {
+          throw new Error('HTTP collector requested but fetch is unavailable in this environment');
+        }
+
+        const response = await fetchImpl(collector.url, {
+          method: collector.method || 'GET',
+          headers: collector.headers || {},
+          body:
+            collector.method && collector.method !== 'GET' && collector.payload
+              ? JSON.stringify(collector.payload)
+              : undefined,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP collector responded with status ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const records = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.records)
+          ? payload.records
+          : Array.isArray(payload?.items)
+          ? payload.items
+          : this.ensureArray(payload);
+
+        let normalized = this.applyEntryWindow(records, timestampField, windowStart);
+        normalized = this.projectEntries(normalized, fields);
+        if (limit) {
+          normalized = normalized.slice(0, limit);
+        }
+        return { entries: normalized, type: 'http' };
+      }
+
+      if (collector?.type === 'inline' || collector?.type === 'static') {
+        const entries = this.ensureArray(collector.data ?? collector.entries);
+        let normalized = this.applyEntryWindow(entries, timestampField, windowStart);
+        normalized = this.projectEntries(normalized, fields);
+        if (limit) {
+          normalized = normalized.slice(0, limit);
+        }
+        return { entries: normalized, type: collector.type };
+      }
+    } catch (error) {
+      const fallbackEntries = this.applyEntryWindow(
+        this.ensureArray(fallback),
+        timestampField,
+        windowStart,
+      );
+      return {
+        entries: limit ? fallbackEntries.slice(0, limit) : fallbackEntries,
+        type: collector?.type ?? 'unknown',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+
+    const fallbackEntries = this.applyEntryWindow(
+      this.ensureArray(fallback),
+      timestampField,
+      windowStart,
+    );
+    const projected = this.projectEntries(fallbackEntries, fields);
+    return {
+      entries: limit ? projected.slice(0, limit) : projected,
+      type: projected.length ? 'fallback' : 'none',
+    };
+  }
+
+  private safeJsonParse<T = any>(value: string): T | undefined {
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private ensureArray(value: unknown): any[] {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (value === undefined || value === null) {
+      return [];
+    }
+    return [value];
+  }
+
+  private applyEntryWindow(entries: any[], timestampField: string | undefined, windowStart: number): any[] {
+    if (!entries?.length) {
+      return [];
+    }
+
+    return entries.filter((entry) => {
+      if (!entry || typeof entry !== 'object') {
+        return true;
+      }
+
+      const rawTimestamp =
+        (timestampField && entry[timestampField]) ?? entry.timestamp ?? entry.time ?? entry.ts;
+
+      if (!rawTimestamp) {
+        return true;
+      }
+
+      const value =
+        typeof rawTimestamp === 'number'
+          ? rawTimestamp
+          : new Date(rawTimestamp as string).getTime();
+
+      if (!Number.isFinite(value)) {
+        return true;
+      }
+
+      return value >= windowStart;
+    });
+  }
+
+  private projectEntries(entries: any[], fields?: string[]): any[] {
+    if (!fields?.length) {
+      return entries;
+    }
+
+    return entries.map((entry) => {
+      if (!entry || typeof entry !== 'object') {
+        return entry;
+      }
+
+      const projected: Record<string, any> = {};
+      for (const field of fields) {
+        if (field in entry) {
+          projected[field] = entry[field];
+        }
+      }
+      return projected;
+    });
+  }
+
+  private attachMetricContext(entry: any, source: string): any {
+    if (!this.isPlainObject(entry)) {
+      if (typeof entry === 'number') {
+        return { value: entry, source, timestamp: Date.now() };
+      }
+      return { data: entry, source, timestamp: Date.now() };
+    }
+
+    return {
+      ...entry,
+      source: entry.source ?? source,
+      timestamp: entry.timestamp ?? entry.time ?? Date.now(),
+    };
+  }
+
+  private summarizeNumericSeries(entries: any[]): Record<string, any> {
+    const values = entries
+      .map((entry) => {
+        if (entry && typeof entry.value === 'number' && Number.isFinite(entry.value)) {
+          return entry.value;
+        }
+        if (typeof entry === 'number' && Number.isFinite(entry)) {
+          return entry;
+        }
+        return undefined;
+      })
+      .filter((value): value is number => value !== undefined);
+
+    const summary: Record<string, any> = { count: entries.length };
+
+    if (values.length) {
+      const total = values.reduce((sum, value) => sum + value, 0);
+      summary.min = Math.min(...values);
+      summary.max = Math.max(...values);
+      summary.avg = Number((total / values.length).toFixed(2));
+      summary.latest = values[values.length - 1];
+    }
+
+    return summary;
+  }
+
+  private attachTraceContext(entry: any, source: string): any {
+    if (!this.isPlainObject(entry)) {
+      return {
+        spanId: typeof entry === 'string' ? entry : undefined,
+        source,
+        timestamp: Date.now(),
+      };
+    }
+
+    return {
+      ...entry,
+      source: entry.source ?? source,
+      spanId:
+        entry.spanId ??
+        entry.id ??
+        entry.traceId ??
+        `${source}-${Math.random().toString(36).slice(2, 10)}`,
+      timestamp: entry.timestamp ?? entry.startTime ?? Date.now(),
+      duration: entry.duration ?? entry.latency ?? entry.elapsed,
+    };
+  }
+
+  private summarizeTraces(entries: any[]): Record<string, any> {
+    const summary: Record<string, any> = { count: entries.length };
+
+    if (!entries.length) {
+      summary.servicesInvolved = [];
+      return summary;
+    }
+
+    const durations = entries
+      .map((entry) =>
+        entry && typeof entry.duration === 'number' && Number.isFinite(entry.duration)
+          ? entry.duration
+          : undefined,
+      )
+      .filter((value): value is number => value !== undefined);
+
+    if (durations.length) {
+      const total = durations.reduce((sum, value) => sum + value, 0);
+      summary.maxDuration = Math.max(...durations);
+      summary.avgDuration = Number((total / durations.length).toFixed(2));
+    }
+
+    const services = new Set<string>();
+    for (const entry of entries) {
+      if (entry?.service) {
+        services.add(String(entry.service));
+      }
+      if (entry?.targetService) {
+        services.add(String(entry.targetService));
+      }
+    }
+
+    summary.servicesInvolved = Array.from(services).filter((item) => item.length > 0);
+    return summary;
+  }
+
+  private attachContextToEntry(entry: any, context: IncidentContext, source: string): any {
+    if (!this.isPlainObject(entry)) {
+      return {
+        raw: entry,
+        incidentId: context.id,
+        source,
+        timestamp: Date.now(),
+      };
+    }
+
+    return {
+      ...entry,
+      incidentId: entry.incidentId ?? context.id,
+      source: entry.source ?? source,
+      timestamp: entry.timestamp ?? entry.time ?? Date.now(),
+    };
+  }
+
+  private normalizeSeverity(value: unknown): string {
+    if (typeof value === 'string') {
+      const normalized = value.toLowerCase();
+      if (normalized === 'critical') return 'CRITICAL';
+      if (normalized === 'high') return 'HIGH';
+      if (normalized === 'medium') return 'MEDIUM';
+      if (normalized === 'low') return 'LOW';
+    }
+
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      if (value >= 80) return 'CRITICAL';
+      if (value >= 60) return 'HIGH';
+      if (value >= 40) return 'MEDIUM';
+      if (value >= 20) return 'LOW';
+    }
+
+    return 'INFO';
   }
 
   private async sendSecurityAlert(context: IncidentContext): Promise<void> {
