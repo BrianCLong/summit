@@ -1,0 +1,37 @@
+name: SCPE Supply Chain Gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  verify-provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install SCPE CLI
+        run: |
+          pip install ./tools/scpe
+
+      - name: Run SCPE verification gate
+        run: |
+          scpe verify --config tools/scpe/examples/scpe-config.yml --receipt scpe-receipt.json
+
+      - name: Verify attested receipt offline
+        run: |
+          scpe receipt-verify --receipt scpe-receipt.json
+
+      - name: Upload SCPE receipt artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scpe-receipt
+          path: scpe-receipt.json
