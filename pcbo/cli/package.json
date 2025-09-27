@@ -1,0 +1,21 @@
+{
+  "name": "@summit/pcbo-cli",
+  "version": "0.1.0",
+  "description": "CLI for interacting with the policy-constrained backfill orchestrator",
+  "type": "module",
+  "bin": {
+    "pcbo": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --ext .ts",
+    "test": "node --test dist",
+    "prepare": "npm run build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.16.11",
+    "eslint": "^9.15.0",
+    "typescript": "^5.7.3"
+  }
+}
