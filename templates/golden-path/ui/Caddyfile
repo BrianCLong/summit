@@ -1,0 +1,6 @@
+:80 {
+  root * /srv
+  file_server
+  encode gzip zstd
+  header Strict-Transport-Security "max-age=63072000"
+}

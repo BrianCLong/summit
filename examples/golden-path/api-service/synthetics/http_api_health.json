@@ -1,0 +1,10 @@
+{
+  "name": "Summit Golden Path API health",
+  "method": "GET",
+  "url": "https://summit-golden-path-api.example.invalid/healthz",
+  "assertions": [
+    { "property": "status", "operator": "equals", "value": 200 },
+    { "property": "body.status", "operator": "equals", "value": "ok" }
+  ],
+  "intervalSeconds": 60
+}

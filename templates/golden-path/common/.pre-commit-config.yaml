@@ -1,0 +1,32 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.93.0
+    hooks:
+      - id: terraform_fmt
+        files: "terraform/.*"
+  - repo: https://github.com/awslabs/git-secrets
+    rev: 1.3.0
+    hooks:
+      - id: git-secrets
+  - repo: https://github.com/marketplace/actions/trufflehog
+    rev: v3.68.4
+    hooks:
+      - id: trufflehog
+        name: trufflehog-secrets-scan
+        entry: trufflehog filesystem --no-entropy --fail --json .
+        language: python
+        pass_filenames: false
+  - repo: local
+    hooks:
+      - id: opa-policy
+        name: opa-policy
+        entry: opa eval --data policy/bundle.rego --input .opa/input.json --format pretty --fail-defined 'data.goldenpath.allow'
+        language: system
+        files: "\.opa/.*|policy/.*|sbom/.*|reports/.*"
+        require_serial: true

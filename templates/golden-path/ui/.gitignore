@@ -1,0 +1,9 @@
+node_modules
+dist
+sbom
+reports
+release.pem
+release.sig
+.env
+coverage
+.vitest

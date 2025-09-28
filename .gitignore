@@ -9,6 +9,10 @@ lerna-debug.log*
 pids
 *.pid
 *.seed
+
+# Generated locks excluded from source control
+tools/railhead-cli/package-lock.json
+cognitive_insights_engine/poetry.lock
 *.pid.lock
 
 # Coverage directory used by tools like istanbul

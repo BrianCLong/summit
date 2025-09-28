@@ -1,0 +1,26 @@
+{
+  "node": "20.10.0",
+  "pnpm": "8.15.6",
+  "actions": {
+    "checkout": "8ade135a132e4c3cd8e2b1c5e4d8c9d6c6a9ab5b",
+    "setup-node": "60f3c573d66fa13b0f318664c8f3e07bdb36e8ab",
+    "cache": "704facf90aa48ca5ab0c4a5c6adfb58b3dbee4b4",
+    "upload-artifact": "a8a3f3ad0f1b9706824b87c7a0a37f1df8e7f0a3",
+    "download-artifact": "89d1a2f2261d97cbaa2a6b2bf78490ea5a9d46f8",
+    "cosign-installer": "c6df43d2f0fa2edfe1a8d43e6cdd58a3b22b8b82",
+    "slsa-generator": "a3dbca39b756bd78c58c8f6046354f12c16128f8",
+    "trivy-action": "f3bf9c61cdd81a4edaa16c1aafbd2f5da3d58ad4"
+  },
+  "containers": {
+    "syft": "anchore/syft:v0.104.0",
+    "grype": "anchore/grype:v0.78.0"
+  },
+  "opa": {
+    "bundleVersion": "2024.10.01",
+    "policies": [
+      "license-allowlist.rego",
+      "cve-budget.rego",
+      "secrets-gate.rego"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "@summit/{{SERVICE_SLUG}}-ui",
+  "version": "0.1.0",
+  "description": "{{SERVICE_DESCRIPTION}}",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "vitest run",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\""
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "14.2.1",
+    "@types/react": "18.2.24",
+    "@types/react-dom": "18.2.8",
+    "@vitejs/plugin-react": "4.2.1",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-react": "7.34.1",
+    "jsdom": "24.0.0",
+    "prettier": "3.2.5",
+    "typescript": "5.4.5",
+    "vite": "5.0.10",
+    "vitest": "1.4.0"
+  }
+}

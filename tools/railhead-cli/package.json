@@ -1,0 +1,23 @@
+{
+  "name": "railhead-cli",
+  "version": "0.1.0",
+  "description": "Golden Path railhead scaffolding CLI for paved-road service templates.",
+  "type": "module",
+  "bin": {
+    "railhead": "./bin/railhead.js"
+  },
+  "scripts": {
+    "lint": "node --check src/index.js",
+    "test": "node src/index.js --help"
+  },
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "keywords": [
+    "scaffold",
+    "ci",
+    "provenance"
+  ],
+  "author": "Summit Golden Path Team",
+  "license": "Apache-2.0"
+}

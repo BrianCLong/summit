@@ -1,0 +1,14 @@
+{
+  "sbom": {
+    "packages": [{ "name": "express", "version": "4.19.2", "license": "MIT" }]
+  },
+  "vulns": {
+    "findings": []
+  },
+  "secrets": {
+    "findings": []
+  },
+  "policy": {
+    "cve_budget_limit": 0
+  }
+}

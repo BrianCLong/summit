@@ -1,0 +1,6 @@
+{
+  "name": "{{SERVICE_NAME}} queue depth",
+  "metric": "bullmq.queue_depth",
+  "threshold": 100,
+  "alert": "Queue depth exceeded budget"
+}

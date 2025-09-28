@@ -1,0 +1,5 @@
+{
+  "name": "Async Worker Service",
+  "description": "BullMQ-powered worker with provenance-aware release process.",
+  "language": "nodejs"
+}

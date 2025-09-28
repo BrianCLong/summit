@@ -1,0 +1,25 @@
+{
+  "title": "Golden Path Platform Overview",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "CI Pipeline p50",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum(rate(ci_pipeline_duration_seconds_bucket{workflow=\"paved-road\"}[5m])) by (le))"
+        }
+      ],
+      "unit": "s"
+    },
+    {
+      "type": "stat",
+      "title": "Main Branch Success Rate",
+      "targets": [
+        {
+          "expr": "sum(rate(ci_pipeline_runs_total{status=\"success\", branch=\"main\"}[1d])) / sum(rate(ci_pipeline_runs_total{branch=\"main\"}[1d]))"
+        }
+      ],
+      "unit": "percent"
+    }
+  ]
+}

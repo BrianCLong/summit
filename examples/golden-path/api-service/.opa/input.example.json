@@ -1,0 +1,14 @@
+{
+  "sbom": {
+    "packages": []
+  },
+  "vulns": {
+    "findings": []
+  },
+  "secrets": {
+    "findings": []
+  },
+  "policy": {
+    "cve_budget_limit": 0
+  }
+}

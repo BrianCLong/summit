@@ -1,0 +1,5 @@
+{
+  "name": "golden-path-bundle",
+  "version": "2024.10.01",
+  "roots": ["goldenpath"]
+}

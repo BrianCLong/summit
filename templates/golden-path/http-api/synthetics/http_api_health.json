@@ -1,0 +1,10 @@
+{
+  "name": "{{SERVICE_NAME}} health",
+  "method": "GET",
+  "url": "https://{{SERVICE_SLUG}}.example.invalid/healthz",
+  "assertions": [
+    { "property": "status", "operator": "equals", "value": 200 },
+    { "property": "body.status", "operator": "equals", "value": "ok" }
+  ],
+  "intervalSeconds": 60
+}

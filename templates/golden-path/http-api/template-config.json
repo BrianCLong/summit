@@ -1,0 +1,9 @@
+{
+  "name": "HTTP API Service",
+  "description": "Express API with provenance-aware CI/CD and observability defaults.",
+  "language": "nodejs",
+  "commands": {
+    "build": "npm run build",
+    "test": "npm test"
+  }
+}

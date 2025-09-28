@@ -1,0 +1,6 @@
+{
+  "name": "{{SERVICE_NAME}} availability",
+  "url": "https://{{SERVICE_SLUG}}.example.invalid/",
+  "method": "GET",
+  "assertions": [{ "property": "status", "operator": "equals", "value": 200 }]
+}

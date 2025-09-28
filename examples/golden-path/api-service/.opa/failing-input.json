@@ -1,0 +1,16 @@
+{
+  "sbom": {
+    "packages": [
+      { "name": "badlib", "version": "1.0.0", "license": "Proprietary" }
+    ]
+  },
+  "vulns": {
+    "findings": [{ "id": "CVE-2024-0001", "severity": "critical" }]
+  },
+  "secrets": {
+    "findings": [{ "match": "GITHUB_TOKEN", "status": "new" }]
+  },
+  "policy": {
+    "cve_budget_limit": 0
+  }
+}

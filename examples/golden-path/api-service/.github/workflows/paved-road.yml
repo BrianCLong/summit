@@ -1,0 +1,167 @@
+name: Paved Road CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20.10.0'
+  OCI_IMAGE: 'ghcr.io/summit/golden-path/summit-golden-path-api'
+  CVE_BUDGET: '0'
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+  attestations: write
+
+jobs:
+  build-test-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8ade135a132e4c3cd8e2b1c5e4d8c9d6c6a9ab5b
+      - name: Setup Node
+        uses: actions/setup-node@60f3c573d66fa13b0f318664c8f3e07bdb36e8ab
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - name: Use npm cache
+        uses: actions/cache@704facf90aa48ca5ab0c4a5c6adfb58b3dbee4b4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'pnpm-lock.yaml', 'yarn.lock') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint --if-present
+      - name: Test
+        run: npm test --if-present -- --ci
+      - name: Build
+        run: npm run build --if-present
+      - name: Create distribution archive
+        run: |
+          mkdir -p dist
+          tar czf dist/release.tar.gz dist package.json
+      - name: Generate SBOM (Syft)
+        run: |
+          mkdir -p sbom
+          docker run --rm -v "${PWD}:/src" anchore/syft:v0.104.0 dir:/src --output json > sbom/sbom.json
+      - name: Vulnerability scan (Grype)
+        run: |
+          mkdir -p reports
+          docker run --rm -v "${PWD}:/src" anchore/grype:v0.78.0 sbom:sbom/sbom.json --fail-on high --output json > reports/grype.json
+      - name: Secret scan (TruffleHog)
+        run: |
+          docker run --rm -v "${PWD}:/repo" docker.io/trufflesecurity/trufflehog:3.68.4 filesystem --no-entropy --json /repo > reports/trufflehog.json || true
+      - name: Assemble OPA input
+        run: |
+          mkdir -p .opa
+          jq -n \
+            --slurpfile sbom sbom/sbom.json \
+            --slurpfile vulns reports/grype.json \
+            --slurpfile secrets reports/trufflehog.json \
+            --argjson budget "${{ env.CVE_BUDGET }}" \
+            '{ sbom: $sbom[0], vulns: { findings: $vulns[0].matches }, secrets: { findings: $secrets[0] }, policy: { cve_budget_limit: ($budget|tonumber) } }' > .opa/input.json
+      - name: Install OPA CLI
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/v0.67.0/opa_linux_amd64
+          chmod +x opa
+          sudo mv opa /usr/local/bin/opa
+      - name: Evaluate policy bundle
+        run: |
+          opa eval --data policy/bundle.rego --input .opa/input.json --fail-defined 'data.goldenpath.deny'
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@a8a3f3ad0f1b9706824b87c7a0a37f1df8e7f0a3
+        with:
+          name: paved-road-artifacts
+          path: |
+            dist/release.tar.gz
+            sbom/sbom.json
+            reports/grype.json
+            reports/trufflehog.json
+            .opa/input.json
+  sign-and-attest:
+    needs: build-test-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@89d1a2f2261d97cbaa2a6b2bf78490ea5a9d46f8
+        with:
+          name: paved-road-artifacts
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@c6df43d2f0fa2edfe1a8d43e6cdd58a3b22b8b82
+      - name: Sign artifact
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          cosign sign-blob --yes --output-signature release.sig --output-certificate release.pem dist/release.tar.gz
+      - name: Generate provenance
+        uses: slsa-framework/slsa-github-generator@a3dbca39b756bd78c58c8f6046354f12c16128f8
+        with:
+          artifact_path: dist/release.tar.gz
+          artifact_name: release
+          upload_assets: true
+      - name: Upload signed bundle
+        uses: actions/upload-artifact@a8a3f3ad0f1b9706824b87c7a0a37f1df8e7f0a3
+        with:
+          name: signed-release
+          path: |
+            dist/release.tar.gz
+            release.sig
+            release.pem
+  release:
+    needs: sign-and-attest
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8ade135a132e4c3cd8e2b1c5e4d8c9d6c6a9ab5b
+      - name: Download build artifacts
+        uses: actions/download-artifact@89d1a2f2261d97cbaa2a6b2bf78490ea5a9d46f8
+        with:
+          name: paved-road-artifacts
+      - name: Download signed bundle
+        uses: actions/download-artifact@89d1a2f2261d97cbaa2a6b2bf78490ea5a9d46f8
+        with:
+          name: signed-release
+      - name: Create release
+        uses: softprops/action-gh-release@5d4b6d92447a9b76c16a2ccb6c60f85c95f4661b
+        with:
+          tag_name: build-${{ github.run_number }}
+          files: |
+            dist/release.tar.gz
+            release.sig
+            release.pem
+            sbom/sbom.json
+            reports/grype.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  deploy-canary:
+    needs: release
+    runs-on: ubuntu-latest
+    environment:
+      name: canary
+      url: https://deployments.example.invalid/${{ env.SERVICE_SLUG }}
+    steps:
+      - name: Download signed bundle
+        uses: actions/download-artifact@89d1a2f2261d97cbaa2a6b2bf78490ea5a9d46f8
+        with:
+          name: signed-release
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@c6df43d2f0fa2edfe1a8d43e6cdd58a3b22b8b82
+      - name: Verify release signature
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          cosign verify-blob --certificate release.pem --signature release.sig dist/release.tar.gz
+      - name: Canary deploy (placeholder)
+        run: |
+          echo "Deploying ${{ env.OCI_IMAGE }}:build-${{ github.run_number }} to canary"

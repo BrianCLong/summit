@@ -1,0 +1,19 @@
+{
+  "templates": [
+    {
+      "id": "http-api",
+      "name": "HTTP API Service",
+      "description": "Express-based API service with paved-road CI/CD and provenance."
+    },
+    {
+      "id": "worker",
+      "name": "Async Worker Service",
+      "description": "Background job processor with deterministic container builds and policy gates."
+    },
+    {
+      "id": "ui",
+      "name": "React UI Frontend",
+      "description": "Vite-powered UI with provenance-aware deployment pipeline."
+    }
+  ]
+}

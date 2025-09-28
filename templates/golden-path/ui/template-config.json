@@ -1,0 +1,5 @@
+{
+  "name": "React UI Frontend",
+  "description": "Vite + React UI with provenance-verified releases and hardened CI.",
+  "language": "typescript"
+}

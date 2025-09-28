@@ -10,6 +10,10 @@ route:
         - alertname=~"AttestationJWSFailureBudget|BudgetV2NoiseHigh|CanaryCompositeScoreLow|GraphQLFastBurn|GraphQLSlowBurn"
       continue: false
       receiver: slack-mc-threaded
+    - matchers:
+        - service="golden-path"
+      receiver: slack-golden-path
+      continue: false
 
 receivers:
   - name: slack-mc
@@ -50,6 +54,19 @@ receivers:
             text: 'Runbook'
             url: '{{ (index .Alerts 0).Annotations.runbook_url }}'
         color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+
+  - name: slack-golden-path
+    slack_configs:
+      - api_url: ${SLACK_WEBHOOK_URL_GOLDEN}
+        channel: "#golden-path-alerts"
+        send_resolved: true
+        title: ':vertical_traffic_light: {{ .CommonLabels.alertname }}'
+        text: >-
+          *Service:* {{ .CommonLabels.service }} | *Severity:* {{ .CommonLabels.severity }}
+
+          *Summary:* {{ (index .Alerts 0).Annotations.summary }}
+
+          *Evidence:* {{ (index .Alerts 0).Annotations.evidence_url }}
 
 templates:
   - '/etc/alertmanager/templates/*.tmpl'
