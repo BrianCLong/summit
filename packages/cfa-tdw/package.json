@@ -1,0 +1,21 @@
+{
+  "name": "@intelgraph/cfa-tdw",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@intelgraph/kpw-media": "*",
+    "@intelgraph/afl-store": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "@types/node": "^22.7.4"
+  }
+}
