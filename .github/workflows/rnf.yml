@@ -1,0 +1,19 @@
+name: RNF Replay Check
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate RNF bundles
+        run: |
+          python -m pip install --upgrade pip
+          python -m tools.notebook_freezer ci-check --root .
