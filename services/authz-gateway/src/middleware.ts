@@ -2,6 +2,7 @@ import { jwtVerify, type JWTPayload } from 'jose';
 import { getPublicKey } from './keys';
 import { authorize } from './policy';
 import { log } from './audit';
+import { annotateActiveSpan } from './observability';
 import type { Request, Response, NextFunction } from 'express';
 
 interface Options {
@@ -44,6 +45,12 @@ export function requireAuth(options: Options) {
         resource,
         options.action,
       );
+      annotateActiveSpan(String(payload.tenantId), {
+        'auth.action': options.action,
+        'abac.decision': allowed ? 'allow' : 'deny',
+        'abac.reason': reason,
+        'resource.tenant.id': resource.tenantId,
+      });
       await log({
         subject: String(payload.sub),
         action: options.action,

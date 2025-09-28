@@ -1,0 +1,39 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: authz-gateway-slo
+  namespace: monitoring
+  labels:
+    app: authz-gateway
+    release: prometheus
+spec:
+  groups:
+    - name: authz-gateway.slo
+      rules:
+        - alert: AuthZGatewayP95LatencyBreached
+          expr: histogram_quantile(0.95, sum(rate(graphql_request_duration_bucket{service="authz-gateway"}[5m])) by (le, tenant)) > 0.75
+          for: 5m
+          labels:
+            severity: warning
+            service: authz-gateway
+          annotations:
+            summary: "AuthZ Gateway latency SLO is breaching"
+            description: "Tenant {{ $labels.tenant }} latency p95 is {{ $value }}s over 5m."
+        - alert: AuthZGatewayHighErrorRate
+          expr: (sum(rate(error_rate{service="authz-gateway"}[5m])) by (tenant)) / (sum(rate(graphql_request_duration_count{service="authz-gateway"}[5m])) by (tenant)) > 0.02
+          for: 10m
+          labels:
+            severity: critical
+            service: authz-gateway
+          annotations:
+            summary: "AuthZ Gateway error budget burn >2%"
+            description: "Tenant {{ $labels.tenant }} error ratio exceeded 2% over the last 10m."
+        - alert: AuthZGatewayCostBudget80
+          expr: sum(rate(ingest_events_processed{service="authz-gateway"}[5m])) by (tenant) * 0.05 > 0.8 * 100
+          for: 15m
+          labels:
+            severity: warning
+            service: authz-gateway
+          annotations:
+            summary: "AuthZ Gateway spend exceeded 80% of budget"
+            description: "Tenant {{ $labels.tenant }} ingest spend breached 80% of the $100 budget at $0.05 per event."
