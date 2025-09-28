@@ -1,0 +1,35 @@
+{
+  "clearance_rank": {
+    "public": 0,
+    "restricted": 1,
+    "confidential": 2,
+    "secret": 3
+  },
+  "actions": {
+    "dataset:read": {
+      "allowedRoles": ["reader", "analyst"],
+      "requiresStepUp": false
+    },
+    "dataset:write": {
+      "allowedRoles": ["analyst"],
+      "requiresStepUp": true
+    },
+    "dataset:delete": {
+      "allowedRoles": ["admin"],
+      "requiresStepUp": true
+    },
+    "dataset:share-external": {
+      "allowedRoles": ["admin", "analyst"],
+      "requiresStepUp": true
+    },
+    "policy:publish": {
+      "allowedRoles": ["admin"],
+      "requiresStepUp": true
+    }
+  },
+  "residency_matrix": {
+    "us": ["us"],
+    "eu": ["eu"],
+    "apac": ["apac", "us"]
+  }
+}

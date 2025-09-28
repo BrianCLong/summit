@@ -1,0 +1,42 @@
+{
+  "title": "ABAC Gateway",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Decision Latency",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(authz_gateway_decision_latency_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(authz_gateway_decision_latency_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p99"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "stat",
+      "title": "Step-Up Success Rate",
+      "targets": [
+        {
+          "expr": "rate(authz_gateway_step_up_success_total[5m]) / (rate(authz_gateway_step_up_success_total[5m]) + rate(authz_gateway_step_up_failure_total[5m]))",
+          "legendFormat": "success"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "graph",
+      "title": "Attribute Cache Hit Ratio",
+      "targets": [
+        {
+          "expr": "rate(authz_gateway_attribute_cache_hits_total[5m]) / (rate(authz_gateway_attribute_cache_hits_total[5m]) + rate(authz_gateway_attribute_cache_misses_total[5m]))",
+          "legendFormat": "hit ratio"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
+    }
+  ]
+}
