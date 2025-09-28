@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import {
   Box,
   Paper,
@@ -27,6 +27,22 @@ import {
   DialogActions,
   TextField,
 } from "@mui/material";
+import {
+  ZoomIn,
+  ZoomOut,
+  CenterFocusStrong,
+  Add,
+  Save,
+  Refresh,
+  Settings,
+  FilterList,
+  Timeline,
+  AccountTree,
+  Psychology,
+  AutoGraph,
+  GroupWork,
+  PlayArrow,
+  Stop,
   Download,
 } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
@@ -95,11 +111,10 @@ function CytoscapeGraph() {
     timeRange: [0, 100],
   });
   const [lodMode, setLodMode] = useState("high"); // "high", "medium", "low"
-  const [lodModeChanges, setLodModeChanges] = useState(0); // Telemetry
+  const [lodModeChanges, setLodModeChanges] = useState(0);
   const [suggestedEdges, setSuggestedEdges] = useState([]);
 
   useEffect(() => {
-    // Increment telemetry counter when LOD mode changes
     setLodModeChanges((prev) => prev + 1);
   }, [lodMode]);
 
@@ -194,13 +209,13 @@ function CytoscapeGraph() {
     {
       selector: ".highlighted",
       style: {
-        opacity: 0.3,
         "background-color": "#FFD700",
         "line-color": "#FFD700",
         "target-arrow-color": "#FFD700",
         "transition-property":
           "background-color, line-color, target-arrow-color, opacity",
         "transition-duration": "0.3s",
+        opacity: 1,
       },
     },
     {
@@ -209,22 +224,6 @@ function CytoscapeGraph() {
         opacity: 0.3,
       },
     },
-    // LOD: Hide labels at low zoom levels
-    {
-      selector: "node[zoom < 0.5]", // Adjust threshold as needed
-      style: {
-        label: "",
-        "text-opacity": 0,
-      },
-    },
-    {
-      selector: "edge[zoom < 0.5]", // Adjust threshold as needed
-      style: {
-        label: "",
-        "text-opacity": 0,
-      },
-    },
-    // LOD: Simplified styles for low detail mode
     {
       selector: ".low-detail",
       style: {
@@ -234,14 +233,14 @@ function CytoscapeGraph() {
         "background-color": "#ccc",
         "line-color": "#eee",
         "target-arrow-shape": "none",
-        "curve-style": "haystack", // Simpler edge rendering
+        "curve-style": "haystack",
         opacity: 0.7,
       },
     },
   ];
 
   // Layout configurations
-  const layoutConfigs = {
+  const layoutConfigs = useMemo(() => ({
     fcose: {
       name: "fcose",
       quality: "default",
@@ -330,7 +329,7 @@ function CytoscapeGraph() {
       rows: undefined,
       cols: undefined,
     },
-  };
+  }), []);
 
   const sampleNodes = [
     {
@@ -538,27 +537,20 @@ function CytoscapeGraph() {
         const zoom = cytoscapeInstance.zoom();
         const numElements = cytoscapeInstance.elements().size();
 
-        let newLodMode = 'high';
-        if (zoom < 0.3 || numElements > 10000) { // Example thresholds
-          newLodMode = 'low';
+        let nextMode = "high";
+        if (zoom < 0.3 || numElements > 10000) {
+          nextMode = "low";
         } else if (zoom < 0.7 || numElements > 5000) {
-          newLodMode = 'medium';
+          nextMode = "medium";
         }
 
-        if (newLodMode !== lodMode) {
-          setLodMode(newLodMode);
-          if (newLodMode === 'low') {
-            cytoscapeInstance.elements().addClass('low-detail');
-          } else {
-            cytoscapeInstance.elements().removeClass('low-detail');
-          }
-        }
+        setLodMode((prev) => (prev === nextMode ? prev : nextMode));
       };
 
       // Initial LOD update and event listeners
       updateLOD(); // Call once on initialization
-      cytoscapeInstance.on('zoom', updateLOD);
-      cytoscapeInstance.on('pan', updateLOD);
+      cytoscapeInstance.on("zoom", updateLOD);
+      cytoscapeInstance.on("pan", updateLOD);
 
       setCy(cytoscapeInstance);
       cyRef.current = cytoscapeInstance;
@@ -567,8 +559,8 @@ function CytoscapeGraph() {
     return () => {
       if (cyRef.current) {
         // Remove event listeners
-        cyRef.current.off('zoom', updateLOD);
-        cyRef.current.off('pan', updateLOD);
+        cyRef.current.off("zoom", updateLOD);
+        cyRef.current.off("pan", updateLOD);
 
         // Clean up all active popovers before destroying Cytoscape instance
         popovers.forEach(({ popper, root, popperDiv }) => {
@@ -581,7 +573,15 @@ function CytoscapeGraph() {
         setCy(null);
       }
     };
-  }, [lodMode]);
+  }, [
+    cy,
+    clearHighlights,
+    currentLayout,
+    dispatch,
+    highlightConnectedElements,
+    highlightEdge,
+    layoutConfigs,
+  ]);
 
   useEffect(() => {
     if (cy && (nodes.length > 0 || edges.length > 0)) {
@@ -592,7 +592,14 @@ function CytoscapeGraph() {
 
       cy.elements().remove();
       cy.add(elements);
-      debouncedApplyLayout(currentLayout); // Use the debounced function here
+      if (debouncedApplyLayout) {
+        debouncedApplyLayout(currentLayout);
+      } else {
+        const config = layoutConfigs[currentLayout];
+        if (config) {
+          cy.layout(config).run();
+        }
+      }
     }
   }, [cy, nodes, edges, currentLayout, debouncedApplyLayout]);
 
@@ -667,32 +674,71 @@ function CytoscapeGraph() {
     return colors[communityId % colors.length];
   };
 
-  // Utility for debouncing layout operations
-  const debounce = (func, delay) => {
-    let timeout;
-    return function (...args) {
-      const context = this;
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(context, args), delay);
-    };
-  };
-
-  const debouncedApplyLayout = useRef(
-    debounce((layoutName) => {
-      if (cy) {
-        const startTime = performance.now();
-        const layout = cy.layout(layoutConfigs[layoutName]);
-        layout.run();
-        layout.promiseOn("layoutstop").then(() => {
-          const endTime = performance.now();
-          const duration = endTime - startTime;
-          console.log(
-            `Layout '${layoutName}' took ${duration.toFixed(2)} ms`,
-          );
-        });
+  const debounce = useCallback((func, delay) => {
+    let timeoutId;
+    return (...args) => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
-    }, 300),
-  ).current; // Debounce for 300ms
+      timeoutId = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
+  }, []);
+
+  const debouncedApplyLayout = useMemo(() => {
+    if (!cy) {
+      return null;
+    }
+    return debounce((layoutName) => {
+      const config = layoutConfigs[layoutName];
+      if (!config) {
+        return;
+      }
+      const layout = cy.layout(config);
+      const startTime = performance.now();
+      layout.run();
+      if (typeof layout?.promiseOn === "function") {
+        layout
+          .promiseOn("layoutstop")
+          .then(() => {
+            const duration = performance.now() - startTime;
+            console.log(`Layout '${layoutName}' took ${duration.toFixed(2)} ms`);
+          })
+          .catch(() => {
+            /* ignore timing errors */
+          });
+      }
+    }, 300);
+  }, [cy, debounce, layoutConfigs]);
+
+  useEffect(() => {
+    if (!cy) return;
+
+    cy.batch(() => {
+      cy.nodes().forEach((node) => {
+        node.removeClass("low-detail");
+        if (lodMode === "low") {
+          node.addClass("low-detail");
+          node.style("label", "");
+        } else {
+          node.style("label", node.data("label") ?? "");
+        }
+      });
+
+      cy.edges().forEach((edge) => {
+        edge.removeClass("low-detail");
+        if (lodMode === "low") {
+          edge.addClass("low-detail");
+          edge.style("label", "");
+        } else if (lodMode === "medium") {
+          edge.style("label", "");
+        } else {
+          edge.style("label", edge.data("label") ?? "");
+        }
+      });
+    });
+  }, [cy, lodMode]);
   // Apply AI Insights highlighting
   useEffect(() => {
     if (!cy) return;
@@ -1110,7 +1156,6 @@ function CytoscapeGraph() {
         </Box>
       </Box>
 
-      {/* Investigation Presence */}
       {id && <InvestigationPresence />}
 
       <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>

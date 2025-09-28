@@ -369,7 +369,12 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
       <AIInsightsPanel open={insightsOpen} onClose={() => setInsightsOpen(false)} />
       <EdgeInspectorDialog open={edgeInspectorOpen} onClose={() => setEdgeInspectorOpen(false)} edge={edgeDetail} />
       {/* TTP Correlation Overlay */}
-      <TTPCorrelationOverlay cy={cyRef.current} nodes={elements.nodes} edges={elements.edges} open={ttpOverlayOpen} />
+      <TTPCorrelationOverlay
+        cy={cyRef.current}
+        nodes={elements.nodes}
+        edges={elements.edges}
+        open={ttpOverlayOpen}
+      />
       {/* TTP Triage Panel */}
       <TTPTriagePanel
         open={triagePanelOpen}
