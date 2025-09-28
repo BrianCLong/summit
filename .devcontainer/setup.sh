@@ -48,11 +48,22 @@ fi
 log_info "Creating project directories..."
 mkdir -p dist reports logs tmp .env.local
 
+# Ensure Git hooks are wired for provenance and smoke checks
+log_info "Configuring Git hooks..."
+git config core.hooksPath .githooks
+chmod +x .githooks/* || true
+
 # Copy environment configuration
 if [ ! -f ".env" ] && [ -f ".env.example" ]; then
     log_info "Creating .env from template..."
     cp .env.example .env
     log_warning "Please review and update .env file with your configuration"
+fi
+
+if [ ! -f ".envrc" ] && [ -f ".envrc.template" ]; then
+    log_info "Creating .envrc from template..."
+    cp .envrc.template .envrc
+    log_warning "Run 'direnv allow' once inside the repo to load secrets"
 fi
 
 # Wait for services to be ready
@@ -230,6 +241,8 @@ echo "  npm run dev      # Start development server"
 echo "  npm test         # Run tests"
 echo "  npm run build    # Build project"
 echo "  env-info         # Show environment information"
+echo "  make dev         # Launch the full devkit stack"
+echo "  make dev-down    # Stop the devkit stack"
 echo
 echo "Database connections:"
 echo "  psql-dev         # Connect to PostgreSQL"

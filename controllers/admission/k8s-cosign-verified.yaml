@@ -1,0 +1,50 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8scosignverified
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sCosignVerified
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            allowedPrefixes:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8scosignverified
+
+        violation[{"msg": msg}] {
+          input.review.kind.kind == "Pod"
+          container := input.review.object.spec.containers[_]
+          not prefix_allowed(container.image, input.parameters.allowedPrefixes)
+          not signed(container.image, input.review.object.metadata.annotations)
+          msg := sprintf("image %s is missing cosign signature annotations", [container.image])
+        }
+
+        prefix_allowed(image, prefixes) {
+          some prefix
+          prefixes[prefix]
+          startswith(image, prefix)
+        }
+
+        signed(image, annotations) {
+          key := sprintf("cosign.sigstore.dev/%s", [image])
+          annotations[key]
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sCosignVerified
+metadata:
+  name: require-cosign-signed-images
+spec:
+  enforcementAction: deny
+  parameters:
+    allowedPrefixes:
+      - ghcr.io/intelgraph/

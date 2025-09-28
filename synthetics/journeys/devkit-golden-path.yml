@@ -1,0 +1,49 @@
+name: devkit-golden-path
+frequency: 5m
+steps:
+  - name: api-health
+    type: http
+    request:
+      method: GET
+      url: http://localhost:4000/health
+    assertions:
+      - type: status
+        expected: 200
+  - name: worker-health
+    type: http
+    request:
+      method: GET
+      url: http://localhost:7000/health
+    assertions:
+      - type: status
+        expected: 200
+      - type: jsonpath
+        expression: $.status
+        expected: ok
+  - name: opa-authz
+    type: http
+    request:
+      method: POST
+      url: http://localhost:8181/v1/data/devkit/authz/allow
+      headers:
+        Content-Type: application/json
+      body: |
+        {"input": {"method": "GET", "path": ["health"], "user": {"role": "analyst"}}}
+    assertions:
+      - type: status
+        expected: 200
+      - type: jsonpath
+        expression: $.result
+        expected: true
+  - name: mock-notify
+    type: http
+    request:
+      method: POST
+      url: http://localhost:7080/events
+      headers:
+        Content-Type: application/json
+      body: |
+        {"source":"synthetic","message":"Devkit synthetic notification"}
+    assertions:
+      - type: status
+        expected: 202

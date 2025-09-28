@@ -1,0 +1,72 @@
+{
+  "id": null,
+  "uid": "devkit-golden-path",
+  "title": "DevKit Golden Path",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Smoke Test Pass Rate",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 90 },
+              { "color": "green", "value": 99 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "(sum(increase(devkit_worker_processed_jobs_total[24h])) > 0) * 100",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Worker Heartbeat",
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "targets": [
+        {
+          "expr": "increase(devkit_worker_processed_jobs_total[5m])",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Onboarding Minutes",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 6 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "m",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 240 },
+              { "color": "red", "value": 300 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg(devkit_onboarding_minutes)",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

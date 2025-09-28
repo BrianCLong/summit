@@ -1,0 +1,37 @@
+name: devkit-smoke
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+      - name: Build devkit stack
+        run: npm run devkit:stack
+      - name: Seed fixtures
+        run: npm run devkit:seed
+      - name: Run smoke suite
+        run: npm run smoke
+      - name: Tear down
+        if: always()
+        run: npm run devkit:down
+  cosign-provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: v2.4.1
+      - name: Verify provenance toolchain
+        run: scripts/devkit/verify-provenance.sh

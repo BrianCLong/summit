@@ -10,6 +10,10 @@ route:
         - alertname=~"AttestationJWSFailureBudget|BudgetV2NoiseHigh|CanaryCompositeScoreLow|GraphQLFastBurn|GraphQLSlowBurn"
       continue: false
       receiver: slack-mc-threaded
+    - matchers:
+        - service="devkit"
+      continue: false
+      receiver: slack-devkit
 
 receivers:
   - name: slack-mc
@@ -50,6 +54,19 @@ receivers:
             text: 'Runbook'
             url: '{{ (index .Alerts 0).Annotations.runbook_url }}'
         color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+
+  - name: slack-devkit
+    slack_configs:
+      - api_url: ${SLACK_DEVKIT_WEBHOOK_URL:-${SLACK_WEBHOOK_URL}}
+        channel: "#devkit-onboarding"
+        send_resolved: true
+        title: ':rocket: DevKit Alert — {{ .CommonLabels.alertname }}'
+        text: >-
+          *Status:* {{ .Status | toUpper }} | *Environment:* {{ .CommonLabels.environment | default "local" }}
+
+          {{ (index .Alerts 0).Annotations.summary }}
+
+          Onboarding SLA: <240 minutes. Review evidence in `.evidence/` if red.
 
 templates:
   - '/etc/alertmanager/templates/*.tmpl'

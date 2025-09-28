@@ -1,0 +1,16 @@
+# IntelGraph Golden Path DevKit Environment
+# Copy to .envrc and run `direnv allow` to load local secrets safely.
+
+export POSTGRES_USER=intelgraph
+export POSTGRES_PASSWORD=dev_password
+export POSTGRES_DB=intelgraph_dev
+export POSTGRES_HOST=localhost
+export REDIS_URL=redis://localhost:6379
+export NEO4J_URI=bolt://localhost:7687
+export NEO4J_USERNAME=neo4j
+export NEO4J_PASSWORD=dev_password
+export OPA_BASE_URL=http://localhost:8181
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+export MOCK_NOTIFICATION_URL=http://localhost:7080/events
+export DEVKIT_QUEUE_NAME=devkit-jobs
+export DEVKIT_ONBOARDING_SLO_MINUTES=240

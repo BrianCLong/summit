@@ -76,21 +76,27 @@ async function testGraphQL() {
 }
 
 async function runSmokeTests() {
+  const startedAt = Date.now();
   console.log('🚀 Running IntelGraph Platform Smoke Tests...\n');
-  
+
   const tests = [
     () => testEndpoint('http://localhost:3000', 'Frontend (Client)'),
     () => testEndpoint('http://localhost:4000', 'Backend (Server)'),
+    () => testEndpoint('http://localhost:7000/health', 'Worker Health'),
+    () => testEndpoint('http://localhost:7080/health', 'Mock Notification Service'),
+    () => testEndpoint('http://localhost:8181/health', 'OPA Policy Engine'),
+    () => testEndpoint('http://localhost:13133/health/status', 'OTEL Collector Health'),
     () => testGraphQL()
   ];
-  
+
   const results = await Promise.all(tests.map(test => test()));
   const passed = results.filter(Boolean).length;
   
   console.log(`\n📊 Test Results: ${passed}/${results.length} passed`);
   
   if (passed === results.length) {
-    console.log('🎉 All smoke tests passed! Application is working correctly.');
+    const duration = Math.round((Date.now() - startedAt) / 1000);
+    console.log(`🎉 All smoke tests passed in ${duration}s! Application is working correctly.`);
     process.exit(0);
   } else {
     console.log('⚠️  Some tests failed. Please check the logs above.');

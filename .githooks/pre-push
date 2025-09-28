@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v npm >/dev/null 2>&1; then
+  echo "pre-push: npm not found; skipping smoke tests" >&2
+  exit 0
+fi
+
+if ! command -v timeout >/dev/null 2>&1; then
+  echo "pre-push: timeout not available; install coreutils" >&2
+  exit 1
+fi
+
+printf '🔍 Running 60s smoke suite before push...\n'
+if ! timeout 60s npm run smoke >/tmp/devkit-smoke.log 2>&1; then
+  cat /tmp/devkit-smoke.log >&2
+  echo "❌ Smoke tests failed; push aborted" >&2
+  exit 1
+fi
+
+if [[ -s /tmp/devkit-smoke.log ]]; then
+  cat /tmp/devkit-smoke.log
+fi
+
+latest_sig=$(git log -1 --pretty=%G?)
+if [[ "$latest_sig" != "G" && "$latest_sig" != "U" ]]; then
+  echo "❌ Latest commit is not signed. Configure git commit signing before pushing." >&2
+  exit 1
+fi
+
+echo "✅ Smoke tests passed and commit signature verified"

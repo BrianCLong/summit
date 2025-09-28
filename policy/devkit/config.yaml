@@ -1,0 +1,7 @@
+default_decision: data.devkit.authz.allow
+labels:
+  stack: devkit
+  environment: local
+plugins:
+  decision_logs:
+    console: true
