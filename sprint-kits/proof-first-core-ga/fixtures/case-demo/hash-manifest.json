@@ -1,0 +1,8 @@
+{
+  "caseId": "demo",
+  "root": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+  "steps": [
+    { "op": "ingest", "model": "csv", "configChecksum": "abc123" },
+    { "op": "er", "model": "lsh-v1", "configChecksum": "def456" }
+  ]
+}

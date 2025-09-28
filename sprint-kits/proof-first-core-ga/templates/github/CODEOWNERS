@@ -1,0 +1,7 @@
+/services/prov-ledger/   @backend-team @security-lead
+/services/er-service/    @backend-team
+/services/cost-guard/    @platform-team
+/packages/query-copilot/ @fe-team @ai-team
+/apps/web/               @fe-team
+/charts/                 @platform-team
+/tests/                  @qa-team

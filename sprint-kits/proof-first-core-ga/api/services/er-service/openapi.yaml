@@ -1,0 +1,55 @@
+openapi: 3.0.3
+info:
+  title: ER Service
+  version: 0.1.0
+paths:
+  /er/candidates:
+    post:
+      summary: Generate candidate pairs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                block:
+                  type: string
+                limit:
+                  type: integer
+                  default: 100
+      responses:
+        '200':
+          description: OK
+  /er/merge:
+    post:
+      summary: Merge entities (reversible)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [leftId, rightId, policy]
+              properties:
+                leftId:
+                  type: string
+                rightId:
+                  type: string
+                policy:
+                  type: string
+      responses:
+        '200':
+          description: OK
+  /er/explain:
+    get:
+      summary: Explain decision
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK

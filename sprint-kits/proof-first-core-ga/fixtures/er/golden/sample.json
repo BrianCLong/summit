@@ -1,0 +1,9 @@
+{
+  "leftId": "p:123",
+  "rightId": "p:456",
+  "features": {
+    "nameJaro": 0.93,
+    "emailExact": 1
+  },
+  "decision": "merge"
+}
