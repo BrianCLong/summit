@@ -1,4 +1,13 @@
-import { createHash, createHmac, randomUUID } from 'node:crypto';
+import {
+  createHash,
+  createHmac,
+  randomUUID,
+  createPrivateKey,
+  createPublicKey,
+  sign as signMessage,
+  verify as verifySignature,
+} from 'node:crypto';
+import type { KeyObject } from 'node:crypto';
 import type { 
   EvidenceBundle, 
   LedgerEntry, 
@@ -467,4 +476,562 @@ export class CoopProvenanceLedger {
   getSecret(): string {
     return this.secret;
   }
+}
+
+// ============================================================================
+// HUMAN ANNOTATION PROVENANCE LEDGER (HAPL)
+// ============================================================================
+
+export type HaplEventType = 'label' | 'payment' | 'conflict';
+
+export interface HaplLedgerOptions {
+  privateKey: KeyInput;
+  publicKey: KeyInput;
+  now?: () => Date;
+}
+
+export interface LabelEventInput {
+  datasetId: string;
+  itemId: string;
+  labelerId: string;
+  label: unknown;
+  rubricVersion: string;
+  toolVersion: string;
+  rubricId?: string;
+  metadata?: Record<string, unknown>;
+  timestamp?: string;
+}
+
+export interface PaymentEventInput {
+  datasetId: string;
+  itemId?: string;
+  payerId: string;
+  labelerId: string;
+  amount: number;
+  currency: string;
+  reference?: string;
+  metadata?: Record<string, unknown>;
+  timestamp?: string;
+}
+
+export interface ConflictEventInput {
+  datasetId: string;
+  itemId: string;
+  raisedBy: string;
+  actors: string[];
+  reason: string;
+  resolution?: string;
+  metadata?: Record<string, unknown>;
+  timestamp?: string;
+}
+
+export interface HaplLabelPayload {
+  labelerId: string;
+  label: unknown;
+  rubricVersion: string;
+  toolVersion: string;
+  rubricId?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface HaplPaymentPayload {
+  payerId: string;
+  labelerId: string;
+  amount: number;
+  currency: string;
+  reference?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface HaplConflictPayload {
+  actors: string[];
+  reason: string;
+  resolution?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export type HaplPayload =
+  | HaplLabelPayload
+  | HaplPaymentPayload
+  | HaplConflictPayload;
+
+export interface HaplLedgerEntry<T extends HaplPayload = HaplPayload> {
+  sequence: number;
+  eventType: HaplEventType;
+  datasetId: string;
+  itemId?: string;
+  actor: string;
+  timestamp: string;
+  payload: T;
+  signerId: string;
+  previousHash?: string;
+  hash: string;
+  signature: string;
+}
+
+export interface HaplLedgerExport {
+  signerId?: string;
+  root?: string;
+  entries: HaplLedgerEntry[];
+}
+
+export interface HaplVerificationResult {
+  valid: boolean;
+  error?: string;
+}
+
+type KeyInput = string | Buffer | KeyObject;
+
+interface EntrySignPayload<T extends HaplPayload> {
+  sequence: number;
+  eventType: HaplEventType;
+  datasetId: string;
+  itemId?: string;
+  actor: string;
+  timestamp: string;
+  payload: T;
+  signerId: string;
+  previousHash?: string;
+}
+
+export class HaplLedger {
+  private readonly privateKey: KeyObject;
+  private readonly publicKey: KeyObject;
+  private readonly now: () => Date;
+  private readonly signerId: string;
+  private readonly entries: HaplLedgerEntry[] = [];
+
+  constructor(options: HaplLedgerOptions) {
+    if (!options.privateKey || !options.publicKey) {
+      throw new Error('HaplLedger requires both private and public keys');
+    }
+    this.privateKey = toPrivateKey(options.privateKey);
+    this.publicKey = toPublicKey(options.publicKey);
+    this.now = options.now ?? (() => new Date());
+    this.signerId = fingerprintKey(this.publicKey);
+  }
+
+  appendLabel(input: LabelEventInput): HaplLedgerEntry<HaplLabelPayload> {
+    const payload: HaplLabelPayload = {
+      labelerId: input.labelerId,
+      label: input.label,
+      rubricVersion: input.rubricVersion,
+      toolVersion: input.toolVersion,
+      rubricId: input.rubricId,
+      metadata: input.metadata && pruneEmptyObject(input.metadata),
+    };
+
+    return this.appendEntry('label', input.datasetId, input.itemId, input.labelerId, payload, input.timestamp);
+  }
+
+  appendPayment(input: PaymentEventInput): HaplLedgerEntry<HaplPaymentPayload> {
+    const payload: HaplPaymentPayload = {
+      payerId: input.payerId,
+      labelerId: input.labelerId,
+      amount: Number(input.amount),
+      currency: input.currency,
+      reference: input.reference,
+      metadata: input.metadata && pruneEmptyObject(input.metadata),
+    };
+
+    return this.appendEntry('payment', input.datasetId, input.itemId, input.payerId, payload, input.timestamp);
+  }
+
+  appendConflict(input: ConflictEventInput): HaplLedgerEntry<HaplConflictPayload> {
+    const actors = Array.from(new Set(input.actors.concat(input.raisedBy))).sort();
+    const payload: HaplConflictPayload = {
+      actors,
+      reason: input.reason,
+      resolution: input.resolution,
+      metadata: input.metadata && pruneEmptyObject(input.metadata),
+    };
+
+    return this.appendEntry('conflict', input.datasetId, input.itemId, input.raisedBy, payload, input.timestamp);
+  }
+
+  verify(): HaplVerificationResult {
+    return verifyHaplEntries(this.entries, this.publicKey);
+  }
+
+  getRootHash(): string | undefined {
+    return this.entries.at(-1)?.hash;
+  }
+
+  getSignerId(): string {
+    return this.signerId;
+  }
+
+  getEntries(): readonly HaplLedgerEntry[] {
+    return this.entries.slice();
+  }
+
+  toJSON(): HaplLedgerExport {
+    return {
+      signerId: this.signerId,
+      root: this.getRootHash(),
+      entries: this.entries.map((entry) => JSON.parse(JSON.stringify(entry))),
+    };
+  }
+
+  private appendEntry<T extends HaplPayload>(
+    eventType: HaplEventType,
+    datasetId: string,
+    itemId: string | undefined,
+    actor: string,
+    payload: T,
+    timestamp?: string,
+  ): HaplLedgerEntry<T> {
+    const sequence = this.entries.length;
+    const isoTimestamp = ensureIsoTimestamp(timestamp, this.now);
+    const previousHash = this.entries.at(-1)?.hash;
+    const canonicalPayload = canonicalizePayload(payload);
+    const signPayload: EntrySignPayload<typeof canonicalPayload> = {
+      sequence,
+      eventType,
+      datasetId,
+      actor,
+      timestamp: isoTimestamp,
+      payload: canonicalPayload,
+      signerId: this.signerId,
+      previousHash,
+    };
+
+    if (itemId !== undefined) {
+      signPayload.itemId = itemId;
+    }
+
+    const canonicalString = canonicalStringify(signPayload);
+    const hash = computeEntryHash(previousHash, canonicalString);
+    const signature = signCanonical(canonicalString, this.privateKey);
+    const entry: HaplLedgerEntry<typeof canonicalPayload> = {
+      ...signPayload,
+      hash,
+      signature,
+    };
+
+    const frozen = deepFreeze(entry) as HaplLedgerEntry<T>;
+    this.entries.push(frozen);
+    return frozen;
+  }
+}
+
+export interface DatasetOverlayLabel {
+  sequence: number;
+  labelerId: string;
+  label: unknown;
+  rubricVersion: string;
+  toolVersion: string;
+  rubricId?: string;
+  timestamp: string;
+  signerId: string;
+  hash: string;
+  previousHash?: string;
+  signature: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface DatasetOverlayPayment {
+  sequence: number;
+  payerId: string;
+  labelerId: string;
+  amount: number;
+  currency: string;
+  reference?: string;
+  timestamp: string;
+  signerId: string;
+  hash: string;
+  previousHash?: string;
+  signature: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface DatasetOverlayConflict {
+  sequence: number;
+  raisedBy: string;
+  actors: string[];
+  reason: string;
+  resolution?: string;
+  timestamp: string;
+  signerId: string;
+  hash: string;
+  previousHash?: string;
+  signature: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface DatasetOverlayItem {
+  labels: DatasetOverlayLabel[];
+  payments: DatasetOverlayPayment[];
+  conflicts: DatasetOverlayConflict[];
+}
+
+export interface DatasetProvenanceOverlay {
+  signerId?: string;
+  root?: string;
+  datasets: Record<string, { items: Record<string, DatasetOverlayItem> }>;
+}
+
+export function buildDatasetProvenanceOverlay(
+  entries: readonly HaplLedgerEntry[],
+): DatasetProvenanceOverlay {
+  const overlay: DatasetProvenanceOverlay = {
+    signerId: entries[0]?.signerId,
+    root: entries.at(-1)?.hash,
+    datasets: {},
+  };
+
+  for (const entry of entries) {
+    const dataset = (overlay.datasets[entry.datasetId] ??= { items: {} });
+    const itemKey = entry.itemId ?? '__dataset__';
+    const item = (dataset.items[itemKey] ??= {
+      labels: [],
+      payments: [],
+      conflicts: [],
+    });
+
+    if (entry.eventType === 'label') {
+      const payload = entry.payload as HaplLabelPayload;
+      item.labels.push({
+        sequence: entry.sequence,
+        labelerId: payload.labelerId,
+        label: payload.label,
+        rubricVersion: payload.rubricVersion,
+        toolVersion: payload.toolVersion,
+        rubricId: payload.rubricId,
+        timestamp: entry.timestamp,
+        signerId: entry.signerId,
+        hash: entry.hash,
+        previousHash: entry.previousHash,
+        signature: entry.signature,
+        metadata: payload.metadata,
+      });
+      continue;
+    }
+
+    if (entry.eventType === 'payment') {
+      const payload = entry.payload as HaplPaymentPayload;
+      item.payments.push({
+        sequence: entry.sequence,
+        payerId: payload.payerId,
+        labelerId: payload.labelerId,
+        amount: payload.amount,
+        currency: payload.currency,
+        reference: payload.reference,
+        timestamp: entry.timestamp,
+        signerId: entry.signerId,
+        hash: entry.hash,
+        previousHash: entry.previousHash,
+        signature: entry.signature,
+        metadata: payload.metadata,
+      });
+      continue;
+    }
+
+    if (entry.eventType === 'conflict') {
+      const payload = entry.payload as HaplConflictPayload;
+      item.conflicts.push({
+        sequence: entry.sequence,
+        raisedBy: entry.actor,
+        actors: payload.actors,
+        reason: payload.reason,
+        resolution: payload.resolution,
+        timestamp: entry.timestamp,
+        signerId: entry.signerId,
+        hash: entry.hash,
+        previousHash: entry.previousHash,
+        signature: entry.signature,
+        metadata: payload.metadata,
+      });
+    }
+  }
+
+  return overlay;
+}
+
+export function verifyHaplEntries(
+  entries: readonly HaplLedgerEntry[],
+  publicKey: KeyInput,
+): HaplVerificationResult {
+  const key = toPublicKey(publicKey);
+  const signerId = fingerprintKey(key);
+  let expectedPrevious: string | undefined;
+
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index];
+    if (entry.sequence !== index) {
+      return { valid: false, error: `Sequence mismatch at index ${index}` };
+    }
+    if (entry.signerId !== signerId) {
+      return { valid: false, error: `Unexpected signer for entry ${index}` };
+    }
+    if ((entry.previousHash ?? undefined) !== expectedPrevious) {
+      return { valid: false, error: `Hash chain broken at entry ${index}` };
+    }
+
+    const payload = payloadForSignature(entry);
+    const canonicalString = canonicalStringify(payload);
+    const expectedHash = computeEntryHash(expectedPrevious, canonicalString);
+    if (entry.hash !== expectedHash) {
+      return { valid: false, error: `Hash mismatch at entry ${index}` };
+    }
+    if (!verifyCanonical(canonicalString, entry.signature, key)) {
+      return { valid: false, error: `Signature mismatch at entry ${index}` };
+    }
+
+    expectedPrevious = entry.hash;
+  }
+
+  return { valid: true };
+}
+
+function payloadForSignature(entry: HaplLedgerEntry): EntrySignPayload<HaplPayload> {
+  const payload = canonicalizePayload(entry.payload);
+  const signPayload: EntrySignPayload<HaplPayload> = {
+    sequence: entry.sequence,
+    eventType: entry.eventType,
+    datasetId: entry.datasetId,
+    actor: entry.actor,
+    timestamp: entry.timestamp,
+    payload,
+    signerId: entry.signerId,
+    previousHash: entry.previousHash,
+  };
+
+  if (entry.itemId !== undefined) {
+    signPayload.itemId = entry.itemId;
+  }
+
+  return signPayload;
+}
+
+function ensureIsoTimestamp(timestamp: string | undefined, now: () => Date): string {
+  if (!timestamp) {
+    return now().toISOString();
+  }
+  return new Date(timestamp).toISOString();
+}
+
+function canonicalizePayload<T extends HaplPayload>(payload: T): T {
+  return canonicalizeValue(payload) as T;
+}
+
+function canonicalizeValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => canonicalizeValue(item));
+  }
+
+  if (value && typeof value === 'object') {
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    const record = value as Record<string, unknown>;
+    const sortedKeys = Object.keys(record).sort();
+    const result: Record<string, unknown> = {};
+    for (const key of sortedKeys) {
+      const child = canonicalizeValue(record[key]);
+      if (child !== undefined) {
+        result[key] = child;
+      }
+    }
+    return result;
+  }
+
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) {
+      throw new Error('Ledger payload numbers must be finite');
+    }
+    return value;
+  }
+
+  if (typeof value === 'bigint') {
+    return value.toString();
+  }
+
+  if (value === undefined) {
+    return undefined;
+  }
+
+  return value;
+}
+
+function canonicalStringify(value: unknown): string {
+  return JSON.stringify(canonicalizeValue(value));
+}
+
+function computeEntryHash(previousHash: string | undefined, canonical: string): string {
+  const hash = createHash('sha256');
+  if (previousHash) {
+    hash.update(previousHash);
+  }
+  hash.update(canonical);
+  return hash.digest('hex');
+}
+
+function signCanonical(payload: string, privateKey: KeyObject): string {
+  return signMessage(null, Buffer.from(payload), privateKey).toString('base64');
+}
+
+function verifyCanonical(payload: string, signature: string, publicKey: KeyObject): boolean {
+  try {
+    return verifySignature(
+      null,
+      Buffer.from(payload),
+      publicKey,
+      Buffer.from(signature, 'base64'),
+    );
+  } catch {
+    return false;
+  }
+}
+
+function toPublicKey(key: KeyInput): KeyObject {
+  if (typeof key === 'string' || Buffer.isBuffer(key)) {
+    return createPublicKey(key);
+  }
+  return key;
+}
+
+function toPrivateKey(key: KeyInput): KeyObject {
+  if (typeof key === 'string' || Buffer.isBuffer(key)) {
+    return createPrivateKey(key);
+  }
+  return key;
+}
+
+function fingerprintKey(key: KeyObject): string {
+  const exported = key.export({ format: 'der', type: 'spki' });
+  return createHash('sha256').update(exported).digest('hex');
+}
+
+function deepFreeze<T>(value: T): T {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      deepFreeze(item);
+    }
+    return Object.freeze(value);
+  }
+
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    for (const key of Object.keys(record)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      deepFreeze((record as any)[key]);
+    }
+    return Object.freeze(value);
+  }
+
+  return value;
+}
+
+function pruneEmptyObject(value: Record<string, unknown>): Record<string, unknown> | undefined {
+  const canonical = canonicalizeValue(value) as Record<string, unknown> | undefined;
+  if (!canonical) {
+    return undefined;
+  }
+  const keys = Object.keys(canonical);
+  if (keys.length === 0) {
+    return undefined;
+  }
+  return canonical;
 }
