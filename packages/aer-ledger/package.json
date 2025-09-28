@@ -1,0 +1,26 @@
+{
+  "name": "@intelgraph/aer-ledger",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "aer-verify": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "body-parser": "^1.20.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2",
+    "@types/node": "^22.7.4",
+    "@types/express": "^4.17.21",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12"
+  }
+}
