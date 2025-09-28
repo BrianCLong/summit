@@ -7,11 +7,13 @@ Self-tuning canary deployments with composite scoring
 import json
 import time
 import argparse
+import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass
 import statistics
 import random
+from urllib import request, error
 
 
 @dataclass
@@ -38,6 +40,20 @@ class CanaryScore:
     reasons: List[str]
 
 
+@dataclass
+class SyntheticResult:
+    """Outcome of the synthetic probe evaluation"""
+
+    score: float
+    availability: float
+    latency_p95: float
+    rollback_recommended: bool
+    metadata: Dict[str, Any]
+
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+
 class AdaptiveCanaryController:
     """Self-tuning canary controller with composite scoring"""
 
@@ -47,6 +63,14 @@ class AdaptiveCanaryController:
         self.decision_history = []
         self.baseline_history = []
         self.adaptation_enabled = config.get("adaptation_enabled", True)
+        self.synthetic_config = config.get("synthetics", {})
+        self.rollback_webhook = config.get("rollback_webhook")
+        self.promotion_webhook = config.get("promotion_webhook")
+        self.feature_flag_config = config.get("feature_flags", {})
+        self.rollback_policy = config.get("rollback_policy", {
+            "median_target_seconds": 300,
+            "max_false_abort_rate": 0.02
+        })
 
     def _parse_metric_sources(self, metrics_config: List[Dict]) -> List[MetricSource]:
         """Parse metric sources from configuration"""
@@ -99,6 +123,57 @@ class AdaptiveCanaryController:
 
         return sources
 
+    def _synthetic_endpoint(self) -> Optional[str]:
+        """Return the configured synthetic service endpoint"""
+
+        return self.synthetic_config.get(
+            "api_url", "http://synthetics.canary.svc.cluster.local:8080"
+        )
+
+    def fetch_synthetic_result(self) -> Optional[SyntheticResult]:
+        """Pull the latest synthetic probe summary"""
+
+        endpoint = self._synthetic_endpoint()
+        if not endpoint:
+            logging.warning("Synthetic probes disabled; skipping synthetic weighting")
+            return None
+
+        summary_path = self.synthetic_config.get(
+            "summary_path", "/api/v1/checks/maestro-api/summary"
+        )
+
+        url = f"{endpoint.rstrip('/')}{summary_path}"
+        logging.debug("Fetching synthetic summary from %s", url)
+
+        try:
+            with request.urlopen(url, timeout=self.synthetic_config.get("timeout", 5)) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+        except error.URLError as exc:
+            logging.error("Unable to fetch synthetic summary: %s", exc)
+            return None
+        except json.JSONDecodeError as exc:
+            logging.error("Invalid JSON from synthetic service: %s", exc)
+            return None
+
+        synthetic_score = float(payload.get("syntheticScore", 0))
+        availability = float(payload.get("availability", 0))
+        latency_p95 = float(payload.get("latencyP95", 0))
+        rollback_flag = bool(payload.get("rollbackRecommended", False))
+
+        metadata = {
+            "source": url,
+            "generated_at": payload.get("generatedAt"),
+            "false_abort_rate": payload.get("falseAbortRate", 0),
+        }
+
+        return SyntheticResult(
+            score=synthetic_score,
+            availability=availability,
+            latency_p95=latency_p95,
+            rollback_recommended=rollback_flag,
+            metadata=metadata,
+        )
+
     def fetch_metric(self, source: MetricSource, service_selector: str) -> Optional[float]:
         """Fetch metric value from Prometheus (simulated)"""
 
@@ -124,6 +199,44 @@ class AdaptiveCanaryController:
 
         # Default fallback
         return random.uniform(0.1, 1.0)
+
+    def _feature_flag_rollout(self) -> Tuple[bool, List[str]]:
+        """Coordinate adaptive traffic + feature flag experiments"""
+
+        adjustments = []
+        if not self.feature_flag_config:
+            return False, adjustments
+
+        for flag_name, flag_config in self.feature_flag_config.items():
+            current_allocation = flag_config.get("traffic", 0.1)
+            target = flag_config.get("target", 0.3)
+            step = flag_config.get("step", 0.05)
+
+            if current_allocation < target:
+                new_allocation = round(min(target, current_allocation + step), 2)
+                flag_config["traffic"] = new_allocation
+                adjustments.append(
+                    f"Increased feature flag '{flag_name}' traffic from {current_allocation:.2f} to {new_allocation:.2f}"
+                )
+
+        return bool(adjustments), adjustments
+
+    def _publish_event(self, event_type: str, payload: Dict[str, Any]) -> None:
+        """Send rollout decisions to external systems via webhook"""
+
+        url = self.promotion_webhook if event_type == "PROMOTE" else self.rollback_webhook
+        if not url:
+            logging.debug("No webhook configured for %s", event_type)
+            return
+
+        body = json.dumps({"event": event_type, **payload}).encode("utf-8")
+
+        try:
+            req = request.Request(url, data=body, headers={"Content-Type": "application/json"})
+            with request.urlopen(req, timeout=5):
+                logging.info("Published %s event to %s", event_type, url)
+        except Exception as exc:  # noqa: BLE001
+            logging.error("Failed to publish %s event: %s", event_type, exc)
 
     def calculate_metric_score(self, baseline: float, candidate: float,
                               threshold: Dict[str, float], invert: bool = False) -> float:
@@ -193,6 +306,29 @@ class AdaptiveCanaryController:
                 else:
                     reasons.append(f"{source.name} regression: {candidate_value:.3f} < {source.threshold['hold']}")
 
+        synthetic_result = self.fetch_synthetic_result()
+        if synthetic_result:
+            synthetic_weight = self.synthetic_config.get("weight", 0.2)
+            weighted_scores["synthetic_probes"] = synthetic_result.score * synthetic_weight
+            logging.info(
+                "Synthetic score %.3f (availability=%.3f latency_p95=%.3f)",
+                synthetic_result.score,
+                synthetic_result.availability,
+                synthetic_result.latency_p95,
+            )
+            if synthetic_result.availability < 0.999:
+                reasons.append(
+                    f"Synthetic availability {synthetic_result.availability:.3f} below 99.9% threshold"
+                )
+            if synthetic_result.latency_p95 > 0.18:
+                reasons.append(
+                    f"Synthetic latency p95 {synthetic_result.latency_p95:.3f}s exceeds 180ms goal"
+                )
+            if synthetic_result.metadata.get("false_abort_rate", 0) > self.rollback_policy["max_false_abort_rate"]:
+                reasons.append(
+                    "Synthetic false abort rate trending hot; blending with real metrics"
+                )
+
         # Calculate composite score
         composite_score = sum(weighted_scores.values())
         confidence = min(1.0, composite_score + 0.1)  # Slight confidence boost
@@ -207,6 +343,13 @@ class AdaptiveCanaryController:
         else:
             decision = "ROLLBACK"
             reasons.append(f"Composite score {composite_score:.3f} below rollback threshold")
+
+        if synthetic_result and synthetic_result.rollback_recommended and decision != "ROLLBACK":
+            decision = "ROLLBACK"
+            reasons.append("Synthetic probes recommended rollback")
+
+        if synthetic_result and synthetic_result.metadata.get("generated_at"):
+            reasons.append(f"Synthetic snapshot: {synthetic_result.metadata['generated_at']}")
 
         score = CanaryScore(
             timestamp=timestamp,
@@ -267,12 +410,28 @@ class AdaptiveCanaryController:
         scores = []
         start_time = time.time()
         evaluation_interval = 60  # 1 minute between evaluations
+        synthetic_snapshots: List[Dict[str, Any]] = []
+
+        flags_changed, adjustments = self._feature_flag_rollout()
+        if flags_changed:
+            for note in adjustments:
+                print(f"  🎛️ {note}")
+
+        event_emitted = False
 
         while (time.time() - start_time) < (window_minutes * 60):
             # Calculate current score
             score = self.calculate_composite_score(baseline_url, candidate_url)
             scores.append(score)
             self.decision_history.append(score)
+
+            if "Synthetic snapshot" in " ".join(score.reasons):
+                synthetic_metadata = [r for r in score.reasons if r.startswith("Synthetic snapshot")]
+                if synthetic_metadata:
+                    synthetic_snapshots.append({
+                        "timestamp": score.timestamp,
+                        "snapshot": synthetic_metadata[-1].split(":", 1)[-1].strip()
+                    })
 
             # Adapt thresholds if enabled
             if len(self.decision_history) >= 5:
@@ -281,10 +440,22 @@ class AdaptiveCanaryController:
             # Check for early termination conditions
             if score.decision == "ROLLBACK":
                 print(f"🛑 Early termination: ROLLBACK decision")
+                self._publish_event("ROLLBACK", {
+                    "confidence": score.confidence,
+                    "composite_score": score.composite_score,
+                    "reasons": score.reasons,
+                })
+                event_emitted = True
                 break
 
             if len(scores) >= 3 and all(s.decision == "PROMOTE" for s in scores[-3:]):
                 print(f"🚀 Early termination: 3 consecutive PROMOTE decisions")
+                self._publish_event("PROMOTE", {
+                    "confidence": score.confidence,
+                    "composite_score": score.composite_score,
+                    "reasons": score.reasons,
+                })
+                event_emitted = True
                 break
 
             # Wait for next evaluation (simplified for demo)
@@ -297,6 +468,13 @@ class AdaptiveCanaryController:
         decision_counts = {}
         for score in scores:
             decision_counts[score.decision] = decision_counts.get(score.decision, 0) + 1
+
+        if final_score and not event_emitted and final_score.decision in {"PROMOTE", "ROLLBACK"}:
+            self._publish_event(final_score.decision, {
+                "confidence": final_score.confidence,
+                "composite_score": final_score.composite_score,
+                "reasons": final_score.reasons,
+            })
 
         # Generate evaluation report
         report = {
@@ -316,7 +494,9 @@ class AdaptiveCanaryController:
             },
             "metric_analysis": self._analyze_metrics(scores),
             "threshold_adaptations": self._get_threshold_changes(),
-            "all_scores": [self._score_to_dict(score) for score in scores]
+            "all_scores": [self._score_to_dict(score) for score in scores],
+            "synthetic_snapshots": synthetic_snapshots,
+            "feature_flag_adjustments": adjustments,
         }
 
         print(f"\n🎯 Final Decision: {report['decision_summary']['final_decision']}")

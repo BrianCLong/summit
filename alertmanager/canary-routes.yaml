@@ -1,0 +1,37 @@
+route:
+  receiver: reliability-oncall
+  group_by: ['alertname', 'env']
+  group_wait: 10s
+  group_interval: 5m
+  repeat_interval: 30m
+  routes:
+    - matchers:
+        - alertname =~ "Canary(.*)SLOBurn"
+      receiver: reliability-oncall
+      continue: true
+    - matchers:
+        - alertname = "SyntheticProbeFailure"
+      receiver: synthetic-standby
+      continue: true
+    - matchers:
+        - alertname = "UnsignedArtifactBlocked"
+      receiver: platform-security
+receivers:
+  - name: reliability-oncall
+    webhook_configs:
+      - url: https://pagerduty.summit/hooks/canary-oncall
+        send_resolved: true
+  - name: synthetic-standby
+    webhook_configs:
+      - url: https://pagerduty.summit/hooks/synthetic
+        send_resolved: true
+  - name: platform-security
+    webhook_configs:
+      - url: https://pagerduty.summit/hooks/supplychain
+        send_resolved: true
+      - url: https://slack.com/api/chat.postMessage
+        http_config:
+          bearer_token_file: /etc/alertmanager/slack-token
+        send_resolved: true
+templates:
+  - '../synthetics/templates/*.tmpl'

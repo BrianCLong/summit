@@ -1,0 +1,72 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: enforce-signed-images
+  annotations:
+    policies.kyverno.io/title: Enforce Signed Images
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/subject: Pods
+    policies.kyverno.io/description: >-
+      Reject pod workloads whose container images do not carry valid cosign signatures
+      matching the IntelGraph signing authority.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: verify-cosign-signature
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/intelgraph/*"
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |
+                      -----BEGIN PUBLIC KEY-----
+                      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOnWjue8hrS8jFETI+dgjf6n2V8Ir
+                      YGKlkxYXexvJIF+PTjddld5aXTxsvnECAVG9HOzojidO3XaFFxYh21xXKA==
+                      -----END PUBLIC KEY-----
+          repository: ghcr.io/intelgraph
+          signatureAlgorithm: cosign
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: enforce-signed-rollouts
+  annotations:
+    policies.kyverno.io/title: Enforce Signed Rollout Manifests
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/subject: Rollout
+    policies.kyverno.io/description: >-
+      Block Argo Rollout resources that are not signed with cosign provenance bundles.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: verify-rollout-signature
+      match:
+        any:
+          - resources:
+              kinds:
+                - Rollout
+      context:
+        - name: signatureResult
+          imageRegistry:
+            reference: "ghcr.io/intelgraph/release-artifacts:${{request.object.metadata.annotations['supplychain.summit.dev/digest']}}"
+      preconditions:
+        all:
+          - key: "{{ request.object.metadata.annotations['cosign.sigstore.dev/bundle'] || '' }}"
+            operator: NotEquals
+            value: ""
+      validate:
+        message: >-
+          Rollout manifests must include a valid cosign bundle annotation and provenance digest.
+        pattern:
+          metadata:
+            annotations:
+              cosign.sigstore.dev/bundle: "?*"
+              supplychain.summit.dev/digest: "sha256:*"

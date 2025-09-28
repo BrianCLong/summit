@@ -1,0 +1,203 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: maestro-api-canary
+  labels:
+    app.kubernetes.io/part-of: reliability-release
+    app.kubernetes.io/component: canary-controller
+    summit.dev/mission: canary-manager-synthetic-probes-auto-rollback
+  annotations:
+    rollout.argoproj.io/controller: argo-rollouts
+    summit.dev/promotion-criteria: >-
+      promote when error_rate < 0.5%, p95_latency < 250ms, synthetic score >= 0.98 for 3 intervals,
+      and error budget consumption < 10% during canary window.
+    summit.dev/target-environments: "staging,preprod,prod"
+    cosign.sigstore.dev/bundle: .evidence/signatures/rollouts.yaml.bundle.json
+    supplychain.summit.dev/digest: sha256:ad966a16eb3d8eec5aab8325761063f398de2c047bf317e29c183e7b51d287db
+spec:
+  replicas: 6
+  strategy:
+    canary:
+      canaryMetadata:
+        annotations:
+          release.summit.dev/channel: canary
+      stableMetadata:
+        annotations:
+          release.summit.dev/channel: stable
+      steps:
+        - setWeight: 10
+        - pause: {duration: 3m}
+        - analysis:
+            templates:
+              - templateName: maestro-api-health
+        - setWeight: 30
+        - pause: {duration: 5m}
+        - analysis:
+            templates:
+              - templateName: maestro-api-health
+              - templateName: maestro-api-synthetic
+        - setWeight: 60
+        - pause: {duration: 10m}
+        - analysis:
+            templates:
+              - templateName: maestro-api-health
+              - templateName: maestro-api-synthetic
+              - templateName: maestro-api-error-budget
+      trafficRouting:
+        managedRoutes:
+          - name: maestro-api-canary-header
+      analysis:
+        templates:
+          - templateName: maestro-api-final
+        args:
+          - name: errorBudgetBurn
+            value: "0.1"
+  selector:
+    matchLabels:
+      app: maestro-api
+  template:
+    metadata:
+      labels:
+        app: maestro-api
+        app.kubernetes.io/version: v2
+    spec:
+      containers:
+        - name: maestro-api
+          image: ghcr.io/intelgraph/maestro-api:v2.4.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          envFrom:
+            - secretRef:
+                name: maestro-api-env
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: maestro-api-health
+spec:
+  args: []
+  metrics:
+    - name: error-rate
+      interval: 1m
+      count: 3
+      successCondition: result < 0.005
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(maestro_api_requests_total{job="maestro-api",status=~"5.."}[1m]))
+            /
+            sum(rate(maestro_api_requests_total{job="maestro-api"}[1m]))
+    - name: p95-latency
+      interval: 1m
+      count: 3
+      successCondition: result < 0.25
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            histogram_quantile(0.95,
+              sum(rate(maestro_api_request_latency_seconds_bucket{job="maestro-api"}[1m])) by (le))
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: maestro-api-synthetic
+spec:
+  args: []
+  metrics:
+    - name: synthetic-availability
+      interval: 1m
+      count: 3
+      successCondition: result >= 0.999
+      failureLimit: 1
+      provider:
+        web:
+          url: http://synthetics.canary.svc.cluster.local:8080/api/v1/checks/maestro-api/availability
+          method: GET
+    - name: synthetic-latency
+      interval: 1m
+      count: 3
+      successCondition: result <= 0.18
+      failureLimit: 1
+      provider:
+        web:
+          url: http://synthetics.canary.svc.cluster.local:8080/api/v1/checks/maestro-api/p95
+          method: GET
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: maestro-api-error-budget
+spec:
+  args:
+    - name: burnThreshold
+      default: "0.1"
+  metrics:
+    - name: error-budget-burn
+      interval: 2m
+      count: 2
+      successCondition: result < {{args.burnThreshold}}
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(maestro_api_error_budget_burn{env=~"staging|preprod|prod"}[5m]))
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: maestro-api-final
+spec:
+  args:
+    - name: errorBudgetBurn
+      default: "0.1"
+  metrics:
+    - name: composite-score
+      interval: 1m
+      count: 2
+      successCondition: result >= 0.9
+      failureLimit: 0
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            avg(maestro_api_canary_composite_score{env=~"staging|preprod|prod"})
+    - name: rollback-slo
+      interval: 1m
+      count: 2
+      successCondition: result <= 300
+      failureLimit: 0
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            histogram_quantile(0.5,
+              sum(rate(maestro_api_rollback_duration_seconds_bucket{env=~"staging|preprod|prod"}[5m])) by (le))
+    - name: error-budget
+      interval: 2m
+      count: 2
+      successCondition: result < {{args.errorBudgetBurn}}
+      failureLimit: 0
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(maestro_api_error_budget_burn{env=~"staging|preprod|prod"}[5m]))

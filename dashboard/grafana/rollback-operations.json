@@ -1,0 +1,70 @@
+{
+  "title": "Rollback Operations",
+  "uid": "rollback-ops",
+  "tags": ["canary", "rollback"],
+  "panels": [
+    {
+      "type": "table",
+      "title": "Recent Promotions & Rollbacks",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "maestro_api_rollout_events{event=~\"PROMOTE|ROLLBACK\"}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "displayMode": "color-text"
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Rollback Rate (per environment)",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(maestro_api_rollbacks_total{env=\"staging\"}[15m]))"
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(maestro_api_rollbacks_total{env=\"preprod\"}[15m]))"
+        },
+        {
+          "refId": "C",
+          "expr": "sum(rate(maestro_api_rollbacks_total{env=\"prod\"}[15m]))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "False Abort Rate",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "synthetic_probe_false_abort_rate{suite=\"maestro-api-canary\"}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "red", "value": 0.02 }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "refresh": "1m"
+}

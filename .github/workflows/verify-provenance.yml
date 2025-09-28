@@ -1,0 +1,73 @@
+name: verify-provenance
+
+on:
+  pull_request:
+    paths:
+      - 'rollouts.yaml'
+      - 'controllers/admission/**'
+      - '.github/workflows/verify-provenance.yml'
+      - '.evidence/signatures/**'
+
+jobs:
+  verify:
+    name: Verify cosign signatures and provenance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.4'
+      - name: Install Python dependencies
+        run: pip install --disable-pip-version-check --no-cache-dir pyyaml
+      - name: Verify rollout manifest signature
+        run: |
+          cosign verify-blob \
+            --key controllers/admission/canary-cosign.pub \
+            --signature .evidence/signatures/rollouts.yaml.sig \
+            rollouts.yaml
+      - name: Validate rollout digest annotation
+        run: |
+          python - <<'PY'
+          import hashlib
+          import yaml
+          from pathlib import Path
+
+          rollout_path = Path('rollouts.yaml')
+          with rollout_path.open('rb') as fh:
+              content = fh.read()
+
+          digest = hashlib.sha256(content).hexdigest()
+          with rollout_path.open('r', encoding='utf-8') as stream:
+              docs = list(yaml.safe_load_all(stream))
+          annotation = docs[0]['metadata']['annotations']['supplychain.summit.dev/digest']
+          expected = f'sha256:{digest}'
+          if annotation != expected:
+              raise SystemExit(f'Digest annotation mismatch: {annotation} != {expected}')
+          print('Digest annotation validated:', expected)
+          PY
+      - name: Validate admission policy structure
+        run: |
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+
+          policy_path = Path('controllers/admission/cosign-verification-policy.yaml')
+          with policy_path.open('r', encoding='utf-8') as stream:
+              docs = list(yaml.safe_load_all(stream))
+
+          required_names = {'enforce-signed-images', 'enforce-signed-rollouts'}
+          found = {doc['metadata']['name'] for doc in docs if doc}
+          missing = required_names - found
+          if missing:
+              raise SystemExit(f'Missing policies: {missing}')
+          print('Found policies:', ', '.join(sorted(found)))
+          PY
+      - name: Check evidence bundle metadata
+        run: |
+          if [ ! -f .evidence/signatures/rollouts.yaml.sig ]; then
+            echo 'Missing rollouts.yaml signature evidence'
+            exit 1
+          fi

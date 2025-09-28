@@ -1,0 +1,7 @@
+{
+  "mediaType": "application/vnd.dev.cosign.simulation",
+  "bundleVersion": "1.0",
+  "signedEntity": "rollouts.yaml",
+  "timestamp": "2025-02-09T00:00:00Z",
+  "note": "Placeholder bundle metadata for admission policy validation in staging."
+}

@@ -54,6 +54,7 @@ const sidebars = {
         'maestro/DR_RUNBOOK',
         'infra/dr-runbook',
         'devops/incident-runbook',
+        'runbooks/canary-rollback',
       ],
     },
     {

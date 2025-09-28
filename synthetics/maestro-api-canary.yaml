@@ -1,0 +1,131 @@
+apiVersion: summit.dev/v1alpha1
+kind: SyntheticProbeSuite
+metadata:
+  name: maestro-api-canary
+  labels:
+    summit.dev/mission: canary-manager-synthetic-probes-auto-rollback
+    summit.dev/slo-binding: maestro-api
+spec:
+  description: >-
+    Canary synthetic coverage for Maestro API release promotions. Flows model hidden dependencies,
+    error-budget policy thresholds, and chaos-lite degradations. All probes must maintain 99.9%
+    uptime and median response < 180ms.
+  schedules:
+    - name: continuous-canary
+      cron: "*/1 * * * *"
+      maxRunDuration: 45s
+  flows:
+    - name: baseline-health
+      weight: 0.4
+      slo:
+        objective: availability
+        target: 0.999
+        burnRateWindow: 5m
+      steps:
+        - type: http
+          name: healthcheck
+          request:
+            method: GET
+            url: https://canary.maestro.summit/api/healthz
+            headers:
+              X-Canary-Tier: baseline
+          assertions:
+            - type: status
+              operator: equals
+              value: 200
+            - type: jsonpath
+              path: $.status
+              operator: equals
+              value: ok
+    - name: order-happy-path
+      weight: 0.35
+      slo:
+        objective: latency
+        target: 0.98
+        burnRateWindow: 10m
+      steps:
+        - type: http
+          name: create-session
+          request:
+            method: POST
+            url: https://canary.maestro.summit/api/v1/sessions
+            body:
+              customerId: synthetic-canary
+              featureFlags:
+                - adaptive-canary
+          assertions:
+            - type: status
+              operator: equals
+              value: 201
+            - type: latency
+              operator: lt
+              value: 0.18
+        - type: http
+          name: submit-order
+          request:
+            method: POST
+            url: https://canary.maestro.summit/api/v1/orders
+            body:
+              sessionId: ${steps.create-session.response.body.id}
+              sku: synthetic-plan-premium
+              amount: 100
+          assertions:
+            - type: status
+              operator: equals
+              value: 202
+            - type: jsonpath
+              path: $.state
+              operator: equals
+              value: accepted
+    - name: rollback-chaos-lite
+      weight: 0.25
+      slo:
+        objective: rollback-detection
+        target: 0.95
+        burnRateWindow: 15m
+      steps:
+        - type: http
+          name: inject-fault
+          request:
+            method: POST
+            url: https://canary.maestro.summit/api/v1/chaos/inject
+            body:
+              experiment: degrade-downstream-cache
+              magnitude: 0.3
+          assertions:
+            - type: status
+              operator: equals
+              value: 202
+        - type: http
+          name: detect-degradation
+          request:
+            method: GET
+            url: https://canary.maestro.summit/api/v1/insights/canary-score
+            headers:
+              X-Canary-Tier: candidate
+          assertions:
+            - type: status
+              operator: equals
+              value: 200
+            - type: jsonpath
+              path: $.syntheticScore
+              operator: gte
+              value: 0.95
+            - type: jsonpath
+              path: $.rollbackRecommended
+              operator: in
+              value: [true, false]
+  outputs:
+    - name: availability
+      metric: synthetic_probe_availability
+      labels:
+        suite: maestro-api-canary
+    - name: latency_p95
+      metric: synthetic_probe_latency_seconds
+      statistic: p95
+      labels:
+        suite: maestro-api-canary
+    - name: rollback_signal
+      metric: synthetic_probe_rollback_signal
+      labels:
+        suite: maestro-api-canary

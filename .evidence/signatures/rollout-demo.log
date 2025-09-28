@@ -1,0 +1,3 @@
+2025-02-09T12:00:00Z PROMOTE composite=0.93 confidence=0.88
+2025-02-09T12:07:00Z HOLD composite=0.71 confidence=0.79 reason="synthetic availability dip"
+2025-02-09T12:12:00Z ROLLBACK composite=0.42 confidence=0.91 reason="Synthetic probes recommended rollback"
