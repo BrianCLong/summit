@@ -1,4 +1,4 @@
-import { createHash, createHmac } from 'node:crypto';
+import { createHash, createHmac, randomUUID } from 'node:crypto';
 import type { 
   EvidenceBundle, 
   LedgerEntry, 
@@ -14,7 +14,8 @@ import type {
   WorkflowRunRecord,
   PolicyMetadata,
   PolicyTag,
-  ProvenanceRecord as CoopProvenanceRecord
+  ProvenanceRecord as CoopProvenanceRecord,
+  ExportArtifactDescriptor
 } from 'common-types';
 import {
   buildLedgerUri,
@@ -94,7 +95,7 @@ import type {
   WorkcellToolDefinition
 } from '../../common-types/src/index.js';
 import { PolicyEngine, buildDefaultPolicyEngine } from 'policy';
-import { ProvenanceLedger } from 'prov-ledger';
+import { ClaimLedger, ProvenanceLedger } from 'prov-ledger';
 import { WorkcellRuntime } from 'workcell-runtime';
 
 function parseJsonLiteral(ast: ValueNode): unknown {
@@ -134,6 +135,7 @@ interface GatewayContext {
   policy: PolicyEngine;
   ledger: ProvenanceLedger;
   workcell: WorkcellRuntime;
+  claims: ClaimLedger;
 }
 
 const PolicyEffectEnum = new GraphQLEnumType({
@@ -306,6 +308,146 @@ const WorkOrderInputType = new GraphQLInputObjectType({
   }
 });
 
+const ProvenanceEvidenceItemType = new GraphQLObjectType({
+  name: 'ProvenanceEvidenceItem',
+  fields: {
+    uri: { type: new GraphQLNonNull(GraphQLString) },
+    hash: { type: new GraphQLNonNull(GraphQLString) },
+    algorithm: { type: new GraphQLNonNull(GraphQLString) },
+    role: { type: new GraphQLNonNull(GraphQLString) },
+    bytes: { type: GraphQLInt },
+    mediaType: { type: GraphQLString },
+    label: { type: GraphQLString },
+    annotations: { type: GraphQLJSON }
+  }
+});
+
+const ProvenanceClaimEvidenceType = new GraphQLObjectType({
+  name: 'ProvenanceClaimEvidence',
+  fields: {
+    inputs: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ProvenanceEvidenceItemType))
+      )
+    },
+    outputs: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ProvenanceEvidenceItemType))
+      )
+    },
+    references: {
+      type: new GraphQLList(new GraphQLNonNull(ProvenanceEvidenceItemType))
+    }
+  }
+});
+
+const ProvenanceClaimType = new GraphQLObjectType({
+  name: 'ProvenanceClaim',
+  fields: {
+    claimId: { type: new GraphQLNonNull(GraphQLString) },
+    chainId: { type: new GraphQLNonNull(GraphQLString) },
+    layer: { type: new GraphQLNonNull(GraphQLString) },
+    actor: { type: new GraphQLNonNull(GraphQLString) },
+    assertedAt: { type: new GraphQLNonNull(GraphQLString) },
+    previousHash: { type: GraphQLString },
+    hash: { type: new GraphQLNonNull(GraphQLString) },
+    signature: { type: new GraphQLNonNull(GraphQLString) },
+    context: { type: GraphQLJSON },
+    evidence: { type: new GraphQLNonNull(ProvenanceClaimEvidenceType) },
+    transform: { type: GraphQLJSON }
+  }
+});
+
+const ExportArtifactType = new GraphQLObjectType({
+  name: 'ExportArtifact',
+  fields: {
+    path: { type: new GraphQLNonNull(GraphQLString) },
+    hash: { type: new GraphQLNonNull(GraphQLString) },
+    algorithm: { type: new GraphQLNonNull(GraphQLString) },
+    bytes: { type: new GraphQLNonNull(GraphQLInt) },
+    claimId: { type: new GraphQLNonNull(GraphQLString) },
+    role: { type: new GraphQLNonNull(GraphQLString) },
+    mediaType: { type: GraphQLString },
+    description: { type: GraphQLString }
+  }
+});
+
+const ExportSignatureType = new GraphQLObjectType({
+  name: 'ExportSignature',
+  fields: {
+    keyId: { type: new GraphQLNonNull(GraphQLString) },
+    signer: { type: new GraphQLNonNull(GraphQLString) },
+    algorithm: { type: new GraphQLNonNull(GraphQLString) },
+    signedAt: { type: new GraphQLNonNull(GraphQLString) },
+    signature: { type: new GraphQLNonNull(GraphQLString) }
+  }
+});
+
+const ClaimChainType = new GraphQLObjectType({
+  name: 'ProvenanceClaimChain',
+  fields: {
+    chainId: { type: new GraphQLNonNull(GraphQLString) },
+    head: { type: new GraphQLNonNull(GraphQLString) },
+    claims: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ProvenanceClaimType))
+      )
+    }
+  }
+});
+
+const ProvenanceResyncBundleType = new GraphQLObjectType({
+  name: 'ProvenanceResyncBundle',
+  fields: {
+    chainId: { type: new GraphQLNonNull(GraphQLString) },
+    exportedAt: { type: new GraphQLNonNull(GraphQLString) },
+    startHash: { type: GraphQLString },
+    headHash: { type: GraphQLString },
+    entries: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ProvenanceClaimType))
+      )
+    }
+  }
+});
+
+const ExportManifestType = new GraphQLObjectType({
+  name: 'ExportManifest',
+  fields: {
+    manifestVersion: { type: new GraphQLNonNull(GraphQLString) },
+    exportId: { type: new GraphQLNonNull(GraphQLString) },
+    createdAt: { type: new GraphQLNonNull(GraphQLString) },
+    dataset: { type: GraphQLJSON },
+    destination: { type: GraphQLJSON },
+    claimChain: { type: new GraphQLNonNull(ClaimChainType) },
+    ledgerAnchors: { type: GraphQLJSON },
+    artifacts: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ExportArtifactType))
+      )
+    },
+    verification: { type: GraphQLJSON },
+    signatures: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(ExportSignatureType))
+      )
+    }
+  }
+});
+
+const ExportArtifactInput = new GraphQLInputObjectType({
+  name: 'ExportArtifactInput',
+  fields: {
+    path: { type: new GraphQLNonNull(GraphQLString) },
+    hash: { type: GraphQLString },
+    bytes: { type: new GraphQLNonNull(GraphQLInt) },
+    claimId: { type: GraphQLString },
+    role: { type: GraphQLString },
+    mediaType: { type: GraphQLString },
+    description: { type: GraphQLString }
+  }
+});
+
 function buildSchema(): GraphQLSchema {
   const queryType = new GraphQLObjectType({
     name: 'Query',
@@ -318,6 +460,106 @@ function buildSchema(): GraphQLSchema {
           },
           resolve: (_source, args: { category?: string; limit?: number }, context: GatewayContext) =>
             context.ledger.list(args)
+        },
+        provenanceClaims: {
+          type: new GraphQLNonNull(
+            new GraphQLList(new GraphQLNonNull(ProvenanceClaimType))
+          ),
+          args: {
+            limit: { type: GraphQLInt }
+          },
+          resolve: (
+            _source,
+            args: { limit?: number },
+            context: GatewayContext
+          ) => context.claims.listClaims(args.limit)
+        },
+        provenanceResync: {
+          type: new GraphQLNonNull(ProvenanceResyncBundleType),
+          args: {
+            startHash: { type: GraphQLString }
+          },
+          resolve: (
+            _source,
+            args: { startHash?: string },
+            context: GatewayContext
+          ) => context.claims.exportResyncBundle(args.startHash)
+        },
+        exportManifest: {
+          type: new GraphQLNonNull(ExportManifestType),
+          args: {
+            exportId: { type: new GraphQLNonNull(GraphQLString) },
+            datasetId: { type: new GraphQLNonNull(GraphQLString) },
+            destinationUri: { type: new GraphQLNonNull(GraphQLString) },
+            format: { type: new GraphQLNonNull(GraphQLString) },
+            totalRecords: { type: new GraphQLNonNull(GraphQLInt) },
+            datasetName: { type: GraphQLString },
+            description: { type: GraphQLString },
+            owner: { type: GraphQLString },
+            sensitivity: { type: new GraphQLList(new GraphQLNonNull(GraphQLString)) },
+            tags: { type: new GraphQLList(new GraphQLNonNull(GraphQLString)) },
+            artifacts: { type: new GraphQLList(new GraphQLNonNull(ExportArtifactInput)) }
+          },
+          resolve: (
+            _source,
+            args: {
+              exportId: string;
+              datasetId: string;
+              destinationUri: string;
+              format: string;
+              totalRecords: number;
+              datasetName?: string;
+              description?: string;
+              owner?: string;
+              sensitivity?: string[];
+              tags?: string[];
+              artifacts?: Array<{
+                path: string;
+                hash?: string;
+                bytes: number;
+                claimId?: string;
+                role?: string;
+                mediaType?: string;
+                description?: string;
+              }>;
+            },
+            context: GatewayContext
+          ) => {
+            const head = context.claims.getHead();
+            if (!head) {
+              throw new Error('no provenance claims recorded');
+            }
+            const artifacts = (args.artifacts ?? [
+              {
+                path: args.destinationUri,
+                bytes: 0,
+                claimId: head.claimId,
+                role: 'dataset'
+              }
+            ]).map((artifact) => ({
+              path: artifact.path,
+              bytes: artifact.bytes,
+              claimId: artifact.claimId ?? head.claimId,
+              role: (artifact.role as ExportArtifactDescriptor['role']) ?? 'dataset',
+              hash: artifact.hash,
+              mediaType: artifact.mediaType,
+              description: artifact.description
+            }));
+
+            return context.claims.createExportManifest({
+              exportId: args.exportId,
+              datasetId: args.datasetId,
+              datasetName: args.datasetName,
+              description: args.description,
+              owner: args.owner,
+              sensitivity: args.sensitivity,
+              tags: args.tags,
+              totalRecords: args.totalRecords,
+              destinationUri: args.destinationUri,
+              format: args.format,
+              artifacts,
+            });
+          }
         },
         policyRules: {
           type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PolicyRuleType))),
@@ -447,17 +689,32 @@ export interface GatewayOptions {
   rules?: PolicyRule[];
   seedEntries?: LedgerFactInput[];
   workcell?: GatewayWorkcellOptions;
+  provenance?: {
+    chainId?: string;
+    signer?: string;
+    signingKey?: string;
+    storagePath?: string;
+    environment?: string;
+  };
 }
 
 export class GatewayRuntime {
   private readonly policy: PolicyEngine;
   private readonly ledger: ProvenanceLedger;
+  private readonly claims: ClaimLedger;
   private readonly schema: GraphQLSchema;
   private readonly workcell: WorkcellRuntime;
 
   constructor(options: GatewayOptions = {}) {
     this.policy = options.rules ? new PolicyEngine(options.rules) : buildDefaultPolicyEngine();
     this.ledger = new ProvenanceLedger();
+    this.claims = new ClaimLedger({
+      chainId: options.provenance?.chainId ?? 'gateway-api',
+      signer: options.provenance?.signer ?? 'gateway-runtime',
+      signingKey: options.provenance?.signingKey ?? 'gateway-runtime',
+      storagePath: options.provenance?.storagePath,
+      environment: options.provenance?.environment ?? process.env.NODE_ENV ?? 'development',
+    });
     if (options.seedEntries) {
       for (const entry of options.seedEntries) {
         this.ledger.append(entry);
@@ -491,16 +748,30 @@ export class GatewayRuntime {
   }
 
   async execute(source: string, variableValues?: Record<string, unknown>) {
-    return graphql({
+    const requestId = randomUUID();
+    const start = new Date();
+    const result = await graphql({
       schema: this.schema,
       source,
       variableValues,
       contextValue: {
         policy: this.policy,
         ledger: this.ledger,
-        workcell: this.workcell
+        workcell: this.workcell,
+        claims: this.claims
       }
     });
+    this.claims.recordApiClaim({
+      requestId,
+      datasetId: 'gateway',
+      route: 'graphql',
+      method: 'POST',
+      statusCode: result.errors && result.errors.length > 0 ? 500 : 200,
+      request: { source, variables: variableValues },
+      response: result,
+      assertedAt: start.toISOString(),
+    });
+    return result;
   }
 
   getSchema(): GraphQLSchema {

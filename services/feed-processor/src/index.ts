@@ -10,6 +10,10 @@ import { Pool } from 'pg';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import pino from 'pino';
+import {
+  recordIngestProvenance,
+  recordTransformProvenance,
+} from './provenance';
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -351,6 +355,22 @@ ingestionQueue.process('ingest-data', 5, async (job) => {
 
     const rawData = await connector(jobData.source_config);
 
+    const ingestClaim = recordIngestProvenance({
+      jobId: jobData.job_id,
+      runId,
+      datasetId: jobData.target_graph,
+      tenantId: jobData.authority_id ?? jobData.data_source_id,
+      sourceType: jobData.source_type,
+      sourceConfig: jobData.source_config,
+      records: rawData,
+    });
+
+    logger.info('Recorded ingest provenance claim', {
+      jobId: jobData.job_id,
+      claimId: ingestClaim.claimId,
+      hash: ingestClaim.hash,
+    });
+
     // Transform data if rules provided
     let transformedData = rawData;
     if (jobData.transform_rules && jobData.transform_rules.length > 0) {
@@ -359,7 +379,10 @@ ingestionQueue.process('ingest-data', 5, async (job) => {
         job_id: jobData.job_id,
         raw_data: rawData,
         transform_rules: jobData.transform_rules,
-        run_id: runId
+        run_id: runId,
+        ingest_claim_id: ingestClaim.claimId,
+        tenant_id: jobData.authority_id ?? jobData.data_source_id,
+        dataset_id: jobData.target_graph,
       });
     } else {
       // Store directly
@@ -411,7 +434,7 @@ ingestionQueue.process('ingest-data', 5, async (job) => {
 });
 
 transformQueue.process('transform-data', 3, async (job) => {
-  const { job_id, raw_data, transform_rules, run_id } = job.data;
+  const { job_id, raw_data, transform_rules, run_id, ingest_claim_id, tenant_id, dataset_id } = job.data;
 
   try {
     logger.info('Starting data transformation', { jobId: job_id, runId: run_id });
@@ -457,6 +480,25 @@ transformQueue.process('transform-data', 3, async (job) => {
     const relationships = extractRelationships(transformedData);
     if (relationships.length > 0) {
       await graphStorage.createRelationships(relationships, job_id);
+    }
+
+    if (ingest_claim_id) {
+      const transformClaim = recordTransformProvenance({
+        previousClaimId: ingest_claim_id,
+        runId: run_id,
+        jobId: job_id,
+        datasetId: dataset_id ?? 'default',
+        tenantId: tenant_id ?? 'system',
+        transformId: `transform-${job_id}`,
+        rules: transform_rules ?? [],
+        rawRecords: raw_data,
+        transformedRecords: transformedData,
+      });
+      logger.info('Recorded transform provenance claim', {
+        jobId: job_id,
+        claimId: transformClaim.claimId,
+        hash: transformClaim.hash,
+      });
     }
 
     logger.info('Transformation completed', {

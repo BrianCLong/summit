@@ -317,6 +317,345 @@ export interface ValueDensityMetrics {
   latency: number;
 }
 
+export interface UsageEstimate {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  costUsd?: number;
+  currency?: string;
+}
+
+export interface ModelPricing {
+  input: number;
+  output: number;
+}
+
+export interface ModelMetadata {
+  id: string;
+  displayName: string;
+  family: string;
+  provider: string;
+  local: boolean;
+  license: string;
+  contextWindow: number;
+  rpm: number;
+  pricing: ModelPricing;
+  modality: string[];
+  capabilities: string[];
+  tags?: string[];
+}
+
+export interface ModelCaps {
+  hardUsd: number;
+  softPct: number;
+  tokenCap: number;
+  rpm: number;
+}
+
+export interface ModelFilter {
+  local?: boolean;
+  family?: string;
+  provider?: string;
+  license?: string;
+  modality?: string;
+  tag?: string;
+}
+
+export function clamp(value: number, min: number, max: number): number {
+  if (Number.isNaN(value)) {
+    return min;
+  }
+  if (value < min) {
+    return min;
+  }
+  if (value > max) {
+    return max;
+  }
+  return value;
+}
+
+export function computeValueDensity(metrics: ValueDensityMetrics): number {
+  const quality = clamp(metrics.quality ?? 0, 0, 1);
+  const coverage = clamp(metrics.coverage ?? 1, 0, 1);
+  const cost = metrics.cost ?? 0;
+  const latency = metrics.latency ?? 0;
+  if (cost <= 0 || latency <= 0) {
+    return 0;
+  }
+  return (quality * coverage) / (cost * latency);
+}
+
+export function percentile(values: number[], percentileValue: number): number {
+  if (!Array.isArray(values) || values.length === 0) {
+    return 0;
+  }
+  const sorted = [...values].sort((a, b) => a - b);
+  const idx = clamp(percentileValue, 0, 1) * (sorted.length - 1);
+  const lower = Math.floor(idx);
+  const upper = Math.ceil(idx);
+  if (lower === upper) {
+    return sorted[lower];
+  }
+  const weight = idx - lower;
+  return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+}
+
+export function updateEma(current: number, observation: number, alpha = 0.3): number {
+  if (!Number.isFinite(observation)) {
+    return current;
+  }
+  if (!Number.isFinite(current)) {
+    return observation;
+  }
+  return alpha * observation + (1 - alpha) * current;
+}
+
+export function createDecisionRecord(payload: DecisionRecord): DecisionRecord {
+  const arms = Array.isArray(payload.arms)
+    ? payload.arms.map((arm) => ({ id: String(arm.id), V: Number(arm.V) }))
+    : [];
+  const record: DecisionRecord = {
+    taskId: String(payload.taskId),
+    arms,
+    chosen: String(payload.chosen),
+    pred: {
+      quality: Number(payload.pred?.quality ?? 0),
+      lat: Number(payload.pred?.lat ?? 0),
+      cost: Number(payload.pred?.cost ?? 0),
+    },
+    actual: {
+      quality: Number(payload.actual?.quality ?? 0),
+      lat: Number(payload.actual?.lat ?? 0),
+      cost: Number(payload.actual?.cost ?? 0),
+    },
+    provenanceUri: String(payload.provenanceUri ?? ""),
+    budgetDeltaUSD: Number(payload.budgetDeltaUSD ?? 0),
+  };
+  return Object.freeze(record) as DecisionRecord;
+}
+
+export function createBudgetSnapshot(input: {
+  baselineMonthlyUSD: number;
+  consumedUSD: number;
+  timestamp?: Date;
+}): BudgetSnapshot {
+  const baseline = Math.max(0, Number(input.baselineMonthlyUSD ?? 0));
+  const consumed = Math.max(0, Number(input.consumedUSD ?? 0));
+  const now = input.timestamp instanceof Date ? input.timestamp : new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const daysElapsed = Math.max(1, (now.getTime() - startOfMonth.getTime()) / (1000 * 60 * 60 * 24));
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const burnRate = consumed / daysElapsed;
+  const forecast = burnRate * daysInMonth;
+  const headroomPct = baseline > 0 ? clamp(1 - forecast / baseline, 0, 1) : 1;
+  return {
+    baselineMonthlyUSD: baseline,
+    consumedUSD: consumed,
+    headroomPct,
+    burnRateUSDPerDay: burnRate,
+    forecastUSD: forecast,
+  };
+}
+
+export function aggregateCoverage(contributions: number[]): number {
+  if (!Array.isArray(contributions) || contributions.length === 0) {
+    return 0;
+  }
+  const total = contributions.reduce((acc, value) => acc + clamp(value, 0, 1), 0);
+  return clamp(total / contributions.length, 0, 1);
+}
+
+export function buildMemoCacheKey(promptHash: string, policyVersion: string): string {
+  return `${promptHash}::${policyVersion}`;
+}
+
+export function normalizeLatency(latency: Partial<LatencyDistribution>): LatencyDistribution {
+  const p50 = Number(latency?.p50 ?? 0);
+  const p95 = Number(latency?.p95 ?? 0);
+  if (p95 < p50) {
+    return { p50, p95: p50 };
+  }
+  return { p50, p95 };
+}
+
+export const DEFAULT_CAPS: ModelCaps = Object.freeze({
+  hardUsd: 0,
+  softPct: 0.8,
+  tokenCap: 250_000,
+  rpm: 600,
+});
+
+export function normalizeCaps(caps?: Partial<ModelCaps>): ModelCaps {
+  if (!caps) {
+    return DEFAULT_CAPS;
+  }
+  const normalized: ModelCaps = {
+    hardUsd: Math.max(0, Number(caps.hardUsd ?? DEFAULT_CAPS.hardUsd)),
+    softPct: clamp(Number(caps.softPct ?? DEFAULT_CAPS.softPct), 0, 1),
+    tokenCap: Math.max(0, Math.round(Number(caps.tokenCap ?? DEFAULT_CAPS.tokenCap))),
+    rpm: Math.max(0, Math.round(Number(caps.rpm ?? DEFAULT_CAPS.rpm))),
+  };
+  return Object.freeze(normalized);
+}
+
+const MODEL_CATALOG: readonly ModelMetadata[] = Object.freeze([
+  {
+    id: "mixtral-8x22b-instruct",
+    displayName: "Mixtral 8x22B Instruct",
+    family: "mixtral",
+    provider: "mistral",
+    local: true,
+    license: "Apache-2.0",
+    contextWindow: 32768,
+    rpm: 180,
+    pricing: { input: 0, output: 0 },
+    modality: ["text"],
+    capabilities: ["reasoning", "code"],
+    tags: ["general", "oss"],
+  },
+  {
+    id: "llama-3-8b-instruct",
+    displayName: "Llama 3 8B Instruct",
+    family: "llama",
+    provider: "meta",
+    local: true,
+    license: "Llama-3-community",
+    contextWindow: 8192,
+    rpm: 300,
+    pricing: { input: 0, output: 0 },
+    modality: ["text"],
+    capabilities: ["general", "chat"],
+    tags: ["oss", "fast"],
+  },
+  {
+    id: "qwen-14b-instruct",
+    displayName: "Qwen 14B Instruct",
+    family: "qwen",
+    provider: "alibaba",
+    local: true,
+    license: "Qwen-Community",
+    contextWindow: 32768,
+    rpm: 220,
+    pricing: { input: 0, output: 0 },
+    modality: ["text"],
+    capabilities: ["multilingual", "chat"],
+    tags: ["oss", "multilingual"],
+  },
+  {
+    id: "gemma-2-9b-it",
+    displayName: "Gemma 2 9B IT",
+    family: "gemma",
+    provider: "google",
+    local: true,
+    license: "Gemma-2",
+    contextWindow: 8192,
+    rpm: 280,
+    pricing: { input: 0, output: 0 },
+    modality: ["text"],
+    capabilities: ["summarization", "chat"],
+    tags: ["oss"],
+  },
+  {
+    id: "falcon-2-vlm",
+    displayName: "Falcon 2 VLM",
+    family: "falcon",
+    provider: "tii",
+    local: true,
+    license: "Falcon-2",
+    contextWindow: 4096,
+    rpm: 120,
+    pricing: { input: 0, output: 0 },
+    modality: ["text", "vision"],
+    capabilities: ["vision", "multimodal"],
+    tags: ["oss", "vision"],
+  },
+  {
+    id: "gpt-4o-mini",
+    displayName: "GPT-4o Mini",
+    family: "gpt-4o",
+    provider: "openai",
+    local: false,
+    license: "OpenAI-terms",
+    contextWindow: 128_000,
+    rpm: 90,
+    pricing: { input: 0.00015, output: 0.0006 },
+    modality: ["text", "vision"],
+    capabilities: ["reasoning", "vision", "speech"],
+    tags: ["paid", "fallback"],
+  },
+  {
+    id: "grok-2",
+    displayName: "Grok 2",
+    family: "grok",
+    provider: "xai",
+    local: false,
+    license: "xAI-terms",
+    contextWindow: 131_072,
+    rpm: 60,
+    pricing: { input: 0.00018, output: 0.00072 },
+    modality: ["text", "vision"],
+    capabilities: ["analysis", "chat"],
+    tags: ["paid", "fallback"],
+  },
+]);
+
+export function listModels(filter: ModelFilter = {}): ModelMetadata[] {
+  return MODEL_CATALOG.filter((model) => {
+    if (typeof filter.local === "boolean" && model.local !== filter.local) {
+      return false;
+    }
+    if (filter.family && model.family !== filter.family) {
+      return false;
+    }
+    if (filter.provider && model.provider !== filter.provider) {
+      return false;
+    }
+    if (filter.license && model.license !== filter.license) {
+      return false;
+    }
+    if (filter.modality && !model.modality.includes(filter.modality)) {
+      return false;
+    }
+    if (filter.tag && !(model.tags ?? []).includes(filter.tag)) {
+      return false;
+    }
+    return true;
+  });
+}
+
+export function getModelById(id: string): ModelMetadata | undefined {
+  return MODEL_CATALOG.find((model) => model.id === id);
+}
+
+export function calculateCost(
+  model: ModelMetadata,
+  tokensIn: number,
+  tokensOut: number,
+): { usd: number; tokensIn: number; tokensOut: number } {
+  const usd =
+    Math.max(0, tokensIn) * (model.pricing.input ?? 0) +
+    Math.max(0, tokensOut) * (model.pricing.output ?? 0);
+  return {
+    usd: Number(usd.toFixed(6)),
+    tokensIn: Math.max(0, Math.floor(tokensIn)),
+    tokensOut: Math.max(0, Math.floor(tokensOut)),
+  };
+}
+
+export function estimateTokens(text: string | { content?: string }): number {
+  if (!text) {
+    return 0;
+  }
+  const value = typeof text === "string" ? text : text.content ?? "";
+  const normalized = value.trim();
+  if (!normalized) {
+    return 0;
+  }
+  const wordCount = normalized.split(/\s+/).length;
+  const charEstimate = Math.ceil(normalized.length / 4);
+  return Math.max(wordCount, charEstimate);
+}
+
 // ============================================================================
 // CURSOR GOVERNANCE TYPES - Added from PR 1299
 // ============================================================================
@@ -1527,4 +1866,125 @@ export function validateTaskSpec(spec: TaskSpec): ValidationResult {
     errors,
     warnings,
   };
+}
+
+// ============================================================================
+// PROVENANCE CLAIM & EXPORT MANIFEST TYPES
+// ============================================================================
+
+export type ProvenanceLayer = 'ingest' | 'transform' | 'api' | 'export';
+
+export interface ProvenanceClaimEvidenceItem {
+  uri: string;
+  hash: string;
+  algorithm: 'sha256';
+  role: 'input' | 'output' | 'reference';
+  bytes?: number;
+  mediaType?: string;
+  label?: string;
+  annotations?: Record<string, unknown>;
+}
+
+export interface ProvenanceClaimEvidence {
+  inputs: ProvenanceClaimEvidenceItem[];
+  outputs: ProvenanceClaimEvidenceItem[];
+  references?: ProvenanceClaimEvidenceItem[];
+}
+
+export interface ProvenanceClaimContext {
+  tenantId: string;
+  datasetId: string;
+  environment?: string;
+  runId?: string;
+  jobId?: string;
+  requestId?: string;
+  transformId?: string;
+  exportId?: string;
+  sourceUri?: string;
+  destinationUri?: string;
+  [key: string]: unknown;
+}
+
+export interface ProvenanceTransformMetadata {
+  id?: string;
+  description?: string;
+  codeHash?: string;
+  parameters?: Record<string, unknown>;
+  version?: string;
+}
+
+export interface ProvenanceClaimRecord {
+  chainId: string;
+  claimId: string;
+  layer: ProvenanceLayer;
+  actor: string;
+  assertedAt: string;
+  context: ProvenanceClaimContext;
+  evidence: ProvenanceClaimEvidence;
+  transform?: ProvenanceTransformMetadata;
+  previousHash?: string;
+  hash: string;
+  signature: string;
+}
+
+export interface ClaimResyncBundle {
+  chainId: string;
+  exportedAt: string;
+  startHash?: string;
+  headHash?: string;
+  entries: ProvenanceClaimRecord[];
+}
+
+export interface ExportArtifactDescriptor {
+  path: string;
+  hash: string;
+  algorithm: 'sha256';
+  bytes: number;
+  claimId: string;
+  role: 'dataset' | 'evidence' | 'manifest' | 'log';
+  mediaType?: string;
+  description?: string;
+}
+
+export interface ExportSignature {
+  keyId: string;
+  signer: string;
+  algorithm: 'hmac-sha256' | 'ed25519';
+  signedAt: string;
+  signature: string;
+}
+
+export interface ExportManifest {
+  manifestVersion: string;
+  exportId: string;
+  createdAt: string;
+  dataset: {
+    id: string;
+    name?: string;
+    description?: string;
+    totalRecords?: number;
+    sensitivity?: string[];
+    tags?: string[];
+    owner?: string;
+  };
+  destination: {
+    uri: string;
+    format: string;
+  };
+  claimChain: {
+    chainId: string;
+    head: string;
+    claims: ProvenanceClaimRecord[];
+  };
+  ledgerAnchors: {
+    ingest?: string;
+    transform?: string;
+    api?: string;
+  };
+  artifacts: ExportArtifactDescriptor[];
+  verification: {
+    manifestHash: string;
+    includedHashes: string[];
+  };
+  signatures: ExportSignature[];
 }
