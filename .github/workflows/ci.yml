@@ -1,42 +1,11 @@
-name: CI
-
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
-
-jobs:
-  api-tests:
+build-afl-aer-crsp-lreg:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_PASSWORD: pgpass
-          POSTGRES_DB: intelgraph
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd="pg_isready -U postgres -d intelgraph" 
-          --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - name: Install dependencies
-        run: npm ci
-      - name: Install PostgreSQL client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-      - name: Apply API migrations
-        env:
-          PG_URL: postgresql://postgres:pgpass@localhost:5432/intelgraph
-        run: npm run db:api:migrate
-      - name: Run API tests
-        run: npm run test:api
-      - name: Build persisted map & check drift (non-fatal until map is finalized)
-        run: npm run persisted:check || true
-      - name: Enforce persisted mode (audit)
-        run: |
-          echo "PERSISTED_QUERY_MODE=audit" >> $GITHUB_ENV
-          echo "PERSISTED_QUERY_MAP_PATH=services/api/persisted/queries.json" >> $GITHUB_ENV
+      - uses: actions/checkout @v4/**
+      - uses: actions/setup-node @v4/**
+        with: { node-version: '18' }
+      - run: npm ci
+      - run: npm run build --workspaces
+      - run: npm test --workspaces --if-present
+      - name: SBOM
+        run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json

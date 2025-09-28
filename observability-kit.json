@@ -1,0 +1,232 @@
+{
+  "version": "mc-platform-v0.4.5",
+  "name": "MC Platform Observability Kit",
+  "description": "Complete monitoring and alerting configuration for MC Platform v0.4.5",
+  "prometheus": {
+    "recording_rules": [
+      {
+        "name": "mc.decision.latency_percentiles",
+        "query": "histogram_quantile(0.95, rate(mc_decision_latency_ms_bucket[5m]))",
+        "interval": "30s"
+      },
+      {
+        "name": "mc.exploration.rate_current",
+        "query": "mc_exploration_rate",
+        "interval": "15s"
+      },
+      {
+        "name": "mc.weights.pinned_status",
+        "query": "mc_weights_pinned",
+        "interval": "15s"
+      },
+      {
+        "name": "mc.incident_reweighter.active_count",
+        "query": "sum(mc_incident_reweighter_active)",
+        "interval": "15s"
+      }
+    ],
+    "alerting_rules": [
+      {
+        "alert": "ReweighterToggleStuck",
+        "expr": "mc_incident_reweighter_active == 1 and on() (time() - mc_last_incident_timestamp) > 600",
+        "for": "5m",
+        "severity": "critical",
+        "summary": "IncidentAutoReweighter stuck in active state without recent incident"
+      },
+      {
+        "alert": "PinTTLExpiredButPinned",
+        "expr": "mc_weights_pinned == 1 and on() (time() - mc_pin_start_timestamp) > 7800",
+        "for": "2m",
+        "severity": "warning",
+        "summary": "Weight pinning exceeded 2h10m TTL"
+      },
+      {
+        "alert": "ExplorationNotReduced",
+        "expr": "mc_incident_reweighter_active == 1 and mc_exploration_rate > 0.6 * mc_exploration_rate_baseline",
+        "for": "2m",
+        "severity": "critical",
+        "summary": "Exploration rate not reduced during active incident"
+      },
+      {
+        "alert": "RestoreFailed",
+        "expr": "increase(mc_reweighter_restore_success_total[5m]) == 0 and on() (time() - mc_incident_clear_timestamp) > 300",
+        "for": "1m",
+        "severity": "critical",
+        "summary": "Failed to restore settings after incident clearance"
+      },
+      {
+        "alert": "DecisionLatencyHigh",
+        "expr": "histogram_quantile(0.95, rate(mc_decision_latency_ms_bucket[5m])) > 250",
+        "for": "10m",
+        "severity": "warning",
+        "summary": "Decision latency p95 exceeds 250ms SLO"
+      },
+      {
+        "alert": "ErrorRateHigh",
+        "expr": "rate(mc_decision_errors_total[10m]) > 0.005",
+        "for": "5m",
+        "severity": "critical",
+        "summary": "Error rate exceeds 0.5% SLO"
+      }
+    ]
+  },
+  "grafana": {
+    "dashboard": {
+      "title": "MC Platform v0.4.5 - Golden Dashboard",
+      "panels": [
+        {
+          "title": "Decision Latency SLI",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, rate(mc_decision_latency_ms_bucket[5m]))",
+              "legendFormat": "p95 Latency"
+            }
+          ],
+          "thresholds": [
+            {"color": "green", "value": 0},
+            {"color": "yellow", "value": 200},
+            {"color": "red", "value": 250}
+          ]
+        },
+        {
+          "title": "Error Rate SLI",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "rate(mc_decision_errors_total[10m])",
+              "legendFormat": "Error Rate"
+            }
+          ],
+          "thresholds": [
+            {"color": "green", "value": 0},
+            {"color": "yellow", "value": 0.003},
+            {"color": "red", "value": 0.005}
+          ]
+        },
+        {
+          "title": "Exploration Rate",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "mc_exploration_rate",
+              "legendFormat": "Current Rate"
+            },
+            {
+              "expr": "mc_exploration_rate_baseline",
+              "legendFormat": "Baseline Rate"
+            }
+          ]
+        },
+        {
+          "title": "Weight Pin Status",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "mc_weights_pinned",
+              "legendFormat": "Weights Pinned"
+            }
+          ]
+        },
+        {
+          "title": "Active Incidents",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "sum by (incident_type, severity) (mc_incident_reweighter_active)",
+              "legendFormat": "{{incident_type}} - {{severity}}"
+            }
+          ]
+        },
+        {
+          "title": "QAM Service Health",
+          "type": "table",
+          "targets": [
+            {
+              "expr": "up{job=~'mc-.*'}",
+              "legendFormat": "{{instance}}"
+            }
+          ]
+        },
+        {
+          "title": "Reweighter Metrics",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "rate(mc_reweighter_incidents_processed_total[5m])",
+              "legendFormat": "Incidents Processed/sec"
+            },
+            {
+              "expr": "rate(mc_reweighter_restore_success_total[5m])",
+              "legendFormat": "Successful Restores/sec"
+            },
+            {
+              "expr": "rate(mc_reweighter_restore_failed_total[5m])",
+              "legendFormat": "Failed Restores/sec"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "alertmanager": {
+    "routes": [
+      {
+        "match": {
+          "severity": "critical",
+          "alertname": "ReweighterToggleStuck|ExplorationNotReduced|RestoreFailed"
+        },
+        "receiver": "pagerduty-mc-platform"
+      },
+      {
+        "match": {
+          "severity": "warning"
+        },
+        "receiver": "slack-mc-platform"
+      }
+    ],
+    "receivers": [
+      {
+        "name": "pagerduty-mc-platform",
+        "pagerduty_configs": [
+          {
+            "routing_key": "${PAGERDUTY_MC_PLATFORM_KEY}",
+            "description": "MC Platform v0.4.5 Critical Alert: {{ .GroupLabels.alertname }}"
+          }
+        ]
+      },
+      {
+        "name": "slack-mc-platform",
+        "slack_configs": [
+          {
+            "api_url": "${SLACK_MC_PLATFORM_WEBHOOK}",
+            "channel": "#mc-platform-alerts",
+            "title": "MC Platform Alert: {{ .GroupLabels.alertname }}",
+            "text": "{{ .CommonAnnotations.summary }}"
+          }
+        ]
+      }
+    ]
+  },
+  "slo_definitions": [
+    {
+      "name": "availability",
+      "description": "Decision success rate",
+      "target": 0.999,
+      "query": "rate(mc_decision_success_total[30d]) / rate(mc_decision_total[30d])"
+    },
+    {
+      "name": "latency",
+      "description": "p95 end-to-end decision time",
+      "target": 250,
+      "unit": "ms",
+      "query": "histogram_quantile(0.95, rate(mc_decision_latency_ms_bucket[30d]))"
+    },
+    {
+      "name": "reweighter_correctness",
+      "description": "Incident response correctness",
+      "target": 0.95,
+      "query": "(rate(mc_reweighter_correct_reduction_total[30d]) + rate(mc_reweighter_correct_pin_duration_total[30d])) / (rate(mc_reweighter_incidents_total[30d]) * 2)"
+    }
+  ]
+}

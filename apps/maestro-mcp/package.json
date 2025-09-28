@@ -10,6 +10,6 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@intelgraph/mcp-core": "workspace:*"
+    "@intelgraph/mcp-core": "*"
   }
 }

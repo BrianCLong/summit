@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
-  "workspaces": ["apps/*","packages/*","packages/prov-ledger","packages/lac","packages/prov-ledger-client","packages/kompromat-sim","packages/hit-protocol","packages/canary-lattice","apps/server"],
+  "workspaces": ["apps/*","packages/*","services/*","packages/prov-ledger","packages/lac","packages/prov-ledger-client","packages/kompromat-sim","packages/hit-protocol","packages/canary-lattice","apps/server"],
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
