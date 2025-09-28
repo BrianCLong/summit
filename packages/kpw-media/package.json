@@ -1,0 +1,25 @@
+{
+  "name": "@intelgraph/kpw-media",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "kpw-verify": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node --env-file=.env dist/server.js",
+    "start": "node dist/server.js",
+    "verify": "node dist/cli.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.7.4",
+    "typescript": "^5.6.2"
+  }
+}

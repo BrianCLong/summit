@@ -1,0 +1,3 @@
+mutation SuggestTriage($type: TriageType!, $data: JSON!) {
+  triageSuggest(type: $type, data: $data) { id status score }
+}

@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "KPW Media Verifier",
+  "version": "0.1.0",
+  "description": "Verifies KPW-Media selective-disclosure bundles and shows a badge.",
+  "action": { "default_popup": "popup.html" },
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{
+    "matches": ["https://*/*", "http://*/*"],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }],
+  "permissions": ["storage", "activeTab", "scripting"]
+}

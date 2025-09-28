@@ -411,4 +411,25 @@ export const typeDefs = gql`
     investigationUpdated(id: ID!): Investigation!
     analysisCompleted(jobId: ID!): JSON!
   }
+  # Cases & Evidence & Triage (PR-19–22)
+  type Case { id: ID!, title: String!, status: String!, createdAt: DateTime }
+  type Annotation { id: ID!, range: String!, note: String!, author: String }
+  type Suggestion { id: ID!, type: String!, status: String!, data: JSON, score: Float }
+  enum TriageType { TEXT LINK ROUTE_ANOMALY OTHER }
+
+  extend type Query {
+    caseById(id: ID!): Case
+    caseExport(id: ID!): JSON
+    evidenceAnnotations(id: ID!): [Annotation!]!
+    triageSuggestions(caseId: ID): [Suggestion!]!
+  }
+
+  extend type Mutation {
+    createCase(title: String!): Case!
+    approveCase(id: ID!): Case!
+    annotateEvidence(id: ID!, range: String!, note: String!): Annotation!
+    triageSuggest(type: TriageType!, data: JSON): Suggestion!
+    triageApprove(id: ID!): Suggestion!
+    triageMaterialize(id: ID!): Suggestion!
+  }
 `;

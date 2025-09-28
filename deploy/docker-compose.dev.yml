@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+  prov-ledger:
+    build: ../packages/prov-ledger
+    environment:
+      - PRIVATE_KEY_PEM=${PRIVATE_KEY_PEM}
+    ports: ["7101:7101"]

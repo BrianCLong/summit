@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { estimatePromptCost } from './utils/costEstimator';
 
 type CopilotResponse = {
   ok?: boolean;
@@ -19,6 +20,7 @@ export default function CopilotPanel(){
   const [loading, setLoading] = useState(false);
   const [resp, setResp] = useState<CopilotResponse|null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const localCost = useMemo(()=> estimatePromptCost(prompt), [prompt]);
 
   useEffect(()=>{
     const handler = (e: KeyboardEvent)=>{
@@ -52,6 +54,24 @@ export default function CopilotPanel(){
     finally{ setLoading(false); }
   }
 
+  async function checkSafety(){
+    try{
+      const api = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
+      const res = await fetch(api + '/copilot/classify', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ prompt })});
+      const data = await res.json();
+      setResp({ ...(resp||{}), type:'safety', answer: `Classification: ${data.classification} (${(data.reasons||[]).join(',')})` } as any);
+    }catch(e){ /* noop */ }
+  }
+
+  async function loadCookbook(){
+    try{
+      const api = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
+      const res = await fetch(api + '/copilot/cookbook', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ topic: 'analytics' })});
+      const data = await res.json();
+      setResp({ ...(resp||{}), type:'cookbook', citations: (data.items||[]).map((x:any)=>({ source:x.id, title:x.title, score:1 })) } as any);
+    }catch(e){ /* noop */ }
+  }
+
   return (
     <div style={{ border: '1px solid #ddd', borderRadius: 6, padding: 12 }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8 }}>
@@ -68,6 +88,9 @@ export default function CopilotPanel(){
         <button onClick={run} disabled={loading}>
           {loading ? 'Running…' : 'Run'}
         </button>
+        <button onClick={checkSafety} disabled={loading}>Check Safety</button>
+        <button onClick={loadCookbook} disabled={loading}>Cookbook</button>
+        <div style={{ marginLeft:'auto', fontSize:12, color:'#666' }}>Est. Cost: {localCost.score}</div>
       </div>
       {resp?.guardrail?.deny && (
         <div style={{ color:'#a00', marginBottom:8 }}>Blocked: {resp.guardrail.reason}</div>
@@ -92,4 +115,3 @@ export default function CopilotPanel(){
     </div>
   );
 }
-

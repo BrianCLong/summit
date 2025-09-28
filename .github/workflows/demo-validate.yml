@@ -1,0 +1,47 @@
+name: Demo Validate (Seed + Screens + k6)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Compose up (api-stub + ui + redis)
+        run: docker compose -f .github/ci/docker-compose.ci.yml up -d --build
+      - name: Wait for UI
+        run: |
+          for i in {1..60}; do curl -fsS http://localhost:3000 && break || sleep 2; done
+      - name: Seed demo data
+        env:
+          API_URL: http://localhost:4000
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASS: ${{ secrets.NEO4J_PASS }}
+        run: |
+          npm run seed:demo || true
+          npm run seed:demo:cet || true
+      - name: Playwright screenshots
+        env:
+          UI_URL: http://localhost:3000
+        run: |
+          npx playwright install --with-deps
+          npm run screenshots
+      - name: k6 smoke
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: .github/ci/k6/smoke.js
+        env:
+          UI_URL: http://localhost:3000
+          API_URL: http://localhost:4000
+          SMOKE_JWT: ${{ secrets.SMOKE_JWT }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-artifacts
+          path: |
+            docs/cookbook/screenshots/**
+            test-results/**
+            playwright-report/**

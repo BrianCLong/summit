@@ -1,0 +1,3 @@
+query ListTriageSuggestions($caseId: ID!) {
+  triageSuggestions(caseId: $caseId) { id type status score }
+}

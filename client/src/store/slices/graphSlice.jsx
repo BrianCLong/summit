@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { GET_GRAPH_DATA } from '../graphql/graphData.gql.js';
+import { GET_GRAPH_DATA } from '../graphql/graphData.js';
 import client from '../services/apollo.js'; // Import the Apollo Client instance
 
 // Async thunk for fetching graph data
@@ -334,3 +334,5 @@ const graphSlice = createSlice({
     setMinConfidenceFilter: (state, action) => {
       state.minConfidenceFilter = action.payload;
     },
+  },
+});

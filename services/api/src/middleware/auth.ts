@@ -9,6 +9,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { logger } from '../utils/logger.js';
+import { auditLog } from './auditLog.js';
 import { redisClient } from '../db/redis.js';
 import { postgresPool } from '../db/postgres.js';
 
@@ -121,6 +122,7 @@ export async function authMiddleware(
       ip: req.ip,
       userAgent: req.get('User-Agent'),
     });
+    auditLog(req, 'auth.success', { userId: user.id });
 
     next();
   } catch (error) {
@@ -195,7 +197,18 @@ async function getUserFromDatabase(
   }
 }
 
-async function getUserPermissions(userId: string, role: string): Promise<string[]> {
+function mapClaimsToPermissions(payload: any): string[] {
+  const out: string[] = [];
+  const scopes: string[] = (payload?.scope||'').split(' ').filter(Boolean);
+  const claimsPerms: string[] = Array.isArray(payload?.permissions) ? payload.permissions : [];
+  const groups: string[] = Array.isArray(payload?.groups) ? payload.groups : [];
+  for(const s of scopes){ out.push(s); }
+  for(const p of claimsPerms){ out.push(p); }
+  if(groups.includes('admins')) out.push('*:*');
+  return out;
+}
+
+async function getUserPermissions(userId: string, role: string, payload?: any): Promise<string[]> {
   try {
     // Get permissions from cache first
     const cacheKey = `user:permissions:${userId}`;
@@ -262,11 +275,13 @@ async function getUserPermissions(userId: string, role: string): Promise<string[
     };
 
     const permissions = basePermissions[role] || basePermissions['viewer'];
+    const extra = mapClaimsToPermissions(payload||{});
+    const merged = Array.from(new Set([ ...permissions, ...extra ]));
 
     // Cache permissions for 15 minutes
-    await redisClient.set(cacheKey, permissions, 900);
+    await redisClient.set(cacheKey, merged, 900);
 
-    return permissions;
+    return merged;
   } catch (error) {
     logger.error({
       message: 'Failed to get user permissions',
@@ -307,26 +322,21 @@ export function requirePermission(permission: string) {
     }
 
     // Admin wildcard check
-    if (user.permissions.includes('*:*')) {
-      next();
-      return;
-    }
+    if (user.permissions.includes('*:*')) { auditLog(req,'authz.allow',{ permission }); return next(); }
 
     // Specific permission check
     if (user.permissions.includes(permission)) {
-      next();
-      return;
+      auditLog(req,'authz.allow',{ permission });
+      return next();
     }
 
     // Wildcard permission check (e.g., "entity:*" allows "entity:read")
     const [resource, action] = permission.split(':');
     const wildcardPermission = `${resource}:*`;
 
-    if (user.permissions.includes(wildcardPermission)) {
-      next();
-      return;
-    }
+    if (user.permissions.includes(wildcardPermission)) { auditLog(req,'authz.allow',{ permission }); return next(); }
 
+    auditLog(req,'authz.deny',{ permission });
     res.status(403).json({
       error: 'Insufficient permissions',
       code: 'AUTH_INSUFFICIENT_PERMISSIONS',

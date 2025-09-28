@@ -6,18 +6,6 @@ import path from 'path'
 export default defineConfig({
   plugins: [
     react(),
-    babel({
-      filter: /react-speech-recognition/, // Only apply to this module
-      babelConfig: {
-        presets: [
-          ['@babel/preset-env', { targets: { node: 'current' } }],
-          ['@babel/preset-react', { runtime: 'automatic' }],
-        ],
-        plugins: [
-          '@babel/plugin-transform-runtime',
-        ],
-      },
-    }),
   ],
   resolve: {
     alias: {

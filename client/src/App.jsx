@@ -4,6 +4,8 @@ import { store } from "./store"; // Import the Redux store
 import { fetchGraphData } from "./store/slices/graphSlice"; // Import fetchGraphData thunk
 import GraphVisualization from "./features/graph/GraphVisualization"; // Import the GraphVisualization component
 import AnalyticsDashboardPanel from "./components/AnalyticsDashboardPanel"; // Import the new panel
+import IngestWizard from "./components/IngestWizard";
+import AdminPanel from "./components/AdminPanel";
 import TimelineView from "./features/timeline/TimelineView";
 import {
   ApolloClient,
@@ -70,7 +72,11 @@ function TestApp() {
               borderLeft: "1px solid #eee",
             }}
           >
-            <AnalyticsDashboardPanel />
+            <IngestWizard />
+            <div style={{ height: 12 }} />
+            <AdminPanel />
+            <div style={{ height: 12 }} />
+            {import.meta.env.VITE_PERF_MODE ? null : <AnalyticsDashboardPanel />}
           </div>
         </div>
       </Provider>

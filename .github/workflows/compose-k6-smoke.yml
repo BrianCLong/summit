@@ -1,0 +1,28 @@
+name: Compose k6 Smoke
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start compose
+        run: |
+          docker compose -f .github/ci/docker-compose.ci.yml build
+          docker compose -f .github/ci/docker-compose.ci.yml up -d
+      - name: Wait for UI
+        run: |
+          for i in {1..60}; do curl -fsS http://localhost:3000 && break || sleep 2; done
+      - name: Run k6 smoke
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: .github/ci/k6/smoke.js
+        env:
+          UI_URL: http://localhost:3000
+          API_URL: http://localhost:4000
+          SMOKE_JWT: ${{ secrets.SMOKE_JWT }}
+      - name: Compose down
+        if: always()
+        run: docker compose -f .github/ci/docker-compose.ci.yml down -v

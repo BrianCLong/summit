@@ -58,11 +58,43 @@ ingestRouter.post('/cancel/:id', (req,res)=>{
 const schemas: Record<string, any> = {
   rss: {
     required: ['feedUrl'],
-    properties: { feedUrl: { type: 'string', format: 'uri' } }
+    properties: { feedUrl: { type: 'string', format: 'uri', title: 'Feed URL' } }
   },
   twitter: {
     required: ['bearerToken','query'],
-    properties: { bearerToken: { type: 'string' }, query: { type: 'string' } }
+    properties: { bearerToken: { type: 'string', title: 'Bearer Token' }, query: { type: 'string', title: 'Search Query' } }
+  },
+  tiktok: {
+    required: ['cookie','query'],
+    properties: { cookie: { type: 'string', title: 'Session Cookie' }, query: { type: 'string', title: 'Search Query' } }
+  },
+  youtube: {
+    required: ['apiKey','channelId'],
+    properties: { apiKey: { type: 'string', title: 'API Key' }, channelId: { type: 'string', title: 'Channel ID' } }
+  },
+  reddit: {
+    required: ['clientId','secret','subreddit'],
+    properties: { clientId: { type: 'string', title: 'Client ID' }, secret: { type: 'string', title: 'Secret' }, subreddit: { type: 'string', title: 'Subreddit' } }
+  },
+  telegram: {
+    required: ['botToken','chatId'],
+    properties: { botToken: { type: 'string', title: 'Bot Token' }, chatId: { type: 'string', title: 'Chat ID' } }
+  },
+  github: {
+    required: ['token','repo'],
+    properties: { token: { type: 'string', title: 'Token' }, repo: { type: 'string', title: 'owner/repo' } }
+  },
+  slack: {
+    required: ['token','channel'],
+    properties: { token: { type: 'string', title: 'Bot Token' }, channel: { type: 'string', title: 'Channel ID' } }
+  },
+  gdrive: {
+    required: ['credentials','folderId'],
+    properties: { credentials: { type: 'string', title: 'Credentials JSON' }, folderId: { type: 'string', title: 'Folder ID' } }
+  },
+  s3: {
+    required: ['bucket','region','accessKey','secretKey'],
+    properties: { bucket: { type: 'string', title: 'Bucket' }, region: { type: 'string', title: 'Region' }, accessKey: { type: 'string', title: 'Access Key' }, secretKey: { type: 'string', title: 'Secret Key' } }
   }
 };
 
