@@ -1,0 +1,66 @@
+{{- if and .Values.databaseFailover.enabled .Values.databaseFailover.postgres.enabled }}
+{{- $pg := .Values.databaseFailover.postgres }}
+{{- $cluster := $pg.cluster }}
+{{- $metrics := $cluster.metrics }}
+{{- $patroni := deepCopy $cluster.patroni }}
+{{- if $cluster.synchronousMode }}
+{{- $_ := set $patroni "synchronous_mode" true }}
+{{- $_ := set $patroni "synchronous_mode_strict" true }}
+{{- end }}
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: {{ $cluster.name }}
+  namespace: {{ $pg.operator.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ $cluster.name }}
+    app.kubernetes.io/part-of: summit-data-plane
+spec:
+  teamId: {{ $cluster.teamId }}
+  volume:
+    size: {{ $cluster.volumeSize }}
+  numberOfInstances: {{ $cluster.numberOfInstances }}
+  enableConnectionPooler: {{ $cluster.connectionPooler }}
+  enablePodDisruptionBudget: {{ $cluster.enablePodDisruptionBudget }}
+  enableLoadBalancer: {{ $cluster.enableLoadBalancer }}
+  users:
+{{ toYaml $cluster.users | nindent 4 }}
+  databases:
+{{ toYaml $cluster.databases | nindent 4 }}
+  postgresql:
+{{ toYaml $cluster.postgresql | nindent 4 }}
+  patroni:
+{{ toYaml $patroni | nindent 4 }}
+  resources:
+{{ toYaml $cluster.resources | nindent 4 }}
+{{- if $cluster.maintenanceWindows }}
+  maintenanceWindows:
+{{ toYaml $cluster.maintenanceWindows | nindent 4 }}
+{{- end }}
+{{- if $cluster.additionalVolumes }}
+  additionalVolumes:
+{{ toYaml $cluster.additionalVolumes | nindent 4 }}
+{{- end }}
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ $metrics.port }}"
+  sidecars:
+    - name: metrics
+      image: {{ $metrics.image }}
+      ports:
+        - name: metrics
+          containerPort: {{ $metrics.port }}
+      env:
+        - name: DATA_SOURCE_URI
+          value: localhost:5432/postgres?sslmode=disable
+        - name: DATA_SOURCE_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s.%s.credentials" $cluster.name $metrics.credentialsUser }}
+              key: username
+        - name: DATA_SOURCE_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ printf "%s.%s.credentials" $cluster.name $metrics.credentialsUser }}
+              key: password
+{{- end }}

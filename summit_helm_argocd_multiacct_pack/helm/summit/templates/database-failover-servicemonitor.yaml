@@ -1,0 +1,46 @@
+{{- $root := .Values.databaseFailover }}
+{{- if and $root.enabled $root.monitoring.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: summit-postgres-operator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: summit-database-failover
+    app.kubernetes.io/part-of: summit-data-plane
+{{- range $key, $value := $root.monitoring.serviceMonitor.labels }}
+    {{ $key }}: {{ $value | quote }}
+{{- end }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ $root.postgres.operator.namespace }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgres-operator
+  endpoints:
+    - port: http
+      interval: {{ $root.monitoring.serviceMonitor.interval }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: summit-neo4j-operator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: summit-database-failover
+    app.kubernetes.io/part-of: summit-data-plane
+{{- range $key, $value := $root.monitoring.serviceMonitor.labels }}
+    {{ $key }}: {{ $value | quote }}
+{{- end }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ $root.neo4j.operator.namespace }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: neo4j-operator
+  endpoints:
+    - port: http
+      interval: {{ $root.monitoring.serviceMonitor.interval }}
+{{- end }}

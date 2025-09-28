@@ -1,3 +1,35 @@
 replicaCount: 1
 image:
   tag: latest
+databaseFailover:
+  postgres:
+    cluster:
+      numberOfInstances: 2
+      volumeSize: 20Gi
+      resources:
+        requests:
+          cpu: 200m
+          memory: 512Mi
+        limits:
+          cpu: 500m
+          memory: 1Gi
+  neo4j:
+    cluster:
+      coreServers: 3
+      replicaServers: 1
+      coreStorage: 20Gi
+      replicaStorage: 20Gi
+      coreResources:
+        requests:
+          cpu: 500m
+          memory: 2Gi
+        limits:
+          cpu: 1
+          memory: 4Gi
+      replicaResources:
+        requests:
+          cpu: 200m
+          memory: 1Gi
+        limits:
+          cpu: 500m
+          memory: 2Gi

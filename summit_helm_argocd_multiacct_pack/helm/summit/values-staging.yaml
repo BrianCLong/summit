@@ -1,3 +1,14 @@
 replicaCount: 2
 image:
   tag: latest
+databaseFailover:
+  postgres:
+    cluster:
+      numberOfInstances: 3
+      volumeSize: 50Gi
+  neo4j:
+    cluster:
+      coreServers: 3
+      replicaServers: 2
+      coreStorage: 50Gi
+      replicaStorage: 50Gi

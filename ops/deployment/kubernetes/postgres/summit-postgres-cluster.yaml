@@ -1,0 +1,72 @@
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: summit-postgres
+  namespace: database-operators
+  labels:
+    app.kubernetes.io/name: summit-postgres
+    app.kubernetes.io/part-of: summit-data-plane
+spec:
+  teamId: summit
+  volume:
+    size: 100Gi
+  numberOfInstances: 3
+  enableConnectionPooler: true
+  users:
+    summit_app: []
+    summit_readonly:
+      - "readonly"
+  databases:
+    summit: summit_app
+  postgresql:
+    version: "15"
+    parameters:
+      max_connections: "100"
+      shared_buffers: "256MB"
+  patroni:
+    synchronous_mode: true
+    synchronous_mode_strict: true
+    ttl: 30
+    loop_wait: 10
+    retry_timeout: 10
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "1"
+      memory: 2Gi
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9187"
+  enablePodDisruptionBudget: true
+  enableLoadBalancer: false
+  maintenanceWindows:
+    - Mon:00:00-01:00
+    - Thu:00:00-01:00
+  standbyCluster:
+    enabled: false
+  additionalVolumes:
+    - name: wal-volume
+      mountPath: /var/lib/postgresql/data/pg_wal
+      volumeSource:
+        emptyDir: {}
+  sidecars:
+    - name: metrics
+      image: wrouesnel/postgres_exporter:v0.10.1
+      ports:
+        - name: metrics
+          containerPort: 9187
+      env:
+        - name: DATA_SOURCE_URI
+          value: localhost:5432/postgres?sslmode=disable
+        - name: DATA_SOURCE_USER
+          valueFrom:
+            secretKeyRef:
+              name: summit-postgres.summit_app.credentials
+              key: username
+        - name: DATA_SOURCE_PASS
+          valueFrom:
+            secretKeyRef:
+              name: summit-postgres.summit_app.credentials
+              key: password

@@ -43,3 +43,106 @@ readinessProbe:
     port: http
   initialDelaySeconds: 5
   periodSeconds: 5
+
+databaseFailover:
+  enabled: true
+  postgres:
+    enabled: true
+    operator:
+      namespace: database-operators
+      image: ghcr.io/zalando/postgres-operator:v1.10.1
+      scrapePort: 8080
+      config:
+        watched_namespace: ""
+        enable_shm_volume: true
+        enable_team_superuser: true
+        resync_period_seconds: 30
+        teams_api:
+          enable_admin_role_for_users: true
+          enable_team_superuser: true
+          enable_pod_disruption_budget: true
+          team_admin_role: summit-db-admin
+    cluster:
+      name: summit-postgres
+      teamId: summit
+      numberOfInstances: 3
+      volumeSize: 100Gi
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          cpu: "1"
+          memory: 2Gi
+      connectionPooler: true
+      synchronousMode: true
+      enablePodDisruptionBudget: true
+      enableLoadBalancer: false
+      maintenanceWindows:
+        - Mon:00:00-01:00
+        - Thu:00:00-01:00
+      postgresql:
+        version: "15"
+        parameters:
+          max_connections: "100"
+          shared_buffers: "256MB"
+      patroni:
+        ttl: 30
+        loop_wait: 10
+        retry_timeout: 10
+      users:
+        summit_app: []
+        summit_readonly:
+          - readonly
+      databases:
+        summit: summit_app
+      additionalVolumes:
+        - name: wal-volume
+          mountPath: /var/lib/postgresql/data/pg_wal
+          volumeSource:
+            emptyDir: {}
+      metrics:
+        image: wrouesnel/postgres_exporter:v0.10.1
+        port: 9187
+        credentialsUser: summit_app
+  neo4j:
+    enabled: true
+    operator:
+      namespace: graph-operators
+      image: neo4j/neo4j-operator:5.20.0
+      scrapePort: 8080
+    cluster:
+      name: summit-neo4j
+      image: neo4j:5.20.0-enterprise
+      authSecretName: summit-neo4j-auth
+      coreServers: 3
+      replicaServers: 2
+      coreStorage: 100Gi
+      replicaStorage: 100Gi
+      coreResources:
+        requests:
+          cpu: 1
+          memory: 4Gi
+        limits:
+          cpu: 2
+          memory: 8Gi
+      replicaResources:
+        requests:
+          cpu: 500m
+          memory: 2Gi
+        limits:
+          cpu: 1
+          memory: 4Gi
+      metrics:
+        image: ghcr.io/neo4j-contrib/neo4j-prometheus-exporter:4.0.2
+        port: 2004
+  monitoring:
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      labels: {}
+    prometheusRule:
+      enabled: true
+      labels: {}
+      failoverAlertSeverity: critical
+      additionalRules: []
