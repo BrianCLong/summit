@@ -32,6 +32,7 @@ const logger = {
 
 // Basic GraphQL schema and resolvers
 const { gql } = require('apollo-server-express');
+const { generateEngagementPlan } = require('./src/modules/activities/engagementPlan');
 
 const typeDefs = gql`
   type Query {
@@ -39,8 +40,52 @@ const typeDefs = gql`
     status: String
   }
 
+  input ConfigInput {
+    collaborationIntensity: Float
+    engagementAmplification: Float
+    globalDataSync: Boolean
+    hybridCoordination: Boolean
+    integrityThreshold: Float
+    complianceStandard: Boolean
+    opportunityPrecision: Float
+    stabilizationNexus: Float
+    engagementIntensity: Float
+    coherenceScale: Float
+  }
+
+  type EngagementMetric {
+    name: String!
+    label: String!
+    score: Float!
+    trend: Float!
+    summary: String!
+  }
+
+  type EngagementPlanConfig {
+    collaborationIntensity: Float!
+    engagementAmplification: Float!
+    globalDataSync: Boolean!
+    hybridCoordination: Boolean!
+    integrityThreshold: Float!
+    complianceStandard: Boolean!
+    opportunityPrecision: Float!
+    stabilizationNexus: Float!
+    engagementIntensity: Float!
+    coherenceScale: Float!
+  }
+
+  type EngagementPlan {
+    ids: [ID!]!
+    generatedAt: String!
+    metrics: [EngagementMetric!]!
+    highlights: [String!]!
+    recommendedActions: [String!]!
+    config: EngagementPlanConfig!
+  }
+
   type Mutation {
     ping: String
+    deployCollaborative(ids: [ID!]!, config: ConfigInput): EngagementPlan!
   }
 `;
 
@@ -50,7 +95,8 @@ const resolvers = {
     status: () => 'Server is running successfully'
   },
   Mutation: {
-    ping: () => 'pong'
+    ping: () => 'pong',
+    deployCollaborative: (_, { ids = [], config }) => generateEngagementPlan(ids, config)
   }
 };
 
