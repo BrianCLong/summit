@@ -12,6 +12,7 @@ import { investigationResolvers } from './investigation.js';
 import { analyticsResolvers } from './analytics.js';
 import { copilotResolvers } from './copilot.js';
 import { userResolvers } from './user.js';
+import { withABAC } from '../abac.js';
 
 export const resolvers = {
   // Scalar types
@@ -26,6 +27,11 @@ export const resolvers = {
     ...analyticsResolvers.Query,
     ...copilotResolvers.Query,
     ...userResolvers.Query,
+
+    // ABAC-wrapped high-value resolvers
+    entity: withABAC(entityResolvers.Query?.entity || (async()=>null), 'read'),
+    investigation: withABAC(investigationResolvers.Query?.investigation || (async()=>null), 'read'),
+    investigations: withABAC(investigationResolvers.Query?.investigations || (async()=>[]), 'read'),
 
     // Global search across all types
     globalSearch: async (_, { query, types }, context) => {
