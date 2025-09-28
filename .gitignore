@@ -23,6 +23,7 @@ node_modules/
 # Prevent secrets / env files
 .env.*
 !.env.example
+.envrc
 
 # dotenv environment variables file
 .env.test
