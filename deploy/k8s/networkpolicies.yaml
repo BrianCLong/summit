@@ -1,0 +1,7 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: allow-server-to-aer }
+spec:
+  podSelector: { matchLabels: { app: aer-ledger } }
+  ingress: [{ from: [{ podSelector: { matchLabels: { app: server } } }] }]
+  policyTypes: [Ingress]
