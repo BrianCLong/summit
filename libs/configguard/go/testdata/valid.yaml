@@ -1,0 +1,5 @@
+serviceName: intelgraph-api
+port: 8080
+mode: production
+database:
+  url: ${DATABASE_URL}
