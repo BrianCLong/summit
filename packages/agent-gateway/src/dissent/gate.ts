@@ -7,10 +7,9 @@ export async function ensureCoverage(runId: string, minCoverage=0.7){
   return cov;
 }
 
-async function computeCoverage(runId: string): Promise<number> {
+async function computeCoverage(_runId: string): Promise<number> {
     // Placeholder: In a real implementation, this would analyze planner traces
     // from adversarial co-agents to determine the breadth of hypotheses explored.
-    console.log(`Computing dissent coverage for run ${runId}...`);
     // Simulate a coverage score.
     return Promise.resolve(Math.random() * (0.9 - 0.5) + 0.5); // Random score between 0.5 and 0.9
 }

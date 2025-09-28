@@ -1,15 +1,15 @@
-import { AFLStore } from ' @intelgraph/afl-store';
+import { AFLStore } from '@intelgraph/afl-store';
 import { applyTariffToRequest } from '../middleware/tariff';
 
 const store = new AFLStore(process.env.AFL_REDIS_URL);
 
-export async function handleInbound(buf: Buffer, meta: any){
+export async function handleInbound(buf: Buffer, meta: unknown){
   // 1) fingerprint
   const fp = {
-    contentHash: meta.contentHash, formatSig: meta.formatSig, timingSig: meta.timingSig,
-    xformSig: meta.xformSig || 'nokpw', route: meta.route || 'unknown'
+    contentHash: (meta as any).contentHash, formatSig: (meta as any).formatSig, timingSig: (meta as any).timingSig,
+    xformSig: (meta as any).xformSig || 'nokpw', route: (meta as any).route || 'unknown'
   };
-  await store.put(fp as any);
+  await store.put(fp as unknown);
 
   // 2) tariff + enforce
   const t = applyTariffToRequest({ formatSig: fp.formatSig, timingSig: fp.timingSig, xformSig: fp.xformSig });

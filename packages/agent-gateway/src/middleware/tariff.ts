@@ -1,4 +1,4 @@
-import { tariff } from ' @intelgraph/gateway-tariff';
+import { tariff } from '@intelgraph/gateway-tariff';
 
 export function applyTariffToRequest(sig: {formatSig:string; timingSig:string; xformSig:string}) {
   const t = tariff(sig);
