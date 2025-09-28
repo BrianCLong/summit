@@ -37,7 +37,7 @@
     "@opentelemetry/sdk-node": "0.45.0",
     "@opentelemetry/semantic-conventions": "1.17.0",
     "@socket.io/redis-adapter": "8.3.0",
-    "@turf/area": "7.1.0",
+    "@turf/area": "7.2.0",
     "@turf/bbox": "7.1.0",
     "@turf/boolean-point-in-polygon": "7.1.0",
     "@turf/buffer": "7.1.0",
