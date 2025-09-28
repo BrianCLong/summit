@@ -1,0 +1,88 @@
+[
+  {
+    "question": "Who is the current CEO of HelioCorp?",
+    "correct_answer_id": "cand-new-ceo",
+    "candidates": [
+      {
+        "id": "cand-old-ceo",
+        "answer": "HelioCorp's CEO is Dana Wright.",
+        "relevance": 0.91,
+        "metadata": {
+          "source": "newswire",
+          "published_at": "2024-05-01T12:00:00Z",
+          "last_verified_at": "2024-05-02T12:00:00Z"
+        }
+      },
+      {
+        "id": "cand-new-ceo",
+        "answer": "HelioCorp appointed Amir Patel as CEO in January 2025.",
+        "relevance": 0.89,
+        "metadata": {
+          "source": "official",
+          "published_at": "2025-01-12T15:00:00Z",
+          "last_verified_at": "2025-01-14T09:00:00Z"
+        }
+      }
+    ]
+  },
+  {
+    "question": "What is the current wildfire containment status in Redwood Valley?",
+    "correct_answer_id": "cand-latest-status",
+    "candidates": [
+      {
+        "id": "cand-old-status",
+        "answer": "The fire is 30% contained.",
+        "relevance": 0.87,
+        "metadata": {
+          "source": "situation-report",
+          "published_at": "2025-01-18T06:00:00Z",
+          "last_verified_at": "2025-01-18T12:00:00Z"
+        }
+      },
+      {
+        "id": "cand-latest-status",
+        "answer": "Containment improved to 68% as of January 31.",
+        "relevance": 0.84,
+        "metadata": {
+          "source": "official",
+          "published_at": "2025-01-31T23:30:00Z",
+          "last_verified_at": "2025-02-01T00:15:00Z"
+        }
+      }
+    ]
+  },
+  {
+    "question": "What travel advisory level is issued for Norlandia?",
+    "correct_answer_id": "cand-advisory-update",
+    "candidates": [
+      {
+        "id": "cand-old-advisory",
+        "answer": "Level 2: Exercise Increased Caution.",
+        "relevance": 0.93,
+        "metadata": {
+          "source": "travel-blog",
+          "published_at": "2024-11-20T08:00:00Z"
+        }
+      },
+      {
+        "id": "cand-advisory-update",
+        "answer": "Level 4: Do Not Travel (escalated January 28).",
+        "relevance": 0.9,
+        "metadata": {
+          "source": "official",
+          "published_at": "2025-01-28T10:00:00Z",
+          "last_verified_at": "2025-01-29T07:30:00Z"
+        }
+      },
+      {
+        "id": "cand-analyst-opinion",
+        "answer": "Analysts expect Level 3 guidance soon.",
+        "relevance": 0.86,
+        "metadata": {
+          "source": "analysis",
+          "published_at": "2025-01-15T09:00:00Z"
+        }
+      }
+    ]
+  }
+]
