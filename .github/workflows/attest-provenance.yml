@@ -1,1 +1,28 @@
 name: attest-provenance
+
+on:
+  pull_request:
+    paths:
+      - 'server/src/disclosure/**'
+      - 'server/src/routes/disclosures.ts'
+      - 'client/src/pages/DisclosurePackagerPage.tsx'
+      - 'client/src/services/disclosures.ts'
+      - 'dashboard/grafana/disclosure-packager.json'
+      - 'controllers/admission/disclosure-bundle-policy.yaml'
+      - '.github/workflows/attest-provenance.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-cosign-policy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+      - name: Verify disclosure cosign policy
+        run: |
+          bash ./scripts/verify-disclosure-signing.sh

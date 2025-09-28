@@ -58,14 +58,17 @@ import ExecutiveDashboard from "./features/wargame/ExecutiveDashboard"; // WAR-G
 import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import AccessIntelPage from "./features/rbac/AccessIntelPage.jsx";
 import { Security } from "@mui/icons-material";
+import DisclosurePackagerPage from "./pages/DisclosurePackagerPage";
 
 // Navigation items
+const ADMIN = "ADMIN";
 const navigationItems = [
   { path: "/dashboard", label: "Dashboard", icon: <DashboardIcon /> },
   { path: "/investigations", label: "Timeline", icon: <Search /> },
   { path: "/graph", label: "Graph Explorer", icon: <Timeline /> },
   { path: "/copilot", label: "AI Copilot", icon: <Psychology /> },
   { path: "/threats", label: "Threat Assessment", icon: <Assessment /> },
+  { path: "/disclosures", label: "Disclosures", icon: <Assessment /> },
   { path: "/access-intel", label: "Access Intel", icon: <Security /> },
   { path: "/geoint", label: "GeoInt Map", icon: <Map /> },
   { path: "/reports", label: "Reports", icon: <Assessment /> },
@@ -99,7 +102,7 @@ function ConnectionStatus() {
           body: JSON.stringify({ query: "{ __typename }" }),
         });
         setBackendStatus(response.ok ? "connected" : "error");
-      } catch (error) {
+      } catch {
         setBackendStatus("error");
       }
     };
@@ -610,6 +613,7 @@ function MainLayout() {
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/threats" element={<ThreatsPage />} />
+            <Route path="/disclosures" element={<DisclosurePackagerPage />} />
             <Route path="/access-intel" element={<AccessIntelPage />} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />

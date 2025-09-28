@@ -1,0 +1,119 @@
+{
+  "title": "Disclosure Packager Ops",
+  "uid": "disclosure-packager",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Active exports",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(disclosure_packager_active_exports)",
+          "legendFormat": "active"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Export duration (seconds)",
+      "gridPos": { "h": 8, "w": 12, "x": 6, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 120 },
+              { "color": "red", "value": 180 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(disclosure_packager_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "sum(rate(disclosure_packager_duration_seconds_sum[5m])) / sum(rate(disclosure_packager_duration_seconds_count[5m]))",
+          "legendFormat": "avg"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Bundle size (MB)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "decimals": 2
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(disclosure_packager_bundle_bytes_sum[5m])) / 1024 / 1024",
+          "legendFormat": "Throughput MB/s"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "table",
+      "title": "Warnings by tenant",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "targets": [
+        {
+          "expr": "sum(increase(disclosure_packager_warnings_total[24h])) by (tenant, type)",
+          "legendFormat": "{{tenant}} — {{type}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Exports started (24h)",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(increase(disclosure_packager_events_total{event=\"start\"}[24h]))",
+          "legendFormat": "starts"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": []
+  }
+}
