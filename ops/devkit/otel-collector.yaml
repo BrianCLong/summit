@@ -1,0 +1,36 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 400
+    spike_limit_mib: 100
+  batch:
+    timeout: 1s
+    send_batch_max_size: 512
+exporters:
+  logging:
+    loglevel: warn
+  prometheus:
+    endpoint: 0.0.0.0:9464
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+service:
+  telemetry:
+    logs:
+      level: "debug"
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [logging, otlp/jaeger]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [logging, prometheus]
+

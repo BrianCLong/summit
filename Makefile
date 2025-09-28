@@ -1,7 +1,22 @@
 SHELL := /bin/bash
 PY := python3
 
-.PHONY: bootstrap up down logs ps server client ingest graph smoke clean reset-db ingest-assets up-local logs-local down-local demo
+.PHONY: bootstrap up down logs ps server client ingest graph smoke smoke-ci dev dev-setup dev-down dev-parity clean reset-db ingest-assets up-local logs-local down-local demo
+
+dev-setup:
+	npm install
+	cd server && npm install
+	cd client && npm install
+
+dev:
+	$(MAKE) dev-setup
+	docker compose --profile devkit up -d --build
+
+dev-down:
+	docker compose down --remove-orphans
+
+dev-parity:
+	node scripts/devkit/check-parity.js
 
 bootstrap: ; @test -f .env || cp .env.example .env; echo "✅ .env ready. Next: make up"
 up: ; docker compose up -d --build
@@ -17,7 +32,10 @@ ingest: ; if [ ! -d ingestion/.venv ]; then $(PY) -m venv ingestion/.venv; fi; \
   source ingestion/.venv/bin/activate && pip install -r ingestion/requirements.txt && $(PY) ingestion/main.py
 graph: ; if [ ! -d graph-service/.venv ]; then $(PY) -m venv graph-service/.venv; fi; \
   source graph-service/.venv/bin/activate && pip install -r graph-service/requirements.txt && $(PY) graph-service/main.py
-smoke: ; node smoke-test.js
+smoke: smoke-ci
+
+smoke-ci:
+	node smoke-test.js --ci
 clean: ; find . -name "node_modules" -type d -prune -exec rm -rf '{}' +; \
   find . -name ".venv" -type d -prune -exec rm -rf '{}' +; echo "🧹 cleaned node_modules and venvs"
 reset-db: ; docker compose down; \
