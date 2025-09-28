@@ -1,0 +1,3 @@
+{"id":"evt-drift-1","consentId":"consent-a","declaredPurpose":"analytics","endpoint":"/collect/marketing","endpointPurpose":"marketing","streamKind":"live","observedAt":"2024-01-01T00:00:00Z","metadata":{"tenant":"acme"}}
+{"id":"evt-drift-2","consentId":"consent-a","declaredPurpose":"analytics","endpoint":"/collect/marketing","endpointPurpose":"marketing","streamKind":"live","observedAt":"2024-01-01T00:03:00Z","metadata":{"tenant":"acme"}}
+{"id":"evt-drift-3","consentId":"consent-a","declaredPurpose":"marketing","endpoint":"/collect/analytics","endpointPurpose":"analytics","streamKind":"live","observedAt":"2024-01-01T00:05:00Z","metadata":{"tenant":"acme"}}

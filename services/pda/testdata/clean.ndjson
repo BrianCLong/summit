@@ -1,0 +1,2 @@
+{"id":"evt-clean-1","consentId":"consent-a","declaredPurpose":"analytics","endpoint":"/collect/analytics","endpointPurpose":"analytics","streamKind":"control","observedAt":"2024-01-01T00:00:00Z","metadata":{"tenant":"acme"}}
+{"id":"evt-clean-2","consentId":"consent-a","declaredPurpose":"marketing","endpoint":"/collect/marketing","endpointPurpose":"marketing","streamKind":"control","observedAt":"2024-01-01T00:01:00Z","metadata":{"tenant":"acme"}}
