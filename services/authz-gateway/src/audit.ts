@@ -5,6 +5,7 @@ export interface AuditEntry {
   action: string;
   resource: string;
   tenantId: string;
+  purpose: string;
   allowed: boolean;
   reason: string;
 }

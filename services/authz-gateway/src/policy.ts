@@ -7,6 +7,7 @@ function opaUrl() {
 export interface UserContext {
   tenantId: string;
   roles: string[];
+  purpose?: string;
 }
 
 export interface ResourceContext {
