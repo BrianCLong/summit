@@ -19,7 +19,7 @@ module.exports = {
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
     '**/?(*.)+(spec|test).{ts,tsx,js,jsx}'
   ],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   transformIgnorePatterns: [
@@ -42,6 +42,11 @@ module.exports = {
       testMatch: ['<rootDir>/client/**/*.{test,spec}.{js,jsx,ts,tsx}'],
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/client/src/setupTests.js']
+    },
+    {
+      displayName: 'docforge',
+      testMatch: ['<rootDir>/tools/docforge/**/*.test.js'],
+      testEnvironment: 'node'
     }
   ]
 };

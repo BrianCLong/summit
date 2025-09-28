@@ -54,6 +54,7 @@ jspm_packages/
 out
 dist
 build
+docs/site/
 
 # Serverless directories
 .serverless/
