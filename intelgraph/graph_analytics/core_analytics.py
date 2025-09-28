@@ -1,31 +1,65 @@
+"""Lightweight graph analytics utilities used across IntelGraph."""
 
-# intelgraph/graph_analytics/core_analytics.py
+from __future__ import annotations
 
 from collections import deque
+from typing import Any, Dict, List, Optional
+
 
 class Graph:
-    """
-    A simple in-memory graph representation using adjacency lists.
-    For demonstration purposes.
-    """
-    def __init__(self):
-        self.adj = {}
+    """A simple in-memory undirected graph with attribute support."""
 
-    def add_node(self, node):
+    def __init__(self) -> None:
+        self.adj: Dict[Any, List[Any]] = {}
+        self.node_attrs: Dict[Any, Dict[str, Any]] = {}
+        self.edge_attrs: Dict[tuple[Any, Any], Dict[str, Any]] = {}
+
+    def add_node(self, node: Any, attributes: Optional[Dict[str, Any]] = None) -> None:
         if node not in self.adj:
             self.adj[node] = []
+        if node not in self.node_attrs:
+            self.node_attrs[node] = {}
+        if attributes:
+            self.node_attrs[node].update(attributes)
 
-    def add_edge(self, u, v):
+    def update_node_attributes(self, node: Any, attributes: Dict[str, Any]) -> None:
+        self.add_node(node)
+        self.node_attrs[node].update(attributes)
+
+    def get_node_attributes(self, node: Any) -> Dict[str, Any]:
+        return dict(self.node_attrs.get(node, {}))
+
+    def add_edge(self, u: Any, v: Any, attributes: Optional[Dict[str, Any]] = None) -> None:
         self.add_node(u)
         self.add_node(v)
-        self.adj[u].append(v)
-        # For undirected graph, add the reverse edge as well
-        self.adj[v].append(u)
+        if v not in self.adj[u]:
+            self.adj[u].append(v)
+        if u not in self.adj[v]:
+            self.adj[v].append(u)
+        if attributes:
+            key = self._edge_key(u, v)
+            data = self.edge_attrs.setdefault(key, {})
+            data.update(attributes)
 
-def find_shortest_path(graph: Graph, start_node, end_node) -> list:
-    """
-    Finds the shortest path between two nodes in an unweighted graph using BFS.
-    """
+    def update_edge_attributes(self, u: Any, v: Any, attributes: Dict[str, Any]) -> None:
+        self.add_edge(u, v)
+        key = self._edge_key(u, v)
+        data = self.edge_attrs.setdefault(key, {})
+        data.update(attributes)
+
+    def get_edge_attributes(self, u: Any, v: Any) -> Dict[str, Any]:
+        return dict(self.edge_attrs.get(self._edge_key(u, v), {}))
+
+    def neighbors(self, node: Any) -> List[Any]:
+        return list(self.adj.get(node, []))
+
+    def _edge_key(self, u: Any, v: Any) -> tuple[Any, Any]:
+        return tuple(sorted((u, v), key=repr))
+
+
+def find_shortest_path(graph: Graph, start_node: Any, end_node: Any) -> List[Any]:
+    """Find the shortest path between ``start_node`` and ``end_node``."""
+
     if start_node not in graph.adj or end_node not in graph.adj:
         return []
 
@@ -45,44 +79,64 @@ def find_shortest_path(graph: Graph, start_node, end_node) -> list:
 
     return []
 
-def find_k_shortest_paths(graph, start_node, end_node, k, weight_property=None):
-    """
-    Stub for finding the K shortest paths between two nodes in a graph.
-    """
+
+def find_k_shortest_paths(
+    graph: Graph,
+    start_node: Any,
+    end_node: Any,
+    k: int,
+    weight_property: Optional[str] = None,
+) -> List[List[Any]]:
+    """Stub for finding the ``k`` shortest paths between two nodes."""
+
     print(f"Finding {k} shortest paths from {start_node} to {end_node}")
+    if weight_property:
+        print(f"Ignoring weight property '{weight_property}' in stub implementation")
     return []
 
-def detect_communities_louvain(graph):
-    """
-    Stub for detecting communities using the Louvain method.
-    """
+
+def detect_communities_louvain(graph: Graph) -> Dict[str, Any]:
+    """Stub for detecting communities using the Louvain method."""
+
     print("Detecting communities using Louvain method")
     return {}
 
-def detect_communities_leiden(graph):
-    """
-    Stub for detecting communities using the Leiden method.
-    """
+
+def detect_communities_leiden(graph: Graph) -> Dict[str, Any]:
+    """Stub for detecting communities using the Leiden method."""
+
     print("Detecting communities using Leiden method")
     return {}
 
-def calculate_betweenness_centrality(graph):
-    """
-    Stub for calculating betweenness centrality for nodes in a graph.
-    """
+
+def calculate_betweenness_centrality(graph: Graph) -> Dict[str, Any]:
+    """Stub for calculating betweenness centrality."""
+
     print("Calculating betweenness centrality")
     return {}
 
-def calculate_eigenvector_centrality(graph):
-    """
-    Stub for calculating eigenvector centrality for nodes in a graph.
-    """
+
+def calculate_eigenvector_centrality(graph: Graph) -> Dict[str, Any]:
+    """Stub for calculating eigenvector centrality."""
+
     print("Calculating eigenvector centrality")
     return {}
 
-def detect_roles_and_brokers(graph):
-    """
-    Stub for detecting roles and brokers in a graph.
-    """
+
+def detect_roles_and_brokers(graph: Graph) -> Dict[str, Any]:
+    """Stub for detecting roles and brokers in a graph."""
+
     print("Detecting roles and brokers")
     return {}
+
+
+__all__ = [
+    "Graph",
+    "find_shortest_path",
+    "find_k_shortest_paths",
+    "detect_communities_louvain",
+    "detect_communities_leiden",
+    "calculate_betweenness_centrality",
+    "calculate_eigenvector_centrality",
+    "detect_roles_and_brokers",
+]
