@@ -1,0 +1,12 @@
+route:
+  receiver: observability-pager
+  group_by: [service_name]
+receivers:
+  - name: observability-pager
+    slack_configs:
+      - channel: "#observability-ops"
+        title: '{{ .CommonLabels.alertname }} for {{ .CommonLabels.service_name }}'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}'
+    pagerduty_configs:
+      - service_key: "PAGERDUTY_INTEGRATION_KEY"
+        severity: '{{ .CommonLabels.severity }}'

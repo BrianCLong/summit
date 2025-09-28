@@ -1,0 +1,11 @@
+name: demo-api-latency
+interval: 1m
+steps:
+  - http:
+      method: GET
+      url: http://demo-api:8000/orders/1234
+      assertions:
+        - type: response_time
+          threshold: 1000
+        - type: status_code
+          expected: 200

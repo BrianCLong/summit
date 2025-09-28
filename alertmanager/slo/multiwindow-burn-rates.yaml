@@ -1,0 +1,39 @@
+groups:
+  - name: observability-slos
+    rules:
+      - alert: LatencyBudgetBurn
+        expr: |
+          histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (service_name, le)) > 1
+            and histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket[1h])) by (service_name, le)) > 1
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: "Latency SLO burn for {{ $labels.service_name }}"
+          runbook: "https://runbooks.summit.internal/observability-first"
+      - alert: ErrorBudgetBurn
+        expr: |
+          (
+            sum(rate(http_server_request_total{status=~"5.."}[5m])) by (service_name)
+              /
+            sum(rate(http_server_request_total[5m])) by (service_name)
+          ) > 0.02
+            and (
+              sum(rate(http_server_request_total{status=~"5.."}[1h])) by (service_name)
+                /
+              sum(rate(http_server_request_total[1h])) by (service_name)
+            ) > 0.02
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: "Error budget burn for {{ $labels.service_name }}"
+          runbook: "https://runbooks.summit.internal/observability-first"
+      - alert: ExporterBacklog
+        expr: otel_exporter_queue_length > 500
+        for: 5m
+        labels:
+          severity: warn
+        annotations:
+          summary: "Exporter backlog high for {{ $labels.service_name }}"
+          runbook: "https://runbooks.summit.internal/observability-first"

@@ -1,0 +1,26 @@
+{
+  "title": "Error Budget",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Burn Rate (5m / 1h)",
+      "targets": [
+        {
+          "expr": "(sum(rate(http_server_request_total{status=~\"5..\",service_name=\"$service\"}[5m])) / sum(rate(http_server_request_total{service_name=\"$service\"}[5m]))) / 0.02"
+        },
+        {
+          "expr": "(sum(rate(http_server_request_total{status=~\"5..\",service_name=\"$service\"}[1h])) / sum(rate(http_server_request_total{service_name=\"$service\"}[1h]))) / 0.02"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Budget Remaining",
+      "targets": [
+        {
+          "expr": "1 - increase(http_server_request_total{status=~\"5..\",service_name=\"$service\"}[1d]) / increase(http_server_request_total{service_name=\"$service\"}[1d])"
+        }
+      ]
+    }
+  ]
+}

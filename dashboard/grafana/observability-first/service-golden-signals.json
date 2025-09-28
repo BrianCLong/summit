@@ -1,0 +1,47 @@
+{
+  "title": "Service Golden Signals",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Latency (p95/p99)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{service_name=\"$service\"}[5m])) by (le))"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{service_name=\"$service\"}[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate",
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_total{status=~\"5..\",service_name=\"$service\"}[5m])) / sum(rate(http_server_request_total{service_name=\"$service\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Saturation",
+      "targets": [
+        {
+          "expr": "avg(runtime_cpu_seconds_total{service_name=\"$service\"})"
+        },
+        {
+          "expr": "avg(db_client_connection_pool_utilization{service_name=\"$service\"})"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "query": "label_values(service_name)",
+        "type": "query"
+      }
+    ]
+  }
+}

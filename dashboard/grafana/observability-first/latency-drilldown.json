@@ -1,0 +1,46 @@
+{
+  "title": "Latency Drilldown",
+  "panels": [
+    {
+      "type": "table",
+      "title": "Top Slow Routes",
+      "targets": [
+        {
+          "expr": "topk(10, histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{service_name=\"$service\"}[5m])) by (le, route)))",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Trace Exemplars",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{service_name=\"$service\",route=\"$route\"}[5m])) by (le))"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "exemplar",
+          "options": {
+            "query": "sum(rate(http_server_request_duration_seconds_exemplars{service_name=\"$service\",route=\"$route\"}[5m]))"
+          }
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "query": "label_values(http_server_request_duration_seconds_bucket, service_name)",
+        "type": "query"
+      },
+      {
+        "name": "route",
+        "query": "label_values(http_server_request_duration_seconds_bucket{service_name=\"$service\"}, route)",
+        "type": "query"
+      }
+    ]
+  }
+}

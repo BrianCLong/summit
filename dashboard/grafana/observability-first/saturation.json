@@ -1,0 +1,32 @@
+{
+  "title": "Capacity & Saturation",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "CPU Utilization",
+      "targets": [
+        {
+          "expr": "avg(rate(runtime_cpu_seconds_total{service_name=\"$service\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Worker Queue Depth",
+      "targets": [
+        {
+          "expr": "avg(worker_queue_depth{service_name=\"$service\"})"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Exporter Backlog",
+      "targets": [
+        {
+          "expr": "max(otel_exporter_queue_length{service_name=\"$service\"})"
+        }
+      ]
+    }
+  ]
+}

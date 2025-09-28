@@ -1,0 +1,18 @@
+apiVersion: policy.sigstore.dev/v1alpha1
+kind: ClusterImagePolicy
+metadata:
+  name: telemetry-collector-provenance
+spec:
+  images:
+    - glob: "ghcr.io/summit/telemetry-collector:*"
+  authorities:
+    - keyless:
+        url: https://fulcio.sigstore.dev
+        identities:
+          - issuer: https://token.actions.githubusercontent.com
+            subject: "repo:summit-platform/telemetry-collector:*"
+      attestations:
+        - name: provenance
+          predicateType: https://slsa.dev/provenance/v1
+        - name: cosign-signature
+          predicateType: cosign.sigstore.dev/attestation/v1

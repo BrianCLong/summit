@@ -1,1 +1,57 @@
 name: attest-provenance
+
+on:
+  push:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+  attestations: write
+
+jobs:
+  build-and-attest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test -- --watch=false
+      - name: Build collector image
+        run: docker build -t ghcr.io/summit/telemetry-collector:${{ github.sha }} -f Dockerfile .
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push image
+        run: docker push ghcr.io/summit/telemetry-collector:${{ github.sha }}
+      - name: Capture digest
+        id: digest
+        run: |
+          echo "digest=$(docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/summit/telemetry-collector:${{ github.sha }} | cut -d'@' -f2)" >> $GITHUB_OUTPUT
+      - name: Generate provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ghcr.io/summit/telemetry-collector
+          subject-digest: ${{ steps.digest.outputs.digest }}
+          push-to-registry: true
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+      - name: Sign image with cosign
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+        run: cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/summit/telemetry-collector:${{ github.sha }}
+      - name: Upload attestation
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+        run: cosign attest --key env://COSIGN_PRIVATE_KEY --predicate build/intoto.jsonl --type slsaprovenance ghcr.io/summit/telemetry-collector:${{ github.sha }}

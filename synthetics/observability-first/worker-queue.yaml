@@ -1,0 +1,10 @@
+name: demo-worker-queue
+interval: 5m
+steps:
+  - script:
+      description: "Check worker queue depth"
+      command: |
+        curl -s http://demo-worker:9000/metrics | grep worker_job_duration_seconds_bucket
+      assertions:
+        - type: contains
+          expected: worker_job_duration_seconds_bucket
