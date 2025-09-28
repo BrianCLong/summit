@@ -23,6 +23,7 @@ import { tenantMiddleware } from './middleware/tenant.js';
 import { auditMiddleware } from './middleware/audit.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { logger } from './utils/logger.js';
+import { ingestRouter } from './routes/ingest.js';
 
 export async function createApp() {
   const app = express();
@@ -68,6 +69,9 @@ export async function createApp() {
       timestamp: new Date().toISOString(),
     });
   });
+
+  // Ingest wizard API (scaffold)
+  app.use('/ingest', ingestRouter);
 
   // Create Apollo Server
   const server = new ApolloServer({
