@@ -34,6 +34,10 @@
     "orval": "^7.11.2",
     "prettier": "^3.6.2",
     "ts-jest": "^29.4.1",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "axios": "^1.7.9"
+  },
+  "dependencies": {
+    "tweetnacl": "^1.0.3"
   }
 }
