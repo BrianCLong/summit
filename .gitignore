@@ -123,3 +123,7 @@ conflicts/
 __pycache__/
 *.pyc
 
+# Railhead automation output
+artifacts/railhead/
+logs/railhead/
+

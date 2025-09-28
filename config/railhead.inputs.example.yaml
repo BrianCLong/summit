@@ -1,0 +1,15 @@
+github:
+  org: summit-systems
+  additional_scm:
+    - type: gitlab
+      url: https://gitlab.example.com/groups/ml-platform
+clouds:
+  - aws
+  - azure
+observability:
+  prometheus_endpoint: https://prom.example.com/api
+  grafana_endpoint: https://grafana.example.com
+filters:
+  business_units:
+    - payments
+    - risk

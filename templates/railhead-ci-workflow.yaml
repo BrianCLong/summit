@@ -1,0 +1,30 @@
+name: Railhead Gates
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  railhead-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install
+      - name: Run lint
+        run: npm run lint
+      - name: Run tests
+        run: npm test -- --watch=false
+      - name: Security audit
+        run: npm audit --omit=dev || true
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: railhead-artifacts
+          path: artifacts/railhead/latest

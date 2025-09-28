@@ -1,0 +1,11 @@
+quality:
+  coverage: 0.8
+  lint: true
+security:
+  critical_vulns: 0
+  high_vulns: 5
+operational:
+  required_checks:
+    - lint
+    - test
+    - security
