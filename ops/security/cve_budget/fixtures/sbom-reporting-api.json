@@ -1,0 +1,11 @@
+{
+  "bomFormat": "SPDX",
+  "specVersion": "2.3",
+  "name": "reporting-api",
+  "versionInfo": "2025.09.01",
+  "packages": [
+    {"name": "reporting-api", "versionInfo": "2025.09.01"},
+    {"name": "django", "versionInfo": "4.2.8"},
+    {"name": "requests", "versionInfo": "2.31.0"}
+  ]
+}

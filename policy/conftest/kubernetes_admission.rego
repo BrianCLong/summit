@@ -103,6 +103,19 @@ warn[msg] {
   msg := sprintf("Container '%s' should have readiness probe", [container.name])
 }
 
+# Require signed and attested images for deployments
+deny[msg] {
+  input.kind == "Deployment"
+  not input.spec.template.metadata.annotations["supplychain.summit.dev/signed"] == "true"
+  msg := "Deployment must declare supplychain.summit.dev/signed=true"
+}
+
+deny[msg] {
+  input.kind == "Deployment"
+  not input.spec.template.metadata.annotations["supplychain.summit.dev/attested"] == "true"
+  msg := "Deployment must declare supplychain.summit.dev/attested=true"
+}
+
 # Validate image pull policy
 warn[msg] {
   input.kind == "Deployment"
