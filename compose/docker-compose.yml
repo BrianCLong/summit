@@ -53,3 +53,13 @@ services:
       - RATE_MS=200
     depends_on: [mc]
     command: ["node","/app/traffic.js"]
+
+  k6:
+    image: grafana/k6:0.51.0
+    environment:
+      - COS_GQL_URL=http://cos:3000/graphql
+      - RATE=30
+    volumes:
+      - ./synthetic/graphql_cos_k6.js:/scripts/graphql_cos_k6.js:ro
+    depends_on: [cos]
+    command: ["run","/scripts/graphql_cos_k6.js"]

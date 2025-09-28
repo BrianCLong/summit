@@ -1,0 +1,50 @@
+name: asset-inventory
+on:
+  pull_request:
+    paths: [ 'services/asset-inventory/**' ]
+  push:
+    branches: [ main ]
+    paths: [ 'services/asset-inventory/**' ]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with: { python-version: '3.12' }
+      - run: pip install -r services/asset-inventory/requirements.txt
+      - run: python -m pyflakes services/asset-inventory || true
+  build-sbom-sign:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: |
+          IMAGE=ghcr.io/${{ github.repository }}/asset-inventory:${{ github.sha }}
+          docker build -t $IMAGE services/asset-inventory
+          echo IMAGE=$IMAGE >> $GITHUB_ENV
+      - name: SBOM
+        uses: anchore/sbom-action@v0.14.3
+        with: { image: ${{ env.IMAGE }}, format: cyclonedx-json, output-file: sbom.cdx.json }
+      - name: Trivy gate
+        uses: aquasecurity/trivy-action@0.24.0
+        with: { image-ref: ${{ env.IMAGE }}, exit-code: '1', severity: 'CRITICAL,HIGH' }
+      - name: Push image
+        run: echo "$CR_PAT" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin && docker push $IMAGE
+        env: { CR_PAT: ${{ secrets.GITHUB_TOKEN }} }
+      - name: Cosign sign
+        uses: sigstore/cosign-installer@v3.3.0
+      - run: cosign sign --yes ${{ env.IMAGE }}
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with: { name: sbom-cyclonedx, path: sbom.cdx.json }
+      - name: SLSA provenance
+        uses: slsa-framework/slsa-github-generator@v2.0.0
+        with:
+          artifacts: "${{ env.IMAGE }}"
+          upload-assets: true

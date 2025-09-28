@@ -1,0 +1,46 @@
+{
+    "run_id": "9b19ecbf-cb33-432e-909d-3b83aacb2fd7",
+    "workflow": "R1 Rapid Attribution",
+    "input_id": "case_6_golden_match",
+    "e2e_ok": false,
+    "first_failure_at": null,
+    "step_results": [
+        {
+            "step_id": "step_1",
+            "ok": true,
+            "details": {
+                "output": "processed data A",
+                "cost_usd": 0.01,
+                "side_effects": [
+                    "ticket created"
+                ]
+            },
+            "started_at": 1759020538.9805598,
+            "ended_at": 1759020539.0805597
+        },
+        {
+            "step_id": "step_2",
+            "ok": true,
+            "details": {
+                "output": "processed data B",
+                "cost_usd": 0.02
+            },
+            "started_at": 1759020539.0805607,
+            "ended_at": 1759020539.1805608
+        },
+        {
+            "step_id": "step_3",
+            "ok": true,
+            "details": {
+                "output": "specific golden output",
+                "cost_usd": 0.015
+            },
+            "started_at": 1759020539.180562,
+            "ended_at": 1759020539.280562
+        }
+    ],
+    "judge": "<lambda>",
+    "latency_ms": 0,
+    "cost_usd": 0.045,
+    "rubric_name": "Rapid Attribution Rubric V1"
+}

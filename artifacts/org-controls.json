@@ -1,0 +1,7 @@
+{
+  "login": "your-org",
+  "two_factor_requirement_enabled": null,
+  "members_can_create_repositories": null,
+  "default_repository_permission": null,
+  "plan": null
+}

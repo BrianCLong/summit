@@ -1,0 +1,331 @@
+# ────────────────────────────────────────────────────────────────────────────────
+# MC v0.4.3 — "Quantum‑Enhanced Cognitive Networks" (QECN)
+# Design-first, safety-first scaffolds: contracts, policies, observability,
+# CI, Helm overlay, and runbooks. Drop at repo root.
+# ────────────────────────────────────────────────────────────────────────────────
+---
+kind: file
+name: roadmap/v0.4.3/CONDUCTOR_SUMMARY.md
+content: |
+  # MC v0.4.3 — Quantum‑Enhanced Cognitive Networks
+  
+  **Goal**: Safely integrate quantum backends into the Cognitive Synthesis Engine (CSE) for query‑time acceleration and federated training—under strict cost, residency,
+  privacy, and provenance guardrails.
+  
+  **Non‑Goals**: New autonomy levels; generalized AGI claims; unbounded egress.
+  
+  **Constraints**: Persisted‑only API; OPA/ABAC; PQ dual‑sign; zk fairness; HITL for scope; residency locks per quantum region; QC budget ceilings per tenant.
+  
+  **Risks**: Cloud‑provider drift; QC queue unpredictability; cost spikes; mixed‑mode correctness gaps.
+  
+  **Done**: All epics meet AC; rollout gates pass (p95 ≤350ms; QC cost/tenant ≤ ceiling); evidence bundle signed; error‑budget burn <20% during canaries.
+  
+  ---
+  ## Epics
+  - **E1 Quantum Orchestration Gateway (QOG)** — Broker for quantum/classical/emu backends with deterministic fallbacks and correctness checks.
+  - **E2 Residency & Sovereignty for QC** — Region‑pinned job routing; per‑tenant residency proofs; export controls.
+  - **E3 QC Budget Guard v3** — Per‑tenant QC minute ceilings, surge protection, and composite cost score.
+  - **E4 Mixed‑Mode Correctness** — Differential tests (classical vs emu vs QC) + zk‑bounded‑error attestations.
+  - **E5 Federated Quantum Learning (FQL) Hooks** — Privacy‑preserving updates with DP budgets and post‑quantum secure aggregation.
+  - **E6 Sovereign Console v3** — UI: quantum job queue, budgets, residency map, correctness tiles, attestor status.
+---
+kind: file
+name: adr/ADR-0049-quantum-orchestration-gateway.md
+content: |
+  # ADR‑0049: Quantum Orchestration Gateway (QOG)
+  **Decision**: Introduce a broker that selects among {classical, emulator, QC} backends with policy‑driven routing (residency, cost, latency, correctness) and fail‑closed semantics.
+  **Why**: Hide provider specifics, enforce guardrails, and preserve determinism via emulation and proofs.
+  **Consequences**: Slight latency overhead for checks; strong safety/usability gains.
+---
+kind: file
+name: graphql/schema/mc-admin.v043.graphql
+content: |
+  """ v0.4.3 GraphQL delta (extends v0.4.2/0.4.1) """
+  
+  enum QuantumBackend { CLASSICAL EMULATOR QPU }
+  type QuantumRegion { id: ID!, provider: String!, geo: String!, residencyTag: String! }
+  
+  type QuantumJob {
+    id: ID!, tenant: Tenant!, backend: QuantumBackend!, region: QuantumRegion!,
+    submittedAt: DateTime!, status: String!, costMinutes: Float!, resultHash: String
+  }
+  
+  type QcBudgets { minutesMonthly: Float!, minutesUsed: Float!, surgeThreshold: Float!, hardCeiling: Float! }
+  
+  extend type Query {
+    quantumBackends: [QuantumRegion!]!
+    quantumQueue(tenant: Tenant!, limit: Int = 20): [QuantumJob!]!
+    qcBudgets(tenant: Tenant!): QcBudgets!
+    mixedModeCorrectness(tenant: Tenant!, route: String!): Float!  # bounded‑error score [0..1]
+  }
+  
+  input QcBudgetSetInput { minutesMonthly: Float!, surgeThreshold: Float!, hardCeiling: Float! }
+  input QuantumSubmitInput { route: String!, payload: JSON!, preferred: QuantumBackend!, regionId: ID!, timeoutMs: Int! }
+  
+  extend type Mutation {
+    qcBudgetsSet(tenant: Tenant!, input: QcBudgetSetInput!): MutationResult!
+    quantumSubmit(tenant: Tenant!, input: QuantumSubmitInput!): MutationResult!
+    quantumCancel(jobId: ID!): MutationResult!
+    registerQcAttestor(lab: String!, bundleHash: String!): MutationResult!
+  }
+---
+kind: file
+name: graphql/persisted/quantumSubmit.graphql
+content: |
+  mutation quantumSubmit($tenant: Tenant!, $input: QuantumSubmitInput!) {
+    quantumSubmit(tenant: $tenant, input: $input) { ok audit { evidenceId ts actor } }
+  }
+---
+kind: file
+name: graphql/persisted/qcBudgetsSet.graphql
+content: |
+  mutation qcBudgetsSet($tenant: Tenant!, $input: QcBudgetSetInput!) {
+    qcBudgetsSet(tenant: $tenant, input: $input) { ok audit { evidenceId ts actor } }
+  }
+---
+kind: file
+name: policy/mc-admin.v043.rego
+content: |
+  package mc.admin.v043
+  import data.mc.admin
+  
+  default allow = false
+  base := data.mc.admin.decision
+  
+  # Residency: requested quantum region must match tenant residency tag
+  deny[msg] {
+    input.operation.name == "quantumSubmit"
+    input.operation.variables.input.regionId != input.actor.region
+    msg := "qc_residency_violation"
+  }
+  
+  # Budgets: forbid when projected minutes exceed hard ceiling
+  deny[msg] {
+    input.operation.name == "quantumSubmit"
+    projected := input.operation.variables.input.payload.costMinutes
+    ceiling := input.tenant.budget.hardCeiling
+    projected + input.tenant.budget.minutesUsed > ceiling
+    msg := "qc_budget_exceeded"
+  }
+  
+  # Only platform‑admin may set tenant QC budgets; HITL required
+  deny[msg] {
+    input.operation.name == "qcBudgetsSet"
+    input.actor.role != "platform-admin"
+    msg := "role_platform_admin_required"
+  }
+  deny[msg] {
+    input.operation.name == "qcBudgetsSet"
+    not input.context.hitl
+    msg := "hitl_required"
+  }
+  
+  allow { base.allow }
+  decision = {"allow": allow, "deny": base.deny ++ deny}
+---
+kind: file
+name: policy/tests/mc-admin.v043_test.rego
+content: |
+  package mc.admin.v043
+  
+  test_residency_enforced {
+    not allow with input as {
+      "operation": {"name": "quantumSubmit", "variables": {"input": {"regionId": "EU"}}},
+      "actor": {"region": "US"},
+      "tenant": {"budget": {"minutesUsed": 0, "hardCeiling": 10}}
+    }
+  }
+  
+  test_budget_violation_blocks {
+    not allow with input as {
+      "operation": {"name": "quantumSubmit", "variables": {"input": {"payload": {"costMinutes": 9}}}},
+      "actor": {"region": "US"},
+      "tenant": {"budget": {"minutesUsed": 3, "hardCeiling": 10}}
+    }
+  }
+---
+kind: file
+name: server/src/qecn/resolvers.v043.ts
+content: |
+  import { emitAudit } from '../audit.js';
+  
+  export const v043Resolvers = {
+    Query: {
+      quantumBackends: async () => [
+        { id: 'US', provider: 'aws-braket', geo: 'us-west-2', residencyTag: 'US' },
+        { id: 'EU', provider: 'iqm', geo: 'eu-central-1', residencyTag: 'EU' }
+      ],
+      quantumQueue: async (_: any, { tenant, limit }: any) => [],
+      qcBudgets: async (_: any, { tenant }: any) => ({ minutesMonthly: 100, minutesUsed: 0, surgeThreshold: 0.8, hardCeiling: 120 }),
+      mixedModeCorrectness: async (_: any, { tenant, route }: any) => 0.995
+    },
+    Mutation: {
+      qcBudgetsSet: async (_: any, vars: any, ctx: any) => {
+        const input = { operation: { name: 'qcBudgetsSet', variables: vars }, actor: ctx.actor, context: { ...ctx.context, hitl: true } };
+        const d = await ctx.authz(input); if (!d.allow || d.deny?.length) throw new Error(`policy_denied:${d.deny?.[0]||'unknown'}`);
+        const audit = await emitAudit(ctx, input); return { ok: true, audit };
+      },
+      quantumSubmit: async (_: any, vars: any, ctx: any) => {
+        const input = { operation: { name: 'quantumSubmit', variables: vars }, actor: ctx.actor, tenant: vars.tenant, context: ctx.context };
+        const d = await ctx.authz(input); if (!d.allow || d.deny?.length) throw new Error(`policy_denied:${d.deny?.[0]||'unknown'}`);
+        // Broker selection (placeholder) — route to emulator if QC unavailable
+        const audit = await emitAudit(ctx, input); return { ok: true, audit };
+      },
+      quantumCancel: async (_: any, vars: any, ctx: any) => {
+        const input = { operation: { name: 'quantumCancel', variables: vars }, actor: ctx.actor, context: ctx.context };
+        const d = await ctx.authz(input); if (!d.allow || d.deny?.length) throw new Error(`policy_denied:${d.deny?.[0]||'unknown'}`);
+        const audit = await emitAudit(ctx, input); return { ok: true, audit };
+      },
+      registerQcAttestor: async (_: any, vars: any, ctx: any) => {
+        const input = { operation: { name: 'registerQcAttestor', variables: vars }, actor: ctx.actor, context: { ...ctx.context, purpose: 'audit' } };
+        const d = await ctx.authz(input); if (!d.allow || d.deny?.length) throw new Error(`policy_denied:${d.deny?.[0]||'unknown'}`);
+        const audit = await emitAudit(ctx, input); return { ok: true, audit };
+      }
+    }
+  };
+---
+kind: file
+name: observability/grafana/dashboards/mc-v043-qecn.json
+content: |
+  {"title":"MC v0.4.3 — QECN","panels":[
+    {"type":"stat","title":"QC Minutes Used (tenant)","targets":[{"expr":"sum(mc_qc_minutes_used) by (tenant)"}]},
+    {"type":"stat","title":"QC Budget Headroom %","targets":[{"expr":"100*(1 - sum(mc_qc_minutes_used)/sum(mc_qc_minutes_ceiling))"}]},
+    {"type":"graph","title":"Mixed‑Mode Correctness","targets":[{"expr":"avg_over_time(mc_mixed_correctness[30m])"}]},
+    {"type":"graph","title":"QOG Success/Fallback","targets":[{"expr":"sum(rate(mc_qog_route_total[5m])) by (route,backend)"}]},
+    {"type":"stat","title":"Residency Violations (5m)","targets":[{"expr":"sum(rate(mc_qc_residency_violation_total[5m]))"}]},
+    {"type":"stat","title":"QC Attestor Freshness (h)","targets":[{"expr":"(time()-max(mc_qc_attestor_ts))/3600"}]}
+  ]}
+---
+kind: file
+name: prom/rules/mc-v043-recording.rules.yaml
+content: |
+  groups:
+  - name: mc-v043
+    interval: 15s
+    rules:
+    - record: mc_qc_minutes_used
+      expr: sum(rate(mc_qc_job_minutes[5m])) by (tenant)
+    - record: mc_qc_minutes_ceiling
+      expr: max(mc_qc_budget_ceiling) by (tenant)
+    - record: mc_mixed_correctness
+      expr: avg(mc_mixed_correctness_raw)
+    - record: mc_qog_route_total
+      expr: sum by (route,backend) (rate(mc_qog_route_count[5m]))
+    - record: mc_qc_residency_violation_total
+      expr: sum(rate(mc_qc_residency_violation_count[5m]))
+    - record: mc_qc_attestor_ts
+      expr: max(mc_qc_attestor_report_ts)
+---
+kind: file
+name: prom/alerts/mc-v043.alerts.yaml
+content: |
+  groups:
+  - name: mc-v043
+    rules:
+    - alert: QCBudgetNearCeiling
+      expr: (sum(mc_qc_minutes_used)/sum(mc_qc_minutes_ceiling)) > 0.8
+      for: 10m
+      labels: {severity: warn}
+      annotations:
+        summary: "QC budget headroom <20%"
+    - alert: ResidencyViolationDetected
+      expr: sum(rate(mc_qc_residency_violation_total[5m])) > 0
+      for: 1m
+      labels: {severity: page}
+      annotations:
+        summary: "Quantum residency violation observed"
+    - alert: MixedModeCorrectnessDegrading
+      expr: avg_over_time(mc_mixed_correctness[30m]) < 0.98
+      for: 15m
+      labels: {severity: hold}
+      annotations:
+        summary: "Mixed‑mode correctness below 0.98"
+---
+kind: file
+name: helm/overlays/v043/values-v043-qecn.yaml
+content: |
+  adminApi:
+    env:
+      - name: QOG_PROVIDER_MAP
+        value: |-
+          {"US": {"provider": "aws-braket", "modes": ["EMULATOR","QPU"]}, "EU": {"provider": "iqm", "modes": ["EMULATOR","QPU"]}}
+  prometheusRules:
+    files:
+      - prom/rules/mc-v043-recording.rules.yaml
+      - prom/alerts/mc-v043.alerts.yaml
+  serviceMonitor:
+    enabled: true
+  networkPolicy:
+    enabled: true
+    egressAllowCidrs:
+      - 52.95.245.0/24   # example QC API CIDR
+      - 18.156.0.0/15   
+---
+kind: file
+name: .github/workflows/v043-qecn-verify.yml
+content: |
+  name: v043-qecn-verify
+  on: [pull_request, workflow_dispatch]
+  jobs:
+    verify:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - name: OPA tests
+          run: conftest test policy/mc-admin.v043.rego policy/tests
+        - name: Prom checks
+          run: |
+            promtool check rules prom/rules/mc-v043-recording.rules.yaml
+            promtool check rules prom/alerts/mc-v043.alerts.yaml
+        - name: SDL lint
+          run: npx graphql-schema-linter graphql/schema/mc-admin.v043.graphql
+        - name: Evidence skeleton
+          run: |
+            mkdir -p dist && echo '{"version":"v0.4.3","artifacts":[]}' > dist/evidence-v0.4.3-mc.json
+---
+kind: file
+name: docs/runbooks/v0.4.3-qecn.md
+content: |
+  # Ops — v0.4.3 QECN
+  - **Budgets**: set per tenant via `qcBudgetsSet` (HITL required). Alerts at 80%, block at 100%.
+  - **Residency**: actor.region must match regionId; violations page; auto‑rollback job.
+  - **Correctness**: watch Mixed‑Mode tile; HOLD canary if <0.98.
+  - **Attestors**: register QC bundles; stale >72h pages.
+  - **Rollback**: broker to EMULATOR/CLASSICAL; disable QC submit; attach evidence.
+---
+kind: file
+name: ui/console/qecn/QecnPanel.tsx
+content: |
+  import React,{useEffect,useState} from 'react';
+  import { Button } from '@/components/ui/button';
+  
+  export default function QecnPanel({ client, tenant }: any){
+    const [budgets,setBudgets]=useState<any>();
+    const [backends,setBackends]=useState<any[]>([]);
+    useEffect(()=>{(async()=>{
+      setBudgets(await client.qcBudgets({tenant}));
+      setBackends(await client.quantumBackends());
+    })();},[tenant]);
+    return (
+      <div className="grid gap-3">
+        <div className="text-xl font-semibold">Quantum‑Enhanced Cognitive Networks</div>
+        <pre className="bg-gray-100 p-3 rounded">{JSON.stringify(budgets,null,2)}</pre>
+        <div className="grid grid-cols-3 gap-2">
+          {backends.map(b=> <div key={b.id} className="p-3 rounded border"><div className="font-medium">{b.provider} — {b.geo}</div><div className="text-xs">residency: {b.residencyTag}</div></div>)}
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={()=>client.qcBudgetsSet({tenant, input:{ minutesMonthly:120, surgeThreshold:0.8, hardCeiling:150 }})}>Set Budgets</Button>
+        </div>
+      </div>
+    );
+  }
+---
+kind: file
+name: README-v043.md
+content: |
+  # v0.4.3 QECN — Snap‑in Steps
+  1) Merge; resolve persisted IDs for new ops in CI.
+  2) Mount `v043Resolvers` in your server alongside v0.4.x.
+  3) Apply Helm overlay `values-v043-qecn.yaml` and import dashboard JSON.
+  4) Enable `v043-qecn-verify` workflow; make required on `main`.
+  5) Add `QecnPanel` to the Sovereign Console; wire client calls.

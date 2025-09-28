@@ -1,0 +1,55 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "type": "text",
+      "title": "Agentic Evals Dashboard",
+      "options": {
+        "content": "# Agentic Evals Overview\n\nThis dashboard provides an overview of the agentic workflow evaluation metrics.\n\n**Key Metrics:**\n- Pass rate over time by workflow\n- First failure pareto (bar chart of step ids)\n- Latency p50/p95\n- Cost per task\n- Coverage metrics (tools_used, retry_rate, backtrack_depth)\n\n**Alert Rules:**\n- Pass rate drop > 10% in 24h\n- New top-1 first_failure_at persists > 3h\n- p95 latency > SLO"
+      }
+    }
+  ],
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Agentic Evals",
+  "uid": "agentic-evals-dashboard",
+  "version": 1
+}

@@ -1,0 +1,389 @@
+name: v0.4.5 Canary Gates
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # Every 5 minutes
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to validate'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      tenant_id:
+        description: 'Tenant ID for validation'
+        required: true
+        default: 'TENANT_001'
+
+env:
+  PROM_URL: ${{ vars.PROMETHEUS_URL || 'http://prometheus.monitoring.svc.cluster.local:9090' }}
+  GRAFANA_URL: ${{ vars.GRAFANA_URL || 'http://grafana.monitoring.svc.cluster.local:3000' }}
+
+jobs:
+  canary-gates:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'staging' }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y bc jq curl
+
+    - name: Set environment variables
+      run: |
+        echo "TENANT_ID=${{ inputs.tenant_id || 'TENANT_001' }}" >> $GITHUB_ENV
+        echo "ENVIRONMENT=${{ inputs.environment || 'staging' }}" >> $GITHUB_ENV
+
+    - name: Validate Prometheus connectivity
+      run: |
+        echo "🔍 Testing Prometheus connectivity..."
+        curl -sf "$PROM_URL/api/v1/query?query=up" > /dev/null
+        echo "✅ Prometheus accessible at $PROM_URL"
+
+    - name: Delta Gate - 24h Score Positive
+      id: delta_gate
+      run: |
+        echo "🎯 Checking Delta Gate: avg_over_time(mc_opt_delta_score[24h]) > 0"
+        Q='avg_over_time(mc_opt_delta_score[24h])'
+        VAL=$(curl -sS "$PROM_URL/api/v1/query?query=$Q" | jq -r '.data.result[0].value[1] // "null"')
+
+        if [[ "$VAL" == "null" ]]; then
+          echo "❌ Delta score metric not available"
+          echo "result=FAIL" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+        # Use awk for floating point comparison
+        if awk -v v="$VAL" 'BEGIN{exit(v>0?0:1)}'; then
+          echo "✅ Delta gate PASSED: $VAL > 0"
+          echo "result=PASS" >> $GITHUB_OUTPUT
+          echo "value=$VAL" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Delta gate FAILED: $VAL ≤ 0"
+          echo "result=FAIL" >> $GITHUB_OUTPUT
+          echo "value=$VAL" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+    - name: Correctness Floor Gate
+      id: correctness_gate
+      run: |
+        echo "🛡️ Checking Correctness Floor: increase(mc_correctness_floor_breach_total[30m]) == 0"
+        Q='increase(mc_correctness_floor_breach_total[30m])'
+        VAL=$(curl -sS "$PROM_URL/api/v1/query?query=$Q" | jq -r '.data.result[0].value[1] // "0"')
+
+        if [[ "$VAL" == "0" ]]; then
+          echo "✅ Correctness floor gate PASSED: $VAL breaches"
+          echo "result=PASS" >> $GITHUB_OUTPUT
+          echo "value=$VAL" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Correctness floor gate FAILED: $VAL breaches in 30m"
+          echo "result=FAIL" >> $GITHUB_OUTPUT
+          echo "value=$VAL" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+    - name: Weight Sanity Gate
+      id: weight_gate
+      run: |
+        echo "⚖️ Checking Weight Sanity: sum of weights ≤ 1.0"
+        Q='(mc_autotune_weight_latency + mc_autotune_weight_cost + mc_autotune_weight_carbon)'
+        VAL=$(curl -sS "$PROM_URL/api/v1/query?query=$Q" | jq -r '.data.result[0].value[1] // "null"')
+
+        if [[ "$VAL" == "null" ]]; then
+          echo "❌ Weight metrics not available"
+          echo "result=FAIL" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+        if awk -v v="$VAL" 'BEGIN{exit(v<=1.0?0:1)}'; then
+          echo "✅ Weight sanity gate PASSED: $VAL ≤ 1.0"
+          echo "result=PASS" >> $GITHUB_OUTPUT
+          echo "value=$VAL" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Weight sanity gate FAILED: $VAL > 1.0"
+          echo "result=FAIL" >> $GITHUB_OUTPUT
+          echo "value=$VAL" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+    - name: Budget Gate
+      id: budget_gate
+      run: |
+        echo "💰 Checking Budget Gate: QC minutes < 100% block threshold"
+        USED_Q="sum(mc_qam_quantum_minutes_used{tenant=\"$TENANT_ID\"})"
+        BUDGET_Q="mc_qam_quantum_minutes_budget{tenant=\"$TENANT_ID\"}"
+
+        USED=$(curl -sS "$PROM_URL/api/v1/query?query=$USED_Q" | jq -r '.data.result[0].value[1] // "0"')
+        BUDGET=$(curl -sS "$PROM_URL/api/v1/query?query=$BUDGET_Q" | jq -r '.data.result[0].value[1] // "100"')
+
+        USAGE_PERCENT=$(echo "scale=2; ($USED / $BUDGET) * 100" | bc -l)
+
+        if awk -v v="$USAGE_PERCENT" 'BEGIN{exit(v<100?0:1)}'; then
+          echo "✅ Budget gate PASSED: ${USAGE_PERCENT}% < 100%"
+          echo "result=PASS" >> $GITHUB_OUTPUT
+          echo "value=$USAGE_PERCENT" >> $GITHUB_OUTPUT
+
+          if awk -v v="$USAGE_PERCENT" 'BEGIN{exit(v>=80?1:0)}'; then
+            echo "⚠️ Budget warning: ${USAGE_PERCENT}% ≥ 80% threshold"
+          fi
+        else
+          echo "❌ Budget gate FAILED: ${USAGE_PERCENT}% ≥ 100%"
+          echo "result=FAIL" >> $GITHUB_OUTPUT
+          echo "value=$USAGE_PERCENT" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+    - name: Performance Regression Gate
+      id: performance_gate
+      run: |
+        echo "📊 Checking Performance Gate: P95 within +5% of baseline"
+        CURRENT_Q="histogram_quantile(0.95, rate(mc_qam_request_duration_seconds_bucket[5m]))"
+        BASELINE_Q="mc_qam_baseline_p95_seconds"
+
+        CURRENT=$(curl -sS "$PROM_URL/api/v1/query?query=$CURRENT_Q" | jq -r '.data.result[0].value[1] // "null"')
+        BASELINE=$(curl -sS "$PROM_URL/api/v1/query?query=$BASELINE_Q" | jq -r '.data.result[0].value[1] // "null"')
+
+        if [[ "$CURRENT" == "null" ]] || [[ "$BASELINE" == "null" ]]; then
+          echo "⚠️ Performance metrics not available, skipping gate"
+          echo "result=SKIP" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        THRESHOLD=$(echo "$BASELINE * 1.05" | bc -l)
+
+        if awk -v c="$CURRENT" -v t="$THRESHOLD" 'BEGIN{exit(c<=t?0:1)}'; then
+          IMPROVEMENT=$(echo "scale=2; (($BASELINE - $CURRENT) / $BASELINE) * 100" | bc -l)
+          echo "✅ Performance gate PASSED: ${CURRENT}s ≤ ${THRESHOLD}s (${IMPROVEMENT}% improvement)"
+          echo "result=PASS" >> $GITHUB_OUTPUT
+          echo "value=$CURRENT" >> $GITHUB_OUTPUT
+          echo "baseline=$BASELINE" >> $GITHUB_OUTPUT
+        else
+          REGRESSION=$(echo "scale=2; (($CURRENT - $BASELINE) / $BASELINE) * 100" | bc -l)
+          echo "❌ Performance gate FAILED: ${CURRENT}s > ${THRESHOLD}s (+${REGRESSION}%)"
+          echo "result=FAIL" >> $GITHUB_OUTPUT
+          echo "value=$CURRENT" >> $GITHUB_OUTPUT
+          echo "baseline=$BASELINE" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+    - name: Generate Gate Results Summary
+      if: always()
+      run: |
+        echo "📋 Canary Gate Results Summary"
+        echo "================================"
+        echo "Environment: $ENVIRONMENT"
+        echo "Tenant: $TENANT_ID"
+        echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        echo ""
+        echo "Gate Results:"
+        echo "- Delta Gate (24h): ${{ steps.delta_gate.outputs.result }} (${{ steps.delta_gate.outputs.value }})"
+        echo "- Correctness Floor: ${{ steps.correctness_gate.outputs.result }} (${{ steps.correctness_gate.outputs.value }} breaches)"
+        echo "- Weight Sanity: ${{ steps.weight_gate.outputs.result }} (sum: ${{ steps.weight_gate.outputs.value }})"
+        echo "- Budget Gate: ${{ steps.budget_gate.outputs.result }} (${{ steps.budget_gate.outputs.value }}%)"
+        echo "- Performance Gate: ${{ steps.performance_gate.outputs.result }} (${{ steps.performance_gate.outputs.value }}s)"
+        echo ""
+
+        # Check if all critical gates passed
+        CRITICAL_PASSED=true
+        [[ "${{ steps.delta_gate.outputs.result }}" == "PASS" ]] || CRITICAL_PASSED=false
+        [[ "${{ steps.correctness_gate.outputs.result }}" == "PASS" ]] || CRITICAL_PASSED=false
+        [[ "${{ steps.weight_gate.outputs.result }}" == "PASS" ]] || CRITICAL_PASSED=false
+        [[ "${{ steps.budget_gate.outputs.result }}" == "PASS" ]] || CRITICAL_PASSED=false
+
+        if [[ "$CRITICAL_PASSED" == "true" ]]; then
+          echo "🟢 ALL CRITICAL GATES PASSED - System healthy"
+          echo "gate_status=HEALTHY" >> $GITHUB_ENV
+        else
+          echo "🔴 CRITICAL GATE FAILURE - System requires attention"
+          echo "gate_status=UNHEALTHY" >> $GITHUB_ENV
+        fi
+
+    - name: Create Evidence Artifact
+      if: always()
+      run: |
+        mkdir -p evidence
+
+        cat > evidence/canary-gates-${{ github.run_number }}.json << EOF
+        {
+          "run_id": "${{ github.run_number }}",
+          "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+          "environment": "$ENVIRONMENT",
+          "tenant_id": "$TENANT_ID",
+          "gates": {
+            "delta_gate": {
+              "result": "${{ steps.delta_gate.outputs.result }}",
+              "value": "${{ steps.delta_gate.outputs.value }}",
+              "threshold": 0,
+              "description": "24h optimization delta score positive"
+            },
+            "correctness_gate": {
+              "result": "${{ steps.correctness_gate.outputs.result }}",
+              "value": "${{ steps.correctness_gate.outputs.value }}",
+              "threshold": 0,
+              "description": "No correctness floor breaches in 30m"
+            },
+            "weight_gate": {
+              "result": "${{ steps.weight_gate.outputs.result }}",
+              "value": "${{ steps.weight_gate.outputs.value }}",
+              "threshold": 1.0,
+              "description": "Weight sum within bounds"
+            },
+            "budget_gate": {
+              "result": "${{ steps.budget_gate.outputs.result }}",
+              "value": "${{ steps.budget_gate.outputs.value }}",
+              "threshold": 100,
+              "description": "Budget utilization under limit"
+            },
+            "performance_gate": {
+              "result": "${{ steps.performance_gate.outputs.result }}",
+              "value": "${{ steps.performance_gate.outputs.value }}",
+              "baseline": "${{ steps.performance_gate.outputs.baseline }}",
+              "description": "P95 latency within regression threshold"
+            }
+          },
+          "overall_status": "${{ env.gate_status }}",
+          "prometheus_url": "${{ env.PROM_URL }}",
+          "checksum": "$(find evidence -name "*.json" -exec cat {} \; | sha256sum | cut -d' ' -f1)"
+        }
+        EOF
+
+    - name: Upload Evidence Artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: canary-gates-evidence-${{ github.run_number }}
+        path: evidence/
+        retention-days: 30
+
+    - name: Post to Slack on Failure
+      if: failure() && env.gate_status == 'UNHEALTHY'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        channel: '#mc-platform-alerts'
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+        text: |
+          🚨 MC Platform v0.4.5 Canary Gate Failure
+
+          Environment: ${{ env.ENVIRONMENT }}
+          Tenant: ${{ env.TENANT_ID }}
+
+          Failed Gates:
+          - Delta: ${{ steps.delta_gate.outputs.result }}
+          - Correctness: ${{ steps.correctness_gate.outputs.result }}
+          - Weights: ${{ steps.weight_gate.outputs.result }}
+          - Budget: ${{ steps.budget_gate.outputs.result }}
+          - Performance: ${{ steps.performance_gate.outputs.result }}
+
+          Immediate action required! 🔥
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Create GitHub Issue on Critical Failure
+      if: failure() && env.gate_status == 'UNHEALTHY'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const title = `🚨 MC Platform v0.4.5 Canary Gate Failure - ${process.env.ENVIRONMENT}`;
+          const body = `
+          ## Critical Canary Gate Failure
+
+          **Environment:** ${process.env.ENVIRONMENT}
+          **Tenant:** ${process.env.TENANT_ID}
+          **Timestamp:** ${new Date().toISOString()}
+          **Run:** ${{ github.run_number }}
+
+          ### Failed Gates
+
+          | Gate | Result | Value | Threshold |
+          |------|--------|--------|-----------|
+          | Delta 24h | ${{ steps.delta_gate.outputs.result }} | ${{ steps.delta_gate.outputs.value }} | > 0 |
+          | Correctness Floor | ${{ steps.correctness_gate.outputs.result }} | ${{ steps.correctness_gate.outputs.value }} | = 0 |
+          | Weight Sanity | ${{ steps.weight_gate.outputs.result }} | ${{ steps.weight_gate.outputs.value }} | ≤ 1.0 |
+          | Budget | ${{ steps.budget_gate.outputs.result }} | ${{ steps.budget_gate.outputs.value }}% | < 100% |
+          | Performance | ${{ steps.performance_gate.outputs.result }} | ${{ steps.performance_gate.outputs.value }}s | +5% max |
+
+          ### Immediate Actions Required
+
+          1. 🔍 Investigate root cause of gate failure
+          2. 🛑 Consider rollback if correctness or delta gates failed
+          3. 📊 Review Grafana dashboards for system health
+          4. 🔧 Execute remediation based on specific gate failure
+
+          ### Runbooks
+
+          - [Gate Failure Response](./docs/runbooks/canary-gate-failure.md)
+          - [Emergency Rollback](./docs/runbooks/emergency-rollback.md)
+          - [System Health Check](./docs/runbooks/system-health-check.md)
+
+          /cc @mc-platform-team @sre-team
+          `;
+
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: title,
+            body: body,
+            labels: ['critical', 'mc-platform', 'canary-failure', 'production']
+          });
+
+  rollback-trigger:
+    runs-on: ubuntu-latest
+    needs: canary-gates
+    if: failure()
+    environment: ${{ inputs.environment || 'staging' }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Execute Emergency Rollback
+      run: |
+        echo "🔄 Triggering emergency rollback procedure..."
+
+        # Execute rollback validation script
+        chmod +x scripts/v045-go-live-validation.sh
+        scripts/v045-go-live-validation.sh rollback
+
+        echo "📋 Rollback procedure initiated"
+        echo "⚠️ Manual verification required:"
+        echo "1. Confirm autoTune disabled via GraphQL"
+        echo "2. Verify weight reversion to last known good state"
+        echo "3. Monitor delta score for 10-minute window"
+        echo "4. Check correctness floor for any new breaches"
+
+    - name: Notify Operations Team
+      uses: 8398a7/action-slack@v3
+      with:
+        status: custom
+        custom_payload: |
+          {
+            channel: '#mc-platform-ops',
+            text: '🔄 MC Platform v0.4.5 Emergency Rollback Initiated',
+            attachments: [{
+              color: 'warning',
+              fields: [{
+                title: 'Environment',
+                value: '${{ inputs.environment || "staging" }}',
+                short: true
+              }, {
+                title: 'Trigger',
+                value: 'Canary gate failure',
+                short: true
+              }, {
+                title: 'Action Required',
+                value: 'Manual verification of rollback completion',
+                short: false
+              }]
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

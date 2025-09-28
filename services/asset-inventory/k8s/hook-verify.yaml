@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify-asset-inventory
+  annotations: { "argocd.argoproj.io/hook": PreSync, "argocd.argoproj.io/hook-delete-policy": HookSucceeded }
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: verify
+        image: ghcr.io/sigstore/cosign/cosign:v2.4.1
+        command: ["sh","-lc","cosign verify $IMAGE"]
+        env:
+        - name: IMAGE
+          value: "ghcr.io/brianclong/summit/asset-inventory:{{ .SHA | default \"latest\" }}"

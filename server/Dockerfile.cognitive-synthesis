@@ -1,0 +1,149 @@
+# MC Platform v0.4.2 Cognitive Synthesis Engine - Multi-stage Dockerfile
+# Optimized for production deployment with multi-modal capabilities
+
+# Stage 1: Base image with Node.js and system dependencies
+FROM node:20.11-slim AS base
+
+# Install system dependencies for cognitive processing
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    libffi-dev \
+    libssl-dev \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libglib2.0-0 \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies for AI/ML processing
+RUN pip3 install --no-cache-dir \
+    torch==2.1.0 \
+    transformers==4.35.0 \
+    librosa==0.10.1 \
+    Pillow==10.0.1 \
+    opencv-python==4.8.1.78 \
+    scikit-learn==1.3.0 \
+    numpy==1.24.3
+
+# Set up pnpm
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+# Stage 2: Dependencies
+FROM base AS deps
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+# Stage 3: Builder
+FROM base AS builder
+
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source code
+COPY . .
+
+# Build arguments
+ARG VERSION=v0.4.2
+ARG BUILD_DATE
+ARG COMMIT_SHA
+
+# Set build environment variables
+ENV NODE_ENV=production
+ENV VERSION=$VERSION
+ENV BUILD_DATE=$BUILD_DATE
+ENV COMMIT_SHA=$COMMIT_SHA
+
+# Build the application
+RUN pnpm run build:cognitive-synthesis
+
+# Remove development dependencies
+RUN pnpm prune --production
+
+# Stage 4: Runtime
+FROM node:20.11-slim AS runtime
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libglib2.0-0 \
+    libgl1-mesa-glx \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python runtime dependencies
+RUN pip3 install --no-cache-dir \
+    torch==2.1.0 \
+    transformers==4.35.0 \
+    librosa==0.10.1 \
+    Pillow==10.0.1 \
+    opencv-python==4.8.1.78
+
+# Create app user for security
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+
+# Set working directory
+WORKDIR /app
+
+# Copy built application from builder stage
+COPY --from=builder --chown=appuser:appgroup /app/dist ./dist
+COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appgroup /app/package.json ./
+
+# Create necessary directories
+RUN mkdir -p /app/cache /app/logs /data/memory /data/models /data/audit && \
+    chown -R appuser:appgroup /app /data
+
+# Copy cognitive synthesis configuration
+COPY --chown=appuser:appgroup config/cognitive-synthesis/ ./config/
+
+# Copy AI models (placeholder - in production these would be mounted volumes)
+RUN mkdir -p /models/vision-language /models/audio-language && \
+    chown -R appuser:appgroup /models
+
+# Set build metadata
+LABEL version=$VERSION \
+      build-date=$BUILD_DATE \
+      commit-sha=$COMMIT_SHA \
+      component="cognitive-synthesis" \
+      maintainer="MC Platform Team"
+
+# Environment configuration
+ENV NODE_ENV=production \
+    PORT=8080 \
+    FEDERATED_LEARNING_PORT=8090 \
+    COGNITIVE_MODE=true \
+    FEDERATED_LEARNING=true \
+    ADAPTIVE_ARCHITECTURE=true
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:$PORT/health || exit 1
+
+# Switch to non-root user
+USER appuser
+
+# Expose ports
+EXPOSE 8080 8090
+
+# Start command
+CMD ["node", "dist/cognitive-synthesis-server.js"]

@@ -2,7 +2,7 @@ services:
   # Frontend Development Server
   client:
     build:
-      context: ./client
+      context: ../../client
       dockerfile: Dockerfile.dev
     volumes:
       - ./client:/app
@@ -39,7 +39,7 @@ services:
   # Database Migrations
   migrations:
     build:
-      context: ./server
+      context: ../../server
       dockerfile: Dockerfile.dev
     volumes:
       - ./server:/app
@@ -66,7 +66,7 @@ services:
   # Backend Development Server
   server:
     build:
-      context: ./server
+      context: ../../server
       dockerfile: Dockerfile.dev
       no_cache: true
     volumes:
@@ -213,7 +213,7 @@ services:
   # AI/ML Microservice
   intelgraph-ml:
     build:
-      context: ./ml
+      context: ../../ml
       dockerfile: Dockerfile
     environment:
       - UVICORN_HOST=0.0.0.0
@@ -254,7 +254,7 @@ services:
   # ML Worker (Celery)
   intelgraph-ml-worker:
     build:
-      context: ./ml
+      context: ../../ml
       dockerfile: Dockerfile
     command:
       [

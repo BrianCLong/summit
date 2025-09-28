@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+neo4j
+pydantic
+boto3
+PyNaCl
+psycopg2-binary

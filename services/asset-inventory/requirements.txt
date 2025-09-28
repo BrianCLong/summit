@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+boto3
+google-cloud-resource-manager
+azure-identity
+azure-mgmt-resource
+requests
+prometheus-client
+pydantic

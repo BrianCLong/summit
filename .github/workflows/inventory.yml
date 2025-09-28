@@ -1,0 +1,102 @@
+name: inventory-readonly
+on:
+  workflow_dispatch:
+    inputs:
+      run_k8s_probe:
+        description: "Run K8s monitoring probe (requires K8s access via action)"
+        required: false
+        type: boolean
+        default: false
+      run_aws:
+        description: "Run AWS inventory with OIDC role"
+        required: false
+        type: boolean
+        default: false
+      run_gcp:
+        description: "Run GCP inventory with WIF"
+        required: false
+        type: boolean
+        default: false
+      run_azure:
+        description: "Run Azure inventory with federated cred"
+        required: false
+        type: boolean
+        default: false
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+
+      - name: Install CLIs (minimal)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+          echo "If you need aws/gcloud/az or kubectl, add setup actions below."
+
+      # Optional cloud/k8s setup actions can be added here.
+
+      - name: Run org inventory
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_READORG || secrets.GITHUB_TOKEN }}
+        run: bash scripts/inventory/inventory_orgs.sh
+
+      - name: AWS OIDC inventory
+        if: inputs.run_aws == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.AWS_INVENTORY_ROLE_ARN }}
+
+      - name: Run AWS inventory
+        if: inputs.run_aws == 'true'
+        run: |
+          aws sts get-caller-identity | tee artifacts/aws.identity.json
+          aws organizations list-accounts --query 'Accounts[].{Name:Name,Id:Id,Email:Email}' --output table \
+            | tee artifacts/aws.accounts.table.txt
+
+      - name: GCP WIF auth
+        if: inputs.run_gcp == 'true'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIP }}
+          service_account: ${{ secrets.GCP_INVENTORY_SA }}
+
+      - name: Install gcloud CLI
+        if: inputs.run_gcp == 'true'
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Run GCP inventory
+        if: inputs.run_gcp == 'true'
+        run: gcloud projects list --format='table(PROJECT_ID, NAME, PROJECT_NUMBER)' | tee artifacts/gcp.projects.table.txt
+
+      - name: Azure login
+        if: inputs.run_azure == 'true'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run Azure inventory
+        if: inputs.run_azure == 'true'
+        run: az account list --output table | tee artifacts/azure.subscriptions.table.txt
+
+      - name: Run K8s monitoring probe (optional)
+        if: inputs.run_k8s_probe == 'true'
+        run: bash scripts/inventory/inventory_k8s_monitoring.sh
+
+      - name: Scan CI markers
+        run: bash scripts/inventory/scan_ci_markers.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        with:
+          name: inventory-artifacts
+          path: artifacts/**
+          if-no-files-found: warn

@@ -1,0 +1,8 @@
+{"title":"MC v0.4.3 — QECN","panels":[
+  {"type":"stat","title":"QC Minutes Used (tenant)","targets":[{"expr":"sum(mc_qc_minutes_used) by (tenant)"}]},
+  {"type":"stat","title":"QC Budget Headroom %","targets":[{"expr":"100*(1 - sum(mc_qc_minutes_used)/sum(mc_qc_minutes_ceiling))"}]},
+  {"type":"graph","title":"Mixed‑Mode Correctness","targets":[{"expr":"avg_over_time(mc_mixed_correctness[30m])"}]},
+  {"type":"graph","title":"QOG Success/Fallback","targets":[{"expr":"sum(rate(mc_qog_route_total[5m])) by (route,backend)"}]},
+  {"type":"stat","title":"Residency Violations (5m)","targets":[{"expr":"sum(rate(mc_qc_residency_violation_total[5m]))"}]},
+  {"type":"stat","title":"QC Attestor Freshness (h)","targets":[{"expr":"(time()-max(mc_qc_attestor_ts))/3600"}]}
+]}

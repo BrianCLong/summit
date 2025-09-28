@@ -1,0 +1,7 @@
+id: r3_disinfo_mapping
+version: 1
+success_rule:
+  type: "placeholder_rule"
+  path: "some.path"
+judge:
+  default: "llm_gptX_v1"

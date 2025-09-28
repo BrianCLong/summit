@@ -1,0 +1,48 @@
+{{- if .Values.cognitiveSynthesis.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mc-platform.fullname" . }}-cognitive-synthesis
+  labels:
+    {{- include "mc-platform.labels" . | nindent 4 }}
+    component: cognitive-synthesis
+    version: v0.4.2
+spec:
+  type: {{ .Values.cognitiveSynthesis.service.type }}
+  ports:
+    - port: {{ .Values.cognitiveSynthesis.service.port }}
+      targetPort: {{ .Values.cognitiveSynthesis.service.targetPort }}
+      protocol: TCP
+      name: http
+    {{- if .Values.cognitiveSynthesis.federatedLearning.coordinator.enabled }}
+    - port: {{ .Values.cognitiveSynthesis.federatedLearning.coordinator.port }}
+      targetPort: {{ .Values.cognitiveSynthesis.federatedLearning.coordinator.port }}
+      protocol: TCP
+      name: federated
+    {{- end }}
+  selector:
+    {{- include "mc-platform.selectorLabels" . | nindent 4 }}
+    component: cognitive-synthesis
+---
+{{- if .Values.cognitiveSynthesis.federatedLearning.coordinator.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mc-platform.fullname" . }}-federated-learning
+  labels:
+    {{- include "mc-platform.labels" . | nindent 4 }}
+    component: cognitive-synthesis
+    service-type: federated-learning
+    version: v0.4.2
+spec:
+  type: {{ .Values.networking.federatedLearning.serviceType }}
+  ports:
+    - port: {{ .Values.networking.federatedLearning.externalPort }}
+      targetPort: {{ .Values.networking.federatedLearning.internalPort }}
+      protocol: TCP
+      name: federated-learning
+  selector:
+    {{- include "mc-platform.selectorLabels" . | nindent 4 }}
+    component: cognitive-synthesis
+{{- end }}
+{{- end }}

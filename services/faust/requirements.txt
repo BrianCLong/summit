@@ -1,0 +1,2 @@
+faust-streaming
+neo4j

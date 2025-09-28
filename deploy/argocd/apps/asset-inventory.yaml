@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: asset-inventory
+  namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: asset=ghcr.io/brianclong/summit/asset-inventory
+    argocd-image-updater.argoproj.io/asset.update-strategy: digest
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/BrianCLong/summit.git
+    targetRevision: main
+    path: services/asset-inventory/k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: companyos
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [CreateNamespace=true]

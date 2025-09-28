@@ -1,0 +1,185 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: mc-platform-v042-cognitive-synthesis
+  namespace: mc-platform
+  labels:
+    app: mc-platform
+    version: v0.4.2
+    component: cognitive-synthesis
+spec:
+  groups:
+    - name: cognitive_synthesis_performance
+      interval: 30s
+      rules:
+        - alert: CognitiveProcessingHighLatency
+          expr: histogram_quantile(0.95, rate(cognitive_processing_duration_seconds_bucket[5m])) > 0.5
+          for: 2m
+          labels:
+            severity: warning
+            component: cognitive-synthesis
+            version: v0.4.2
+          annotations:
+            summary: "Cognitive processing experiencing high latency"
+            description: "95th percentile cognitive processing latency is {{ $value }}s, exceeding 500ms threshold"
+
+        - alert: MultiModalReasoningFailureRate
+          expr: rate(cognitive_multimodal_reasoning_failures_total[5m]) / rate(cognitive_multimodal_reasoning_requests_total[5m]) > 0.05
+          for: 1m
+          labels:
+            severity: critical
+            component: cognitive-synthesis
+            version: v0.4.2
+          annotations:
+            summary: "High multi-modal reasoning failure rate"
+            description: "Multi-modal reasoning failure rate is {{ $value | humanizePercentage }}, exceeding 5% threshold"
+
+        - alert: FederatedLearningParticipantFailure
+          expr: federated_learning_active_participants < federated_learning_required_participants
+          for: 5m
+          labels:
+            severity: warning
+            component: cognitive-synthesis
+            version: v0.4.2
+          annotations:
+            summary: "Insufficient federated learning participants"
+            description: "Only {{ $value }} participants active, {{ $labels.required }} required for federated learning"
+
+        - alert: CognitiveMemoryStorageHigh
+          expr: (cognitive_memory_storage_used_bytes / cognitive_memory_storage_total_bytes) > 0.85
+          for: 2m
+          labels:
+            severity: warning
+            component: cognitive-synthesis
+            version: v0.4.2
+          annotations:
+            summary: "Cognitive memory storage usage high"
+            description: "Cognitive memory storage usage is {{ $value | humanizePercentage }}, exceeding 85% threshold"
+
+        - alert: AdaptiveArchitectureRebalancingFailed
+          expr: increase(cognitive_architecture_rebalancing_failures_total[10m]) > 0
+          for: 1m
+          labels:
+            severity: critical
+            component: cognitive-synthesis
+            version: v0.4.2
+          annotations:
+            summary: "Adaptive architecture rebalancing failures detected"
+            description: "{{ $value }} architecture rebalancing failures in the last 10 minutes"
+
+    - name: cognitive_synthesis_compliance
+      interval: 60s
+      rules:
+        - alert: CognitiveComplianceScoreLow
+          expr: cognitive_compliance_score < 0.95
+          for: 1m
+          labels:
+            severity: critical
+            component: cognitive-synthesis
+            version: v0.4.2
+          annotations:
+            summary: "Cognitive compliance score below threshold"
+            description: "Cognitive compliance score is {{ $value }}, below required 95% threshold for tenant {{ $labels.tenant }}"
+
+        - alert: PrivacyPreservationViolation
+          expr: federated_learning_privacy_violations_total > 0
+          for: 1m
+          labels:
+            severity: critical
+            component: cognitive-synthesis
+            version: v0.4.2
+          annotations:
+            summary: "Privacy preservation violation in federated learning"
+            description: "{{ $value }} privacy violations detected in federated learning for tenant {{ $labels.tenant }}"
+
+        - alert: CognitiveIntegrityBreach
+          expr: cognitive_integrity_violations_total > 0
+          for: 1m
+          labels:
+            severity: critical
+            component: cognitive-synthesis
+            version: v0.4.2
+          annotations:
+            summary: "Cognitive integrity breach detected"
+            description: "{{ $value }} cognitive integrity violations for tenant {{ $labels.tenant }}"
+
+    - name: cognitive_synthesis_availability
+      interval: 30s
+      rules:
+        - alert: CognitiveSynthesisServiceDown
+          expr: up{job="mc-platform-cognitive-synthesis"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            component: cognitive-synthesis
+            version: v0.4.2
+          annotations:
+            summary: "Cognitive synthesis service is down"
+            description: "Cognitive synthesis service instance {{ $labels.instance }} has been down for more than 1 minute"
+
+        - alert: CognitiveProcessingCapacityLow
+          expr: cognitive_processing_capacity_utilization > 0.90
+          for: 2m
+          labels:
+            severity: warning
+            component: cognitive-synthesis
+            version: v0.4.2
+          annotations:
+            summary: "Cognitive processing capacity utilization high"
+            description: "Cognitive processing capacity utilization is {{ $value | humanizePercentage }}, exceeding 90% threshold"
+
+        - alert: FederatedLearningNetworkPartition
+          expr: federated_learning_network_partitions_total > 0
+          for: 30s
+          labels:
+            severity: critical
+            component: cognitive-synthesis
+            version: v0.4.2
+          annotations:
+            summary: "Federated learning network partition detected"
+            description: "{{ $value }} network partitions detected in federated learning network"
+
+    - name: cognitive_synthesis_slo_burn_rate
+      interval: 30s
+      rules:
+        # Fast burn rate (2% budget consumption in 1 hour)
+        - alert: CognitiveSynthesisSLOFastBurn
+          expr: |
+            (
+              1 - (
+                (
+                  rate(cognitive_processing_requests_total[1h]) -
+                  rate(cognitive_processing_failures_total[1h])
+                ) / rate(cognitive_processing_requests_total[1h])
+              )
+            ) > (14.4 * 0.001)
+          for: 2m
+          labels:
+            severity: critical
+            component: cognitive-synthesis
+            version: v0.4.2
+            slo_type: availability
+          annotations:
+            summary: "Cognitive synthesis SLO fast burn rate"
+            description: "Error rate {{ $value | humanizePercentage }} is burning through error budget too quickly"
+
+        # Slow burn rate (10% budget consumption in 6 hours)
+        - alert: CognitiveSynthesisSLOSlowBurn
+          expr: |
+            (
+              1 - (
+                (
+                  rate(cognitive_processing_requests_total[6h]) -
+                  rate(cognitive_processing_failures_total[6h])
+                ) / rate(cognitive_processing_requests_total[6h])
+              )
+            ) > (6 * 0.001)
+          for: 15m
+          labels:
+            severity: warning
+            component: cognitive-synthesis
+            version: v0.4.2
+            slo_type: availability
+          annotations:
+            summary: "Cognitive synthesis SLO slow burn rate"
+            description: "Error rate {{ $value | humanizePercentage }} is slowly burning through error budget"

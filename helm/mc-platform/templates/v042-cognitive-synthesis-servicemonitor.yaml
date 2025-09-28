@@ -1,0 +1,52 @@
+{{- if and .Values.cognitiveSynthesis.enabled .Values.monitoring.prometheus.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "mc-platform.fullname" . }}-cognitive-synthesis
+  labels:
+    {{- include "mc-platform.labels" . | nindent 4 }}
+    component: cognitive-synthesis
+    version: v0.4.2
+spec:
+  selector:
+    matchLabels:
+      {{- include "mc-platform.selectorLabels" . | nindent 6 }}
+      component: cognitive-synthesis
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    metricRelabelings:
+    - sourceLabels: [__name__]
+      regex: 'cognitive_.*'
+      targetLabel: __tmp_cognitive_metric
+      replacement: 'true'
+    - sourceLabels: [__name__]
+      regex: 'federated_.*'
+      targetLabel: __tmp_federated_metric
+      replacement: 'true'
+    - sourceLabels: [__name__]
+      regex: 'multimodal_.*'
+      targetLabel: __tmp_multimodal_metric
+      replacement: 'true'
+    - sourceLabels: [__name__]
+      regex: 'adaptive_.*'
+      targetLabel: __tmp_adaptive_metric
+      replacement: 'true'
+    - sourceLabels: [__name__]
+      regex: 'memory_.*'
+      targetLabel: __tmp_memory_metric
+      replacement: 'true'
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_service_name]
+      targetLabel: service
+    - sourceLabels: [__meta_kubernetes_namespace]
+      targetLabel: namespace
+    - sourceLabels: [__meta_kubernetes_pod_name]
+      targetLabel: pod
+    - sourceLabels: [__meta_kubernetes_pod_label_version]
+      targetLabel: version
+    - sourceLabels: [__meta_kubernetes_pod_label_component]
+      targetLabel: component
+{{- end }}

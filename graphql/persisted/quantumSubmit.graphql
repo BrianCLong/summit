@@ -1,0 +1,3 @@
+mutation quantumSubmit($tenant: Tenant!, $input: QuantumSubmitInput!) {
+  quantumSubmit(tenant: $tenant, input: $input) { ok audit { evidenceId ts actor } }
+}

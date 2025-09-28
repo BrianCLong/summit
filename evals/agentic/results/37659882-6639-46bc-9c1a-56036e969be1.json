@@ -1,0 +1,42 @@
+{
+    "run_id": "37659882-6639-46bc-9c1a-56036e969be1",
+    "workflow": "R1 Rapid Attribution",
+    "input_id": "test_case_2",
+    "e2e_ok": false,
+    "first_failure_at": "step_2",
+    "step_results": [
+        {
+            "step_id": "step_1",
+            "ok": true,
+            "details": {
+                "output": "processed data A",
+                "cost_usd": 0.01
+            },
+            "started_at": 1759020292.0304792,
+            "ended_at": 1759020292.130479
+        },
+        {
+            "step_id": "step_2",
+            "ok": false,
+            "details": {
+                "output": "processed data B",
+                "cost_usd": 0.02
+            },
+            "started_at": 1759020292.1304808,
+            "ended_at": 1759020292.2304819
+        },
+        {
+            "step_id": "step_3",
+            "ok": true,
+            "details": {
+                "output": "final result",
+                "cost_usd": 0.015
+            },
+            "started_at": 1759020292.2304819,
+            "ended_at": 1759020292.330483
+        }
+    ],
+    "judge": "dummy_judge",
+    "latency_ms": 0,
+    "cost_usd": 0.045
+}

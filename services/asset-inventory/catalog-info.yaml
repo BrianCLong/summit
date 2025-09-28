@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: asset-inventory
+  description: CompanyOS cloud & monitoring asset registry.
+  annotations:
+    companyos.io/inventory-api: "/api/v1"
+    companyos.io/providers: "aws,gcp,azure,prometheus,grafana"
+    backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: BrianCLong/summit
+    grafana/dashboard-uid: asset-inventory-main
+    prometheus/servicemonitor: companyos/asset-inventory
+spec:
+  type: service
+  lifecycle: beta
+  owner: team-platform
+  system: companyos

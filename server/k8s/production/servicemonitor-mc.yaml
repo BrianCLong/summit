@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mc-app
+  namespace: monitoring
+  labels:
+    app: mc-app
+spec:
+  namespaceSelector:
+    matchNames: [intelgraph-production]
+  selector:
+    matchLabels:
+      app: intelgraph
+      component: backend
+  endpoints:
+    - interval: 30s
+      path: /metrics
+      port: http
+

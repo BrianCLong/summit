@@ -1,0 +1,93 @@
+name: terraform-aws-inventory-role
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        type: boolean
+        description: "Apply changes (requires environment approval)"
+        default: false
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/inventory/aws
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (bootstrap or OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_TF_REGION || 'us-east-1' }}
+          # Prefer role-to-assume if provided, else access keys
+          role-to-assume: ${{ secrets.AWS_TF_BOOTSTRAP_ROLE_ARN || '' }}
+          aws-access-key-id: ${{ secrets.AWS_TF_ACCESS_KEY_ID || '' }}
+          aws-secret-access-key: ${{ secrets.AWS_TF_SECRET_ACCESS_KEY || '' }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: |
+          terraform init -input=false \
+            -backend-config="bucket=${{ secrets.AWS_TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ secrets.AWS_TF_STATE_KEY }}" \
+            -backend-config="region=${{ secrets.AWS_TF_STATE_REGION || secrets.AWS_TF_REGION || 'us-east-1' }}" \
+            -backend-config="dynamodb_table=${{ secrets.AWS_TF_STATE_DDB }}"
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Upload Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-aws-inventory
+          path: terraform/inventory/aws/tfplan
+
+  apply:
+    name: Terraform Apply
+    if: inputs.apply == 'true'
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: aws-inventory-apply
+    defaults:
+      run:
+        working-directory: terraform/inventory/aws
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (bootstrap or OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_TF_REGION || 'us-east-1' }}
+          role-to-assume: ${{ secrets.AWS_TF_BOOTSTRAP_ROLE_ARN || '' }}
+          aws-access-key-id: ${{ secrets.AWS_TF_ACCESS_KEY_ID || '' }}
+          aws-secret-access-key: ${{ secrets.AWS_TF_SECRET_ACCESS_KEY || '' }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: |
+          terraform init -input=false \
+            -backend-config="bucket=${{ secrets.AWS_TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ secrets.AWS_TF_STATE_KEY }}" \
+            -backend-config="region=${{ secrets.AWS_TF_STATE_REGION || secrets.AWS_TF_REGION || 'us-east-1' }}" \
+            -backend-config="dynamodb_table=${{ secrets.AWS_TF_STATE_DDB }}"
+
+      - name: Terraform Apply
+        run: terraform apply -input=false -auto-approve tfplan || terraform apply -input=false -auto-approve

@@ -1,0 +1,15 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata: { name: asset-inventory-egress }
+spec:
+  endpointSelector: { matchLabels: { app: asset-inventory } }
+  egress:
+  - toFQDNs:
+    - matchName: "sts.amazonaws.com"
+    - matchName: "organizations.us-east-1.amazonaws.com"
+    - matchName: "api.github.com"
+    - matchName: "ghcr.io"
+    - matchName: "<your-prom-host>"
+    - matchName: "<your-grafana-host>"
+    toPorts:
+    - ports: [{ port: "443", protocol: TCP }]

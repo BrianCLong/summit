@@ -1,0 +1,429 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "MC Platform v0.4.2 - Cognitive Synthesis Engine",
+    "tags": ["mc-platform", "v0.4.2", "cognitive-synthesis"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Cognitive Processing Overview",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(cognitive_processing_requests_total[5m])",
+            "legendFormat": "Requests/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(cognitive_processing_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95 Latency",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(cognitive_processing_failures_total[5m]) / rate(cognitive_processing_requests_total[5m])",
+            "legendFormat": "Error Rate",
+            "refId": "C"
+          },
+          {
+            "expr": "cognitive_compliance_score",
+            "legendFormat": "Compliance Score",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 0.05},
+                {"color": "red", "value": 0.10}
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "P95 Latency"},
+              "properties": [{"id": "unit", "value": "s"}]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Error Rate"},
+              "properties": [{"id": "unit", "value": "percentunit"}]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Compliance Score"},
+              "properties": [
+                {"id": "unit", "value": "percentunit"},
+                {"id": "min", "value": 0.9},
+                {"id": "max", "value": 1.0}
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Multi-Modal Intelligence Processing",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(cognitive_multimodal_reasoning_requests_total[5m])",
+            "legendFormat": "{{modality}} Requests/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(cognitive_multimodal_reasoning_failures_total[5m])",
+            "legendFormat": "{{modality}} Failures/sec",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "min": 0
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Federated Learning Network",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "federated_learning_active_participants",
+            "legendFormat": "Active Participants",
+            "refId": "A"
+          },
+          {
+            "expr": "federated_learning_training_rounds_total",
+            "legendFormat": "Training Rounds",
+            "refId": "B"
+          },
+          {
+            "expr": "federated_learning_model_accuracy",
+            "legendFormat": "Model Accuracy",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Model Accuracy"},
+              "properties": [
+                {"id": "unit", "value": "percentunit"},
+                {"id": "min", "value": 0.8},
+                {"id": "max", "value": 1.0}
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 4,
+        "title": "Cognitive Memory Systems",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "cognitive_memory_working_operations_total",
+            "legendFormat": "Working Memory Ops",
+            "refId": "A"
+          },
+          {
+            "expr": "cognitive_memory_episodic_operations_total",
+            "legendFormat": "Episodic Memory Ops",
+            "refId": "B"
+          },
+          {
+            "expr": "cognitive_memory_semantic_operations_total",
+            "legendFormat": "Semantic Memory Ops",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "min": 0
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Memory Storage Utilization",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 16},
+        "targets": [
+          {
+            "expr": "cognitive_memory_storage_used_bytes / cognitive_memory_storage_total_bytes",
+            "legendFormat": "Storage Utilization",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "min": 0,
+            "max": 1,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 0.7},
+                {"color": "red", "value": 0.85}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Adaptive Architecture Status",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 16},
+        "targets": [
+          {
+            "expr": "cognitive_architecture_adaptations_total",
+            "legendFormat": "Architecture Adaptations",
+            "refId": "A"
+          },
+          {
+            "expr": "cognitive_architecture_performance_score",
+            "legendFormat": "Performance Score",
+            "refId": "B"
+          },
+          {
+            "expr": "cognitive_load_balancing_efficiency",
+            "legendFormat": "Load Balancing Efficiency",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Performance Score"},
+              "properties": [
+                {"id": "unit", "value": "percentunit"},
+                {"id": "max", "value": 1.0}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Load Balancing Efficiency"},
+              "properties": [
+                {"id": "unit", "value": "percentunit"},
+                {"id": "max", "value": 1.0}
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 7,
+        "title": "Privacy & Security Metrics",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "federated_learning_privacy_preservation_score",
+            "legendFormat": "Privacy Preservation",
+            "refId": "A"
+          },
+          {
+            "expr": "cognitive_integrity_score",
+            "legendFormat": "Cognitive Integrity",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(cognitive_security_incidents_total[24h])",
+            "legendFormat": "Security Incidents/day",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 0.95},
+                {"color": "green", "value": 0.99}
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Privacy Preservation"},
+              "properties": [{"id": "unit", "value": "percentunit"}]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Cognitive Integrity"},
+              "properties": [{"id": "unit", "value": "percentunit"}]
+            }
+          ]
+        }
+      },
+      {
+        "id": 8,
+        "title": "SLO Error Budget Burn Rate",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "targets": [
+          {
+            "expr": "cognitive_synthesis_error_budget_remaining",
+            "legendFormat": "Error Budget Remaining",
+            "refId": "A"
+          },
+          {
+            "expr": "cognitive_synthesis_error_budget_burn_rate_1h",
+            "legendFormat": "1h Burn Rate",
+            "refId": "B"
+          },
+          {
+            "expr": "cognitive_synthesis_error_budget_burn_rate_6h",
+            "legendFormat": "6h Burn Rate",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "min": 0,
+            "max": 1
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Cross-Modal Reasoning Performance",
+        "type": "heatmap",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32},
+        "targets": [
+          {
+            "expr": "rate(cognitive_cross_modal_reasoning_duration_seconds_bucket[5m])",
+            "legendFormat": "{{modality_from}} -> {{modality_to}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Tenant-Specific Cognitive Metrics",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 40},
+        "targets": [
+          {
+            "expr": "cognitive_processing_requests_total",
+            "legendFormat": "",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          },
+          {
+            "expr": "cognitive_compliance_score",
+            "legendFormat": "",
+            "refId": "B",
+            "format": "table",
+            "instant": true
+          },
+          {
+            "expr": "cognitive_memory_utilization",
+            "legendFormat": "",
+            "refId": "C",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "job": true,
+                "instance": true
+              },
+              "indexByName": {
+                "tenant": 0,
+                "Value #A": 1,
+                "Value #B": 2,
+                "Value #C": 3
+              },
+              "renameByName": {
+                "tenant": "Tenant",
+                "Value #A": "Requests Total",
+                "Value #B": "Compliance Score",
+                "Value #C": "Memory Utilization"
+              }
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "displayMode": "auto",
+              "filterable": true
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Compliance Score"},
+              "properties": [
+                {"id": "unit", "value": "percentunit"},
+                {"id": "custom.displayMode", "value": "gradient-gauge"},
+                {"id": "min", "value": 0.9},
+                {"id": "max", "value": 1.0}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Memory Utilization"},
+              "properties": [
+                {"id": "unit", "value": "percentunit"},
+                {"id": "custom.displayMode", "value": "gradient-gauge"}
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "name": "Cognitive Synthesis Events",
+          "datasource": "Prometheus",
+          "enable": true,
+          "expr": "ALERTS{alertname=~\"Cognitive.*\"}",
+          "titleFormat": "{{alertname}}",
+          "textFormat": "{{summary}}",
+          "iconColor": "red"
+        }
+      ]
+    }
+  }
+}

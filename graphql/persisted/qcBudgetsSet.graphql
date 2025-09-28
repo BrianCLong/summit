@@ -1,0 +1,3 @@
+mutation qcBudgetsSet($tenant: Tenant!, $input: QcBudgetSetInput!) {
+  qcBudgetsSet(tenant: $tenant, input: $input) { ok audit { evidenceId ts actor } }
+}

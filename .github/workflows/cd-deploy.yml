@@ -5,6 +5,12 @@ on:
     workflows: ["CI Image"]
     types: 
       - completed
+  workflow_dispatch:
+    inputs:
+      drill:
+        description: 'Run a canary breach drill'
+        type: boolean
+        default: false
 
 jobs:
   deploy-dev:
@@ -41,6 +47,33 @@ jobs:
             echo "Pruning unused images..."
             docker image prune -f
 
+      - name: Canary health check (drill)
+        if: ${{ github.event.inputs.drill == 'true' }}
+        env:
+          FORCE_BREACH: "all"
+          PROM_URL: ""               # intentionally empty
+        run: ./scripts/canary-watch.sh
+
+      - name: Auto-rollback on breach (drill)
+        if: ${{ failure() && github.event.inputs.drill == 'true' }}
+        run: ./scripts/rollback.sh
+
+      - name: Canary health check
+        run: |
+          export PROM_URL="${{ secrets.PROM_URL }}"
+          export SVC="summit"
+          export WINDOW="10m"
+          export SLO_P95_MS="1500"
+          export ERR_RATE="0.01"
+          export SAT_MAX="0.80"
+          ./scripts/canary-watch.sh
+
+      - name: Auto-rollback on breach
+        if: failure()
+        run: |
+          export RELEASE="summit"
+          export NAMESPACE="summit"
+          ./scripts/rollback.sh
             # Pre-migration backup (PostgreSQL)
             PG_BACKUP_FILE="/tmp/pg_backup_$(date +%Y%m%d%H%M%S).sql"
             PGPASSWORD="${{ secrets.DEV_DB_PASSWORD }}" pg_dump -h ${{ secrets.DEV_DB_HOST }} -U ${{ secrets.DEV_DB_USER }} ${{ secrets.DEV_DB_NAME }} > $PG_BACKUP_FILE || true

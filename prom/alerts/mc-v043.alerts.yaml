@@ -1,0 +1,21 @@
+groups:
+- name: mc-v043
+  rules:
+  - alert: QCBudgetNearCeiling
+    expr: (sum(mc_qc_minutes_used)/sum(mc_qc_minutes_ceiling)) > 0.8
+    for: 10m
+    labels: {severity: warn}
+    annotations:
+      summary: "QC budget headroom <20%"
+  - alert: ResidencyViolationDetected
+    expr: sum(rate(mc_qc_residency_violation_total[5m])) > 0
+    for: 1m
+    labels: {severity: page}
+    annotations:
+      summary: "Quantum residency violation observed"
+  - alert: MixedModeCorrectnessDegrading
+    expr: avg_over_time(mc_mixed_correctness[30m]) < 0.98
+    for: 15m
+    labels: {severity: hold}
+    annotations:
+      summary: "Mixed‑mode correctness below 0.98"

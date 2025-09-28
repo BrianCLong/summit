@@ -1,0 +1,358 @@
+# MC Platform v0.4.5 Prometheus Recording Rules and Alerts
+# Canary Gates and Adaptive Quantum Excellence Monitoring
+
+groups:
+  - name: mc_v045_canary_gates
+    interval: 30s
+    rules:
+    # Delta Score Gates
+    - record: mc:opt_delta_score_24h
+      expr: avg_over_time(mc_opt_delta_score[24h])
+
+    - record: mc:opt_delta_score_7d
+      expr: avg_over_time(mc_opt_delta_score[7d])
+
+    - record: mc:opt_sustain_score
+      expr: mc:opt_delta_score_7d >= 0.5 * mc:opt_delta_score_24h
+
+    # Weight Validation
+    - record: mc:autotune_weight_sum
+      expr: mc_autotune_weight_latency + mc_autotune_weight_cost + mc_autotune_weight_carbon
+
+    - record: mc:autotune_weight_valid
+      expr: mc:autotune_weight_sum <= 1.0
+
+    # Correctness Floor
+    - record: mc:correctness_floor_breaches_30m
+      expr: increase(mc_correctness_floor_breach_total[30m])
+
+    - record: mc:correctness_floor_ok
+      expr: mc:correctness_floor_breaches_30m == 0
+
+    # Budget Utilization
+    - record: mc:qam_budget_utilization_percent
+      expr: (sum by (tenant) (mc_qam_quantum_minutes_used) / mc_qam_quantum_minutes_budget) * 100
+
+    - record: mc:qam_budget_headroom_percent
+      expr: 100 - mc:qam_budget_utilization_percent
+
+    # Performance Regression Detection
+    - record: mc:qam_p95_current
+      expr: histogram_quantile(0.95, rate(mc_qam_request_duration_seconds_bucket[5m]))
+
+    - record: mc:qam_p95_regression_percent
+      expr: ((mc:qam_p95_current - mc_qam_baseline_p95_seconds) / mc_qam_baseline_p95_seconds) * 100
+
+    # Exploration Rate Validation
+    - record: mc:opt_explore_rate_valid
+      expr: mc_opt_explore_rate >= 0.02 and mc_opt_explore_rate <= 0.08
+
+    # Epsilon Budget Tracking
+    - record: mc:opt_epsilon_utilization_percent
+      expr: (mc_opt_epsilon_current / mc_opt_epsilon_cap) * 100
+
+    # Composite Health Score
+    - record: mc:canary_gate_health_score
+      expr: |
+        (
+          (mc:opt_delta_score_24h > 0) * 0.3 +
+          mc:correctness_floor_ok * 0.25 +
+          mc:autotune_weight_valid * 0.15 +
+          (mc:qam_budget_utilization_percent < 100) * 0.15 +
+          (mc:qam_p95_regression_percent < 5) * 0.15
+        )
+
+  - name: mc_v045_adaptive_metrics
+    interval: 60s
+    rules:
+    # Tri-Objective Optimization Metrics
+    - record: mc:tri_opt_performance_score
+      expr: mc_tri_opt_performance_score
+
+    - record: mc:tri_opt_cost_score
+      expr: mc_tri_opt_cost_score
+
+    - record: mc:tri_opt_security_score
+      expr: mc_tri_opt_security_score
+
+    - record: mc:tri_opt_composite_score
+      expr: |
+        mc:tri_opt_performance_score * mc_autotune_weight_performance +
+        mc:tri_opt_cost_score * mc_autotune_weight_cost +
+        mc:tri_opt_security_score * mc_autotune_weight_security
+
+    # Pareto Frontier Metrics
+    - record: mc:pareto_frontier_diversity
+      expr: mc_pareto_frontier_diversity
+
+    - record: mc:pareto_frontier_coverage
+      expr: mc_pareto_frontier_coverage
+
+    # Adaptive Learning Progress
+    - record: mc:adaptive_learning_convergence
+      expr: mc_adaptive_learning_convergence_score
+
+    - record: mc:adaptive_parameter_stability
+      expr: mc_adaptive_parameter_stability_score
+
+    # Resource Allocation Efficiency
+    - record: mc:resource_allocation_efficiency
+      expr: mc_resource_utilization_score / mc_resource_cost_score
+
+    - record: mc:quantum_backend_utilization
+      expr: sum by (backend) (mc_quantum_backend_utilization_percent)
+
+alerts:
+  - name: mc_v045_critical_gates
+    rules:
+    # Critical Gate Failures
+    - alert: MC_DeltaScoreNegative
+      expr: mc:opt_delta_score_24h <= 0
+      for: 5m
+      labels:
+        severity: critical
+        service: mc-platform
+        component: optimization
+        gate: delta_score
+      annotations:
+        summary: "MC Platform optimization delta score is negative"
+        description: "24h delta score is {{ $value }}, indicating optimization degradation"
+        runbook_url: "https://runbooks.mc-platform.com/delta-score-negative"
+        dashboard: "https://grafana.mc-platform.com/d/mc-v045-optimization"
+
+    - alert: MC_CorrectnessFloorBreached
+      expr: mc:correctness_floor_breaches_30m > 0
+      for: 1m
+      labels:
+        severity: critical
+        service: mc-platform
+        component: correctness
+        gate: correctness_floor
+      annotations:
+        summary: "MC Platform correctness floor breached"
+        description: "{{ $value }} correctness floor breaches in the last 30 minutes"
+        runbook_url: "https://runbooks.mc-platform.com/correctness-floor-breach"
+        dashboard: "https://grafana.mc-platform.com/d/mc-v045-correctness"
+
+    - alert: MC_WeightSumViolation
+      expr: mc:autotune_weight_sum > 1.0
+      for: 2m
+      labels:
+        severity: critical
+        service: mc-platform
+        component: autotune
+        gate: weight_sanity
+      annotations:
+        summary: "MC Platform autotune weight sum exceeds 1.0"
+        description: "Weight sum is {{ $value }}, must be ≤ 1.0"
+        runbook_url: "https://runbooks.mc-platform.com/weight-sum-violation"
+        dashboard: "https://grafana.mc-platform.com/d/mc-v045-autotune"
+
+    - alert: MC_BudgetExceeded
+      expr: mc:qam_budget_utilization_percent >= 100
+      for: 1m
+      labels:
+        severity: critical
+        service: mc-platform
+        component: budget
+        gate: budget_limit
+      annotations:
+        summary: "MC Platform budget limit exceeded"
+        description: "Budget utilization is {{ $value }}% for tenant {{ $labels.tenant }}"
+        runbook_url: "https://runbooks.mc-platform.com/budget-exceeded"
+        dashboard: "https://grafana.mc-platform.com/d/mc-v045-budget"
+
+    - alert: MC_PerformanceRegression
+      expr: mc:qam_p95_regression_percent > 5
+      for: 5m
+      labels:
+        severity: critical
+        service: mc-platform
+        component: performance
+        gate: performance_regression
+      annotations:
+        summary: "MC Platform performance regression detected"
+        description: "P95 latency increased by {{ $value }}% (threshold: 5%)"
+        runbook_url: "https://runbooks.mc-platform.com/performance-regression"
+        dashboard: "https://grafana.mc-platform.com/d/mc-v045-performance"
+
+  - name: mc_v045_warning_gates
+    rules:
+    # Warning Level Alerts
+    - alert: MC_BudgetWarning
+      expr: mc:qam_budget_utilization_percent >= 80 and mc:qam_budget_utilization_percent < 100
+      for: 5m
+      labels:
+        severity: warning
+        service: mc-platform
+        component: budget
+        gate: budget_warning
+      annotations:
+        summary: "MC Platform budget warning threshold reached"
+        description: "Budget utilization is {{ $value }}% for tenant {{ $labels.tenant }} (warning: 80%)"
+        runbook_url: "https://runbooks.mc-platform.com/budget-warning"
+
+    - alert: MC_ExploreRateOutOfBounds
+      expr: mc_opt_explore_rate < 0.02 or mc_opt_explore_rate > 0.08
+      for: 10m
+      labels:
+        severity: warning
+        service: mc-platform
+        component: exploration
+      annotations:
+        summary: "MC Platform exploration rate outside recommended bounds"
+        description: "Exploration rate is {{ $value }} (recommended: 0.02-0.08)"
+        runbook_url: "https://runbooks.mc-platform.com/explore-rate-bounds"
+
+    - alert: MC_EpsilonBudgetHigh
+      expr: mc:opt_epsilon_utilization_percent >= 80
+      for: 5m
+      labels:
+        severity: warning
+        service: mc-platform
+        component: privacy
+      annotations:
+        summary: "MC Platform epsilon budget utilization high"
+        description: "Epsilon budget utilization is {{ $value }}% for tenant {{ $labels.tenant }}"
+        runbook_url: "https://runbooks.mc-platform.com/epsilon-budget-high"
+
+    - alert: MC_AdaptiveLearningStalled
+      expr: mc:adaptive_learning_convergence < 0.5
+      for: 30m
+      labels:
+        severity: warning
+        service: mc-platform
+        component: adaptive_learning
+      annotations:
+        summary: "MC Platform adaptive learning convergence low"
+        description: "Learning convergence score is {{ $value }} (threshold: 0.5)"
+        runbook_url: "https://runbooks.mc-platform.com/learning-stalled"
+
+    - alert: MC_ParetoFrontierDegradation
+      expr: mc:pareto_frontier_diversity < 0.6 or mc:pareto_frontier_coverage < 0.7
+      for: 15m
+      labels:
+        severity: warning
+        service: mc-platform
+        component: optimization
+      annotations:
+        summary: "MC Platform Pareto frontier quality degraded"
+        description: "Diversity: {{ .diversity }}, Coverage: {{ .coverage }} (thresholds: 0.6, 0.7)"
+        runbook_url: "https://runbooks.mc-platform.com/pareto-degradation"
+
+  - name: mc_v045_system_health
+    rules:
+    # System Health Indicators
+    - alert: MC_SystemHealthDegraded
+      expr: mc:canary_gate_health_score < 0.8
+      for: 10m
+      labels:
+        severity: warning
+        service: mc-platform
+        component: system_health
+      annotations:
+        summary: "MC Platform overall system health degraded"
+        description: "Composite health score is {{ $value }} (threshold: 0.8)"
+        runbook_url: "https://runbooks.mc-platform.com/system-health-degraded"
+
+    - alert: MC_QuantumBackendUtilizationLow
+      expr: mc:quantum_backend_utilization < 30
+      for: 20m
+      labels:
+        severity: info
+        service: mc-platform
+        component: quantum_backend
+      annotations:
+        summary: "MC Platform quantum backend utilization low"
+        description: "Backend {{ $labels.backend }} utilization is {{ $value }}% (threshold: 30%)"
+
+    - alert: MC_ResourceAllocationInefficient
+      expr: mc:resource_allocation_efficiency < 0.7
+      for: 15m
+      labels:
+        severity: warning
+        service: mc-platform
+        component: resource_allocation
+      annotations:
+        summary: "MC Platform resource allocation efficiency low"
+        description: "Resource allocation efficiency is {{ $value }} (threshold: 0.7)"
+        runbook_url: "https://runbooks.mc-platform.com/resource-efficiency-low"
+
+  - name: mc_v045_operational
+    rules:
+    # Operational Alerts
+    - alert: MC_OptimizationLatencyHigh
+      expr: histogram_quantile(0.95, rate(mc_tri_opt_optimization_duration_seconds_bucket[5m])) > 0.1
+      for: 5m
+      labels:
+        severity: warning
+        service: mc-platform
+        component: optimization
+      annotations:
+        summary: "MC Platform optimization latency high"
+        description: "P95 optimization latency is {{ $value }}s (threshold: 0.1s)"
+
+    - alert: MC_AdaptiveParameterInstability
+      expr: mc:adaptive_parameter_stability < 0.8
+      for: 15m
+      labels:
+        severity: warning
+        service: mc-platform
+        component: adaptive_learning
+      annotations:
+        summary: "MC Platform adaptive parameters unstable"
+        description: "Parameter stability score is {{ $value }} (threshold: 0.8)"
+
+    - alert: MC_TriObjectiveImbalance
+      expr: |
+        (
+          max(mc:tri_opt_performance_score, mc:tri_opt_cost_score, mc:tri_opt_security_score) -
+          min(mc:tri_opt_performance_score, mc:tri_opt_cost_score, mc:tri_opt_security_score)
+        ) > 0.4
+      for: 10m
+      labels:
+        severity: info
+        service: mc-platform
+        component: tri_objective
+      annotations:
+        summary: "MC Platform tri-objective scores imbalanced"
+        description: "Objective score spread is {{ $value }} (threshold: 0.4)"
+
+    # Sustainment Gate (opt++)
+    - alert: MC_SustainmentGateFailure
+      expr: mc:opt_sustain_score != 1
+      for: 10m
+      labels:
+        severity: warning
+        service: mc-platform
+        component: sustainment
+        gate: sustainment
+      annotations:
+        summary: "MC Platform sustainment gate failure"
+        description: "7-day delta score not sustaining at 50% of 24h delta"
+        runbook_url: "https://runbooks.mc-platform.com/sustainment-gate-failure"
+
+# Recording rules for evidence generation
+  - name: mc_v045_evidence
+    interval: 5m
+    rules:
+    - record: mc:evidence_delta_24h
+      expr: mc:opt_delta_score_24h
+
+    - record: mc:evidence_correctness_breaches
+      expr: mc:correctness_floor_breaches_30m
+
+    - record: mc:evidence_weight_sum
+      expr: mc:autotune_weight_sum
+
+    - record: mc:evidence_budget_utilization
+      expr: mc:qam_budget_utilization_percent
+
+    - record: mc:evidence_performance_regression
+      expr: mc:qam_p95_regression_percent
+
+    - record: mc:evidence_health_score
+      expr: mc:canary_gate_health_score
+
+    - record: mc:evidence_timestamp
+      expr: time()

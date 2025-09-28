@@ -1,0 +1,8 @@
+{
+  "name": "ui-service",
+  "version": "1.0.0",
+  "description": "IntelGraph UI",
+  "scripts": {
+    "start": "nginx -g 'daemon off;'"
+  }
+}

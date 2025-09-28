@@ -1,0 +1,43 @@
+{
+    "run_id": "cfe7461d-d2f4-44a5-b3b5-66b78c7519da",
+    "workflow": "R1 Rapid Attribution",
+    "input_id": "case_3_se",
+    "e2e_ok": false,
+    "first_failure_at": null,
+    "step_results": [
+        {
+            "step_id": "step_1",
+            "ok": true,
+            "details": {
+                "output": "processed data A",
+                "cost_usd": 0.01
+            },
+            "started_at": 1759020474.247148,
+            "ended_at": 1759020474.347148
+        },
+        {
+            "step_id": "step_2",
+            "ok": true,
+            "details": {
+                "output": "processed data B",
+                "cost_usd": 0.02
+            },
+            "started_at": 1759020474.347152,
+            "ended_at": 1759020474.4471521
+        },
+        {
+            "step_id": "step_3",
+            "ok": true,
+            "details": {
+                "output": "final result",
+                "cost_usd": 0.015
+            },
+            "started_at": 1759020474.447154,
+            "ended_at": 1759020474.547154
+        }
+    ],
+    "judge": "dummy_side_effect_judge",
+    "latency_ms": 0,
+    "cost_usd": 0.045,
+    "rubric_name": "Rapid Attribution Rubric V1"
+}

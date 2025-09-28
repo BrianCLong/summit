@@ -1,0 +1,41 @@
+type Step {
+  step_id: String!
+  tool: String!
+  ok: Boolean!
+  input: JSON!
+  output: JSON!
+  error: String
+  started_at_ms: Int!
+  ended_at_ms: Int!
+  cost_usd: Float
+  retries: Int
+}
+
+type EvalRun {
+  run_id: ID!
+  workflow: String!
+  input_id: String!
+  e2e_ok: Boolean!
+  first_failure_at: String
+  judge_id: String!
+  score: Float!
+  rubric_id: String!
+  latency_ms: Int!
+  cost_usd: Float!
+  created_at: BigInt!
+  steps: [Step!]!
+}
+
+type Summary {
+  workflow: String!
+  since_ms: BigInt!
+  pass_rate: Float!
+  p95_latency_ms: Int!
+  avg_cost_usd: Float!
+  top_first_failures: [String!]!
+}
+
+type Query {
+  evalRuns(workflow: String, limit: Int = 50): [EvalRun!]!
+  summary(workflow: String!, since_ms: BigInt!): Summary!
+}

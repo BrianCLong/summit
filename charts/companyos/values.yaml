@@ -13,3 +13,18 @@ image:
   pullPolicy: IfNotPresent
   digest: "sha256:REPLACE_ME"
 
+service:
+  type: ClusterIP
+  port: 3000
+  annotations: {}
+
+metrics:
+  enabled: true
+  path: /metrics
+  port: 3000
+
+prometheusOperator:
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    labels: {}

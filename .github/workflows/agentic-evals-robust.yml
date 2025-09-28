@@ -1,0 +1,64 @@
+name: agentic-evals-robust
+on:
+  pull_request:
+    paths:
+      - "evals/**"
+      - "runbooks/**"
+jobs:
+  run-robust-evals:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Install dependencies
+        run: pip install pydantic click pyyaml sqlalchemy psycopg2-binary prometheus_client fastapi uvicorn python-jose[cryptography]
+      - name: Run R1 robust fixtures
+        run: |
+          python -m intelgraph.evals.agentic.cli \
+            --runbook r1_rapid_attribution \
+            --cases evals/agentic/fixtures/r1/cases.jsonl | tee r1-robust.out
+          PASS_R1=$(grep -c '"e2e_ok": true' r1-robust.out || true)
+          TOTAL_R1=$(wc -l < evals/agentic/fixtures/r1/cases.jsonl)
+          echo "PASS_R1=$PASS_R1" >> $GITHUB_ENV
+          echo "TOTAL_R1=$TOTAL_R1" >> $GITHUB_ENV
+        env:
+          CHAOS_ON: "1"
+          CHAOS_TOOL_FAIL_PCT: "0.05"
+          CHAOS_LATENCY_MS_P95: "1200"
+      - name: Run R3 robust fixtures
+        run: |
+          python -m intelgraph.evals.agentic.cli \
+            --runbook r3_disinfo_mapping \
+            --cases evals/agentic/fixtures/r3/cases.jsonl | tee r3-robust.out
+          PASS_R3=$(grep -c '"e2e_ok": true' r3-robust.out || true)
+          TOTAL_R3=$(wc -l < evals/agentic/fixtures/r3/cases.jsonl)
+          echo "PASS_R3=$PASS_R3" >> $GITHUB_ENV
+          echo "TOTAL_R3=$TOTAL_R3" >> $GITHUB_ENV
+        env:
+          CHAOS_ON: "1"
+          CHAOS_TOOL_FAIL_PCT: "0.05"
+          CHAOS_LATENCY_MS_P95: "1200"
+      - name: Check Robust Pass Rates
+        run: |
+          python - <<'PY'
+import os,sys
+
+def check_pass_rate(runbook_name, pass_count_env, total_count_env, threshold_env):
+    pass_cnt = int(os.environ.get(pass_count_env, 0))
+    total = int(os.environ.get(total_count_env, 1))
+    threshold = float(os.environ.get(threshold_env, "0.60")) # Lower threshold for robust lane
+    rate = pass_cnt / float(total)
+    print(f"SUMMARY | runbook={runbook_name} pass_rate={pass_cnt}/{total}={rate:.2%} threshold={threshold}")
+    if rate < threshold:
+        print(f"Error: {runbook_name} robust pass rate {rate:.2%} is below threshold {threshold:.2%}")
+        sys.exit(1)
+
+check_pass_rate("r1_rapid_attribution", "PASS_R1", "TOTAL_R1", "THRESHOLD_R1")
+check_pass_rate("r3_disinfo_mapping", "PASS_R3", "TOTAL_R3", "THRESHOLD_R3")
+PY
+        env:
+          THRESHOLD_R1: "0.60"
+          THRESHOLD_R3: "0.50"

@@ -14,6 +14,9 @@ import { v040Resolvers } from './v040';
 // MC Platform v0.4.1 Sovereign Safeguards Resolvers
 import { v041Resolvers } from './v041';
 
+// MC Platform v0.4.2 Cognitive Synthesis Engine Resolvers
+import { v042Resolvers } from './v042';
+
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 
@@ -29,6 +32,8 @@ const resolvers = {
     ...(v040Resolvers.Query || {}),
     // MC Platform v0.4.1 Sovereign Safeguards
     ...(v041Resolvers.Query || {}),
+    // MC Platform v0.4.2 Cognitive Synthesis Engine
+    ...(v042Resolvers.Query || {}),
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     getCrisisTelemetry: wargameResolver.getCrisisTelemetry.bind(wargameResolver),
     getAdversaryIntentEstimates: wargameResolver.getAdversaryIntentEstimates.bind(wargameResolver),
@@ -49,6 +54,8 @@ const resolvers = {
     ...(v040Resolvers.Mutation || {}),
     // MC Platform v0.4.1 Sovereign Safeguards
     ...(v041Resolvers.Mutation || {}),
+    // MC Platform v0.4.2 Cognitive Synthesis Engine
+    ...(v042Resolvers.Mutation || {}),
     // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
     runWarGameSimulation: wargameResolver.runWarGameSimulation.bind(wargameResolver),
     updateCrisisScenario: wargameResolver.updateCrisisScenario.bind(wargameResolver),

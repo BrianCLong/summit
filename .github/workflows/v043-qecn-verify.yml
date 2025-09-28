@@ -1,0 +1,18 @@
+name: v043-qecn-verify
+on: [pull_request, workflow_dispatch]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: OPA tests
+        run: conftest test policy/mc-admin.v043.rego policy/tests
+      - name: Prom checks
+        run: |
+          promtool check rules prom/rules/mc-v043-recording.rules.yaml
+          promtool check rules prom/alerts/mc-v043.alerts.yaml
+      - name: SDL lint
+        run: npx graphql-schema-linter graphql/schema/mc-admin.v043.graphql
+      - name: Evidence skeleton
+        run: |
+          mkdir -p dist && echo '{"version":"v0.4.3","artifacts":[]}' > dist/evidence-v0.4.3-mc.json

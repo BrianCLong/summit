@@ -1,0 +1,23 @@
+name: Auto-request CODEOWNERS
+on:
+  pull_request:
+    types: [opened, ready_for_review, synchronize, reopened, labeled, unlabeled]
+permissions:
+  pull-requests: write
+  contents: read
+jobs:
+  request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: necojackarc/auto-request-review@v0.14.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Optional knobs:
+          config: |
+            draft: false
+            # request review from teams/users resolved via CODEOWNERS
+            # limit max reviewers per PR (prevents overload)
+            maxReviewers: 3
+            # when PR is labeled `needs-review`, re-request
+            labelPatterns:
+              - "^needs-review$"

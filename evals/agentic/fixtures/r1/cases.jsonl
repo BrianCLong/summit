@@ -1,0 +1,5 @@
+{"id": "case-001", "query": "Identify the source of recent cyber attack on company X", "inputs": {}}
+{"id": "case-002", "query": "Analyze phishing campaign targeting employees", "inputs": {"fail_at_step_2": true}}
+{"id": "case-003", "query": "Investigate data breach at subsidiary Y", "inputs": {"include_side_effect_in_step1": true}}
+{"id": "case-004", "query": "Determine attribution for APT group Z activity", "inputs": {"custom_final_output": {"final_answer": {"entity_id": "APT_Group_Z", "confidence": 0.9, "source_ids": ["report_A", "report_B"]}}, "include_side_effect_in_step1": {"kind": "neo4j_write", "label": "Attribution", "confidence": 0.9, "source_ids": ["report_A", "report_B"]}}}
+{"id": "case-005", "query": "Evaluate impact of malware variant W", "inputs": {"custom_final_output": {"final_answer": {"entity_id": "Malware_W_Impact", "confidence": 0.7}}, "include_side_effect_in_step1": {"kind": "neo4j_write", "label": "Attribution", "confidence": 0.7}}}

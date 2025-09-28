@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: agentic-evals-weekly
+spec:
+  schedule: "0 3 * * 0" # Sundays 03:00 America/Denver
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: evals
+              image: ghcr.io/brianclong/summit:latest # Adjusted image name
+              imagePullPolicy: IfNotPresent
+              command: ["python","-m","evals.agentic.cli"] # Adjusted module path
+              args:
+                ["--runbook","r1_rapid_attribution","--cases","/app/evals/agentic/fixtures/r1/cases.jsonl"] # Adjusted fixture path
+              env:
+                - name: PG_URL
+                  valueFrom: { secretKeyRef: { name: evalsvc, key: pg_url } }
+                - name: CHAOS_TOOL_FAIL_PCT    # opt-in chaos for weekly
+                  value: "0.05"
+                - name: CHAOS_LATENCY_MS_P95
+                  value: "1200"
+              volumeMounts:
+                - name: fixtures
+                  mountPath: /app/evals/agentic/fixtures # Adjusted mount path
+          volumes:
+            - name: fixtures
+              configMap:
+                name: agentic-fixtures

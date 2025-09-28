@@ -1,0 +1,1609 @@
+# MC Platform v0.4.5 "Adaptive Quantum Excellence" GraphQL Schema
+# Tri-Objective Optimization & Adaptive Quantum Applications
+
+extend type Query {
+  # Tri-Objective Optimizer Queries
+  getOptimizationResult(optimizationId: ID!): OptimizationResult
+  getOptimizationHistory(workloadId: ID!, limit: Int = 10): [OptimizationResult!]!
+  getParetoFrontier(workloadId: ID!, objectiveSpace: ObjectiveSpaceInput!): ParetoFrontier
+  getOptimizationRecommendations(workloadId: ID!): [OptimizationRecommendation!]!
+
+  # Adaptive Applications Queries
+  getAdaptiveApp(appId: ID!): AdaptiveQuantumApp
+  getAdaptiveApps(tenantId: ID!, filters: AdaptiveAppFilters): [AdaptiveQuantumApp!]!
+  getAdaptationHistory(appId: ID!, limit: Int = 20): [AdaptationEvent!]!
+  getLearningProgress(appId: ID!): LearningProgress
+
+  # Quantum Intelligence Engine Queries
+  getPerformancePrediction(workloadId: ID!, backendId: ID!): PerformancePrediction
+  getAnomalyReport(workloadId: ID!, timeRange: TimeRange!): AnomalyReport
+  getWorkloadAffinity(workloadIds: [ID!]!): AffinityMatrix
+  getIntelligenceInsights(tenantId: ID!, timeRange: TimeRange!): [IntelligenceInsight!]!
+
+  # Dynamic Resource Allocation Queries
+  getResourceAllocation(tenantId: ID!): ResourceAllocation
+  getResourceForecast(tenantId: ID!, timeHorizon: Int!): ResourceForecast
+  getResourceUtilization(tenantId: ID!, timeRange: TimeRange!): ResourceUtilization
+  getResourceRecommendations(tenantId: ID!): [ResourceRecommendation!]!
+}
+
+extend type Mutation {
+  # Tri-Objective Optimizer Mutations
+  optimizeWorkload(input: OptimizeWorkloadInput!): OptimizationResult!
+  updateOptimizationObjectives(input: UpdateObjectivesInput!): OptimizationObjectives!
+  createOptimizationPlan(input: OptimizationPlanInput!): OptimizationPlan!
+
+  # Adaptive Applications Mutations
+  createAdaptiveApp(input: CreateAdaptiveAppInput!): AdaptiveQuantumApp!
+  updateAdaptiveApp(input: UpdateAdaptiveAppInput!): AdaptiveQuantumApp!
+  trainAdaptiveApp(appId: ID!, trainingData: TrainingDataInput!): TrainingResult!
+  rollbackAdaptation(appId: ID!, adaptationId: ID!): AdaptationRollback!
+
+  # Quantum Intelligence Engine Mutations
+  trainPredictionModel(input: TrainModelInput!): ModelTrainingResult!
+  updateAnomalyThresholds(input: AnomalyThresholdsInput!): AnomalyConfiguration!
+  optimizeSchedule(input: ScheduleOptimizationInput!): OptimalSchedule!
+
+  # Dynamic Resource Allocation Mutations
+  reallocateResources(input: ReallocateResourcesInput!): AllocationResult!
+  updateResourcePriorities(input: ResourcePrioritiesInput!): ResourcePriorities!
+  scaleResources(input: ScaleResourcesInput!): ScalingResult!
+  enforceResourceFairness(tenantId: ID!): FairnessEnforcement!
+}
+
+extend type Subscription {
+  # Optimization Subscriptions
+  optimizationProgress(optimizationId: ID!): OptimizationProgress!
+  paretoFrontierUpdates(workloadId: ID!): ParetoFrontier!
+
+  # Adaptive Applications Subscriptions
+  adaptationEvents(appId: ID!): AdaptationEvent!
+  learningProgress(appId: ID!): LearningProgress!
+
+  # Intelligence Engine Subscriptions
+  anomalyDetected(tenantId: ID!): AnomalyAlert!
+  performancePredictionUpdates(workloadId: ID!): PerformancePrediction!
+
+  # Resource Allocation Subscriptions
+  resourceAllocationUpdates(tenantId: ID!): ResourceAllocation!
+  resourceUtilizationAlerts(tenantId: ID!): ResourceAlert!
+}
+
+# Core Types
+
+type OptimizationResult {
+  id: ID!
+  workloadId: ID!
+  solution: QuantumSolution!
+  objectives: AchievedObjectives!
+  tradeoffs: TradeoffAnalysis!
+  paretoPosition: ParetoPosition!
+  optimizationScore: Float!
+  timestamp: DateTime!
+  duration: Float!
+  metadata: JSON
+}
+
+type QuantumSolution {
+  circuitParameters: CircuitParameters!
+  backendSelection: BackendSelection!
+  resourceAllocation: ResourceAllocationPlan!
+  errorMitigationStrategy: ErrorMitigationStrategy!
+  executionConfiguration: ExecutionConfiguration!
+}
+
+type AchievedObjectives {
+  performance: PerformanceMetrics!
+  cost: CostMetrics!
+  security: SecurityMetrics!
+  overallScore: Float!
+  weightedScore: Float!
+}
+
+type TradeoffAnalysis {
+  performanceVsCost: TradeoffMetric!
+  performanceVsSecurity: TradeoffMetric!
+  costVsSecurity: TradeoffMetric!
+  optimalBalance: OptimalBalance!
+  sensitivityAnalysis: SensitivityAnalysis!
+}
+
+type ParetoFrontier {
+  solutions: [ParetoSolution!]!
+  dominatedSolutions: [ParetoSolution!]!
+  frontierMetrics: FrontierMetrics!
+  coverage: Float!
+  diversity: Float!
+}
+
+type ParetoSolution {
+  id: ID!
+  solution: QuantumSolution!
+  objectives: ObjectiveValues!
+  dominanceRank: Int!
+  crowdingDistance: Float!
+}
+
+type AdaptiveQuantumApp {
+  id: ID!
+  tenantId: ID!
+  name: String!
+  description: String
+  templateId: ID!
+  adaptationStrategy: AdaptationStrategy!
+  learningStatus: LearningStatus!
+  currentParameters: CircuitParameters!
+  performanceHistory: [PerformancePoint!]!
+  adaptationHistory: [AdaptationEvent!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AdaptationStrategy {
+  learningRate: Float!
+  adaptationThreshold: Float!
+  maxParameterChange: Float!
+  convergenceCriteria: ConvergenceCriteria!
+  rollbackPolicy: RollbackPolicy!
+  adaptationBounds: AdaptationBounds!
+}
+
+type LearningStatus {
+  isLearning: Boolean!
+  convergenceScore: Float!
+  stabilityScore: Float!
+  performanceImprovement: Float!
+  adaptationRisk: RiskLevel!
+  lastAdaptation: DateTime
+}
+
+type AdaptationEvent {
+  id: ID!
+  appId: ID!
+  eventType: AdaptationEventType!
+  parameterChanges: [ParameterChange!]!
+  performanceImpact: PerformanceImpact!
+  confidenceScore: Float!
+  timestamp: DateTime!
+  rollbackAvailable: Boolean!
+}
+
+type PerformancePrediction {
+  workloadId: ID!
+  backendId: ID!
+  expectedFidelity: Float!
+  expectedExecutionTime: Float!
+  expectedCost: Float!
+  confidenceInterval: ConfidenceInterval!
+  riskFactors: [RiskFactor!]!
+  predictionAccuracy: Float!
+  timestamp: DateTime!
+}
+
+type AnomalyReport {
+  id: ID!
+  workloadId: ID!
+  anomalies: [Anomaly!]!
+  severityLevel: SeverityLevel!
+  detectionConfidence: Float!
+  recommendedActions: [RecommendedAction!]!
+  timeRange: TimeRange!
+  timestamp: DateTime!
+}
+
+type Anomaly {
+  id: ID!
+  type: AnomalyType!
+  description: String!
+  severity: SeverityLevel!
+  confidence: Float!
+  affectedMetrics: [String!]!
+  detectionMethod: String!
+  timestamp: DateTime!
+}
+
+type AffinityMatrix {
+  workloads: [ID!]!
+  affinityScores: [[Float!]!]!
+  clusteringRecommendations: [ClusterRecommendation!]!
+  schedulingOptimizations: [SchedulingOptimization!]!
+}
+
+type ResourceAllocation {
+  tenantId: ID!
+  currentAllocations: [ResourceAllocationItem!]!
+  plannedAllocations: [PlannedAllocation!]!
+  utilizationMetrics: ResourceUtilizationMetrics!
+  fairnessScore: Float!
+  costEfficiency: Float!
+  lastUpdated: DateTime!
+}
+
+type ResourceForecast {
+  tenantId: ID!
+  timeHorizon: Int!
+  predictedDemand: [ResourceDemandPoint!]!
+  recommendedCapacity: [CapacityRecommendation!]!
+  costProjection: CostProjection!
+  riskAssessment: ForecastRiskAssessment!
+}
+
+type DynamicAllocationPlan {
+  id: ID!
+  tenantId: ID!
+  allocations: [DynamicAllocation!]!
+  optimizationStrategy: AllocationStrategy!
+  expectedBenefits: AllocationBenefits!
+  implementationPlan: ImplementationPlan!
+  riskMitigation: RiskMitigation!
+}
+
+# Input Types
+
+input OptimizeWorkloadInput {
+  workloadId: ID!
+  objectives: OptimizationObjectivesInput!
+  constraints: OptimizationConstraintsInput!
+  preferences: OptimizationPreferencesInput
+}
+
+input OptimizationObjectivesInput {
+  performance: PerformanceObjectiveInput!
+  cost: CostObjectiveInput!
+  security: SecurityObjectiveInput!
+  weights: ObjectiveWeightsInput!
+}
+
+input PerformanceObjectiveInput {
+  targetFidelity: Float!
+  maxExecutionTime: Float!
+  minThroughput: Float!
+  maxErrorRate: Float!
+  quantumVolumeTarget: Float
+}
+
+input CostObjectiveInput {
+  maxCostPerExecution: Float!
+  totalBudgetLimit: Float!
+  costEfficiencyTarget: Float!
+  resourceUtilizationTarget: Float!
+}
+
+input SecurityObjectiveInput {
+  minCryptographicStrength: Int!
+  privacyPreservationLevel: SecurityLevel!
+  complianceRequirements: [ComplianceFramework!]!
+  auditRequirements: AuditLevel!
+}
+
+input ObjectiveWeightsInput {
+  performance: Float!
+  cost: Float!
+  security: Float!
+}
+
+input CreateAdaptiveAppInput {
+  tenantId: ID!
+  name: String!
+  description: String
+  templateId: ID!
+  adaptationStrategy: AdaptationStrategyInput!
+  initialParameters: CircuitParametersInput!
+}
+
+input AdaptationStrategyInput {
+  learningRate: Float!
+  adaptationThreshold: Float!
+  maxParameterChange: Float!
+  convergenceCriteria: ConvergenceCriteriaInput!
+  rollbackPolicy: RollbackPolicyInput!
+}
+
+input TrainingDataInput {
+  executionResults: [ExecutionResultInput!]!
+  feedbackData: [FeedbackDataInput!]!
+  performanceTargets: PerformanceTargetsInput!
+}
+
+input ReallocateResourcesInput {
+  tenantId: ID!
+  newAllocations: [ResourceAllocationInput!]!
+  priority: ResourcePriority!
+  reason: String!
+}
+
+input ScheduleOptimizationInput {
+  workloadIds: [ID!]!
+  resourceConstraints: ResourceConstraintsInput!
+  optimizationGoals: [SchedulingGoal!]!
+  timeWindow: TimeWindowInput!
+}
+
+# Enum Types
+
+enum AdaptationEventType {
+  PARAMETER_UPDATE
+  BACKEND_SWITCH
+  ERROR_MITIGATION_CHANGE
+  RESOURCE_OPTIMIZATION
+  CONVERGENCE_ACHIEVED
+  ROLLBACK_EXECUTED
+}
+
+enum AnomalyType {
+  PERFORMANCE_DEGRADATION
+  COST_SPIKE
+  ERROR_RATE_INCREASE
+  FIDELITY_DROP
+  RESOURCE_CONTENTION
+  SECURITY_ANOMALY
+  COMPLIANCE_VIOLATION
+}
+
+enum SecurityLevel {
+  BASIC
+  STANDARD
+  HIGH
+  MAXIMUM
+}
+
+enum SeverityLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+  EMERGENCY
+}
+
+enum RiskLevel {
+  MINIMAL
+  LOW
+  MODERATE
+  HIGH
+  EXTREME
+}
+
+enum ComplianceFramework {
+  ITAR
+  EAR
+  GDPR
+  CCPA
+  HIPAA
+  SOX
+  PCI_DSS
+  CUSTOM
+}
+
+enum AuditLevel {
+  BASIC
+  STANDARD
+  COMPREHENSIVE
+  FORENSIC
+}
+
+enum ResourcePriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+  EMERGENCY
+}
+
+enum SchedulingGoal {
+  MINIMIZE_COST
+  MAXIMIZE_THROUGHPUT
+  MINIMIZE_LATENCY
+  MAXIMIZE_FAIRNESS
+  OPTIMIZE_UTILIZATION
+}
+
+enum AllocationStrategy {
+  COST_OPTIMIZED
+  PERFORMANCE_OPTIMIZED
+  BALANCED
+  FAIRNESS_FOCUSED
+  SECURITY_PRIORITIZED
+}
+
+# Scalar Types
+
+scalar DateTime
+scalar JSON
+scalar TimeRange
+
+# Complex Types
+
+type CircuitParameters {
+  angles: [Float!]!
+  depths: [Int!]!
+  gateSequences: [String!]!
+  optimizationLevel: Int!
+  customParameters: JSON
+}
+
+type BackendSelection {
+  backendId: ID!
+  backendType: String!
+  justification: String!
+  expectedPerformance: ExpectedPerformance!
+  cost: Float!
+}
+
+type ErrorMitigationStrategy {
+  techniques: [String!]!
+  parameters: JSON!
+  expectedImprovement: Float!
+  overheadCost: Float!
+}
+
+type PerformanceMetrics {
+  fidelity: Float!
+  executionTime: Float!
+  throughput: Float!
+  errorRate: Float!
+  quantumVolume: Float!
+}
+
+type CostMetrics {
+  executionCost: Float!
+  resourceCost: Float!
+  totalCost: Float!
+  costEfficiency: Float!
+  budgetUtilization: Float!
+}
+
+type SecurityMetrics {
+  cryptographicStrength: Int!
+  privacyScore: Float!
+  complianceScore: Float!
+  auditScore: Float!
+  overallSecurityScore: Float!
+}
+
+type TradeoffMetric {
+  correlation: Float!
+  sensitivity: Float!
+  optimalRatio: Float!
+  tradeoffPoints: [TradeoffPoint!]!
+}
+
+type OptimalBalance {
+  performanceWeight: Float!
+  costWeight: Float!
+  securityWeight: Float!
+  balanceScore: Float!
+  justification: String!
+}
+
+type SensitivityAnalysis {
+  parameterSensitivities: [ParameterSensitivity!]!
+  objectiveSensitivities: [ObjectiveSensitivity!]!
+  robustnessScore: Float!
+}
+
+type ConvergenceCriteria {
+  maxIterations: Int!
+  toleranceThreshold: Float!
+  stabilityWindow: Int!
+  improvementThreshold: Float!
+}
+
+type RollbackPolicy {
+  autoRollbackEnabled: Boolean!
+  performanceThreshold: Float!
+  maxRollbackDepth: Int!
+  rollbackCooldown: Int!
+}
+
+type AdaptationBounds {
+  minValues: [Float!]!
+  maxValues: [Float!]!
+  constraintTypes: [String!]!
+  violationPolicy: ViolationPolicy!
+}
+
+type PerformancePoint {
+  timestamp: DateTime!
+  fidelity: Float!
+  executionTime: Float!
+  cost: Float!
+  errorRate: Float!
+}
+
+type ParameterChange {
+  parameterId: String!
+  oldValue: Float!
+  newValue: Float!
+  changeReason: String!
+  impact: Float!
+}
+
+type PerformanceImpact {
+  fidelityChange: Float!
+  executionTimeChange: Float!
+  costChange: Float!
+  overallImpact: Float!
+}
+
+type ConfidenceInterval {
+  lowerBound: Float!
+  upperBound: Float!
+  confidence: Float!
+  interval: String!
+}
+
+type RiskFactor {
+  factor: String!
+  impact: Float!
+  probability: Float!
+  mitigation: String!
+}
+
+type RecommendedAction {
+  action: String!
+  priority: Int!
+  expectedBenefit: String!
+  implementationEffort: String!
+  riskLevel: RiskLevel!
+}
+
+type ClusterRecommendation {
+  clusterIds: [String!]!
+  workloadIds: [ID!]!
+  affinityScore: Float!
+  expectedBenefit: String!
+}
+
+type SchedulingOptimization {
+  optimizationType: String!
+  workloadIds: [ID!]!
+  expectedImprovement: Float!
+  implementation: String!
+}
+
+type ResourceAllocationItem {
+  resourceType: String!
+  allocated: Float!
+  utilized: Float!
+  efficiency: Float!
+  cost: Float!
+}
+
+type PlannedAllocation {
+  resourceType: String!
+  plannedAmount: Float!
+  timeWindow: TimeRange!
+  justification: String!
+  expectedUtilization: Float!
+}
+
+type ResourceUtilizationMetrics {
+  averageUtilization: Float!
+  peakUtilization: Float!
+  efficiency: Float!
+  wastePercentage: Float!
+  trendDirection: String!
+}
+
+type ResourceDemandPoint {
+  timestamp: DateTime!
+  demandLevel: Float!
+  confidence: Float!
+  factors: [String!]!
+}
+
+type CapacityRecommendation {
+  resourceType: String!
+  recommendedCapacity: Float!
+  currentCapacity: Float!
+  justification: String!
+  priority: Int!
+}
+
+type CostProjection {
+  totalCost: Float!
+  costByResource: [ResourceCost!]!
+  costTrend: [CostPoint!]!
+  optimizationOpportunities: [CostOptimization!]!
+}
+
+type ForecastRiskAssessment {
+  riskLevel: RiskLevel!
+  riskFactors: [RiskFactor!]!
+  mitigation: [String!]!
+  confidence: Float!
+}
+
+type DynamicAllocation {
+  resourceType: String!
+  currentAmount: Float!
+  targetAmount: Float!
+  reallocationStrategy: String!
+  timeline: String!
+}
+
+type AllocationBenefits {
+  costSavings: Float!
+  performanceImprovement: Float!
+  utilizationImprovement: Float!
+  riskReduction: String!
+}
+
+type ImplementationPlan {
+  phases: [ImplementationPhase!]!
+  totalDuration: String!
+  rollbackPlan: String!
+  validationSteps: [String!]!
+}
+
+type RiskMitigation {
+  identifiedRisks: [Risk!]!
+  mitigationStrategies: [MitigationStrategy!]!
+  contingencyPlans: [ContingencyPlan!]!
+}
+
+# Optimization Progress and Results
+
+type OptimizationProgress {
+  optimizationId: ID!
+  progress: Float!
+  currentIteration: Int!
+  bestSolution: QuantumSolution
+  estimatedCompletion: DateTime
+  intermediateResults: [IntermediateResult!]!
+}
+
+type IntermediateResult {
+  iteration: Int!
+  objectiveValues: ObjectiveValues!
+  solution: QuantumSolution!
+  improvementRate: Float!
+  timestamp: DateTime!
+}
+
+type ObjectiveValues {
+  performance: Float!
+  cost: Float!
+  security: Float!
+  weighted: Float!
+}
+
+type LearningProgress {
+  appId: ID!
+  learningPhase: LearningPhase!
+  convergenceProgress: Float!
+  performanceImprovement: Float!
+  stabilityScore: Float!
+  nextAdaptationEta: DateTime
+  confidenceLevel: Float!
+}
+
+enum LearningPhase {
+  INITIALIZATION
+  EXPLORATION
+  EXPLOITATION
+  CONVERGENCE
+  MAINTENANCE
+  ADAPTATION
+}
+
+type OptimizationRecommendation {
+  id: ID!
+  type: RecommendationType!
+  priority: Int!
+  description: String!
+  expectedBenefit: String!
+  implementation: String!
+  effort: String!
+  riskLevel: RiskLevel!
+}
+
+enum RecommendationType {
+  PARAMETER_TUNING
+  BACKEND_SWITCH
+  RESOURCE_OPTIMIZATION
+  COST_REDUCTION
+  SECURITY_ENHANCEMENT
+  PERFORMANCE_BOOST
+}
+
+type IntelligenceInsight {
+  id: ID!
+  type: InsightType!
+  title: String!
+  description: String!
+  confidence: Float!
+  actionable: Boolean!
+  recommendedActions: [String!]!
+  timestamp: DateTime!
+}
+
+enum InsightType {
+  PERFORMANCE_PATTERN
+  COST_ANOMALY
+  RESOURCE_TREND
+  OPTIMIZATION_OPPORTUNITY
+  RISK_IDENTIFICATION
+  EFFICIENCY_IMPROVEMENT
+}
+
+# Additional Supporting Types
+
+type ViolationPolicy {
+  action: ViolationAction!
+  severity: SeverityLevel!
+  notification: Boolean!
+  autoCorrect: Boolean!
+}
+
+enum ViolationAction {
+  WARN
+  RESTRICT
+  ROLLBACK
+  ABORT
+}
+
+type ResourceCost {
+  resourceType: String!
+  cost: Float!
+  trend: String!
+  optimization: Float!
+}
+
+type CostPoint {
+  timestamp: DateTime!
+  cost: Float!
+  factors: [String!]!
+}
+
+type CostOptimization {
+  opportunity: String!
+  potentialSavings: Float!
+  implementation: String!
+  risk: RiskLevel!
+}
+
+type ImplementationPhase {
+  phase: String!
+  duration: String!
+  activities: [String!]!
+  dependencies: [String!]!
+  validation: [String!]!
+}
+
+type Risk {
+  id: ID!
+  description: String!
+  probability: Float!
+  impact: Float!
+  severity: RiskLevel!
+}
+
+type MitigationStrategy {
+  riskId: ID!
+  strategy: String!
+  effectiveness: Float!
+  cost: Float!
+  implementation: String!
+}
+
+type ContingencyPlan {
+  trigger: String!
+  actions: [String!]!
+  responsibleParty: String!
+  timeline: String!
+}
+
+type ExpectedPerformance {
+  fidelity: Float!
+  executionTime: Float!
+  throughput: Float!
+  reliability: Float!
+}
+
+type ParameterSensitivity {
+  parameter: String!
+  sensitivity: Float!
+  impact: String!
+  optimization: String!
+}
+
+type ObjectiveSensitivity {
+  objective: String!
+  sensitivity: Float!
+  stability: Float!
+  recommendation: String!
+}
+
+type TradeoffPoint {
+  x: Float!
+  y: Float!
+  label: String!
+  optimal: Boolean!
+}
+
+type ParetoPosition {
+  rank: Int!
+  dominanceCount: Int!
+  crowdingDistance: Float!
+  isOptimal: Boolean!
+}
+
+type FrontierMetrics {
+  diversity: Float!
+  coverage: Float!
+  convergence: Float!
+  spacing: Float!
+}
+
+type AllocationResult {
+  success: Boolean!
+  newAllocations: [ResourceAllocationItem!]!
+  transitionPlan: TransitionPlan!
+  estimatedBenefits: AllocationBenefits!
+  risks: [Risk!]!
+}
+
+type TransitionPlan {
+  phases: [TransitionPhase!]!
+  totalDuration: String!
+  rollbackProcedure: String!
+  monitoring: [String!]!
+}
+
+type TransitionPhase {
+  name: String!
+  duration: String!
+  actions: [String!]!
+  validation: [String!]!
+  rollbackPoint: Boolean!
+}
+
+type ResourcePriorities {
+  tenantId: ID!
+  priorities: [ResourcePriorityItem!]!
+  lastUpdated: DateTime!
+  nextReview: DateTime!
+}
+
+type ResourcePriorityItem {
+  resourceType: String!
+  priority: ResourcePriority!
+  weight: Float!
+  justification: String!
+}
+
+type ScalingResult {
+  success: Boolean!
+  scalingActions: [ScalingAction!]!
+  newCapacity: [CapacityAllocation!]!
+  costImpact: Float!
+  timeline: String!
+}
+
+type ScalingAction {
+  action: String!
+  resourceType: String!
+  amount: Float!
+  timeline: String!
+  cost: Float!
+}
+
+type CapacityAllocation {
+  resourceType: String!
+  oldCapacity: Float!
+  newCapacity: Float!
+  utilizationTarget: Float!
+}
+
+type FairnessEnforcement {
+  tenantId: ID!
+  fairnessScore: Float!
+  adjustments: [FairnessAdjustment!]!
+  complianceStatus: String!
+  nextReview: DateTime!
+}
+
+type FairnessAdjustment {
+  resourceType: String!
+  adjustment: Float!
+  reason: String!
+  impact: String!
+}
+
+type ResourceAlert {
+  id: ID!
+  tenantId: ID!
+  alertType: ResourceAlertType!
+  severity: SeverityLevel!
+  message: String!
+  threshold: Float!
+  currentValue: Float!
+  timestamp: DateTime!
+  resolved: Boolean!
+}
+
+enum ResourceAlertType {
+  UTILIZATION_HIGH
+  UTILIZATION_LOW
+  COST_THRESHOLD_EXCEEDED
+  FAIRNESS_VIOLATION
+  CAPACITY_SHORTAGE
+  PERFORMANCE_DEGRADATION
+}
+
+# Filter and Search Types
+
+input AdaptiveAppFilters {
+  status: [LearningPhase!]
+  templateIds: [ID!]
+  performanceRange: PerformanceRangeInput
+  createdAfter: DateTime
+  createdBefore: DateTime
+}
+
+input PerformanceRangeInput {
+  minFidelity: Float
+  maxFidelity: Float
+  minThroughput: Float
+  maxThroughput: Float
+}
+
+input TimeWindowInput {
+  start: DateTime!
+  end: DateTime!
+  granularity: String!
+}
+
+input ResourceConstraintsInput {
+  maxCost: Float
+  maxDuration: Float
+  requiredBackends: [String!]
+  excludedBackends: [String!]
+}
+
+input OptimizationConstraintsInput {
+  maxOptimizationTime: Float!
+  budgetLimit: Float!
+  performanceFloor: PerformanceFloorInput!
+  securityRequirements: SecurityRequirementsInput!
+}
+
+input PerformanceFloorInput {
+  minFidelity: Float!
+  maxExecutionTime: Float!
+  maxErrorRate: Float!
+}
+
+input SecurityRequirementsInput {
+  minCryptographicStrength: Int!
+  requiredCompliance: [ComplianceFramework!]!
+  auditLevel: AuditLevel!
+}
+
+input OptimizationPreferencesInput {
+  preferredBackends: [String!]
+  avoidBackends: [String!]
+  optimizationStyle: OptimizationStyle
+  riskTolerance: RiskLevel
+}
+
+enum OptimizationStyle {
+  CONSERVATIVE
+  BALANCED
+  AGGRESSIVE
+  EXPERIMENTAL
+}
+
+input OptimizationPlanInput {
+  workloadId: ID!
+  objectives: OptimizationObjectivesInput!
+  timeframe: String!
+  milestones: [MilestoneInput!]!
+}
+
+input MilestoneInput {
+  name: String!
+  targetDate: DateTime!
+  objectives: ObjectiveTargetsInput!
+  validation: [String!]!
+}
+
+input ObjectiveTargetsInput {
+  performance: Float
+  cost: Float
+  security: Float
+  composite: Float
+}
+
+type OptimizationPlan {
+  id: ID!
+  workloadId: ID!
+  objectives: OptimizationObjectives!
+  milestones: [Milestone!]!
+  estimatedDuration: String!
+  expectedBenefits: ExpectedBenefits!
+  riskAssessment: RiskAssessment!
+  createdAt: DateTime!
+}
+
+type Milestone {
+  id: ID!
+  name: String!
+  targetDate: DateTime!
+  status: MilestoneStatus!
+  objectives: ObjectiveTargets!
+  actualResults: ObjectiveTargets
+  validation: [ValidationResult!]!
+}
+
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  DELAYED
+  CANCELLED
+}
+
+type ObjectiveTargets {
+  performance: Float
+  cost: Float
+  security: Float
+  composite: Float
+}
+
+type ValidationResult {
+  test: String!
+  passed: Boolean!
+  score: Float
+  details: String
+}
+
+type ExpectedBenefits {
+  performanceImprovement: Float!
+  costReduction: Float!
+  securityEnhancement: Float!
+  riskReduction: String!
+}
+
+type RiskAssessment {
+  overallRisk: RiskLevel!
+  riskFactors: [RiskFactor!]!
+  mitigation: [String!]!
+  contingency: [String!]!
+}
+
+input UpdateObjectivesInput {
+  workloadId: ID!
+  objectives: OptimizationObjectivesInput!
+  reason: String!
+  effectiveDate: DateTime
+}
+
+type OptimizationObjectives {
+  workloadId: ID!
+  performance: PerformanceObjective!
+  cost: CostObjective!
+  security: SecurityObjective!
+  weights: ObjectiveWeights!
+  lastUpdated: DateTime!
+  version: Int!
+}
+
+type PerformanceObjective {
+  targetFidelity: Float!
+  maxExecutionTime: Float!
+  minThroughput: Float!
+  maxErrorRate: Float!
+  quantumVolumeTarget: Float
+}
+
+type CostObjective {
+  maxCostPerExecution: Float!
+  totalBudgetLimit: Float!
+  costEfficiencyTarget: Float!
+  resourceUtilizationTarget: Float!
+}
+
+type SecurityObjective {
+  minCryptographicStrength: Int!
+  privacyPreservationLevel: SecurityLevel!
+  complianceRequirements: [ComplianceFramework!]!
+  auditRequirements: AuditLevel!
+}
+
+type ObjectiveWeights {
+  performance: Float!
+  cost: Float!
+  security: Float!
+  normalized: Boolean!
+}
+
+input UpdateAdaptiveAppInput {
+  appId: ID!
+  name: String
+  description: String
+  adaptationStrategy: AdaptationStrategyInput
+  active: Boolean
+}
+
+input ConvergenceCriteriaInput {
+  maxIterations: Int!
+  toleranceThreshold: Float!
+  stabilityWindow: Int!
+  improvementThreshold: Float!
+}
+
+input RollbackPolicyInput {
+  autoRollbackEnabled: Boolean!
+  performanceThreshold: Float!
+  maxRollbackDepth: Int!
+  rollbackCooldown: Int!
+}
+
+input CircuitParametersInput {
+  angles: [Float!]!
+  depths: [Int!]!
+  gateSequences: [String!]!
+  optimizationLevel: Int!
+  customParameters: JSON
+}
+
+type TrainingResult {
+  success: Boolean!
+  modelVersion: String!
+  trainingMetrics: TrainingMetrics!
+  validationResults: ValidationResults!
+  deploymentReady: Boolean!
+}
+
+type TrainingMetrics {
+  accuracy: Float!
+  loss: Float!
+  convergenceRate: Float!
+  trainingTime: Float!
+  dataQuality: Float!
+}
+
+type ValidationResults {
+  testAccuracy: Float!
+  crossValidationScore: Float!
+  performanceImprovement: Float!
+  robustnessScore: Float!
+}
+
+type AdaptationRollback {
+  success: Boolean!
+  rolledBackToVersion: String!
+  restoredParameters: CircuitParameters!
+  performanceImpact: PerformanceImpact!
+  rollbackReason: String!
+}
+
+input TrainModelInput {
+  modelType: ModelType!
+  trainingData: TrainingDatasetInput!
+  hyperparameters: HyperparametersInput!
+  validationSplit: Float!
+}
+
+enum ModelType {
+  PERFORMANCE_PREDICTOR
+  ANOMALY_DETECTOR
+  RESOURCE_OPTIMIZER
+  SCHEDULER
+  COST_PREDICTOR
+}
+
+input TrainingDatasetInput {
+  datasetId: ID!
+  features: [String!]!
+  targets: [String!]!
+  preprocessing: PreprocessingConfig
+}
+
+input PreprocessingConfig {
+  normalization: Boolean!
+  featureScaling: String!
+  outlierRemoval: Boolean!
+  dataAugmentation: Boolean!
+}
+
+input HyperparametersInput {
+  learningRate: Float!
+  batchSize: Int!
+  epochs: Int!
+  regularization: Float!
+  architecture: ArchitectureConfig!
+}
+
+input ArchitectureConfig {
+  layers: [LayerConfig!]!
+  activation: String!
+  optimizer: String!
+  lossFunction: String!
+}
+
+input LayerConfig {
+  type: String!
+  size: Int!
+  dropout: Float
+  activation: String
+}
+
+type ModelTrainingResult {
+  success: Boolean!
+  modelId: ID!
+  trainingMetrics: TrainingMetrics!
+  validationMetrics: ValidationMetrics!
+  deploymentInfo: DeploymentInfo!
+}
+
+type ValidationMetrics {
+  accuracy: Float!
+  precision: Float!
+  recall: Float!
+  f1Score: Float!
+  auc: Float!
+}
+
+type DeploymentInfo {
+  modelVersion: String!
+  deploymentReady: Boolean!
+  estimatedPerformance: EstimatedPerformance!
+  resourceRequirements: ResourceRequirements!
+}
+
+type EstimatedPerformance {
+  inferenceTime: Float!
+  throughput: Float!
+  accuracy: Float!
+  resourceEfficiency: Float!
+}
+
+type ResourceRequirements {
+  memory: Float!
+  cpu: Float!
+  storage: Float!
+  network: Float!
+}
+
+input AnomalyThresholdsInput {
+  tenantId: ID!
+  thresholds: [ThresholdConfig!]!
+  sensitivity: Float!
+  alerting: AlertingConfig!
+}
+
+input ThresholdConfig {
+  metric: String!
+  threshold: Float!
+  comparison: ComparisonOperator!
+  severity: SeverityLevel!
+}
+
+enum ComparisonOperator {
+  GREATER_THAN
+  LESS_THAN
+  EQUAL_TO
+  NOT_EQUAL_TO
+  GREATER_THAN_OR_EQUAL
+  LESS_THAN_OR_EQUAL
+}
+
+input AlertingConfig {
+  emailEnabled: Boolean!
+  slackEnabled: Boolean!
+  webhookUrl: String
+  escalationPolicy: EscalationPolicy!
+}
+
+input EscalationPolicy {
+  levels: [EscalationLevel!]!
+  timeout: Int!
+  maxEscalations: Int!
+}
+
+input EscalationLevel {
+  level: Int!
+  contacts: [String!]!
+  delayMinutes: Int!
+  methods: [NotificationMethod!]!
+}
+
+enum NotificationMethod {
+  EMAIL
+  SLACK
+  SMS
+  WEBHOOK
+  PAGERDUTY
+}
+
+type AnomalyConfiguration {
+  tenantId: ID!
+  thresholds: [ConfiguredThreshold!]!
+  sensitivity: Float!
+  alerting: ConfiguredAlerting!
+  lastUpdated: DateTime!
+}
+
+type ConfiguredThreshold {
+  metric: String!
+  threshold: Float!
+  comparison: ComparisonOperator!
+  severity: SeverityLevel!
+  enabled: Boolean!
+}
+
+type ConfiguredAlerting {
+  emailEnabled: Boolean!
+  slackEnabled: Boolean!
+  webhookUrl: String
+  escalationPolicy: ConfiguredEscalation!
+}
+
+type ConfiguredEscalation {
+  levels: [ConfiguredEscalationLevel!]!
+  timeout: Int!
+  maxEscalations: Int!
+}
+
+type ConfiguredEscalationLevel {
+  level: Int!
+  contacts: [String!]!
+  delayMinutes: Int!
+  methods: [NotificationMethod!]!
+}
+
+type OptimalSchedule {
+  scheduleId: ID!
+  workloads: [ScheduledWorkload!]!
+  optimizationMetrics: SchedulingMetrics!
+  resourceUtilization: ScheduledResourceUtilization!
+  costEfficiency: Float!
+  estimatedCompletion: DateTime!
+}
+
+type ScheduledWorkload {
+  workloadId: ID!
+  scheduledStart: DateTime!
+  estimatedDuration: Float!
+  assignedResources: [AssignedResource!]!
+  priority: Int!
+  dependencies: [ID!]!
+}
+
+type AssignedResource {
+  resourceId: ID!
+  resourceType: String!
+  allocation: Float!
+  utilizationRate: Float!
+}
+
+type SchedulingMetrics {
+  totalMakespan: Float!
+  averageWaitTime: Float!
+  resourceEfficiency: Float!
+  fairnessScore: Float!
+  optimizationScore: Float!
+}
+
+type ScheduledResourceUtilization {
+  timeline: [ResourceUtilizationPoint!]!
+  peakUtilization: Float!
+  averageUtilization: Float!
+  bottlenecks: [ResourceBottleneck!]!
+}
+
+type ResourceUtilizationPoint {
+  timestamp: DateTime!
+  resourceType: String!
+  utilization: Float!
+  cost: Float!
+}
+
+type ResourceBottleneck {
+  resourceType: String!
+  timeWindow: TimeRange!
+  severity: Float!
+  affectedWorkloads: [ID!]!
+  recommendations: [String!]!
+}
+
+input ResourceAllocationInput {
+  resourceType: String!
+  amount: Float!
+  priority: ResourcePriority!
+  timeWindow: TimeRange
+}
+
+input ResourcePrioritiesInput {
+  tenantId: ID!
+  priorities: [ResourcePriorityInput!]!
+  reason: String!
+}
+
+input ResourcePriorityInput {
+  resourceType: String!
+  priority: ResourcePriority!
+  weight: Float!
+  justification: String!
+}
+
+input ScaleResourcesInput {
+  tenantId: ID!
+  scalingActions: [ScalingActionInput!]!
+  trigger: ScalingTrigger!
+  timeframe: String!
+}
+
+input ScalingActionInput {
+  resourceType: String!
+  action: ScalingActionType!
+  amount: Float!
+  maxAmount: Float
+  conditions: [ScalingCondition!]
+}
+
+enum ScalingActionType {
+  SCALE_UP
+  SCALE_DOWN
+  AUTO_SCALE
+  FREEZE
+  RELEASE
+}
+
+input ScalingCondition {
+  metric: String!
+  threshold: Float!
+  duration: Int!
+  comparison: ComparisonOperator!
+}
+
+input ScalingTrigger {
+  type: TriggerType!
+  source: String!
+  urgency: UrgencyLevel!
+  justification: String!
+}
+
+enum TriggerType {
+  MANUAL
+  AUTOMATIC
+  PREDICTIVE
+  EMERGENCY
+  SCHEDULED
+}
+
+enum UrgencyLevel {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+  EMERGENCY
+}
+
+input ExecutionResultInput {
+  executionId: ID!
+  fidelity: Float!
+  executionTime: Float!
+  cost: Float!
+  errorRate: Float!
+  metadata: JSON
+}
+
+input FeedbackDataInput {
+  executionId: ID!
+  userRating: Float!
+  performanceRating: Float!
+  qualityRating: Float!
+  comments: String
+}
+
+input PerformanceTargetsInput {
+  targetFidelity: Float!
+  targetExecutionTime: Float!
+  targetCost: Float!
+  targetErrorRate: Float!
+}
+
+input ObjectiveSpaceInput {
+  dimensions: [ObjectiveDimension!]!
+  constraints: [ObjectiveConstraint!]!
+  resolution: Float!
+}
+
+input ObjectiveDimension {
+  name: String!
+  min: Float!
+  max: Float!
+  weight: Float!
+}
+
+input ObjectiveConstraint {
+  dimension: String!
+  operator: ComparisonOperator!
+  value: Float!
+  priority: Int!
+}
+
+type ResourceRecommendation {
+  id: ID!
+  type: ResourceRecommendationType!
+  title: String!
+  description: String!
+  expectedBenefit: String!
+  implementation: String!
+  priority: Int!
+  effort: EffortLevel!
+  riskLevel: RiskLevel!
+  costImpact: Float!
+}
+
+enum ResourceRecommendationType {
+  INCREASE_ALLOCATION
+  DECREASE_ALLOCATION
+  REBALANCE_RESOURCES
+  OPTIMIZE_UTILIZATION
+  REDUCE_COSTS
+  IMPROVE_FAIRNESS
+}
+
+enum EffortLevel {
+  MINIMAL
+  LOW
+  MEDIUM
+  HIGH
+  EXTENSIVE
+}
+
+type AnomalyAlert {
+  id: ID!
+  tenantId: ID!
+  anomaly: Anomaly!
+  alertLevel: SeverityLevel!
+  message: String!
+  affectedWorkloads: [ID!]!
+  recommendedActions: [String!]!
+  autoResolution: Boolean!
+  timestamp: DateTime!
+}
+
+type ResourceUtilization {
+  tenantId: ID!
+  timeRange: TimeRange!
+  utilizationData: [ResourceUtilizationData!]!
+  trends: [UtilizationTrend!]!
+  efficiency: Float!
+  recommendations: [String!]!
+}
+
+type ResourceUtilizationData {
+  timestamp: DateTime!
+  resourceType: String!
+  allocated: Float!
+  utilized: Float!
+  efficiency: Float!
+  cost: Float!
+}
+
+type UtilizationTrend {
+  resourceType: String!
+  trendDirection: TrendDirection!
+  changeRate: Float!
+  prediction: UtilizationPrediction!
+}
+
+enum TrendDirection {
+  INCREASING
+  DECREASING
+  STABLE
+  VOLATILE
+}
+
+type UtilizationPrediction {
+  nextWeek: Float!
+  nextMonth: Float!
+  confidence: Float!
+  factors: [String!]!
+}

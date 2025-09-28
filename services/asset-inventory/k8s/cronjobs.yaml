@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata: {name: collector-aws}
+spec:
+  schedule: "*/15 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: asset-inventory
+          containers:
+            - name: collector
+              image: ghcr.io/BrianCLong/summit/asset-inventory:{{ .SHA | default "latest" }}
+              command: ["python","/app/collectors/aws_collect.py"]
+              env:
+                - name: DB_PATH
+                  value: /data/inventory.db
+                - name: AWS_ORG_AUDIT_ROLE_ARN
+                  valueFrom:
+                    secretKeyRef: {name: asset-inventory, key: aws_org_audit_role_arn}
+          restartPolicy: OnFailure
+---
+# Similar CronJobs for gcp_collect.py, azure_collect.py, monitoring_collect.py

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IntelGraph UI</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.21.0/cytoscape.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 0; }
+        #cy { width: 100vw; height: 90vh; display: block; }
+        #controls { padding: 10px; background: #f0f0f0; }
+        #snackbar { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 2px; padding: 16px; position: fixed; z-index: 1; left: 50%; bottom: 30px; font-size: 17px; }
+        #snackbar.show { visibility: visible; -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @-webkit-keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @-webkit-keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <label><input type="checkbox" id="toggle-coord"> Show Coordination Edges</label>
+        <button id="btn-export">Export Case</button>
+        <button id="btn-summarize">Summarize Case</button>
+        <button id="btn-download-bundle">Download Bundle</button>
+        <select id="case-template-select">
+            <option value="">Apply Template</option>
+            <option value="coord_default">Coordination Default</option>
+        </select>
+    </div>
+    <div id="cy"></div>
+    <div id="snackbar"></div>
+
+    <div id="explain-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:100;">
+        <div style="background:white; margin:10% auto; padding:20px; width:80%; max-width:600px; border-radius:8px;">
+            <h3>Explain Coordination Edge</h3>
+            <p>Score: <span id="exp-score"></span></p>
+            <div id="exp-tags"></div>
+            <h4>Examples:</h4>
+            <div id="exp-examples"></div>
+            <button onclick="document.getElementById('explain-modal').style.display='none'">Close</button>
+        </div>
+    </div>
+
+    <script src="/main.js"></script>
+    <script>
+        var cy = cytoscape({
+            container: document.getElementById('cy'),
+            elements: [],
+            style: [
+                { selector: 'node', style: { 'label': 'data(id)', 'text-valign': 'center', 'color': 'white', 'text-outline-width': 2, 'text-outline-color': '#888', 'background-color': '#888' } },
+                { selector: 'edge', style: { 'width': 1, 'line-color': '#ccc', 'target-arrow-color': '#ccc', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier' } },
+                { selector: 'edge[type = "COORDINATION"]', style: { 'line-color': 'red', 'width': 'mapData(score, 0, 10, 1, 8)', 'line-opacity': 0.15 } }
+            ],
+            layout: { name: 'cose' }
+        });
+
+        function openCase(caseData) {
+            console.log("Opening case:", caseData);
+            // Placeholder for opening a case view
+            alert(`Case ${caseData.id} created for reason: ${caseData.reason}`);
+        }
+
+        // Mock data for demonstration
+        cy.add([
+            { group: 'nodes', data: { id: 'acc_1' } },
+            { group: 'nodes', data: { id: 'acc_2' } },
+            { group: 'nodes', data: { id: 'acc_3' } },
+            { group: 'edges', data: { id: 'e1', source: 'acc_1', target: 'acc_2', type: 'COORDINATION', score: 5.5 } },
+            { group: 'edges', data: { id: 'e2', source: 'acc_2', target: 'acc_3', type: 'COORDINATION', score: 3.2 } }
+        ]);
+    </script>
+</body>
+</html>

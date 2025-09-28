@@ -1,0 +1,32 @@
+name: agentic-weekly
+on:
+  schedule:
+    - cron: "0 9 * * 0"   # Sundays 09:00 UTC (~03:00 America/Denver)
+  workflow_dispatch: {}
+jobs:
+  weekly-evals:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pydantic click pyyaml sqlalchemy psycopg2-binary prometheus_client fastapi uvicorn python-jose[cryptography]
+      - name: Run R1
+        run: |
+          python -m intelgraph.evals.agentic.cli \
+            --runbook r1_rapid_attribution \
+            --cases evals/agentic/fixtures/r1/cases.jsonl | tee r1.out
+      - name: Run R3
+        run: |
+          python -m intelgraph.evals.agentic.cli \
+            --runbook r3_disinfo_mapping \
+            --cases evals/agentic/fixtures/r3/cases.jsonl | tee r3.out
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-eval-logs
+          path: |
+            r1.out
+            r3.out

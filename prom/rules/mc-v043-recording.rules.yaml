@@ -1,0 +1,16 @@
+groups:
+- name: mc-v043
+  interval: 15s
+  rules:
+  - record: mc_qc_minutes_used
+    expr: sum(rate(mc_qc_job_minutes[5m])) by (tenant)
+  - record: mc_qc_minutes_ceiling
+    expr: max(mc_qc_budget_ceiling) by (tenant)
+  - record: mc_mixed_correctness
+    expr: avg(mc_mixed_correctness_raw)
+  - record: mc_qog_route_total
+    expr: sum by (route,backend) (rate(mc_qog_route_count[5m]))
+  - record: mc_qc_residency_violation_total
+    expr: sum(rate(mc_qc_residency_violation_count[5m]))
+  - record: mc_qc_attestor_ts
+    expr: max(mc_qc_attestor_report_ts)

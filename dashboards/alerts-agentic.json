@@ -1,0 +1,10 @@
+{
+  "annotations": { "list": [] },
+  "panels": [],
+  "templating": { "list": [] },
+  "title": "Agentic Alerts (Rules Only)",
+  "uid": "agentic-alerts",
+  "version": 1,
+  "fiscalYearStartMonth": 0,
+  "weekStart": ""
+}

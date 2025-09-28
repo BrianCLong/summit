@@ -1,0 +1,4 @@
+{"id": "r3-case-001", "query": "Analyze disinformation campaign on social media", "inputs": {}}
+{"id": "r3-case-002", "query": "Identify sources of election interference narratives", "inputs": {"fail_at_step_2": true}}
+{"id": "r3-case-003", "query": "Map spread of health misinformation", "inputs": {"custom_final_output": {"final_answer": {"disinfo_score": 0.8, "narrative_id": "health_misinfo_A"}}}}
+{"id": "r3-case-004", "query": "Evaluate impact of deepfake propaganda", "inputs": {"custom_final_output": {"final_answer": {"disinfo_score": 0.9, "narrative_id": "deepfake_propaganda_B"}}}}

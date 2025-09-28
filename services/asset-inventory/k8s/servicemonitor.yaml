@@ -1,0 +1,11 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: asset-inventory
+  namespace: companyos
+spec:
+  selector: { matchLabels: { app: asset-inventory } }
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s

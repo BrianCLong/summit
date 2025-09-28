@@ -1,0 +1,11 @@
+# Dockerfile.faust
+FROM python:3.11-slim-buster
+
+WORKDIR /app
+
+COPY stream/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY stream/ /app/stream
+
+CMD ["faust", "-A", "stream.coord_detector", "worker", "-l", "info"]

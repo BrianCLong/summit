@@ -1,0 +1,98 @@
+name: agentic-evals
+on:
+  pull_request:
+    paths:
+      - "evals/**"
+      - "runbooks/**" # Assuming runbooks are in a top-level 'runbooks' directory
+jobs:
+  run-evals:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5 # Use v5 for setup-python
+        with: { python-version: "3.12" }
+      - name: Install dependencies
+        run: pip install pydantic click pyyaml sqlalchemy psycopg2-binary prometheus_client fastapi uvicorn python-jose[cryptography]
+      - name: Run R1 fixtures
+        id: r1_eval
+        run: |
+          python -m intelgraph.evals.agentic.cli \
+            --runbook r1_rapid_attribution \
+            --cases evals/agentic/fixtures/r1/cases.jsonl | tee r1.out
+          PASS_R1=$(grep -c '"e2e_ok": true' r1.out || true)
+          TOTAL_R1=$(wc -l < evals/agentic/fixtures/r1/cases.jsonl)
+          echo "PASS_R1=$PASS_R1" >> $GITHUB_ENV
+          echo "TOTAL_R1=$TOTAL_R1" >> $GITHUB_ENV
+          # Extract current top-1 first_failure_at for R1
+          CURRENT_TOP1_R1=$(jq -r 'select(.first_failure_at!=null)|.first_failure_at' r1.out | sort | uniq -c | sort -nr | head -1 | awk '{print $2}')
+          echo "CURRENT_TOP1_R1=$CURRENT_TOP1_R1" >> $GITHUB_ENV
+      - name: Run R3 fixtures
+        id: r3_eval
+        run: |
+          python -m intelgraph.evals.agentic.cli \
+            --runbook r3_disinfo_mapping \
+            --cases evals/agentic/fixtures/r3/cases.jsonl | tee r3.out
+          PASS_R3=$(grep -c '"e2e_ok": true' r3.out || true)
+          TOTAL_R3=$(wc -l < evals/agentic/fixtures/r3/cases.jsonl)
+          echo "PASS_R3=$PASS_R3" >> $GITHUB_ENV
+          echo "TOTAL_R3=$TOTAL_R3" >> $GITHUB_ENV
+          # Extract current top-1 first_failure_at for R3
+          CURRENT_TOP1_R3=$(jq -r 'select(.first_failure_at!=null)|.first_failure_at' r3.out | sort | uniq -c | sort -nr | head -1 | awk '{print $2}')
+          echo "CURRENT_TOP1_R3=$CURRENT_TOP1_R3" >> $GITHUB_ENV
+      - name: Check Pass Rates
+        run: |
+          python - <<'PY'
+import os,sys
+
+def check_pass_rate(runbook_name, pass_count_env, total_count_env, threshold_env):
+    pass_cnt = int(os.environ.get(pass_count_env, 0))
+    total = int(os.environ.get(total_count_env, 1))
+    threshold = float(os.environ.get(threshold_env, "0.80"))
+    rate = pass_cnt / float(total)
+    print(f"SUMMARY | runbook={runbook_name} pass_rate={pass_cnt}/{total}={rate:.2%} threshold={threshold}")
+    if rate < threshold:
+        print(f"Error: {runbook_name} pass rate {rate:.2%} is below threshold {threshold:.2%}")
+        sys.exit(1)
+
+check_pass_rate("r1_rapid_attribution", "PASS_R1", "TOTAL_R1", "THRESHOLD_R1")
+check_pass_rate("r3_disinfo_mapping", "PASS_R3", "TOTAL_R3", "THRESHOLD_R3")
+PY
+        env:
+          THRESHOLD_R1: "0.80"
+          THRESHOLD_R3: "0.75"
+      - name: Check First Failure Regression (R1)
+        run: |
+          # This is a conceptual check. You need to manage BASELINE_TOP1_R1 externally.
+          # Example: Fetch from GitHub Releases, S3, or a dedicated service.
+          # For demonstration, we'll use a dummy baseline.
+          BASELINE_TOP1_R1="step_2" # Replace with actual baseline
+          if [ "${{ env.CURRENT_TOP1_R1 }}" != "" ] && [ "${{ env.CURRENT_TOP1_R1 }}" != "$BASELINE_TOP1_R1" ]; then
+            echo "Top-1 first_failure_at for R1 shifted: $BASELINE_TOP1_R1 -> ${{ env.CURRENT_TOP1_R1 }}"
+            # Check for 'runbook-change-ok' label on the PR
+            # This requires GitHub CLI or API calls, which are beyond this script's scope.
+            # For now, we'll just fail.
+            exit 1
+          else
+            echo "Top-1 first_failure_at for R1 is stable or empty."
+          fi
+        env:
+          CURRENT_TOP1_R1: ${{ env.CURRENT_TOP1_R1 }}
+      - name: Check First Failure Regression (R3)
+        run: |
+          # This is a conceptual check. You need to manage BASELINE_TOP1_R3 externally.
+          # Example: Fetch from GitHub Releases, S3, or a dedicated service.
+          # For demonstration, we'll use a dummy baseline.
+          BASELINE_TOP1_R3="step_2" # Replace with actual baseline
+          if [ "${{ env.CURRENT_TOP1_R3 }}" != "" ] && [ "${{ env.CURRENT_TOP1_R3 }}" != "$BASELINE_TOP1_R3" ]; then
+            echo "Top-1 first_failure_at for R3 shifted: $BASELINE_TOP1_R3 -> ${{ env.CURRENT_TOP1_R3 }}"
+            # Check for 'runbook-change-ok' label on the PR
+            # This requires GitHub CLI or API calls, which are beyond this script's scope.
+            # For now, we'll just fail.
+            exit 1
+          else
+            echo "Top-1 first_failure_at for R3 is stable or empty."
+          fi
+        env:
+          CURRENT_TOP1_R3: ${{ env.CURRENT_TOP1_R3 }}

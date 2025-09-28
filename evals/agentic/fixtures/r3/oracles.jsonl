@@ -1,0 +1,4 @@
+{"id": "r3-case-001", "expected_e2e_ok": false, "expected_first_failure": null, "expected_final_answer": null}
+{"id": "r3-case-002", "expected_e2e_ok": false, "expected_first_failure": "step_2", "expected_final_answer": null}
+{"id": "r3-case-003", "expected_e2e_ok": true, "expected_first_failure": null, "expected_final_answer": {"disinfo_score": 0.8}}
+{"id": "r3-case-004", "expected_e2e_ok": true, "expected_first_failure": null, "expected_final_answer": {"disinfo_score": 0.9}}

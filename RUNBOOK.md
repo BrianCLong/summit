@@ -1,146 +1,164 @@
-# Maestro Conductor Operational Runbook
+# Agentic Evaluation Harness: On-Call Runbook
 
-This document serves as a detailed operational runbook for the Maestro Conductor service, providing guidance on common tasks, troubleshooting, and incident response for SREs and operations teams.
+This document provides essential information for operating and troubleshooting the Agentic Evaluation Harness. It covers deployment, monitoring, alerting, and incident response procedures.
 
 ## 1. Overview
 
-Maestro Conductor is the central orchestration engine. This runbook covers its day-to-day operations, monitoring, and incident management.
+The Agentic Evaluation Harness is a critical subsystem designed to continuously evaluate the performance, robustness, and correctness of agentic workflows. It performs two-phase evaluations (End-to-End success + stepwise failure analysis), integrates with various judges (LLM, human, hybrid), and provides comprehensive observability through metrics, alerts, and dashboards.
 
-## 2. Monitoring & Alerting Cribsheet
+## 2. Go-Live Checklist (15-minute pass)
 
-Maestro exposes Prometheus metrics and OpenTelemetry traces.
+Before declaring the system live, ensure the following checks are passed:
 
-### 2.1. Key Metrics & Queries
-
-| Metric Name                              | Description                                    | Prometheus Query Example                                                                |
-| :--------------------------------------- | :--------------------------------------------- | :-------------------------------------------------------------------------------------- |
-| `maestro_jobs_started_total`             | Counter for initiated orchestration jobs       | `sum(rate(maestro_jobs_started_total[5m]))`                                             |
-| `maestro_jobs_succeeded_total`           | Counter for successfully completed jobs        | `sum(rate(maestro_jobs_succeeded_total[5m]))`                                           |
-| `maestro_jobs_failed_total`              | Counter for failed jobs                        | `sum(rate(maestro_jobs_failed_total[5m])) by (workflow)`                                |
-| `maestro_job_latency_seconds`            | Histogram for job execution latency            | `histogram_quantile(0.95, sum(rate(maestro_job_latency_seconds_bucket[5m])) by (le))`   |
-| `maestro_runs_active`                    | Gauge for currently active runs                | `maestro_runs_active`                                                                   |
-| `maestro_tasks_inflight`                 | Gauge for tasks currently being processed      | `maestro_tasks_inflight`                                                                |
-| `maestro_lease_renew_failures_total`     | Counter for lease renewal failures             | `sum(rate(maestro_lease_renew_failures_total[5m]))`                                     |
-| `maestro_orphaned_tasks_reclaimed_total` | Counter for tasks reclaimed due to lost leases | `sum(rate(maestro_orphaned_tasks_reclaimed_total[5m]))`                                 |
-| `maestro_queue_depth`                    | Gauge for internal queue depth                 | `maestro_queue_depth`                                                                   |
-| `maestro_schedule_latency_ms`            | Gauge for task scheduling latency              | `maestro_schedule_latency_ms`                                                           |
-| `http_requests_total`                    | API request rate                               | `sum(rate(http_requests_total{job="maestro"}[5m]))`                                     |
-| `http_request_duration_seconds`          | API request latency                            | `histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))` |
-| `process_cpu_seconds_total`              | Process CPU usage                              | `sum(rate(process_cpu_seconds_total{job="maestro"}[5m]))`                               |
-| `process_memory_bytes`                   | Process memory usage                           | `process_memory_bytes{job="maestro"}`                                                   |
-
-### 2.2. Grafana Dashboards
-
-- **IntelGraph Maestro - Full Production Overview**: Provides a comprehensive view of Maestro's health, performance, and activity.
-  - **Location**: Imported via `charts/maestro/grafana-dashboard-full.json`.
-  - **Key Panels**: Job Success/Failure, Latency, Queue Depth, API Performance, Resource Saturation, Orchestrator Health & Activity.
-
-### 2.3. Alerts & On-Call Rotation
-
-Alerts are configured in Prometheus and routed via Alertmanager to Slack/Teams and PagerDuty.
-
-- **Common Alerts**: High error rates, high latency, pod restarts, queue backlogs, lease failures.
-- **On-Call**: Follow standard IntelGraph on-call rotation and incident response procedures.
-
-## 3. Troubleshooting Guide
-
-### 3.1. Pod CrashLoopBackOff
-
-**Symptoms**: Maestro pods repeatedly crash and restart.
-
-**Possible Causes**:
-
-- Missing environment variables or incorrect configuration.
-- Application startup failure (e.g., unable to connect to DB/Redis/Kafka).
-- Resource limits too low.
-- Application bug.
-
-**Steps**:
-
-1.  **Check Pod Logs**:
-    ```bash
-    kubectl logs -n intelgraph-dev <pod-name> --tail=100 -f
+*   **Migrate & Index Database**:
+    ```sql
+    CREATE INDEX IF NOT EXISTS eval_runs_workflow_created_idx ON eval_runs (workflow, created_at DESC);
+    CREATE INDEX IF NOT EXISTS eval_runs_first_failure_idx ON eval_runs (workflow, first_failure_at);
     ```
-2.  **Check Pod Events**:
+*   **Seed Environment Variables**:
+    *   Copy `.env.example` to `.env` for local/dev pods and populate with actual values.
+    *   Ensure GitHub Actions secrets are configured for CI/CD.
+*   **Boot the Service**:
     ```bash
-    kubectl describe pod <pod-name> -n intelgraph-dev
+    uvicorn services.evalsvc.app:app --host 0.0.0.0 --port 8080
     ```
-3.  **Verify ConfigMap/Secrets**: Ensure all required `env` variables are correctly mounted and values are valid.
+*   **Run Evals Locally (Sanity Check)**:
     ```bash
-    kubectl -n intelgraph-dev get secret maestro-production-secrets -o yaml
-    kubectl -n intelgraph-dev get configmap maestro-production-config -o yaml
+    python -m evals.agentic.cli --runbook r1_rapid_attribution --cases evals/agentic/fixtures/r1/cases.jsonl
     ```
-4.  **Test External Dependencies**:
-    - **Postgres**: `kubectl exec -it <maestro-pod> -- psql -h <db-host> -U <db-user>`
-    - **Redis**: `kubectl exec -it <maestro-pod> -- redis-cli -h <redis-host>`
-    - **Kafka**: `kubectl exec -it <maestro-pod> -- kafka-console-consumer --bootstrap-server <kafka-brokers> --topic <some-topic> --from-beginning`
-5.  **Check Resource Limits**: Compare `requests`/`limits` in `deployment.yaml` with actual pod usage.
+*   **Metrics Endpoint Visible**: Hit your Prometheus scrape target and confirm `agent_eval_*` series exist.
+*   **Grafana Dashboard Loads**: Import `dashboards/agentic-evals.json`, verify panels render.
+*   **Alerts Wired**: Create three alert rules (pass-rate, first-failure dominance, p95 latency) in Grafana and point them at the Slack contact point. Save & test.
+*   **PII Scrub Test**: Insert a run with an email/phone in `steps.input`. Verify masked in DB / UI.
+*   **RBAC Spot Check**: Ensure non-admin role can see Summary but not raw steps.
+*   **CI Lanes Green**: Both normal lane (chaos OFF) and robust lane (chaos ON) pass thresholds.
 
-### 3.2. High Latency / Low Throughput
+## 3. One-Button Smoke Tests
 
-**Symptoms**: Orchestration jobs are slow, API responses are delayed, or queue depth is increasing.
+These tests verify the entire evaluation loop from eval execution to metrics and alerting.
 
-**Possible Causes**:
+### A) End-to-end “Green Path”
 
-- Under-provisioned resources (CPU/Memory).
-- Database/Redis/Kafka bottlenecks.
-- Inefficient application logic.
-- External service dependencies (e.g., LLMs, S3).
+```bash
+export CHAOS_ON=0 JUDGE_MODE=llm
+python -m evals.agentic.cli --runbook r1_rapid_attribution --cases evals/agentic/fixtures/r1/cases.jsonl
+```
+*   **Expected Outcome**: Pass-rate ≥ threshold, Prometheus shows increased pass counters.
 
-**Steps**:
+### B) Force a Regression → Trigger Slack Alert
 
-1.  **Check Grafana Dashboard**: Look at "API Performance", "Job Latency", "Queue Depth", and "Resource Saturation" panels.
-2.  **Scale Up**: Increase `replicaCount` in `charts/maestro/values.yaml` or adjust HPA targets.
-3.  **Check Dependent Services**: Monitor performance of Postgres, Redis, Kafka, and external APIs.
-4.  **Analyze Logs**: Look for slow queries, external API timeouts, or repeated errors.
+```bash
+export CHAOS_ON=1 CHAOS_TOOL_FAIL_PCT=0.25 CHAOS_SEED=42
+python -m evals.agentic.cli --runbook r1_rapid_attribution --cases evals/agentic/fixtures/r1/cases.jsonl
+```
+*   **Expected Outcome**: In Grafana, the pass-rate panel dips; an alert should fire to Slack within the evaluation window.
 
-### 3.3. Lease Renewal Failures / Orphaned Tasks
+### C) New Top-1 First Failure At
 
-**Symptoms**: `maestro_lease_renew_failures_total` is increasing, or tasks are getting stuck/reclaimed.
+```bash
+export CHAOS_ON=1 CHAOS_SCHEMA_MANGLE_PCT=0.3
+python -m evals.agentic.cli --runbook r1_rapid_attribution --cases evals/agentic/fixtures/r1/cases.jsonl
+```
+*   **Expected Outcome**: Verify the First Failure Pareto shifts in Grafana and the dominance alert triggers.
 
-**Possible Causes**:
+## 4. Alerts & Troubleshooting
 
-- Network issues between Conductor and Workers.
-- Worker crashes/unresponsiveness.
-- Clock skew between Conductor and Workers.
+### When Slack fires “pass-rate < 90%”:
 
-**Steps**:
+1.  **Open Grafana** → Navigate to the "Agentic Evals" dashboard.
+2.  **Focus on First Failure Pareto** for the workflow that triggered the alert. Identify the top failing step.
+3.  **Drill into Failing Step**: Check "recent changes" (Prometheus annotation from CI) related to that step.
+4.  **Re-run CLI Locally**:
+    *   Identify a failing `input_id` from the Grafana dashboard or logs.
+    *   Activate your virtual environment.
+    *   Run the CLI for that specific case with chaos off:
+        ```bash
+        CHAOS_ON=0 python -m evals.agentic.cli --runbook <workflow_name> --cases <path_to_single_case_jsonl>
+        ```
+        (You might need to create a temporary `.jsonl` file with just the failing case.)
+5.  **If judge-related**: If the issue points to the judge, toggle the hybrid judge to human-only via environment variable for a specific evaluation run:
+    ```bash
+    JUDGE_MODE=human python -m evals.agentic.cli ...
+    ```
+6.  **File a hotfix PR** or roll back the runbook prompt/tool pinned version.
 
-1.  **Check Worker Pods**: Ensure worker pods are healthy and not restarting.
-2.  **Check NetworkPolicy**: Verify egress rules allow communication to Conductor.
-3.  **Review Conductor Logs**: Look for messages related to lease expiration or worker disconnections.
-4.  **Verify Clock Sync**: Ensure NTP is configured on all nodes.
+### PromQL for Grafana Alert Rules
 
-## 4. Deployment & Rollback
+*   **Pass-rate drop >10% (24h window)**:
+    ```promql
+    sum(increase(agent_eval_pass_total[24h])) 
+    / clamp_min(sum(increase(agent_eval_pass_total[24h])) + sum(increase(agent_eval_fail_total[24h])), 1)
+    < 0.90
+    ```
+*   **New top-1 first_failure persists >3h**:
+    ```promql
+    topk(1, sum(increase(agent_eval_first_failure[3h])) by (workflow,step_id))
+    / 
+    topk(2, sum(increase(agent_eval_first_failure[3h])) by (workflow,step_id))
+    < 0.50
+    ```
+*   **p95 latency > SLO**:
+    ```promql
+    histogram_quantile(0.95, sum(rate(agent_eval_latency_ms_bucket[3h])) by (le, workflow))
+    > 25000
+    ```
 
-- **Deployment**: Follow the steps in `README-DEPLOY.md`.
-- **Rollback**: Use `helm rollback maestro -n intelgraph-dev <REVISION_NUMBER>`.
-  - **Verification**: After rollback, re-run post-deployment verification steps.
+## 5. Key Configuration
 
-## 5. Log & Metric Cribsheet
+### `.env` Variables (for local/dev)
 
-### 5.1. Accessing Logs
+```ini
+PG_URL=postgresql+psycopg2://eval:password@localhost:5432/evals_db
+SLACK_WEBHOOK=https://hooks.slack.com/services/XXX/YYY/ZZZ
+JUDGE_MODE=llm   # llm | human | hybrid
+CHAOS_ON=0
+```
 
-- **Kubernetes Pod Logs**:
-  ```bash
-  kubectl logs -n intelgraph-dev -l app.kubernetes.io/name=maestro -f
-  ```
-- **Centralized Logging**: Access logs via your centralized logging solution (e.g., Grafana Loki, ELK Stack, Splunk). Search by `runId`, `taskId`, `tenantId`.
+### Database Setup
 
-### 5.2. Accessing Metrics
+*   **Connection String**: Configured in `services/evalsvc/db.py`.
+*   **Initialization**: Run `db.init()` once to create the `eval_runs` table.
 
-- **Prometheus**: Access Prometheus UI at `http://<prometheus-url>/graph`.
-- **Grafana**: Access Grafana UI at `http://<grafana-url>/d/intelgraph-maestro-full-prod`.
+## 6. Deployment
 
-## 6. PII Redaction & Security Checks
+### FastAPI Service
 
-- **PII Redaction**: Verify logs do not contain sensitive PII.
-  - **Test**: Send test data with PII through a workflow and inspect logs.
-- **Cosign Verification**: Ensure all deployed images are signed and verified.
-  ```bash
-  cosign verify --key <public-key-or-keyless-identity> ghcr.io/yourorg/maestro-conductor:<image-tag>
-  ```
+Run using `uvicorn services.evalsvc.app:app --host 0.0.0.0 --port 8080`.
 
----
+### CI/CD
 
-**For high-level deployment instructions, refer to `README-DEPLOY.md`.**
+*   **Normal Lane**: `.github/workflows/agentic-evals.yml`
+*   **Robust Lane**: `.github/workflows/agentic-evals-robust.yml`
+*   **Weekly Scheduler**: `.github/workflows/agentic-weekly.yml`
+
+### Kubernetes CronJob (Example)
+
+See `deploy/evalsvc-weekly-cronjob.yaml` for an example Kubernetes CronJob definition.
+
+## 7. Data Hygiene & Privacy Policy
+
+*   **PII Masking**: Emails, phones, tokens, SSNs, IPs are masked in `steps.input/output` before persistence.
+*   **Data Retention**: Raw `steps` JSON is deleted after 90 days; aggregate rows are kept indefinitely. (Implemented via `ops/retention.sql` and a scheduled job).
+*   **Access Control (RBAC)**: Only `role:agentic-admin` can query raw steps; other roles (e.g., `analyst`, `viewer`) are restricted to summaries.
+
+## 8. Determinism Controls
+
+*   **LLM Temperature**: Ensure `temperature=0.0` (or nearest minimum) for LLM calls in evaluation runs.
+*   **Chaos Seed**: Use `CHAOS_SEED` environment variable for reproducible chaos runs.
+
+## 9. Rollback Plan
+
+Refer to `ops/ROLLBACK.md` for detailed steps on how to roll back the system in case of issues.
+
+## 10. Suggested SLOs (Initial Baselines)
+
+*   **R1 Rapid Attribution**:
+    *   Pass-rate: ≥ 90% (over a 24-hour window)
+    *   P95 Latency: ≤ 20 seconds
+    *   Average Cost: ≤ $0.08/task
+*   **R3 Disinfo Mapping**:
+    *   Pass-rate: ≥ 85% (over a 24-hour window)
+    *   P95 Latency: ≤ 30 seconds
+    *   Average Cost: ≤ $0.12/task
+
+*Note: These are initial baselines. Tune them after two weeks of collecting real-world data.*

@@ -1,0 +1,5 @@
+{"id": "case-001", "expected_e2e_ok": false, "expected_first_failure": null, "expected_final_answer": null}
+{"id": "case-002", "expected_e2e_ok": false, "expected_first_failure": "step_2", "expected_final_answer": null}
+{"id": "case-003", "expected_e2e_ok": false, "expected_first_failure": null, "expected_final_answer": null}
+{"id": "case-004", "expected_e2e_ok": true, "expected_first_failure": null, "expected_final_answer": {"entity_id": "APT_Group_Z"}, "expected_side_effects": [{"kind": "neo4j_write", "label": "Attribution", "must_include_props": ["confidence", "source_ids"]}]}
+{"id": "case-005", "expected_e2e_ok": false, "expected_first_failure": null, "expected_final_answer": {"entity_id": "Malware_W_Impact"}, "expected_side_effects": [{"kind": "neo4j_write", "label": "Attribution", "must_include_props": ["confidence", "source_ids"]}]}

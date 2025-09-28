@@ -1,0 +1,15 @@
+{
+  "type":"record","name":"Message","namespace":"intelgraph",
+  "fields":[
+    {"name":"id","type":"string"},
+    {"name":"source","type":{"type":"enum","name":"Source","symbols":["TWITTER","YOUTUBE","TELEGRAM","REDDIT","TIKTOK","FACEBOOK","INSTAGRAM","TRUTHSOCIAL","GAB","CHAN","RSS","FORUM","BLOG"]}},
+    {"name":"account_id","type":"string"},
+    {"name":"ts","type":"long","logicalType":"timestamp-millis"},
+    {"name":"text","type":["null","string"],"default":null},
+    {"name":"url","type":["null","string"],"default":null},
+    {"name":"hashtags","type":{"type":"array","items":"string"},"default":[]},
+    {"name":"mentions","type":{"type":"array","items":"string"},"default":[]},
+    {"name":"lang","type":["null","string"],"default":null},
+    {"name":"embed","type":{"type":"array","items":"float"},"default":[]}
+  ]
+}

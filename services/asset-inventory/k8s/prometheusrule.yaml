@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata: { name: asset-inventory }
+spec:
+  groups:
+  - name: asset-inventory-api
+    rules:
+    - record: job:asset_api_availability:rate5m
+      expr: sum(rate(asset_api_requests_total{code!~"5.."}[5m])) / sum(rate(asset_api_requests_total[5m]))
+    - alert: AssetAPIErrorBudgetBurn
+      expr: job:asset_api_availability:rate5m < 0.999
+      for: 15m
+      labels: { severity: warning }
+      annotations: { summary: "Asset API availability below SLO" }
+  - name: asset-collectors
+    rules:
+    - record: job:collector_success_ts:latest
+      expr: max_over_time(kube_job_status_succeeded{job=~"collector-.*"}[24h])
+    - alert: CollectorStale
+      expr: time() - job:collector_success_ts:latest > 30m
+      for: 5m
+      labels: { severity: warning }
+      annotations: { summary: "Collector stale >30m" }

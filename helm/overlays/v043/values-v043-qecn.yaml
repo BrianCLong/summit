@@ -1,0 +1,16 @@
+adminApi:
+  env:
+    - name: QOG_PROVIDER_MAP
+      value: |-
+        {"US": {"provider": "aws-braket", "modes": ["EMULATOR","QPU"]}, "EU": {"provider": "iqm", "modes": ["EMULATOR","QPU"]}}
+prometheusRules:
+  files:
+    - prom/rules/mc-v043-recording.rules.yaml
+    - prom/alerts/mc-v043.alerts.yaml
+serviceMonitor:
+  enabled: true
+networkPolicy:
+  enabled: true
+  egressAllowCidrs:
+    - 52.95.245.0/24   # example QC API CIDR
+    - 18.156.0.0/15

@@ -1,0 +1,28 @@
+""" v0.4.3 GraphQL delta (extends v0.4.2/0.4.1) """
+
+enum QuantumBackend { CLASSICAL EMULATOR QPU }
+type QuantumRegion { id: ID!, provider: String!, geo: String!, residencyTag: String! }
+
+type QuantumJob {
+  id: ID!, tenant: Tenant!, backend: QuantumBackend!, region: QuantumRegion!,
+  submittedAt: DateTime!, status: String!, costMinutes: Float!, resultHash: String
+}
+
+type QcBudgets { minutesMonthly: Float!, minutesUsed: Float!, surgeThreshold: Float!, hardCeiling: Float! }
+
+extend type Query {
+  quantumBackends: [QuantumRegion!]!
+  quantumQueue(tenant: Tenant!, limit: Int = 20): [QuantumJob!]!
+  qcBudgets(tenant: Tenant!): QcBudgets!
+  mixedModeCorrectness(tenant: Tenant!, route: String!): Float!  # bounded‑error score [0..1]
+}
+
+input QcBudgetSetInput { minutesMonthly: Float!, surgeThreshold: Float!, hardCeiling: Float! }
+input QuantumSubmitInput { route: String!, payload: JSON!, preferred: QuantumBackend!, regionId: ID!, timeoutMs: Int! }
+
+extend type Mutation {
+  qcBudgetsSet(tenant: Tenant!, input: QcBudgetSetInput!): MutationResult!
+  quantumSubmit(tenant: Tenant!, input: QuantumSubmitInput!): MutationResult!
+  quantumCancel(jobId: ID!): MutationResult!
+  registerQcAttestor(lab: String!, bundleHash: String!): MutationResult!
+}

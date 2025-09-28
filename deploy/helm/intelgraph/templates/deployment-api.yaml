@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: intelgraph-api }
+spec:
+  replicas: 2
+  strategy: { type: RollingUpdate }
+  selector: { matchLabels: { app: intelgraph-api } }
+  template:
+    metadata: { labels: { app: intelgraph-api } }
+    spec:
+      containers:
+        - name: api
+          image: "{{ .Values.imageRepo }}/api:{{ .Values.tag }}"
+          env:
+            - name: SUMMARIES_URL
+              value: "{{ .Values.env.SUMMARIES_URL }}"
+            - name: SLACK_WEBHOOK_URL
+              valueFrom: { secretKeyRef: { name: intelgraph-secrets, key: SLACK_WEBHOOK_URL } }
+            - name: SLACK_BOT_TOKEN
+              valueFrom: { secretKeyRef: { name: intelgraph-secrets, key: SLACK_BOT_TOKEN } }
+            - name: SLACK_CHANNEL_ID
+              valueFrom: { secretKeyRef: { name: intelgraph-secrets, key: SLACK_CHANNEL_ID } }
+            - name: SLACK_SIGNING_SECRET
+              valueFrom: { secretKeyRef: { name: intelgraph-secrets, key: SLACK_SIGNING_SECRET } }
+          ports: [{ containerPort: 8000 }]
+          readinessProbe: { httpGet: { path: /docs, port: 8000 }, initialDelaySeconds: 5 }
+          livenessProbe:  { httpGet: { path: /metrics, port: 8000 }, initialDelaySeconds: 10 }

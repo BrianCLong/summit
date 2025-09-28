@@ -1,0 +1,208 @@
+{{- if .Values.cognitiveSynthesis.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mc-platform.fullname" . }}-cognitive-synthesis
+  labels:
+    {{- include "mc-platform.labels" . | nindent 4 }}
+    component: cognitive-synthesis
+    version: v0.4.2
+spec:
+  replicas: {{ .Values.cognitiveSynthesis.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "mc-platform.selectorLabels" . | nindent 6 }}
+      component: cognitive-synthesis
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+        checksum/config: {{ include (print $.Template.BasePath "/v042-cognitive-synthesis-configmap.yaml") . | sha256sum }}
+      labels:
+        {{- include "mc-platform.selectorLabels" . | nindent 8 }}
+        component: cognitive-synthesis
+        version: v0.4.2
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "mc-platform.serviceAccountName" . }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        fsGroup: 65534
+      containers:
+        - name: cognitive-synthesis
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+          image: "{{ .Values.cognitiveSynthesis.image.repository }}:{{ .Values.cognitiveSynthesis.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.cognitiveSynthesis.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            {{- if .Values.cognitiveSynthesis.federatedLearning.coordinator.enabled }}
+            - name: federated
+              containerPort: {{ .Values.cognitiveSynthesis.federatedLearning.coordinator.port }}
+              protocol: TCP
+            {{- end }}
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: COGNITIVE_MODE
+              value: "{{ .Values.global.cognitiveMode }}"
+            - name: FEDERATED_LEARNING
+              value: "{{ .Values.global.federatedLearning }}"
+            - name: ADAPTIVE_ARCHITECTURE
+              value: "{{ .Values.global.adaptiveArchitecture }}"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- if .Values.cognitiveSynthesis.multiModal.visionLanguage.enabled }}
+            - name: VISION_LANGUAGE_MODEL_PATH
+              value: {{ .Values.cognitiveSynthesis.multiModal.visionLanguage.modelPath }}
+            {{- end }}
+            {{- if .Values.cognitiveSynthesis.multiModal.audioLanguage.enabled }}
+            - name: AUDIO_LANGUAGE_MODEL_PATH
+              value: {{ .Values.cognitiveSynthesis.multiModal.audioLanguage.modelPath }}
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "mc-platform.fullname" . }}-cognitive-synthesis-config
+            - secretRef:
+                name: {{ include "mc-platform.fullname" . }}-cognitive-synthesis-secrets
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.cognitiveSynthesis.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /app/cache
+            {{- if .Values.persistence.cognitiveMemory.enabled }}
+            - name: cognitive-memory
+              mountPath: /data/memory
+            {{- end }}
+            {{- if .Values.persistence.federatedModels.enabled }}
+            - name: federated-models
+              mountPath: /data/models
+            {{- end }}
+            {{- if .Values.persistence.auditLogs.enabled }}
+            - name: audit-logs
+              mountPath: /data/audit
+            {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir:
+            sizeLimit: 1Gi
+        {{- if .Values.persistence.cognitiveMemory.enabled }}
+        - name: cognitive-memory
+          persistentVolumeClaim:
+            claimName: {{ include "mc-platform.fullname" . }}-cognitive-memory
+        {{- end }}
+        {{- if .Values.persistence.federatedModels.enabled }}
+        - name: federated-models
+          persistentVolumeClaim:
+            claimName: {{ include "mc-platform.fullname" . }}-federated-models
+        {{- end }}
+        {{- if .Values.persistence.auditLogs.enabled }}
+        - name: audit-logs
+          persistentVolumeClaim:
+            claimName: {{ include "mc-platform.fullname" . }}-audit-logs
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+{{- if .Values.persistence.cognitiveMemory.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "mc-platform.fullname" . }}-cognitive-memory
+  labels:
+    {{- include "mc-platform.labels" . | nindent 4 }}
+    component: cognitive-synthesis
+    type: cognitive-memory
+spec:
+  accessModes:
+    - {{ .Values.persistence.cognitiveMemory.accessMode }}
+  storageClassName: {{ .Values.persistence.cognitiveMemory.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.cognitiveMemory.size }}
+---
+{{- end }}
+{{- if .Values.persistence.federatedModels.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "mc-platform.fullname" . }}-federated-models
+  labels:
+    {{- include "mc-platform.labels" . | nindent 4 }}
+    component: cognitive-synthesis
+    type: federated-models
+spec:
+  accessModes:
+    - {{ .Values.persistence.federatedModels.accessMode }}
+  storageClassName: {{ .Values.persistence.federatedModels.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.federatedModels.size }}
+---
+{{- end }}
+{{- if .Values.persistence.auditLogs.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "mc-platform.fullname" . }}-audit-logs
+  labels:
+    {{- include "mc-platform.labels" . | nindent 4 }}
+    component: cognitive-synthesis
+    type: audit-logs
+spec:
+  accessModes:
+    - {{ .Values.persistence.auditLogs.accessMode }}
+  storageClassName: {{ .Values.persistence.auditLogs.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.auditLogs.size }}
+{{- end }}
+{{- end }}

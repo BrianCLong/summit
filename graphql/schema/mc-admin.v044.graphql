@@ -1,0 +1,1251 @@
+# MC Platform v0.4.4 "Quantum Application Mesh" GraphQL Schema
+# Comprehensive quantum application ecosystem with templates, export controls, SLAs, and AppOps
+
+# ═══════════════════════════════════════════════════════════════
+# QAM CORE TYPES
+# ═══════════════════════════════════════════════════════════════
+
+type QuantumTemplate {
+  id: ID!
+  name: String!
+  description: String!
+  category: TemplateCategory!
+  version: String!
+  algorithms: [QuantumAlgorithm!]!
+  parameters: [TemplateParameter!]!
+  compliance: ExportControlClassification!
+  slaRequirements: [CorrectnessRequirement!]!
+  resourceEstimate: ResourceEstimate!
+  deployment: TemplateDeployment
+  status: TemplateStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum TemplateCategory {
+  OPTIMIZATION
+  SIMULATION
+  CRYPTOGRAPHY
+  FINANCE
+  MACHINE_LEARNING
+  CHEMISTRY
+}
+
+enum TemplateStatus {
+  AVAILABLE
+  DEPRECATED
+  EXPERIMENTAL
+  RESTRICTED
+  MAINTENANCE
+}
+
+type QuantumAlgorithm {
+  id: ID!
+  name: String!
+  type: AlgorithmType!
+  quantumAdvantage: String!
+  exportControlLevel: ExportControlLevel!
+  resourceRequirements: AlgorithmResourceRequirements!
+  implementation: AlgorithmImplementation!
+}
+
+enum AlgorithmType {
+  QAOA
+  VQE
+  QUANTUM_ANNEALING
+  QUANTUM_MONTE_CARLO
+  AMPLITUDE_ESTIMATION
+  GROVERS_ALGORITHM
+  QUANTUM_FOURIER_TRANSFORM
+  POST_QUANTUM_CRYPTOGRAPHY
+}
+
+type TemplateParameter {
+  name: String!
+  type: ParameterType!
+  required: Boolean!
+  defaultValue: String
+  validation: ParameterValidation!
+  description: String!
+  exportControlImpact: Boolean!
+}
+
+enum ParameterType {
+  INTEGER
+  FLOAT
+  STRING
+  BOOLEAN
+  ARRAY
+  OBJECT
+  QUANTUM_CIRCUIT
+  OPTIMIZATION_FUNCTION
+}
+
+type ParameterValidation {
+  minValue: Float
+  maxValue: Float
+  allowedValues: [String!]
+  pattern: String
+  customValidator: String
+}
+
+# ═══════════════════════════════════════════════════════════════
+# TEMPLATE DEPLOYMENT
+# ═══════════════════════════════════════════════════════════════
+
+type TemplateDeployment {
+  id: ID!
+  templateId: ID!
+  tenantId: ID!
+  configuration: DeploymentConfiguration!
+  status: DeploymentStatus!
+  exportControlApproval: ExportControlApproval
+  slaAgreement: SLAAgreement!
+  resourceAllocation: ResourceAllocation!
+  executionHistory: [QuantumExecution!]!
+  metrics: DeploymentMetrics!
+  createdAt: DateTime!
+  lastExecutedAt: DateTime
+}
+
+enum DeploymentStatus {
+  PENDING
+  CONFIGURING
+  VALIDATING_EXPORT_CONTROL
+  ALLOCATING_RESOURCES
+  DEPLOYED
+  EXECUTING
+  COMPLETED
+  FAILED
+  SUSPENDED
+  ARCHIVED
+}
+
+type DeploymentConfiguration {
+  parameters: [ConfigurationParameter!]!
+  backendPreference: [QuantumBackendType!]!
+  executionMode: ExecutionMode!
+  optimization: OptimizationSettings!
+  monitoring: MonitoringSettings!
+}
+
+enum ExecutionMode {
+  DEVELOPMENT
+  TESTING
+  PRODUCTION
+  BENCHMARK
+}
+
+type ConfigurationParameter {
+  name: String!
+  value: String!
+  encrypted: Boolean!
+  validated: Boolean!
+}
+
+# ═══════════════════════════════════════════════════════════════
+# EXPORT CONTROL ENGINE
+# ═══════════════════════════════════════════════════════════════
+
+type ExportControlClassification {
+  level: ExportControlLevel!
+  jurisdictions: [Jurisdiction!]!
+  restrictions: [ExportRestriction!]!
+  requiredLicenses: [ExportLicense!]!
+  automatedApproval: Boolean!
+  reviewRequired: Boolean!
+  lastClassified: DateTime!
+}
+
+enum ExportControlLevel {
+  UNRESTRICTED
+  DUAL_USE
+  RESTRICTED
+  CLASSIFIED
+  ITAR_CONTROLLED
+  EAR_CONTROLLED
+}
+
+type Jurisdiction {
+  code: String!
+  name: String!
+  regulations: [Regulation!]!
+  adequacyStatus: AdequacyStatus!
+}
+
+enum AdequacyStatus {
+  ADEQUATE
+  PARTIALLY_ADEQUATE
+  INADEQUATE
+  UNDER_REVIEW
+}
+
+type Regulation {
+  name: String!
+  authority: String!
+  applicability: String!
+  requirements: [String!]!
+}
+
+type ExportRestriction {
+  type: RestrictionType!
+  description: String!
+  exemptions: [String!]!
+  validUntil: DateTime
+}
+
+enum RestrictionType {
+  GEOGRAPHIC
+  ENTITY_BASED
+  END_USE
+  TECHNOLOGY_SPECIFIC
+  TIME_LIMITED
+}
+
+type ExportControlApproval {
+  id: ID!
+  status: ApprovalStatus!
+  decisionReasoning: String!
+  approver: String
+  conditions: [String!]!
+  validUntil: DateTime
+  auditTrail: [ApprovalEvent!]!
+  createdAt: DateTime!
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  CONDITIONAL
+  DENIED
+  EXPIRED
+  REVOKED
+}
+
+type ApprovalEvent {
+  timestamp: DateTime!
+  action: String!
+  actor: String!
+  details: String!
+}
+
+type ExportLicense {
+  id: ID!
+  type: LicenseType!
+  issuer: String!
+  validFrom: DateTime!
+  validUntil: DateTime!
+  coverage: LicenseCoverage!
+  status: LicenseStatus!
+}
+
+enum LicenseType {
+  GENERAL
+  SPECIFIC
+  TEMPORARY
+  EMERGENCY
+}
+
+enum LicenseStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+  REVOKED
+  PENDING_RENEWAL
+}
+
+type LicenseCoverage {
+  algorithms: [String!]!
+  jurisdictions: [String!]!
+  entities: [String!]!
+  endUses: [String!]!
+}
+
+# ═══════════════════════════════════════════════════════════════
+# CORRECTNESS SLAs
+# ═══════════════════════════════════════════════════════════════
+
+type SLAAgreement {
+  id: ID!
+  templateId: ID!
+  tenantId: ID!
+  requirements: [CorrectnessRequirement!]!
+  performance: PerformanceRequirement!
+  monitoring: SLAMonitoring!
+  compliance: SLACompliance!
+  penalties: [SLAPenalty!]!
+  effectiveFrom: DateTime!
+  validUntil: DateTime!
+}
+
+type CorrectnessRequirement {
+  metric: CorrectnessMetric!
+  threshold: Float!
+  measurement: MeasurementMethod!
+  validation: ValidationMethod!
+  fallbackChain: [QuantumBackendType!]!
+}
+
+enum CorrectnessMetric {
+  ERROR_RATE
+  FIDELITY
+  SUCCESS_PROBABILITY
+  QUANTUM_VOLUME
+  GATE_ERROR_RATE
+  COHERENCE_TIME
+}
+
+enum MeasurementMethod {
+  STATISTICAL_SAMPLING
+  PROCESS_TOMOGRAPHY
+  RANDOMIZED_BENCHMARKING
+  CROSS_ENTROPY_BENCHMARKING
+  DIFFERENTIAL_TESTING
+}
+
+enum ValidationMethod {
+  CLASSICAL_SIMULATION
+  ANALYTICAL_BOUNDS
+  EMPIRICAL_VERIFICATION
+  ZERO_KNOWLEDGE_PROOF
+  MULTI_BACKEND_CONSENSUS
+}
+
+type PerformanceRequirement {
+  maxExecutionTime: Int!
+  maxQueueTime: Int!
+  minThroughput: Float!
+  availability: Float!
+  responseTime: Int!
+}
+
+type SLAMonitoring {
+  frequency: MonitoringFrequency!
+  metrics: [MonitoringMetric!]!
+  alerting: AlertingConfiguration!
+  reporting: ReportingConfiguration!
+}
+
+enum MonitoringFrequency {
+  REAL_TIME
+  EVERY_MINUTE
+  EVERY_FIVE_MINUTES
+  HOURLY
+  DAILY
+}
+
+type MonitoringMetric {
+  name: String!
+  query: String!
+  threshold: Float!
+  severity: AlertSeverity!
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+  EMERGENCY
+}
+
+type SLACompliance {
+  currentStatus: ComplianceStatus!
+  complianceScore: Float!
+  violations: [SLAViolation!]!
+  credits: [SLACredit!]!
+  nextReview: DateTime!
+}
+
+enum ComplianceStatus {
+  COMPLIANT
+  AT_RISK
+  VIOLATED
+  UNDER_REVIEW
+}
+
+type SLAViolation {
+  id: ID!
+  type: ViolationType!
+  severity: AlertSeverity!
+  description: String!
+  impact: String!
+  remediation: String!
+  resolvedAt: DateTime
+  createdAt: DateTime!
+}
+
+enum ViolationType {
+  CORRECTNESS_THRESHOLD
+  PERFORMANCE_DEGRADATION
+  AVAILABILITY_BREACH
+  RESPONSE_TIME_EXCEEDED
+}
+
+type SLACredit {
+  id: ID!
+  violationId: ID!
+  amount: Float!
+  currency: String!
+  reason: String!
+  appliedAt: DateTime!
+}
+
+type SLAPenalty {
+  trigger: ViolationType!
+  penalty: PenaltyType!
+  amount: Float!
+  escalation: [EscalationLevel!]!
+}
+
+enum PenaltyType {
+  SERVICE_CREDIT
+  PERFORMANCE_BONUS
+  ACCESS_RESTRICTION
+  PRIORITY_REDUCTION
+}
+
+type EscalationLevel {
+  threshold: Int!
+  action: String!
+  notification: [String!]!
+}
+
+# ═══════════════════════════════════════════════════════════════
+# TENANT APPOPS CONSOLE
+# ═══════════════════════════════════════════════════════════════
+
+type AppOpsConsole {
+  tenantId: ID!
+  dashboard: QuantumWorkloadDashboard!
+  templates: TemplateManager!
+  resources: ResourceManager!
+  analytics: PerformanceAnalytics!
+  compliance: ComplianceManager!
+}
+
+type QuantumWorkloadDashboard {
+  activeDeployments: [TemplateDeployment!]!
+  recentExecutions: [QuantumExecution!]!
+  resourceUtilization: ResourceUtilization!
+  budgetStatus: BudgetStatus!
+  slaStatus: [SLAStatus!]!
+  alerts: [Alert!]!
+  metrics: DashboardMetrics!
+}
+
+type TemplateManager {
+  availableTemplates: [QuantumTemplate!]!
+  deployedTemplates: [TemplateDeployment!]!
+  deploymentWizard: DeploymentWizard!
+  configurationValidator: ConfigurationValidator!
+}
+
+type DeploymentWizard {
+  currentStep: WizardStep!
+  availableSteps: [WizardStep!]!
+  configuration: DeploymentConfiguration!
+  validation: ValidationResults!
+}
+
+enum WizardStep {
+  TEMPLATE_SELECTION
+  PARAMETER_CONFIGURATION
+  EXPORT_CONTROL_VALIDATION
+  RESOURCE_ALLOCATION
+  SLA_AGREEMENT
+  FINAL_REVIEW
+  DEPLOYMENT
+}
+
+type ValidationResults {
+  parameterValidation: [ParameterValidationResult!]!
+  exportControlValidation: ExportControlValidationResult!
+  resourceValidation: ResourceValidationResult!
+  slaValidation: SLAValidationResult!
+}
+
+type ParameterValidationResult {
+  parameter: String!
+  valid: Boolean!
+  errors: [String!]!
+  warnings: [String!]!
+}
+
+type ExportControlValidationResult {
+  approved: Boolean!
+  level: ExportControlLevel!
+  restrictions: [String!]!
+  requiredApprovals: [String!]!
+}
+
+type ResourceValidationResult {
+  available: Boolean!
+  allocation: ResourceAllocation!
+  estimatedCost: Float!
+  availability: String!
+}
+
+type SLAValidationResult {
+  achievable: Boolean!
+  requirements: [CorrectnessRequirement!]!
+  risks: [String!]!
+  recommendations: [String!]!
+}
+
+type ResourceManager {
+  budgetStatus: BudgetStatus!
+  allocation: ResourceAllocation!
+  usage: ResourceUsage!
+  optimization: ResourceOptimization!
+}
+
+type PerformanceAnalytics {
+  executionMetrics: ExecutionMetrics!
+  correctnessAnalysis: CorrectnessAnalysis!
+  costAnalysis: CostAnalysis!
+  trendAnalysis: TrendAnalysis!
+  recommendations: [PerformanceRecommendation!]!
+}
+
+type ComplianceManager {
+  exportControlStatus: ExportControlStatus!
+  slaCompliance: [SLACompliance!]!
+  auditTrail: [AuditEvent!]!
+  complianceScore: ComplianceScore!
+}
+
+# ═══════════════════════════════════════════════════════════════
+# EXECUTION & MONITORING
+# ═══════════════════════════════════════════════════════════════
+
+type QuantumExecution {
+  id: ID!
+  deploymentId: ID!
+  templateId: ID!
+  status: ExecutionStatus!
+  backend: QuantumBackend!
+  configuration: ExecutionConfiguration!
+  results: ExecutionResults
+  correctness: CorrectnessValidation!
+  performance: ExecutionPerformance!
+  cost: ExecutionCost!
+  auditTrail: [ExecutionEvent!]!
+  createdAt: DateTime!
+  startedAt: DateTime
+  completedAt: DateTime
+}
+
+enum ExecutionStatus {
+  QUEUED
+  VALIDATING
+  ALLOCATING
+  EXECUTING
+  POST_PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  TIMEOUT
+}
+
+type ExecutionConfiguration {
+  shots: Int!
+  optimization: OptimizationLevel!
+  errorMitigation: ErrorMitigationStrategy!
+  postProcessing: PostProcessingOptions!
+}
+
+enum OptimizationLevel {
+  NONE
+  BASIC
+  ADVANCED
+  MAXIMUM
+}
+
+enum ErrorMitigationStrategy {
+  NONE
+  ZERO_NOISE_EXTRAPOLATION
+  READOUT_ERROR_MITIGATION
+  SYMMETRY_VERIFICATION
+  COMPOSITE_MITIGATION
+}
+
+type ExecutionResults {
+  measurements: [QuantumMeasurement!]!
+  estimatedCorrectness: Float!
+  confidence: Float!
+  verified: Boolean!
+  artifacts: [ResultArtifact!]!
+}
+
+type QuantumMeasurement {
+  bitstring: String!
+  probability: Float!
+  count: Int!
+  confidence: Float!
+}
+
+type ResultArtifact {
+  type: ArtifactType!
+  data: String!
+  metadata: [KeyValuePair!]!
+}
+
+enum ArtifactType {
+  QUANTUM_CIRCUIT
+  CLASSICAL_RESULT
+  VISUALIZATION
+  ANALYSIS_REPORT
+  VERIFICATION_PROOF
+}
+
+type CorrectnessValidation {
+  validated: Boolean!
+  score: Float!
+  methods: [ValidationMethod!]!
+  evidence: [ValidationEvidence!]!
+  warnings: [String!]!
+}
+
+type ValidationEvidence {
+  method: ValidationMethod!
+  result: Float!
+  confidence: Float!
+  details: String!
+}
+
+# ═══════════════════════════════════════════════════════════════
+# QUERIES
+# ═══════════════════════════════════════════════════════════════
+
+type Query {
+  # QAM Templates
+  quantumTemplates(category: TemplateCategory, status: TemplateStatus): [QuantumTemplate!]!
+  quantumTemplate(id: ID!): QuantumTemplate
+  templatesByCompliance(level: ExportControlLevel!): [QuantumTemplate!]!
+
+  # Template Deployments
+  templateDeployments(tenantId: ID!, status: DeploymentStatus): [TemplateDeployment!]!
+  templateDeployment(id: ID!): TemplateDeployment
+
+  # Export Control
+  exportControlStatus(tenantId: ID!): ExportControlStatus!
+  exportControlClassification(algorithmId: ID!): ExportControlClassification!
+  exportLicenses(tenantId: ID!): [ExportLicense!]!
+
+  # SLA Management
+  slaAgreements(tenantId: ID!): [SLAAgreement!]!
+  slaCompliance(deploymentId: ID!): SLACompliance!
+  slaViolations(tenantId: ID!, severity: AlertSeverity): [SLAViolation!]!
+
+  # AppOps Console
+  appOpsConsole(tenantId: ID!): AppOpsConsole!
+  quantumWorkloadDashboard(tenantId: ID!): QuantumWorkloadDashboard!
+
+  # Execution Monitoring
+  quantumExecutions(deploymentId: ID!, status: ExecutionStatus, limit: Int): [QuantumExecution!]!
+  quantumExecution(id: ID!): QuantumExecution
+
+  # Analytics
+  performanceAnalytics(tenantId: ID!, period: AnalyticsPeriod!): PerformanceAnalytics!
+  costAnalysis(tenantId: ID!, templateId: ID, period: AnalyticsPeriod!): CostAnalysis!
+  correctnessAnalysis(deploymentId: ID!, period: AnalyticsPeriod!): CorrectnessAnalysis!
+
+  # Compliance
+  complianceScore(tenantId: ID!): ComplianceScore!
+  auditTrail(tenantId: ID!, startDate: DateTime, endDate: DateTime): [AuditEvent!]!
+}
+
+# ═══════════════════════════════════════════════════════════════
+# MUTATIONS
+# ═══════════════════════════════════════════════════════════════
+
+type Mutation {
+  # Template Deployment
+  deployTemplate(input: DeployTemplateInput!): TemplateDeployment!
+  updateDeploymentConfiguration(deploymentId: ID!, configuration: DeploymentConfigurationInput!): TemplateDeployment!
+  suspendDeployment(deploymentId: ID!, reason: String!): TemplateDeployment!
+  resumeDeployment(deploymentId: ID!): TemplateDeployment!
+  archiveDeployment(deploymentId: ID!): TemplateDeployment!
+
+  # Quantum Execution
+  executeQuantumTemplate(deploymentId: ID!, configuration: ExecutionConfigurationInput!): QuantumExecution!
+  cancelExecution(executionId: ID!, reason: String!): QuantumExecution!
+  retryExecution(executionId: ID!): QuantumExecution!
+
+  # Export Control
+  requestExportControlApproval(input: ExportControlRequestInput!): ExportControlApproval!
+  updateExportControlClassification(algorithmId: ID!, classification: ExportControlClassificationInput!): ExportControlClassification!
+
+  # SLA Management
+  createSLAAgreement(input: SLAAgreementInput!): SLAAgreement!
+  updateSLAAgreement(id: ID!, input: SLAAgreementInput!): SLAAgreement!
+  acknowledgeSLAViolation(violationId: ID!, response: String!): SLAViolation!
+
+  # Resource Management
+  updateBudgetAllocation(tenantId: ID!, allocation: BudgetAllocationInput!): BudgetStatus!
+  optimizeResourceAllocation(deploymentId: ID!): ResourceAllocation!
+
+  # Configuration
+  updateMonitoringConfiguration(deploymentId: ID!, configuration: MonitoringConfigurationInput!): MonitoringConfiguration!
+  updateAlertConfiguration(tenantId: ID!, configuration: AlertConfigurationInput!): AlertConfiguration!
+}
+
+# ═══════════════════════════════════════════════════════════════
+# SUBSCRIPTIONS
+# ═══════════════════════════════════════════════════════════════
+
+type Subscription {
+  # Real-time Execution Monitoring
+  executionUpdates(deploymentId: ID!): QuantumExecution!
+  workloadDashboard(tenantId: ID!): QuantumWorkloadDashboard!
+
+  # SLA Monitoring
+  slaViolations(tenantId: ID!): SLAViolation!
+  slaCompliance(deploymentId: ID!): SLACompliance!
+
+  # Export Control
+  exportControlUpdates(tenantId: ID!): ExportControlApproval!
+
+  # Performance Metrics
+  performanceMetrics(deploymentId: ID!): ExecutionMetrics!
+  resourceUtilization(tenantId: ID!): ResourceUtilization!
+
+  # Alerts
+  alerts(tenantId: ID!, severity: AlertSeverity): Alert!
+}
+
+# ═══════════════════════════════════════════════════════════════
+# INPUT TYPES
+# ═══════════════════════════════════════════════════════════════
+
+input DeployTemplateInput {
+  templateId: ID!
+  tenantId: ID!
+  name: String!
+  description: String
+  configuration: DeploymentConfigurationInput!
+  slaRequirements: [CorrectnessRequirementInput!]!
+}
+
+input DeploymentConfigurationInput {
+  parameters: [ConfigurationParameterInput!]!
+  backendPreference: [QuantumBackendType!]!
+  executionMode: ExecutionMode!
+  optimization: OptimizationSettingsInput!
+  monitoring: MonitoringSettingsInput!
+}
+
+input ConfigurationParameterInput {
+  name: String!
+  value: String!
+  encrypted: Boolean = false
+}
+
+input OptimizationSettingsInput {
+  level: OptimizationLevel!
+  errorMitigation: ErrorMitigationStrategy!
+  costOptimization: Boolean!
+  performanceOptimization: Boolean!
+}
+
+input MonitoringSettingsInput {
+  frequency: MonitoringFrequency!
+  metrics: [String!]!
+  alerting: Boolean!
+}
+
+input ExecutionConfigurationInput {
+  shots: Int!
+  optimization: OptimizationLevel!
+  errorMitigation: ErrorMitigationStrategy!
+  postProcessing: PostProcessingOptionsInput!
+}
+
+input PostProcessingOptionsInput {
+  errorCorrection: Boolean!
+  resultValidation: Boolean!
+  statisticalAnalysis: Boolean!
+}
+
+input ExportControlRequestInput {
+  deploymentId: ID!
+  justification: String!
+  intendedUse: String!
+  endUsers: [String!]!
+  geographicScope: [String!]!
+}
+
+input ExportControlClassificationInput {
+  level: ExportControlLevel!
+  jurisdictions: [JurisdictionInput!]!
+  restrictions: [ExportRestrictionInput!]!
+}
+
+input JurisdictionInput {
+  code: String!
+  adequacyStatus: AdequacyStatus!
+}
+
+input ExportRestrictionInput {
+  type: RestrictionType!
+  description: String!
+  exemptions: [String!]!
+  validUntil: DateTime
+}
+
+input SLAAgreementInput {
+  templateId: ID!
+  tenantId: ID!
+  requirements: [CorrectnessRequirementInput!]!
+  performance: PerformanceRequirementInput!
+  monitoring: SLAMonitoringInput!
+}
+
+input CorrectnessRequirementInput {
+  metric: CorrectnessMetric!
+  threshold: Float!
+  measurement: MeasurementMethod!
+  validation: ValidationMethod!
+  fallbackChain: [QuantumBackendType!]!
+}
+
+input PerformanceRequirementInput {
+  maxExecutionTime: Int!
+  maxQueueTime: Int!
+  minThroughput: Float!
+  availability: Float!
+  responseTime: Int!
+}
+
+input SLAMonitoringInput {
+  frequency: MonitoringFrequency!
+  metrics: [MonitoringMetricInput!]!
+  alerting: AlertingConfigurationInput!
+}
+
+input MonitoringMetricInput {
+  name: String!
+  query: String!
+  threshold: Float!
+  severity: AlertSeverity!
+}
+
+input AlertingConfigurationInput {
+  enabled: Boolean!
+  channels: [String!]!
+  escalation: [String!]!
+}
+
+input BudgetAllocationInput {
+  quantumMinutes: Int!
+  classicalCompute: Float!
+  storage: Float!
+  network: Float!
+  surgeAllowance: Float!
+}
+
+input MonitoringConfigurationInput {
+  frequency: MonitoringFrequency!
+  metrics: [String!]!
+  alertThresholds: [AlertThresholdInput!]!
+}
+
+input AlertThresholdInput {
+  metric: String!
+  threshold: Float!
+  severity: AlertSeverity!
+}
+
+input AlertConfigurationInput {
+  channels: [NotificationChannelInput!]!
+  escalation: EscalationConfigurationInput!
+}
+
+input NotificationChannelInput {
+  type: NotificationChannelType!
+  endpoint: String!
+  severity: [AlertSeverity!]!
+}
+
+enum NotificationChannelType {
+  EMAIL
+  SLACK
+  WEBHOOK
+  SMS
+  PAGERDUTY
+}
+
+input EscalationConfigurationInput {
+  levels: [EscalationLevelInput!]!
+  timeout: Int!
+}
+
+input EscalationLevelInput {
+  threshold: Int!
+  actions: [String!]!
+  notifications: [String!]!
+}
+
+# ═══════════════════════════════════════════════════════════════
+# COMMON TYPES
+# ═══════════════════════════════════════════════════════════════
+
+scalar DateTime
+scalar JSON
+
+type KeyValuePair {
+  key: String!
+  value: String!
+}
+
+enum AnalyticsPeriod {
+  LAST_HOUR
+  LAST_DAY
+  LAST_WEEK
+  LAST_MONTH
+  LAST_QUARTER
+  LAST_YEAR
+  CUSTOM
+}
+
+# Referenced types from v0.4.3 QECN
+enum QuantumBackendType {
+  CLASSICAL
+  EMULATOR
+  QPU
+}
+
+type QuantumBackend {
+  id: ID!
+  type: QuantumBackendType!
+  provider: String!
+  region: String!
+  availability: Float!
+  costPerShot: Float!
+}
+
+type ResourceEstimate {
+  quantumMinutes: Int!
+  classicalCompute: Float!
+  memory: Float!
+  storage: Float!
+  estimatedCost: Float!
+}
+
+type ResourceAllocation {
+  quantumMinutes: Int!
+  classicalCompute: Float!
+  memory: Float!
+  storage: Float!
+  cost: Float!
+  reserved: Boolean!
+}
+
+type ResourceUsage {
+  used: ResourceAllocation!
+  available: ResourceAllocation!
+  utilization: Float!
+  efficiency: Float!
+}
+
+type ResourceUtilization {
+  quantum: Float!
+  classical: Float!
+  memory: Float!
+  storage: Float!
+  cost: Float!
+}
+
+type ResourceOptimization {
+  recommendations: [OptimizationRecommendation!]!
+  potentialSavings: Float!
+  efficiency: Float!
+}
+
+type OptimizationRecommendation {
+  type: OptimizationType!
+  description: String!
+  impact: Float!
+  effort: String!
+}
+
+enum OptimizationType {
+  BACKEND_SELECTION
+  PARAMETER_TUNING
+  RESOURCE_SCALING
+  COST_OPTIMIZATION
+  PERFORMANCE_TUNING
+}
+
+type BudgetStatus {
+  allocated: Float!
+  used: Float!
+  remaining: Float!
+  utilization: Float!
+  forecast: Float!
+  alerts: [BudgetAlert!]!
+}
+
+type BudgetAlert {
+  type: BudgetAlertType!
+  threshold: Float!
+  current: Float!
+  severity: AlertSeverity!
+  message: String!
+}
+
+enum BudgetAlertType {
+  UTILIZATION_WARNING
+  UTILIZATION_CRITICAL
+  FORECAST_EXCEEDED
+  BUDGET_EXHAUSTED
+}
+
+type SLAStatus {
+  deploymentId: ID!
+  status: ComplianceStatus!
+  score: Float!
+  violations: Int!
+  lastUpdate: DateTime!
+}
+
+type Alert {
+  id: ID!
+  type: AlertType!
+  severity: AlertSeverity!
+  title: String!
+  description: String!
+  source: String!
+  acknowledged: Boolean!
+  resolvedAt: DateTime
+  createdAt: DateTime!
+}
+
+enum AlertType {
+  SLA_VIOLATION
+  BUDGET_EXCEEDED
+  EXPORT_CONTROL_ISSUE
+  PERFORMANCE_DEGRADATION
+  SECURITY_INCIDENT
+  SYSTEM_ERROR
+}
+
+type DashboardMetrics {
+  totalExecutions: Int!
+  successRate: Float!
+  averageExecutionTime: Float!
+  costEfficiency: Float!
+  complianceScore: Float!
+}
+
+type ExecutionMetrics {
+  executionTime: Float!
+  queueTime: Float!
+  successRate: Float!
+  errorRate: Float!
+  throughput: Float!
+  costPerExecution: Float!
+}
+
+type ExecutionPerformance {
+  executionTime: Float!
+  queueTime: Float!
+  processingTime: Float!
+  throughput: Float!
+  efficiency: Float!
+}
+
+type ExecutionCost {
+  quantumMinutes: Float!
+  classicalCompute: Float!
+  total: Float!
+  currency: String!
+  breakdown: [CostBreakdown!]!
+}
+
+type CostBreakdown {
+  component: String!
+  cost: Float!
+  percentage: Float!
+}
+
+type CostAnalysis {
+  period: AnalyticsPeriod!
+  totalCost: Float!
+  breakdown: [CostBreakdown!]!
+  trends: [CostTrend!]!
+  optimization: CostOptimization!
+}
+
+type CostTrend {
+  date: DateTime!
+  cost: Float!
+  volume: Int!
+}
+
+type CostOptimization {
+  currentEfficiency: Float!
+  potentialSavings: Float!
+  recommendations: [CostRecommendation!]!
+}
+
+type CostRecommendation {
+  type: OptimizationType!
+  description: String!
+  estimatedSavings: Float!
+  implementation: String!
+}
+
+type CorrectnessAnalysis {
+  period: AnalyticsPeriod!
+  averageScore: Float!
+  trends: [CorrectnessTrend!]!
+  violations: [CorrectnessViolation!]!
+  improvements: [CorrectnessImprovement!]!
+}
+
+type CorrectnessTrend {
+  date: DateTime!
+  score: Float!
+  executions: Int!
+}
+
+type CorrectnessViolation {
+  metric: CorrectnessMetric!
+  threshold: Float!
+  actual: Float!
+  count: Int!
+  severity: AlertSeverity!
+}
+
+type CorrectnessImprovement {
+  recommendation: String!
+  impact: Float!
+  effort: String!
+}
+
+type TrendAnalysis {
+  period: AnalyticsPeriod!
+  executionTrends: [ExecutionTrend!]!
+  performanceTrends: [PerformanceTrend!]!
+  costTrends: [CostTrend!]!
+  correctnessTrends: [CorrectnessTrend!]!
+}
+
+type ExecutionTrend {
+  date: DateTime!
+  executions: Int!
+  successRate: Float!
+}
+
+type PerformanceTrend {
+  date: DateTime!
+  averageTime: Float!
+  throughput: Float!
+}
+
+type PerformanceRecommendation {
+  type: OptimizationType!
+  description: String!
+  impact: String!
+  priority: RecommendationPriority!
+}
+
+enum RecommendationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+type ExportControlStatus {
+  overall: ApprovalStatus!
+  pendingApprovals: Int!
+  activeRestrictions: Int!
+  compliance: Float!
+  lastReview: DateTime!
+}
+
+type ComplianceScore {
+  overall: Float!
+  exportControl: Float!
+  sla: Float!
+  security: Float!
+  operational: Float!
+  trend: Float!
+}
+
+type AuditEvent {
+  id: ID!
+  timestamp: DateTime!
+  actor: String!
+  action: String!
+  resource: String!
+  details: String!
+  result: String!
+  metadata: [KeyValuePair!]!
+}
+
+type ExecutionEvent {
+  timestamp: DateTime!
+  event: String!
+  details: String!
+  metadata: [KeyValuePair!]!
+}
+
+type AlgorithmResourceRequirements {
+  qubits: Int!
+  depth: Int!
+  gates: Int!
+  connectivity: String!
+  coherenceTime: Float!
+}
+
+type AlgorithmImplementation {
+  language: String!
+  framework: String!
+  version: String!
+  repository: String!
+  documentation: String!
+}
+
+type ConfigurationValidator {
+  validateParameters(parameters: [ConfigurationParameterInput!]!): ValidationResults!
+  validateExportControl(templateId: ID!, configuration: DeploymentConfigurationInput!): ExportControlValidationResult!
+  validateResources(configuration: DeploymentConfigurationInput!): ResourceValidationResult!
+}
+
+type MonitoringConfiguration {
+  frequency: MonitoringFrequency!
+  metrics: [String!]!
+  alerting: AlertingConfiguration!
+}
+
+type AlertingConfiguration {
+  enabled: Boolean!
+  channels: [String!]!
+  escalation: [String!]!
+  thresholds: [AlertThreshold!]!
+}
+
+type AlertThreshold {
+  metric: String!
+  threshold: Float!
+  severity: AlertSeverity!
+}
+
+type AlertConfiguration {
+  channels: [NotificationChannel!]!
+  escalation: EscalationConfiguration!
+}
+
+type NotificationChannel {
+  type: NotificationChannelType!
+  endpoint: String!
+  severity: [AlertSeverity!]!
+}
+
+type EscalationConfiguration {
+  levels: [EscalationLevel!]!
+  timeout: Int!
+}

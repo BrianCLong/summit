@@ -1,0 +1,20 @@
+{{- if and .Values.metrics.enabled .Values.prometheusOperator.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: companyos
+  labels:
+    app: companyos
+    {{- range $k, $v := .Values.prometheusOperator.serviceMonitor.labels }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app: companyos
+  endpoints:
+    - interval: {{ .Values.prometheusOperator.serviceMonitor.interval }}
+      path: {{ .Values.metrics.path }}
+      port: http
+{{- end }}
+

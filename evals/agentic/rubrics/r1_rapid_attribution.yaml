@@ -1,0 +1,21 @@
+id: r1_rapid_attribution
+version: 1
+success_rule:
+  type: "composite_all"
+  rules:
+    - type: "exact_match"           # compare to oracle answer
+      path: "final.answer.entity_id"
+    - type: "side_effect_exists"    # e.g., created node/edge in Neo4j
+      kind: "neo4j_write"
+      label: "Attribution"
+      must_include_props: ["confidence", "source_ids"]
+partials:
+  - name: "structured_output"
+    weight: 0.2
+    rule: { type: "json_schema_valid", path: "final.answer" }
+  - name: "citation_count"
+    weight: 0.1
+    rule: { type: "min_len", path: "final.citations", min: 2 }
+judge:
+  default: "llm_gptX_v1"
+  fallback: "human_pool_alpha"
