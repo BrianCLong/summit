@@ -1,0 +1,47 @@
+name: ci.pr.mstc
+
+on:
+  pull_request:
+    paths:
+      - 'maestro/**'
+      - 'orchestrations/mc/**'
+      - 'src/maestro/**'
+      - 'apps/maestro-mcp/**'
+      - 'packages/maestro-*/**'
+      - 'charts/maestro/**'
+      - 'deploy/maestro/**'
+      - 'contracts/maestro/**'
+      - 'tools/maestro/**'
+      - 'docs/maestro/**'
+      - '.github/**'
+
+jobs:
+  use-reusable:
+    uses: ./.github/workflows/ci.scoped-reusable.yml
+    with:
+      filter_name: "mstc"
+      include_globs: |
+        maestro/**
+        orchestrations/mc/**
+        src/maestro/**
+        apps/maestro-mcp/**
+        packages/maestro-*/**
+        charts/maestro/**
+        deploy/maestro/**
+        contracts/maestro/**
+        tools/maestro/**
+        docs/maestro/**
+      exclude_globs: |
+        **/*.snap
+        **/*.png
+        **/*.jpg
+        neo4j/data/**
+      node_version: "20"
+      preflight_vitest: false
+      setup_cmd: |
+        corepack enable || true
+        pnpm install --frozen-lockfile || npm ci
+      lint_cmd: |
+        pnpm run lint || npm run lint
+      test_cmd: |
+        pnpm run test -- --runInBand --passWithNoTests || npm test -- --runInBand --passWithNoTests

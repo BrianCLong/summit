@@ -182,3 +182,42 @@ metrics-v041: ## View v0.4.1 Prometheus metrics
 	kubectl port-forward -n monitoring svc/prometheus 9090:9090 &
 	@echo "Prometheus available at http://localhost:9090"
 	@echo "Query: mc_platform_sovereign_*"
+
+add-caller: ## Generate a scoped CI caller workflow (NAME=<short> ROOT=<path>)
+	@test -n "$(NAME)" || (echo "Usage: make add-caller NAME=<short> ROOT=<path>"; exit 1)
+	@test -n "$(ROOT)" || (echo "Usage: make add-caller NAME=<short> ROOT=<path>"; exit 1)
+	mkdir -p .github/workflows
+	cat > .github/workflows/ci.pr.$(NAME).yml <<'YAML'
+# generated
+name: ci.pr.$(NAME)
+on:
+  pull_request:
+    paths:
+      - '$(ROOT)/**'
+      - '.github/**'
+jobs:
+  use-reusable:
+    uses: ./.github/workflows/ci.scoped-reusable.yml
+    with:
+      filter_name: "$(NAME)"
+      include_globs: |
+        $(ROOT)/**
+      exclude_globs: |
+        **/*.snap
+        **/*.png
+        **/*.jpg
+        neo4j/data/**
+      node_version: "20"
+      preflight_vitest: true
+      preflight_paths: |
+        $(ROOT)
+      setup_cmd: |
+        corepack enable || true
+        pnpm install --frozen-lockfile || npm ci
+      lint_cmd: |
+        pnpm -C $(ROOT) lint || npm --prefix $(ROOT) run lint
+      test_cmd: |
+        pnpm -C $(ROOT) test -- --run || npm --prefix $(ROOT) test -- --run
+YAML
+	git add .github/workflows/ci.pr.$(NAME).yml
+	@echo "Added caller workflow: .github/workflows/ci.pr.$(NAME).yml"

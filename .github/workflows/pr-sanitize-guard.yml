@@ -1,0 +1,30 @@
+name: pr-sanitize-guard
+
+on:
+  pull_request:
+
+jobs:
+  block-binaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Block large or binary files
+        run: |
+          set -euo pipefail
+          CHANGED="$(git diff --name-only origin/${{ github.base_ref }}...HEAD)"
+          echo "$CHANGED" | sed '/^$/d' > changed.txt
+          BLOCK='\.png$|\.jpe?g$|\.gif$|\.webp$|\.ico$|\.mp4$|\.mov$|\.pdf$|\.zip$|\.tar$|\.tgz$|\.gz$|\.bmp$|\.psd$|\.ai$|\.heic$|\.dmg$|\.exe$|\.dll$'
+          if grep -E "$BLOCK" changed.txt; then
+            echo "::error::Binary assets detected in PR. Keep binaries out of Git; see docs/REGENERATE_ARTIFACTS.md."
+            exit 1
+          fi
+          while read -r f; do
+            [ -f "$f" ] || continue
+            sz=$(wc -c < "$f")
+            if [ "$sz" -gt $((5*1024*1024)) ]; then
+              echo "::error file=$f::File exceeds 5MB (${sz} bytes). Remove from Git; keep as generated artifact."
+              exit 1
+            fi
+          done < changed.txt

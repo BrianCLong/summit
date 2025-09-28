@@ -1,0 +1,63 @@
+name: ci.pr.opa
+
+on:
+  pull_request:
+    paths:
+      - 'policies/**'
+      - 'policy/**'
+      - 'services/**/policy/**'
+      - 'services/**/opa/**'
+      - 'server/src/policy/**'
+      - 'tools/policy/**'
+      - 'docs/policy/**'
+      - '.github/**'
+
+jobs:
+  use-reusable:
+    uses: ./.github/workflows/ci.scoped-reusable.yml
+    with:
+      filter_name: "opa"
+      include_globs: |
+        policies/**
+        policy/**
+        services/**/policy/**
+        services/**/opa/**
+        server/src/policy/**
+        tools/policy/**
+        docs/policy/**
+      exclude_globs: |
+        **/*.snap
+        **/*.png
+        **/*.jpg
+        neo4j/data/**
+      node_version: ""
+      preflight_vitest: false
+      setup_cmd: |
+        set -euo pipefail
+        if ! command -v opa >/dev/null 2>&1; then
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa
+          sudo mv opa /usr/local/bin/opa
+        fi
+        opa version
+      lint_cmd: |
+        set -euo pipefail
+        mapfile -t rego < <(find policies policy services server/src tools docs -type f -name '*.rego' 2>/dev/null)
+        if [ ${#rego[@]} -eq 0 ]; then
+          echo "No Rego files detected"
+          exit 0
+        fi
+        opa fmt --write=false "${rego[@]}"
+      test_cmd: |
+        set -euo pipefail
+        if [ -d policies ]; then
+          opa test policies
+        fi
+        if [ -d policy ]; then
+          opa test policy
+        fi
+        mapfile -t service_policies < <(find services -type d -name policy 2>/dev/null || true)
+        for dir in "${service_policies[@]}"; do
+          [ -d "$dir" ] || continue
+          opa test "$dir"
+        done

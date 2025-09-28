@@ -1,0 +1,63 @@
+name: ci.pr.trr
+
+on:
+  pull_request:
+    paths:
+      - 'terraform/**'
+      - 'infra/**'
+      - 'infrastructure/**'
+      - 'ops/terraform/**'
+      - 'envs/**'
+      - 'deploy/terraform/**'
+      - 'docs/terraform/**'
+      - '.github/**'
+
+jobs:
+  use-reusable:
+    uses: ./.github/workflows/ci.scoped-reusable.yml
+    with:
+      filter_name: "trr"
+      include_globs: |
+        terraform/**
+        infra/**
+        infrastructure/**
+        ops/terraform/**
+        envs/**
+        deploy/terraform/**
+        docs/terraform/**
+      exclude_globs: |
+        **/*.snap
+        **/*.png
+        **/*.jpg
+        neo4j/data/**
+      node_version: ""
+      preflight_vitest: false
+      setup_cmd: |
+        set -euo pipefail
+        if ! command -v terraform >/dev/null 2>&1; then
+          curl -fsSL https://releases.hashicorp.com/terraform/1.8.5/terraform_1.8.5_linux_amd64.zip -o terraform.zip
+          unzip -o terraform.zip
+          sudo mv terraform /usr/local/bin/terraform
+          rm -f terraform.zip
+        fi
+        terraform -version
+      lint_cmd: |
+        set -euo pipefail
+        exit_code=0
+        for dir in terraform infra infrastructure ops/terraform envs deploy/terraform; do
+          if [ -d "$dir" ]; then
+            terraform fmt -check -recursive "$dir" || exit_code=$?
+          fi
+        done
+        exit $exit_code
+      test_cmd: |
+        set -euo pipefail
+        mapfile -t modules < <(find terraform infra infrastructure ops/terraform envs deploy/terraform -type f -name '*.tf' -printf '%h\n' 2>/dev/null | sort -u)
+        if [ ${#modules[@]} -eq 0 ]; then
+          echo "No terraform modules detected"
+          exit 0
+        fi
+        for module in "${modules[@]}"; do
+          echo "Validating $module"
+          (cd "$module" && terraform init -backend=false >/dev/null && terraform validate)
+        done
