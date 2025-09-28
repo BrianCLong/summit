@@ -1,0 +1,23 @@
+route:
+  receiver: data-spine-pager
+  group_by: ['alertname']
+  matchers:
+    - pipeline = "data-spine-cdc"
+  routes:
+    - receiver: data-spine-email
+      matchers:
+        - severity = "warning"
+    - receiver: data-spine-pager
+      matchers:
+        - severity = "critical"
+receivers:
+  - name: data-spine-email
+    email_configs:
+      - to: dataplatform-oncall@example.com
+        headers:
+          Subject: "[Data Spine] CDC Lag Warning"
+  - name: data-spine-pager
+    pagerduty_configs:
+      - routing_key: ${PAGERDUTY_KEY}
+        severity: critical
+        description: "Data Spine CDC lag exceeded SLO"

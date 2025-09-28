@@ -1,0 +1,28 @@
+name: data-spine-supply-chain
+
+on:
+  pull_request:
+    paths:
+      - 'services/schema-registry/**'
+      - 'tools/schema-cli/**'
+      - 'streaming/cdc/**'
+      - 'controllers/admission/**'
+      - 'services/data-spine/**'
+      - '.github/workflows/data-spine-supply-chain.yml'
+      - 'schema/data-residency-matrix.*'
+
+jobs:
+  verify-provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: sigstore/cosign-installer@v3
+      - name: Verify admission policy signature
+        run: |
+          cosign verify-blob \
+            --key controllers/admission/cosign.pub \
+            --signature controllers/admission/cosign-policy.yaml.sig \
+            controllers/admission/cosign-policy.yaml
+      - name: Validate residency matrix schema
+        run: |
+          node -e "const fs=require('fs');const matrix=JSON.parse(fs.readFileSync('schema/data-residency-matrix.json','utf8'));if(!matrix.classifications)throw new Error('matrix missing classifications');"

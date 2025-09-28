@@ -1,0 +1,16 @@
+[
+  {
+    "classification": "pii",
+    "target": "eu-central-1",
+    "allowed": true,
+    "reason": "approved",
+    "retention": "P6M"
+  },
+  {
+    "classification": "pci",
+    "target": "eu-west-1",
+    "allowed": false,
+    "reason": "pci data may not replicate to eu-west-1",
+    "retention": "P3M"
+  }
+]

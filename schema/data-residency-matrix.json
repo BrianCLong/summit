@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "updated_at": "2025-02-17T00:00:00Z",
+  "classifications": {
+    "pii": {
+      "allowed_regions": ["eu-central-1", "eu-west-1"],
+      "denied_regions": ["us-gov-west-1", "ap-southeast-1"],
+      "notes": "PII must remain within EU sovereign regions unless explicit derogation is approved."
+    },
+    "pci": {
+      "allowed_regions": ["us-east-1", "us-west-2"],
+      "denied_regions": ["eu-west-1", "ap-southeast-2"],
+      "notes": "PCI workloads operate only in US data centers due to acquiring bank mandate."
+    },
+    "restricted": {
+      "allowed_regions": ["us-east-1", "eu-central-1", "ap-southeast-1"],
+      "denied_regions": ["sa-east-1"],
+      "notes": "Restricted data may transit multi-region but must avoid Brazil due to export controls."
+    }
+  },
+  "retention_policies": {
+    "default": "P1Y",
+    "pii": "P6M",
+    "pci": "P3M"
+  },
+  "routes": [
+    {
+      "name": "oltp_to_lakehouse",
+      "classification": "pii",
+      "target_region": "eu-central-1",
+      "sink": "s3://analytics-eu-central-1/data-spine/"
+    },
+    {
+      "name": "oltp_to_warehouse",
+      "classification": "pci",
+      "target_region": "us-east-1",
+      "sink": "redshift://analytics-prod/financials"
+    },
+    {
+      "name": "customer360_replica",
+      "classification": "restricted",
+      "target_region": "ap-southeast-1",
+      "sink": "bigquery://customer360/prod"
+    }
+  ]
+}

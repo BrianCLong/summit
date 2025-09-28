@@ -1,0 +1,73 @@
+apiVersion: v1alpha
+kind: DataSpinePipeline
+metadata:
+  name: data-spine-cdc
+  description: OLTP to analytics CDC flow with residency guardrails
+spec:
+  source:
+    connector: debezium-postgres
+    config:
+      database.hostname: oltp-postgres
+      database.port: 5432
+      database.user: cdc_reader
+      database.password: ${CDC_READER_PASSWORD}
+      database.dbname: ledger
+      slot.name: data_spine_slot
+      publication.autocreate.mode: filtered
+      table.include.list:
+        - public.customers
+        - public.transactions
+      tombstones.on.delete: false
+  transforms:
+    - name: classify
+      type: grok
+      config:
+        field: metadata.classification
+        pattern: '%{DATA_CLASSIFICATION:classification}'
+    - name: enforceResidency
+      type: http
+      config:
+        url: http://router:8080/residency/check
+        method: POST
+        headers:
+          Content-Type: application/json
+        bodyTemplate: |
+          {
+            "route": "${route}",
+            "classification": "${classification}",
+            "targetRegion": "${target.region}"
+          }
+        retry:
+          attempts: 5
+          backoff: PT5S
+  sink:
+    type: kafka
+    topics:
+      analytics:
+        topic: data-spine.analytics
+        partitions: 12
+        config:
+          cleanup.policy: compact,delete
+          min.insync.replicas: 2
+      dead_letter:
+        topic: data-spine.dlq
+        retention.ms: 604800000
+  residency:
+    matrixRef: schema/data-residency-matrix.yaml
+    failOpen: false
+  lineage:
+    emitter:
+      type: openlineage
+      config:
+        endpoint: http://lineage-emitter:8081
+        namespace: data-spine
+        jobName: oltp_cdc
+        runName: ${run.id}
+  monitoring:
+    metricsTopic: data-spine.metrics
+    lagSloSeconds: 60
+    alerts:
+      - name: data-spine-lag
+        condition: cdc_lag_p95_seconds > 60
+        severity: critical
+        route: data-spine

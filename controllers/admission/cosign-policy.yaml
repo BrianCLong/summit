@@ -1,0 +1,22 @@
+apiVersion: policy.sigstore.dev/v1beta1
+kind: ClusterImagePolicy
+metadata:
+  name: data-spine-signed-images
+spec:
+  images:
+    - glob: ghcr.io/summit/data-spine/*
+  authorities:
+    - key:
+        secretRef:
+          name: data-spine-cosign
+      attestations:
+        - name: build-provenance
+          predicateType: https://slsa.dev/provenance/v1
+          policy:
+            type: cue
+            data: |
+              predicateType: "https://slsa.dev/provenance/v1"
+              predicate:
+                builder:
+                  id: "https://github.com/summit/actions/.github/workflows/data-spine-supply-chain.yml@refs/heads/main"
+                buildType: "https://github.com/Attestations/GitHubActionsWorkflow"

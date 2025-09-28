@@ -1,0 +1,78 @@
+{
+  "__inputs": [],
+  "title": "Data Spine Control Plane",
+  "uid": "data-spine",
+  "timezone": "browser",
+  "editable": true,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "CDC Lag p95 (s)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum(rate(cdc_lag_seconds_bucket{pipeline=\"data-spine-cdc\"}[5m])) by (le))"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "list" },
+        "tooltip": { "mode": "single" }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Schema Validation p95 (ms)",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.95, sum(rate(schema_validation_ms_bucket{service=\"schema-registry\"}[5m])) by (le))"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Lineage Delivery Success",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 8 },
+      "targets": [
+        {
+          "refId": "C",
+          "expr": "(sum(rate(lineage_events_total{result=\"success\",namespace=\"data-spine\"}[5m])) / sum(rate(lineage_events_total{namespace=\"data-spine\"}[5m]))) * 100"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "type": "table",
+      "title": "Residency Gate Decisions",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "refId": "D",
+          "expr": "residency_gate_decisions_total{pipeline=\"data-spine-cdc\"}"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": true,
+          "fields": "Count"
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  }
+}
