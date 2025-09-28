@@ -5,6 +5,13 @@
 # Lockfiles – do not noise diffs
 package-lock.json -diff
 yarn.lock -diff
+pnpm-lock.yaml -diff
+**/package-lock.json -diff
+**/yarn.lock -diff
+**/pnpm-lock.yaml -diff
+
+# Ensure VRF fixtures remain reviewable text
+*.hex text eol=lf
 
 # Graph schemas
 *.graphql diff

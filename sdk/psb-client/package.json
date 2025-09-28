@@ -1,0 +1,22 @@
+{
+  "name": "@summit/psb-client",
+  "version": "0.1.0",
+  "description": "TypeScript client for the Partner Sampling Broker",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.3"
+  }
+}

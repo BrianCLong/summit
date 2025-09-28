@@ -1,0 +1,51 @@
+{
+  "intl-analytics": [
+    {
+      "id": "rec-006",
+      "geo": "BR",
+      "consented_partners": ["partner-a"],
+      "consent_tags": ["analytics"],
+      "attributes": {
+        "age": 32,
+        "interests": ["field-ops"],
+        "lifecycle_stage": "pilot"
+      },
+      "metadata": {
+        "ingested_at": "2025-01-24T10:05:00Z",
+        "source": "field"
+      }
+    }
+  ],
+  "us-analytics": [
+    {
+      "id": "rec-005",
+      "geo": "US",
+      "consented_partners": ["partner-a"],
+      "consent_tags": ["analytics", "research"],
+      "attributes": {
+        "age": 45,
+        "interests": ["risk", "operations"],
+        "lifecycle_stage": "customer"
+      },
+      "metadata": {
+        "ingested_at": "2025-01-22T16:20:00Z",
+        "source": "crm"
+      }
+    },
+    {
+      "id": "rec-001",
+      "geo": "US",
+      "consented_partners": ["partner-a", "partner-b"],
+      "consent_tags": ["analytics", "email"],
+      "attributes": {
+        "age": 34,
+        "interests": ["security", "compliance"],
+        "lifecycle_stage": "customer"
+      },
+      "metadata": {
+        "ingested_at": "2025-01-15T12:00:00Z",
+        "source": "crm"
+      }
+    }
+  ]
+}

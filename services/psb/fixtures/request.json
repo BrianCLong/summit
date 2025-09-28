@@ -1,0 +1,19 @@
+{
+  "partner_id": "partner-a",
+  "seed": "2025-Q1",
+  "exclusions": ["rec-002"],
+  "strata": [
+    {
+      "name": "us-analytics",
+      "target": 2,
+      "geo": ["US"],
+      "consent_tags": ["analytics"]
+    },
+    {
+      "name": "intl-analytics",
+      "target": 1,
+      "geo": ["CA", "BR"],
+      "consent_tags": ["analytics"]
+    }
+  ]
+}

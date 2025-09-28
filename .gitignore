@@ -55,6 +55,9 @@ out
 dist
 build
 
+# Gradle cache
+.gradle/
+
 # Serverless directories
 .serverless/
 
@@ -83,6 +86,28 @@ Thumbs.db
 *.swo
 *~
 
+# Lock and state files
+# Block all package manager lock/state artifacts so transient dependency diffs
+# never block PR generation across nested workspaces or archived snapshots.
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lockb
+.pnp.cjs
+.pnp.js
+.pnp.loader.mjs
+.pnp.data.json
+.pnp.meta.json
+**/package-lock.json
+**/pnpm-lock.yaml
+**/yarn.lock
+**/bun.lockb
+**/*.lock
+**/*.lockb
+
+# Partner Sampling Broker SDK artifacts
+sdk/psb-client/package-lock.json
+
 # Logs
 logs/
 *.log
@@ -108,12 +133,39 @@ config/local.json
 *.db
 *.sqlite
 
+# Binary artifacts
+# Explicitly guard against accidental binary commits that GitHub blocks when
+# generating patches.
+*.bin
+*.exe
+*.dll
+*.dylib
+*.so
+*.a
+*.lib
+*.o
+*.obj
+*.class
+*.wasm
+*.pdb
+*.deb
+*.rpm
+*.msi
+*.iso
+
 # Backup files
 backups/
 *.bak
+*.tmp
+*.orig
+*.rej
 
 # Conflicts directory
 conflicts/
+*.LOCAL.*
+*.REMOTE.*
+*.BACKUP.*
+*.BASE.*
 
 # Docker
 .dockerignore

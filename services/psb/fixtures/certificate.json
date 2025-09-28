@@ -1,0 +1,27 @@
+{
+  "partner_id": "partner-a",
+  "seed": "2025-Q1",
+  "vrf_public_key": "a2038912648d804b55d61c92af4a8600973ca0d251ed73f954375e170d453516",
+  "strata": [
+    {
+      "name": "us-analytics",
+      "target": 2,
+      "geo": ["US"],
+      "consent_tags": ["analytics"],
+      "sampled_ids": ["rec-005", "rec-001"],
+      "seed_output": "24e55f07b9d4b632959dd21172c71388bdd9ab3fbaa10c8ae2455894bc885d6d",
+      "seed_proof": "cc54e59b434b23c62265e0007aa92c0dad3c373ee35fa1c452cce16aca725235032f2e036d1f993932eab479bc5acf39c82ef2e7e220e78eb256f10ad542cd03"
+    },
+    {
+      "name": "intl-analytics",
+      "target": 1,
+      "geo": ["CA", "BR"],
+      "consent_tags": ["analytics"],
+      "sampled_ids": ["rec-006"],
+      "seed_output": "0aac719f14ab5b1032b1205640c22d944d19bfde4da30f0bce1c3d8c05724054",
+      "seed_proof": "9887ccbc244efdcf0c59067396722c547cdeb28966c294939d6666a1bb63c7ae67227a1bc21c90b6e7dfc2e2a92ce2bfa1ad1744ea62ab749562b2b14565c508"
+    }
+  ],
+  "exclusions": ["rec-002"],
+  "generated_at": "2025-09-27T07:25:13.154913374Z"
+}
