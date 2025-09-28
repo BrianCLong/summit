@@ -1,0 +1,7 @@
+{
+  "policyId": "default-us-east-1",
+  "description": "Allow execution only within us-east-1 edge nodes and deny invocations without verifiable residency attestation.",
+  "allowedRegions": ["us-east-1"],
+  "denyWithoutValidAttestation": true,
+  "minimumChainLength": 1
+}

@@ -1,0 +1,38 @@
+{
+  "name": "@summit/raewr",
+  "version": "0.1.0",
+  "description": "Residency-Attested Edge WASM Runner",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "raewr-verify": "dist/cli/raewr-verify.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "node --test"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "policies",
+    "keys"
+  ],
+  "keywords": [
+    "wasm",
+    "edge",
+    "attestation",
+    "residency"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.3"
+  }
+}

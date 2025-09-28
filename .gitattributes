@@ -1,16 +1,59 @@
+# Default to LF line endings for text
 * text=auto eol=lf
+
+# Ensure consistent text handling
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.jsonc text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.graphql text eol=lf
+*.py text eol=lf
 *.sh text eol=lf
+*.tf text eol=lf
+*.cjs text eol=lf
+*.mjs text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.rs text eol=lf
+
+# Explicitly mark binary artifacts
+*.zip binary
+*.tar binary
+*.gz binary
+*.tgz binary
+*.bz2 binary
+*.xz binary
+*.7z binary
+*.wasm binary
+*.so binary
+*.dll binary
+*.dylib binary
+*.exe binary
+*.bin binary
+*.class binary
+*.lock text eol=lf
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.mov binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+
+# Honor existing Windows shell scripts
 *.bat text eol=crlf
 
-# Lockfiles – do not noise diffs
-package-lock.json -diff
-yarn.lock -diff
-
-# Graph schemas
-*.graphql diff
-*.cql diff
-
-# LFS
+# Preserve large media in Git LFS
 *.png filter=lfs diff=lfs merge=lfs -text
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.mp4 filter=lfs diff=lfs merge=lfs -text
