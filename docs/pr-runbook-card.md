@@ -1,19 +1,29 @@
-# PR Runbook Card
+# Universal PR Creator
 
 ## Summary
-- Restore the worker automation entrypoints so tickets can be planned and executed end-to-end.
-- Introduce default worker profiles and prompt tuning metadata used by the router.
 
-## AC Mapping
-- AC1: `plan_tickets.run` returns structured assignments for incoming ticket payloads – ✅
-- AC2: `execute_ticket.run` respects manual worker overrides and returns captured work product – ✅
+- Restore the repository to its pre-MVPL spike state by reverting the "Fix MVPL runner determinism" changes.
+- Standardize repository hygiene with enforced `.gitattributes` and `.gitignore` rules that prevent large artifacts from entering future diffs.
+
+## Acceptance Criteria Mapping
+
+- **AC-1:** Oversized MapViz/MOTC/CRUL/etc. scaffolding is removed so the diff is reviewable. ✅
+- **AC-2:** Global ignore and attributes guardrails match the release engineering spec to block generated assets and binaries. ✅
 
 ## Gates
-- ✅ Unit: `pytest` (ga-graphai/packages/worker)
-- [BLOCKER] SBOM: `forge attest ga-graphai/packages/worker`
+
+- [BLOCKER] `npm test` (revert-only change; run to confirm no regressions).
+- [BLOCKER] `gh workflow run ci.pr.core.yml` (kick off the main CI suite once merged).
 
 ## Evidence
-- ✅ `pytest` (ga-graphai/packages/worker) – see output in CI logs / local run.
+
+- Revert commit `3f26012e` deletes the MVPL/MOTC/CRUL/PRDC/NCSS/BSGD/SBFS/HLCK scaffolding that caused the oversize diff.
+- Hygiene commit `a06ffcc6` enforces the sanitized `.gitattributes` and `.gitignore` baselines.
+
+## SBOM / Attestations
+
+- [BLOCKER] `make sbom` (generate refreshed supply-chain artifacts after the revert lands).
 
 ## Rollback Plan
-- Revert commits `13a624f0` and `a54dfed1` with `git revert` in reverse order, then redeploy.
+
+- Re-apply commit `db0cc31e` if we need to restore the MVPL runner and related scaffolding.
