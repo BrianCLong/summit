@@ -1,0 +1,22 @@
+version: '3.9'
+services:
+  prov-ledger:
+    build: ./services/prov-ledger
+    ports:
+      - '8081:8080'
+  er-service:
+    build: ./services/er-service
+    ports:
+      - '8082:8080'
+  api-gateway:
+    build: ./packages/api-gateway
+    ports:
+      - '4000:4000'
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - '3000:3000'
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - '9090:9090'

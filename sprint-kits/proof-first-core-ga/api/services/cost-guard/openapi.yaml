@@ -1,0 +1,37 @@
+openapi: 3.0.3
+info:
+  title: Cost Guard
+  version: 0.1.0
+paths:
+  /budget/evaluate:
+    post:
+      summary: Evaluate query plan budget
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenant:
+                  type: string
+                plan:
+                  type: object
+      responses:
+        '200':
+          description: allowed|throttle|kill
+  /kill:
+    post:
+      summary: Kill slow query by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                queryId:
+                  type: string
+      responses:
+        '202':
+          description: accepted

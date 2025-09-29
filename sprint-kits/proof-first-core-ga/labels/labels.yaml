@@ -1,0 +1,14 @@
+- name: feat
+- name: bug
+- name: ops
+- name: security
+- name: backend
+- name: frontend
+- name: ai
+- name: ui
+- name: data
+- name: integrations
+- name: docs
+- name: blocked
+- name: needs-triage
+- name: good-first-issue

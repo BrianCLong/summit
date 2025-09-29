@@ -1,0 +1,25 @@
+Title,Body,Labels,Assignees,Milestone
+A-1: Implement /evidence/register,Implements POST /evidence/register in prov-ledger; includes hashing & metadata persistence.,feat,backend,Proof-First Core GA
+A-2: Transform recorder middleware,Middleware to log operation+model+config checksum for each transform.,feat,backend,Proof-First Core GA
+A-3: Export hash-manifest.json (Merkle),Generate verifiable manifest tree for exports.,feat,backend,Proof-First Core GA
+A-4: prov-verify CLI,External verification tool with diffing and nonzero exit on tamper.,tools,tools,Proof-First Core GA
+A-5: Export blocker policy evaluation,OPA pass-through for export policy with readable block reasons.,security,backend,Proof-First Core GA
+B-1: nl_to_cypher module,TS lib to compose schema-aware prompts → Cypher + cost estimate.,ai,frontend,Proof-First Core GA
+B-2: Cost estimator & preview panel,UI panel to preview Cypher + cost before run.,ui,frontend,Proof-First Core GA
+B-3: Sandbox executor + undo/redo,Sandboxed exec with result preview and reversible ops.,ui,frontend,Proof-First Core GA
+B-4: NL→Cypher corpus + tests,Corpus and tests achieving ≥95% syntactic validity.,ai,qa,Proof-First Core GA
+C-1: ER candidate generation,Blocking + pairwise scoring endpoints.,feat,backend,Proof-First Core GA
+C-2: Reversible merges + audit,Implement /er/merge with rollback + audit trail.,feat,backend,Proof-First Core GA
+C-3: /er/explain endpoint,Return features and rationale JSON.,feat,backend,Proof-First Core GA
+C-4: ER golden fixtures,Author fixtures in er/golden/*.json.,data,qa,Proof-First Core GA
+D-1: OTEL + Prom emitters,Instrument services for traces/metrics.,ops,platform,Proof-First Core GA
+D-2: Dashboards JSON,Publish p95 latency, errors, CostGuard dashboards.,ops,platform,Proof-First Core GA
+D-3: Cost Guard budgeter + killer,Plan budget & kill APIs + metrics.,ops,platform,Proof-First Core GA
+D-4: k6 load + alerts,Load scripts and alert wiring.,ops,platform,Proof-First Core GA
+E-1: Tri-pane shell & routing,Build /case/:id/explore with panes.,ui,frontend,Proof-First Core GA
+E-2: Sync brushing,Linked interactions across panes.,ui,frontend,Proof-First Core GA
+E-3: Explain overlay + tooltips,Provenance + policy overlays and tooltips.,ui,frontend,Proof-First Core GA
+E-4: Cypress benchmarks + screenshots,Time-to-path benchmark + visual diffs.,qa,frontend,Proof-First Core GA
+F-1: RSS/News connector,Connector + manifest + tests.,integrations,integrations,Proof-First Core GA
+F-2: STIX/TAXII connector,Pull indicators → canonical schema.,integrations,integrations,Proof-First Core GA
+F-3: CSV ingest wizard,Mapping wizard + PII flags.,integrations,integrations,Proof-First Core GA

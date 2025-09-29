@@ -1,0 +1,4 @@
+apiVersion: v2
+name: cost-guard
+version: 0.1.0
+appVersion: 0.1.0
