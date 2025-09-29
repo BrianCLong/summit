@@ -54,3 +54,4 @@ export function invalidationPlugin(map = defaultMap) {
         },
     };
 }
+//# sourceMappingURL=invalidationPlugin.js.map

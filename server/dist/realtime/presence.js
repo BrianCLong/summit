@@ -1,5 +1,5 @@
-import baseLogger from '../config/logger';
-const logger = baseLogger.child({ name: 'presence' });
+import pino from 'pino';
+const logger = pino();
 const presence = new Map();
 function broadcast(workspaceId, socket) {
     const list = Array.from(presence.get(workspaceId)?.values() || []);
@@ -46,3 +46,4 @@ export function registerPresenceHandlers(socket) {
         logger.info({ userId: user.id, workspaceId }, 'presence:disconnect');
     });
 }
+//# sourceMappingURL=presence.js.map

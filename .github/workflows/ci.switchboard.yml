@@ -1,43 +1,18 @@
 name: CI Switchboard
-
-on:
-  push:
-    paths:
-      - "ui/components/Switchboard.tsx"
-      - "deploy/local/docker-compose.switchboard.yml"
-      - "policies/switchboard.rego"
-      - "docs/modules/switchboard-blueprint.md"
-      - "apis/switchboard.yaml"
-      - "db/switchboard/schema.sql"
-      - ".github/workflows/ci.switchboard.yml"
-  pull_request:
-    paths:
-      - "ui/components/Switchboard.tsx"
-      - "deploy/local/docker-compose.switchboard.yml"
-      - "policies/switchboard.rego"
-      - "docs/modules/switchboard-blueprint.md"
-      - "apis/switchboard.yaml"
-      - "db/switchboard/schema.sql"
-
+on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+        with: { node-version: 20 }
       - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
+      - run: npm run lint && npm run typecheck
       - run: npm run build
-
   policies:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: open-policy-agent/setup-opa@v2
-      - name: Format and test policies
-        run: |
-          opa fmt policies --write
-          opa test policies -v
+      - run: opa fmt -w policies && opa test policies -v

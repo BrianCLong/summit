@@ -1,19 +1,18 @@
 import { EventEmitter } from 'events';
 import { RedisCache } from '../cache/redis';
 export class PerformanceOptimizationService extends EventEmitter {
-    metrics = new Map();
-    cacheStrategies = new Map();
-    queryOptimizations = new Map();
-    connectionPools = new Map();
-    cache;
-    performanceThresholds = {
-        responseTime: 1000, // ms
-        memoryUsage: 80, // percentage
-        cacheHitRate: 85, // percentage
-        errorRate: 5, // percentage
-    };
     constructor() {
         super();
+        this.metrics = new Map();
+        this.cacheStrategies = new Map();
+        this.queryOptimizations = new Map();
+        this.connectionPools = new Map();
+        this.performanceThresholds = {
+            responseTime: 1000, // ms
+            memoryUsage: 80, // percentage
+            cacheHitRate: 85, // percentage
+            errorRate: 5, // percentage
+        };
         this.cache = new RedisCache();
         this.initializeCacheStrategies();
         this.initializeConnectionPools();
@@ -339,3 +338,4 @@ export class PerformanceOptimizationService extends EventEmitter {
         console.log('[PERFORMANCE] Data compression completed');
     }
 }
+//# sourceMappingURL=performanceOptimizationService.js.map

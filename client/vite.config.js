@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import babel from 'vite-plugin-babel'; // Added import
 import path from 'path'
 
 export default defineConfig({

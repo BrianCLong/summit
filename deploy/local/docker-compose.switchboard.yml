@@ -1,45 +1,29 @@
 version: "3.8"
 services:
   sfu:
-    image: ghcr.io/companyos/media-sfu:latest
+    image: ghcr.io/companyos/media-sfu:latest   # or livekit/mediasoup build
     network_mode: host
     environment:
       - ENABLE_E2EE=true
   turn:
     image: coturn/coturn:latest
     network_mode: host
-    command:
-      - -n
-      - --no-cli
-      - --no-tls
-      - --no-dtls
-      - --min-port
-      - "49160"
-      - --max-port
-      - "49200"
+    command: ["-n","--no-cli","--no-tls","--no-dtls","--min-port","49160","--max-port","49200"]
   signaling:
     image: ghcr.io/companyos/signaling:latest
-    ports:
-      - "8080:8080"
+    ports: ["8080:8080"]
   nats:
     image: nats:2
-    command:
-      - -js
-    ports:
-      - "4222:4222"
-      - "8222:8222"
+    command: ["-js"]
+    ports: ["4222:4222","8222:8222"]
   opa:
     image: openpolicyagent/opa:latest
-    command:
-      - run
-      - --server
-      - /policies
+    command: ["run","--server","/policies"]
     volumes:
-      - ../../policies:/policies:ro
+      - ./policies:/policies:ro
   agent-gateway:
     image: ghcr.io/companyos/agent-gateway:latest
     environment:
       - NATS_URL=nats://nats:4222
       - OPA_URL=http://opa:8181
-    ports:
-      - "7070:7070"
+    ports: ["7070:7070"]
