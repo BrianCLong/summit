@@ -2,7 +2,15 @@ name: Mirror CI Logs (self-archiving)
 on:
   workflow_run:
     workflows:
-      ['CI', 'Compose UI Screens', 'Unified CI', 'ci.unified', 'Build & Test']
+      [
+        'CI Validate',
+        'CI Image',
+        'Client CI',
+        'Server CI',
+        'IntelGraph CI/CD Pipeline',
+        'E2E (Playwright)',
+        'Security-Scans',
+      ]
     types: [completed]
 
 permissions:
