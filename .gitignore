@@ -74,6 +74,15 @@ logs/
 tmp/
 temp/
 
+# Python artifacts
+__pycache__/
+.venv/
+poetry.lock
+
+# Gradle state
+.gradle/
+**/.gradle/
+
 # Archive files
 *.zip
 *.tar
