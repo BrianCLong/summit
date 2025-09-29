@@ -8,14 +8,14 @@ spec:
     metadata: { labels: { app: aer-ledger } }
     spec:
       containers:
-      - name: aer
-        image: ghcr.io/org/aer-ledger:latest
-        env:
-        - name: AER_PRIVATE_KEY_PEM
-          valueFrom: { secretKeyRef: { name: aer-secrets, key: priv } }
-        - name: AER_PUBLIC_KEY_PEM
-          valueFrom: { secretKeyRef: { name: aer-secrets, key: pub } }
-        ports: [{ containerPort: 7201 }]
+        - name: aer
+          image: ghcr.io/org/aer-ledger:latest
+          env:
+            - name: AER_PRIVATE_KEY_PEM
+              valueFrom: { secretKeyRef: { name: aer-secrets, key: priv } }
+            - name: AER_PUBLIC_KEY_PEM
+              valueFrom: { secretKeyRef: { name: aer-secrets, key: pub } }
+          ports: [{ containerPort: 7201 }]
 ---
 apiVersion: v1
 kind: Service
