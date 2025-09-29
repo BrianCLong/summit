@@ -1,0 +1,37 @@
+name: Mirror CI Logs (self-archiving)
+on:
+  workflow_run:
+    workflows:
+      ['CI', 'Compose UI Screens', 'Unified CI', 'ci.unified', 'Build & Test']
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    if: "${{ github.event.workflow_run.conclusion != 'skipped' }}"
+    steps:
+      - name: Download logs for triggering run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          mkdir -p logs
+          gh api -H "Accept: application/vnd.github+json" \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/logs" > "logs/run_${RUN_ID}.zip" || true
+          unzip -q "logs/run_${RUN_ID}.zip" -d "logs/run_${RUN_ID}" || true
+          # Always create a summary index for quick grep:
+          ( cd "logs/run_${RUN_ID}" 2>/dev/null && \
+            grep -RniE "error|fail|exception|TypeError|ReferenceError" || true ) \
+            | sed -E "s#^#RUN ${RUN_ID}: #" > "logs/run_${RUN_ID}_grep.txt" || true
+
+      - name: Upload mirrored logs (30 days)
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'logs-${{ github.event.workflow_run.id }}'
+          path: logs/**
+          if-no-files-found: warn
+          retention-days: 30
