@@ -1,0 +1,96 @@
+{
+  "findings": [
+    {
+      "description": "AWS access key ID",
+      "file": "app/secrets.txt",
+      "line": 1,
+      "redacted": "AKIA\u20263456",
+      "rule": "AWS Access Key",
+      "severity": "high"
+    },
+    {
+      "description": "AWS secret access key",
+      "file": "app/secrets.txt",
+      "line": 2,
+      "redacted": "wJal\u2026EKEY",
+      "rule": "AWS Secret Key",
+      "severity": "high"
+    },
+    {
+      "description": "Slack legacy token",
+      "file": "app/secrets.txt",
+      "line": 3,
+      "redacted": "xoxb\u2026WXYZ",
+      "rule": "Slack Token",
+      "severity": "high"
+    },
+    {
+      "description": "Potential secret detected via entropy",
+      "file": "app/secrets.txt",
+      "line": 4,
+      "redacted": "eyJh\u2026VCJ9",
+      "rule": "High Entropy String",
+      "severity": "medium"
+    },
+    {
+      "description": "Potential secret detected via entropy",
+      "file": "app/secrets.txt",
+      "line": 4,
+      "redacted": "eyJz\u2026IyfQ",
+      "rule": "High Entropy String",
+      "severity": "medium"
+    },
+    {
+      "description": "Potential secret detected via entropy",
+      "file": "app/secrets.txt",
+      "line": 4,
+      "redacted": "SflK\u2026sw5c",
+      "rule": "High Entropy String",
+      "severity": "medium"
+    },
+    {
+      "description": "JSON Web Token",
+      "file": "app/secrets.txt",
+      "line": 4,
+      "redacted": "eyJh\u2026sw5c",
+      "rule": "JWT",
+      "severity": "medium"
+    },
+    {
+      "description": "GitHub personal access token",
+      "file": "app/secrets.txt",
+      "line": 5,
+      "redacted": "ghp_\u2026Q7R8",
+      "rule": "GitHub Token",
+      "severity": "high"
+    },
+    {
+      "description": "Stripe secret key",
+      "file": "app/secrets.txt",
+      "line": 6,
+      "redacted": "sk_t\u20269012",
+      "rule": "Stripe Secret Key",
+      "severity": "high"
+    },
+    {
+      "description": "Generic OAuth client secret",
+      "file": "app/secrets.txt",
+      "line": 7,
+      "redacted": "ya29\u2026tial",
+      "rule": "OAuth Client Secret",
+      "severity": "high"
+    },
+    {
+      "description": "Potential secret detected via entropy",
+      "file": "app/secrets.txt",
+      "line": 8,
+      "redacted": "abcd\u20263456",
+      "rule": "High Entropy String",
+      "severity": "medium"
+    }
+  ],
+  "summary": {
+    "findings": 11,
+    "scanned_files": 2
+  }
+}
