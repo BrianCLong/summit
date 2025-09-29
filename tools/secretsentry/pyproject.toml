@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "secretsentry"
+version = "0.1.0"
+description = "Deterministic secret scanning CLI used in Summit repos."
+requires-python = ">=3.10"
+authors = [
+  { name = "Summit Automation", email = "eng@summit.ai" }
+]
+dependencies = []
+readme = "README.md"
+
+[project.optional-dependencies]
+test = ["pytest>=7.4"]
+
+[project.scripts]
+secretsentry = "secretsentry.cli:main"
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
