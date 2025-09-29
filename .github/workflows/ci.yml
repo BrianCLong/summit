@@ -14,6 +14,9 @@ jobs:
         with: { node-version: ${{ matrix.node }}, cache: 'pnpm' }
       - run: corepack enable
       - run: pnpm i --frozen-lockfile
-      - run: pnpm -w run typecheck || npx tsc -p .
-      - run: pnpm -w run lint
-      - run: pnpm -w exec jest --ci --maxWorkers=50% --coverage
+      - name: Typecheck
+        run: pnpm -w run typecheck || npx tsc -p .
+      - name: Lint
+        run: pnpm -w run lint
+      - name: Unit tests (Jest+SWC)
+        run: pnpm -w exec jest --ci --maxWorkers=50% --coverage
