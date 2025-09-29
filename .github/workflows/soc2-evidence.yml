@@ -1,13 +1,15 @@
 name: SOC2 Evidence Bundle
 on:
   workflow_run:
-    workflows: ["CI", "CI Security", "CI Performance (k6)", "CodeQL", "SBOM"]
+    workflows: ["CI"]
     types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   bundle:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
 

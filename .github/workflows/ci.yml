@@ -1,11 +1,19 @@
-build-afl-aer-crsp-lreg:
+name: CI
+on:
+  pull_request: { branches: [ main ] }
+  push:         { branches: [ main ] }
+permissions:
+  contents: read
+jobs:
+  build-test:
     runs-on: ubuntu-latest
+    strategy: { matrix: { node: [18, 20] } }
     steps:
-      - uses: actions/checkout @v4/**
-      - uses: actions/setup-node @v4/**
-        with: { node-version: '18' }
-      - run: npm ci
-      - run: npm run build --workspaces
-      - run: npm test --workspaces --if-present
-      - name: SBOM
-        run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: ${{ matrix.node }}, cache: 'pnpm' }
+      - run: corepack enable
+      - run: pnpm i --frozen-lockfile
+      - run: pnpm -w run typecheck || npx tsc -p .
+      - run: pnpm -w run lint
+      - run: pnpm -w exec jest --ci --maxWorkers=50% --coverage

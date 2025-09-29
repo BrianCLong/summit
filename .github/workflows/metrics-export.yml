@@ -2,8 +2,8 @@ name: 📊 Metrics Export
 
 on:
   schedule:
-    # Export metrics every 5 minutes
-    - cron: '*/5 * * * *'
+    # Export metrics every hour (reduced frequency)
+    - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
       export_type:
@@ -37,6 +37,7 @@ jobs:
     name: 📈 Export Release Captain Metrics
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    if: ${{ github.repository_owner == 'BrianCLong' }}
     steps:
     - uses: actions/checkout@v4
 
