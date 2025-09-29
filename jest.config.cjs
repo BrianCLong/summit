@@ -6,42 +6,56 @@ module.exports = {
       useESM: true
     }
   },
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
+  roots: ['server', 'client', 'packages'],
+  modulePathIgnorePatterns: [
+    '<rootDir>/dist/',
+    '<rootDir>/archive/',
+    '<rootDir>/archive_20250926/',
+    '<rootDir>/salvage/',
+    '<rootDir>/pull/'
+  ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+    '/archive/',
+    '/archive_20250926/',
+    '/salvage/',
+    '/pull/'
+  ],
+  watchPathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+    '/archive/',
+    '/archive_20250926/',
+    '/salvage/',
+    '/pull/'
+  ],
   collectCoverageFrom: [
     '**/*.{ts,tsx,js,jsx}',
     '!**/node_modules/**',
     '!**/dist/**',
     '!**/build/**',
     '!**/*.config.{js,ts}',
-    '!**/coverage/**'
+    '!**/coverage/**',
+    '!**/archive/**',
+    '!**/archive_20250926/**',
+    '!**/salvage/**',
+    '!**/pull/**'
   ],
   testMatch: [
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
     '**/?(*.)+(spec|test).{ts,tsx,js,jsx}'
   ],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^node-fetch$': '<rootDir>/__mocks__/node-fetch.js',
+    '^pg$': '<rootDir>/__mocks__/pg.js',
+    '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
+    '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
+    '^@server/(.*)$': '<rootDir>/server/src/$1'
   },
   transformIgnorePatterns: [
     'node_modules/(?!(.*\\.mjs$))'
-  ],
-  projects: [
-    {
-      displayName: 'server',
-      testMatch: ['<rootDir>/server/**/*.{test,spec}.{js,ts}'],
-      preset: 'ts-jest/presets/default-esm',
-      extensionsToTreatAsEsm: ['.ts'],
-      globals: {
-        'ts-jest': {
-          useESM: true
-        }
-      }
-    },
-    {
-      displayName: 'client',
-      testMatch: ['<rootDir>/client/**/*.{test,spec}.{js,jsx,ts,tsx}'],
-      testEnvironment: 'jsdom',
-      setupFilesAfterEnv: ['<rootDir>/client/src/setupTests.js']
-    }
   ]
 };
