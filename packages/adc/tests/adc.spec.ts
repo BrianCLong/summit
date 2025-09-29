@@ -1,0 +1,31 @@
+import { ADC } from '../src';
+import { AFLStore } from '@intelgraph/afl-store';
+import { randomUUID } from 'crypto';
+
+describe('ADC', () => {
+  let aflStore: AFLStore;
+  let adc: ADC;
+
+  beforeEach(() => {
+    aflStore = new AFLStore('redis://localhost:6381'); // Mock or test Redis
+    adc = new ADC(aflStore);
+  });
+
+  afterEach(async () => {
+    await aflStore.close();
+  });
+
+  test('should deploy bait drop and detect trigger', async () => {
+    const expectedFp = { contentHash: randomUUID(), formatSig: 'test', timingSig: 'test', xformSig: 'test', route: 'test' };
+    const bait = await adc.deployBaitDrop('fake content', expectedFp);
+    expect(bait).toBeDefined();
+
+    const triggeredBait = await adc.monitorBaitDrops(expectedFp);
+    expect(triggeredBait?.triggered).toBe(true);
+  });
+
+  test('should trigger counter-drop', async () => {
+    const result = await adc.triggerCounterDrop('adversary.com', { type: 'contradiction', content: 'This is false.' });
+    expect(result).toBe(true);
+  });
+});
