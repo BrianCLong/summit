@@ -1,0 +1,103 @@
+name: issue-auto-split
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: read
+  issues: write
+  projects: write
+
+jobs:
+  split:
+    if: contains(github.event.label.name, 'release: v1.1') || startsWith(github.event.label.name, 'theme: ')
+    runs-on: ubuntu-latest
+    env:
+      DEFAULT_STATUS: Planned
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Bootstrap milestones/project (idempotent)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECT_TITLE: Assistant v1.1
+        run: |
+          chmod +x scripts/bootstrap_roadmap.sh
+          ./scripts/bootstrap_roadmap.sh >/dev/null || true
+
+      - name: Classify and apply milestone/assignees/project
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          PROJECT_TITLE: Assistant v1.1
+        run: |
+          set -euo pipefail
+
+          # Determine theme from existing labels
+          OWNER_REPO=$(gh repo view --json owner,name -q '.owner.login + "/" + .name')
+          ALL_LABELS=$(gh issue view "$ISSUE_NUMBER" --json labels -q '.labels[].name' | tr '\n' ',' || true)
+          if   [[ "$ALL_LABELS" == *"theme: routing"*   ]]; then THEME="routing";
+          elif [[ "$ALL_LABELS" == *"theme: citations"* ]]; then THEME="citations";
+          elif [[ "$ALL_LABELS" == *"theme: exports"*   ]]; then THEME="exports";
+          else THEME="quality"; fi
+
+          # Milestones
+          mid() { gh api "repos/$OWNER_REPO/milestones" --jq \
+            ".[]|select(.title==\"$1\")|.number"; }
+          M12=$(mid "Assistant v1.1 — W1–2" || echo "")
+          M34=$(mid "Assistant v1.1 — W3–4" || echo "")
+          M5=$(mid  "Assistant v1.1 — W5"   || echo "")
+          M6=$(mid  "Assistant v1.1 — W6"   || echo "")
+          case "$THEME" in
+            routing|citations) TARGET="$M12" ;;
+            exports)           TARGET="$M34" ;;
+            *)                 TARGET="$M5"  ;;
+          esac
+          [ -n "$TARGET" ] && gh issue edit "$ISSUE_NUMBER" --milestone "$TARGET"
+
+          # Assignees from YAML or env overrides
+          assign_from_yaml() {
+            python3 - "$1" << 'PY'
+import sys, yaml
+k=sys.argv[1]
+try:
+  data=yaml.safe_load(open('.github/assignees.yml'))
+except Exception:
+  data={}
+lst = data.get(k, data.get('default', []))
+print(','.join(lst))
+PY
+          }
+          ASG=""
+          case "$THEME" in
+            routing)   ASG="${ROUTING_ASSIGNEES:-}"   ;;
+            citations) ASG="${CITATIONS_ASSIGNEES:-}" ;;
+            exports)   ASG="${EXPORTS_ASSIGNEES:-}"   ;;
+            quality)   ASG="${QUALITY_ASSIGNEES:-}"   ;;
+          esac
+          if [ -z "$ASG" ] && [ -f .github/assignees.yml ]; then
+            ASG=$(assign_from_yaml "$THEME")
+          fi
+          if [ -n "$ASG" ]; then
+            IFS=',' read -r -a A <<< "$ASG"
+            gh issue edit "$ISSUE_NUMBER" --add-assignee "${A[@]}" || true
+          fi
+
+          # Add to project and set status
+          PID=$(gh api graphql -f query='
+            query($o:String!,$r:String!,$t:String!){
+              repository(owner:$o,name:$r){ projectsV2(first:20, query:$t){ nodes { id title } } }
+            }' -F o="$(cut -d/ -f1 <<<"$OWNER_REPO")" -F r="$(cut -d/ -f2 <<<"$OWNER_REPO")" -F t="$PROJECT_TITLE" \
+            | jq -r '.data.repository.projectsV2.nodes[0].id')
+          INID=$(gh api "repos/$OWNER_REPO/issues/$ISSUE_NUMBER" --jq .node_id)
+          if [ -n "$PID" ] && [ -n "$INID" ]; then
+            gh api graphql -f query='
+              mutation($p:ID!,$c:ID!){ addProjectV2ItemById(input:{projectId:$p,contentId:$c}){ item { id } } }' \
+              -F p="$PID" -F c="$INID" >/dev/null || true
+          fi
+
+          echo "✓ Auto-split: #$ISSUE_NUMBER → theme=$THEME, milestone set, project added"

@@ -1,0 +1,19 @@
+query EntityRevisions($entityId: ID!) {
+  entityRevisions(entityId: $entityId) {
+    id
+    version
+    actorId
+    createdAt
+    diff
+  }
+}
+
+mutation RevertEntity($id: ID!, $revisionId: ID!) {
+  revertEntity(id: $id, revisionId: $revisionId) {
+    id
+    label
+    description
+    properties
+    updatedAt
+  }
+}

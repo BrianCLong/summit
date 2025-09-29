@@ -1,0 +1,77 @@
+repository:
+  allow_merge_commit: false
+  allow_rebase_merge: false
+  allow_squash_merge: true
+  delete_branch_on_merge: true
+  enable_automated_security_fixes: true
+  enable_vulnerability_alerts: true
+  default_branch: main
+
+branches:
+  - name: main
+    protection:
+      required_signatures: true
+      required_status_checks:
+        strict: true
+        contexts:
+          - validate-gates-and-promql / validate-gates
+          - validate-gates-and-promql / promtool-check
+          - validate-gates-and-promql / promtool-config
+          - validate-gates-and-promql / alertmanager-config
+          - opa-test / opa-unit-tests
+          - hygiene / actionlint
+          - hygiene / shellcheck
+          - hygiene / actions-pinned
+      enforce_admins: true
+      required_pull_request_reviews:
+        required_approving_review_count: 2
+        require_code_owner_reviews: true
+        dismiss_stale_reviews: true
+      restrictions: null
+      required_linear_history: true
+      required_conversation_resolution: true
+      allow_force_pushes: false
+      allow_deletions: false
+
+  - name: release/*
+    protection:
+      required_signatures: true
+      required_status_checks:
+        strict: true
+        contexts:
+          - validate-gates-and-promql / validate-gates
+          - validate-gates-and-promql / promtool-check
+          - validate-gates-and-promql / promtool-config
+          - validate-gates-and-promql / alertmanager-config
+          - opa-test / opa-unit-tests
+          - hygiene / actionlint
+          - hygiene / shellcheck
+          - hygiene / actions-pinned
+      enforce_admins: true
+      required_pull_request_reviews:
+        required_approving_review_count: 2
+        require_code_owner_reviews: true
+      restrictions: null
+      required_linear_history: true
+      required_conversation_resolution: true
+      allow_force_pushes: false
+      allow_deletions: false
+
+environments:
+  - name: production
+    wait_timer: 10
+    reviewers:
+      users: []
+      teams:
+        - yourorg/release-mgmt
+        - yourorg/sre
+    deployment_branch_policy:
+      protected_branches: true
+      custom_branch_policies: []
+
+tags:
+  - name: 'v*'
+    protection:
+      create_protected: true
+      require_signed_commits: true
+      restrict_creation_to_admins: true

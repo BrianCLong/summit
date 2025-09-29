@@ -1,0 +1,15 @@
+{
+  "title": "Forecast Accuracy",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Precision@K",
+      "targets": [{ "expr": "forecast_precision_k" }]
+    },
+    {
+      "type": "graph",
+      "title": "MAE",
+      "targets": [{ "expr": "forecast_mae" }]
+    }
+  ]
+}

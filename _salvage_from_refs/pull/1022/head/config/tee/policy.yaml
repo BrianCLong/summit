@@ -1,0 +1,5 @@
+type: sgx
+mrEnclave: []
+mrSigner: []
+maxSkewMs: 300000
+enforcement: true

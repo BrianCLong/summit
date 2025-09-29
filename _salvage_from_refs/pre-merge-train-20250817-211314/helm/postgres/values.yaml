@@ -1,0 +1,33 @@
+image:
+  repository: postgres
+  tag: 14
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5432
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: ""
+
+env:
+  - name: POSTGRES_DB
+    value: intelgraph
+  - name: POSTGRES_USER
+    value: intelgraph
+  - name: POSTGRES_PASSWORD
+    value: change-me
+
+serviceMonitor:
+  enabled: false
+

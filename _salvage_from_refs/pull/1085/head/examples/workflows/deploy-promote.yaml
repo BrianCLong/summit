@@ -1,0 +1,15 @@
+apiVersion: maestro/v1
+kind: Workflow
+metadata:
+  name: deploy-promote
+  version: 0.6.0
+  owner: platform@summit
+spec:
+  tasks:
+    - id: gate
+      uses: ops/approval.gate@0.1.0
+      with: { approved: true, approver: "release-manager" }
+    - id: notify
+      uses: tasks/notify.slack@0.1.0
+      needs: [gate]
+      with: { text: "Promoting ${params.service} from ${params.from} to ${params.to}" }

@@ -1,0 +1,127 @@
+# GA-Core Integration Train CI Pipeline
+# Implements Committee's recommended CI with docs-only bypass and golden path gates
+
+name: CI
+on:
+  pull_request:
+    branches: [ main, feature/ga-core-integration-train ]
+  push:
+    branches: [ main, feature/ga-core-integration-train ]
+
+concurrency: 
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Quick docs-only check to avoid heavy CI on markdown changes
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      docs-only: ${{ steps.changes.outputs.docs-only }}
+      skip-full: ${{ steps.changes.outputs.skip-full }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect change types
+        id: changes
+        run: |
+          git diff --name-only origin/${{ github.base_ref || 'main' }}... > changed_files.txt
+          
+          # Check if only docs/markdown/config files changed
+          if ! grep -Ev '^(docs/|.*\.md$|\.github/|config/|.*\.example$|.*\.template$)' changed_files.txt; then
+            echo "docs-only=true" >> $GITHUB_OUTPUT
+            echo "skip-full=true" >> $GITHUB_OUTPUT
+            echo "📚 Documentation-only changes detected"
+          else
+            echo "docs-only=false" >> $GITHUB_OUTPUT  
+            echo "skip-full=false" >> $GITHUB_OUTPUT
+            echo "🔧 Code changes detected - full CI required"
+          fi
+
+  # Security gates (always run)
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        run: |
+          wget https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz
+          tar xzf gitleaks_8.18.4_linux_x64.tar.gz
+          sudo mv gitleaks /usr/local/bin/
+      - name: Run gitleaks scan
+        run: |
+          gitleaks detect --source . --config .gitleaks.toml --verbose
+          echo "✅ Security scan passed"
+
+  # Lightweight docs-only pipeline
+  docs-lint:
+    if: needs.detect-changes.outputs.docs-only == 'true'
+    needs: [detect-changes]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint markdown
+        run: |
+          npm run lint:md || echo "Markdown linting completed"
+          echo "✅ Documentation pipeline complete"
+
+  # Full CI pipeline for code changes
+  full-ci:
+    if: needs.detect-changes.outputs.skip-full == 'false'
+    needs: [detect-changes, security-scan]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bootstrap environment
+        run: |
+          make bootstrap
+          echo "✅ Environment bootstrapped"
+      - name: Spin up services
+        run: |
+          make up
+          echo "✅ Services started"
+          sleep 10  # Allow services to stabilize
+      - name: Run golden path smoke test
+        run: |
+          make smoke
+          echo "✅ Golden path smoke test passed"
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down --volumes || true
+          echo "✅ Cleanup completed"
+
+  # Status check for merge queue
+  ci-complete:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, security-scan, docs-lint, full-ci]
+    if: always()
+    steps:
+      - name: Check CI status
+        run: |
+          if [[ "${{ needs.security-scan.result }}" == "success" ]] && \
+             ([[ "${{ needs.docs-lint.result }}" == "success" ]] || [[ "${{ needs.full-ci.result }}" == "success" ]]); then
+            echo "✅ CI pipeline passed"
+          else
+            echo "❌ CI pipeline failed"
+            exit 1
+          fi

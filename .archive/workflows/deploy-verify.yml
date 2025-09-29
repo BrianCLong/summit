@@ -1,0 +1,160 @@
+name: Deploy with Cosign Verification
+
+on:
+  workflow_run:
+    workflows: ["Cosign Sign & Attest"]
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      image_digest:
+        description: 'Image digest to deploy'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  verify-and-deploy:
+    name: Verify Attestations & Deploy
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.0'
+
+      - name: Get image digest
+        id: digest
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "digest=${{ inputs.image_digest }}" >> $GITHUB_OUTPUT
+          else
+            # Extract digest from successful workflow run artifacts
+            echo "digest=${{ github.event.workflow_run.outputs.image-digest }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify image signature
+        run: |
+          IMAGE="ghcr.io/${{ github.repository }}/intelgraph@${{ steps.digest.outputs.digest }}"
+          echo "🔐 Verifying signature for: $IMAGE"
+
+          cosign verify --certificate-identity="https://github.com/${{ github.repository }}/.github/workflows/cosign-attest.yml@refs/heads/main" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+            "$IMAGE"
+
+          if [ $? -eq 0 ]; then
+            echo "✅ Image signature verification PASSED"
+          else
+            echo "❌ Image signature verification FAILED"
+            exit 1
+          fi
+
+      - name: Verify SBOM attestation
+        run: |
+          IMAGE="ghcr.io/${{ github.repository }}/intelgraph@${{ steps.digest.outputs.digest }}"
+          echo "📋 Verifying SBOM attestation for: $IMAGE"
+
+          cosign verify-attestation --type spdx \
+            --certificate-identity="https://github.com/${{ github.repository }}/.github/workflows/cosign-attest.yml@refs/heads/main" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+            "$IMAGE"
+
+          if [ $? -eq 0 ]; then
+            echo "✅ SBOM attestation verification PASSED"
+          else
+            echo "❌ SBOM attestation verification FAILED"
+            exit 1
+          fi
+
+      - name: Verify SLSA provenance attestation
+        run: |
+          IMAGE="ghcr.io/${{ github.repository }}/intelgraph@${{ steps.digest.outputs.digest }}"
+          echo "🏗️  Verifying SLSA provenance attestation for: $IMAGE"
+
+          cosign verify-attestation --type slsaprovenance \
+            --certificate-identity="https://github.com/${{ github.repository }}/.github/workflows/cosign-attest.yml@refs/heads/main" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+            "$IMAGE"
+
+          if [ $? -eq 0 ]; then
+            echo "✅ SLSA provenance attestation verification PASSED"
+          else
+            echo "❌ SLSA provenance attestation verification FAILED"
+            exit 1
+          fi
+
+      - name: Deploy to staging
+        run: |
+          echo "🚀 All verifications passed! Deploying to staging..."
+          IMAGE_DIGEST="${{ steps.digest.outputs.digest }}"
+
+          # Update staging values with verified digest
+          sed -i "s|digest: sha256:.*|digest: $IMAGE_DIGEST|" charts/intelgraph/values.staging.yaml
+
+          # Deploy using Helm (example - adjust for your deployment method)
+          helm upgrade --install intelgraph-staging charts/intelgraph \
+            -f charts/intelgraph/values.staging.yaml \
+            --namespace intelgraph-staging \
+            --create-namespace \
+            --wait \
+            --timeout 10m
+
+          echo "✅ Deployment completed successfully"
+
+      - name: Break-glass verification test
+        run: |
+          echo "🧪 Running break-glass test to ensure policy enforcement..."
+
+          # Test with unsigned image (should fail)
+          UNSIGNED_IMAGE="ghcr.io/${{ github.repository }}/intelgraph:unsigned-test"
+
+          set +e  # Don't exit on error for this test
+          cosign verify --certificate-identity="https://github.com/${{ github.repository }}/.github/workflows/cosign-attest.yml@refs/heads/main" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+            "$UNSIGNED_IMAGE" 2>/dev/null
+
+          if [ $? -eq 0 ]; then
+            echo "❌ SECURITY FAILURE: Unsigned image verification should have failed!"
+            exit 1
+          else
+            echo "✅ Break-glass test PASSED: Unsigned images correctly rejected"
+          fi
+          set -e
+
+      - name: Generate deployment report
+        run: |
+          cat > deployment-report.md << EOF
+          # Deployment Report
+
+          **Image**: ghcr.io/${{ github.repository }}/intelgraph@${{ steps.digest.outputs.digest }}
+          **Deployment Time**: $(date -u)
+          **Git SHA**: ${{ github.sha }}
+
+          ## Security Verification Results
+          - ✅ Image signature verified
+          - ✅ SBOM attestation verified
+          - ✅ SLSA provenance verified
+          - ✅ Break-glass test passed
+
+          ## Attestation Links
+          - SBOM: Available in container registry
+          - Provenance: Available in container registry
+          - Signature: Available in container registry
+
+          EOF
+
+          echo "📊 Deployment report generated"
+
+      - name: Upload deployment report
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-report-${{ github.sha }}
+          path: deployment-report.md
+          retention-days: 90

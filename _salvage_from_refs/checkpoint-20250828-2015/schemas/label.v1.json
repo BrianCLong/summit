@@ -1,0 +1,10 @@
+{
+  "$id": "ig.label.v1",
+  "type": "object",
+  "required": ["tenantId","userId","suggestionId","label","ts"],
+  "properties": {
+    "tenantId":{"type":"string"}, "userId":{"type":"string"},
+    "suggestionId":{"type":"string"}, "label":{"enum":["accept","reject"]},
+    "context":{"type":"object"}, "ts":{"type":"string","format":"date-time"}
+  }
+}

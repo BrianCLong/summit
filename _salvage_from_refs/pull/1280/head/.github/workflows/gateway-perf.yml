@@ -1,0 +1,19 @@
+name: gateway-perf
+on:
+  pull_request:
+    paths:
+      - 'services/gateway/**'
+      - 'tools/k6/**'
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/k6-action@v0.3.1
+        with:
+          filename: tools/k6/s26-pq.js
+        env:
+          URL: ${{ secrets.STAGING_GATEWAY_URL }}
+          PQ_HASH: ${{ secrets.PQ_HASH }}
+      - uses: actions/upload-artifact@v4
+        with: { name: k6-report, path: results/** }

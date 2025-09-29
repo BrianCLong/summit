@@ -1,0 +1,8 @@
+# If present, these dates override “next Monday” logic for v1.1.
+v1_1:
+  start: 2025-09-01          # YYYY-MM-DD (W1 starts)
+  w12_due: 2025-09-14
+  w34_due: 2025-09-28
+  w5_due:  2025-10-05
+  w6_due:  2025-10-12
+

@@ -1,0 +1,16 @@
+# Simplified activity feed using existing server stats
+query GW_ActivityFeedData {
+  serverStats {
+    uptime
+    totalInvestigations
+    totalEntities
+  }
+}
+
+# Mock comment operations (would be real when server supports them)
+query GW_MockComments($targetId: ID!) {
+  serverStats {
+    uptime
+    # Mock comment data - would be replaced with real comments
+  }
+}

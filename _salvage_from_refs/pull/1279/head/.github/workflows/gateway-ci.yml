@@ -1,0 +1,96 @@
+name: Gateway CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'services/gateway/**'
+      - '.github/workflows/gateway-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'services/gateway/**'
+      - '.github/workflows/gateway-ci.yml'
+
+jobs:
+  test-gateway:
+    name: Test Gateway Service
+    runs-on: ubuntu-latest
+
+    services:
+      opa:
+        image: openpolicyagent/opa:latest-envoy
+        ports:
+          - 8181:8181
+        options: >-
+          --health-cmd "curl -f http://localhost:8181/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        cd services/gateway
+        npm ci
+
+    - name: Load test policies into OPA
+      run: |
+        # Wait for OPA to be ready
+        for i in {1..30}; do
+          if curl -f http://localhost:8181/health; then
+            echo "OPA is ready"
+            break
+          fi
+          echo "Waiting for OPA... ($i/30)"
+          sleep 2
+        done
+
+        # Load export policy for testing
+        curl -X PUT \
+          "http://localhost:8181/v1/policies/export" \
+          -H "Content-Type: text/plain" \
+          --data-binary "@policy/opa/export_enhanced.rego"
+
+    - name: Run gateway tests
+      run: |
+        cd services/gateway
+        npm test
+      env:
+        NODE_ENV: test
+        OPA_URL: http://localhost:8181
+
+    - name: Test export simulation endpoint
+      run: |
+        cd services/gateway
+        npm run test:integration -- --testPathPattern=export
+      env:
+        NODE_ENV: test
+        OPA_URL: http://localhost:8181
+
+    - name: Test NL→Cypher guardrails
+      run: |
+        cd services/gateway
+        npm run test:integration -- --testPathPattern=nlq
+      env:
+        NODE_ENV: test
+
+    - name: Generate coverage report
+      run: |
+        cd services/gateway
+        npm run test:coverage
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./services/gateway/coverage/lcov.info
+        flags: gateway

@@ -1,0 +1,17 @@
+# Simplified search using existing entity search
+query GW_PowerSearchEntities($query: String!) {
+  searchEntities(query: $query) {
+    id
+    label
+    type
+    properties
+  }
+}
+
+# Mock saved searches using server stats
+query GW_MockSavedSearches {
+  serverStats {
+    uptime
+    totalInvestigations
+  }
+}

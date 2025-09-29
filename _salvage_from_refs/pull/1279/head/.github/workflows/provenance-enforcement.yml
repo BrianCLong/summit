@@ -1,0 +1,374 @@
+name: Provenance Enforcement
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_call:
+    inputs:
+      artifact_name:
+        description: 'Name of the artifact to verify'
+        required: true
+        type: string
+      min_slsa_level:
+        description: 'Minimum SLSA level required'
+        required: false
+        type: number
+        default: 2
+      skip_verification:
+        description: 'Skip verification (emergency only)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  SLSA_LEVEL: 3
+  VERIFICATION_POLICY: '.github/policies/verification-policy.json'
+
+jobs:
+  # Generate SLSA3 provenance for all builds
+  provenance:
+    name: Generate Provenance
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
+    outputs:
+      artifact-name: ${{ steps.upload.outputs.artifact-name }}
+      provenance-name: ${{ steps.provenance.outputs.provenance-name }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Generate SBOM
+        run: |
+          npm install -g @cyclonedx/cdxgen
+          cdxgen -o sbom.json .
+
+      - name: Upload build artifacts
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: |
+            dist/
+            sbom.json
+          retention-days: 30
+
+      - name: Generate SLSA3 Provenance
+        id: provenance
+        uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
+        with:
+          base64-subjects: ${{ steps.upload.outputs.artifact-digest }}
+          attestation-name: provenance-${{ github.sha }}
+
+      - name: Create provenance bundle
+        run: |
+          cat > provenance-bundle.json << 'BUNDLE'
+          {
+            "version": "1.0.0",
+            "mediaType": "application/vnd.in-toto+json",
+            "subjects": [
+              {
+                "name": "build-artifacts-${{ github.sha }}",
+                "digest": {
+                  "sha256": "${{ steps.upload.outputs.artifact-digest }}"
+                }
+              }
+            ],
+            "provenance": ${{ steps.provenance.outputs.provenance-predicate }},
+            "attestations": [
+              {
+                "predicateType": "https://cyclonedx.org/bom",
+                "predicate": $(cat sbom.json)
+              }
+            ],
+            "metadata": {
+              "buildId": "${{ github.run_id }}",
+              "buildNumber": "${{ github.run_number }}",
+              "commit": "${{ github.sha }}",
+              "ref": "${{ github.ref }}",
+              "actor": "${{ github.actor }}",
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            }
+          }
+          BUNDLE
+
+      - name: Upload provenance bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: provenance-bundle-${{ github.sha }}
+          path: provenance-bundle.json
+          retention-days: 90
+
+  # Mandatory verification of provenance before deployment
+  verify-provenance:
+    name: Verify Provenance
+    runs-on: ubuntu-latest
+    needs: provenance
+    if: ${{ !inputs.skip_verification }}
+    permissions:
+      contents: read
+      attestations: read
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install verify-bundle CLI
+        run: |
+          cd tools/verify-bundle
+          npm install
+          npm run build
+          npm link
+
+      - name: Download provenance bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: provenance-bundle-${{ github.sha }}
+          path: .
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: artifacts/
+
+      - name: Verify provenance bundle
+        run: |
+          echo "🔍 Verifying provenance bundle with SLSA level ${{ env.SLSA_LEVEL }}..."
+          
+          verify-bundle verify \
+            --bundle provenance-bundle.json \
+            --policy ${{ env.VERIFICATION_POLICY }} \
+            --min-score 80 \
+            --format table \
+            --verbose
+
+      - name: Verify round-trip proof
+        run: |
+          echo "🔄 Performing round-trip proof verification..."
+          
+          # Calculate actual artifact digest
+          ACTUAL_DIGEST=$(find artifacts/ -type f -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1)
+          
+          # Extract expected digest from provenance
+          EXPECTED_DIGEST=$(jq -r '.subjects[0].digest.sha256' provenance-bundle.json)
+          
+          echo "Expected digest: $EXPECTED_DIGEST"
+          echo "Actual digest: $ACTUAL_DIGEST"
+          
+          if [ "$ACTUAL_DIGEST" = "$EXPECTED_DIGEST" ]; then
+            echo "✅ Round-trip proof verification passed"
+          else
+            echo "❌ Round-trip proof verification failed"
+            exit 1
+          fi
+
+      - name: Verify SLSA level compliance
+        run: |
+          SLSA_LEVEL=$(jq -r '.provenance.predicate.metadata.slsaLevel // 0' provenance-bundle.json)
+          MIN_LEVEL=${{ inputs.min_slsa_level || env.SLSA_LEVEL }}
+          
+          echo "Artifact SLSA level: $SLSA_LEVEL"
+          echo "Required minimum level: $MIN_LEVEL"
+          
+          if [ "$SLSA_LEVEL" -ge "$MIN_LEVEL" ]; then
+            echo "✅ SLSA level compliance verified"
+          else
+            echo "❌ SLSA level $SLSA_LEVEL below required minimum $MIN_LEVEL"
+            exit 1
+          fi
+
+      - name: Generate verification report
+        if: always()
+        run: |
+          verify-bundle verify \
+            --bundle provenance-bundle.json \
+            --policy ${{ env.VERIFICATION_POLICY }} \
+            --format json \
+            --output verification-report.json
+
+          # Extract key metrics
+          SCORE=$(jq -r '.score' verification-report.json)
+          ERRORS=$(jq -r '.errors | length' verification-report.json)
+          WARNINGS=$(jq -r '.warnings | length' verification-report.json)
+          
+          echo "verification_score=$SCORE" >> $GITHUB_OUTPUT
+          echo "error_count=$ERRORS" >> $GITHUB_OUTPUT
+          echo "warning_count=$WARNINGS" >> $GITHUB_OUTPUT
+
+      - name: Upload verification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-report-${{ github.sha }}
+          path: verification-report.json
+          retention-days: 90
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('verification-report.json', 'utf8'));
+            
+            const status = report.valid ? '✅ PASSED' : '❌ FAILED';
+            const score = report.score;
+            const errors = report.errors.length;
+            const warnings = report.warnings.length;
+            
+            const comment = `## 🔐 Provenance Verification Report
+            
+            **Status:** ${status}
+            **Score:** ${score}/100
+            **Errors:** ${errors}
+            **Warnings:** ${warnings}
+            
+            ${errors > 0 ? '### Errors\n' + report.errors.map(e => `- ${e}`).join('\n') : ''}
+            ${warnings > 0 ? '### Warnings\n' + report.warnings.map(w => `- ${w}`).join('\n') : ''}
+            
+            <details>
+            <summary>View detailed report</summary>
+            
+            \`\`\`json
+            ${JSON.stringify(report, null, 2)}
+            \`\`\`
+            </details>`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # Deployment gate - only proceed if verification passes
+  deployment-gate:
+    name: Deployment Gate
+    runs-on: ubuntu-latest
+    needs: [provenance, verify-provenance]
+    if: always()
+    outputs:
+      deploy-approved: ${{ steps.gate.outputs.approved }}
+    
+    steps:
+      - name: Evaluate deployment gate
+        id: gate
+        run: |
+          if [ "${{ needs.verify-provenance.result }}" = "success" ] || [ "${{ inputs.skip_verification }}" = "true" ]; then
+            echo "✅ Deployment gate passed"
+            echo "approved=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Deployment gate failed - provenance verification required"
+            echo "approved=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Emergency bypass warning
+        if: inputs.skip_verification == true
+        run: |
+          echo "⚠️ WARNING: Provenance verification bypassed"
+          echo "This should only be used in emergency situations"
+          echo "Ensure proper security review before deployment"
+
+  # Security scan integration
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: provenance
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: artifacts/
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'artifacts/'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Check for critical vulnerabilities
+        run: |
+          CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.level == "error")] | length' trivy-results.sarif)
+          HIGH_COUNT=$(jq '[.runs[].results[] | select(.level == "warning")] | length' trivy-results.sarif)
+          
+          echo "Critical vulnerabilities: $CRITICAL_COUNT"
+          echo "High vulnerabilities: $HIGH_COUNT"
+          
+          if [ "$CRITICAL_COUNT" -gt 0 ]; then
+            echo "❌ Critical vulnerabilities found - blocking deployment"
+            exit 1
+          fi
+          
+          if [ "$HIGH_COUNT" -gt 5 ]; then
+            echo "⚠️ High number of high-severity vulnerabilities ($HIGH_COUNT)"
+          fi
+
+  # Final status check
+  provenance-status:
+    name: Provenance Status
+    runs-on: ubuntu-latest
+    needs: [provenance, verify-provenance, deployment-gate, security-scan]
+    if: always()
+    
+    steps:
+      - name: Report final status
+        run: |
+          echo "## 📊 Provenance Enforcement Summary"
+          echo ""
+          echo "| Stage | Status |"
+          echo "|-------|--------|"
+          echo "| Provenance Generation | ${{ needs.provenance.result == 'success' && '✅' || '❌' }} |"
+          echo "| Verification | ${{ needs.verify-provenance.result == 'success' && '✅' || '❌' }} |"
+          echo "| Deployment Gate | ${{ needs.deployment-gate.result == 'success' && '✅' || '❌' }} |"
+          echo "| Security Scan | ${{ needs.security-scan.result == 'success' && '✅' || '❌' }} |"
+          echo ""
+          
+          if [ "${{ needs.deployment-gate.outputs.deploy-approved }}" = "true" ]; then
+            echo "🚀 **DEPLOYMENT APPROVED** - All provenance checks passed"
+            exit 0
+          else
+            echo "🛑 **DEPLOYMENT BLOCKED** - Provenance verification failed"
+            exit 1
+          fi

@@ -1,0 +1,83 @@
+name: Client CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'client/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'client/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'client/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: client
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high || true # Allow audit to fail without failing CI
+        working-directory: client
+
+      - name: Run lint
+        run: npm run lint
+        working-directory: client
+
+      - name: Run Jest tests
+        run: npm run test:jest
+        working-directory: client
+
+      - name: Run Vitest tests
+        run: npm run test:vitest
+        working-directory: client
+
+      - name: Build client
+        run: npm run build
+        working-directory: client
+
+      - name: Generate Persisted Queries Manifest
+        run: npm run persist:queries
+        working-directory: client
+
+      - name: Upload Persisted Queries Manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: persisted-queries-manifest
+          path: client/persisted-operations.json
+
+      - name: Run CodeQL Analysis (Placeholder)
+        run: echo "CodeQL analysis would run here"
+
+      - name: Generate SBOM (Placeholder)
+        run: echo "SBOM generation would run here"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-coverage-report
+          path: client/coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./client/coverage/lcov.info # Path to LCOV coverage report
+          flags: client # Optional: add flags to distinguish reports
+          name: client-coverage # Optional: a name for the upload

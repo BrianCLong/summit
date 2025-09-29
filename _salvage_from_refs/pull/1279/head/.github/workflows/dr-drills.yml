@@ -1,0 +1,465 @@
+name: Disaster Recovery Drills
+
+on:
+  schedule:
+    # Weekly DR drills every Sunday at 02:00 UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Drill scenario to execute'
+        required: true
+        type: choice
+        options:
+          - 'db-failover'
+          - 'service-failover'
+          - 'network-partition'
+          - 'backup-restore'
+          - 'security-incident'
+          - 'data-corruption'
+        default: 'service-failover'
+      dry_run:
+        description: 'Perform dry run (recommended for production)'
+        required: false
+        type: boolean
+        default: true
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - 'staging'
+          - 'production'
+        default: 'staging'
+
+env:
+  DR_DRILL_VERSION: 'v1.0.0'
+  NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_DR_WEBHOOK }}
+
+jobs:
+  # Pre-drill checks and setup
+  pre-drill-checks:
+    name: Pre-Drill Checks
+    runs-on: ubuntu-latest
+    outputs:
+      drill-approved: ${{ steps.approval.outputs.approved }}
+      scenario: ${{ steps.config.outputs.scenario }}
+      dry-run: ${{ steps.config.outputs.dry_run }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install DR tools
+        run: |
+          cd tools/dr-drill
+          npm install
+          npm run build
+          npm link
+
+      - name: Configure drill parameters
+        id: config
+        run: |
+          # Set scenario based on input or schedule
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SCENARIO="${{ inputs.scenario }}"
+            DRY_RUN="${{ inputs.dry_run }}"
+            ENVIRONMENT="${{ inputs.environment }}"
+          else
+            # Scheduled run - rotate through scenarios
+            WEEK_NUMBER=$(date +%U)
+            SCENARIOS=("db-failover" "service-failover" "network-partition" "backup-restore")
+            SCENARIO_INDEX=$((WEEK_NUMBER % ${#SCENARIOS[@]}))
+            SCENARIO="${SCENARIOS[$SCENARIO_INDEX]}"
+            DRY_RUN="true"
+            ENVIRONMENT="staging"
+          fi
+          
+          echo "scenario=$SCENARIO" >> $GITHUB_OUTPUT
+          echo "dry_run=$DRY_RUN" >> $GITHUB_OUTPUT
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+          
+          echo "📋 Drill Configuration:"
+          echo "  Scenario: $SCENARIO"
+          echo "  Dry Run: $DRY_RUN"
+          echo "  Environment: $ENVIRONMENT"
+
+      - name: Verify system health
+        run: |
+          echo "🏥 Checking system health before drill..."
+          
+          # Check service health
+          dr-drill scenarios --format json > scenarios.json
+          
+          # Verify scenario exists
+          if ! jq -e --arg scenario "${{ steps.config.outputs.scenario }}" '.[] | select(.id == $scenario)' scenarios.json > /dev/null; then
+            echo "❌ Scenario not found: ${{ steps.config.outputs.scenario }}"
+            exit 1
+          fi
+          
+          echo "✅ Pre-drill checks passed"
+
+      - name: Check change freeze status
+        run: |
+          echo "🧊 Checking change freeze status..."
+          
+          # Check if change freeze is active
+          if dr-drill freeze status 2>/dev/null | grep -q "Active Change Freeze"; then
+            echo "⚠️ Change freeze is active - drill will be limited"
+          else
+            echo "✅ No active change freeze"
+          fi
+
+      - name: Drill approval gate
+        id: approval
+        run: |
+          # For production drills, require additional approval
+          if [ "${{ steps.config.outputs.environment }}" = "production" ] && [ "${{ steps.config.outputs.dry_run }}" != "true" ]; then
+            echo "🛑 Production live drill requires manual approval"
+            echo "approved=false" >> $GITHUB_OUTPUT
+            
+            # In a real implementation, this would wait for approval
+            # For now, we'll reject production live drills
+            exit 1
+          else
+            echo "approved=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send drill notification
+        if: env.NOTIFICATION_WEBHOOK
+        run: |
+          curl -X POST "${{ env.NOTIFICATION_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "🚨 DR Drill Starting",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Disaster Recovery Drill Starting*\n• Scenario: `${{ steps.config.outputs.scenario }}`\n• Environment: `${{ steps.config.outputs.environment }}`\n• Mode: `${{ steps.config.outputs.dry_run == 'true' && 'Dry Run' || 'Live' }}`\n• Triggered by: ${{ github.actor }}"
+                  }
+                }
+              ]
+            }'
+
+  # Execute the DR drill
+  execute-drill:
+    name: Execute DR Drill
+    runs-on: ubuntu-latest
+    needs: pre-drill-checks
+    if: needs.pre-drill-checks.outputs.drill-approved == 'true'
+    environment: ${{ inputs.environment || 'staging' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install DR tools
+        run: |
+          cd tools/dr-drill
+          npm install
+          npm run build
+          npm link
+
+      - name: Setup infrastructure access
+        run: |
+          # Configure kubectl access
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          
+          # Configure cloud provider credentials
+          echo "${{ secrets.CLOUD_CREDENTIALS }}" | base64 -d > ~/.cloud/credentials
+
+      - name: Execute drill scenario
+        id: drill
+        run: |
+          echo "🎯 Executing drill scenario: ${{ needs.pre-drill-checks.outputs.scenario }}"
+          
+          # Execute the drill
+          EXECUTION_ID=$(dr-drill execute \
+            --scenario "${{ needs.pre-drill-checks.outputs.scenario }}" \
+            ${{ needs.pre-drill-checks.outputs.dry-run == 'true' && '--dry-run' || '' }} \
+            --yes \
+            --report "drill-report-$(date +%Y%m%d-%H%M%S).json")
+          
+          echo "execution_id=$EXECUTION_ID" >> $GITHUB_OUTPUT
+          echo "✅ Drill execution completed: $EXECUTION_ID"
+
+      - name: Generate drill report
+        if: always()
+        run: |
+          echo "📄 Generating comprehensive drill report..."
+          
+          # Get execution details
+          if [ -n "${{ steps.drill.outputs.execution_id }}" ]; then
+            dr-drill show --execution "${{ steps.drill.outputs.execution_id }}" --format json > execution-details.json
+          fi
+          
+          # Generate runbook
+          dr-drill runbook --output dr-runbook-$(date +%Y%m%d).md
+          
+          # Create summary report
+          cat > drill-summary.md << 'REPORT'
+          # DR Drill Execution Report
+          
+          **Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          **Scenario:** ${{ needs.pre-drill-checks.outputs.scenario }}
+          **Environment:** ${{ inputs.environment || 'staging' }}
+          **Mode:** ${{ needs.pre-drill-checks.outputs.dry-run == 'true' && 'Dry Run' || 'Live Execution' }}
+          **Execution ID:** ${{ steps.drill.outputs.execution_id }}
+          **Triggered by:** ${{ github.actor }}
+          **Workflow:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          ## Summary
+          
+          REPORT
+          
+          # Add execution details if available
+          if [ -f "execution-details.json" ]; then
+            echo "$(jq -r '.report.summary | "**Status:** \(.status)\n**Duration:** \(.duration) minutes\n**Success Rate:** \(.successRate)%"' execution-details.json)" >> drill-summary.md
+          fi
+
+      - name: Upload drill artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: drill-reports-${{ github.run_id }}
+          path: |
+            drill-report-*.json
+            execution-details.json
+            dr-runbook-*.md
+            drill-summary.md
+          retention-days: 90
+
+      - name: Post drill results
+        if: always() && env.NOTIFICATION_WEBHOOK
+        run: |
+          # Determine status color
+          if [ "${{ job.status }}" = "success" ]; then
+            COLOR="good"
+            EMOJI="✅"
+            STATUS="Completed Successfully"
+          else
+            COLOR="danger"
+            EMOJI="❌"
+            STATUS="Failed"
+          fi
+          
+          # Extract key metrics if available
+          if [ -f "execution-details.json" ]; then
+            DURATION=$(jq -r '.report.summary.duration // "Unknown"' execution-details.json)
+            SUCCESS_RATE=$(jq -r '.report.summary.successRate // "Unknown"' execution-details.json)
+            METRICS_TEXT="• Duration: ${DURATION} minutes\n• Success Rate: ${SUCCESS_RATE}%"
+          else
+            METRICS_TEXT="• Metrics not available"
+          fi
+          
+          curl -X POST "${{ env.NOTIFICATION_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"attachments\": [
+                {
+                  \"color\": \"$COLOR\",
+                  \"blocks\": [
+                    {
+                      \"type\": \"section\",
+                      \"text\": {
+                        \"type\": \"mrkdwn\",
+                        \"text\": \"$EMOJI *DR Drill $STATUS*\n• Scenario: \`${{ needs.pre-drill-checks.outputs.scenario }}\`\n• Environment: \`${{ inputs.environment || 'staging' }}\`\n$METRICS_TEXT\n• <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>\"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }"
+
+  # Post-drill analysis and cleanup
+  post-drill-analysis:
+    name: Post-Drill Analysis
+    runs-on: ubuntu-latest
+    needs: [pre-drill-checks, execute-drill]
+    if: always() && needs.pre-drill-checks.outputs.drill-approved == 'true'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download drill artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: drill-reports-${{ github.run_id }}
+          path: drill-reports/
+
+      - name: Analyze drill results
+        run: |
+          echo "🔍 Analyzing drill results..."
+          
+          # Check if execution was successful
+          if [ -f "drill-reports/execution-details.json" ]; then
+            STATUS=$(jq -r '.status' drill-reports/execution-details.json)
+            FAILED_STEPS=$(jq -r '.metrics.failedSteps' drill-reports/execution-details.json)
+            
+            echo "Drill Status: $STATUS"
+            echo "Failed Steps: $FAILED_STEPS"
+            
+            # Create GitHub issue for failed drills
+            if [ "$STATUS" = "failed" ] || [ "$FAILED_STEPS" -gt 0 ]; then
+              echo "⚠️ Drill had failures - creating tracking issue"
+              
+              # Create issue (would use GitHub CLI in real implementation)
+              echo "Would create GitHub issue for drill failures"
+            fi
+          fi
+
+      - name: Update drill metrics
+        run: |
+          echo "📊 Updating drill metrics dashboard..."
+          
+          # In a real implementation, this would update metrics in monitoring system
+          # For now, we'll create a metrics file
+          cat > drill-metrics.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "scenario": "${{ needs.pre-drill-checks.outputs.scenario }}",
+            "environment": "${{ inputs.environment || 'staging' }}",
+            "dry_run": ${{ needs.pre-drill-checks.outputs.dry-run }},
+            "status": "${{ needs.execute-drill.result }}",
+            "workflow_run_id": "${{ github.run_id }}"
+          }
+          EOF
+
+      - name: Cleanup and system restore
+        if: needs.pre-drill-checks.outputs.dry-run != 'true'
+        run: |
+          echo "🧹 Performing post-drill cleanup..."
+          
+          # Ensure all systems are restored to normal operation
+          # This would include:
+          # - Verifying all services are healthy
+          # - Confirming data integrity
+          # - Removing any test data or configurations
+          # - Resetting monitoring alerts
+          
+          echo "✅ Post-drill cleanup completed"
+
+      - name: Generate lessons learned
+        run: |
+          echo "📝 Generating lessons learned document..."
+          
+          cat > lessons-learned-$(date +%Y%m%d).md << 'LESSONS'
+          # Lessons Learned - DR Drill $(date +%Y-%m-%d)
+          
+          ## Drill Details
+          - **Scenario:** ${{ needs.pre-drill-checks.outputs.scenario }}
+          - **Environment:** ${{ inputs.environment || 'staging' }}
+          - **Mode:** ${{ needs.pre-drill-checks.outputs.dry-run == 'true' && 'Dry Run' || 'Live' }}
+          - **Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          
+          ## What Went Well
+          - [ ] Add positive outcomes
+          
+          ## Areas for Improvement
+          - [ ] Add improvement areas
+          
+          ## Action Items
+          - [ ] Add specific action items with owners and due dates
+          
+          ## Next Steps
+          - [ ] Schedule follow-up drill
+          - [ ] Update runbooks based on findings
+          - [ ] Implement identified improvements
+          LESSONS
+
+      - name: Store drill history
+        run: |
+          echo "💾 Storing drill execution in history..."
+          
+          # In a real implementation, this would store in a database
+          # For now, we'll create a history entry
+          mkdir -p drill-history
+          cat > drill-history/$(date +%Y%m%d-%H%M%S)-${{ needs.pre-drill-checks.outputs.scenario }}.json << EOF
+          {
+            "date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "scenario": "${{ needs.pre-drill-checks.outputs.scenario }}",
+            "environment": "${{ inputs.environment || 'staging' }}",
+            "dry_run": ${{ needs.pre-drill-checks.outputs.dry-run }},
+            "status": "${{ needs.execute-drill.result }}",
+            "triggered_by": "${{ github.actor }}",
+            "workflow_run": "${{ github.run_id }}",
+            "artifacts": "drill-reports-${{ github.run_id }}"
+          }
+          EOF
+
+  # Emergency rollback capability
+  emergency-rollback:
+    name: Emergency Rollback
+    runs-on: ubuntu-latest
+    if: failure() && needs.pre-drill-checks.outputs.dry-run != 'true'
+    needs: [pre-drill-checks, execute-drill]
+    environment: ${{ inputs.environment || 'staging' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup emergency tools
+        run: |
+          cd tools/dr-drill
+          npm install
+          npm run build
+          npm link
+
+      - name: Execute emergency rollback
+        run: |
+          echo "🚨 Executing emergency rollback procedures..."
+          
+          # Get the scenario to determine rollback steps
+          SCENARIO="${{ needs.pre-drill-checks.outputs.scenario }}"
+          
+          # Execute rollback
+          dr-drill execute \
+            --scenario "${SCENARIO}-rollback" \
+            --yes \
+            --report "emergency-rollback-$(date +%Y%m%d-%H%M%S).json"
+
+      - name: Verify system state
+        run: |
+          echo "🔍 Verifying system state after rollback..."
+          
+          # Comprehensive health checks
+          ./scripts/comprehensive-health-check.sh
+
+      - name: Emergency notification
+        if: env.NOTIFICATION_WEBHOOK
+        run: |
+          curl -X POST "${{ env.NOTIFICATION_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "🚨 EMERGENCY: DR Drill Required Rollback",
+              "attachments": [
+                {
+                  "color": "danger",
+                  "blocks": [
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "*EMERGENCY ROLLBACK EXECUTED*\n• Scenario: `${{ needs.pre-drill-checks.outputs.scenario }}`\n• Environment: `${{ inputs.environment || 'staging' }}`\n• Immediate attention required\n• <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }'

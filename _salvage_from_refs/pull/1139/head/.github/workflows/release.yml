@@ -1,0 +1,71 @@
+name: release
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+concurrency: { group: release-${{ github.ref }}, cancel-in-progress: false }
+jobs:
+  cut_release:
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: google-github-actions/release-please-action@v4
+        with:
+          release-type: node
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: server/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/intelgraph-server:${{ github.ref_name }}
+      - name: Generate SBOM (syft)
+        uses: anchore/syft-action@v0.21.0
+        with: { image: ghcr.io/${{ github.repository_owner }}/intelgraph-server:${{ github.ref_name }}, output-file: sbom.syft.json, format: spdx-json }
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.6.0
+      - name: Cosign sign image (keyless OIDC)
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          cosign sign --yes ghcr.io/${{ github.repository_owner }}/intelgraph-server@${{ steps.build.outputs.digest }}
+      - name: Cosign attest SBOM
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          cosign attest --yes \
+            --predicate sbom.syft.json \
+            --type spdx \
+            ghcr.io/${{ github.repository_owner }}/intelgraph-server@${{ steps.build.outputs.digest }}
+  stage_canary:
+    needs: cut_release
+    runs-on: ubuntu-latest
+    environment: stage
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy canary (50%)
+        env: { KUBECONFIG: ${{ secrets.STAGE_KUBECONFIG }} }
+        run: |
+          helm upgrade --install ig charts/intelgraph \
+            -f charts/intelgraph/values.prod.yaml \
+            --set image.tag=${{ github.ref_name }} \
+            --set-string image.digest=${{ needs.cut_release.outputs.digest }} \
+            --set featureFlags.v24.coherence=true
+      - name: Hold for SLO gate
+        uses: ./.github/workflows/verify-release.yml
+  promote_prod:
+    needs: stage_canary
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: Promote 100%
+        env: { KUBECONFIG: ${{ secrets.PROD_KUBECONFIG }} }
+        run: |
+          argo rollouts promote app -n prod

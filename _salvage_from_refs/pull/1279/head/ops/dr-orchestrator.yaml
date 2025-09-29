@@ -1,0 +1,506 @@
+# IntelGraph DR Orchestrator Configuration
+# Sprint 26: Disaster Recovery automation for GA cutover
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dr-orchestrator-config
+  namespace: intelgraph
+  labels:
+    app: intelgraph
+    component: dr-orchestrator
+    version: v1.0.0-ga
+data:
+  orchestrator.yaml: |
+    # DR Orchestrator Configuration
+    version: "1.0"
+    name: "intelgraph-dr-orchestrator"
+
+    # Global settings
+    settings:
+      default_timeout: "30m"
+      max_concurrent_drills: 3
+      notification_delay: "5m"
+      auto_rollback_enabled: true
+      dry_run_by_default: false
+
+    # Drill definitions
+    drill_types:
+      - name: "failover"
+        description: "Database failover from primary to replica"
+        timeout: "15m"
+        requirements:
+          - "replica_lag_ms <= 100"
+          - "replica_available == true"
+        steps:
+          - name: "pre_check"
+            action: "verify_replica_health"
+            timeout: "2m"
+          - name: "initiate_failover"
+            action: "promote_replica"
+            timeout: "5m"
+          - name: "verify_failover"
+            action: "check_new_primary"
+            timeout: "3m"
+          - name: "update_dns"
+            action: "update_service_endpoints"
+            timeout: "2m"
+          - name: "post_check"
+            action: "verify_application_health"
+            timeout: "3m"
+        success_criteria:
+          rto_seconds: 600    # 10 minutes
+          rpo_seconds: 300    # 5 minutes
+          data_loss_tolerance: 0
+
+      - name: "backup-restore"
+        description: "Restore from backup to verify backup integrity"
+        timeout: "45m"
+        requirements:
+          - "backup_age_hours <= 24"
+          - "backup_integrity == verified"
+        steps:
+          - name: "select_backup"
+            action: "find_latest_backup"
+            timeout: "2m"
+          - name: "create_restore_instance"
+            action: "provision_restore_target"
+            timeout: "10m"
+          - name: "restore_data"
+            action: "restore_from_backup"
+            timeout: "20m"
+          - name: "verify_data"
+            action: "validate_restored_data"
+            timeout: "10m"
+          - name: "cleanup"
+            action: "cleanup_restore_instance"
+            timeout: "3m"
+        success_criteria:
+          rto_seconds: 2700   # 45 minutes
+          rpo_seconds: 86400  # 24 hours (backup interval)
+          data_integrity_check: true
+
+      - name: "network-partition"
+        description: "Simulate network partition and test resilience"
+        timeout: "20m"
+        requirements:
+          - "cluster_nodes >= 3"
+          - "partition_tolerance_enabled == true"
+        steps:
+          - name: "baseline_check"
+            action: "record_baseline_metrics"
+            timeout: "2m"
+          - name: "create_partition"
+            action: "isolate_network_segment"
+            timeout: "1m"
+          - name: "monitor_behavior"
+            action: "observe_system_behavior"
+            timeout: "10m"
+          - name: "heal_partition"
+            action: "restore_network_connectivity"
+            timeout: "1m"
+          - name: "verify_recovery"
+            action: "validate_cluster_health"
+            timeout: "5m"
+          - name: "cleanup"
+            action: "reset_network_configuration"
+            timeout: "1m"
+        success_criteria:
+          availability_during_partition: 0.99
+          recovery_time_seconds: 300
+          data_consistency: true
+
+      - name: "chaos"
+        description: "Random chaos engineering test"
+        timeout: "30m"
+        requirements:
+          - "environment != production"
+          - "chaos_monkey_enabled == true"
+        steps:
+          - name: "select_target"
+            action: "choose_random_component"
+            timeout: "1m"
+          - name: "inject_failure"
+            action: "cause_random_failure"
+            timeout: "1m"
+          - name: "monitor_impact"
+            action: "observe_system_response"
+            timeout: "15m"
+          - name: "auto_recovery"
+            action: "wait_for_self_healing"
+            timeout: "10m"
+          - name: "manual_intervention"
+            action: "apply_manual_fixes"
+            timeout: "3m"
+            condition: "auto_recovery_failed"
+        success_criteria:
+          self_healing_rate: 0.8
+          mttr_seconds: 600
+          blast_radius_limited: true
+
+    # Target configurations
+    targets:
+      neo4j:
+        primary:
+          endpoint: "neo4j-primary.intelgraph.svc.cluster.local:7687"
+          health_check: "/health"
+        replicas:
+          - name: "neo4j-replica-1"
+            endpoint: "neo4j-replica-1.intelgraph.svc.cluster.local:7687"
+            priority: 1
+          - name: "neo4j-replica-2"
+            endpoint: "neo4j-replica-2.intelgraph.svc.cluster.local:7687"
+            priority: 2
+        backup:
+          location: "s3://intelgraph-backups/neo4j/"
+          retention_days: 30
+          encryption: true
+
+      postgres:
+        primary:
+          endpoint: "postgres-primary.intelgraph.svc.cluster.local:5432"
+          health_check: "SELECT 1"
+        replicas:
+          - name: "postgres-replica-1"
+            endpoint: "postgres-replica-1.intelgraph.svc.cluster.local:5432"
+            priority: 1
+        backup:
+          location: "s3://intelgraph-backups/postgres/"
+          retention_days: 30
+          encryption: true
+
+      redis:
+        primary:
+          endpoint: "redis-primary.intelgraph.svc.cluster.local:6379"
+          health_check: "PING"
+        replicas:
+          - name: "redis-replica-1"
+            endpoint: "redis-replica-1.intelgraph.svc.cluster.local:6379"
+            priority: 1
+        backup:
+          location: "s3://intelgraph-backups/redis/"
+          retention_days: 7
+          encryption: true
+
+    # Monitoring and alerting
+    monitoring:
+      metrics:
+        - name: "drill_success_rate"
+          query: "sum(rate(dr_drill_success_total[24h])) / sum(rate(dr_drill_total[24h]))"
+          threshold: 0.95
+
+        - name: "rto_compliance"
+          query: "histogram_quantile(0.95, dr_drill_rto_seconds)"
+          threshold: 600  # 10 minutes
+
+        - name: "rpo_compliance"
+          query: "histogram_quantile(0.95, dr_drill_rpo_seconds)"
+          threshold: 300  # 5 minutes
+
+      alerts:
+        - name: "DrillFailureRate"
+          condition: "drill_success_rate < 0.90"
+          severity: "warning"
+          description: "DR drill success rate below threshold"
+
+        - name: "RTOExceeded"
+          condition: "rto_compliance > 900"
+          severity: "critical"
+          description: "Recovery Time Objective exceeded"
+
+        - name: "RPOExceeded"
+          condition: "rpo_compliance > 600"
+          severity: "critical"
+          description: "Recovery Point Objective exceeded"
+
+    # Notification settings
+    notifications:
+      channels:
+        - type: "slack"
+          webhook_url: "${SLACK_SRE_WEBHOOK}"
+          events: ["drill_started", "drill_completed", "drill_failed"]
+
+        - type: "pagerduty"
+          service_key: "${PAGERDUTY_SRE_KEY}"
+          events: ["drill_failed", "rto_exceeded", "rpo_exceeded"]
+
+        - type: "email"
+          recipients: ["sre@intelgraph.dev", "oncall@intelgraph.dev"]
+          events: ["drill_failed"]
+
+      templates:
+        drill_started: |
+          🔧 DR Drill Started
+          Type: {{ .drill_type }}
+          Target: {{ .target }}
+          Expected Duration: {{ .timeout }}
+          Initiated by: {{ .initiated_by }}
+
+        drill_completed: |
+          ✅ DR Drill Completed Successfully
+          Type: {{ .drill_type }}
+          Target: {{ .target }}
+          Duration: {{ .actual_duration }}
+          RTO: {{ .rto }}
+          RPO: {{ .rpo }}
+          Results: {{ .results_url }}
+
+        drill_failed: |
+          ❌ DR Drill Failed
+          Type: {{ .drill_type }}
+          Target: {{ .target }}
+          Error: {{ .error_message }}
+          Duration: {{ .actual_duration }}
+          Logs: {{ .logs_url }}
+
+  freeze-windows.yaml: |
+    # Change Freeze Windows Configuration
+    freeze_windows:
+      # Scheduled maintenance windows
+      scheduled:
+        - name: "monthly_maintenance"
+          description: "Monthly maintenance window"
+          schedule: "0 2 1 * *"  # First day of month at 2 AM UTC
+          duration: "4h"
+          auto_freeze: true
+
+        - name: "security_patching"
+          description: "Security patching window"
+          schedule: "0 3 * * 2"  # Every Tuesday at 3 AM UTC
+          duration: "2h"
+          auto_freeze: true
+
+      # Emergency procedures
+      emergency:
+        allowed_bypass_roles:
+          - "sre-lead"
+          - "engineering-manager"
+          - "security-team"
+
+        approval_requirements:
+          - min_approvers: 2
+          - max_duration: "4h"
+          - incident_ticket_required: true
+
+        escalation:
+          - level: 1
+            delay: "15m"
+            notify: ["sre-oncall"]
+          - level: 2
+            delay: "30m"
+            notify: ["engineering-manager", "sre-lead"]
+          - level: 3
+            delay: "1h"
+            notify: ["cto", "vp-engineering"]
+
+      # Audit settings
+      audit:
+        log_all_actions: true
+        retention_days: 365
+        immutable_logs: true
+        external_siem: true
+
+    # Change approval workflows
+    approval_workflows:
+      production:
+        freeze_required: true
+        approvers_required: 2
+        approval_timeout: "24h"
+        emergency_override: true
+
+      staging:
+        freeze_required: false
+        approvers_required: 1
+        approval_timeout: "4h"
+        emergency_override: true
+
+      development:
+        freeze_required: false
+        approvers_required: 0
+        approval_timeout: "1h"
+        emergency_override: true
+
+  drill-schedules.yaml: |
+    # DR Drill Schedules
+    schedules:
+      # Regular drill schedules
+      automated:
+        - name: "weekly_failover"
+          drill_type: "failover"
+          target: "neo4j"
+          schedule: "0 6 * * 1"  # Monday 6 AM UTC
+          enabled: true
+
+        - name: "monthly_backup_restore"
+          drill_type: "backup-restore"
+          target: "postgres"
+          schedule: "0 4 1 * *"  # First day of month 4 AM UTC
+          enabled: true
+
+        - name: "quarterly_chaos"
+          drill_type: "chaos"
+          target: "random"
+          schedule: "0 10 1 */3 *"  # First day of quarter 10 AM UTC
+          enabled: true
+          environment_filter: "staging"
+
+      # Ad-hoc drill templates
+      templates:
+        - name: "pre_release_validation"
+          description: "Pre-release DR validation"
+          drills:
+            - type: "failover"
+              target: "neo4j"
+            - type: "backup-restore"
+              target: "postgres"
+            - type: "network-partition"
+              target: "cluster"
+
+        - name: "incident_response_drill"
+          description: "Full incident response simulation"
+          drills:
+            - type: "chaos"
+              target: "random"
+            - type: "failover"
+              target: "primary"
+
+      # Compliance requirements
+      compliance:
+        soc2:
+          frequency: "quarterly"
+          required_drills: ["backup-restore", "failover"]
+          documentation_required: true
+
+        iso27001:
+          frequency: "semi-annually"
+          required_drills: ["backup-restore", "network-partition"]
+          external_audit: true
+
+        hipaa:
+          frequency: "annually"
+          required_drills: ["backup-restore", "chaos"]
+          privacy_impact_assessment: true
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dr-orchestrator
+  namespace: intelgraph
+  labels:
+    app: dr-orchestrator
+    component: operations
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dr-orchestrator
+  template:
+    metadata:
+      labels:
+        app: dr-orchestrator
+    spec:
+      serviceAccountName: dr-orchestrator
+      containers:
+      - name: orchestrator
+        image: intelgraph/dr-orchestrator:v1.0.0-ga
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: CONFIG_PATH
+          value: "/etc/config/orchestrator.yaml"
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: config
+          mountPath: /etc/config
+          readOnly: true
+        - name: drill-logs
+          mountPath: /var/log/drills
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: config
+        configMap:
+          name: dr-orchestrator-config
+      - name: drill-logs
+        persistentVolumeClaim:
+          claimName: drill-logs-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dr-orchestrator
+  namespace: intelgraph
+  labels:
+    app: dr-orchestrator
+spec:
+  selector:
+    app: dr-orchestrator
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dr-orchestrator
+  namespace: intelgraph
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: dr-orchestrator
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints", "configmaps"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["networkpolicies"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: dr-orchestrator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: dr-orchestrator
+subjects:
+- kind: ServiceAccount
+  name: dr-orchestrator
+  namespace: intelgraph

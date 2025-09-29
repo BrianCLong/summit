@@ -1,0 +1,44 @@
+{
+  "name": "summit-server",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc -p .",
+    "test": "jest --runInBand",
+    "openapi": "openapi-generator-cli version-manager set 7.9.0",
+    "generate:sdk:ts": "rimraf sdks/typescript && openapi-generator-cli generate -i docs/openapi/intelgraph.v1.yaml -g typescript-fetch -o sdks/typescript --additional-properties=supportsES6=true,npmName=@intelgraph/sdk,npmVersion=0.0.1,typescriptThreePlus=true,withInterfaces=true,modelPropertyNaming=original",
+    "generate:sdk:python": "rimraf sdks/python && openapi-generator-cli generate -i docs/openapi/intelgraph.v1.yaml -g python -o sdks/python --additional-properties=packageName=intelgraph_sdk,projectName=intelgraph-sdk,packageVersion=0.0.1,hideGenerationTimestamp=true",
+    "generate:sdk:java": "rimraf sdks/java && openapi-generator-cli generate -i docs/openapi/intelgraph.v1.yaml -g java -o sdks/java --additional-properties=library=resttemplate,groupId=ai.intelgraph,artifactId=intelgraph-sdk,artifactVersion=0.0.1,dateLibrary=java8"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.ts"],
+    "collectCoverage": true
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "pino": "^9.2.0",
+    "pino-http": "^10.3.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.13.12",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.10",
+    "@types/supertest": "^2.0.16",
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "rimraf": "^5.0.7",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,33 @@
+name: helm-conftest
+on:
+  pull_request:
+    paths:
+      - 'charts/**'
+      - 'policy/helm/**'
+  push:
+    paths:
+      - 'charts/**'
+      - 'policy/helm/**'
+
+jobs:
+  conftest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with: { version: '3.14.0' }
+      - name: Install conftest
+        run: |
+          curl -L https://github.com/open-policy-agent/conftest/releases/download/v0.53.0/conftest_0.53.0_Linux_x86_64.tar.gz \
+            | tar -xz conftest
+          sudo mv conftest /usr/local/bin/
+      - name: Render maestro chart with flags enabled
+        run: |
+          helm template charts/maestro \
+            --set zeroTrust.enabled=true \
+            --set zeroTrust.mesh=istio \
+            --set argoRollouts.enabled=true \
+            --namespace maestro > maestro.rendered.yaml
+      - name: Run conftest on rendered manifests
+        run: conftest test --policy policy/helm maestro.rendered.yaml

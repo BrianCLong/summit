@@ -1,0 +1,80 @@
+# Extends the main schema with types for entitlements, metering, and billing.
+
+# Directive to enforce entitlements on GraphQL fields.
+directive @requiresEntitlement(name: String!, scope: EntitlementScope = TENANT) on FIELD_DEFINITION | OBJECT
+
+enum EntitlementScope {
+  TENANT
+  USER
+}
+
+"""
+Represents a billing plan with associated entitlements.
+"""
+type Plan {
+  id: ID!
+  name: String!
+  "The tier of the plan (e.g., 0 for Free, 1 for Pro, 2 for Enterprise)."
+  tier: Int!
+  "The list of features and their limits included in this plan."
+  entitlements: [Entitlement!]!
+}
+
+"""
+Represents a single feature entitlement within a plan.
+"""
+type Entitlement {
+  "The unique key for the feature (e.g., 'graph.query', 'predict.suggestLinks')."
+  key: String!
+  "The overall limit for the feature (e.g., monthly, daily)."
+  limit: Int
+  "The budget for the feature, typically a floating-point value for differential privacy or cost."
+  budget: Float
+  "Whether the feature is enabled for this plan."
+  enabled: Boolean!
+}
+
+"""
+Represents a tenant's assigned plan and any custom overrides.
+"""
+type TenantPlan {
+  tenantId: ID!
+  planId: ID!
+  "JSON object containing any feature limits that override the default plan limits."
+  overrides: JSON
+}
+
+"""
+Represents a single item of aggregated usage for a feature.
+"""
+type UsageItem {
+  feature: String!
+  total: Int!
+}
+
+"""
+Provides a preview of an invoice, including line items and estimated total.
+"""
+type InvoicePreview {
+  items: [UsageItem!]!
+  estimate: Float!
+  currency: String!
+}
+
+extend type Query {
+  "Fetches the plan details for a specific tenant."
+  tenantPlan(tenantId: ID!): TenantPlan!
+  "Retrieves a summary of usage for a tenant within a specified window (e.g., '30d', '7d', 'month')."
+  usageSummary(tenantId: ID!, window: String!): [UsageItem!]!
+  "Fetches the details of a specific plan."
+  plan(id: ID!): Plan
+  "Fetches the current plan for the authenticated user's tenant."
+  myPlan: Plan!
+}
+
+extend type Mutation {
+  "Sets or updates the plan for a specific tenant, with optional overrides."
+  setTenantPlan(tenantId: ID!, planId: ID!, overrides: JSON): TenantPlan!
+  "Simulates an invoice for a tenant for a given period, showing estimated charges."
+  simulateInvoice(tenantId: ID!, start: DateTime!, end: DateTime!): InvoicePreview!
+}

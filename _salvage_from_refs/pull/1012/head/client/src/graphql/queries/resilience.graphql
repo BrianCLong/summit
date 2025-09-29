@@ -1,0 +1,10 @@
+# Resilience queries
+
+query RegionStatus {
+  regionStatus {
+    region
+    rto
+    rpo
+    lastFailover
+  }
+}

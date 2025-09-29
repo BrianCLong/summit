@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "intelgraph-ml"
+version = "0.2.0"
+description = "IntelGraph AI/ML microservice"
+authors = ["IntelGraph Team <dev@intelgraph.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.0"
+uvicorn = "^0.30.0"
+pydantic = "^2.8.0"
+python-jose = "^3.3.0"
+redis = "^5.0.7"
+celery = "^5.4.0"
+numpy = "^2.0.0"
+scikit-learn = "^1.5.1"
+networkx = "^3.3"
+torch = "^2.3.1"
+torch-geometric = "^2.4.0"
+torch-scatter = "^2.1.2"
+torch-sparse = "^0.6.18"
+torch-cluster = "^1.6.3"
+httpx = "^0.27.0"
+neo4j = "^5.23.0"
+sentence-transformers = "^2.7.0"
+prometheus-client = "^0.20.0"
+psutil = "^5.9.8"
+# Optional — only used if USE_SPACY=true
+spacy = {version="^3.7.5", optional=true}
+# Optional community detection
+python-louvain = {version="^0.16", optional=true}
+
+[tool.poetry.extras]
+spacy = ["spacy"]
+community = ["python-louvain"]
+full = ["spacy", "python-louvain"]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.1"
+pytest-asyncio = "^0.23.8"
+pytest-cov = "^4.1.0"
+pytest-mock = "^3.11.1"
+httpx = "^0.27.0"
+coverage = "^7.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

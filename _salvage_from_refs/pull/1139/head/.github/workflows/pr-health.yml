@@ -1,0 +1,13 @@
+name: PR Health
+on: [pull_request]
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    permissions: { pull-requests: write, contents: read }
+    steps:
+      - uses: actions/checkout@v4
+      - run: node tools/ci/risk_score.ts
+      - run: node tools/ci/tia_select.ts
+      - run: node tools/ci/merge_confidence.ts
+      - run: echo '${{ secrets.MUTATION_LAST_JSON || "{}" }}' > mutation.json || true
+      - run: node tools/ci/pr_health.js

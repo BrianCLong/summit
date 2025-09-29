@@ -1,0 +1,11 @@
+id: "cr-analytics-001"
+tenants: ["tenantA", "tenantB"]
+datasets:
+  - { id: "alerts", residency: ["us-west"] }
+  - { id: "cases", residency: ["us-west"] }
+allowedQueries: ["TopAlertsAggregate", "CaseCountsBySeverity"]
+retentionDays: 30
+piiOff: true
+signedAt: "2025-08-17T23:00:00Z"
+signer: "intelgraph"
+signature: "BASE64SIG"

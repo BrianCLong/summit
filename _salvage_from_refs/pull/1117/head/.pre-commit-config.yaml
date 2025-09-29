@@ -1,0 +1,233 @@
+# Pre-commit hooks for IntelGraph security and quality gates
+# Install: pip install pre-commit && pre-commit install
+
+repos:
+  # Secret detection with multiple engines
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: Detect secrets
+        entry: detect-secrets-hook
+        language: python
+        types: [text]
+        exclude: |
+          (?x)(
+            ^\.secrets\.baseline$|
+            ^tests/.*fixtures.*|
+            ^docs/.*examples.*|
+            \.lock$|
+            \.min\.js$|
+            \.map$
+          )
+        args: [
+            '--baseline',
+            '.secrets.baseline',
+            '--force-use-all-plugins',
+            '--disable-plugin',
+            'Base64HighEntropyString', # Too many false positives
+          ]
+
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.63.2
+    hooks:
+      - id: trufflehog
+        name: TruffleHog secret scan
+        entry: trufflehog
+        language: system
+        types: [text]
+        exclude: |
+          (?x)(
+            ^\.git/|
+            ^node_modules/|
+            ^\.secrets\.baseline$|
+            ^tests/.*fixtures.*|
+            \.lock$|
+            \.min\.js$|
+            \.map$
+          )
+        args:
+          - 'filesystem'
+          - '--directory=.'
+          - '--only-verified'
+          - '--fail'
+          - '--no-update'
+          - '--exclude-paths=.trufflerc'
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+        name: GitLeaks secret scan
+        entry: gitleaks
+        language: system
+        pass_filenames: false
+        args: ['detect', '--source=.', '--verbose', '--redact']
+
+  # Code quality and formatting
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        name: Check for large files
+        args: ['--maxkb=1024'] # 1MB limit
+      - id: check-case-conflict
+        name: Check filename case conflicts
+      - id: check-executables-have-shebangs
+        name: Check executables have shebangs
+      - id: check-json
+        name: Check JSON syntax
+        exclude: ^\.vscode/
+      - id: check-merge-conflict
+        name: Check for merge conflicts
+      - id: check-symlinks
+        name: Check for broken symlinks
+      - id: check-yaml
+        name: Check YAML syntax
+        exclude: |
+          (?x)(
+            ^k8s/.*\.yaml$|  # K8s files may have templates
+            ^helm/.*\.yaml$
+          )
+      - id: detect-aws-credentials
+        name: Detect AWS credentials
+      - id: detect-private-key
+        name: Detect private keys
+      - id: end-of-file-fixer
+        name: Fix end of files
+        exclude: ^tests/.*fixtures.*
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+        exclude: ^tests/.*fixtures.*
+      - id: mixed-line-ending
+        name: Check line endings
+        args: ['--fix=lf']
+
+  # Python code quality
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.5
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+      - id: black
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.17.1
+    hooks:
+      - id: mypy
+        additional_dependencies: ['types-requests']
+
+  # TypeScript/JavaScript quality
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.33.0
+    hooks:
+      - id: eslint
+        name: ESLint JavaScript/TypeScript
+        files: \.(js|jsx|ts|tsx)$
+        exclude: |
+          (?x)(
+            ^node_modules/|
+            ^dist/|
+            ^build/|
+            \.min\.js$|
+            \.d\.ts$
+          )
+        additional_dependencies:
+          - 'eslint@^8.0.0'
+          - 'prettier@^3.0.0'
+          - 'eslint-config-prettier@^9.0.0'
+          - '@typescript-eslint/eslint-plugin@^6.0.0'
+          - '@typescript-eslint/parser@^6.0.0'
+          - 'eslint-plugin-security@^1.7.1'
+        args: ['--fix', '--max-warnings=0']
+
+  # Additional security checks
+  - repo: https://github.com/PyCQA/bandit
+    rev: '1.7.5'
+    hooks:
+      - id: bandit
+        name: Bandit security linter (Python)
+        files: \.py$
+        exclude: ^tests/
+        args: ['-ll', '-i', '--skip=B101,B601']
+
+  # Infrastructure as Code security
+  - repo: https://github.com/bridgecrewio/checkov
+    rev: '3.0.34'
+    hooks:
+      - id: checkov
+        name: Checkov IaC security scan
+        files: \.(yaml|yml|json|tf|dockerfile|Dockerfile)$
+        exclude: |
+          (?x)(
+            ^tests/.*|
+            ^\.github/.*|
+            node_modules/
+          )
+        args: [
+            '--framework',
+            'kubernetes,dockerfile,terraform,cloudformation,arm,github_configuration',
+            '--skip-check',
+            'CKV_DOCKER_2,CKV_DOCKER_3', # Skip specific checks if needed
+            '--quiet',
+            '--compact',
+          ]
+
+  # Container security
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        name: Dockerfile linting
+        files: Dockerfile.*
+        args: ['--ignore', 'DL3008', '--ignore', 'DL3009']
+
+  # Git commit message validation
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.0.0
+    hooks:
+      - id: conventional-pre-commit
+        name: Conventional commit format
+        stages: [commit-msg]
+        args: [optional-scope]
+
+  # Custom IntelGraph-specific hooks
+  - repo: local
+    hooks:
+      - id: intelgraph-secrets-check
+        name: IntelGraph custom secrets check
+        entry: ./scripts/security/custom-secrets-check.sh
+        language: script
+        files: \.(js|ts|py|yaml|yml|json|env)$
+        exclude: |
+          (?x)(
+            ^\.secrets\.baseline$|
+            ^tests/.*fixtures.*|
+            ^node_modules/|
+            ^dist/|
+            \.lock$
+          )
+
+      - id: intelgraph-api-key-check
+        name: Check for exposed API keys
+        entry: ./scripts/security/api-key-check.sh
+        language: script
+        files: \.(js|ts|py|yaml|yml|json|md)$
+        exclude: |
+          (?x)(
+            ^tests/.*fixtures.*|
+            ^docs/.*examples.*|
+            ^node_modules/
+          )
+
+# Global configuration
+fail_fast: false # Continue running hooks even if one fails
+minimum_pre_commit_version: 3.0.0
+
+# Default hooks to run on all files during manual runs
+default_stages: [pre-commit]

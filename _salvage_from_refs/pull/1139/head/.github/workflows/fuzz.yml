@@ -1,0 +1,13 @@
+name: Fuzz & Properties
+on: [pull_request]
+jobs:
+  gen-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout @v4/**
+      - uses: pnpm/action-setup @v4/**
+        with: { version: 9 }
+      - run: pnpm i
+      - run: pnpm -w run api:start & sleep 6
+      - run: node tools/fuzz/api_fuzz.ts
+      - run: npx jest server/test/graph.invariants.spec.ts --runInBand

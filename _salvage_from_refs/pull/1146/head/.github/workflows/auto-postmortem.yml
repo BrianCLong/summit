@@ -1,0 +1,19 @@
+name: auto-postmortem
+
+permissions:
+  contents: read
+on:
+  issues:
+    types: [labeled]
+jobs:
+  build_pm:
+    if: contains(github.event.issue.labels.*.name, 'incident')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Draft PM
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "Postmortem: #${{ github.event.issue.number }}"
+          content-file: runbooks/postmortem_template.md
+          labels: postmortem

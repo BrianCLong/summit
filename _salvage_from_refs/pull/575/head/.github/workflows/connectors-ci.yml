@@ -1,0 +1,24 @@
+name: connectors-ci
+
+on:
+  push:
+    paths:
+      - 'server/src/connectors/**'
+      - 'server/tests/connectors/**'
+  pull_request:
+    paths:
+      - 'server/src/connectors/**'
+      - 'server/tests/connectors/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm ci
+      - name: disable network
+        run: sudo iptables -A OUTPUT -j REJECT || true
+      - run: npm run test:server -- server/tests/connectors

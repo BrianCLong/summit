@@ -1,0 +1,58 @@
+name: cd
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+permissions:
+  id-token: write
+  contents: read
+  deployments: write
+jobs:
+  preview-deploy:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    env:
+      NAMESPACE: pr-${{ github.event.number }}
+      IMAGE: ghcr.io/${{ github.repository }}/maestro:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-helm@v4
+      - name: Kube auth (OIDC → cloud)
+        uses: azure/k8s-set-context@v4
+        with:
+          method: service-account
+          k8s-url: ${{ secrets.DEV_K8S_API }}
+          k8s-secret: ${{ secrets.DEV_K8S_SA_TOKEN }}
+      - name: Create namespace
+        run: kubectl create ns $NAMESPACE || true
+      - name: Helm upgrade
+        run: |
+          helm upgrade --install maestro charts/maestro \
+            --namespace $NAMESPACE \
+            --set image.repository=ghcr.io/${{ github.repository }}/maestro \
+            --set image.tag=${{ github.sha }}
+            --set app.env=preview \
+            --wait --timeout 5m
+  dev-deploy:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-helm@v4
+      - name: Kube auth
+        uses: azure/k8s-set-context@v4
+        with:
+          method: service-account
+          k8s-url: ${{ secrets.DEV_K8S_API }}
+          k8s-secret: ${{ secrets.DEV_K8S_SA_TOKEN }}
+      - name: Helm upgrade (dev)
+        run: |
+          helm upgrade --install maestro charts/maestro \
+            --namespace dev \
+            --set image.repository=ghcr.io/${{ github.repository }}/maestro \
+            --set image.tag=${{ github.sha }}
+            --set app.env=dev \
+            --wait --timeout 5m

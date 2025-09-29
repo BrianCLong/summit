@@ -1,0 +1,75 @@
+name: Validate Gates & PromQL
+
+on:
+  pull_request:
+    paths:
+      - 'ops/**'
+      - '.github/workflows/validate-gates-and-promql.yml'
+  push:
+    paths:
+      - 'tools/igctl/**'
+      - 'ops/**'
+      - '.github/workflows/validate-gates-and-promql.yml'
+
+env:
+  # Fail-closed: require configs to exist & pass validation
+  REQUIRE_PROM_CONFIG: "true"
+  REQUIRE_AM_CONFIG: "true"
+
+jobs:
+  validate-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm', cache-dependency-path: tools/igctl/package-lock.json }
+      - name: Install validator deps
+        run: |
+          npm --prefix tools/igctl ci || npm --prefix tools/igctl install
+      - name: Validate gate extensions
+        run: node tools/igctl/validate_go_no_go.js --schema tools/igctl/go-no-go.schema.json --file tools/igctl/go-no-go-extensions.yaml
+
+  promtool-check:
+    runs-on: ubuntu-latest
+    container: prom/prometheus:v2.53.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: promtool check rules
+        run: |
+          set -e
+          files=(ops/prometheus/recording_rules.yaml ops/prometheus/slo_burn_rules.yaml ops/observability/intelgraph-slo-burn.yaml)
+          for f in "${files[@]}"; do
+            if [ -f "$f" ]; then
+              echo "Checking $f"
+              promtool check rules "$f"
+            fi
+          done
+      - name: promtool test rules
+        run: |
+          if ls ops/prometheus/tests/*.test.yaml 1> /dev/null 2>&1; then
+            promtool test rules ops/prometheus/tests/*.test.yaml
+          else
+            echo "No promtool unit tests found."
+          fi
+
+  promtool-config:
+    if: env.REQUIRE_PROM_CONFIG == 'true'
+    runs-on: ubuntu-latest
+    container: prom/prometheus:v2.53.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure prom config exists
+        run: test -f ops/prometheus/prometheus.yml
+      - name: promtool check config
+        run: promtool check config ops/prometheus/prometheus.yml
+
+  alertmanager-config:
+    if: env.REQUIRE_AM_CONFIG == 'true'
+    runs-on: ubuntu-latest
+    container: prom/alertmanager:v0.27.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure alertmanager config exists
+        run: test -f ops/alertmanager/alertmanager.yml
+      - run: amtool check-config ops/alertmanager/alertmanager.yml

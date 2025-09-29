@@ -1,0 +1,7 @@
+{
+  "title": "HITL Queue",
+  "panels": [
+    { "type": "stat", "title": "Queue Depth", "datasource": "prometheus" },
+    { "type": "graph", "title": "p95 Review Latency", "datasource": "prometheus" }
+  ]
+}

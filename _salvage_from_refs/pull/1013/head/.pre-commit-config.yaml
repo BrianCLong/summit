@@ -1,0 +1,37 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0 # Use a specific version
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: forbid-env-files
+        name: "Forbid committing real .env or secret files"
+        entry: bash .githooks/forbid-env.sh
+        language: system
+        pass_filenames: true
+      - id: forbid-duckdb-placeholder
+        name: "Forbid duckdb placeholder"
+        entry: bash .githooks/forbid-placeholder.sh
+        language: system
+        pass_filenames: true

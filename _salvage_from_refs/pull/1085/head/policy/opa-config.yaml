@@ -1,0 +1,49 @@
+# OPA Configuration for Signed Bundle Verification
+# Enables cryptographic verification of policy bundles and secure polling
+
+services:
+  policy:
+    name: policy
+    url: https://policy.intelgraph.local
+    headers:
+      Authorization: "Bearer ${POLICY_SERVICE_TOKEN}"
+    
+bundles:
+  conductor:
+    service: policy
+    resource: bundles/conductor.tar.gz
+    polling:
+      min_delay_seconds: 30
+      max_delay_seconds: 60
+    # Bundle signature verification
+    # Public key must be mounted at /etc/opa/keys/conductor-policy.pem
+    signing:
+      keyid: "conductor-policy"
+      scope: bundle
+      exclude_files:
+        - "*.md"
+        - "test_*"
+
+decision_logs:
+  console: false
+  service: policy
+  resource: logs/decisions
+  partition_name: "conductor-${HOSTNAME}"
+  
+status:
+  console: false
+  service: policy
+  resource: status/conductor
+
+# Security configuration
+persistence:
+  directory: /opt/opa/data
+
+# Restrict bundle origins
+bundle_service:
+  credentials:
+    bearer:
+      token: "${POLICY_SERVICE_TOKEN}"
+  
+# Performance tuning  
+nd_builtin_cache: true

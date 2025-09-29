@@ -1,0 +1,84 @@
+# Auto-labeling configuration for pull requests
+# This file defines which labels are automatically applied based on file changes
+
+# Client/Frontend changes
+'client':
+  - 'client/**/*'
+
+# Server/Backend changes  
+'server':
+  - 'server/**/*'
+
+# Database/Schema changes
+'database':
+  - 'server/src/db/**/*'
+  - 'server/src/graphql/schemas/**/*'
+  - '**/*.sql'
+  - '**/migrations/**/*'
+
+# AI/ML changes
+'ai':
+  - 'server/src/services/aiAnalysis.ts'
+  - 'server/src/graphql/resolvers/aiAnalysis.ts'
+  - 'client/src/components/ai/**/*'
+  - '**/*ai*/**/*'
+  - '**/*ml*/**/*'
+
+# Documentation changes
+'documentation':
+  - '**/*.md'
+  - 'docs/**/*'
+  - 'README*'
+
+# Configuration changes
+'config':
+  - '**/.env*'
+  - '**/package.json'
+  - '**/package-lock.json'
+  - '**/tsconfig.json'
+  - '**/vite.config.*'
+  - '**/docker*'
+  - '.github/**/*'
+
+# Dependencies
+'dependencies':
+  - 'package.json'
+  - 'package-lock.json'
+  - '**/package.json'
+  - '**/package-lock.json'
+  - 'yarn.lock'
+  - 'pnpm-lock.yaml'
+
+# Security-related
+'security':
+  - 'server/src/lib/auth.ts'
+  - '**/*auth*/**/*'
+  - '**/*security*/**/*'
+  - '**/.github/workflows/security*'
+
+# Tests
+'tests':
+  - '**/__tests__/**/*'
+  - '**/*.test.*'
+  - '**/*.spec.*'
+  - '**/test/**/*'
+
+# GraphQL
+'graphql':
+  - 'server/src/graphql/**/*'
+  - '**/*.graphql'
+  - '**/*.gql'
+
+# UI/UX
+'ui':
+  - 'client/src/components/**/*'
+  - 'client/src/theme/**/*'
+  - '**/*.css'
+  - '**/*.scss'
+
+# Infrastructure/DevOps
+'infrastructure':
+  - '.github/**/*'
+  - 'docker*'
+  - '**/*.yml'
+  - '**/*.yaml'

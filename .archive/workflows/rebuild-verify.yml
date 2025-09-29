@@ -1,0 +1,48 @@
+name: rebuild-verify
+
+permissions:
+  contents: read
+on:
+  push: { tags: ["v*.*.*"] }
+jobs:
+  build-a:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout @v4/**
+      - uses: pnpm/action-setup @v4/**
+        with: { version: 9 }
+      - run: pnpm i --frozen-lockfile && pnpm build
+      - name: Build image A
+        run: docker buildx build -t ghcr.io/${{ github.repository }}/maestro:${{ github.ref_name }} --load .
+      - uses: anchore/sbom-action @db/migrations/V16__v09_autopilot.sql
+        with: { path: ".", format: "cyclonedx", output-file: "sbom-a.json" }
+      - name: Attest (cosign keyless)
+        run: cosign attest --predicate sbom-a.json --type cyclonedx ghcr.io/${{ github.repository }}/maestro:${{ github.ref_name }} || true
+  build-b:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout @v4/**
+      - uses: pnpm/action-setup @v4/**
+        with: { version: 9 }
+      - run: pnpm i --frozen-lockfile && pnpm build
+      - name: Build image B
+        run: docker buildx build -t maestro-b:${{ github.ref_name }} --load .
+      - name: Diffoscope (A vs B)
+        run: |
+          IMG_A=$(docker save ghcr.io/${{ github.repository }}/maestro:${{ github.ref_name }} | gzip -c)
+          IMG_B=$(docker save maestro-b:${{ github.ref_name }} | gzip -c)
+          diffoscope --text diff.txt <(echo "$IMG_A") <(echo "$IMG_B") || true
+      - uses: actions/upload-artifact @v4/**
+        with: { name: reproducibility-diff, path: diff.txt }
+  gate:
+    needs: [build-a, build-b]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact @v4/**
+        with: { name: reproducibility-diff, path: . }
+      - name: Fail on non-determinism
+        run: |
+          if [ -s diff.txt ]; then
+            echo "::error ::rebuild mismatch (non-deterministic). See artifact diff.txt"
+            exit 1
+          fi

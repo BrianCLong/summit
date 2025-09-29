@@ -1,0 +1,171 @@
+name: Maestro Build Plane Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.2.3)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.semantic.outputs.version }}
+      released: ${{ steps.semantic.outputs.released }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9.0.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.14.0
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Semantic Release
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx semantic-release --dry-run > semantic-output.txt 2>&1 || true
+
+          if grep -q "The next release version is" semantic-output.txt; then
+            VERSION=$(grep "The next release version is" semantic-output.txt | sed 's/.*version is \([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/')
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "released=true" >> $GITHUB_OUTPUT
+            
+            # Actually run semantic-release
+            npx semantic-release
+          else
+            echo "released=false" >> $GITHUB_OUTPUT
+            echo "No release needed"
+          fi
+
+  build-and-push:
+    needs: release
+    if: ${{ needs.release.outputs.released == 'true' }}
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        service: [server, client]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push release images
+        run: |
+          SERVICE="${{ matrix.service }}"
+          VERSION="${{ needs.release.outputs.version }}"
+
+          IMAGE_VERSIONED="ghcr.io/${{ github.repository }}/${SERVICE}:${VERSION}"
+          IMAGE_LATEST="ghcr.io/${{ github.repository }}/${SERVICE}:latest"
+
+          docker buildx build \
+            --push \
+            --platform linux/amd64,linux/arm64 \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            --build-arg VCS_REF=${{ github.sha }} \
+            --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+            --tag $IMAGE_VERSIONED \
+            --tag $IMAGE_LATEST \
+            --file services/${SERVICE}/Dockerfile \
+            .
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/${{ github.repository }}/${{ matrix.service }}:${{ needs.release.outputs.version }}
+          format: spdx-json
+          output-file: sbom-${{ matrix.service }}-${{ needs.release.outputs.version }}.spdx.json
+
+      - name: Sign release image
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign with Cosign
+        run: |
+          IMAGE="ghcr.io/${{ github.repository }}/${{ matrix.service }}:${{ needs.release.outputs.version }}"
+          cosign sign --yes $IMAGE
+
+      - name: Upload SBOM to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.release.outputs.version }}
+          files: sbom-${{ matrix.service }}-${{ needs.release.outputs.version }}.spdx.json
+
+  deploy-staging:
+    needs: [release, build-and-push]
+    if: ${{ needs.release.outputs.released == 'true' }}
+    runs-on: ubuntu-22.04
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_STAGING_B64 }}" | base64 -d > ~/.kube/config
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Deploy to staging
+        run: |
+          helm upgrade --install intelgraph helm/intelgraph \
+            --namespace staging \
+            --create-namespace \
+            --set image.server.tag=${{ needs.release.outputs.version }} \
+            --set image.client.tag=${{ needs.release.outputs.version }} \
+            --set ingress.host=staging.intelgraph.dev \
+            --set environment=staging \
+            --wait --timeout=15m
+
+      - name: Run smoke tests
+        run: |
+          pnpm install --frozen-lockfile
+          BASE_URL=https://staging.intelgraph.dev \
+            npx k6 run tests/k6-smoke.js
+
+      - name: Notify deployment
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          text: |
+            🚀 IntelGraph v${{ needs.release.outputs.version }} deployed to staging
+            URL: https://staging.intelgraph.dev
+            Status: ${{ job.status }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

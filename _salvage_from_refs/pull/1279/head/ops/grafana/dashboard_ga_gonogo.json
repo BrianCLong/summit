@@ -1,0 +1,12 @@
+{
+  "title": "IntelGraph GA Go/No-Go",
+  "panels": [
+    {"type":"stat","title":"Read p95 (ms)","targets":[{"expr":"histogram_quantile(0.95, sum(rate(http_server_duration_seconds_bucket{path=~\"/graphql\",method=~\"POST\",kind=\"read\"}[5m])) by (le)) * 1000"}]},
+    {"type":"stat","title":"Write p95 (ms)","targets":[{"expr":"histogram_quantile(0.95, sum(rate(http_server_duration_seconds_bucket{path=~\"/graphql\",method=~\"POST\",kind=\"write\"}[5m])) by (le)) * 1000"}]},
+    {"type":"stat","title":"Error Rate","targets":[{"expr":"sum(rate(http_server_requests_errors_total[5m])) / sum(rate(http_server_requests_total[5m]))"}]},
+    {"type":"stat","title":"ER DLQ %","targets":[{"expr":"sum(rate(er_dlq_total[5m])) / sum(rate(er_ingress_total[5m]))"}]},
+    {"type":"stat","title":"Step-up Coverage","targets":[{"expr":"sum(increase(authz_stepup_required_total[1h])) / sum(increase(authz_high_risk_total[1h]))"}]}
+  ],
+  "time": {"from":"now-6h","to":"now"}
+}
+

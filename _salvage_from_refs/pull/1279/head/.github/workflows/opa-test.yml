@@ -1,0 +1,24 @@
+name: opa-test
+
+on:
+  pull_request:
+    paths:
+      - 'server/policies/**'
+      - '.github/workflows/opa-test.yml'
+
+jobs:
+  opa-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: open-policy-agent/setup-opa@v2
+        with:
+          version: v0.64.1
+      - name: Run OPA tests
+        run: |
+          if [ -d server/policies ]; then
+            opa test server/policies -v || exit 1
+          else
+            echo "No server/policies directory found."
+          fi
+

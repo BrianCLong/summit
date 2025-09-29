@@ -1,0 +1,5 @@
+tenantA:
+  - us-west
+  - us-east
+tenantB:
+  - eu-central

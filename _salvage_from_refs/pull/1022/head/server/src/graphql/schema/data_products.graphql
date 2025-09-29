@@ -1,0 +1,27 @@
+type Product {
+  id: ID!
+  name: String!
+  description: String
+  template: String!
+  epsilonTiers: [Float!]!
+  priceHint: String
+}
+
+type Entitlement {
+  id: ID!
+  productId: String!
+  tenantId: String!
+  epsilonCap: Float!
+  expiresAt: String!
+  scopes: [String!]!
+}
+
+extend type Query {
+  products: [Product!]!
+  entitlements(tenantId: String!): [Entitlement!]!
+}
+
+extend type Mutation {
+  issueEntitlement(tenantId: String!, productId: String!, epsilonCap: Float!, expiresAt: String!): Entitlement!
+  revokeEntitlement(id: ID!): Boolean!
+}

@@ -1,0 +1,25 @@
+name: gatekeeper-apply
+on:
+  workflow_dispatch: {}
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        if: ${{ secrets.AWS_PRODUCTION_ROLE && secrets.AWS_REGION }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_PRODUCTION_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Setup kubectl and kustomize
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.30.0'
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_PRODUCTION_CLUSTER }}
+      - name: Apply Gatekeeper policies
+        run: |
+          kubectl apply -k deploy/gatekeeper

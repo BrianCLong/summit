@@ -1,0 +1,28 @@
+# Dashboard GraphQL documents for codegen (persisted ops/safelisting)
+
+query DB_ServerStats {
+  serverStats {
+    uptime
+    totalInvestigations
+    totalEntities
+    totalRelationships
+    databaseStatus {
+      redis
+      postgres
+      neo4j
+    }
+  }
+}
+
+query DB_Investigations {
+  getInvestigations {
+    id
+    name
+    description
+    status
+    createdAt
+    nodeCount
+    edgeCount
+  }
+}
+

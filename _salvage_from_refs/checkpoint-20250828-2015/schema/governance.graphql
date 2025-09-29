@@ -1,0 +1,84 @@
+# Extends the main schema with types for data governance and lineage.
+
+"""
+Represents a data retention policy for a specific class of data.
+"""
+type GovernancePolicy {
+  "The class of data this policy applies to (e.g., OSINT_RAW)."
+  klass: String!
+  "The time-to-live for this data class, in days."
+  ttlDays: Int!
+}
+
+"""
+A node in the data lineage graph, representing a piece of data like a file or an export.
+"""
+type DataAsset {
+  id: ID!
+  "The classification of the data asset, used for retention."
+  klass: String!
+  "SHA256 hash of the asset's content for integrity verification."
+  sha256: String!
+  "Whether the asset is under a legal hold, exempting it from retention."
+  legalHold: Boolean!
+  "The timestamp when the asset was created."
+  createdAt: DateTime!
+}
+
+"""
+Represents a directed edge in the data lineage graph.
+"""
+type LineageEdge {
+  "The ID of the source DataAsset."
+  from: ID!
+  "The ID of the destination DataAsset."
+  to: ID!
+  "The timestamp of the production event."
+  ts: DateTime!
+}
+
+"""
+Provides the results of a simulated retention policy run.
+"""
+type RetentionSimulation {
+  "The number of assets that would be deleted."
+  willDeleteCount: Int!
+  "A sample of asset IDs that would be deleted."
+  sample: [ID!]!
+}
+
+"""
+Provides the results of a Key Encryption Key (KEK) rotation operation.
+"""
+type RotationResult {
+  "The number of Data Encryption Keys (DEKs) that were rotated to a new KEK."
+  rotated: Int!
+  "The number of encrypted data fields that were re-wrapped with the new DEK."
+  rewrapped: Int!
+  "The ID of the new Key Encryption Key."
+  keyId: String!
+}
+
+# Extend the root Query type
+extend type Query {
+  "Fetches all active data governance policies."
+  governancePolicies: [GovernancePolicy!]!
+  
+  "Fetches a specific data asset by its ID."
+  dataAsset(id: ID!): DataAsset
+  
+  "Retrieves the lineage graph for a given data asset."
+  lineage(assetId: ID!): [LineageEdge!]!
+}
+
+# Extend the root Mutation type
+extend type Mutation {
+  "Places or removes a legal hold on a data asset."
+  setLegalHold(assetId: ID!, on: Boolean!): DataAsset!
+  
+  "Simulates a retention run to preview which assets would be deleted."
+  simulateRetention(klass: String!, now: DateTime): RetentionSimulation!
+  
+  "Initiates a rotation of the Key Encryption Keys (KEKs)."
+  rotateKeys(scope: String!, reason: String!): RotationResult!
+}

@@ -1,0 +1,30 @@
+
+name: Enforce Policy Gates
+
+on:
+  pull_request:
+
+jobs:
+  enforce-policy:
+    # This job only runs if the repo variable is set to 1
+    if: vars.POLICY_ENFORCEMENT == '1'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: open-policy-agent/setup-opa@v2
+      
+      - name: Enforce OPA Policy Gates
+        id: opa_enforce
+        run: |
+          echo "POLICY_ENFORCEMENT is active. Failing PR on policy violations."
+          # This step would fail the job if violations are found
+          opa exec --decision /my/policy/allow --bundle policies/ bundle.json
+
+      - name: Notify on Failure
+        if: failure() && steps.opa_enforce.conclusion == 'failure'
+        uses: ./.github/workflows/reusable/notify-on-failure.yml
+        with:
+          job_name: "Policy Enforcement"
+          pr_url: ${{ github.event.pull_request.html_url }}
+        secrets:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

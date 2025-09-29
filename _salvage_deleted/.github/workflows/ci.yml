@@ -1,0 +1,76 @@
+name: CI
+on:
+  pull_request:
+    branches: [ main ]
+permissions:
+  contents: read
+jobs:
+  pr-validate:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
+          cache: 'pnpm'
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            **/pnpm-lock.yaml
+
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint + Typecheck + Unit (changed only)
+        run: pnpm dlx turbo run lint typecheck test --filter=...[HEAD^1] --cache-dir .turbo
+
+      - name: Coverage enforcement (80% lines, 75% branches)
+        run: |
+          echo "📊 Enforcing repo-wide coverage thresholds..."
+          npm run coverage:enforce
+
+      - name: Integration tests (docker-compose)
+        run: |
+          if [ -f tests/integration/docker-compose.yml ]; then
+            docker compose -f tests/integration/docker-compose.yml up -d --wait
+            pnpm run itest || (docker compose -f tests/integration/docker-compose.yml logs && false)
+            docker compose -f tests/integration/docker-compose.yml down -v
+          else
+            echo "No integration harness yet — skipping"
+          fi
+
+      - name: Playwright smoke
+        working-directory: packages/e2e-shared
+        env:
+          BASE_URL: ${{ vars.STAGE_URL || 'http://localhost:3000' }}
+        run: |
+          npx playwright install --with-deps
+          pnpm run e2e:smoke
+
+      - name: k6 smoke
+        env:
+          BASE_URL: ${{ vars.STAGE_URL || 'http://localhost:3000' }}
+        run: |
+          npm i -g k6
+          k6 run maestro/tests/k6/smoke.js -e BASE_URL="$BASE_URL" -e STAGE="pr" -e COMMIT="${{ github.sha }}"
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-artifacts
+          path: |
+            **/junit*.xml
+            **/playwright-report/**
+            **/coverage/**
+            coverage-junit.xml
+            k6-summary.json
+            test-results/**

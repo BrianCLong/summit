@@ -1,0 +1,125 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-signed-images
+  annotations:
+    policies.kyverno.io/title: Require Signed Container Images
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      This policy ensures that all container images are signed using cosign.
+      It verifies the signature against the expected identity and issuer for
+      production and staging environments.
+spec:
+  validationFailureAction: enforce
+  background: true
+  rules:
+    - name: check-signed-images
+      match:
+        any:
+        - resources:
+            kinds:
+            - Pod
+            namespaces:
+            - intelgraph-prod
+            - intelgraph-stage
+      verifyImages:
+      - imageReferences:
+        - "ghcr.io/brianclong/intelgraph/*"
+        attestors:
+        - entries:
+          - keyless:
+              subject: "https://github.com/BrianCLong/summit/.github/workflows/*"
+              issuer: "https://token.actions.githubusercontent.com"
+              additionalExtensions:
+                github_workflow_trigger: "push"
+                github_workflow_repository: "BrianCLong/summit"
+
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-image-attestations
+  annotations:
+    policies.kyverno.io/title: Require SBOM Attestations
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      This policy ensures that all container images have SBOM attestations
+      for vulnerability tracking and compliance.
+spec:
+  validationFailureAction: enforce
+  background: true
+  rules:
+    - name: check-sbom-attestations
+      match:
+        any:
+        - resources:
+            kinds:
+            - Pod
+            namespaces:
+            - intelgraph-prod
+            - intelgraph-stage
+      verifyImages:
+      - imageReferences:
+        - "ghcr.io/brianclong/intelgraph/*"
+        attestations:
+        - predicateType: https://spdx.dev/Document
+          attestors:
+          - entries:
+            - keyless:
+                subject: "https://github.com/BrianCLong/summit/.github/workflows/*"
+                issuer: "https://token.actions.githubusercontent.com"
+
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: block-unsigned-images
+  annotations:
+    policies.kyverno.io/title: Block Unsigned Images
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      This policy blocks any container images that are not signed or do not
+      come from trusted registries in production environments.
+spec:
+  validationFailureAction: enforce
+  background: true
+  rules:
+    - name: block-unsigned-containers
+      match:
+        any:
+        - resources:
+            kinds:
+            - Pod
+            namespaces:
+            - intelgraph-prod
+            - intelgraph-stage
+      validate:
+        message: "Container images must be signed and from approved registries"
+        pattern:
+          spec:
+            containers:
+            - image: "ghcr.io/brianclong/intelgraph/*"
+    - name: deny-privileged-containers
+      match:
+        any:
+        - resources:
+            kinds:
+            - Pod
+            namespaces:
+            - intelgraph-prod
+            - intelgraph-stage
+      validate:
+        message: "Privileged containers are not allowed in production"
+        pattern:
+          spec:
+            =(securityContext):
+              =(privileged): "false"
+            containers:
+            - =(securityContext):
+                =(privileged): "false"

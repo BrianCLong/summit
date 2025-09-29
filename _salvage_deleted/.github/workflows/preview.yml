@@ -1,0 +1,44 @@
+name: Preview
+on: pull_request
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    permissions: { pull-requests: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-build-push
+        with:
+          image: ghcr.io/${{ github.repository }}/maestro
+          context: .
+          tags: ghcr.io/${{ github.repository }}/maestro:pr-${{ github.event.number }}
+      - uses: ./.github/actions/helm-deploy
+        with:
+          chart: charts/maestro
+          namespace: preview-${{ github.event.number }}
+          values: charts/maestro/values-preview.yaml
+      - name: DB clone
+        run: bash tools/db/ephemeral_clone.sh 55432
+      - name: Export preview env
+        run: |
+          echo "DATABASE_URL=postgres://postgres:pg@127.0.0.1:55432/app" >> $GITHUB_ENV
+      - name: Comment link
+        run: gh pr comment ${{ github.event.number }} -b "🔎 Preview: https://maestro-pr${{ github.event.number }}.dev"
+        env: { GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+      - name: Smoke test
+        run: k6 run tools/k6/smoke.js
+        env: { BASE_URL: https://maestro-pr${{ github.event.number }}.dev }
+      - name: Smoke test APIs
+        run: k6 run tools/k6/smoke-apis.js
+        env: { BASE: https://maestro-pr${{ github.event.number }}.dev }
+      - name: Shadow delta check
+        run: node tools/ci/shadow_delta.js
+        env:
+          STAGING_BASE: https://maestro-staging.dev
+          PREVIEW_BASE: https://maestro-pr${{ github.event.number }}.dev
+      - name: Run chaos jobs
+        run: |
+          kubectl apply -n preview-${{ github.event.number }} -f charts/chaos/templates/pod-kill.yaml
+          kubectl apply -n preview-${{ github.event.number }} -f charts/chaos/templates/latency.yaml
+      - name: Re-check budgets under chaos
+        env: { PREVIEW_BASE: https://maestro-pr${{ github.event.number }}.dev }
+        run: node tools/contracts/assert_budgets.ts

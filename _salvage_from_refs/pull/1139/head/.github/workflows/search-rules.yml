@@ -1,0 +1,8 @@
+name: Docs Search Rules
+on: [workflow_dispatch]
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo 'Upload docs/ops/search/algolia.rules.json via Algolia API here'

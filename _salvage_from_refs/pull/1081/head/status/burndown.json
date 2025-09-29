@@ -1,0 +1,94 @@
+{
+  "generated_at": "2025-08-30T05:46:38.323867+00:00Z",
+  "windows": {
+    "m1": {
+      "reset_at": "2025-08-30T05:47:00+00:00Z",
+      "per_model": {
+        "unknown": {
+          "req": 34,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "tokens": 0,
+          "cost_usd": 0.0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "caps": null,
+          "fraction_of_cap": null
+        }
+      },
+      "totals": {
+        "req": 34,
+        "ptok": 0,
+        "ctok": 0,
+        "tokens": 0,
+        "cost": 0.0,
+        "p50_ms": null,
+        "p95_ms": null
+      }
+    },
+    "h1": {
+      "reset_at": "2025-08-30T06:00:00+00:00Z",
+      "per_model": {
+        "unknown": {
+          "req": 34,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "tokens": 0,
+          "cost_usd": 0.0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "caps": null,
+          "fraction_of_cap": null
+        }
+      },
+      "totals": {
+        "req": 34,
+        "ptok": 0,
+        "ctok": 0,
+        "tokens": 0,
+        "cost": 0.0,
+        "p50_ms": null,
+        "p95_ms": null
+      }
+    },
+    "d1": {
+      "reset_at": "2025-08-31T00:00:00+00:00Z",
+      "per_model": {
+        "unknown": {
+          "req": 34,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "tokens": 0,
+          "cost_usd": 0.0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "caps": null,
+          "fraction_of_cap": null
+        }
+      },
+      "totals": {
+        "req": 34,
+        "ptok": 0,
+        "ctok": 0,
+        "tokens": 0,
+        "cost": 0.0,
+        "p50_ms": null,
+        "p95_ms": null
+      }
+    }
+  },
+  "perf": {
+    "rps_last_60s": 0.567,
+    "p50_ms_last_60s": null,
+    "p95_ms_last_60s": null
+  },
+  "budgets": {
+    "openrouter": {
+      "daily_budget_usd": 10,
+      "spent_usd": 0.0,
+      "remaining_usd": 10.0,
+      "fraction_used": 0.0,
+      "resets_at": "2025-08-31T00:00:00+00:00Z"
+    }
+  }
+}

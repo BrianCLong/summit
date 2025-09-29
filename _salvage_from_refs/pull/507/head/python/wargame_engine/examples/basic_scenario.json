@@ -1,0 +1,7 @@
+{
+  "map": "maps/basic_map.json",
+  "units": [
+    { "name": "Blue1", "team": "blue", "position": [0, 0] },
+    { "name": "Red1", "team": "red", "position": [4, 4] }
+  ]
+}

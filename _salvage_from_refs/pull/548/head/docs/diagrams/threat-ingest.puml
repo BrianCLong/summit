@@ -1,0 +1,20 @@
+@startuml
+actor Analyst
+participant Client
+participant "UploadGuard" as UG
+participant "Precheck" as PC
+participant "Threat Engine" as TE
+database Neo4j as N4J
+collections "Audit Log" as AUD
+participant "Exporter" as EXP
+
+Analyst -> Client: Upload media
+Client -> UG: POST /upload
+UG -> PC: file, meta
+PC --> UG: decision
+UG -> TE: analyze()
+TE -> N4J: store
+TE -> AUD: audit
+Analyst -> EXP: export
+EXP -> AUD: record
+@enduml

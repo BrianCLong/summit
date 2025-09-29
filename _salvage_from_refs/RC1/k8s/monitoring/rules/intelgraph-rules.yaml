@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: intelgraph-rules
+  namespace: monitoring
+spec:
+  groups:
+    - name: api-latency-errors
+      rules:
+        - alert: HighAPILatencyP95
+          expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=~"server|ai-service|nlp-service|osint-service"}[5m])) by (le)) > 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: High API latency P95 (>1s)
+        - alert: HighErrorRate
+          expr: sum(rate(http_requests_total{status=~"5..",job=~"server|ai-service|nlp-service|osint-service"}[5m]))
+                / sum(rate(http_requests_total{job=~"server|ai-service|nlp-service|osint-service"}[5m])) > 0.02
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: Error rate above 2%
+

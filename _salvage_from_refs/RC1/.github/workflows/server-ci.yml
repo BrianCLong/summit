@@ -1,0 +1,74 @@
+name: Server CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'server/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'server/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'server/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: server
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high || true # Allow audit to fail without failing CI
+        working-directory: server
+
+      - name: Run lint
+        run: npm run lint
+        working-directory: server
+
+      - name: Test OPA policies
+        uses: instrumenta/conftest-action@v0.3.0
+        with:
+          files: server/policies/
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+        working-directory: server
+
+      - name: Build server
+        run: npm run build
+        working-directory: server
+
+      - name: Run CodeQL Analysis (Placeholder)
+        run: echo "CodeQL analysis would run here"
+
+      - name: Generate SBOM (Placeholder)
+        run: echo "SBOM generation would run here"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-coverage-report
+          path: server/coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./server/coverage/lcov.info # Path to LCOV coverage report
+          flags: server # Optional: add flags to distinguish reports
+          name: server-coverage # Optional: a name for the upload

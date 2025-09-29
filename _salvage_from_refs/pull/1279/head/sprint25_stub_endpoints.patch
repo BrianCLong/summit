@@ -1,0 +1,588 @@
+diff --git a/openapi/export.yaml b/openapi/export.yaml
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/openapi/export.yaml
+@@ -0,0 +1,101 @@
++openapi: 3.0.3
++info:
++  title: IntelGraph Export Policy API
++  version: 0.1.0
++  description: |
++    Endpoints wrapping OPA `export/decision` with simulate + enforce modes.
++servers:
++  - url: /
++paths:
++  /export/simulate:
++    post:
++      summary: Simulate export decision (no side effects)
++      requestBody:
++        required: true
++        content:
++          application/json:
++            schema:
++              $ref: '#/components/schemas/ExportDecisionInput'
++      responses:
++        '200':
++          description: OK
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/ExportDecision'
++  /export:
++    post:
++      summary: Enforce export decision (may require step-up or apply redactions)
++      requestBody:
++        required: true
++        content:
++          application/json:
++            schema:
++              $ref: '#/components/schemas/ExportDecisionInput'
++      responses:
++        '200':
++          description: Decision payload
++          content:
++            application/json:
++              schema:
++                $ref: '#/components/schemas/ExportDecision'
++components:
++  schemas:
++    ExportDecisionInput:
++      type: object
++      required: [user, action, bundle, options]
++      properties:
++        simulate:
++          type: boolean
++          default: false
++        webauthn_verified:
++          type: boolean
++          default: false
++        user:
++          type: object
++          required: [id, roles]
++          properties:
++            id: { type: string }
++            roles: { type: array, items: { type: string } }
++            permissions: { type: array, items: { type: string } }
++            tenant: { type: string }
++        action:
++          type: string
++          enum: [export]
++        bundle:
++          type: object
++          required: [id, sensitivity, fields]
++          properties:
++            id: { type: string }
++            sensitivity: { type: string, enum: [Public, Internal, Sensitive, Restricted] }
++            fields:
++              type: array
++              items:
++                type: object
++                required: [name]
++                properties:
++                  name: { type: string }
++                  labels: { type: array, items: { type: string } }
++        options:
++          type: object
++          properties:
++            dlp_mask_fields:
++              type: array
++              items: { type: string }
++    ExportDecision:
++      type: object
++      required: [effect, redact_fields, reasons, simulated]
++      properties:
++        effect:
++          type: string
++          enum: [allow, deny, step_up, allow_with_redactions]
++        redact_fields:
++          type: array
++          items: { type: string }
++        reasons:
++          type: array
++          items: { type: string }
++        simulated:
++          type: boolean
++        note:
++          type: string
+diff --git a/services/gateway-express/package.json b/services/gateway-express/package.json
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/services/gateway-express/package.json
+@@ -0,0 +1,17 @@
++{
++  "name": "intelgraph-export-gateway",
++  "version": "0.1.0",
++  "private": true,
++  "type": "module",
++  "main": "src/index.js",
++  "scripts": {
++    "start": "node src/index.js",
++    "dev": "node --watch src/index.js",
++    "test": "node src/selftest.js"
++  },
++  "dependencies": {
++    "express": "^4.19.2",
++    "node-fetch": "^3.3.2",
++    "pino": "^9.2.0"
++  }
++}
+
+diff --git a/services/gateway-express/src/index.js b/services/gateway-express/src/index.js
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/services/gateway-express/src/index.js
+@@ -0,0 +1,58 @@
++import express from 'express';
++import { evaluateDecision } from './opaClient.js';
++import pino from 'pino';
++
++const app = express();
++const log = pino({ level: process.env.LOG_LEVEL || 'info' });
++
++app.use(express.json({ limit: '2mb' }));
++
++function sanitizeDecision(decision) {
++  // Ensure required fields exist
++  return {
++    effect: decision.effect || 'deny',
++    redact_fields: decision.redact_fields || [],
++    reasons: decision.reasons || ['unspecified'],
++    simulated: !!decision.simulated,
++    note: decision.note || ''
++  };
++}
++
++app.post('/export/simulate', async (req, res) => {
++  try {
++    const input = { ...req.body, simulate: true };
++    const decision = await evaluateDecision(input);
++    res.json(sanitizeDecision({ ...decision, simulated: true }));
++  } catch (err) {
++    log.error({ err }, 'simulate_failed');
++    res.status(200).json(sanitizeDecision({
++      effect: 'allow_with_redactions',
++      redact_fields: [],
++      reasons: ['simulation_fallback'],
++      simulated: true,
++      note: 'OPA unreachable; simulation fallback'
++    }));
++  }
++});
++
++app.post('/export', async (req, res) => {
++  try {
++    const input = { ...req.body, simulate: false };
++    const decision = await evaluateDecision(input);
++    res.json(sanitizeDecision(decision));
++  } catch (err) {
++    log.error({ err }, 'enforce_failed');
++    res.status(200).json(sanitizeDecision({
++      effect: 'deny',
++      redact_fields: [],
++      reasons: ['opa_unreachable'],
++      simulated: false,
++      note: 'OPA unreachable; default deny'
++    }));
++  }
++});
++
++const port = process.env.PORT || 8080;
++app.listen(port, () => {
++  log.info({ port }, 'export-gateway-up');
++});
+diff --git a/services/gateway-express/src/opaClient.js b/services/gateway-express/src/opaClient.js
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/services/gateway-express/src/opaClient.js
+@@ -0,0 +1,21 @@
++import fetch from 'node-fetch';
++
++const OPA_URL = process.env.OPA_URL || 'http://localhost:8181/v1/data/export/decision';
++
++/**
++ * Calls OPA with input and returns the decision object.
++ */
++export async function evaluateDecision(input) {
++  const r = await fetch(OPA_URL, {
++    method: 'POST',
++    headers: { 'content-type': 'application/json' },
++    body: JSON.stringify({ input })
++  });
++  if (!r.ok) {
++    const text = await r.text();
++    throw new Error(`OPA error ${r.status}: ${text}`);
++  }
++  const data = await r.json();
++  // Expect data.result to be the policy object
++  return data.result || data;
++}
+diff --git a/services/gateway-express/src/selftest.js b/services/gateway-express/src/selftest.js
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/services/gateway-express/src/selftest.js
+@@ -0,0 +1,23 @@
++import { evaluateDecision } from './opaClient.js';
++
++const sample = {
++  simulate: true,
++  user: { id: 'u1', roles: ['exporter'], permissions: ['export'], tenant: 'acme' },
++  action: 'export',
++  webauthn_verified: false,
++  bundle: {
++    id: 'b1',
++    sensitivity: 'Sensitive',
++    fields: [
++      { name: 'email', labels: ['pii:email'] },
++      { name: 'name', labels: [] }
++    ]
++  },
++  options: { dlp_mask_fields: [] }
++};
++
++evaluateDecision(sample).then(d => {
++  console.log('Decision:', d);
++}).catch(err => {
++  console.error('OPA call failed (expected in self-test unless OPA running):', err.message);
++});
+diff --git a/services/gateway-express/README.md b/services/gateway-express/README.md
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/services/gateway-express/README.md
+@@ -0,0 +1,11 @@
++# Express Export Gateway
++
++Simple wrapper exposing `/export` and `/export/simulate` and delegating decisions to OPA `export/decision`.
++- Env: `OPA_URL` (default `http://localhost:8181/v1/data/export/decision`), `PORT` (default 8080).
++
++```bash
++npm i
++npm run start
++# In another shell:
++curl -s localhost:8080/export/simulate -H 'content-type: application/json' -d @../../tests/sample_input.json | jq .
++```
+diff --git a/services/gateway-fastapi/requirements.txt b/services/gateway-fastapi/requirements.txt
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/services/gateway-fastapi/requirements.txt
+@@ -0,0 +1,4 @@
++fastapi==0.115.0
++uvicorn==0.30.6
++httpx==0.27.2
++pydantic==2.8.2
+diff --git a/services/gateway-fastapi/app/main.py b/services/gateway-fastapi/app/main.py
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/services/gateway-fastapi/app/main.py
+@@ -0,0 +1,86 @@
++from fastapi import FastAPI, HTTPException
++from pydantic import BaseModel, Field
++from typing import List, Optional
++import os, httpx
++
++class FieldItem(BaseModel):
++    name: str
++    labels: Optional[List[str]] = []
++
++class Bundle(BaseModel):
++    id: str
++    sensitivity: str
++    fields: List[FieldItem]
++
++class User(BaseModel):
++    id: str
++    roles: List[str]
++    permissions: Optional[List[str]] = []
++    tenant: Optional[str] = None
++
++class Options(BaseModel):
++    dlp_mask_fields: Optional[List[str]] = []
++
++class DecisionInput(BaseModel):
++    user: User
++    action: str = Field("export", pattern="^export$")
++    bundle: Bundle
++    options: Options = Options()
++    webauthn_verified: bool = False
++    simulate: bool = False
++
++class Decision(BaseModel):
++    effect: str
++    redact_fields: List[str] = []
++    reasons: List[str] = []
++    simulated: bool = False
++    note: Optional[str] = ""
++
++OPA_URL = os.getenv("OPA_URL", "http://localhost:8181/v1/data/export/decision")
++
++app = FastAPI(title="IntelGraph Export Gateway")
++
++async def call_opa(payload: dict) -> dict:
++    async with httpx.AsyncClient(timeout=5.0) as client:
++        r = await client.post(OPA_URL, json={"input": payload})
++        r.raise_for_status()
++        data = r.json()
++        return data.get("result", data)
++
++def sanitize(decision: dict, simulated: Optional[bool] = None) -> Decision:
++    d = Decision(
++        effect=decision.get("effect", "deny"),
++        redact_fields=decision.get("redact_fields", []) or [],
++        reasons=decision.get("reasons", []) or ["unspecified"],
++        simulated=decision.get("simulated", False),
++        note=decision.get("note", ""),
++    )
++    if simulated is not None:
++        d.simulated = simulated
++    return d
++
++@app.post("/export/simulate", response_model=Decision)
++async def simulate(input: DecisionInput):
++    try:
++        decision = await call_opa({**input.model_dump(), "simulate": True})
++        return sanitize(decision, simulated=True)
++    except Exception as e:
++        return sanitize({
++            "effect": "allow_with_redactions",
++            "redact_fields": [],
++            "reasons": ["simulation_fallback"],
++            "note": f"OPA unreachable: {e}"
++        }, simulated=True)
++
++@app.post("/export", response_model=Decision)
++async def enforce(input: DecisionInput):
++    try:
++        decision = await call_opa({**input.model_dump(), "simulate": False})
++        return sanitize(decision)
++    except Exception as e:
++        return sanitize({
++            "effect": "deny",
++            "redact_fields": [],
++            "reasons": ["opa_unreachable"],
++            "note": f"OPA unreachable: {e}"
++        }, simulated=False)
+diff --git a/services/gateway-fastapi/README.md b/services/gateway-fastapi/README.md
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/services/gateway-fastapi/README.md
+@@ -0,0 +1,8 @@
++# FastAPI Export Gateway
++
++Run locally:
++```bash
++pip install -r requirements.txt
++uvicorn app.main:app --reload --port 8081
++curl -s localhost:8081/export/simulate -H 'content-type: application/json' -d @../../tests/sample_input.json | jq .
++```
+diff --git a/sdks/js/intelgraph-export-client/package.json b/sdks/js/intelgraph-export-client/package.json
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/sdks/js/intelgraph-export-client/package.json
+@@ -0,0 +1,13 @@
++{
++  "name": "@intelgraph/export-client",
++  "version": "0.1.0",
++  "type": "module",
++  "main": "dist/index.js",
++  "types": "dist/index.d.ts",
++  "scripts": {
++    "build": "tsc -p tsconfig.json"
++  },
++  "devDependencies": {
++    "typescript": "^5.5.4"
++  }
++}
+
+diff --git a/sdks/js/intelgraph-export-client/tsconfig.json b/sdks/js/intelgraph-export-client/tsconfig.json
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/sdks/js/intelgraph-export-client/tsconfig.json
+@@ -0,0 +1,12 @@
++{
++  "compilerOptions": {
++    "target": "ES2020",
++    "module": "ES2020",
++    "declaration": true,
++    "outDir": "dist",
++    "strict": true
++  },
++  "include": [
++    "src"
++  ]
++}
+
+diff --git a/sdks/js/intelgraph-export-client/src/index.ts b/sdks/js/intelgraph-export-client/src/index.ts
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/sdks/js/intelgraph-export-client/src/index.ts
+@@ -0,0 +1,45 @@
++export type Decision = {
++  effect: 'allow' | 'deny' | 'step_up' | 'allow_with_redactions';
++  redact_fields: string[];
++  reasons: string[];
++  simulated: boolean;
++  note?: string;
++};
++
++export interface ClientOptions {
++  baseUrl: string; // e.g., http://localhost:8080
++  fetchImpl?: typeof fetch;
++  headers?: Record<string, string>;
++}
++
++export class ExportClient {
++  private baseUrl: string;
++  private fetchImpl: typeof fetch;
++  private headers: Record<string,string>;
++
++  constructor(opts: ClientOptions) {
++    this.baseUrl = opts.baseUrl.replace(/\/$/, '');
++    this.fetchImpl = opts.fetchImpl || fetch;
++    this.headers = { 'content-type': 'application/json', ...(opts.headers || {}) };
++  }
++
++  async simulate(input: any): Promise<Decision> {
++    const r = await this.fetchImpl(`${this.baseUrl}/export/simulate`, {
++      method: 'POST',
++      headers: this.headers,
++      body: JSON.stringify(input)
++    });
++    if (!r.ok) throw new Error(`HTTP ${r.status}`);
++    return await r.json() as Decision;
++  }
++
++  async enforce(input: any): Promise[Decision> {
++    const r = await this.fetchImpl(`${this.baseUrl}/export`, {
++      method: 'POST',
++      headers: this.headers,
++      body: JSON.stringify(input)
++    });
++    if (!r.ok) throw new Error(`HTTP ${r.status}`);
++    return await r.json() as Decision;
++  }
++}
+diff --git a/sdks/python/intelgraph_export_client/pyproject.toml b/sdks/python/intelgraph_export_client/pyproject.toml
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/sdks/python/intelgraph_export_client/pyproject.toml
+@@ -0,0 +1,8 @@
++[project]
++name = "intelgraph-export-client"
++version = "0.1.0"
++description = "Client for IntelGraph export gateway"
++authors = [{name = "IntelGraph", email="dev@intelgraph.example"}]
++dependencies = ["httpx>=0.27"]
++readme = "README.md"
++requires-python = ">=3.9"
+diff --git a/sdks/python/intelgraph_export_client/README.md b/sdks/python/intelgraph_export_client/README.md
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/sdks/python/intelgraph_export_client/README.md
+@@ -0,0 +1,1 @@
++# IntelGraph Export Client (Python)
+diff --git a/sdks/python/intelgraph_export_client/client.py b/sdks/python/intelgraph_export_client/client.py
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/sdks/python/intelgraph_export_client/client.py
+@@ -0,0 +1,21 @@
++from __future__ import annotations
++import httpx
++from typing import Any, Dict
++
++class ExportClient:
++    def __init__(self, base_url: str, headers: Dict[str,str] | None = None, timeout: float = 5.0):
++        self.base_url = base_url.rstrip('/')
++        self.headers = {"content-type":"application/json", **(headers or {})}
++        self.timeout = timeout
++
++    def _post(self, path: str, payload: dict) -> dict:
++        with httpx.Client(timeout=self.timeout) as client:
++            resp = client.post(f"{self.base_url}{path}", json=payload, headers=self.headers)
++            resp.raise_for_status()
++            return resp.json()
++
++    def simulate(self, input: dict) -> dict:
++        return self._post("/export/simulate", input)
++
++    def enforce(self, input: dict) -> dict:
++        return self._post("/export", input)
+diff --git a/tests/sample_input.json b/tests/sample_input.json
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/tests/sample_input.json
+@@ -0,0 +1,34 @@
++{
++  "simulate": true,
++  "webauthn_verified": false,
++  "user": {
++    "id": "u1",
++    "roles": [
++      "exporter"
++    ],
++    "permissions": [
++      "export"
++    ],
++    "tenant": "acme"
++  },
++  "action": "export",
++  "bundle": {
++    "id": "b1",
++    "sensitivity": "Sensitive",
++    "fields": [
++      {
++        "name": "email",
++        "labels": [
++          "pii:email"
++        ]
++      },
++      {
++        "name": "name",
++        "labels": []
++      }
++    ]
++  },
++  "options": {
++    "dlp_mask_fields": []
++  }
++}
+
+diff --git a/examples/curl.http b/examples/curl.http
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/examples/curl.http
+@@ -0,0 +1,19 @@
++// Simulate
++POST http://localhost:8080/export/simulate
++content-type: application/json
++
++< ./tests/sample_input.json
++
++###
++// Enforce
++POST http://localhost:8080/export
++content-type: application/json
++
++{
++  "simulate": false,
++  "webauthn_verified": true,
++  "user": {"id":"u1","roles":["exporter"],"permissions":["export"],"tenant":"acme"},
++  "action":"export",
++  "bundle": {"id":"b1","sensitivity":"Sensitive","fields":[{"name":"email","labels":["pii:email"]}]},
++  "options":{"dlp_mask_fields":[]}
++}

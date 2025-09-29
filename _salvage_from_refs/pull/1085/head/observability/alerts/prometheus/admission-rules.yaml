@@ -1,0 +1,27 @@
+groups:
+- name: admission.decisions
+  rules:
+  - alert: AdmissionDeniesSpikeGold
+    expr: sum by (expert) (rate(admission_decision_total{decision="deny",tier="gold"}[15m])) > 0.2
+    for: 15m
+    labels: { severity: page, tier: gold }
+    annotations:
+      summary: "Admission denies elevated (gold)"
+      description: "Denies > 0.2/s for 15m (gold). Check overrides, budgets, and exploration caps."
+
+  - alert: AdmissionDeniesSpikeNonGold
+    expr: sum by (tier,expert) (rate(admission_decision_total{decision="deny",tier!="gold"}[30m])) > 0.1
+    for: 30m
+    labels: { severity: warn }
+    annotations:
+      summary: "Admission denies elevated ({{ $labels.tier }})"
+      description: "Denies > 0.1/s for 30m ({{ $labels.tier }}). Consider degrade paths."
+
+  - alert: AdmissionDegradeDrift
+    expr: sum by (tier,expert) (rate(admission_decision_total{decision="degrade"}[30m])) 
+          / sum by (tier,expert) (rate(admission_decision_total[30m])) > 0.4
+    for: 30m
+    labels: { severity: warn }
+    annotations:
+      summary: "High degrade ratio ({{ $labels.tier }}/{{ $labels.expert }})"
+      description: "More than 40% of admissions are degraded over 30m."

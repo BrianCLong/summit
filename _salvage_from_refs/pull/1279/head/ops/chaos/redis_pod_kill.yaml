@@ -1,0 +1,13 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: redis-pod-kill
+spec:
+  action: pod-kill
+  mode: one
+  duration: '30s'
+  selector:
+    labelSelectors:
+      'app': 'redis'
+      'tenant': 'canary'
+

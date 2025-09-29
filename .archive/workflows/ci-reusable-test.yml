@@ -1,0 +1,22 @@
+name: ci-reusable-test
+on:
+  workflow_call:
+    inputs:
+      shard-total: { required: false, type: number, default: 1 }
+      shard-index: { required: false, type: number, default: 0 }
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: npm ci
+      - name: Unit & Contract tests
+        run: |
+          # Shard-aware example
+          npm run test -- --shard=${{ inputs.shard-index }}/${{ inputs.shard-total }} --ci --reporter=junit --outputFile=reports/junit.xml
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit
+          path: reports/junit.xml

@@ -1,0 +1,31 @@
+name: User Story
+labels: [story]
+body:
+  - type: textarea
+    id: user
+    attributes:
+      label: As a … I want … so that …
+      placeholder: As a <role>, I want <capability>, so that <benefit>
+    validations: { required: true }
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria (Gherkin)
+      value: |
+        Given …
+        When …
+        Then …
+  - type: dropdown
+    id: priority
+    attributes: { label: Priority, options: [P0, P1, P2, P3] }
+  - type: input
+    id: estimate
+    attributes: { label: Estimate (story points) }
+  - type: checkboxes
+    id: qa
+    attributes:
+      label: Quality
+      options:
+        - label: Tests added/updated
+        - label: Telemetry added
+        - label: Docs updated

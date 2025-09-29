@@ -1,0 +1,115 @@
+
+# 2025-08-29 16:44:00.302170
++Y
+
+# 2025-08-29 16:44:19.220312
++N
+
+# 2025-08-29 17:01:38.189976
++n
+
+# 2025-08-29 20:00:01.590232
++ROLE
++You are the “Orchestra” ops/infra agent for a Mac (Apple Silicon, 16 GB RAM). Your job is to finalize and harden the local AI + LiteLLM + Ollama + DuckDB RAG + disposable Neo4j-guard stack in this repo, using minimal, safe edits. Assume zsh + just, Docker Desktop, Python 3.12+, jq, curl are present. All scripts must be Bash with `#!/usr/bin/env bash`, `set -euo pipefail`, and avoid bashisms that broke earlier (e.g., no `mapfile`). Use POSIX-safe loops and clear error messages.
++
++GROUND TRUTH / PORTS
++- Ollama listens at http://127.0.0.1:11434
++- LiteLLM proxy listens at http://127.0.0.1:4000
++- Local model aliases in LiteLLM: `local/llama` (Qwen coder), `local/llama-cpu` (llama3.1-8b-cpu), `local/llama-small` (llama3.2:3b) if present
++- RAG: DuckDB DB at `rag/index/rag.duckdb`, embeddings via `nomic-embed-text`, dim 768
++- Neo4j guard runs via `docker-compose.neo4j.yml` (ephemeral DB), auth neo4j/testtest1
++
++DO NOT
++- Introduce YAML keys you’re not sure LiteLLM supports.
++- Use `mapfile`, process substitution, or zsh-specific constructs in scripts.
++- Change working pieces unless you make them strictly more robust.
++
++DELIVERABLES (create/update only if missing or weaker than below)
++1) **tools/models_extra.sh** – optional model pulls with safe fallbacks
++   - Pull these if available, ignore failures gracefully:
++     - `deepseek-coder-v2` (any tag Ollama recognizes, e.g., `:latest`, `:instruct`)
++     - `llama3.2:1b` (tiny for quick tests)
++     - `nomic-embed-text` (already used—ensure present)
++   - After pulls, print `ollama list`.
++
++2) **Justfile.ai** – keep current working recipes; add a **models-refresh** recipe that simply runs `bash tools/models_extra.sh`. Do not touch other recipes that are working.
++
++3) **RAG usability**
++   - Add **tools/rag_ingest.py**:
++     - Args: 1+ file/dir paths. For each *.md/*.txt found, chunk (~800 chars), embed with `prompt` key (Ollama embedding API), dimension-check to 768, insert into `docs(id int, path text, chunk text, emb float[768])`.
++     - Create DB and table if missing.
++     - Skip empty embeddings; count inserted/skipped per file; exit non-zero on irrecoverable errors.
++   - Extend **Justfile.rag** (leave existing working targets intact):
++     - `rag-ingest +paths` → `python3 tools/rag_ingest.py {{paths}}`
++     - `rag-rebuild` already present; keep it.
++     - `rag-stats` already present; keep it.
++
++4) **Neo4j guard CI**
++   - Add `.github/workflows/neo4j-guard.yml` with a single job `guard` that:
++     - Checks out, writes `docker-compose.neo4j.yml` matching the local one (auth `neo4j/testtest1`, memory-light settings).
++     - `chmod +x tools/neo4j_guard.sh`
++     - Runs `bash tools/neo4j_guard.sh` with `COMPOSE_FILE=docker-compose.neo4j.yml MIG_DIR=db/migrations KEEP_DB=0`
++     - Uses Docker Compose v2 if available, otherwise v1.
++     - Caches nothing; job is fast and disposable.
++
++5) **Docs**
++   - `docs/ORCHESTRA.md`:
++     - One-screen quickstart: AI up, six-word pings, RAG build, guard run (keep and down).
++     - Troubleshooting table for common Mac pitfalls (launchctl/ollama service, Docker not started, “vector type” in DuckDB → use FLOAT[768], etc).
++     - “Performance tips” section for 16 GB (don’t parallelize heavy jobs; keep context small; use `local/llama-small` for quick tests).
++
++6) **Safety / idempotency passes**
++   - Ensure all bash scripts begin with `#!/usr/bin/env bash` and `set -euo pipefail`.
++   - Grep the repo for lingering `mapfile` or process substitution `<(…)`; replace with POSIX-safe loops.
++   - Ensure every script prints actionable errors and returns non-zero on failure.
++
++ACCEPTANCE TESTS (must pass, list exactly; add no new tests)
++A. AI stack
++   - `just --justfile Justfile.ai ai-up`
++   - `just --justfile Justfile.ai ai-ping`
++   - `bash tools/ai_ask6.sh local/llama 'return exactly six words'` → 6 words
++   - `bash tools/ai_ask6.sh local/llama-cpu 'return exactly six words'` → 6 words
++
++B. RAG
++   - `printf "Neo4j guard runs migrations…\n" > rag/corpus/neo4j_guard.txt`
++   - `just --justfile Justfile.rag rag-rebuild`
++   - `just --justfile Justfile.rag rag-stats` → shows ≥1 doc row
++   - `just --justfile Justfile.rag rag q='how do we run neo4j guard?'` → concise answer with [1] style cites
++   - `just --justfile Justfile.rag rag-ingest rag/corpus` → succeeds idempotently
++
++C. Neo4j Guard (local)
++   - `mkdir -p db/migrations && printf "MERGE (:Hello {msg:'world'});\n" > db/migrations/001_init.cypher`
++   - `just --justfile Justfile.neo4j neo4j-guard` → applies migrations, tears down
++   - `KEEP_DB=1 just --justfile Justfile.neo4j neo4j-guard-keep` → stays up; `just --justfile Justfile.neo4j neo4j-shell` connects; `MATCH (n) RETURN count(n);` returns ≥1; `just --justfile Justfile.neo4j neo4j-down` tears down
++
++D. CI dry-run (structure)
++   - `cat .github/workflows/neo4j-guard.yml` → syntactically valid YAML; job named `guard`
++
++OUTPUT STYLE
++- Make minimal edits. For each file you change or create, output a single unified diff (or Aider “whole-file” block) with the complete content.
++- After diffs, output a one-page run-book: exact commands (in order) to execute the acceptance tests above.
++- Do not include speculative model names in configs; in `tools/models_extra.sh` use best-effort pulls that `|| true` on failure.
++
++NOTES
++- Keep LiteLLM config as-is unless a fix is strictly necessary. Don’t add unverified “fallbacks” keys.
++- Keep all existing, working Justfiles intact; only append the new `models-refresh` and `rag-ingest` targets (no renames).
++- Ensure scripts are executable (`chmod +x`) in diffs via a note at the end listing `chmod` commands to run.
++
++BEGIN NOW
++- Scan repo; propose diffs for the six deliverables in separate blocks; then print the run-book and the `chmod` list.
++
+
+# 2025-08-29 20:00:12.276925
++Y
+
+# 2025-08-29 20:00:39.454228
++A
+
+# 2025-08-29 20:01:55.772210
++Y
+
+# 2025-08-29 20:02:02.678265
++y
+
+# 2025-08-29 20:03:05.465188
++Y

@@ -1,0 +1,45 @@
+image:
+  repository: postgres
+  tag: 16-alpine
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5432
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: ""
+
+env:
+  - name: POSTGRES_DB
+    value: intelgraph
+  - name: POSTGRES_USER
+    value: intelgraph
+  - name: POSTGRES_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: postgres-secret
+        key: password
+
+# Enable pgvector extension
+initdb:
+  enabled: true
+  scripts:
+    enable-extensions.sql: |
+      CREATE EXTENSION IF NOT EXISTS vector;
+      CREATE EXTENSION IF NOT EXISTS pg_trgm;
+      CREATE EXTENSION IF NOT EXISTS btree_gin;
+
+serviceMonitor:
+  enabled: false
+

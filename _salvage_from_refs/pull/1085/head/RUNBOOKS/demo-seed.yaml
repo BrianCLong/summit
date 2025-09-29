@@ -1,0 +1,15 @@
+apiVersion: maestro/v1
+kind: Runbook
+metadata:
+  name: demo-seed
+  version: 0.3.0
+  owner: platform@summit
+  approvals:
+    required: true
+    approvers: ["product-lead"]
+spec:
+  inputs:
+    - name: dataset
+      type: string
+      required: true
+  workflowRef: demo-seed@0.3.0

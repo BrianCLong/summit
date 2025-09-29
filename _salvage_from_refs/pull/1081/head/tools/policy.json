@@ -1,0 +1,10 @@
+{
+  "tasks": {
+    "chat":  { "model": "local/llama",         "temp": 0.3, "max_tokens": 256 },
+    "code":  { "model": "local/llama-cpu",     "temp": 0.1, "max_tokens": 512 },
+    "embed": { "model": "nomic-embed-text", "dim": 768 },
+    "burst": { "model": "cloud/deepseek-v3",   "temp": 0.2, "max_tokens": 1024 },
+    "burst-code": { "model": "cloud/deepseek-coder-v2", "temp": 0.1, "max_tokens": 1024 }
+  },
+  "caps": { "max_ctx": 2048, "max_cost_usd": 0.00 }
+}

@@ -1,0 +1,9 @@
+name: Auto Assign
+on: [pull_request_target]
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node tools/pm/assign_reviewers.js
+        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }

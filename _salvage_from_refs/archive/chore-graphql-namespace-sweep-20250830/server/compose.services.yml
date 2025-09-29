@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  neo4j:
+    image: neo4j:5.22.0-community
+    container_name: intelgraph-neo4j
+    environment:
+      - NEO4J_AUTH=neo4j/devpassword
+      - NEO4J_server_memory_heap_initial__size=512m
+      - NEO4J_server_memory_heap_max__size=512m
+      - NEO4JLABS_PLUGINS=["apoc"]
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+    ports:
+      - "7474:7474"   # HTTP (optional for local debugging)
+      - "7687:7687"   # Bolt
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: intelgraph-redis
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+
+  # Optional lightweight ML placeholder exposing port 8081.
+  # Replace with your actual ML service image/endpoints when available.
+  intelgraph-ml:
+    image: hashicorp/http-echo:1.0.0
+    container_name: intelgraph-ml
+    command: ["-text=OK"]
+    ports:
+      - "8081:5678"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5678"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+
+networks:
+  default:
+    name: intelgraph-services
+
+# Usage (locally or in CI step):
+#   docker compose -f server/compose.services.yml up -d
+#
+# App env hints:
+#   NEO4J_URI=bolt://neo4j:7687
+#   NEO4J_USER=neo4j
+#   NEO4J_PASSWORD=devpassword
+#   REDIS_URL=redis://redis:6379
+#   PYTHON_API_URL=http://intelgraph-ml:8081

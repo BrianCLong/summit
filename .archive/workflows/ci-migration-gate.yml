@@ -1,0 +1,19 @@
+name: migration-gate
+on:
+  pull_request:
+    paths:
+      - 'db/migrations/**'
+      - '.ci/policies/**'
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check required artifacts
+        run: |
+          test -f docs/migrations/plan.md || (echo 'Missing docs/migrations/plan.md' && exit 1)
+          test -f docs/migrations/rollback.md || (echo 'Missing docs/migrations/rollback.md' && exit 1)
+          test -f db/migrations/DRYRUN_RESULT.txt || (echo 'Missing DRYRUN_RESULT.txt' && exit 1)
+      - name: OPA policy check
+        run: |
+          conftest test --policy ./.ci/policies db/migrations

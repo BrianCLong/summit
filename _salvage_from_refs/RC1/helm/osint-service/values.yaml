@@ -1,0 +1,29 @@
+image:
+  repository: ghcr.io/brianclong/intelgraph/osint-service
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  portName: http
+

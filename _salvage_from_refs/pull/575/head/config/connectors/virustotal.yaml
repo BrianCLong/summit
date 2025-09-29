@@ -1,0 +1,3 @@
+rateLimitPerMin: 4
+egress:
+  - www.virustotal.com

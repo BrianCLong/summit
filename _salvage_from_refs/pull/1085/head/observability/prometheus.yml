@@ -1,0 +1,188 @@
+# Prometheus Configuration for IntelGraph Conductor
+# Configures monitoring for the MoE Conductor system and dependencies
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'intelgraph-dev'
+    environment: 'development'
+
+# Load and evaluate rules
+rule_files:
+  - "alert-rules.yml"
+
+# Alert manager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Scrape configuration
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # IntelGraph main server (includes conductor metrics)
+  - job_name: 'intelgraph-server'
+    static_configs:
+      - targets: ['server:4000']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+    honor_labels: true
+
+  # Conductor-specific metrics endpoint (if separate)
+  - job_name: 'conductor'
+    static_configs:
+      - targets: ['server:4000']
+    scrape_interval: 10s
+    metrics_path: /metrics/conductor
+    scrape_timeout: 5s
+    honor_labels: true
+    metric_relabel_configs:
+      # Ensure conductor metrics have proper labels
+      - source_labels: [__name__]
+        regex: 'conductor_.*'
+        target_label: service
+        replacement: 'conductor'
+
+  # MCP GraphOps server
+  - job_name: 'mcp-graphops'
+    static_configs:
+      - targets: ['mcp-graphops:8081']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 5s
+    metric_relabel_configs:
+      - target_label: mcp_server
+        replacement: 'graphops'
+
+  # MCP Files server
+  - job_name: 'mcp-files'
+    static_configs:
+      - targets: ['mcp-files:8082']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 5s
+    metric_relabel_configs:
+      - target_label: mcp_server
+        replacement: 'files'
+
+  # Neo4j database metrics
+  - job_name: 'neo4j'
+    static_configs:
+      - targets: ['neo4j:2004']
+    scrape_interval: 30s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+
+  # PostgreSQL metrics (via postgres_exporter if available)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Redis metrics (via redis_exporter if available)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 30s
+    scrape_timeout: 5s
+
+  # OPA metrics
+  - job_name: 'opa'
+    static_configs:
+      - targets: ['opa:8181']
+    scrape_interval: 30s
+    metrics_path: /metrics
+    scrape_timeout: 5s
+
+  # Node.js application metrics (if using prom-client)
+  - job_name: 'node-app'
+    static_configs:
+      - targets: ['server:4000']
+    scrape_interval: 15s
+    metrics_path: /metrics/nodejs
+    scrape_timeout: 5s
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'nodejs_.*'
+        target_label: component
+        replacement: 'nodejs'
+
+# Remote write configuration (for production)
+# remote_write:
+#   - url: "https://your-prometheus-remote-write-endpoint"
+#     basic_auth:
+#       username: "your-username"
+#       password: "your-password"
+
+# Recording rules for pre-computed metrics
+recording_rules:
+  - name: conductor.recording_rules
+    rules:
+      # Pre-compute error rates
+      - record: conductor:error_rate_5m
+        expr: |
+          rate(conductor_router_decisions_total{result="error"}[5m]) /
+          rate(conductor_router_decisions_total[5m])
+
+      - record: conductor:expert_error_rate_5m
+        expr: |
+          rate(conductor_expert_executions_total{result="error"}[5m]) /
+          rate(conductor_expert_executions_total[5m])
+
+      - record: conductor:mcp_error_rate_5m
+        expr: |
+          rate(conductor_mcp_operations_total{result="error"}[5m]) /
+          rate(conductor_mcp_operations_total[5m])
+
+      # Pre-compute latency percentiles
+      - record: conductor:routing_latency_p95_5m
+        expr: histogram_quantile(0.95, rate(conductor_routing_confidence[5m]))
+
+      - record: conductor:expert_latency_p95_5m
+        expr: histogram_quantile(0.95, rate(conductor_expert_latency_seconds_bucket[5m]))
+
+      - record: conductor:mcp_latency_p95_5m
+        expr: histogram_quantile(0.95, rate(conductor_mcp_latency_seconds_bucket[5m]))
+
+      # Pre-compute throughput
+      - record: conductor:routing_rate_5m
+        expr: rate(conductor_router_decisions_total[5m])
+
+      - record: conductor:expert_execution_rate_5m
+        expr: rate(conductor_expert_executions_total[5m])
+
+      - record: conductor:mcp_operation_rate_5m
+        expr: rate(conductor_mcp_operations_total[5m])
+
+      # Pre-compute cost metrics
+      - record: conductor:cost_p95_5m
+        expr: histogram_quantile(0.95, rate(conductor_expert_cost_usd_bucket[5m]))
+
+      - record: conductor:total_cost_rate_5m
+        expr: rate(conductor_expert_cost_usd_sum[5m])
+
+      # System health composite scores
+      - record: conductor:health_score
+        expr: |
+          (
+            (1 - conductor:error_rate_5m) * 0.3 +
+            (conductor_system_health_status) * 0.3 +
+            (conductor_active_tasks < 30) * 0.2 +
+            (conductor:expert_latency_p95_5m < 20) * 0.2
+          )
+
+      # Expert utilization
+      - record: conductor:expert_utilization
+        expr: |
+          conductor_active_tasks /
+          on() group_left() (conductor_total_experts * 5)  # Assuming 5 concurrent tasks per expert

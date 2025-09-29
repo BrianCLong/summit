@@ -1,0 +1,16 @@
+# Lines starting with '#' are comments.
+# Each line is a file pattern followed by one or more owners.
+
+# Schemas, Policies, and CI Gates
+/schemas/                               @BrianCLong
+/policies/                              @BrianCLong
+/.github/workflows/policy-enforce.yml   @BrianCLong
+/.github/workflows/publish-opa-bundle.yml @BrianCLong
+/docs/examples/**                           @BrianCLong
+# GA Cutover critical paths (update owners to real teams/handles)
+ops/**                  @sre-team @platform-team
+tools/igctl/**          @sre-team @security-team
+.github/workflows/**    @sre-team @security-team
+server/policies/**      @security-team
+ops/prometheus/**       @sre-team
+ops/alertmanager/**     @sre-team

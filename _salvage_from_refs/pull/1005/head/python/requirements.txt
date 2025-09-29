@@ -1,0 +1,11 @@
+networkx
+numpy
+gensim
+scikit-learn
+openai
+strawberry-graphql[fastapi]
+langchain
+langchain-community
+ollama
+redis
+python-json-logger

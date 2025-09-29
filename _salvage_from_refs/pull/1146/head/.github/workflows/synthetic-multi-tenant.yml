@@ -1,0 +1,992 @@
+# Maestro Conductor v24.4.0 - Synthetic Multi-Tenant CI Smoke Tests
+# Epic E22: Tenant-Level SLO Observability - Synthetic testing per tenant
+
+name: Synthetic Multi-Tenant Tests
+
+permissions:
+  contents: read
+
+on:
+  schedule:
+    # Run every 15 minutes for continuous SLO monitoring
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      tenant_filter:
+        description: 'Specific tenant ID to test (optional)'
+        required: false
+        type: string
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - performance_only
+        - functional_only
+        - slo_only
+      environment:
+        description: 'Environment to test against'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'server/src/graphql/**'
+      - 'server/src/services/**'
+      - 'tests/synthetic/**'
+
+env:
+  NODE_VERSION: '20'
+  TIMEOUT_MINUTES: 30
+  MAX_CONCURRENT_TENANTS: 5
+  SLO_THRESHOLD_P95: 800  # 800ms P95 latency threshold
+  SLO_THRESHOLD_ERROR_RATE: 0.1  # 0.1% error rate threshold
+
+jobs:
+  # Prepare tenant test matrix
+  prepare-tenant-matrix:
+    name: Prepare Tenant Test Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      tenant_matrix: ${{ steps.generate-matrix.outputs.tenant_matrix }}
+      test_config: ${{ steps.generate-matrix.outputs.test_config }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+    - name: Generate tenant test matrix
+      id: generate-matrix
+      run: |
+        node << 'EOF'
+        const fs = require('fs');
+        
+        // Define synthetic tenant test scenarios
+        const syntheticTenants = [
+          {
+            id: 'tenant_high_volume',
+            name: 'High Volume Tenant',
+            profile: 'high_throughput',
+            expectedRPS: 100,
+            sloTargets: {
+              availability: 99.9,
+              responseTimeP95: 500,
+              errorRate: 0.05
+            },
+            testScenarios: [
+              'bulk_graphql_queries',
+              'concurrent_subscriptions',
+              'large_dataset_processing',
+              'real_time_analytics'
+            ]
+          },
+          {
+            id: 'tenant_low_latency',
+            name: 'Low Latency Tenant',
+            profile: 'performance_critical',
+            expectedRPS: 50,
+            sloTargets: {
+              availability: 99.95,
+              responseTimeP95: 200,
+              errorRate: 0.01
+            },
+            testScenarios: [
+              'fast_graphql_queries',
+              'cached_responses',
+              'optimized_database_queries'
+            ]
+          },
+          {
+            id: 'tenant_analytics_heavy',
+            name: 'Analytics Heavy Tenant', 
+            profile: 'analytics_workload',
+            expectedRPS: 25,
+            sloTargets: {
+              availability: 99.5,
+              responseTimeP95: 2000,
+              errorRate: 0.2
+            },
+            testScenarios: [
+              'complex_aggregation_queries',
+              'large_graph_traversals',
+              'time_series_analytics',
+              'batch_processing'
+            ]
+          },
+          {
+            id: 'tenant_basic',
+            name: 'Basic Tier Tenant',
+            profile: 'standard_usage',
+            expectedRPS: 10,
+            sloTargets: {
+              availability: 99.0,
+              responseTimeP95: 1000,
+              errorRate: 0.5
+            },
+            testScenarios: [
+              'basic_crud_operations',
+              'simple_queries',
+              'standard_subscriptions'
+            ]
+          },
+          {
+            id: 'tenant_enterprise',
+            name: 'Enterprise Tenant',
+            profile: 'enterprise_features',
+            expectedRPS: 200,
+            sloTargets: {
+              availability: 99.99,
+              responseTimeP95: 300,
+              errorRate: 0.01
+            },
+            testScenarios: [
+              'advanced_graphql_features',
+              'multi_region_queries',
+              'enterprise_security_features',
+              'compliance_workflows'
+            ]
+          }
+        ];
+        
+        // Filter tenants based on input
+        let filteredTenants = syntheticTenants;
+        const tenantFilter = process.env.TENANT_FILTER || '${{ github.event.inputs.tenant_filter }}';
+        if (tenantFilter) {
+          filteredTenants = syntheticTenants.filter(t => t.id === tenantFilter);
+        }
+        
+        // Generate test configuration
+        const testConfig = {
+          environment: process.env.ENVIRONMENT || '${{ github.event.inputs.environment }}' || 'staging',
+          testSuite: process.env.TEST_SUITE || '${{ github.event.inputs.test_suite }}' || 'all',
+          maxConcurrent: parseInt(process.env.MAX_CONCURRENT_TENANTS || '5'),
+          timeoutMinutes: parseInt(process.env.TIMEOUT_MINUTES || '30'),
+          sloThresholds: {
+            responseTimeP95: parseInt(process.env.SLO_THRESHOLD_P95 || '800'),
+            errorRate: parseFloat(process.env.SLO_THRESHOLD_ERROR_RATE || '0.1')
+          }
+        };
+        
+        console.log('Generated tenant matrix:', JSON.stringify(filteredTenants, null, 2));
+        console.log('Test configuration:', JSON.stringify(testConfig, null, 2));
+        
+        // Set outputs for GitHub Actions
+        const core = require('@actions/core');
+        core.setOutput('tenant_matrix', JSON.stringify(filteredTenants));
+        core.setOutput('test_config', JSON.stringify(testConfig));
+        EOF
+
+  # Run synthetic tests per tenant
+  run-tenant-tests:
+    name: Test ${{ matrix.tenant.name }}
+    runs-on: ubuntu-latest
+    needs: prepare-tenant-matrix
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        tenant: ${{ fromJson(needs.prepare-tenant-matrix.outputs.tenant_matrix) }}
+    
+    timeout-minutes: ${{ fromJson(needs.prepare-tenant-matrix.outputs.test_config).timeoutMinutes }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+    - name: Setup test environment
+      run: |
+        # Create tenant-specific test configuration
+        mkdir -p tests/synthetic/config
+        cat > tests/synthetic/config/${{ matrix.tenant.id }}.json << 'EOF'
+        {
+          "tenantId": "${{ matrix.tenant.id }}",
+          "tenantName": "${{ matrix.tenant.name }}",
+          "profile": "${{ matrix.tenant.profile }}",
+          "expectedRPS": ${{ matrix.tenant.expectedRPS }},
+          "sloTargets": ${{ toJson(matrix.tenant.sloTargets) }},
+          "testScenarios": ${{ toJson(matrix.tenant.testScenarios) }},
+          "environment": "${{ fromJson(needs.prepare-tenant-matrix.outputs.test_config).environment }}",
+          "baseUrl": "${{ vars.SYNTHETIC_TEST_BASE_URL || 'https://api-staging.maestro.dev' }}",
+          "timeout": 30000,
+          "retries": 2
+        }
+        EOF
+
+    - name: Validate environment connectivity  
+      run: |
+        # Test basic connectivity to the API
+        BASE_URL="${{ vars.SYNTHETIC_TEST_BASE_URL || 'https://api-staging.maestro.dev' }}"
+        
+        echo "Testing connectivity to: $BASE_URL"
+        
+        # Health check
+        if ! curl -f --connect-timeout 10 --max-time 30 "$BASE_URL/health"; then
+          echo "❌ Health check failed for $BASE_URL"
+          exit 1
+        fi
+        
+        echo "✅ Environment connectivity verified"
+
+    - name: Run functional tests
+      if: ${{ fromJson(needs.prepare-tenant-matrix.outputs.test_config).testSuite == 'all' || fromJson(needs.prepare-tenant-matrix.outputs.test_config).testSuite == 'functional_only' }}
+      run: |
+        echo "🧪 Running functional tests for ${{ matrix.tenant.name }}"
+        
+        # Run tenant-specific functional test suite
+        pnpm run test:synthetic -- \
+          --tenant-config="tests/synthetic/config/${{ matrix.tenant.id }}.json" \
+          --test-type="functional" \
+          --output-format="junit" \
+          --output-file="test-results/functional-${{ matrix.tenant.id }}.xml"
+
+    - name: Run performance tests
+      if: ${{ fromJson(needs.prepare-tenant-matrix.outputs.test_config).testSuite == 'all' || fromJson(needs.prepare-tenant-matrix.outputs.test_config).testSuite == 'performance_only' }}
+      run: |
+        echo "⚡ Running performance tests for ${{ matrix.tenant.name }}"
+        
+        # Run load testing with expected RPS
+        pnpm run test:performance -- \
+          --tenant-config="tests/synthetic/config/${{ matrix.tenant.id }}.json" \
+          --target-rps=${{ matrix.tenant.expectedRPS }} \
+          --duration="5m" \
+          --output-format="json" \
+          --output-file="test-results/performance-${{ matrix.tenant.id }}.json"
+
+    - name: Run SLO compliance tests
+      if: ${{ fromJson(needs.prepare-tenant-matrix.outputs.test_config).testSuite == 'all' || fromJson(needs.prepare-tenant-matrix.outputs.test_config).testSuite == 'slo_only' }}
+      run: |
+        echo "📊 Running SLO compliance tests for ${{ matrix.tenant.name }}"
+        
+        # Test SLO compliance with specific thresholds
+        pnpm run test:slo -- \
+          --tenant-config="tests/synthetic/config/${{ matrix.tenant.id }}.json" \
+          --slo-targets='${{ toJson(matrix.tenant.sloTargets) }}' \
+          --duration="10m" \
+          --output-format="prometheus" \
+          --output-file="test-results/slo-${{ matrix.tenant.id }}.prom"
+
+    - name: Collect performance metrics
+      if: always()
+      run: |
+        echo "📈 Collecting performance metrics for ${{ matrix.tenant.name }}"
+        
+        # Create metrics summary
+        mkdir -p test-results/metrics
+        
+        # Generate tenant-specific metrics report
+        node << 'EOF'
+        const fs = require('fs');
+        
+        // Load test results if they exist
+        let functionalResults = {};
+        let performanceResults = {};
+        let sloResults = {};
+        
+        try {
+          if (fs.existsSync('test-results/functional-${{ matrix.tenant.id }}.xml')) {
+            // Parse JUnit XML results (simplified)
+            functionalResults = { status: 'completed', tests: 'parsed from XML' };
+          }
+          
+          if (fs.existsSync('test-results/performance-${{ matrix.tenant.id }}.json')) {
+            performanceResults = JSON.parse(fs.readFileSync('test-results/performance-${{ matrix.tenant.id }}.json', 'utf8'));
+          }
+          
+          if (fs.existsSync('test-results/slo-${{ matrix.tenant.id }}.prom')) {
+            sloResults = { status: 'completed', metrics: 'prometheus format' };
+          }
+        } catch (error) {
+          console.error('Error reading test results:', error);
+        }
+        
+        // Generate metrics summary
+        const metricsReport = {
+          tenant: {
+            id: '${{ matrix.tenant.id }}',
+            name: '${{ matrix.tenant.name }}',
+            profile: '${{ matrix.tenant.profile }}'
+          },
+          timestamp: new Date().toISOString(),
+          testRun: {
+            workflow: '${{ github.run_id }}',
+            environment: '${{ fromJson(needs.prepare-tenant-matrix.outputs.test_config).environment }}',
+            commit: '${{ github.sha }}',
+            ref: '${{ github.ref }}'
+          },
+          results: {
+            functional: functionalResults,
+            performance: performanceResults,
+            slo: sloResults
+          },
+          sloTargets: ${{ toJson(matrix.tenant.sloTargets) }},
+          compliance: {
+            availability: performanceResults.availability >= ${{ matrix.tenant.sloTargets.availability }} || null,
+            responseTime: performanceResults.responseTimeP95 <= ${{ matrix.tenant.sloTargets.responseTimeP95 }} || null,
+            errorRate: performanceResults.errorRate <= ${{ matrix.tenant.sloTargets.errorRate }} || null
+          }
+        };
+        
+        // Write metrics report
+        fs.writeFileSync(
+          'test-results/metrics/metrics-${{ matrix.tenant.id }}.json', 
+          JSON.stringify(metricsReport, null, 2)
+        );
+        
+        // Write Prometheus metrics for ingestion
+        const prometheusMetrics = [
+          `# HELP synthetic_test_duration_seconds Duration of synthetic test`,
+          `# TYPE synthetic_test_duration_seconds gauge`,
+          `synthetic_test_duration_seconds{tenant_id="${{ matrix.tenant.id }}",test_type="functional"} ${Date.now() / 1000}`,
+          
+          `# HELP synthetic_test_success Test success indicator`,
+          `# TYPE synthetic_test_success gauge`,
+          `synthetic_test_success{tenant_id="${{ matrix.tenant.id }}",test_type="functional"} ${functionalResults.status === 'completed' ? 1 : 0}`,
+          `synthetic_test_success{tenant_id="${{ matrix.tenant.id }}",test_type="performance"} ${performanceResults.status === 'completed' ? 1 : 0}`,
+          `synthetic_test_success{tenant_id="${{ matrix.tenant.id }}",test_type="slo"} ${sloResults.status === 'completed' ? 1 : 0}`,
+          
+          `# HELP synthetic_slo_compliance SLO compliance indicator`,
+          `# TYPE synthetic_slo_compliance gauge`
+        ];
+        
+        // Add SLO compliance metrics
+        if (metricsReport.compliance.availability !== null) {
+          prometheusMetrics.push(`synthetic_slo_compliance{tenant_id="${{ matrix.tenant.id }}",slo_type="availability"} ${metricsReport.compliance.availability ? 1 : 0}`);
+        }
+        if (metricsReport.compliance.responseTime !== null) {
+          prometheusMetrics.push(`synthetic_slo_compliance{tenant_id="${{ matrix.tenant.id }}",slo_type="response_time"} ${metricsReport.compliance.responseTime ? 1 : 0}`);
+        }
+        if (metricsReport.compliance.errorRate !== null) {
+          prometheusMetrics.push(`synthetic_slo_compliance{tenant_id="${{ matrix.tenant.id }}",slo_type="error_rate"} ${metricsReport.compliance.errorRate ? 1 : 0}`);
+        }
+        
+        fs.writeFileSync('test-results/metrics/synthetic-${{ matrix.tenant.id }}.prom', prometheusMetrics.join('\n'));
+        
+        console.log('Generated metrics report for ${{ matrix.tenant.name }}');
+        console.log(JSON.stringify(metricsReport, null, 2));
+        EOF
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: synthetic-test-results-${{ matrix.tenant.id }}
+        path: |
+          test-results/
+        retention-days: 30
+
+    - name: Report SLO violations
+      if: always()
+      run: |
+        # Check for SLO violations and create issue if needed
+        if [ -f "test-results/metrics/metrics-${{ matrix.tenant.id }}.json" ]; then
+          node << 'EOF'
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('test-results/metrics/metrics-${{ matrix.tenant.id }}.json', 'utf8'));
+          
+          const violations = [];
+          if (report.compliance.availability === false) {
+            violations.push(`Availability SLO violated: target ${report.sloTargets.availability}%, actual ${report.results.performance.availability}%`);
+          }
+          if (report.compliance.responseTime === false) {
+            violations.push(`Response time SLO violated: target ${report.sloTargets.responseTimeP95}ms, actual ${report.results.performance.responseTimeP95}ms`);
+          }
+          if (report.compliance.errorRate === false) {
+            violations.push(`Error rate SLO violated: target ${report.sloTargets.errorRate}%, actual ${report.results.performance.errorRate}%`);
+          }
+          
+          if (violations.length > 0) {
+            console.log('🚨 SLO Violations detected for ${{ matrix.tenant.name }}:');
+            violations.forEach(v => console.log(`  - ${v}`));
+            
+            // Set output for potential alerting
+            console.log('::set-output name=slo_violations::' + violations.join('; '));
+            process.exit(1); // Fail the job to trigger alerts
+          } else {
+            console.log('✅ All SLOs met for ${{ matrix.tenant.name }}');
+          }
+          EOF
+        fi
+
+  # Aggregate results and generate summary
+  aggregate-results:
+    name: Aggregate Test Results
+    runs-on: ubuntu-latest
+    needs: [prepare-tenant-matrix, run-tenant-tests]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all test results
+      uses: actions/download-artifact@v4
+      with:
+        pattern: synthetic-test-results-*
+        path: aggregated-results/
+        merge-multiple: true
+
+    - name: Generate aggregated report
+      run: |
+        echo "📊 Generating aggregated synthetic test report"
+        
+        mkdir -p reports
+        
+        node << 'EOF'
+        const fs = require('fs');
+        const path = require('path');
+        
+        // Find all metrics files
+        const metricsFiles = [];
+        function findMetricsFiles(dir) {
+          const files = fs.readdirSync(dir);
+          files.forEach(file => {
+            const filePath = path.join(dir, file);
+            if (fs.statSync(filePath).isDirectory()) {
+              findMetricsFiles(filePath);
+            } else if (file.endsWith('.json') && file.includes('metrics-')) {
+              metricsFiles.push(filePath);
+            }
+          });
+        }
+        
+        if (fs.existsSync('aggregated-results')) {
+          findMetricsFiles('aggregated-results');
+        }
+        
+        console.log('Found metrics files:', metricsFiles);
+        
+        // Aggregate all tenant results
+        const aggregatedReport = {
+          timestamp: new Date().toISOString(),
+          testRun: {
+            workflow: '${{ github.run_id }}',
+            environment: '${{ fromJson(needs.prepare-tenant-matrix.outputs.test_config).environment }}',
+            commit: '${{ github.sha }}',
+            ref: '${{ github.ref }}',
+            triggeredBy: '${{ github.event_name }}'
+          },
+          summary: {
+            totalTenants: 0,
+            tenantsWithViolations: 0,
+            overallSLOCompliance: 0,
+            averageAvailability: 0,
+            averageResponseTime: 0,
+            averageErrorRate: 0
+          },
+          tenantResults: [],
+          violations: [],
+          recommendations: []
+        };
+        
+        let totalAvailability = 0;
+        let totalResponseTime = 0;
+        let totalErrorRate = 0;
+        let validTenants = 0;
+        
+        // Process each tenant's results
+        metricsFiles.forEach(filePath => {
+          try {
+            const report = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+            aggregatedReport.tenantResults.push(report);
+            aggregatedReport.summary.totalTenants++;
+            
+            // Check for violations
+            const hasViolations = Object.values(report.compliance).some(compliant => compliant === false);
+            if (hasViolations) {
+              aggregatedReport.summary.tenantsWithViolations++;
+              
+              // Add specific violations
+              Object.entries(report.compliance).forEach(([sloType, compliant]) => {
+                if (compliant === false) {
+                  aggregatedReport.violations.push({
+                    tenantId: report.tenant.id,
+                    tenantName: report.tenant.name,
+                    sloType,
+                    target: report.sloTargets[sloType === 'responseTime' ? 'responseTimeP95' : sloType],
+                    actual: report.results.performance[sloType === 'responseTime' ? 'responseTimeP95' : sloType]
+                  });
+                }
+              });
+            }
+            
+            // Aggregate performance metrics
+            if (report.results.performance) {
+              const perf = report.results.performance;
+              if (typeof perf.availability === 'number') {
+                totalAvailability += perf.availability;
+                validTenants++;
+              }
+              if (typeof perf.responseTimeP95 === 'number') {
+                totalResponseTime += perf.responseTimeP95;
+              }
+              if (typeof perf.errorRate === 'number') {
+                totalErrorRate += perf.errorRate;
+              }
+            }
+          } catch (error) {
+            console.error('Error processing metrics file:', filePath, error);
+          }
+        });
+        
+        // Calculate summary statistics
+        if (validTenants > 0) {
+          aggregatedReport.summary.averageAvailability = totalAvailability / validTenants;
+          aggregatedReport.summary.averageResponseTime = totalResponseTime / validTenants;
+          aggregatedReport.summary.averageErrorRate = totalErrorRate / validTenants;
+        }
+        
+        aggregatedReport.summary.overallSLOCompliance = 
+          ((aggregatedReport.summary.totalTenants - aggregatedReport.summary.tenantsWithViolations) / 
+           aggregatedReport.summary.totalTenants) * 100;
+        
+        // Generate recommendations
+        if (aggregatedReport.summary.tenantsWithViolations > 0) {
+          aggregatedReport.recommendations.push('Review tenant resource allocation for violating tenants');
+          aggregatedReport.recommendations.push('Consider implementing auto-scaling for high-load tenants');
+          aggregatedReport.recommendations.push('Analyze error patterns and implement targeted optimizations');
+        }
+        
+        if (aggregatedReport.summary.averageResponseTime > 1000) {
+          aggregatedReport.recommendations.push('Consider database query optimization across all tenants');
+          aggregatedReport.recommendations.push('Review caching strategies for frequently accessed data');
+        }
+        
+        // Write aggregated report
+        fs.writeFileSync('reports/synthetic-test-summary.json', JSON.stringify(aggregatedReport, null, 2));
+        
+        // Generate human-readable summary
+        const summaryText = [
+          '# Synthetic Multi-Tenant Test Report',
+          '',
+          `**Test Run:** ${aggregatedReport.testRun.workflow}`,
+          `**Environment:** ${aggregatedReport.testRun.environment}`,
+          `**Commit:** ${aggregatedReport.testRun.commit}`,
+          `**Timestamp:** ${aggregatedReport.timestamp}`,
+          '',
+          '## Summary',
+          `- **Total Tenants Tested:** ${aggregatedReport.summary.totalTenants}`,
+          `- **Tenants with SLO Violations:** ${aggregatedReport.summary.tenantsWithViolations}`,
+          `- **Overall SLO Compliance:** ${aggregatedReport.summary.overallSLOCompliance.toFixed(2)}%`,
+          `- **Average Availability:** ${aggregatedReport.summary.averageAvailability.toFixed(2)}%`,
+          `- **Average Response Time (P95):** ${aggregatedReport.summary.averageResponseTime.toFixed(0)}ms`,
+          `- **Average Error Rate:** ${aggregatedReport.summary.averageErrorRate.toFixed(3)}%`,
+          '',
+        ];
+        
+        if (aggregatedReport.violations.length > 0) {
+          summaryText.push('## SLO Violations');
+          aggregatedReport.violations.forEach(violation => {
+            summaryText.push(`- **${violation.tenantName}** (${violation.tenantId}): ${violation.sloType} - Target: ${violation.target}, Actual: ${violation.actual}`);
+          });
+          summaryText.push('');
+        }
+        
+        if (aggregatedReport.recommendations.length > 0) {
+          summaryText.push('## Recommendations');
+          aggregatedReport.recommendations.forEach(rec => {
+            summaryText.push(`- ${rec}`);
+          });
+          summaryText.push('');
+        }
+        
+        summaryText.push('## Per-Tenant Results');
+        aggregatedReport.tenantResults.forEach(result => {
+          const complianceStatus = Object.values(result.compliance).every(c => c !== false) ? '✅' : '❌';
+          summaryText.push(`- **${result.tenant.name}** (${result.tenant.id}): ${complianceStatus}`);
+        });
+        
+        fs.writeFileSync('reports/synthetic-test-summary.md', summaryText.join('\n'));
+        
+        console.log('📊 Aggregated Report Generated');
+        console.log(JSON.stringify(aggregatedReport.summary, null, 2));
+        EOF
+
+    - name: Generate Prometheus metrics
+      run: |
+        echo "📈 Generating Prometheus metrics for ingestion"
+        
+        # Convert JSON report to Prometheus metrics format
+        node << 'EOF'
+        const fs = require('fs');
+        
+        if (!fs.existsSync('reports/synthetic-test-summary.json')) {
+          console.log('No aggregated report found, skipping metrics generation');
+          process.exit(0);
+        }
+        
+        const report = JSON.parse(fs.readFileSync('reports/synthetic-test-summary.json', 'utf8'));
+        const timestamp = Math.floor(Date.now() / 1000);
+        
+        const metrics = [
+          '# Synthetic Multi-Tenant Test Metrics',
+          '# Generated from CI/CD pipeline',
+          '',
+          '# HELP synthetic_test_slo_compliance Overall SLO compliance percentage',
+          '# TYPE synthetic_test_slo_compliance gauge',
+          `synthetic_test_slo_compliance{environment="${report.testRun.environment}",workflow_id="${report.testRun.workflow}"} ${report.summary.overallSLOCompliance}`,
+          '',
+          '# HELP synthetic_test_average_availability Average availability across all tenants',
+          '# TYPE synthetic_test_average_availability gauge',
+          `synthetic_test_average_availability{environment="${report.testRun.environment}"} ${report.summary.averageAvailability}`,
+          '',
+          '# HELP synthetic_test_average_response_time Average P95 response time across all tenants',
+          '# TYPE synthetic_test_average_response_time gauge',
+          `synthetic_test_average_response_time{environment="${report.testRun.environment}"} ${report.summary.averageResponseTime}`,
+          '',
+          '# HELP synthetic_test_tenants_with_violations Number of tenants with SLO violations',
+          '# TYPE synthetic_test_tenants_with_violations gauge',
+          `synthetic_test_tenants_with_violations{environment="${report.testRun.environment}"} ${report.summary.tenantsWithViolations}`,
+          '',
+          '# HELP synthetic_test_total_tenants Total number of tenants tested',
+          '# TYPE synthetic_test_total_tenants gauge',
+          `synthetic_test_total_tenants{environment="${report.testRun.environment}"} ${report.summary.totalTenants}`,
+          ''
+        ];
+        
+        // Add per-tenant metrics
+        report.tenantResults.forEach(result => {
+          if (result.results.performance) {
+            const perf = result.results.performance;
+            const tenantId = result.tenant.id;
+            
+            if (typeof perf.availability === 'number') {
+              metrics.push(`synthetic_tenant_availability{tenant_id="${tenantId}",environment="${report.testRun.environment}"} ${perf.availability}`);
+            }
+            if (typeof perf.responseTimeP95 === 'number') {
+              metrics.push(`synthetic_tenant_response_time_p95{tenant_id="${tenantId}",environment="${report.testRun.environment}"} ${perf.responseTimeP95}`);
+            }
+            if (typeof perf.errorRate === 'number') {
+              metrics.push(`synthetic_tenant_error_rate{tenant_id="${tenantId}",environment="${report.testRun.environment}"} ${perf.errorRate}`);
+            }
+            
+            // SLO compliance per tenant
+            const overallCompliant = Object.values(result.compliance).every(c => c !== false) ? 1 : 0;
+            metrics.push(`synthetic_tenant_slo_compliant{tenant_id="${tenantId}",environment="${report.testRun.environment}"} ${overallCompliant}`);
+          }
+        });
+        
+        fs.writeFileSync('reports/synthetic-metrics.prom', metrics.join('\n'));
+        console.log('Generated Prometheus metrics file');
+        EOF
+
+    - name: Upload aggregated results
+      uses: actions/upload-artifact@v4
+      with:
+        name: synthetic-test-aggregated-report
+        path: |
+          reports/
+        retention-days: 90
+
+    - name: Post results to PR (if applicable)
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          if (!fs.existsSync('reports/synthetic-test-summary.md')) {
+            console.log('No summary report found, skipping PR comment');
+            return;
+          }
+          
+          const summaryContent = fs.readFileSync('reports/synthetic-test-summary.md', 'utf8');
+          
+          // Find existing comment to update or create new one
+          const comments = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          
+          const botComment = comments.data.find(comment => 
+            comment.user.type === 'Bot' && comment.body.includes('Synthetic Multi-Tenant Test Report')
+          );
+          
+          const commentBody = `## 🧪 ${summaryContent}
+          
+          ---
+          *This comment is automatically updated with the latest synthetic test results.*`;
+          
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: commentBody
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: commentBody
+            });
+          }
+
+    - name: Send Slack notification (on violations)
+      if: failure()
+      run: |
+        echo "🚨 Sending Slack notification for SLO violations"
+        
+        # This would integrate with Slack webhook
+        # For demo purposes, just log the alert
+        if [ -f "reports/synthetic-test-summary.json" ]; then
+          node << 'EOF'
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('reports/synthetic-test-summary.json', 'utf8'));
+          
+          if (report.summary.tenantsWithViolations > 0) {
+            const alertMessage = {
+              text: `🚨 SLO Violations Detected in Synthetic Tests`,
+              blocks: [
+                {
+                  type: "header",
+                  text: {
+                    type: "plain_text",
+                    text: "🚨 Synthetic Test SLO Violations"
+                  }
+                },
+                {
+                  type: "section",
+                  fields: [
+                    {
+                      type: "mrkdwn",
+                      text: `*Environment:* ${report.testRun.environment}`
+                    },
+                    {
+                      type: "mrkdwn", 
+                      text: `*Tenants Affected:* ${report.summary.tenantsWithViolations}/${report.summary.totalTenants}`
+                    },
+                    {
+                      type: "mrkdwn",
+                      text: `*Overall Compliance:* ${report.summary.overallSLOCompliance.toFixed(1)}%`
+                    },
+                    {
+                      type: "mrkdwn",
+                      text: `*Workflow:* <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>`
+                    }
+                  ]
+                }
+              ]
+            };
+            
+            console.log('Slack Alert Payload:');
+            console.log(JSON.stringify(alertMessage, null, 2));
+            
+            // In production, this would POST to SLACK_WEBHOOK_URL
+            // curl -X POST -H 'Content-type: application/json' \
+            //   --data "${JSON.stringify(alertMessage)}" \
+            //   $SLACK_WEBHOOK_URL
+          }
+          EOF
+        fi
+
+    - name: Update SLO dashboard
+      if: always()
+      run: |
+        echo "📊 Updating SLO dashboard with latest results"
+        
+        # This would push metrics to Prometheus/Grafana
+        # For demo purposes, just show what would be updated
+        echo "Would push metrics to monitoring system:"
+        
+        if [ -f "reports/synthetic-metrics.prom" ]; then
+          echo "Prometheus metrics preview:"
+          head -20 "reports/synthetic-metrics.prom"
+          echo ""
+          echo "... (truncated)"
+          
+          # In production, this would push to Prometheus pushgateway:
+          # curl -X POST http://pushgateway:9091/metrics/job/synthetic-tests/instance/${{ github.run_id }} \
+          #   --data-binary @reports/synthetic-metrics.prom
+        fi
+
+  # Optional: Deploy alerts and dashboards
+  deploy-monitoring-updates:
+    name: Deploy Monitoring Updates  
+    runs-on: ubuntu-latest
+    needs: [aggregate-results]
+    if: always() && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download aggregated results
+      uses: actions/download-artifact@v4
+      with:
+        name: synthetic-test-aggregated-report
+        path: reports/
+
+    - name: Update Grafana dashboards
+      run: |
+        echo "📊 Updating Grafana dashboards with synthetic test panels"
+        
+        # Generate/update Grafana dashboard configuration
+        mkdir -p charts/grafana/dashboards
+        
+        cat > charts/grafana/dashboards/synthetic-multi-tenant.json << 'EOF'
+        {
+          "dashboard": {
+            "id": null,
+            "title": "Synthetic Multi-Tenant Tests",
+            "tags": ["synthetic", "slo", "multi-tenant"],
+            "timezone": "browser",
+            "panels": [
+              {
+                "id": 1,
+                "title": "Overall SLO Compliance",
+                "type": "singlestat",
+                "targets": [
+                  {
+                    "expr": "synthetic_test_slo_compliance",
+                    "legendFormat": "{{environment}}"
+                  }
+                ],
+                "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+              },
+              {
+                "id": 2,
+                "title": "Tenants with Violations",
+                "type": "graph",
+                "targets": [
+                  {
+                    "expr": "synthetic_test_tenants_with_violations",
+                    "legendFormat": "{{environment}}"
+                  }
+                ],
+                "gridPos": {"h": 4, "w": 12, "x": 6, "y": 0}
+              },
+              {
+                "id": 3,
+                "title": "Per-Tenant Availability",
+                "type": "graph", 
+                "targets": [
+                  {
+                    "expr": "synthetic_tenant_availability",
+                    "legendFormat": "{{tenant_id}}"
+                  }
+                ],
+                "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+              },
+              {
+                "id": 4,
+                "title": "Per-Tenant Response Time (P95)",
+                "type": "graph",
+                "targets": [
+                  {
+                    "expr": "synthetic_tenant_response_time_p95",
+                    "legendFormat": "{{tenant_id}}"
+                  }
+                ],
+                "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4}
+              }
+            ],
+            "time": {"from": "now-24h", "to": "now"},
+            "refresh": "1m"
+          }
+        }
+        EOF
+        
+        echo "✅ Generated Grafana dashboard configuration"
+
+    - name: Update Prometheus alerting rules
+      run: |
+        echo "🚨 Updating Prometheus alerting rules for synthetic tests"
+        
+        mkdir -p charts/prometheus/rules
+        
+        cat > charts/prometheus/rules/synthetic-tests.yml << 'EOF'
+        groups:
+        - name: synthetic-multi-tenant
+          rules:
+          - alert: SyntheticTestSLOViolation
+            expr: synthetic_test_slo_compliance < 95
+            for: 5m
+            labels:
+              severity: warning
+              service: synthetic-tests
+            annotations:
+              summary: "Synthetic test SLO compliance below threshold"
+              description: "SLO compliance is {{ $value }}% in environment {{ $labels.environment }}"
+              
+          - alert: SyntheticTestTenantDown
+            expr: synthetic_tenant_slo_compliant == 0
+            for: 2m
+            labels:
+              severity: critical
+              service: synthetic-tests
+            annotations:
+              summary: "Tenant {{ $labels.tenant_id }} failing synthetic tests"
+              description: "Tenant {{ $labels.tenant_id }} is not meeting SLO requirements"
+              
+          - alert: SyntheticTestHighLatency
+            expr: synthetic_tenant_response_time_p95 > 2000
+            for: 5m
+            labels:
+              severity: warning
+              service: synthetic-tests
+            annotations:
+              summary: "High response time detected for tenant {{ $labels.tenant_id }}"
+              description: "P95 response time is {{ $value }}ms for tenant {{ $labels.tenant_id }}"
+        EOF
+        
+        echo "✅ Generated Prometheus alerting rules"
+
+    - name: Commit monitoring updates (if changes)
+      if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+      run: |
+        # Check if there are changes to commit
+        if ! git diff --quiet charts/; then
+          echo "📝 Committing monitoring configuration updates"
+          
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          git add charts/grafana/dashboards/synthetic-multi-tenant.json
+          git add charts/prometheus/rules/synthetic-tests.yml
+          
+          git commit -m "chore: update monitoring config from synthetic tests
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+          
+          git push
+        else
+          echo "No monitoring configuration changes to commit"
+        fi

@@ -1,0 +1,3 @@
+brokers:
+  - localhost:9092
+topicPrefix: tenant-

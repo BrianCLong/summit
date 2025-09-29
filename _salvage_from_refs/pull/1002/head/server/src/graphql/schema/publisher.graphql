@@ -1,0 +1,11 @@
+type Template { id:ID!, name:String!, version:String!, kMin:Int!, epsilonTiers:[Float!]!, region:[String!]!, status:String!, provenance:JSON, compositeSig:JSON }
+type Verification { staticOk:Boolean!, dynamicOk:Boolean!, details:JSON! }
+type Listing { id:ID!, templateId:String!, status:String!, reviewer:String, createdAt:String! }
+
+extend type Mutation {
+  submitTemplate(manifest:JSON!, bundleBase64:String!): Template!
+  runVerification(templateId:ID!): Verification!
+  requestListing(templateId:ID!): Listing!
+  approveListing(listingId:ID!): Listing!
+}
+extend type Query { templates(status:String):[Template!]!, listings(status:String):[Listing!]! }

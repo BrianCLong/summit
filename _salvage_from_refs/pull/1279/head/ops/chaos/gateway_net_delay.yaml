@@ -1,0 +1,14 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: gateway-delay
+spec:
+  action: delay
+  mode: all
+  delay:
+    latency: '150ms'
+  selector:
+    labelSelectors:
+      'app': 'api-gateway'
+      'tenant': 'canary'
+

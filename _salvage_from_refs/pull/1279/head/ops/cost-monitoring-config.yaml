@@ -1,0 +1,442 @@
+# IntelGraph Cost Monitoring Configuration
+# Sprint 26: GA cutover cost guardrails and adaptive sampling
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cost-monitoring-config
+  namespace: monitoring
+  labels:
+    app: intelgraph
+    component: cost-guardrails
+    version: v1.0.0-ga
+data:
+  cost-guardrails.yaml: |
+    # Cost Guardrails Configuration
+    budget_limits:
+      monthly:
+        infrastructure_usd: 18000
+        llm_usd: 5000
+        observability_usd: 2000
+        storage_usd: 3000
+        network_usd: 1000
+        total_usd: 25000
+
+      daily:
+        infrastructure_usd: 600    # $18k/30
+        llm_usd: 167              # $5k/30
+        total_usd: 833            # $25k/30
+
+      alert_thresholds:
+        warning: 0.80     # 80% of budget
+        critical: 0.90    # 90% of budget
+        emergency: 0.95   # 95% of budget
+
+    adaptive_sampling:
+      enabled: true
+      target_reduction_percentage: 70  # 60-80% range
+      min_sampling_rate: 0.01          # 1%
+      max_sampling_rate: 1.0           # 100%
+      adjustment_interval_seconds: 300  # 5 minutes
+      cost_pressure_threshold_usd: 100 # Daily cost threshold
+
+      # Priority-based sampling
+      priority_rates:
+        critical: 1.0      # Always sample critical events
+        error: 0.9         # 90% error sampling
+        warning: 0.5       # 50% warning sampling
+        info: 0.2          # 20% info sampling
+        debug: 0.05        # 5% debug sampling
+
+      # Service-specific rates
+      service_rates:
+        graphql_gateway: 0.8
+        neo4j_queries: 0.6
+        er_pipeline: 0.4
+        background_jobs: 0.2
+
+    cost_sources:
+      aws:
+        enabled: true
+        services:
+          - ec2
+          - rds
+          - s3
+          - cloudwatch
+          - vpc
+        cost_allocation_tags:
+          - Environment
+          - Service
+          - Owner
+          - CostCenter
+
+      openai:
+        enabled: true
+        models:
+          - gpt-4
+          - gpt-3.5-turbo
+          - text-embedding-ada-002
+        cost_per_1k_tokens:
+          gpt-4: 0.03
+          gpt-3.5-turbo: 0.002
+
+      anthropic:
+        enabled: true
+        models:
+          - claude-3-opus
+          - claude-3-sonnet
+          - claude-3-haiku
+
+      observability:
+        prometheus: true
+        grafana: true
+        jaeger: true
+        elasticsearch: true
+
+    throttling:
+      enabled: true
+      rules:
+        - condition: "budget_utilization > 0.90"
+          action: "throttle_non_essential"
+          rate_limit: 0.7
+
+        - condition: "emergency_mode == true"
+          action: "essential_only"
+          allowed_paths:
+            - "/health"
+            - "/metrics"
+            - "/auth"
+            - "/api/v1/auth"
+
+        - condition: "llm_budget_utilization > 0.85"
+          action: "throttle_llm_requests"
+          rate_limit: 0.5
+
+    notifications:
+      channels:
+        - type: slack
+          webhook_url: "${SLACK_FINOPS_WEBHOOK}"
+          events: ["warning", "critical", "emergency"]
+
+        - type: pagerduty
+          service_key: "${PAGERDUTY_FINOPS_KEY}"
+          events: ["critical", "emergency"]
+
+        - type: email
+          recipients: ["finops@intelgraph.dev", "oncall@intelgraph.dev"]
+          events: ["emergency"]
+
+  adaptive-sampling.yaml: |
+    # Adaptive Sampling Configuration
+    sampling_strategies:
+      default_strategy:
+        type: "adaptive"
+        max_sampling_rate: 1.0
+        cost_threshold: 100
+
+      per_service_strategies:
+        - service: "intelgraph-gateway"
+          type: "adaptive"
+          max_sampling_rate: 0.8
+          operation_strategies:
+            - operation: "graphql_query"
+              max_sampling_rate: 0.6
+            - operation: "graphql_mutation"
+              max_sampling_rate: 0.8
+
+        - service: "neo4j"
+          type: "adaptive"
+          max_sampling_rate: 0.6
+          operation_strategies:
+            - operation: "read_query"
+              max_sampling_rate: 0.4
+            - operation: "write_query"
+              max_sampling_rate: 0.8
+
+        - service: "er-pipeline"
+          type: "adaptive"
+          max_sampling_rate: 0.4
+
+        - service: "llm-service"
+          type: "cost_aware"
+          cost_per_request: 0.01
+          budget_allocation: 100
+
+    cost_aware_sampling:
+      enabled: true
+      cost_models:
+        - service: "openai"
+          cost_function: "token_based"
+          base_cost: 0.002
+
+        - service: "anthropic"
+          cost_function: "token_based"
+          base_cost: 0.003
+
+        - service: "aws_compute"
+          cost_function: "time_based"
+          cost_per_second: 0.0001
+
+      sampling_adjustments:
+        - cost_range: [0, 10]
+          sampling_rate: 1.0
+        - cost_range: [10, 50]
+          sampling_rate: 0.8
+        - cost_range: [50, 100]
+          sampling_rate: 0.5
+        - cost_range: [100, 999999]
+          sampling_rate: 0.2
+
+  prometheus-rules.yaml: |
+    # Prometheus Rules for Cost Monitoring
+    groups:
+      - name: cost-guardrails
+        interval: 30s
+        rules:
+          # Infrastructure cost tracking
+          - record: intelgraph:infrastructure_cost_usd_daily
+            expr: sum(aws_billing_estimated_charges_usd{service!="Tax"}) by (service)
+
+          - record: intelgraph:llm_cost_usd_daily
+            expr: sum(openai_api_cost_usd + anthropic_api_cost_usd)
+
+          - record: intelgraph:total_cost_usd_daily
+            expr: intelgraph:infrastructure_cost_usd_daily + intelgraph:llm_cost_usd_daily
+
+          # Budget utilization metrics
+          - record: intelgraph:budget_utilization_infrastructure
+            expr: (intelgraph:infrastructure_cost_usd_daily * 30) / 18000
+
+          - record: intelgraph:budget_utilization_llm
+            expr: (intelgraph:llm_cost_usd_daily * 30) / 5000
+
+          - record: intelgraph:budget_utilization_total
+            expr: (intelgraph:total_cost_usd_daily * 30) / 25000
+
+          # Sampling effectiveness
+          - record: intelgraph:sampling_rate_current
+            expr: cost_guardrails_sampling_rate
+
+          - record: intelgraph:observability_cost_reduction
+            expr: 1 - (intelgraph:sampling_rate_current)
+
+          # Alert rules
+          - alert: InfrastructureBudgetWarning
+            expr: intelgraph:budget_utilization_infrastructure > 0.80
+            for: 5m
+            labels:
+              severity: warning
+              component: cost-guardrails
+              category: infrastructure
+            annotations:
+              summary: "Infrastructure budget approaching limit"
+              description: "Infrastructure costs at {{ $value | humanizePercentage }} of monthly budget"
+
+          - alert: InfrastructureBudgetCritical
+            expr: intelgraph:budget_utilization_infrastructure > 0.90
+            for: 2m
+            labels:
+              severity: critical
+              component: cost-guardrails
+              category: infrastructure
+            annotations:
+              summary: "Infrastructure budget critical"
+              description: "Infrastructure costs at {{ $value | humanizePercentage }} of monthly budget"
+
+          - alert: LLMBudgetWarning
+            expr: intelgraph:budget_utilization_llm > 0.80
+            for: 5m
+            labels:
+              severity: warning
+              component: cost-guardrails
+              category: llm
+            annotations:
+              summary: "LLM budget approaching limit"
+              description: "LLM costs at {{ $value | humanizePercentage }} of monthly budget"
+
+          - alert: LLMBudgetCritical
+            expr: intelgraph:budget_utilization_llm > 0.90
+            for: 2m
+            labels:
+              severity: critical
+              component: cost-guardrails
+              category: llm
+            annotations:
+              summary: "LLM budget critical"
+              description: "LLM costs at {{ $value | humanizePercentage }} of monthly budget"
+
+          - alert: TotalBudgetEmergency
+            expr: intelgraph:budget_utilization_total > 0.95
+            for: 1m
+            labels:
+              severity: critical
+              component: cost-guardrails
+              category: total
+              emergency: "true"
+            annotations:
+              summary: "EMERGENCY: Total budget nearly exhausted"
+              description: "Total costs at {{ $value | humanizePercentage }} of monthly budget - emergency mode required"
+
+          - alert: SamplingRateTooLow
+            expr: intelgraph:sampling_rate_current < 0.05
+            for: 10m
+            labels:
+              severity: warning
+              component: cost-guardrails
+              category: observability
+            annotations:
+              summary: "Sampling rate very low"
+              description: "Current sampling rate {{ $value | humanizePercentage }} may impact observability"
+
+  grafana-dashboard.json: |
+    {
+      "dashboard": {
+        "title": "IntelGraph Cost Guardrails",
+        "tags": ["cost", "budget", "guardrails", "ga-cutover"],
+        "time": {
+          "from": "now-24h",
+          "to": "now"
+        },
+        "refresh": "1m",
+        "panels": [
+          {
+            "title": "Budget Utilization Overview",
+            "type": "stat",
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+            "targets": [
+              {
+                "expr": "intelgraph:budget_utilization_total * 100",
+                "legendFormat": "Total Budget %"
+              },
+              {
+                "expr": "intelgraph:budget_utilization_infrastructure * 100",
+                "legendFormat": "Infrastructure %"
+              },
+              {
+                "expr": "intelgraph:budget_utilization_llm * 100",
+                "legendFormat": "LLM %"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "max": 100,
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 80},
+                    {"color": "red", "value": 90}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "title": "Daily Cost Breakdown",
+            "type": "timeseries",
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+            "targets": [
+              {
+                "expr": "intelgraph:infrastructure_cost_usd_daily",
+                "legendFormat": "Infrastructure"
+              },
+              {
+                "expr": "intelgraph:llm_cost_usd_daily",
+                "legendFormat": "LLM Services"
+              },
+              {
+                "expr": "sum(observability_cost_usd)",
+                "legendFormat": "Observability"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "currencyUSD"
+              }
+            }
+          },
+          {
+            "title": "Adaptive Sampling Rate",
+            "type": "timeseries",
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+            "targets": [
+              {
+                "expr": "intelgraph:sampling_rate_current * 100",
+                "legendFormat": "Current Sampling Rate"
+              },
+              {
+                "expr": "intelgraph:observability_cost_reduction * 100",
+                "legendFormat": "Cost Reduction"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "max": 100
+              }
+            }
+          },
+          {
+            "title": "Monthly Budget Projection",
+            "type": "bargauge",
+            "gridPos": {"h": 8, "w": 8, "x": 0, "y": 16},
+            "targets": [
+              {
+                "expr": "intelgraph:infrastructure_cost_usd_daily * 30",
+                "legendFormat": "Infrastructure ($18k limit)"
+              },
+              {
+                "expr": "intelgraph:llm_cost_usd_daily * 30",
+                "legendFormat": "LLM ($5k limit)"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "currencyUSD",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 14400},
+                    {"color": "red", "value": 16200}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "title": "Cost Alerts (Last 24h)",
+            "type": "table",
+            "gridPos": {"h": 8, "w": 8, "x": 8, "y": 16},
+            "targets": [
+              {
+                "expr": "ALERTS{alertname=~\".*Budget.*\",alertstate=\"firing\"}",
+                "format": "table"
+              }
+            ]
+          },
+          {
+            "title": "Emergency Mode Status",
+            "type": "stat",
+            "gridPos": {"h": 8, "w": 8, "x": 16, "y": 16},
+            "targets": [
+              {
+                "expr": "cost_guardrails_emergency_mode",
+                "legendFormat": "Emergency Mode"
+              },
+              {
+                "expr": "cost_guardrails_throttle_active",
+                "legendFormat": "Throttling Active"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "mappings": [
+                  {"value": 0, "text": "Normal"},
+                  {"value": 1, "text": "Active"}
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }

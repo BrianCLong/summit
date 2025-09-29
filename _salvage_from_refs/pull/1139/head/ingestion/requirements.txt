@@ -1,0 +1,6 @@
+kafka-python==2.2.15
+feedparser
+redis
+sentence-transformers
+hdbscan
+prometheus-client

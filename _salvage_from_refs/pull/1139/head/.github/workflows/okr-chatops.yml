@@ -1,0 +1,9 @@
+name: OKR ChatOps
+on: issue_comment
+jobs:
+  plan:
+    if: contains(github.event.comment.body, '/okr plan')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node tools/pm/wsjf_rice.ts

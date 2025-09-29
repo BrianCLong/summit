@@ -1,0 +1,46 @@
+# Default values for IntelGraph Helm chart in production environment.
+
+replicaCount: 3
+
+image:
+  repository: intelgraph/server
+  pullPolicy: Always
+  tag: "prod"
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  hosts:
+    - host: intelgraph.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+
+# Environment-specific variables
+env:
+  NODE_ENV: production
+  LOG_LEVEL: error
+  FEATURE_FLAG_AI: "true"
+  # Database connection strings (usually managed by secrets)
+  NEO4J_URI: "bolt://neo4j-prod:7687"
+  POSTGRES_HOST: "postgres-prod"
+  REDIS_HOST: "redis-prod"
+
+# Resource limits for production
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# Production specific configurations
+debug:
+  enabled: false

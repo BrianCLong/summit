@@ -1,0 +1,436 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: intelgraph-alert-rules
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    # === CRITICAL SYSTEM ALERTS ===
+    - name: intelgraph.critical
+      interval: 30s
+      rules:
+        - alert: MaestroServiceDown
+          expr: up{job="maestro-orchestrator"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            service: maestro
+            team: platform
+          annotations:
+            summary: "Maestro orchestrator service is down"
+            description: "The Maestro orchestrator service has been down for more than 1 minute. This affects all AI orchestration capabilities."
+            runbook_url: "https://runbooks.intelgraph.ai/maestro-service-down"
+            dashboard_url: "https://grafana.intelgraph.ai/d/maestro-overview"
+
+        - alert: Neo4jDatabaseDown
+          expr: up{job="neo4j"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            service: neo4j
+            team: data
+          annotations:
+            summary: "Neo4j graph database is down"
+            description: "Neo4j database has been unreachable for {{ $labels.instance }} for more than 2 minutes."
+            runbook_url: "https://runbooks.intelgraph.ai/neo4j-down"
+
+        - alert: HighErrorRate
+          expr: |
+            (
+              rate(maestro_orchestration_errors_total[5m]) / 
+              rate(maestro_orchestration_requests_total[5m])
+            ) * 100 > 10
+          for: 3m
+          labels:
+            severity: critical
+            service: maestro
+            team: platform
+          annotations:
+            summary: "High error rate detected"
+            description: "Error rate is {{ $value }}% for endpoint {{ $labels.endpoint }}"
+            runbook_url: "https://runbooks.intelgraph.ai/high-error-rate"
+
+        - alert: ExtremeLatency
+          expr: |
+            histogram_quantile(0.95, 
+              rate(maestro_orchestration_duration_seconds_bucket[5m])
+            ) > 60
+          for: 5m
+          labels:
+            severity: critical
+            service: maestro
+            team: platform
+          annotations:
+            summary: "Extreme latency detected"
+            description: "95th percentile latency is {{ $value }}s for {{ $labels.endpoint }}"
+            runbook_url: "https://runbooks.intelgraph.ai/extreme-latency"
+
+        - alert: PodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total[15m]) * 60 * 15 > 0
+          for: 5m
+          labels:
+            severity: critical
+            service: kubernetes
+            team: platform
+          annotations:
+            summary: "Pod is crash looping"
+            description: "Pod {{ $labels.pod }} in {{ $labels.namespace }} is crash looping"
+            runbook_url: "https://runbooks.intelgraph.ai/pod-crash-loop"
+
+    # === HIGH PRIORITY ALERTS ===
+    - name: intelgraph.high
+      interval: 60s
+      rules:
+        - alert: HighMemoryUsage
+          expr: |
+            (
+              container_memory_working_set_bytes{container!="POD",container!=""} / 
+              container_spec_memory_limit_bytes{container!="POD",container!=""} * 100
+            ) > 85
+          for: 10m
+          labels:
+            severity: high
+            service: kubernetes
+            team: platform
+          annotations:
+            summary: "High memory usage"
+            description: "Container {{ $labels.container }} memory usage is {{ $value }}%"
+            runbook_url: "https://runbooks.intelgraph.ai/high-memory"
+
+        - alert: HighCPUUsage
+          expr: |
+            (
+              rate(container_cpu_usage_seconds_total{container!="POD",container!=""}[5m]) / 
+              container_spec_cpu_quota{container!="POD",container!=""} * 100
+            ) > 80
+          for: 15m
+          labels:
+            severity: high
+            service: kubernetes
+            team: platform
+          annotations:
+            summary: "High CPU usage"
+            description: "Container {{ $labels.container }} CPU usage is {{ $value }}%"
+
+        - alert: GraphQueryLatencyHigh
+          expr: |
+            histogram_quantile(0.95, 
+              rate(maestro_graph_query_duration_seconds_bucket[5m])
+            ) > 5
+          for: 10m
+          labels:
+            severity: high
+            service: neo4j
+            team: data
+          annotations:
+            summary: "Graph query latency is high"
+            description: "95th percentile graph query latency is {{ $value }}s"
+            runbook_url: "https://runbooks.intelgraph.ai/slow-graph-queries"
+
+        - alert: AIModelLatencyHigh
+          expr: |
+            histogram_quantile(0.95, 
+              rate(maestro_ai_model_response_time_seconds_bucket[10m])
+            ) > 30
+          for: 5m
+          labels:
+            severity: high
+            service: ai-models
+            team: ai
+          annotations:
+            summary: "AI model response time is high"
+            description: "AI model {{ $labels.model }} 95th percentile latency is {{ $value }}s"
+            runbook_url: "https://runbooks.intelgraph.ai/slow-ai-models"
+
+        - alert: DiskSpaceLow
+          expr: |
+            (
+              node_filesystem_avail_bytes{fstype!="tmpfs"} / 
+              node_filesystem_size_bytes{fstype!="tmpfs"} * 100
+            ) < 15
+          for: 5m
+          labels:
+            severity: high
+            service: infrastructure
+            team: platform
+          annotations:
+            summary: "Disk space is running low"
+            description: "Disk space on {{ $labels.instance }} at {{ $labels.mountpoint }} is {{ $value }}%"
+
+        - alert: PremiumBudgetExhausted
+          expr: maestro_premium_budget_utilization_percent > 95
+          for: 2m
+          labels:
+            severity: high
+            service: premium-routing
+            team: ai
+          annotations:
+            summary: "Premium AI model budget nearly exhausted"
+            description: "Premium budget utilization is {{ $value }}%"
+            runbook_url: "https://runbooks.intelgraph.ai/budget-exhausted"
+
+    # === MEDIUM PRIORITY ALERTS ===
+    - name: intelgraph.medium
+      interval: 120s
+      rules:
+        - alert: ModerateLatencyIncrease
+          expr: |
+            histogram_quantile(0.95, 
+              rate(maestro_orchestration_duration_seconds_bucket[5m])
+            ) > 10
+          for: 10m
+          labels:
+            severity: medium
+            service: maestro
+            team: platform
+          annotations:
+            summary: "Moderate latency increase detected"
+            description: "95th percentile latency is {{ $value }}s for {{ $labels.endpoint }}"
+
+        - alert: ErrorRateElevated
+          expr: |
+            (
+              rate(maestro_orchestration_errors_total[10m]) / 
+              rate(maestro_orchestration_requests_total[10m])
+            ) * 100 > 2
+          for: 10m
+          labels:
+            severity: medium
+            service: maestro
+            team: platform
+          annotations:
+            summary: "Error rate is elevated"
+            description: "Error rate is {{ $value }}% for {{ $labels.endpoint }}"
+
+        - alert: WebScrapingFailureRate
+          expr: |
+            (
+              rate(maestro_web_scraping_requests_total{status!="success"}[10m]) / 
+              rate(maestro_web_scraping_requests_total[10m])
+            ) * 100 > 25
+          for: 15m
+          labels:
+            severity: medium
+            service: web-scraping
+            team: data
+          annotations:
+            summary: "Web scraping failure rate is high"
+            description: "Web scraping failure rate is {{ $value }}%"
+
+        - alert: AIModelErrorRateHigh
+          expr: |
+            (
+              rate(maestro_ai_model_errors_total[10m]) / 
+              rate(maestro_ai_model_requests_total[10m])
+            ) * 100 > 5
+          for: 10m
+          labels:
+            severity: medium
+            service: ai-models
+            team: ai
+          annotations:
+            summary: "AI model error rate is high"
+            description: "AI model {{ $labels.model }} error rate is {{ $value }}%"
+
+    # === SECURITY ALERTS ===
+    - name: intelgraph.security
+      interval: 30s
+      rules:
+        - alert: SecurityEventSpike
+          expr: |
+            rate(maestro_security_events_total[5m]) > 10
+          for: 2m
+          labels:
+            severity: high
+            service: security
+            team: security
+          annotations:
+            summary: "Security event spike detected"
+            description: "Security events of type {{ $labels.event_type }} spiking at {{ $value }} events/sec"
+            runbook_url: "https://runbooks.intelgraph.ai/security-event-spike"
+
+        - alert: FailedAuthenticationSpike
+          expr: |
+            rate(maestro_authentication_attempts_total{status="failed"}[5m]) > 5
+          for: 3m
+          labels:
+            severity: high
+            service: authentication
+            team: security
+          annotations:
+            summary: "Failed authentication attempts spike"
+            description: "Failed authentication rate is {{ $value }} attempts/sec"
+            runbook_url: "https://runbooks.intelgraph.ai/auth-spike"
+
+        - alert: ComplianceViolation
+          expr: |
+            rate(maestro_compliance_gate_decisions_total{decision="deny"}[10m]) > 1
+          for: 1m
+          labels:
+            severity: high
+            service: compliance
+            team: security
+          annotations:
+            summary: "Compliance violations detected"
+            description: "Compliance violations for policy {{ $labels.policy }}: {{ $value }} denials"
+            runbook_url: "https://runbooks.intelgraph.ai/compliance-violation"
+
+        - alert: UnauthorizedAccessAttempt
+          expr: |
+            rate(maestro_authorization_decisions_total{decision="deny"}[5m]) > 2
+          for: 2m
+          labels:
+            severity: medium
+            service: authorization
+            team: security
+          annotations:
+            summary: "Unauthorized access attempts"
+            description: "Authorization denials at {{ $value }} attempts/sec"
+
+    # === BUSINESS METRICS ALERTS ===
+    - name: intelgraph.business
+      interval: 300s
+      rules:
+        - alert: InvestigationCreationDrop
+          expr: |
+            (
+              rate(maestro_investigations_created_total[1h]) < 
+              rate(maestro_investigations_created_total[1h] offset 24h) * 0.5
+            )
+          for: 30m
+          labels:
+            severity: medium
+            service: investigations
+            team: product
+          annotations:
+            summary: "Investigation creation rate has dropped significantly"
+            description: "Investigation creation is 50% below yesterday's rate"
+
+        - alert: DataSourcesOffline
+          expr: |
+            maestro_data_sources_active_total < 5
+          for: 10m
+          labels:
+            severity: medium
+            service: data-sources
+            team: data
+          annotations:
+            summary: "Too few active data sources"
+            description: "Only {{ $value }} data sources are active"
+
+        - alert: AICostSpike
+          expr: |
+            rate(maestro_ai_model_cost_usd[1h]) > 
+            rate(maestro_ai_model_cost_usd[1h] offset 24h) * 2
+          for: 15m
+          labels:
+            severity: medium
+            service: ai-cost-optimization
+            team: ai
+          annotations:
+            summary: "AI costs are spiking"
+            description: "AI costs are 2x higher than yesterday"
+            runbook_url: "https://runbooks.intelgraph.ai/ai-cost-spike"
+
+    # === INFRASTRUCTURE ALERTS ===
+    - name: intelgraph.infrastructure
+      interval: 60s
+      rules:
+        - alert: KubernetesNodeNotReady
+          expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+          for: 5m
+          labels:
+            severity: high
+            service: kubernetes
+            team: platform
+          annotations:
+            summary: "Kubernetes node is not ready"
+            description: "Node {{ $labels.node }} has been not ready for more than 5 minutes"
+
+        - alert: EtcdClusterUnhealthy
+          expr: |
+            (
+              up{job="etcd"} == 0 or 
+              etcd_server_has_leader == 0
+            )
+          for: 3m
+          labels:
+            severity: critical
+            service: etcd
+            team: platform
+          annotations:
+            summary: "etcd cluster is unhealthy"
+            description: "etcd cluster health issue detected on {{ $labels.instance }}"
+
+        - alert: IngressControllerDown
+          expr: up{job="nginx-ingress"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            service: ingress
+            team: platform
+          annotations:
+            summary: "Ingress controller is down"
+            description: "Nginx ingress controller is not responding"
+
+        - alert: NetworkPolicyViolation
+          expr: |
+            rate(cilium_drop_count_total[5m]) > 50
+          for: 5m
+          labels:
+            severity: medium
+            service: network-policy
+            team: security
+          annotations:
+            summary: "High network policy drop rate"
+            description: "Network policy drops at {{ $value }} drops/sec"
+
+    # === PERFORMANCE DEGRADATION ALERTS ===
+    - name: intelgraph.performance
+      interval: 120s
+      rules:
+        - alert: ThompsonSamplingPerformanceDrop
+          expr: |
+            maestro_thompson_sampling_reward_rate < 0.7
+          for: 15m
+          labels:
+            severity: medium
+            service: thompson-sampling
+            team: ai
+          annotations:
+            summary: "Thompson sampling performance has dropped"
+            description: "Model {{ $labels.model }} reward rate is {{ $value }}"
+
+        - alert: GraphTraversalSlowdown
+          expr: |
+            histogram_quantile(0.90, 
+              rate(maestro_graph_query_duration_seconds_bucket{operation="traverse"}[10m])
+            ) > 2
+          for: 10m
+          labels:
+            severity: medium
+            service: graph-traversal
+            team: data
+          annotations:
+            summary: "Graph traversal queries are slow"
+            description: "90th percentile graph traversal time is {{ $value }}s"
+
+        - alert: SynthesisLatencyIncrease
+          expr: |
+            histogram_quantile(0.95, 
+              rate(maestro_synthesis_duration_seconds_bucket[10m])
+            ) > 15
+          for: 10m
+          labels:
+            severity: medium
+            service: synthesis
+            team: ai
+          annotations:
+            summary: "Data synthesis latency has increased"
+            description: "95th percentile synthesis time is {{ $value }}s"

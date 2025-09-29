@@ -1,0 +1,19 @@
+{
+  "title": "Metrics Overview",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "CPU Usage",
+      "targets": [
+        { "expr": "sum(rate(container_cpu_usage_seconds_total{image!=''}[5m]))" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Memory Usage",
+      "targets": [
+        { "expr": "sum(container_memory_usage_bytes{image!=''})" }
+      ]
+    }
+  ]
+}

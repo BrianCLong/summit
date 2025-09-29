@@ -1,0 +1,61 @@
+name: CI
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+concurrency:
+  group: ci-${{ github.head_ref }}
+  cancel-in-progress: true
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Start OTEL tracer
+        run: node tools/otel/ci_tracer.ts
+        env: { OTEL_EXPORTER_OTLP_ENDPOINT: ${{ secrets.OTEL_COLLECTOR }}, CI_STAGE: build }
+      - name: Warm multi-cloud runner
+        uses: ./.github/actions/fabric-warm
+        with: { label: "build" }
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-turbo
+      - name: DB snapshot
+        run: node tools/db/snapshot.ts
+      - name: Codegen drift
+        run: tools/ci/check_codegen.sh
+      - name: Validate Change Contract
+        run: node tools/contracts/validate.ts
+      - name: Assert Budgets on Preview
+        env: { PREVIEW_BASE: https://maestro-pr${{ github.event.number }}.dev }
+        run: node tools/contracts/assert_budgets.ts
+      - name: ABP Build
+        uses: ./.github/actions/abp-build
+        with: { path: "." }
+      - run: npx jest --coverage --coverageReporters=json && node tools/ci/fli_build_map.ts
+      - run: node tools/ci/ast_diff.ts && node tools/ci/fli_select.ts
+      - run: xargs -a fli-tests.txt npx jest --ci --runTestsByPath
+      - name: Verify Plugin OCI
+        run: echo "Running cosign verify for new/changed plugins..." # Placeholder
+      - name: Validate SBOM
+        run: echo "Running CycloneDX JSON schema validation..." # Placeholder
+      - name: Policy Capabilities Check
+        run: echo "Checking plugin capabilities against policy..." # Placeholder
+            - name: Cache Determinism Check
+        run: echo "Running deterministic plugin twice and checking cache hit..." # Placeholder
+      - name: Compute CI concurrency
+        id: cc
+        run: node tools/ci/cost_controller.ts
+        env: { COST_MONTH_USD: ${{ secrets.COST_MONTH_USD }}, PHASE: pull_request }
+      - run: node tools/arch/adr_index.ts && node tools/arch/scan.ts
+      - uses: open-policy-agent/conftest-action@v1
+        with: { policy: tools/policy, files: arch_scan.json }
+      - name: Build policy input
+        run: |
+          node packages/maestroflow/bin/nl2flow.ts runbooks/default.md > flow.json || echo '{"lints":[]}' > flow.json
+          echo '{"flow":'$(cat flow.json)',"pr":{"fail_prob":'${{ steps.predict.outputs.prob || '0' }}'}}' > policy.json
+      - uses: open-policy-agent/conftest-action@v1
+        with: { policy: tools/policy, files: policy.json }
+      - name: Jest Shard 1/2 (TIA)
+        if: hashFiles('tia-tests.txt') != ''
+        run: npx jest --ci --maxWorkers=${{ fromJson(steps.cc.outputs).concurrency }} --runTestsByPath $(awk 'NR%2==1' tia-tests.txt)
+      - name: Jest Shard 2/2 (TIA)
+        if: hashFiles('tia-tests.txt') != ''
+        run: npx jest --ci --maxWorkers=${{ fromJson(steps.cc.outputs).concurrency }} --runTestsByPath $(awk 'NR%2==0' tia-tests.txt)

@@ -1,0 +1,6 @@
+extend type Media {
+  authenticityScore: Float
+  authenticityBand: String
+  quarantined: Boolean!
+  mitreTechniques: [String!]!
+}

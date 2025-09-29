@@ -1,0 +1,30 @@
+name: no-todos
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for TODO/FIXME in production code and manifests
+        run: |
+          set -euo pipefail
+          rg -n "(TODO|FIXME|REPLACE_ME)" \
+            --glob '!**/*.md' \
+            --glob '!docs/**' \
+            --glob '!**/*.test.*' \
+            --glob '!**/__tests__/**' \
+            --glob '!client/**' \
+            --glob '!**/*.spec.*' \
+            --glob '!infra/k8s/auth/**' \
+            --glob '!**/examples/**' \
+            server/src deploy/ infra/k8s charts/maestro | tee /tmp/todos.txt || true
+          if [ -s /tmp/todos.txt ]; then \
+            echo "❌ TODO/FIXME found in production paths"; \
+            exit 1; \
+          fi

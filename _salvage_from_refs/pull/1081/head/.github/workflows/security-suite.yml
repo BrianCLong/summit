@@ -1,0 +1,264 @@
+# Security Scanning Suite - Consolidates security workflows
+# Replaces: security.yml, codeql.yml, gitleaks.yml, trivy.yml, dependency-review.yml
+
+name: 🔒 Security Suite
+on:
+  push:
+    branches: [main, feature/*, release/*]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly scan on Mondays at 2 AM
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  # =============================================================================
+  # Secret Scanning & Detection
+  # =============================================================================
+  secret-scanning:
+    name: 🕵️ Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Install GitLeaks
+        run: |
+          wget -q https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz
+          tar xzf gitleaks_8.18.4_linux_x64.tar.gz
+          sudo mv gitleaks /usr/local/bin/
+
+      - name: 🔍 Scan for Secrets
+        run: |
+          if [ -f ".gitleaks.toml" ]; then
+            gitleaks detect --source . --config .gitleaks.toml --verbose --report-format json --report-path gitleaks-report.json
+          else
+            gitleaks detect --source . --verbose --report-format json --report-path gitleaks-report.json
+          fi
+          echo "✅ Secret scanning completed"
+
+      - name: 📊 Upload GitLeaks Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gitleaks-results
+          path: gitleaks-report.json
+          retention-days: 30
+
+  # =============================================================================
+  # Vulnerability Scanning
+  # =============================================================================
+  vulnerability-scan:
+    name: 🛡️ Vulnerability Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📦 Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: 🔍 Filesystem Vulnerability Scan
+        run: |
+          trivy fs --exit-code 0 --format table .
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format sarif -o trivy-results.sarif .
+          echo "✅ Vulnerability scanning completed"
+        continue-on-error: true
+
+      - name: 🐳 Container Image Scan
+        if: hashFiles('**/Dockerfile*') != ''
+        run: |
+          # Find and scan Docker images
+          find . -name "Dockerfile*" -type f | head -5 | while read dockerfile; do
+            echo "📦 Scanning $dockerfile"
+            trivy config --exit-code 0 --format table "$dockerfile"
+          done
+
+      - name: 📊 Upload Trivy Results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+
+      - name: 📊 Upload Trivy Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-results
+          path: trivy-results.sarif
+          retention-days: 30
+
+  # =============================================================================
+  # Code Analysis (CodeQL)
+  # =============================================================================
+  code-analysis:
+    name: 🔬 Static Code Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript, typescript, python]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📦 Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: +security-and-quality
+
+      - name: 🏗️ Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: 🔍 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  # =============================================================================
+  # Dependency Review & SBOM
+  # =============================================================================
+  dependency-review:
+    name: 📦 Dependency Security Review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔍 Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          allow-licenses: MIT, Apache-2.0, BSD-3-Clause, BSD-2-Clause, ISC
+          deny-licenses: GPL-2.0, GPL-3.0
+
+      - name: 📋 Generate SBOM
+        if: github.event_name == 'push'
+        run: |
+          # JavaScript/TypeScript SBOM
+          if [ -f "package.json" ]; then
+            npm install -g @cyclonedx/cyclonedx-npm
+            cyclonedx-npm --output-file sbom-js.json
+          fi
+          
+          # Python SBOM  
+          if [ -f "requirements.txt" ] || find . -name "requirements*.txt" | head -1; then
+            pip install cyclonedx-bom
+            cyclonedx-py -o sbom-py.json
+          fi
+          
+          echo "✅ SBOM generation completed"
+
+      - name: 📊 Upload SBOM
+        uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && always()
+        with:
+          name: sbom-reports
+          path: |
+            sbom-*.json
+          retention-days: 90
+
+  # =============================================================================
+  # License Compliance
+  # =============================================================================
+  license-check:
+    name: ⚖️ License Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+        if: hashFiles('**/package-lock.json') != ''
+
+      - name: 🔍 License Scanning
+        run: |
+          # JavaScript license check
+          if [ -f "package.json" ]; then
+            npm install -g license-checker
+            npm ci
+            license-checker --json --out licenses-js.json
+            license-checker --summary
+          fi
+          
+          # Python license check
+          if [ -f "requirements.txt" ]; then
+            pip install pip-licenses
+            pip-licenses --format=json --output-file=licenses-py.json
+            pip-licenses --format=plain-vertical
+          fi
+          
+          echo "✅ License scanning completed"
+
+      - name: 📊 Upload License Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: license-reports
+          path: |
+            licenses-*.json
+          retention-days: 30
+
+  # =============================================================================
+  # Security Summary & Reporting
+  # =============================================================================
+  security-summary:
+    name: 📋 Security Summary
+    needs: [secret-scanning, vulnerability-scan, code-analysis, dependency-review, license-check]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📊 Evaluate Security Results
+        run: |
+          echo "🔒 Security Suite Results:"
+          echo "Secret Scanning: ${{ needs.secret-scanning.result }}"
+          echo "Vulnerability Scan: ${{ needs.vulnerability-scan.result }}"
+          echo "Code Analysis: ${{ needs.code-analysis.result }}"
+          echo "Dependency Review: ${{ needs.dependency-review.result }}"
+          echo "License Check: ${{ needs.license-check.result }}"
+          
+          # Determine overall security posture
+          if [[ "${{ needs.secret-scanning.result }}" == "success" ]] && \
+             ([[ "${{ needs.vulnerability-scan.result }}" == "success" ]] || [[ "${{ needs.vulnerability-scan.result }}" == "skipped" ]]) && \
+             ([[ "${{ needs.code-analysis.result }}" == "success" ]] || [[ "${{ needs.code-analysis.result }}" == "skipped" ]]) && \
+             ([[ "${{ needs.dependency-review.result }}" == "success" ]] || [[ "${{ needs.dependency-review.result }}" == "skipped" ]]) && \
+             ([[ "${{ needs.license-check.result }}" == "success" ]] || [[ "${{ needs.license-check.result }}" == "skipped" ]]); then
+            echo "🎉 Security posture: SECURE ✅"
+            echo "🛡️ All security checks passed"
+          else
+            echo "⚠️ Security posture: NEEDS ATTENTION"
+            echo "🔍 Review failed security checks above"
+          fi
+
+      - name: 📈 Security Metrics
+        if: always()
+        run: |
+          echo "📊 Security Metrics Summary:"
+          echo "🔍 Scans Performed: Secret, Vulnerability, Code Analysis, Dependencies, Licenses"
+          echo "⚡ Performance: Parallel execution for faster results"  
+          echo "📋 Compliance: SARIF format for GitHub Security tab integration"
+          echo "🎯 Coverage: Multi-language support (JS/TS/Python)"

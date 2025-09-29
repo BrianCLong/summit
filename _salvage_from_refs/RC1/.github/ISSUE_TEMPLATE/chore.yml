@@ -1,0 +1,6 @@
+name: Chore
+labels: [chore]
+body:
+  - type: textarea
+    id: task
+    attributes: { label: Task, description: What needs to be done? }

@@ -1,0 +1,17 @@
+name: infra-drift
+on:
+  schedule:
+    - cron: '0 6 * * *' # daily 06:00 UTC
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init -backend-config=backend.hcl
+      - run: terraform plan -detailed-exitcode || echo "PLAN_EXIT=$?" >> $GITHUB_ENV
+      - name: Alert on drift
+        run: |
+          if [ "${PLAN_EXIT}" = "2" ]; then
+            echo "Drift detected" && exit 1
+          fi

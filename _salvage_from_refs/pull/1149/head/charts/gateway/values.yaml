@@ -1,0 +1,24 @@
+image:
+  repository: ghcr.io/brianclong/intelgraph/gateway
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 4000
+
+resources: {}
+
+oidc:
+  issuer: ""
+  clientId: ""
+  clientSecret: ""
+  secretName: oidc
+
+scim:
+  token: ""
+  secretName: scim
+

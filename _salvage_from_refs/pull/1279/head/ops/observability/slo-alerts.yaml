@@ -1,0 +1,26 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gateway-slo-burn
+spec:
+  groups:
+  - name: gateway.slo
+    rules:
+    - alert: APISLOFastBurn
+      expr: (
+        sum(rate(http_request_errors_total{job="gateway"}[5m]))
+        / sum(rate(http_requests_total{job="gateway"}[5m]))
+      ) > (0.001 * 14.4)
+      for: 5m
+      labels: {severity: page}
+      annotations:
+        summary: "API SLO fast burn"
+    - alert: APISLOSlowBurn
+      expr: (
+        sum(rate(http_request_errors_total{job="gateway"}[1h]))
+        / sum(rate(http_requests_total{job="gateway"}[1h]))
+      ) > (0.001 * 2)
+      for: 2h
+      labels: {severity: ticket}
+      annotations:
+        summary: "API SLO slow burn"

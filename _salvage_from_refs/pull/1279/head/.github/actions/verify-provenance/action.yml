@@ -1,0 +1,119 @@
+name: 'Verify SLSA Provenance'
+description: 'Verify SLSA provenance attestation for container images using cosign'
+
+inputs:
+  image:
+    description: 'Container image to verify'
+    required: true
+  digest:
+    description: 'Image digest for provenance verification'
+    required: true
+  allowed-builder-id:
+    description: 'Allowed GitHub Actions builder ID'
+    required: true
+  allowed-oidc-issuer:
+    description: 'Allowed OIDC issuer for attestation'
+    required: true
+
+outputs:
+  verified:
+    description: 'Whether provenance verification succeeded'
+    value: ${{ steps.verify.outputs.verified }}
+  builder-id:
+    description: 'Verified builder ID from attestation'
+    value: ${{ steps.verify.outputs.builder-id }}
+
+runs:
+  using: 'composite'
+  steps:
+  - name: Verify provenance attestation
+    id: verify
+    shell: bash
+    run: |
+      set -euo pipefail
+
+      echo "🔍 Verifying SLSA provenance for ${{ inputs.image }}@${{ inputs.digest }}"
+
+      # Download and verify attestation
+      TEMP_DIR=$(mktemp -d)
+      ATTESTATION_FILE="$TEMP_DIR/attestation.json"
+
+      # Verify against OIDC issuer and extract attestation
+      cosign verify-attestation \
+        --type slsaprovenance \
+        --certificate-oidc-issuer "${{ inputs.allowed-oidc-issuer }}" \
+        --certificate-identity-regexp "^https://github\.com/.+/.github/workflows/.+\.yml@.*$" \
+        --output-file "$ATTESTATION_FILE" \
+        "${{ inputs.image }}@${{ inputs.digest }}" || {
+          echo "❌ Cosign verification failed"
+          exit 1
+        }
+
+      echo "✅ Cosign verification succeeded"
+
+      # Extract and verify builder ID from attestation
+      BUILDER_ID=$(jq -r '.payload | @base64d | fromjson | .predicate.builder.id' "$ATTESTATION_FILE")
+      echo "🏗️  Builder ID: $BUILDER_ID"
+
+      # Check against allowed builder
+      if [[ "$BUILDER_ID" != "${{ inputs.allowed-builder-id }}" ]]; then
+        echo "❌ Builder ID mismatch:"
+        echo "   Expected: ${{ inputs.allowed-builder-id }}"
+        echo "   Actual:   $BUILDER_ID"
+        exit 1
+      fi
+
+      echo "✅ Builder ID verified: $BUILDER_ID"
+
+      # Verify the build was triggered by the expected repository
+      REPO_URI=$(jq -r '.payload | @base64d | fromjson | .predicate.invocation.configSource.uri' "$ATTESTATION_FILE")
+      REPO_DIGEST=$(jq -r '.payload | @base64d | fromjson | .predicate.invocation.configSource.digest.sha1' "$ATTESTATION_FILE")
+
+      echo "📦 Repository: $REPO_URI"
+      echo "🔗 Commit: $REPO_DIGEST"
+
+      # Verify materials and dependencies
+      MATERIALS_COUNT=$(jq -r '.payload | @base64d | fromjson | .predicate.materials | length' "$ATTESTATION_FILE")
+      echo "📦 Materials count: $MATERIALS_COUNT"
+
+      # Extract workflow info
+      WORKFLOW_REF=$(jq -r '.payload | @base64d | fromjson | .predicate.metadata.buildInvocationId' "$ATTESTATION_FILE" | cut -d'/' -f4-)
+      echo "🔄 Workflow: $WORKFLOW_REF"
+
+      # Clean up
+      rm -rf "$TEMP_DIR"
+
+      # Set outputs
+      echo "verified=true" >> $GITHUB_OUTPUT
+      echo "builder-id=$BUILDER_ID" >> $GITHUB_OUTPUT
+
+      echo "🎉 SLSA provenance verification completed successfully"
+
+  - name: Verify trust policy
+    shell: bash
+    run: |
+      set -euo pipefail
+
+      echo "🛡️  Checking trust policy compliance..."
+
+      # Load trust policy
+      if [[ ! -f "security/policy/trust-policy.yaml" ]]; then
+        echo "❌ Trust policy not found: security/policy/trust-policy.yaml"
+        exit 1
+      fi
+
+      # Verify builder is in allowed list (basic YAML parsing)
+      if ! grep -q "${{ inputs.allowed-builder-id }}" security/policy/trust-policy.yaml; then
+        echo "❌ Builder not found in trust policy"
+        echo "   Builder: ${{ inputs.allowed-builder-id }}"
+        exit 1
+      fi
+
+      # Verify OIDC issuer is in allowed list
+      if ! grep -q "${{ inputs.allowed-oidc-issuer }}" security/policy/trust-policy.yaml; then
+        echo "❌ OIDC issuer not found in trust policy"
+        echo "   Issuer: ${{ inputs.allowed-oidc-issuer }}"
+        exit 1
+      fi
+
+      echo "✅ Trust policy compliance verified"

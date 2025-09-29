@@ -1,0 +1,12 @@
+{
+  "title": "Central Logging",
+  "panels": [
+    {
+      "type": "logs",
+      "title": "IntelGraph Logs",
+      "targets": [
+        { "expr": "{app='intelgraph'}" }
+      ]
+    }
+  ]
+}

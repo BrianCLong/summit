@@ -1,0 +1,45 @@
+area: ops:
+  - ops/**
+  - scripts/**
+  - charts/**
+
+area: observability:
+  - ops/prometheus/**
+  - ops/grafana/**
+  - ops/alertmanager/**
+  - server/src/observability/**
+  - server/src/metrics/**
+
+area: security:
+  - server/policies/**
+  - server/src/policy/**
+  - docs/security/**
+  - SECURITY/**
+  - .github/workflows/**security**.yml
+
+area: data:
+  - server/src/db/**
+  - server/src/migrations/**
+  - services/er/**
+  - server/src/services/**/er/**
+
+area: auth:
+  - server/src/auth/**
+  - services/gateway/src/auth/**
+  - docs/security/webauthn-coverage.md
+
+area: er:
+  - services/er/**
+  - server/src/routes/**/er/**
+  - server/src/services/**/er/**
+
+area: cost:
+  - ops/cost-guardrails.ts
+  - ops/cost-monitoring-config.yaml
+  - docs/observability/**cost**
+
+area: supply-chain:
+  - ops/cd/**
+  - tools/verify-bundle/**
+  - .github/workflows/**provenance**.yml
+  - docs/releases/**

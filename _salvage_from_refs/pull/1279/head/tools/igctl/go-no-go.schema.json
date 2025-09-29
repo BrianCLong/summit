@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["gates"],
+  "properties": {
+    "version": { "type": ["integer", "string"] },
+    "gates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "thresholds", "validators", "decision"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9._-]+$" },
+          "name": { "type": "string" },
+          "desc": { "type": "string" },
+          "metric": { "type": "string", "pattern": "^promql:" },
+          "threshold": {
+            "type": ["string", "number"],
+            "pattern": "^(<=|>=)\\s?\\d+(\\.\\d+)?$|^dynamic_[a-zA-Z0-9_]+$"
+          },
+          "burn_alert": { "type": "string" },
+          "validators": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": ["string", "object"] }
+          },
+          "thresholds": { "type": "object" },
+          "decision": { "type": "string", "enum": ["fail_on_any_breach", "pass_on_all"] },
+          "type": { "type": "string", "enum": ["auto", "manual"] },
+          "approvers": { "type": "array", "items": { "type": "string" } },
+          "downshift_ladder": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "uniqueItems": true
+    }
+  }
+}
+

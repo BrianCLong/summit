@@ -1,0 +1,11 @@
+version: '3.9'
+services:
+  openapi-mock:
+    image: stoplight/prism:4
+    command: ["mock", "-h", "0.0.0.0", "/spec/export.yaml"]
+    ports:
+      - "4010:4010"
+    volumes:
+      - ./openapi/export.yaml:/spec/export.yaml:ro
+    profiles: ["mock"]
+

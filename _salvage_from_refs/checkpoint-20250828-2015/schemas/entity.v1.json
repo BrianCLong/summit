@@ -1,0 +1,12 @@
+{
+  "$id": "ig.entity.v1",
+  "type": "object",
+  "required": ["id", "tenantId", "type", "ts"],
+  "properties": {
+    "id": {"type": "string"},
+    "tenantId": {"type": "string"},
+    "type": {"type": "string"}, 
+    "attrs": {"type": "object"},
+    "ts": {"type": "string", "format": "date-time"}
+  }
+}

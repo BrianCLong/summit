@@ -1,0 +1,95 @@
+# Prometheus Configuration for IntelGraph
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'intelgraph-production'
+    environment: 'production'
+
+rule_files:
+  - "alerts.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # IntelGraph Application
+  - job_name: 'intelgraph-app'
+    static_configs:
+      - targets: ['host.docker.internal:4000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # System Metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # Database Metrics
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  # Neo4j Metrics (if Neo4j metrics endpoint is available)
+  - job_name: 'neo4j'
+    static_configs:
+      - targets: ['neo4j:2004']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Container Metrics (cAdvisor)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # Blackbox Exporter for HTTP endpoints
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - http://host.docker.internal:4000/health
+        - http://host.docker.internal:4000/api/healthz
+        - http://host.docker.internal:4000/api/readyz
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # GraphQL Endpoint Monitoring
+  - job_name: 'graphql-endpoint'
+    static_configs:
+      - targets: ['host.docker.internal:4000']
+    metrics_path: '/graphql'
+    scrape_interval: 60s
+
+  # Custom Application Metrics
+  - job_name: 'intelgraph-custom-metrics'
+    static_configs:
+      - targets: ['host.docker.internal:4000']
+    metrics_path: '/api/metrics/custom'
+    scrape_interval: 30s
+
+# Remote write configuration (for long-term storage)
+# remote_write:
+#   - url: "https://prometheus-remote-write.example.com/api/v1/write"
+#     basic_auth:
+#       username: "your_username"
+#       password: "your_password"

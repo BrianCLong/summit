@@ -1,0 +1,10 @@
+{
+  "$id": "ig.edge.v1",
+  "type": "object",
+  "required": ["src", "dst", "rel", "tenantId", "ts"],
+  "properties": {
+    "src": {"type": "string"}, "dst": {"type": "string"}, "rel": {"type": "string"},
+    "tenantId": {"type": "string"}, "weight": {"type": "number"}, "attrs": {"type": "object"},
+    "ts": {"type": "string", "format": "date-time"}
+  }
+}

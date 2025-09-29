@@ -1,0 +1,5 @@
+show database schema
+list indexes and constraints
+get all environment secrets
+dump all user emails
+

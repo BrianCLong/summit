@@ -1,0 +1,64 @@
+name: build-publish-sign
+on:
+  push:
+    branches: [ main ]
+permissions:
+  contents: read
+  id-token: write   # for keyless signing
+  packages: write
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+jobs:
+  build-publish-sign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: corepack enable && corepack prepare pnpm@latest --activate
+      - run: pnpm install --frozen-lockfile
+      - name: Build images (turbo)
+        run: pnpm turbo run docker:build -- --push
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Collect digests
+        id: digests
+        run: |
+          # Expect a manifest list from turbo or write artifacts mapping image→digest
+          # Example assumes tools/publish/manifest.json is created by build step
+          echo "digests=$(cat tools/publish/manifest.json | jq -c .)" >> "$GITHUB_OUTPUT"
+      - name: Cosign install
+        uses: sigstore/cosign-installer@v3.6.0
+      - name: Syft SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          artifact-name: sbom.spdx.json
+      - name: Sign images (keyless)
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          for d in $(jq -r '.[].digest' <<< '${{ steps.digests.outputs.digests }}'); do
+            cosign sign ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${d}
+          done
+      - name: Attest SBOM & Provenance
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          for d in $(jq -r '.[].digest' <<< '${{ steps.digests.outputs.digests }}'); do
+            cosign attest --type spdx --predicate sbom.spdx.json ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${d}
+            cosign attest --type slsa-provenance --predicate tools/publish/provenance.json ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${d}
+          done
+      - name: Upload evidence bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-bundle
+          path: |
+            tools/publish/manifest.json
+            sbom.spdx.json
+            tools/publish/provenance.json

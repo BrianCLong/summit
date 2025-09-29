@@ -1,0 +1,11 @@
+name: unquarantine
+
+permissions:
+  contents: read
+on: { schedule: [{ cron: "0 8 * * 1" }] }
+jobs:
+  try:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node tools/ci/retry_quarantined.ts  # run isolated; remove if stable 3x

@@ -1,0 +1,150 @@
+name: CI Security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * 1' # Weekly scan
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
+        with:
+          fetch-depth: 0
+      - name: Check for changes
+        id: changes
+        uses: dorny/paths-filter@4512585
+        with:
+          filters: |
+            client:
+              - 'client/**'
+            server:
+              - 'server/**'
+            python:
+              - 'python/**'
+            dockerfile:
+              - '**/Dockerfile*'
+
+      - name: Run Gitleaks
+        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' || steps.changes.outputs.python == 'true'
+        uses: zricethezav/gitleaks-action@475ab2f0c4472b3e243c95a4c34e53d255f234e5 # v2.2.0
+        continue-on-error: false
+
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    strategy:
+      fail-fast: true
+      matrix:
+        language: ['javascript', 'python'] # Limiting to JS/TS and Python as per brief
+    steps:
+      - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
+      - uses: github/codeql-action/init@b6110717a335152231a71b8447af51af11020a8f # v2
+        with:
+          languages: ${{ matrix.language }}
+      - uses: github/codeql-action/analyze@b6110717a335152231a71b8447af51af11020a8f # v2
+
+  trivy-fs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
+      - name: Run Trivy filesystem scan
+        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' || steps.changes.outputs.python == 'true'
+        uses: aquasecurity/trivy-action@77137e9
+        with:
+          scan-type: 'fs'
+          severity: 'HIGH,CRITICAL'
+          format: 'github'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' || steps.changes.outputs.python == 'true'
+        uses: github/codeql-action/upload-sarif@b6110717a335152231a71b8447af51af11020a8f # v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  trivy-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GHCR
+        uses: docker/login-action@184bdaa
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Trivy image scan (server)
+        if: steps.changes.outputs.server == 'true' || steps.changes.outputs.dockerfile == 'true'
+        uses: aquasecurity/trivy-action@77137e9
+        with:
+          image-ref: ghcr.io/${{ github.repository }}-server:${{ github.sha }}
+          format: 'github'
+          output: 'trivy-server-image-results.sarif'
+          severity: 'HIGH,CRITICAL'
+
+      - name: Upload Trivy server image scan results to GitHub Security tab
+        if: steps.changes.outputs.server == 'true' || steps.changes.outputs.dockerfile == 'true'
+        uses: github/codeql-action/upload-sarif@b6110717a335152231a71b8447af51af11020a8f # v2
+        with:
+          sarif_file: 'trivy-server-image-results.sarif'
+
+      - name: Run Trivy image scan (client)
+        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
+        uses: aquasecurity/trivy-action@77137e9
+        with:
+          image-ref: ghcr.io/${{ github.repository }}-client:${{ github.sha }}
+          format: 'github'
+          output: 'trivy-client-image-results.sarif'
+          severity: 'HIGH,CRITICAL'
+
+      - name: Upload Trivy client image scan results to GitHub Security tab
+        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
+        uses: github/codeql-action/upload-sarif@b6110717a335152231a71b8447af51af11020a8f # v2
+        with:
+          sarif_file: 'trivy-client-image-results.sarif'
+
+  sbom:
+    runs-on: ubuntu-latest
+    needs: [trivy-image]
+    steps:
+      - name: Login to GHCR
+        uses: docker/login-action@184bdaa
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate SBOM for server image
+        if: steps.changes.outputs.server == 'true' || steps.changes.outputs.dockerfile == 'true'
+        uses: aquasecurity/trivy-action@77137e9
+        with:
+          image-ref: ghcr.io/${{ github.repository }}-server:${{ github.sha }}
+          format: 'spdx-json'
+          output: 'server-sbom.json'
+
+      - name: Upload server SBOM
+        if: steps.changes.outputs.server == 'true' || steps.changes.outputs.dockerfile == 'true'
+        uses: actions/upload-artifact@0b7f8f6
+        with:
+          name: server-sbom
+          path: server-sbom.json
+
+      - name: Generate SBOM for client image
+        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
+        uses: aquasecurity/trivy-action@77137e9
+        with:
+          image-ref: ghcr.io/${{ github.repository }}-client:${{ github.sha }}
+          format: 'spdx-json'
+          output: 'client-sbom.json'
+
+      - name: Upload client SBOM
+        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
+        uses: actions/upload-artifact@0b7f8f6
+        with:
+          name: client-sbom
+          path: client-sbom.json

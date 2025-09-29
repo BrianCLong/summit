@@ -1,0 +1,11 @@
+name: model-license-check
+
+permissions:
+  contents: read
+on: [pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/model-license-check.js # This script is not provided in the PR pack, so I will create a placeholder.

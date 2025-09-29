@@ -1,0 +1,10 @@
+name: dr-verify
+on:
+  schedule:
+    - cron: '0 4 * * 1'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch last CronJob status
+        run: echo "Check k8s job status here; fail if last run != success"

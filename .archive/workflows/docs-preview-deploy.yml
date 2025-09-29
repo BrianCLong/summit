@@ -1,0 +1,391 @@
+name: Documentation Preview Deployment
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'docs-site/**'
+      - 'api/**'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  build-preview:
+    name: Build Documentation Preview
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: 'docs-site/pnpm-lock.yaml'
+      - name: Add pnpm to PATH
+        run: echo "$(pnpm config get global-bin)" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          cd docs-site
+          pnpm install --frozen-lockfile
+
+      - name: Configure preview build
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+          BRANCH_NAME: ${{ github.head_ref }}
+        run: |
+          cd docs-site
+
+          # Configure base URL for preview
+          echo "PREVIEW_BASE_URL=/docs-preview/pr-${PR_NUMBER}" >> .env.local
+
+          # Update docusaurus config for preview
+          cp docusaurus.config.js docusaurus.config.preview.js
+
+          # Modify config for preview deployment
+          cat >> docusaurus.config.preview.js << 'EOF'
+
+          // Preview-specific configuration
+          module.exports = {
+            ...module.exports,
+            baseUrl: process.env.PREVIEW_BASE_URL || '/docs-preview/',
+            url: process.env.DEPLOY_URL || 'https://intelgraph.github.io',
+            onBrokenLinks: 'warn', # More lenient for previews
+            onBrokenMarkdownLinks: 'warn',
+            customFields: {
+              ...module.exports.customFields,
+              isPreview: true,
+              previewBranch: process.env.BRANCH_NAME,
+              pullRequestNumber: process.env.PR_NUMBER
+            },
+            plugins: [
+              ...module.exports.plugins,
+              [
+                '@docusaurus/plugin-ideal-image',
+                {
+                  quality: 85,
+                  max: 2000,
+                  min: 500,
+                  steps: 4,
+                }
+              ]
+            ]
+          };
+          EOF
+
+      - name: Build documentation site
+        run: |
+          cd docs-site
+          npm run build -- --config docusaurus.config.preview.js
+
+      - name: Optimize build for preview
+        run: |
+          cd docs-site/build
+
+          # Add preview banner to all HTML files
+          find . -name "*.html" -exec sed -i '' '/<body/a\
+          <div style="background: #ff6b35; color: white; padding: 8px; text-align: center; font-size: 14px; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;">
+            📝 Preview Build - PR #${{ github.event.number }} (${{ github.head_ref }})
+            <a href="https://github.com/${{ github.repository }}/pull/${{ github.event.number }}" style="color: white; text-decoration: underline; margin-left: 10px;">View PR</a>
+          </div>\n          <style>body { padding-top: 40px !important; }</style>' {} \;
+
+          # Generate preview manifest
+          cat > preview-info.json << EOF
+          {
+            "pullRequest": ${{ github.event.number }},
+            "branch": "${{ github.head_ref }}",
+            "commit": "${{ github.sha }}",
+            "buildTime": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "previewUrl": "/docs-preview/pr-${{ github.event.number }}/",
+            "repository": "${{ github.repository }}"
+          }
+          EOF
+
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-preview-pr-${{ github.event.number }}
+          path: docs-site/build/
+          retention-days: 30
+
+      - name: Deploy to Vercel Preview
+        uses: amondnet/vercel-action@v25
+        id: vercel-deploy
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: docs-site/build
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+          alias-domains: |
+            docs-preview-pr${{ github.event.number }}.intelgraph.dev
+
+      - name: Deploy to Netlify Preview
+        uses: nwtgck/actions-netlify@v3.0
+        id: netlify-deploy
+        with:
+          publish-dir: docs-site/build
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: 'Preview for PR #${{ github.event.number }}'
+          alias: docs-preview-pr${{ github.event.number }}
+          netlify-config-path: .netlify.toml
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      - name: Generate preview URLs
+        id: preview-urls
+        run: |
+          echo "vercel-url=${{ steps.vercel-deploy.outputs.preview-url }}" >> $GITHUB_OUTPUT
+          echo "netlify-url=${{ steps.netlify-deploy.outputs.deploy-url }}" >> $GITHUB_OUTPUT
+
+          # Fallback GitHub Pages URL
+          echo "github-pages-url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/docs-preview/pr-${{ github.event.number }}" >> $GITHUB_OUTPUT
+
+      - name: Comment on PR with preview links
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const pr = context.payload.pull_request.number;
+
+            const vercelUrl = '${{ steps.preview-urls.outputs.vercel-url }}';
+            const netlifyUrl = '${{ steps.preview-urls.outputs.netlify-url }}';
+            const githubPagesUrl = '${{ steps.preview-urls.outputs.github-pages-url }}';
+
+            const comment = `## 📖 Documentation Preview Ready!
+
+            Your documentation changes are now available for preview:
+
+            ### 🚀 Preview Links
+            - **Vercel**: ${vercelUrl}
+            - **Netlify**: ${netlifyUrl}
+            - **GitHub Pages**: ${githubPagesUrl}
+
+            ### 📊 Build Information
+            - **Branch**: 
+${{ github.head_ref }}
+            - **Commit**: 
+${{ github.sha }}
+            - **Build Time**: ${new Date().toISOString()}
+
+            ### 🔍 Review Checklist
+            - [ ] Content renders correctly
+            - [ ] Navigation works as expected
+            - [ ] Links are functional
+            - [ ] Images and media display properly
+            - [ ] Mobile responsiveness
+            - [ ] Accessibility compliance
+
+            ### 🤖 Automated Checks
+            - [Preview Quality Gate](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - [Documentation Tests](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            ---
+
+            *This preview will be updated automatically when you push new commits to this PR.*
+            `;
+
+            // Check if we already commented on this PR
+            const comments = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: pr,
+            });
+
+            const existingComment = comments.data.find(comment => 
+              comment.body.includes('📖 Documentation Preview Ready!')
+            );
+
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existingComment.id,
+                body: comment
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr,
+                body: comment
+              });
+            }
+
+  preview-quality-check:
+    name: Preview Quality Validation
+    runs-on: ubuntu-latest
+    needs: build-preview
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download preview artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-preview-pr-${{ github.event.number }}
+          path: preview-build/
+
+      - name: Install quality check tools
+        run: |
+          npm install -g \
+            lighthouse-ci \
+            pa11y-ci \
+            @lycheeverse/lychee \
+            puppeteer
+
+      - name: Start preview server
+        run: |
+          cd preview-build
+          npx serve -s . -l 3001 &
+          sleep 5
+
+      - name: Run Lighthouse CI on preview
+        run: |
+          cat > .lighthouserc-preview.js << 'EOF'
+          module.exports = {
+            ci: {
+              collect: {
+                url: ['http://localhost:3001/'],
+                startServerCommand: 'npx serve -s preview-build -l 3001',
+                startServerReadyPattern: 'Local:',
+                startServerReadyTimeout: 30000,
+              },
+              assert: {
+                assertions: {
+                  'categories:performance': ['warn', { minScore: 0.8 }],
+                  'categories:accessibility': ['error', { minScore: 0.95 }],
+                  'categories:best-practices': ['warn', { minScore: 0.85 }],
+                  'categories:seo': ['warn', { minScore: 0.85 }],
+                },
+              },
+              upload: {
+                target: 'temporary-public-storage',
+              },
+            },
+          };
+          EOF
+
+          lhci autorun --config=.lighthouserc-preview.js
+
+      - name: Run accessibility audit
+        run: |
+          cat > .pa11yci-preview << 'EOF'
+          {
+            "defaults": {
+              "standard": "WCAG2AA",
+              "timeout": 30000,
+              "wait": 2000
+            },
+            "urls": [
+              "http://localhost:3001/",
+              "http://localhost:3001/docs/getting-started/",
+              "http://localhost:3001/docs/api/",
+              "http://localhost:3001/docs/tutorials/"
+            ]
+          }
+          EOF
+
+          pa11y-ci --config .pa11yci-preview
+
+      - name: Check internal links
+        run: |
+          lychee --config lychee.toml preview-build/ --base http://localhost:3001
+
+      - name: Generate preview quality report
+        run: |
+          cat > preview-quality-report.md << 'EOF'
+          # Preview Quality Report
+
+          **PR**: #${{ github.event.number }}
+          **Branch**: ${{ github.head_ref }}
+          **Commit**: ${{ github.sha }}
+          **Generated**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          ## Quality Checks
+
+          ✅ Lighthouse CI passed
+          ✅ Accessibility audit passed
+          ✅ Internal links validated
+
+          ## Performance Metrics
+
+          - Performance: ≥80%
+          - Accessibility: ≥95%
+          - Best Practices: ≥85%
+          - SEO: ≥85%
+
+          ## Preview URLs
+
+          - [Vercel Preview](${{ steps.preview-urls.outputs.vercel-url }})
+          - [Netlify Preview](${{ steps.preview-urls.outputs.netlify-url }})
+
+          ---
+
+          *This report is generated automatically for each preview build.*
+          EOF
+
+      - name: Upload quality report
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-quality-report-pr-${{ github.event.number }}
+          path: |
+            preview-quality-report.md
+            lhci_reports/
+
+      - name: Clean up old preview artifacts
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+
+            // Keep only the last 5 preview artifacts per PR
+            const artifacts = await github.rest.actions.listArtifactsForRepo({
+              owner,
+              repo,
+              per_page: 100
+            });
+
+            const previewArtifacts = artifacts.data.artifacts
+              .filter(artifact => artifact.name.startsWith('docs-preview-pr-'))
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            const prArtifacts = previewArtifacts.filter(artifact => 
+              artifact.name.includes(`pr-${{ github.event.number }}-`)
+            );
+
+            // Keep the 5 most recent, delete the rest
+            const artifactsToDelete = prArtifacts.slice(5);
+
+            for (const artifact of artifactsToDelete) {
+              try {
+                await github.rest.actions.deleteArtifact({
+                  owner,
+                  repo,
+                  artifact_id: artifact.id
+                });
+                console.log(`Deleted old artifact: ${artifact.name}`);
+              } catch (error) {
+                console.log(`Failed to delete artifact ${artifact.name}: ${error.message}`);
+              }
+            }

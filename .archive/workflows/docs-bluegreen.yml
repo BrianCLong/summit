@@ -1,0 +1,24 @@
+name: docs-bluegreen
+
+permissions:
+  contents: read
+on: [workflow_dispatch]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cd docs-site && npm i && npm run build
+      - run: node scripts/deploy/hash-manifest.js
+      - name: Push to GREEN
+        run: echo "rsync build/ to cdn://green ..."
+      - name: Health check
+        run: |
+          for u in "/" "/reference/" "/how-to/zip-export"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" https://green.docs.example$u);
+            if [ "$code" -ge 400 ]; then echo "bad $u $code" && exit 1; fi
+          done
+      - name: Switch traffic to GREEN
+        run: echo "Flip origin to green in edge config"
+      - name: Keep BLUE as rollback for 60m
+        run: echo "Schedule cleanup"

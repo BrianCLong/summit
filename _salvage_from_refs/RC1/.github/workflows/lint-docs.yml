@@ -1,0 +1,30 @@
+name: Docs Lint
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  markdownlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install markdownlint-cli
+        run: npm i -g markdownlint-cli@0.39.0
+      - name: Lint Markdown
+        run: markdownlint "**/*.md" -c .markdownlint.json
+
+  commitlint:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate commits with commitlint
+        uses: wagoid/commitlint-github-action@v6
+        with:
+          configFile: commitlint.config.js

@@ -1,0 +1,22 @@
+name: zkdp-reputation-ci
+on:
+  push:
+    paths:
+      - 'server/src/zkdp/**'
+      - 'server/src/reputation/**'
+      - 'server/policies/zkdp.rego'
+      - 'client/src/features/marketplace/**'
+      - '.github/workflows/zkdp-reputation-ci.yml'
+  pull_request:
+    paths:
+      - 'server/src/zkdp/**'
+      - 'server/src/reputation/**'
+      - 'server/policies/zkdp.rego'
+      - 'client/src/features/marketplace/**'
+      - '.github/workflows/zkdp-reputation-ci.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm test --workspaces=false

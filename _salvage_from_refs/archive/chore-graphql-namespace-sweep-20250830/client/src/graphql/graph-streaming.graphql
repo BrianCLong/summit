@@ -1,0 +1,32 @@
+# Mock streaming using existing graph queries
+query GW_MockGraphStreaming($nodeId: ID!) {
+  graphData(investigationId: $nodeId) {
+    nodes {
+      id
+      label
+      type
+      properties
+    }
+    edges {
+      id
+      source
+      type
+    }
+  }
+}
+
+# Mock k-shortest paths using graph data
+query GW_MockKShortestPaths($sourceId: ID!, $targetId: ID!) {
+  graphData(investigationId: $sourceId) {
+    nodes {
+      id
+      label
+      type
+    }
+    edges {
+      id
+      source
+      type
+    }
+  }
+}

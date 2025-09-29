@@ -1,0 +1,26 @@
+name: Smoke (Playwright)
+on:
+  schedule: [{ cron: "0 5 * * *" }]
+  workflow_dispatch: {}
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - name: Run smoke
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          SERVICE_TOKEN: ${{ secrets.SERVICE_TOKEN }}
+          PQ_HEALTH_HASH: ${{ secrets.PQ_HEALTH_HASH }}
+        run: npm run test:smoke
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report

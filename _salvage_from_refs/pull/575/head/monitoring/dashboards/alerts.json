@@ -1,0 +1,7 @@
+{
+  "title": "Alerts Metrics",
+  "panels": [
+    {"title": "Alerts by Severity", "type": "graph", "targets": []},
+    {"title": "Ack Latency", "type": "graph", "targets": []}
+  ]
+}

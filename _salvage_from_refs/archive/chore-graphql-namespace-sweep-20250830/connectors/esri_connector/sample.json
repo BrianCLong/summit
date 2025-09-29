@@ -1,0 +1,49 @@
+{
+  "objectIdFieldName": "ObjectID",
+  "globalIdFieldName": "GlobalID",
+  "geometryType": "esriGeometryPoint",
+  "spatialReference": {
+    "wkid": 4326
+  },
+  "fields": [
+    {
+      "name": "ObjectID",
+      "type": "esriFieldTypeOID",
+      "alias": "ObjectID"
+    },
+    {
+      "name": "Name",
+      "type": "esriFieldTypeString",
+      "alias": "Name"
+    },
+    {
+      "name": "Type",
+      "type": "esriFieldTypeString",
+      "alias": "Type"
+    }
+  ],
+  "features": [
+    {
+      "attributes": {
+        "ObjectID": 1,
+        "Name": "New York City",
+        "Type": "City"
+      },
+      "geometry": {
+        "x": -74.0060,
+        "y": 40.7128
+      }
+    },
+    {
+      "attributes": {
+        "ObjectID": 2,
+        "Name": "Paris",
+        "Type": "City"
+      },
+      "geometry": {
+        "x": 2.3522,
+        "y": 48.8566
+      }
+    }
+  ]
+}

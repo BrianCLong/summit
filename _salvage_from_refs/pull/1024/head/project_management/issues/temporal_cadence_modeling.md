@@ -1,0 +1,1 @@
+Encode “narrative burst” patterns from bot/troll amplification so you can identify not just what is spreading, but when influence spikes occur.

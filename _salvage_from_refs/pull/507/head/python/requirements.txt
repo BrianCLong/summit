@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+transformers
+torch
+spacy
+networkx
+nltk
+python-multipart
+uvloop
+Pillow

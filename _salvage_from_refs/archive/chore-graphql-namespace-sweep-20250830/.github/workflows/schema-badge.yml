@@ -1,0 +1,95 @@
+name: Reusable Schema Badge
+
+on:
+  workflow_call:
+    inputs:
+      schema_source:
+        description: "Schema source used (live|snapshot|unknown|na)"
+        required: false
+        default: unknown
+        type: string
+      comment_on_pr:
+        description: "Post/update a PR comment with badge"
+        required: false
+        default: true
+        type: boolean
+      title:
+        description: "Job Summary heading"
+        required: false
+        default: "GraphQL Schema Badge"
+        type: string
+      manifest_path:
+        description: "Path to persisted ops manifest JSON"
+        required: false
+        default: client/artifacts/graphql-ops.json
+        type: string
+    secrets: {}
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  schema-badge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Count persisted operations
+        id: ops
+        shell: bash
+        run: |
+          MPATH="${{ inputs.manifest_path }}"
+          if [ ! -f "$MPATH" ]; then
+            echo "ops_count=0" >> "$GITHUB_OUTPUT"
+          else
+            node -e "const fs=require('fs');const p=process.argv[1];const j=JSON.parse(fs.readFileSync(p,'utf8'));const n=Array.isArray(j)?j.length:Object.keys(j).length;console.log('ops_count='+n)" "$MPATH" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Comment schema source on PR
+        if: ${{ github.event_name == 'pull_request' && inputs.comment_on_pr }}
+        uses: actions/github-script@v7
+        env:
+          SCHEMA_SOURCE: ${{ inputs.schema_source }}
+          OPS_COUNT: ${{ steps.ops.outputs.ops_count }}
+          TITLE: ${{ inputs.title }}
+        with:
+          script: |
+            const marker = '<!-- schema-source-badge -->';
+            const src = (process.env.SCHEMA_SOURCE || 'unknown').toUpperCase();
+            const ops = process.env.OPS_COUNT || '0';
+            const color = src === 'LIVE' ? '2ea44f' : (src === 'SNAPSHOT' ? 'ffae42' : '888888');
+            const title = process.env.TITLE || 'GraphQL Schema Badge';
+            const body = `${marker}
+**${title}**\n
+**GraphQL Schema Source:** ![${src}](https://img.shields.io/badge/schema-${src}-${color}?logo=graphql)\n
+**Persisted Ops:** \`${ops}\``;
+
+            const { context, github } = require('@actions/github');
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+      - name: Job Summary
+        shell: bash
+        env:
+          SCHEMA_SOURCE: ${{ inputs.schema_source }}
+          OPS_COUNT: ${{ steps.ops.outputs.ops_count }}
+          TITLE: ${{ inputs.title }}
+        run: |
+          SRC=$(echo "${SCHEMA_SOURCE:-unknown}" | tr '[:lower:]' '[:upper:]')
+          echo "### ${TITLE}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Schema Source: ${SRC}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Persisted Ops: \`${OPS_COUNT:-0}\`" >> "$GITHUB_STEP_SUMMARY"
+

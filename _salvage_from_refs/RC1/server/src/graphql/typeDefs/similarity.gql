@@ -1,0 +1,4 @@
+extend type Query {
+  similarEntities(entityId: ID, text: String, topK: Int = 20): [SimilarEntity!]!
+}
+type SimilarEntity { id: ID!, score: Float! }

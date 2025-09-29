@@ -1,0 +1,47 @@
+# G9–G12 extensions for GA cutover
+- id: G9
+  name: PrivacyAndData
+  thresholds:
+    dsar_p95_ms: 500
+    dsar_p99_ms: 900
+    residency_match_rate: 1.0
+    dlp_info_or_higher: 0
+  validators:
+    - type: dsar-probe
+    - type: residency-audit
+    - type: dlp-sample
+  decision: fail_on_any_breach
+
+- id: G10
+  name: IamBreakglass
+  thresholds:
+    webauthn_success_rate: 0.99
+    breakglass_window_minutes: 60
+  validators:
+    - type: webauthn-synthetic
+    - type: sa-auth-check
+    - type: audit-log-verify
+  decision: fail_on_any_breach
+
+- id: G11
+  name: DataMigrationSafety
+  thresholds:
+    diff_ratio_max: 0.001
+    n1_compatibility_hours: 24
+  validators:
+    - type: shadow-read-compare
+    - type: schema-compat-check
+  decision: fail_on_any_breach
+
+- id: G12
+  name: ThirdPartyCostHealth
+  thresholds:
+    vendor_error_ratio_max: 0.002
+    vendor_latency_p95_ms: 800
+    llm_spike_multiplier_max: 2
+    headroom_min: 0.2
+  validators:
+    - type: vendor-probe
+    - type: cost-anomaly
+    - type: ratelimit-headroom
+  decision: fail_on_any_breach

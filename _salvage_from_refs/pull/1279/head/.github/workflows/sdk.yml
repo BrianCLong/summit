@@ -1,0 +1,24 @@
+name: sdk
+on:
+  pull_request:
+    branches: [ main ]
+    paths: [ 'docs/openapi/**' ]
+jobs:
+  build-sdks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run openapi
+      - run: pnpm run generate:sdk:ts
+      - run: pnpm run generate:sdk:python
+      - run: pnpm run generate:sdk:java
+      - run: tar -czf sdks-artifacts.tgz sdks/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdks-artifacts
+          path: sdks-artifacts.tgz

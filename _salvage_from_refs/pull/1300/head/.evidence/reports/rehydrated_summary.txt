@@ -1,0 +1,4 @@
+Rehydration verification summary
+OK:    756
+FAILED:2
+SKIP:  2

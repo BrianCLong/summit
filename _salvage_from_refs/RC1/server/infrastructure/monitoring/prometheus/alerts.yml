@@ -1,0 +1,211 @@
+# IntelGraph Alert Rules for Prometheus
+
+groups:
+  - name: intelgraph.rules
+    rules:
+      # Application Health Alerts
+      - alert: IntelGraphDown
+        expr: up{job="intelgraph-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "IntelGraph application is down"
+          description: "IntelGraph application has been down for more than 1 minute."
+
+      - alert: IntelGraphHighErrorRate
+        expr: rate(http_requests_total{job="intelgraph-app",status=~"5.."}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate in IntelGraph"
+          description: "IntelGraph is experiencing a high error rate ({{ $value }} errors/sec)."
+
+      - alert: IntelGraphHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="intelgraph-app"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High latency in IntelGraph"
+          description: "95th percentile latency is {{ $value }}s, which is above the 2s threshold."
+
+  - name: database.rules
+    rules:
+      # PostgreSQL Alerts
+      - alert: PostgreSQLDown
+        expr: up{job="postgres-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database has been down for more than 1 minute."
+
+      - alert: PostgreSQLHighConnections
+        expr: pg_stat_database_numbackends / pg_settings_max_connections > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL high connection usage"
+          description: "PostgreSQL connection usage is {{ $value | humanizePercentage }}."
+
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_database_tup_returned[5m]) / rate(pg_stat_database_tup_fetched[5m]) < 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL slow queries detected"
+          description: "PostgreSQL query efficiency is low ({{ $value | humanizePercentage }})."
+
+      # Redis Alerts
+      - alert: RedisDown
+        expr: up{job="redis-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis server has been down for more than 1 minute."
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis high memory usage"
+          description: "Redis memory usage is {{ $value | humanizePercentage }}."
+
+      - alert: RedisHighConnections
+        expr: redis_connected_clients > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis high client connections"
+          description: "Redis has {{ $value }} client connections."
+
+      # Neo4j Alerts
+      - alert: Neo4jDown
+        expr: up{job="neo4j"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Neo4j is down"
+          description: "Neo4j database has been down for more than 1 minute."
+
+  - name: system.rules
+    rules:
+      # System Resource Alerts
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% on instance {{ $labels.instance }}."
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}% on instance {{ $labels.instance }}."
+
+      - alert: HighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage is {{ $value }}% on instance {{ $labels.instance }}, mount {{ $labels.mountpoint }}."
+
+      - alert: DiskWillFillIn24Hours
+        expr: predict_linear(node_filesystem_avail_bytes[1h], 24*3600) < 0
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk will fill in 24 hours"
+          description: "Disk on {{ $labels.instance }}, mount {{ $labels.mountpoint }} will likely fill within 24 hours."
+
+  - name: war_room.rules
+    rules:
+      # War Room Sync Performance
+      - alert: WarRoomHighLatency
+        expr: histogram_quantile(0.95, rate(war_room_sync_duration_seconds_bucket[5m])) > 0.3
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "War Room sync latency high"
+          description: "War Room sync 95th percentile latency is {{ $value }}s, exceeding 300ms target."
+
+      - alert: WarRoomSyncFailures
+        expr: rate(war_room_sync_failures_total[5m]) > 0.01
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "War Room sync failures detected"
+          description: "War Room sync failure rate: {{ $value }} failures/sec."
+
+  - name: ml_models.rules
+    rules:
+      # ML Model Performance
+      - alert: MLModelPredictionLatency
+        expr: histogram_quantile(0.95, rate(ml_prediction_duration_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "ML model prediction latency high"
+          description: "ML model prediction latency is {{ $value }}s, which may impact user experience."
+
+      - alert: MLModelAccuracyDegraded
+        expr: ml_model_accuracy < 0.85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "ML model accuracy degraded"
+          description: "ML model accuracy has dropped to {{ $value }}, below 85% threshold."
+
+  - name: security.rules
+    rules:
+      # Security Alerts
+      - alert: HighFailedLoginRate
+        expr: rate(auth_failed_attempts_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High failed login rate"
+          description: "Failed login rate is {{ $value }} attempts/sec, possible brute force attack."
+
+      - alert: UnauthorizedAPIAccess
+        expr: rate(http_requests_total{status="401"}[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High unauthorized access attempts"
+          description: "Unauthorized API access rate: {{ $value }} requests/sec."
+
+      - alert: SuspiciousActivity
+        expr: rate(security_events_total{severity="high"}[10m]) > 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Suspicious activity detected"
+          description: "High severity security events detected: {{ $value }} events in 10 minutes."

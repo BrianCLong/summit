@@ -1,0 +1,13 @@
+name: chaos-dryrun
+on:
+  pull_request:
+    paths:
+      - 'scripts/chaos/**'
+jobs:
+  dryrun:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/chaos/network_partition.sh
+      - run: bash scripts/chaos/disk_throttle.sh
+      - run: bash scripts/chaos/neo4j_leader_kill.sh

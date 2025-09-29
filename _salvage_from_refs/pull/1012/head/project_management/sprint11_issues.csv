@@ -1,0 +1,12 @@
+Type,Key,Summary
+Epic,MRR,Multi-Region Resilience
+Epic,ZTE,Zero-Trust Edge
+Epic,FOP,FinOps & SLOs
+Epic,CGD,Chaos & Game Day
+Story,RES,Residency policy wiring
+Story,JWK,JWKS rotation alarms
+Story,DEC,Salted decision cache
+Story,DASH,Dashboards
+Story,RUN,Failover runbook
+Bug,GCACHE,Reject global cache fallback
+Bug,MTLS,Enforce mTLS on legacy path

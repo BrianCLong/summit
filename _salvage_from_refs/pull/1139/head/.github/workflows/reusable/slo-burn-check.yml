@@ -1,0 +1,21 @@
+
+name: slo-burn-check
+on:
+  workflow_call:
+    inputs:
+      budget_path:
+        required: false
+        type: string
+        default: .maestro/ci_budget.json
+    secrets:
+      PROM_URL:
+        required: true
+jobs:
+  slo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Run SLO burn checker
+        run: PROM_URL=${{ secrets.PROM_URL }} python scripts/slo_burn_check.py --budget ${{ inputs.budget_path }}

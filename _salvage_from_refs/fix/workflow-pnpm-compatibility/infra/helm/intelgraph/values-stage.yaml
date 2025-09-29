@@ -1,0 +1,200 @@
+# Development environment values
+global:
+  environment: staging
+  domain: topicality.co
+  imageTag: latest
+  prometheus:
+    path: /metrics
+  ingress:
+    enabled: true
+    tls:
+      enabled: true
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/brianclong/intelgraph
+  tag: "REPLACED_AT_DEPLOY"
+  pullPolicy: IfNotPresent
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 2000
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+# External services for development
+postgresql:
+  enabled: true
+  username: postgres
+  host: intelgraph-postgresql
+  port: 5432
+  auth:
+    postgresPassword: devpassword
+    database: intelgraph_dev
+  primary:
+    persistence:
+      enabled: false
+
+redis:
+  enabled: true
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false
+
+neo4j:
+  enabled: true
+  neo4j:
+    password: devpassword
+  volumes:
+    data:
+      mode: defaultStorageClass
+      defaultStorageClass:
+        requests:
+          storage: 1Gi
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-dns
+  hosts:
+    - host: app.stage.topicality.co
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: api.stage.topicality.co
+      paths:
+        - path: /api
+          pathType: Prefix
+  tls:
+    - secretName: stage-topicality-tls
+      hosts:
+        - app.stage.topicality.co
+        - api.stage.topicality.co
+
+networkPolicy:
+  enabled: false
+
+canary:
+  enabled: false
+
+monitoring:
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+  prometheusRules: { enabled: true }
+  grafanaDashboards: { enabled: true }
+  prometheus:
+    server: prometheus-server.monitoring.svc.cluster.local
+
+spire:
+  server:
+    replicas: 1
+    logLevel: INFO
+    storageSize: 1Gi
+  agent:
+    image: ghcr.io/spiffe/spire-agent:1.8.5
+  helper:
+    image: ghcr.io/spiffe/spire-helper:latest
+  trustDomain: stage.topicality.co
+cluster:
+  name: intelgraph-cluster
+
+services:
+  apiGateway:
+    enabled: true
+    name: intelgraph-api-gateway
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 8080
+    securityContext: {}
+  mobile:
+    name: intelgraph-mobile
+    service:
+      port: 80
+  analytics:
+    name: intelgraph-analytics
+    service:
+      port: 80
+  searchEngine:
+    name: intelgraph-search-engine
+    service:
+      port: 80
+  graphAnalytics:
+    name: intelgraph-graph-analytics
+    service:
+      port: 80
+  mlEngine:
+    name: intelgraph-ml-engine
+    service:
+      port: 80
+  feedProcessor:
+    name: intelgraph-feed-processor
+    service:
+      port: 80
+  workflowEngine:
+    name: intelgraph-workflow-engine
+    service:
+      port: 80
+
+conductor:
+  replicas: 1
+
+rollout:
+  autoPromotionEnabled: false
+  tests:
+    enabled: false
+
+zeroTrust:
+  enabled: false
+
+audit:
+  wormEnabled: false
+  worm:
+    image: ghcr.io/intelgraph/worm:latest
+
+mtls:
+  enabled: false
+
+aws:
+  region: us-east-1
+
+security:
+  podSecurityPolicy:
+    enabled: false
+  networkPolicies:
+    enabled: false
+
+federal:
+  classification: UNCLASSIFIED
+  airGap:
+    enabled: false
+  breakGlass:
+    emergencyNetworkOverride: false
+  fips:
+    enforcementAction: deny
+  enforcement:
+    resourceLimits: warn
+  limits:
+    maxCpu: 2000m
+    maxMemory: 2Gi
+  hsm:
+    provider: none
+  storage:
+    fipsCrypto: false
+
+cors:
+  origins: "*"

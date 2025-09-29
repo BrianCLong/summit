@@ -1,0 +1,5 @@
+name: dp_histogram
+defaults:
+  epsilon: 1
+  kMin: 25
+  cooldownSeconds: 60

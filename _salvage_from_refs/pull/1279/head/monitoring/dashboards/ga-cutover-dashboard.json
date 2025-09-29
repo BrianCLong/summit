@@ -1,0 +1,899 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "IntelGraph GA Cutover - Mission Control",
+    "tags": ["intelgraph", "ga-cutover", "slo", "sprint-26"],
+    "style": "dark",
+    "timezone": "UTC",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "10s",
+    "schemaVersion": 30,
+    "version": 1,
+    "panels": [
+      {
+        "id": 1,
+        "title": "🚀 GA CUTOVER STATUS",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "up{job=\"intelgraph-gateway\"} * 100",
+            "legendFormat": "API Availability %",
+            "refId": "A"
+          },
+          {
+            "expr": "ga_cutover_phase",
+            "legendFormat": "Cutover Phase",
+            "refId": "B"
+          },
+          {
+            "expr": "ga_go_nogo_status * 100",
+            "legendFormat": "Go/No-Go Score %",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "displayMode": "lcd",
+              "orientation": "horizontal"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {"text": "Pre-Cutover"},
+                  "1": {"text": "Canary 1%"},
+                  "2": {"text": "Canary 5%"},
+                  "3": {"text": "Canary 25%"},
+                  "4": {"text": "Security Enable"},
+                  "5": {"text": "Full Deploy"},
+                  "6": {"text": "Validation"},
+                  "7": {"text": "Complete"}
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99}
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Cutover Phase"},
+              "properties": [
+                {"id": "unit", "value": "none"},
+                {"id": "mappings", "value": [
+                  {
+                    "options": {
+                      "0": {"text": "Pre-Cutover", "color": "blue"},
+                      "1": {"text": "Canary 1%", "color": "yellow"},
+                      "2": {"text": "Canary 5%", "color": "yellow"},
+                      "3": {"text": "Canary 25%", "color": "orange"},
+                      "4": {"text": "Security Enable", "color": "purple"},
+                      "5": {"text": "Full Deploy", "color": "orange"},
+                      "6": {"text": "Validation", "color": "green"},
+                      "7": {"text": "Complete", "color": "green"}
+                    },
+                    "type": "value"
+                  }
+                ]}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 2,
+        "title": "🎯 SLO Compliance (Real-time)",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(graphql_request_duration_seconds_bucket{operation_type=\"query\"}[5m])) * 1000",
+            "legendFormat": "GraphQL Read p95 (ms)",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(graphql_request_duration_seconds_bucket{operation_type=\"mutation\"}[5m])) * 1000",
+            "legendFormat": "GraphQL Write p95 (ms)",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(neo4j_query_duration_seconds_bucket{hops=\"1\"}[5m])) * 1000",
+            "legendFormat": "Neo4j 1-hop p95 (ms)",
+            "refId": "C"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(neo4j_query_duration_seconds_bucket{hops=~\"2|3\"}[5m])) * 1000",
+            "legendFormat": "Neo4j Multi-hop p95 (ms)",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 300},
+                {"color": "red", "value": 400}
+              ]
+            },
+            "unit": "ms"
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byRegexp", "options": "GraphQL Read.*"},
+              "properties": [
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 350},
+                    {"color": "red", "value": 450}
+                  ]
+                }}
+              ]
+            },
+            {
+              "matcher": {"id": "byRegexp", "options": "GraphQL Write.*"},
+              "properties": [
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 700},
+                    {"color": "red", "value": 850}
+                  ]
+                }}
+              ]
+            },
+            {
+              "matcher": {"id": "byRegexp", "options": "Neo4j Multi-hop.*"},
+              "properties": [
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 1200},
+                    {"color": "red", "value": 1500}
+                  ]
+                }}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 3,
+        "title": "⚠️ ROLLBACK TRIGGERS",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "targets": [
+          {
+            "expr": "ALERTS{alertname=~\"GA.*\",alertstate=\"firing\"}",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 1}
+              ]
+            }
+          }
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Time"
+            }
+          ]
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": false,
+                "__name__": true,
+                "job": true,
+                "instance": true
+              },
+              "indexByName": {},
+              "renameByName": {
+                "alertname": "Alert",
+                "severity": "Severity",
+                "summary": "Description"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "📊 Error Budgets",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+        "targets": [
+          {
+            "expr": "rate(graphql_requests_total{status=~\"5..\"}[5m]) / rate(graphql_requests_total[5m]) * 100",
+            "legendFormat": "API Error Rate %",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(ingest_requests_total{status=~\"error|failed\"}[5m]) / rate(ingest_requests_total[5m]) * 100",
+            "legendFormat": "Ingest Error Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "ga_slo_violations_rate * 100",
+            "legendFormat": "SLO Violation Rate %",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "line"
+              }
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 0.1}
+              ]
+            },
+            "unit": "percent",
+            "max": 1.0
+          }
+        },
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "🔒 Security & Policy Status",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(opa_decision_duration_seconds_bucket[5m])) * 1000",
+            "legendFormat": "OPA Decision p95 (ms)",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(webauthn_stepup_total[1h]) / rate(user_sessions_total[1h]) * 100",
+            "legendFormat": "WebAuthn Step-up Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(policy_denials_total[5m]) / rate(policy_evaluations_total[5m]) * 100",
+            "legendFormat": "Policy Denial Rate %",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "lineWidth": 2,
+              "pointSize": 5,
+              "showPoints": "never"
+            },
+            "unit": "short"
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byRegexp", "options": "OPA Decision.*"},
+              "properties": [
+                {"id": "unit", "value": "ms"},
+                {"id": "custom.axisPlacement", "value": "left"},
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 25},
+                    {"color": "red", "value": 50}
+                  ]
+                }}
+              ]
+            },
+            {
+              "matcher": {"id": "byRegexp", "options": ".*Rate.*"},
+              "properties": [
+                {"id": "unit", "value": "percent"},
+                {"id": "custom.axisPlacement", "value": "right"},
+                {"id": "max", "value": 5}
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 6,
+        "title": "💰 Cost & Budget Tracking",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 22},
+        "targets": [
+          {
+            "expr": "sum(aws_billing_estimated_charges_usd{service=\"total\"}) by (month) / 18000 * 100",
+            "legendFormat": "Infrastructure Budget %",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(openai_api_costs_usd) by (month) / 5000 * 100",
+            "legendFormat": "LLM Budget %",
+            "refId": "B"
+          },
+          {
+            "expr": "cost_guardrails_sampling_rate * 100",
+            "legendFormat": "Sampling Rate %",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 80},
+                {"color": "red", "value": 90}
+              ]
+            },
+            "unit": "percent",
+            "max": 100
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Sampling Rate %"},
+              "properties": [
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "yellow", "value": 20},
+                    {"color": "green", "value": 60}
+                  ]
+                }}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 7,
+        "title": "🔄 Cache Performance",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 22},
+        "targets": [
+          {
+            "expr": "rate(graphql_persisted_query_cache_hits_total[5m]) / rate(graphql_persisted_query_requests_total[5m]) * 100",
+            "legendFormat": "PQ Cache Hit %",
+            "refId": "A"
+          },
+          {
+            "expr": "neo4j_page_cache_hit_ratio * 100",
+            "legendFormat": "Neo4j Page Cache %",
+            "refId": "B"
+          },
+          {
+            "expr": "redis_cache_hit_ratio * 100",
+            "legendFormat": "Redis Cache Hit %",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "lineWidth": 2,
+              "pointSize": 5,
+              "showPoints": "never"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 70},
+                {"color": "green", "value": 85}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "🚨 Emergency Controls",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 22},
+        "targets": [
+          {
+            "expr": "cost_guardrails_emergency_mode",
+            "legendFormat": "Emergency Mode",
+            "refId": "A"
+          },
+          {
+            "expr": "cost_guardrails_throttle_active",
+            "legendFormat": "Throttling Active",
+            "refId": "B"
+          },
+          {
+            "expr": "change_freeze_active",
+            "legendFormat": "Change Freeze",
+            "refId": "C"
+          },
+          {
+            "expr": "sum(rate(ga_rollback_triggers_total[5m]))",
+            "legendFormat": "Rollback Triggers",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {"text": "Normal", "color": "green"},
+                  "1": {"text": "Active", "color": "red"}
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "red", "value": 1}
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Rollback Triggers"},
+              "properties": [
+                {"id": "mappings", "value": []},
+                {"id": "unit", "value": "short"},
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 1},
+                    {"color": "red", "value": 3}
+                  ]
+                }}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 9,
+        "title": "📈 Traffic Distribution",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 28},
+        "targets": [
+          {
+            "expr": "sum(rate(graphql_requests_total[5m])) by (version)",
+            "legendFormat": "{{ version }}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              }
+            },
+            "unit": "reqps"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "pieType": "pie",
+          "tooltip": {
+            "mode": "single"
+          },
+          "legend": {
+            "displayMode": "list",
+            "placement": "right",
+            "values": ["percent"]
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "🔧 ER Pipeline Health",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 28},
+        "targets": [
+          {
+            "expr": "kafka_consumer_lag_seconds{topic=\"entity-resolution\"}",
+            "legendFormat": "Queue Lag (s)",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(er_dlq_messages_total[5m]) / rate(er_processed_messages_total[5m]) * 100",
+            "legendFormat": "DLQ Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(er_processed_messages_total[5m])",
+            "legendFormat": "Processing Rate (msg/s)",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "lineWidth": 2,
+              "pointSize": 5,
+              "showPoints": "never"
+            },
+            "unit": "short"
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byRegexp", "options": "Queue Lag.*"},
+              "properties": [
+                {"id": "unit", "value": "s"},
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 60},
+                    {"color": "red", "value": 120}
+                  ]
+                }}
+              ]
+            },
+            {
+              "matcher": {"id": "byRegexp", "options": "DLQ Rate.*"},
+              "properties": [
+                {"id": "unit", "value": "percent"},
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "yellow", "value": 0.1},
+                    {"color": "red", "value": 0.5}
+                  ]
+                }}
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 11,
+        "title": "🔍 Provenance Status",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 28},
+        "targets": [
+          {
+            "expr": "provenance_verification_success_rate * 100",
+            "legendFormat": "Verification Success %",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(provenance_verification_failures_total[5m]))",
+            "legendFormat": "Verification Failures",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(increase(provenance_emergency_bypass_total[1h]))",
+            "legendFormat": "Emergency Bypasses (1h)",
+            "refId": "C"
+          },
+          {
+            "expr": "slsa_level_current",
+            "legendFormat": "Current SLSA Level",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99}
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byRegexp", "options": ".*Failures.*|.*Bypasses.*"},
+              "properties": [
+                {"id": "unit", "value": "short"},
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 1},
+                    {"color": "red", "value": 5}
+                  ]
+                }}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Current SLSA Level"},
+              "properties": [
+                {"id": "unit", "value": "none"},
+                {"id": "mappings", "value": [
+                  {
+                    "options": {
+                      "1": {"text": "SLSA-1", "color": "red"},
+                      "2": {"text": "SLSA-2", "color": "yellow"},
+                      "3": {"text": "SLSA-3", "color": "green"},
+                      "4": {"text": "SLSA-4", "color": "green"}
+                    },
+                    "type": "value"
+                  }
+                ]}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        }
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        },
+        {
+          "datasource": "prometheus",
+          "enable": true,
+          "expr": "changes(ga_cutover_phase[1m]) > 0",
+          "iconColor": "blue",
+          "name": "Cutover Phase Changes",
+          "titleFormat": "Phase: {{ $value }}",
+          "type": "prometheus"
+        },
+        {
+          "datasource": "prometheus",
+          "enable": true,
+          "expr": "increase(ga_rollback_triggers_total[1m]) > 0",
+          "iconColor": "red",
+          "name": "Rollback Triggers",
+          "titleFormat": "Rollback Trigger: {{ $labels.reason }}",
+          "type": "prometheus"
+        }
+      ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "links": [
+      {
+        "asDropdown": false,
+        "icon": "external link",
+        "includeVars": false,
+        "keepTime": false,
+        "tags": ["intelgraph"],
+        "targetBlank": true,
+        "title": "IntelGraph Dashboards",
+        "type": "dashboards"
+      },
+      {
+        "icon": "doc",
+        "tags": [],
+        "targetBlank": true,
+        "title": "GA Cutover Runbook",
+        "tooltip": "",
+        "type": "link",
+        "url": "https://docs.intelgraph.dev/runbooks/ga-cutover-runbook"
+      },
+      {
+        "icon": "bolt",
+        "tags": [],
+        "targetBlank": true,
+        "title": "Emergency Procedures",
+        "tooltip": "",
+        "type": "link",
+        "url": "https://docs.intelgraph.dev/emergency-procedures"
+      }
+    ],
+    "panels": [],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "intelgraph",
+            "value": "intelgraph"
+          },
+          "datasource": "prometheus",
+          "definition": "label_values(up, job)",
+          "hide": 0,
+          "includeAll": false,
+          "label": "Service",
+          "multi": false,
+          "name": "service",
+          "options": [],
+          "query": {
+            "query": "label_values(up, job)",
+            "refId": "StandardVariableQuery"
+          },
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        },
+        {
+          "current": {
+            "selected": false,
+            "text": "production",
+            "value": "production"
+          },
+          "datasource": "prometheus",
+          "definition": "label_values(up, environment)",
+          "hide": 0,
+          "includeAll": false,
+          "label": "Environment",
+          "multi": false,
+          "name": "environment",
+          "options": [],
+          "query": {
+            "query": "label_values(up, environment)",
+            "refId": "StandardVariableQuery"
+          },
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        }
+      ]
+    }
+  }
+}

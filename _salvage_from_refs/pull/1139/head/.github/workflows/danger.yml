@@ -1,0 +1,10 @@
+name: danger
+on: [pull_request]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: danger/danger-js@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}

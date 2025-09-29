@@ -1,0 +1,274 @@
+{
+  "id": "rb_key_ceremony_v1",
+  "title": "BYOK/HSM Key Ceremony - Initial Setup",
+  "version": "1.0",
+  "description": "Secure key ceremony for initializing customer-managed keys in BYOK/HSM environment",
+  "framework": "security",
+  "category": "cryptographic_operations",
+  "risk_level": "critical",
+  "requires_approval": true,
+  "approval_stages": [
+    {
+      "stage": "security_review",
+      "required_roles": ["security_admin", "ciso"],
+      "minimum_approvals": 2,
+      "timeout_hours": 4
+    },
+    {
+      "stage": "dual_control",
+      "required_roles": ["key_custodian_1", "key_custodian_2"],
+      "minimum_approvals": 2,
+      "timeout_hours": 1
+    }
+  ],
+  "prerequisites": [
+    "HSM cluster operational and accessible",
+    "Key custodians present and verified",
+    "Audit logging enabled and verified",
+    "Network isolation confirmed",
+    "Emergency procedures tested"
+  ],
+  "estimated_duration_minutes": 45,
+  "steps": [
+    {
+      "id": "step_1",
+      "title": "Pre-ceremony Security Verification",
+      "description": "Verify secure environment and personnel",
+      "type": "verification",
+      "requires_manual_confirmation": true,
+      "substeps": [
+        {
+          "action": "Verify physical security of key ceremony location",
+          "expected_result": "Room secured, no unauthorized personnel",
+          "verification_method": "visual_inspection"
+        },
+        {
+          "action": "Confirm identity of all key custodians",
+          "expected_result": "All custodians verified via multi-factor authentication",
+          "verification_method": "mfa_verification"
+        },
+        {
+          "action": "Test HSM connectivity and health",
+          "command": "hsm-tool cluster-status --verbose",
+          "expected_output": "All nodes: HEALTHY, Quorum: ACTIVE",
+          "timeout_seconds": 30
+        },
+        {
+          "action": "Enable audit logging for key operations",
+          "command": "audit-enable --component=hsm --level=detailed",
+          "expected_output": "Audit logging: ENABLED",
+          "timeout_seconds": 10
+        }
+      ]
+    },
+    {
+      "id": "step_2", 
+      "title": "Initialize Master Key Material",
+      "description": "Generate cryptographically secure master key material",
+      "type": "cryptographic_operation",
+      "requires_dual_control": true,
+      "substeps": [
+        {
+          "action": "Generate entropy for master key",
+          "command": "hsm-tool generate-entropy --bits=256 --algorithm=FIPS186-4",
+          "expected_output": "Entropy generation: SUCCESS",
+          "custodian_verification": "both",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "Create master key with dual-control split",
+          "command": "hsm-tool create-master-key --split=dual --algorithm=AES256 --usage=kek",
+          "expected_output": "Master key created: KEY_ID={generated_id}",
+          "custodian_verification": "both",
+          "timeout_seconds": 120
+        },
+        {
+          "action": "Verify key material integrity",
+          "command": "hsm-tool verify-key --key-id={generated_id} --full-check",
+          "expected_output": "Key integrity: VERIFIED",
+          "timeout_seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "step_3",
+      "title": "Configure Customer Key Namespaces",
+      "description": "Set up isolated namespaces for customer-managed keys",
+      "type": "configuration",
+      "substeps": [
+        {
+          "action": "Create customer key namespace template",
+          "command": "hsm-tool create-namespace-template --isolation=strict --audit=full",
+          "expected_output": "Namespace template: CREATED",
+          "timeout_seconds": 30
+        },
+        {
+          "action": "Configure key access policies",
+          "command": "hsm-tool set-key-policy --template=customer_managed --operations=sign,verify,encrypt,decrypt",
+          "expected_output": "Key policy: CONFIGURED", 
+          "timeout_seconds": 30
+        },
+        {
+          "action": "Set key rotation schedule",
+          "command": "hsm-tool set-rotation-policy --interval=90days --auto=false --dual-approval=true",
+          "expected_output": "Rotation policy: SET",
+          "timeout_seconds": 15
+        }
+      ]
+    },
+    {
+      "id": "step_4",
+      "title": "Test Key Operations",
+      "description": "Verify key functionality with test operations",
+      "type": "testing",
+      "substeps": [
+        {
+          "action": "Create test signing key",
+          "command": "hsm-tool create-key --namespace=test --algorithm=RSA2048 --usage=sign",
+          "expected_output": "Test key created: TEST_KEY_ID={test_id}",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "Perform test signature operation",
+          "command": "hsm-tool sign --key-id={test_id} --data='test_data_for_signing' --algorithm=PSS",
+          "expected_output": "Signature: SUCCESS, Length: 256 bytes",
+          "timeout_seconds": 30
+        },
+        {
+          "action": "Verify test signature",
+          "command": "hsm-tool verify --key-id={test_id} --data='test_data_for_signing' --signature={signature}",
+          "expected_output": "Verification: SUCCESS",
+          "timeout_seconds": 30
+        },
+        {
+          "action": "Clean up test materials",
+          "command": "hsm-tool delete-key --key-id={test_id} --confirm",
+          "expected_output": "Key deleted: SUCCESS",
+          "timeout_seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "step_5",
+      "title": "Configure Backup and Recovery",
+      "description": "Set up secure backup and disaster recovery procedures",
+      "type": "configuration",
+      "substeps": [
+        {
+          "action": "Enable encrypted key backups",
+          "command": "hsm-tool enable-backup --encryption=AES256 --split=3of5 --schedule=daily",
+          "expected_output": "Backup configuration: ENABLED",
+          "timeout_seconds": 30
+        },
+        {
+          "action": "Test backup creation",
+          "command": "hsm-tool create-backup --test-mode --verify-integrity",
+          "expected_output": "Test backup: SUCCESS, Integrity: VERIFIED",
+          "timeout_seconds": 120
+        },
+        {
+          "action": "Configure backup storage locations",
+          "command": "hsm-tool set-backup-destinations --primary=hsm_vault --secondary=secure_s3",
+          "expected_output": "Backup destinations: CONFIGURED",
+          "timeout_seconds": 30
+        }
+      ]
+    },
+    {
+      "id": "step_6",
+      "title": "Finalize and Document",
+      "description": "Complete ceremony with proper documentation and handoff",
+      "type": "documentation",
+      "requires_manual_confirmation": true,
+      "substeps": [
+        {
+          "action": "Generate ceremony completion report",
+          "command": "hsm-tool generate-ceremony-report --include=audit-logs --format=pdf",
+          "expected_output": "Report generated: ceremony_report_{timestamp}.pdf",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "Verify all audit events recorded",
+          "command": "audit-verify --component=hsm --start-time={ceremony_start} --completeness-check",
+          "expected_output": "Audit completeness: VERIFIED, Events: {count}",
+          "timeout_seconds": 30
+        },
+        {
+          "action": "Store ceremony artifacts in secure vault",
+          "description": "Manually secure all ceremony documentation and keys",
+          "expected_result": "All materials secured in approved secure storage",
+          "verification_method": "custodian_sign_off"
+        },
+        {
+          "action": "Update operational documentation",
+          "description": "Record key IDs, policies, and procedures in operations manual",
+          "expected_result": "Documentation updated and reviewed",
+          "verification_method": "document_review"
+        }
+      ]
+    }
+  ],
+  "rollback_procedures": [
+    {
+      "condition": "HSM becomes unresponsive during ceremony",
+      "actions": [
+        "Stop all key operations immediately",
+        "Engage emergency HSM recovery procedures", 
+        "Contact HSM vendor emergency support",
+        "Preserve all audit logs and ceremony state"
+      ]
+    },
+    {
+      "condition": "Key generation fails integrity checks",
+      "actions": [
+        "Delete failed key material immediately",
+        "Review HSM health status",
+        "Re-run key generation with increased security checks",
+        "Document failure in ceremony report"
+      ]
+    }
+  ],
+  "emergency_contacts": [
+    {
+      "role": "HSM Vendor Support",
+      "contact": "+1-800-HSM-HELP",
+      "escalation": "critical_priority"
+    },
+    {
+      "role": "Security Incident Response",
+      "contact": "security-incident@company.com",
+      "escalation": "immediate"
+    },
+    {
+      "role": "Key Management Officer", 
+      "contact": "kmo@company.com",
+      "escalation": "high_priority"
+    }
+  ],
+  "post_ceremony_verification": [
+    {
+      "timeframe": "24_hours",
+      "action": "Verify HSM cluster stability and key accessibility"
+    },
+    {
+      "timeframe": "1_week", 
+      "action": "Review audit logs for any anomalies or security events"
+    },
+    {
+      "timeframe": "1_month",
+      "action": "Conduct key rotation test to verify operational procedures"
+    }
+  ],
+  "compliance_requirements": [
+    "FIPS 140-2 Level 3 compliance maintained throughout ceremony",
+    "Dual control enforced for all cryptographic operations",
+    "Complete audit trail captured and verified",
+    "Key custodians maintain separation of duties",
+    "All key material properly secured and backed up"
+  ],
+  "signature": "TO_BE_SIGNED_BY_SECURITY_ADMIN",
+  "created_by": "security_engineering",
+  "approved_by": "TBD",
+  "effective_date": "2025-09-01",
+  "next_review": "2025-12-01"
+}

@@ -1,0 +1,8 @@
+name: golden-gate
+on: [pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/golden_gate.ts

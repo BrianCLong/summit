@@ -1,0 +1,8 @@
+name: flags-promote
+on: workflow_dispatch
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/ffctl.ts graph_reranker_v2 true

@@ -1,0 +1,21 @@
+name: Verify Bundle CLI
+on:
+  workflow_dispatch:
+    inputs:
+      bundle_dir:
+        description: Path to extracted bundle dir (contains evidence.json)
+        required: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify bundle (if provided)
+        run: |
+          set -e
+          if [ -z "${{ inputs.bundle_dir }}" ]; then
+            echo "No bundle_dir provided; skipping."
+            exit 0
+          fi
+          python3 tools/verify_bundle/verify_bundle.py "${{ inputs.bundle_dir }}"
+

@@ -1,0 +1,24 @@
+name: psi-dp-joins-ci
+on:
+  push:
+    paths:
+      - 'server/src/privacy/**'
+      - 'server/src/federation/**'
+      - 'server/src/graphql/schema/psi_dp.graphql'
+      - 'server/src/resolvers/psi_dp.ts'
+  pull_request:
+    paths:
+      - 'server/src/privacy/**'
+      - 'server/src/federation/**'
+      - 'server/src/graphql/schema/psi_dp.graphql'
+      - 'server/src/resolvers/psi_dp.ts'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm install
+      - run: npm test

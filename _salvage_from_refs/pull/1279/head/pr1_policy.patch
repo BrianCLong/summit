@@ -1,0 +1,71 @@
+diff --git a/policies/export.rego b/policies/export.rego
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/policies/export.rego
+@@ -0,0 +2 @@
++package intelgraph.export
++default allow := false
+
+diff --git a/policies/tests/smoke_test.rego b/policies/tests/smoke_test.rego
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/policies/tests/smoke_test.rego
+@@ -0,0 +5 @@
++package tests
++
++test_smoke_policy_compiles {
++  true
++}
+
+diff --git a/.github/workflows/opa.yml b/.github/workflows/opa.yml
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/.github/workflows/opa.yml
+@@ -0,0 +20 @@
++name: Policy CI
++on:
++  pull_request:
++    paths:
++      - 'policies/**'
++      - '.github/workflows/opa.yml'
++  push:
++    branches: [ main ]
++    paths:
++      - 'policies/**'
++
++jobs:
++  opa-test:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4
++      - name: Setup OPA
++        uses: open-policy-agent/setup-opa@v2
++      - name: Run OPA tests
++        run: opa test -v policies
+
+diff --git a/Makefile b/Makefile
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/Makefile
+@@ -0,0 +3 @@
++.PHONY: policy-test
++policy-test:
++	opa test -v policies
+
+diff --git a/docs/policies/export.md b/docs/policies/export.md
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/docs/policies/export.md
+@@ -0,0 +7 @@
++# Export Policy — Decision Contract
++
++**Endpoint pairing**
++- `POST /export/simulate` → returns decision payload (never blocks IO)
++- `POST /export` → enforces policy (may deny if step‑up missing)
++
++**Rollout**: enable **simulate** for first 48h; toggle **enforce** thereafter.

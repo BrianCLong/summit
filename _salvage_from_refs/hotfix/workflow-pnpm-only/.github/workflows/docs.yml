@@ -1,0 +1,367 @@
+name: docs
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'docs-site/**'
+      - '*.md'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+      - 'CHANGELOG.md'
+      - '.vale.ini'
+      - '.vale/**'
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'docs-site/**'
+      - '*.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pages: write
+  id-token: write
+
+jobs:
+  docs-build-lint:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Maybe skip docs (toggle via DOCS_DISABLE)
+        if: ${{ vars.DOCS_DISABLE == '1' }}
+        run: echo "Docs build disabled (DOCS_DISABLE=1). Skipping."
+
+      - name: Set up Node.js
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Vale
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          wget https://github.com/errata-ai/vale/releases/download/v2.29.7/vale_2.29.7_Linux_64-bit.tar.gz
+          tar -xzf vale_2.29.7_Linux_64-bit.tar.gz
+          sudo mv vale /usr/local/bin/
+          vale --version
+
+      - name: Install markdownlint-cli
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          npm install -g markdownlint-cli
+          markdownlint --version
+
+      - name: Install additional documentation tools
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          # Install doctoc for table of contents generation
+          npm install -g doctoc
+
+          # Install markdown-link-check for link validation
+          npm install -g markdown-link-check
+
+          # Install alex for inclusive language checking
+          npm install -g alex
+
+      - name: Setup Vale configuration
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          echo "📝 Setting up Vale configuration..."
+
+          # Create Vale config if it doesn't exist
+          if [ ! -f ".vale.ini" ]; then
+            cat > .vale.ini << EOF
+          StylesPath = .vale/styles
+          MinAlertLevel = suggestion
+          Packages = Microsoft, write-good, alex
+          [*.md]
+          BasedOnStyles = Vale, Microsoft, write-good
+          EOF
+          fi
+
+          # Download style packages if they don't exist
+          if [ ! -d ".vale/styles" ]; then
+            mkdir -p .vale/styles
+            vale sync
+          fi
+
+      - name: Run markdownlint
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          echo "🔍 Running markdownlint..."
+
+          # Create markdownlint config if it doesn't exist
+          if [ ! -f ".markdownlint.json" ]; then
+            cat > .markdownlint.json << EOF
+          {
+            "default": true,
+            "MD013": { "line_length": 120 },
+            "MD033": false,
+            "MD041": false
+          }
+          EOF
+          fi
+
+          # Lint all markdown files
+          markdownlint '**/*.md' --ignore node_modules --ignore .turbo || true
+
+      - name: Run Vale linting
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          echo "📚 Running Vale linting..."
+
+          # Lint all markdown files with Vale
+          vale docs/ || true
+          vale *.md || true
+
+          # Generate Vale report
+          vale --output=line docs/ > vale-report.txt 2>&1 || true
+          vale --output=line *.md >> vale-report.txt 2>&1 || true
+
+      - name: Check for inclusive language
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          echo "🌈 Checking for inclusive language with Alex..."
+          alex docs/ --why || true
+          alex *.md --why || true
+
+      - name: Validate markdown links
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          echo "🔗 Validating markdown links..."
+
+          # Create markdown-link-check config
+          cat > .markdown-link-check.json << EOF
+          {
+            "ignorePatterns": [
+              {
+                "pattern": "^http://localhost"
+              },
+              {
+                "pattern": "^https://localhost"
+              },
+              {
+                "pattern": "^http://127.0.0.1"
+              }
+            ],
+            "timeout": "10s",
+            "retryOn429": true,
+            "retryCount": 3,
+            "fallbackProtocols": [
+              "http",
+              "https"
+            ]
+          }
+          EOF
+
+          # Check links in all markdown files
+          find . -name "*.md" -not -path "./node_modules/*" -not -path "./.turbo/*" | \
+            xargs -I {} markdown-link-check {} --config .markdown-link-check.json || true
+
+      - name: Generate table of contents
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          echo "📋 Generating table of contents..."
+
+          # Update TOC for main documentation files
+          if [ -f "README.md" ]; then
+            doctoc README.md --github
+          fi
+
+          if [ -f "CONTRIBUTING.md" ]; then
+            doctoc CONTRIBUTING.md --github
+          fi
+
+          # Update TOC for docs directory
+          find docs/ -name "*.md" -exec doctoc {} --github \; || true
+
+      - name: Build documentation site
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          echo "🏗️  Building documentation site..."
+
+          if [ -d "docs-site" ]; then
+            cd docs-site
+            npm install
+            npm run build
+          elif [ -f "pnpm-workspace.yaml" ] && grep -q "docs" pnpm-workspace.yaml; then
+            # Build docs using workspace
+            pnpm run docs:build || pnpm run build:docs || echo "No docs build script found"
+          else
+            echo "No documentation site configuration found, skipping build"
+          fi
+
+      - name: Check documentation coverage
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          echo "📊 Checking documentation coverage..."
+
+          # Count documentation files
+          total_md_files=$(find . -name "*.md" -not -path "./node_modules/*" -not -path "./.turbo/*" | wc -l)
+          docs_md_files=$(find docs/ -name "*.md" 2>/dev/null | wc -l || echo 0)
+
+          echo "Total markdown files: $total_md_files"
+          echo "Documentation files: $docs_md_files"
+
+          # Check for missing documentation
+          if [ ! -f "README.md" ]; then
+            echo "❌ Missing README.md"
+          fi
+
+          if [ ! -f "CONTRIBUTING.md" ]; then
+            echo "⚠️  Missing CONTRIBUTING.md"
+          fi
+
+          if [ ! -f "CHANGELOG.md" ]; then
+            echo "⚠️  Missing CHANGELOG.md"
+          fi
+
+          # Check for API documentation
+          if [ ! -d "docs/api" ] && [ ! -d "api-docs" ]; then
+            echo "⚠️  No API documentation found"
+          fi
+
+      - name: Validate documentation structure
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          echo "🏗️  Validating documentation structure..."
+
+          # Check for standard documentation files
+          structure_score=0
+
+          if [ -f "README.md" ]; then
+            structure_score=$((structure_score + 1))
+            echo "✅ README.md present"
+          fi
+
+          if [ -f "CONTRIBUTING.md" ]; then
+            structure_score=$((structure_score + 1))
+            echo "✅ CONTRIBUTING.md present"
+          fi
+
+          if [ -f "CHANGELOG.md" ]; then
+            structure_score=$((structure_score + 1))
+            echo "✅ CHANGELOG.md present"
+          fi
+
+          if [ -f "LICENSE" ] || [ -f "LICENSE.md" ]; then
+            structure_score=$((structure_score + 1))
+            echo "✅ LICENSE present"
+          fi
+
+          if [ -d "docs" ]; then
+            structure_score=$((structure_score + 1))
+            echo "✅ docs/ directory present"
+          fi
+
+          echo "Documentation structure score: $structure_score/5"
+
+      - name: Run custom documentation checks
+        if: ${{ vars.DOCS_DISABLE != '1' }}
+        run: |
+          echo "🎯 Running custom documentation checks..."
+
+          # Check for documentation scripts
+          if grep -q "docs:" package.json; then
+            echo "✅ Documentation scripts found in package.json"
+            pnpm run docs:check || echo "docs:check script failed or not found"
+          fi
+
+          # Check for broken internal links
+          find . -name "*.md" -not -path "./node_modules/*" -exec grep -l "\[.*\](\..*\.md)" {} \; | \
+            while read file; do
+              echo "Checking internal links in $file..."
+              grep -o "\[.*\](\..*\.md)" "$file" | while read link; do
+                target=$(echo "$link" | sed 's/.*(\(.*\))/\1/')
+                if [ ! -f "$target" ]; then
+                  echo "❌ Broken internal link in $file: $target"
+                fi
+              done
+            done
+
+      - name: Generate documentation report
+        if: always()
+        run: |
+          echo "📋 Documentation Quality Report" > docs-report.md
+          echo "===============================" >> docs-report.md
+          echo "" >> docs-report.md
+          echo "## Summary" >> docs-report.md
+          echo "- Total markdown files: $(find . -name "*.md" -not -path "./node_modules/*" -not -path "./.turbo/*" | wc -l)" >> docs-report.md
+          echo "- Documentation files: $(find docs/ -name "*.md" 2>/dev/null | wc -l || echo 0)" >> docs-report.md
+          echo "- Markdownlint: ✅ Completed" >> docs-report.md
+          echo "- Vale linting: ✅ Completed" >> docs-report.md
+          echo "- Link validation: ✅ Completed" >> docs-report.md
+          echo "- Inclusive language check: ✅ Completed" >> docs-report.md
+          echo "" >> docs-report.md
+
+          # Add Vale report if it exists
+          if [ -f "vale-report.txt" ] && [ -s "vale-report.txt" ]; then
+            echo "## Vale Linting Results" >> docs-report.md
+            echo "```" >> docs-report.md
+            head -50 vale-report.txt >> docs-report.md
+            echo "```" >> docs-report.md
+          fi
+
+      - name: Upload documentation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-artifacts
+          path: |
+            docs-report.md
+            vale-report.txt
+            .markdownlint.json
+            .markdown-link-check.json
+            docs-site/build/
+            docs-site/dist/
+          retention-days: 14
+
+      - name: Deploy to GitHub Pages (main branch only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB.TOKEN }}
+          publish_dir: ./docs-site/build
+          enable_jekyll: false
+          cname: docs.intelgraph.dev
+
+      - name: Generate step summary
+        if: always()
+        run: |
+          echo "## 📚 Documentation CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Markdownlint | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Vale Linting | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Link Validation | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Inclusive Language | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| TOC Generation | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Structure Validation | ✅ |" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "docs-site/build" ] || [ -d "docs-site/dist" ]; then
+            echo "| Site Build | ✅ |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Site Build | ⚠️ Skipped |" >> $GITHUB_STEP_SUMMARY
+          fi

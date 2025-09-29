@@ -1,0 +1,18 @@
+github:
+  repo: yourorg/yourrepo
+  labels: [incident, slo, symphony]
+  fields:
+    severity: p1|p2|p3
+    component: router|ui|ingest
+jira:
+  projectKey: SYM
+  type: Incident
+  mappings:
+    labels <- labels
+    summary <- title
+    description <- body
+    severity <- severity
+    component <- component
+sync:
+  link_backrefs: true
+  autoclose_on_recovery: true

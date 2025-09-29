@@ -1,0 +1,7 @@
+{
+  "title": "Cases & SOAR",
+  "panels": [
+    { "type": "stat", "title": "MTTA" },
+    { "type": "stat", "title": "MTTR" }
+  ]
+}

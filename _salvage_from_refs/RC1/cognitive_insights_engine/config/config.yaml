@@ -1,0 +1,27 @@
+nlp:
+  model_choice: "HuggingFaceBackend"
+  batch_size: 32
+  enable_gpu: false
+
+data:
+  raw_text_retention_hours: 24
+  enable_k_anonymity: true
+  k_anonymity_threshold: 20
+  enable_dp: false
+  dp_epsilon: 1.0
+  store_raw: false # Default to false for safety
+
+ethics:
+  allow_persuasion: false # Hardcoded to false
+
+redis:
+  host: "localhost"
+  port: 6379
+  password: null
+
+postgresql:
+  host: "localhost"
+  port: 5432
+  database: "cognitive_insights_db"
+  user: "user"
+  password: "password"

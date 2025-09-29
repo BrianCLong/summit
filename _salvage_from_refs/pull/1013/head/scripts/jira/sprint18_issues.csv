@@ -1,0 +1,5 @@
+Type,Summary,Details
+Epic,Subscriptions Backpressure,Track backpressure metrics
+Epic,Federated Clean Rooms,Guard and policy enforcement
+Story,Cache Coherency E2E,Ensure invalidation works
+Bug,Placeholder Cleanup,Remove duckdb placeholder

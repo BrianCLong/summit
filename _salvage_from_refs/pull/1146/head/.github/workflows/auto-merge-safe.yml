@@ -1,0 +1,13 @@
+name: auto-merge-safe
+
+permissions:
+  contents: read
+on: [pull_request]
+jobs:
+  automerge:
+    if: contains(github.head_ref, 'dependabot')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable automerge on passing PRs
+        uses: fastify/github-action-merge-dependabot@v3
+        with: { target: minor }

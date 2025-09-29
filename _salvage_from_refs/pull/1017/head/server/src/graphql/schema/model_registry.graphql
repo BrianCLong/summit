@@ -1,0 +1,11 @@
+type ModelArtifact { id: ID!, kind: String!, version: String!, checksum: String!, signed: Boolean!, createdAt: String!, biasReport: String }
+
+extend type Query {
+  modelArtifacts(kind: String!): [ModelArtifact!]!
+}
+
+extend type Mutation {
+  registerModel(kind: String!, version: String!, checksum: String!, signed: Boolean!, biasReport: String): ModelArtifact!
+  promoteModel(id: ID!): Boolean!
+  rollbackModel(kind: String!, toVersion: String!): Boolean!
+}

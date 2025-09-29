@@ -1,0 +1,20 @@
+version: 1
+pipeline:
+  name: intelgraph-main
+  environment: development
+  budgets:
+    hard_cap_usd: 25.00
+  steps:
+    - id: build-all
+      run: just build-all
+    - id: web-tests
+      run: pnpm -C apps/web test --run
+    - id: conductor-smoke
+      run: just conductor-smoke
+    - id: package-server
+      run: >
+        docker build -t ghcr.io/${GITHUB_REPOSITORY}/intelgraph-server:${GITHUB_SHA}
+        -f deploy/Dockerfile .
+    - id: push-server
+      run: docker push ghcr.io/${GITHUB_REPOSITORY}/intelgraph-server:${GITHUB_SHA}
+      when: branch == "develop" || event == "pull_request"

@@ -1,0 +1,8 @@
+{
+  "title": "Subscription Performance",
+  "charts": [
+    { "metric": "subscription_latency_ms", "stat": "p95" },
+    { "metric": "subscription_queue_depth" },
+    { "metric": "subscription_drops_total" }
+  ]
+}

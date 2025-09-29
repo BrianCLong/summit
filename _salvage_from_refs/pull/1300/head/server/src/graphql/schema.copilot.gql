@@ -1,0 +1,202 @@
+"""
+Copilot Natural Language Query Schema - GA Core Implementation
+Canonical NL→Cypher service with guardrails and audit trail
+"""
+
+# Enums
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ExecutionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXECUTED
+  FAILED
+}
+
+enum QueryIntent {
+  READ
+  COUNT
+  RELATIONSHIP
+  TEMPORAL
+  SEARCH
+}
+
+# Types
+type CypherTranslation {
+  id: ID!
+  originalQuery: String!
+  generatedCypher: String!
+  confidence: Float!
+  explanation: String!
+  warnings: [String!]!
+  riskLevel: RiskLevel!
+  requiresConfirmation: Boolean!
+  estimatedResults: Int!
+  executionTime: Int
+  citations: [String!]!
+  redactions: [String!]!
+  createdAt: DateTime!
+  createdBy: String!
+}
+
+type QueryExecution {
+  translationId: ID!
+  status: ExecutionStatus!
+  results: JSON
+  error: String
+  executedAt: DateTime
+  executedBy: String!
+  auditTrail: [AuditEvent!]!
+}
+
+type AuditEvent {
+  timestamp: DateTime!
+  action: String!
+  userId: String!
+  details: JSON!
+  ipAddress: String
+  userAgent: String
+}
+
+type QueryPreview {
+  translationId: ID!
+  executionPlan: JSON
+  estimatedCost: Int
+  previewSafe: Boolean!
+  error: String
+}
+
+type CopilotAnalytics {
+  queryDate: Date!
+  totalQueries: Int!
+  lowRiskQueries: Int!
+  mediumRiskQueries: Int!
+  highRiskQueries: Int!
+  confirmationRequired: Int!
+  executedQueries: Int!
+  successfulExecutions: Int!
+  failedExecutions: Int!
+  rejectedQueries: Int!
+  avgConfidence: Float!
+  avgEstimatedResults: Float!
+  uniqueUsers: Int!
+}
+
+type NLQueryHistory {
+  translationId: ID!
+  originalQuery: String!
+  confidence: Float!
+  riskLevel: RiskLevel!
+  executionStatus: ExecutionStatus!
+  createdAt: DateTime!
+}
+
+type QueryPattern {
+  id: ID!
+  patternName: String!
+  regexPattern: String!
+  cypherTemplate: String!
+  confidenceScore: Float!
+  riskLevel: RiskLevel!
+  description: String
+  usageCount: Int!
+  successRate: Float!
+  version: Int!
+  active: Boolean!
+}
+
+# Input Types
+input NLQueryRequest {
+  query: String!
+  contextId: String
+  maxResults: Int = 100
+  previewOnly: Boolean = true
+  includeExplanation: Boolean = true
+}
+
+input QueryExecutionInput {
+  translationId: ID!
+  confirmationToken: String
+  userConfirmed: Boolean = false
+}
+
+input CopilotAnalyticsFilter {
+  daysBack: Int = 30
+  userId: String
+  riskLevel: RiskLevel
+}
+
+# Queries
+type Query {
+  """Translate natural language query to Cypher with guardrails"""
+  translateNLQuery(input: NLQueryRequest!): CypherTranslation!
+  
+  """Preview query execution plan without running the query"""
+  previewQuery(translationId: ID!): QueryPreview!
+  
+  """Get translation by ID"""
+  getCypherTranslation(id: ID!): CypherTranslation
+  
+  """Get query execution details"""
+  getQueryExecution(translationId: ID!): QueryExecution
+  
+  """Get user's NL query history"""
+  getUserNLHistory(userId: String, limit: Int = 20): [NLQueryHistory!]!
+  
+  """Get Copilot usage analytics"""
+  getCopilotAnalytics(filter: CopilotAnalyticsFilter): [CopilotAnalytics!]!
+  
+  """Get available query patterns for suggestions"""
+  getQueryPatterns(active: Boolean = true): [QueryPattern!]!
+  
+  """Search query patterns by text"""
+  searchQueryPatterns(query: String!): [QueryPattern!]!
+}
+
+# Mutations  
+type Mutation {
+  """Execute a translated query with explicit confirmation"""
+  executeQuery(input: QueryExecutionInput!): QueryExecution!
+  
+  """Approve a high-risk query for execution"""
+  approveQuery(
+    translationId: ID!
+    approved: Boolean!
+    reason: String
+  ): QueryExecution!
+  
+  """Reject a query execution"""
+  rejectQuery(
+    translationId: ID!
+    reason: String!
+  ): QueryExecution!
+  
+  """Add or update a query pattern"""
+  upsertQueryPattern(
+    patternName: String!
+    regexPattern: String!
+    cypherTemplate: String!
+    confidenceScore: Float!
+    description: String
+  ): QueryPattern!
+  
+  """Deactivate a query pattern"""
+  deactivateQueryPattern(id: ID!): QueryPattern!
+}
+
+# Subscriptions
+type Subscription {
+  """Subscribe to new high-risk translations requiring approval"""
+  translationRequiringApproval: CypherTranslation!
+  
+  """Subscribe to query execution updates for a specific translation"""
+  executionUpdated(translationId: ID!): QueryExecution!
+  
+  """Subscribe to Copilot analytics updates"""
+  analyticsUpdated: CopilotAnalytics!
+}

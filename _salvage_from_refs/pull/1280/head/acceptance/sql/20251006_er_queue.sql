@@ -1,0 +1,2 @@
+-- mirror of migration
+-- Use the already-migrated schema; this file serves integrity checks for fixtures.

@@ -1,0 +1,129 @@
+image:
+  repository: ghcr.io/BrianCLong/intelgraph/server
+  tag: ""
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 4000
+
+env:
+  - name: NODE_ENV
+    value: production
+  - name: PORT
+    value: "4000"
+  - name: NEO4J_URI
+    value: "bolt://neo4j:7687"
+  - name: NEO4J_USERNAME
+    value: "neo4j"
+  - name: NEO4J_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: neo4j-secret
+        key: password
+  - name: POSTGRES_HOST
+    value: "postgres"
+  - name: POSTGRES_USER
+    value: "intelgraph"
+  - name: POSTGRES_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: postgres-secret
+        key: password
+  - name: POSTGRES_DB
+    value: "intelgraph"
+  - name: REDIS_HOST
+    value: "redis"
+  - name: REDIS_PORT
+    value: "6379"
+  - name: AI_ENABLED
+    value: "false"
+  - name: KAFKA_ENABLED
+    value: "false"
+  # Security Configuration
+  - name: JWT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: server-secret
+        key: jwt-secret
+  - name: JWT_REFRESH_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: server-secret
+        key: jwt-refresh-secret
+  - name: ALLOWED_ORIGINS
+    value: "https://app.intelgraph.com"
+  - name: CORS_ORIGIN
+    value: "https://app.intelgraph.com"
+  - name: RATE_LIMIT_WINDOW_MS
+    value: "900000"
+  - name: RATE_LIMIT_MAX
+    value: "500"
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: api.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    enabled: true
+    secretName: server-tls
+    clusterIssuer: letsencrypt-prod
+  canary:
+    enabled: false
+    weight: 10
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  # Scale up when cypher queries exceed this rate (queries/sec)
+  cypherQueryRate: null
+
+networkPolicy:
+  enabled: true
+  allowNamespaces: []
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  portName: http
+  path: /metrics
+  labels:
+    release: prometheus
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+podAnnotations: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+secret:
+  enabled: false
+  name: server-env
+  data: {}
+
+externalSecrets:
+  enabled: false
+  name: server-env
+  backendType: vault
+  # Example for external-secrets.io with Vault
+  spec: {}

@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: qos-daily-report
+  namespace: intelgraph
+spec:
+  schedule: "15 13 * * *"  # 7:15 AM America/Denver
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: report
+              image: python:3.12-slim
+              env:
+                - name: DATABASE_URL
+                  valueFrom: { secretKeyRef: { name: app-secrets, key: DATABASE_URL } }
+                - name: SLACK_WEBHOOK
+                  valueFrom: { secretKeyRef: { name: app-secrets, key: SLACK_WEBHOOK } }
+              command: ["/bin/sh","-c"]
+              args:
+                - |
+                  pip install psycopg2-binary >/dev/null && \
+                  python services/analytics/reports/qos_daily.py > /tmp/r.json && \
+                  curl -X POST -H 'Content-Type: application/json' \
+                    --data "{"text":"QoS Daily Report\n```$(cat /tmp/r.json)```"}" \
+                    "$SLACK_WEBHOOK"
+              volumeMounts:
+                - name: repo
+                  mountPath: /workspace
+          volumes:
+            - name: repo
+              emptyDir: {}  # replace with your code mount strategy if needed

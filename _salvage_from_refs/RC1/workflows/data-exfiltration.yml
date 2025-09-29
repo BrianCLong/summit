@@ -1,0 +1,13 @@
+steps:
+  - id: detect-large-transfers
+    prompt: "Review logs for large outbound data transfers."
+    expected_artifacts:
+      - transfer_logs
+    queries:
+      - "MATCH (f:Flow {case_id: $case_id, direction: 'outbound'}) RETURN f"
+  - id: correlate-destinations
+    prompt: "Correlate transfer destinations with known bad hosts."
+    expected_artifacts:
+      - destination_nodes
+    queries:
+      - "MATCH (h:Host)-[:RECEIVED]->(:Flow {case_id: $case_id}) RETURN h"

@@ -1,0 +1,28 @@
+image:
+  repository: redis
+  tag: 7
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 6379
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+persistence:
+  enabled: true
+  size: 5Gi
+  storageClass: ""
+
+env: []
+
+redis:
+  appendonly: "yes"
+  save: "300 1 60 10000 5 5000000"
+

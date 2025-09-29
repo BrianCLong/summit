@@ -1,0 +1,61 @@
+name: Auto Pin Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (true/false)'
+        required: false
+        default: 'false'
+      maestro_digest:
+        description: 'Optional maestro-control-plane digest (sha256:...) to set placeholders'
+        required: false
+  schedule:
+    - cron: '0 7 * * 1'  # weekly Monday 07:00 UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: read
+
+jobs:
+  auto-pin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep perl
+          curl -sSfL https://github.com/google/go-containerregistry/releases/download/v0.19.2/crane_0.19.2_Linux_x86_64.tar.gz \
+            | sudo tar -xz -C /usr/local/bin crane
+
+      - name: Login to GHCR (optional)
+        if: ${{ secrets.GHCR_TOKEN != '' }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Run auto-pin
+        env:
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          MAESTRO_DIGEST: ${{ inputs.maestro_digest || '' }}
+        run: |
+          bash scripts/ci/auto-pin-images.sh
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'chore(ci): auto-pin images to immutable digests'
+          title: 'chore(ci): auto-pin images to immutable digests'
+          body: |
+            - Auto-pinned unpinned or :latest image references to @sha256 digests
+            - Updated Maestro Rollout placeholders if digest provided
+          branch: chore/auto-pin-images
+          signoff: true
+          delete-branch: true
+

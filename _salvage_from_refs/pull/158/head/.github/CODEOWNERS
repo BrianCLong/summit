@@ -1,0 +1,7 @@
+# Default code owners
+* @BrianCLong
+
+# Optional: fine-grained ownership examples
+# /client/ @BrianCLong
+# /server/ @BrianCLong
+# /docs/ @BrianCLong

@@ -1,0 +1,236 @@
+name: Release Prod Cut (Canary + Evidence)
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Release tag/name (e.g., marketplace-v1.0.0)
+        required: true
+      namespace:
+        description: Kubernetes namespace (e.g., marketplace-prod)
+        default: marketplace-prod
+        required: true
+      rollout:
+        description: Argo Rollouts name (e.g., marketplace-api)
+        default: marketplace-api
+        required: true
+      prom_url:
+        description: Prometheus URL (e.g., http://prometheus-operated.monitoring:9090)
+        required: true
+      ingress_url:
+        description: External URL for canary smoke (https://host)
+        required: true
+      s3_bucket:
+        description: Evidence bucket name
+        required: true
+      kms_key:
+        description: KMS key id or alias for S3 SSE
+        required: true
+      cosign_key:
+        description: Optional cosign key ref
+        required: false
+
+jobs:
+  cut:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup kubectl context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG_BASE64 }}
+
+      - name: Install kubectl-argo-rollouts
+        run: |
+          curl -sLO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+          chmod +x kubectl-argo-rollouts-linux-amd64
+          sudo mv kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
+          kubectl-argo-rollouts version --short
+
+      - name: Canary header smoke
+        env:
+          BASE_URL: ${{ inputs.ingress_url }}
+        run: |
+          bash scripts/canary_smoke.sh
+
+      - name: Ensure scripts executable
+        run: |
+          chmod +x scripts/release_canary.sh scripts/generate_evidence_bundle.sh scripts/release/prod-cut.sh || true
+
+      - name: Step canary (10→25→50)
+        env:
+          NAMESPACE: ${{ inputs.namespace }}
+          ROLLOUT:   ${{ inputs.rollout }}
+        run: |
+          bash scripts/release_canary.sh
+
+      - name: Prod cut — metrics snapshot + evidence
+        env:
+          NAMESPACE: ${{ inputs.namespace }}
+          ROLLOUT:   ${{ inputs.rollout }}
+          PROM_URL:  ${{ inputs.prom_url }}
+          S3_BUCKET: ${{ inputs.s3_bucket }}
+          KMS_KEY:   ${{ inputs.kms_key }}
+          COSIGN_KEY: ${{ inputs.cosign_key }}
+          AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION:    ${{ secrets.AWS_DEFAULT_REGION }}
+        run: |
+          bash scripts/release/prod-cut.sh
+
+      - name: Upload evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-bundle
+          path: artifacts/evidence/**
+
+      - name: Verify evidence bundle integrity
+        run: |
+          latest_dir=$(dirname $(ls -1dt artifacts/evidence/*/evidence.json | head -n1))
+          echo "Verifying bundle in $latest_dir"
+          python3 tools/verify_bundle/verify_bundle.py "$latest_dir"
+
+      - name: Generate exec brief
+        run: |
+          latest=$(ls -1dt artifacts/evidence/*/evidence.json | head -n1)
+          python3 scripts/exec_brief_from_manifest.py "$latest" exec-brief.md
+          echo "Using evidence: $latest"
+
+      - name: Build TS SDK from OpenAPI
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Generate client SDK (openapi-typescript-codegen)
+        run: |
+          npx -y openapi-typescript-codegen \
+            --input openapi/export.yaml \
+            --output tools/clients/generated-sdk \
+            --client fetch --useOptions --exportCore true --exportServices true --exportModels true
+      - name: Pack SDK tarball
+        id: sdk
+        run: |
+          cd tools/clients/generated-sdk
+          NAME=@intelgraph/export-client
+          VERSION=${{ inputs.release }}
+          npm pkg set name=$NAME >/dev/null
+          npm pkg set version=$VERSION >/dev/null
+          npm pkg set private=false >/dev/null
+          TARBALL=$(npm pack | tail -n1)
+          echo "tarball=$TARBALL" >> $GITHUB_OUTPUT
+
+      - name: Generate SDK CHANGELOG (since previous release)
+        id: changelog
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const tag = core.getInput('release');
+            const { data: releases } = await github.rest.repos.listReleases({ owner: context.repo.owner, repo: context.repo.repo, per_page: 100 });
+            const sorted = releases.filter(r => !r.draft).sort((a,b)=> new Date(b.created_at)-new Date(a.created_at));
+            const currentIndex = sorted.findIndex(r => r.tag_name === tag);
+            const prev = sorted.find((r,i)=> i>currentIndex); // first older than current
+            let markdown = `# SDK Changelog\n\nCurrent: ${tag}\n`;
+            if (prev) {
+              const cmp = await github.rest.repos.compareCommits({ owner: context.repo.owner, repo: context.repo.repo, base: prev.tag_name, head: tag });
+              markdown += `\nChanges since ${prev.tag_name}:\n\n`;
+              for (const c of cmp.data.commits) {
+                markdown += `- ${c.commit.message.split('\n')[0]} (${c.sha.substring(0,7)})\n`;
+              }
+            } else {
+              markdown += `\nInitial release or previous tag not found.\n`;
+            }
+            fs.writeFileSync('sdk-changelog.md', markdown);
+            core.setOutput('file', 'sdk-changelog.md');
+
+      - name: Create/Update GitHub Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const tag = core.getInput('release');
+            const body = fs.readFileSync('exec-brief.md','utf8');
+            try {
+              const rel = await github.rest.repos.getReleaseByTag({ owner: context.repo.owner, repo: context.repo.repo, tag });
+              await github.rest.repos.updateRelease({ owner: context.repo.owner, repo: context.repo.repo, release_id: rel.data.id, body });
+            } catch (e) {
+              await github.rest.repos.createRelease({ owner: context.repo.owner, repo: context.repo.repo, tag_name: tag, name: tag, body });
+            }
+
+      - name: Upload SDK tarball to Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const tag = core.getInput('release');
+            const { data: rel } = await github.rest.repos.getReleaseByTag({ owner: context.repo.owner, repo: context.repo.repo, tag });
+            const tarball = path.join('tools/clients/generated-sdk', process.env.TARBALL);
+            await github.request('POST ' + rel.upload_url, {
+              headers: { 'content-type': 'application/octet-stream', 'content-length': fs.statSync(tarball).size },
+              data: fs.readFileSync(tarball),
+              name: path.basename(tarball)
+            });
+        env:
+          TARBALL: ${{ steps.sdk.outputs.tarball }}
+
+      - name: Upload SDK CHANGELOG to Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const tag = core.getInput('release');
+            const { data: rel } = await github.rest.repos.getReleaseByTag({ owner: context.repo.owner, repo: context.repo.repo, tag });
+            const file = 'sdk-changelog.md';
+            await github.request('POST ' + rel.upload_url, {
+              headers: { 'content-type': 'text/markdown', 'content-length': fs.statSync(file).size },
+              data: fs.readFileSync(file),
+              name: path.basename(file)
+            });
+
+      - name: Append SDK Changelog to Release Body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const tag = core.getInput('release');
+            const body = fs.readFileSync('sdk-changelog.md','utf8');
+            const { data: rel } = await github.rest.repos.getReleaseByTag({ owner: context.repo.owner, repo: context.repo.repo, tag });
+            await github.rest.repos.updateRelease({ owner: context.repo.owner, repo: context.repo.repo, release_id: rel.id, body: (rel.body || '') + "\n\n---\n\n" + body });
+
+      - name: Upload Release Assets (evidence + brief)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const tag = core.getInput('release');
+            const rel = await github.rest.repos.getReleaseByTag({ owner: context.repo.owner, repo: context.repo.repo, tag });
+            const upload_url = rel.data.upload_url;
+            function exists(p){ try { fs.accessSync(p); return true; } catch { return false; } }
+            const dir = fs.readdirSync('artifacts/evidence', { withFileTypes: true })
+              .filter(d => d.isDirectory())
+              .map(d => ({ name: d.name, mtime: fs.statSync(path.join('artifacts/evidence', d.name)).mtimeMs }))
+              .sort((a,b) => b.mtime - a.mtime)[0];
+            if (!dir) { core.info('No evidence directory found; skipping assets upload'); return; }
+            const base = path.join('artifacts/evidence', dir.name);
+            const candidates = [
+              path.join(base, 'evidence.html'),
+              path.join(base + '.tgz'),
+              path.join(base + '.tgz.sha256'),
+              path.join('exec-brief.md'),
+            ];
+            for (const f of candidates) {
+              if (!exists(f)) { core.info(`skip missing ${f}`); continue; }
+              const data = fs.readFileSync(f);
+              const name = path.basename(f);
+              const url = upload_url;
+              await github.request('POST ' + url, {
+                headers: { 'content-type': 'application/octet-stream', 'content-length': data.length },
+                data,
+                name
+              });
+              core.info(`uploaded ${name}`);
+            }

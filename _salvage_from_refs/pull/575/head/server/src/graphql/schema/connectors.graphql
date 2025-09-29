@@ -1,0 +1,12 @@
+type ConnectorInfo { name: String!, enabled: Boolean! }
+
+type EnableConnectorResult { success: Boolean!, message: String }
+
+extend type Query {
+  connectors: [ConnectorInfo!]!
+}
+
+extend type Mutation {
+  enableConnector(name: String!, acceptLicense: Boolean!): EnableConnectorResult!
+  disableConnector(name: String!): EnableConnectorResult!
+}

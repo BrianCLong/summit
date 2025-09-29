@@ -1,0 +1,6 @@
+{
+  "title": "Revenue Share",
+  "panels": [
+    { "type": "graph", "metric": "publisher_net_cents" }
+  ]
+}

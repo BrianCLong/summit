@@ -1,0 +1,151 @@
+{{- if .Values.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-alerts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    app.kubernetes.io/component: monitoring
+spec:
+  groups:
+    - name: intelgraph.sli
+      interval: 30s
+      rules:
+        # SLI: Error Rate
+        - record: intelgraph:error_rate
+          expr: |
+            sum(rate(http_requests_total{job=~".*intelgraph.*", code=~"5.."}[5m])) by (service) /
+            sum(rate(http_requests_total{job=~".*intelgraph.*"}[5m])) by (service)
+
+        # SLI: Latency P95
+        - record: intelgraph:latency_p95
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{job=~".*intelgraph.*"}[5m])) by (le, service)
+            )
+
+        # SLI: Availability
+        - record: intelgraph:availability
+          expr: |
+            sum(up{job=~".*intelgraph.*"}) by (service) /
+            count(up{job=~".*intelgraph.*"}) by (service)
+
+    - name: intelgraph.alerts
+      interval: 30s
+      rules:
+        # High error rate burn rate alert
+        - alert: IntelGraphHighErrorRateBurnRate
+          expr: |
+            (
+              intelgraph:error_rate > (14.4 * 0.001)  # 14.4x error budget burn
+              and
+              intelgraph:error_rate > 0.001
+            )
+            or
+            (
+              intelgraph:error_rate > (6 * 0.001)     # 6x error budget burn
+              and
+              intelgraph:error_rate > 0.001
+            )
+          for: 2m
+          labels:
+            severity: critical
+            slo: error-rate
+          annotations:
+            summary: "IntelGraph high error rate burn detected"
+            description: "Service {{`{{ $labels.service }}`}} error rate {{`{{ $value | humanizePercentage }}`}} is burning error budget too fast"
+            runbook_url: "https://docs.intelgraph.com/runbooks/high-error-rate"
+
+        # High latency burn rate alert
+        - alert: IntelGraphHighLatencyBurnRate
+          expr: |
+            intelgraph:latency_p95 > 1.5  # P95 > 1.5s threshold from Phase 3
+          for: 5m
+          labels:
+            severity: warning
+            slo: latency
+          annotations:
+            summary: "IntelGraph high latency detected"
+            description: "Service {{`{{ $labels.service }}`}} P95 latency {{`{{ $value }}s`}} exceeds 1.5s threshold"
+            runbook_url: "https://docs.intelgraph.com/runbooks/high-latency"
+
+        # Availability burn rate alert
+        - alert: IntelGraphLowAvailability
+          expr: |
+            intelgraph:availability < 0.99  # 99% availability SLO
+          for: 5m
+          labels:
+            severity: critical
+            slo: availability
+          annotations:
+            summary: "IntelGraph availability below SLO"
+            description: "Service {{`{{ $labels.service }}`}} availability {{`{{ $value | humanizePercentage }}`}} is below 99% SLO"
+            runbook_url: "https://docs.intelgraph.com/runbooks/low-availability"
+
+        # Pod crash loop
+        - alert: IntelGraphPodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total{namespace="{{ .Release.Namespace }}"}[5m]) > 0.1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "IntelGraph pod crash looping"
+            description: "Pod {{`{{ $labels.pod }}`}} in namespace {{`{{ $labels.namespace }}`}} is restarting frequently"
+            runbook_url: "https://docs.intelgraph.com/runbooks/pod-crash-loop"
+
+        # Database connection issues
+        - alert: IntelGraphDatabaseConnectionFailures
+          expr: |
+            sum(rate(database_connection_errors_total{job=~".*intelgraph.*"}[5m])) by (service) > 0.1
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "IntelGraph database connection failures"
+            description: "Database connection errors detected for {{`{{ $labels.service }}`}}"
+            runbook_url: "https://docs.intelgraph.com/runbooks/database-connection-failures"
+
+        # Memory usage high
+        - alert: IntelGraphHighMemoryUsage
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}", container!="POD", container!=""} /
+              container_spec_memory_limit_bytes{namespace="{{ .Release.Namespace }}", container!="POD", container!=""}
+            ) > 0.9
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "IntelGraph high memory usage"
+            description: "Container {{`{{ $labels.container }}`}} in pod {{`{{ $labels.pod }}`}} is using {{`{{ $value | humanizePercentage }}`}} of memory"
+            runbook_url: "https://docs.intelgraph.com/runbooks/high-memory-usage"
+
+        # CPU throttling
+        - alert: IntelGraphCPUThrottling
+          expr: |
+            rate(container_cpu_cfs_throttled_seconds_total{namespace="{{ .Release.Namespace }}", container!="POD"}[5m]) > 0.1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "IntelGraph CPU throttling"
+            description: "Container {{`{{ $labels.container }}`}} in pod {{`{{ $labels.pod }}`}} is being CPU throttled"
+            runbook_url: "https://docs.intelgraph.com/runbooks/cpu-throttling"
+
+        # Volume space alerts
+        - alert: IntelGraphVolumeSpaceHigh
+          expr: |
+            (
+              kubelet_volume_stats_used_bytes{namespace="{{ .Release.Namespace }}"} /
+              kubelet_volume_stats_capacity_bytes{namespace="{{ .Release.Namespace }}"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "IntelGraph volume space high"
+            description: "Volume {{`{{ $labels.persistentvolumeclaim }}`}} is {{`{{ $value | humanizePercentage }}`}} full"
+            runbook_url: "https://docs.intelgraph.com/runbooks/volume-space-high"
+{{- end }}

@@ -1,0 +1,45 @@
+name: Nightly-Stage-Validation
+on:
+  schedule: [ { cron: '0 7 * * *' } ]  # 07:00 UTC daily
+  workflow_dispatch: {}
+
+jobs:
+  soak-and-e2e:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: k6 soak (stage)
+        env:
+          BASE_URL: ${{ vars.STAGE_URL }}
+        run: |
+          npm i -g k6
+          k6 run maestro/tests/k6/soak.js -e BASE_URL="$BASE_URL" -e STAGE="stage" -e COMMIT="${{ github.sha }}"
+
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Playwright full suite
+        working-directory: packages/e2e-shared
+        env:
+          BASE_URL: ${{ vars.STAGE_URL }}
+        run: |
+          npx playwright install --with-deps
+          pnpm run e2e:all
+
+      - name: Upload nightly artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-stage-artifacts
+          path: |
+            **/junit*.xml
+            **/playwright-report/**
+            k6-summary.json

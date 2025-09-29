@@ -1,0 +1,14 @@
+name: docs-vale
+
+permissions:
+  contents: read
+on: [pull_request]
+jobs:
+  vale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: errata-ai/vale-action@v2
+        with:
+          files: "docs/**/*.md*"
+          reporter: github-pr-review

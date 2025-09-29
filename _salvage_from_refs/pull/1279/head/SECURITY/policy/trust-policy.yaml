@@ -1,0 +1,175 @@
+# IntelGraph SLSA Trust Policy
+# Defines trusted builders and signers for supply chain security
+
+apiVersion: v1
+kind: TrustPolicy
+metadata:
+  name: intelgraph-slsa-trust-policy
+  version: "1.0"
+  created: "2024-01-01T00:00:00Z"
+  updated: "2024-01-01T00:00:00Z"
+
+# Trusted OIDC issuers for attestation verification
+trusted_issuers:
+  - issuer: "https://token.actions.githubusercontent.com"
+    description: "GitHub Actions OIDC token issuer"
+    jwks_uri: "https://token.actions.githubusercontent.com/.well-known/jwks"
+    allowed_audiences:
+      - "https://github.com/BrianCLong"
+      - "https://github.com/intelgraph"
+
+# Trusted builders for SLSA provenance
+trusted_builders:
+  # GitHub Actions builders
+  - id: "https://github.com/BrianCLong/intelgraph/.github/workflows/ci.yml@refs/heads/main"
+    description: "Main CI workflow for IntelGraph"
+    slsa_level: 3
+    attestation_types:
+      - "https://slsa.dev/provenance/v0.2"
+      - "https://slsa.dev/provenance/v1"
+
+  - id: "https://github.com/BrianCLong/intelgraph/.github/workflows/release.yml@refs/heads/main"
+    description: "Release workflow for IntelGraph"
+    slsa_level: 3
+    attestation_types:
+      - "https://slsa.dev/provenance/v1"
+
+  # Additional approved builders
+  - id: "https://github.com/BrianCLong/intelgraph/.github/workflows/container-build.yml@refs/heads/main"
+    description: "Container build workflow"
+    slsa_level: 3
+
+  - id: "https://github.com/BrianCLong/intelgraph/.github/workflows/cd-guardrails.yml@refs/heads/main"
+    description: "CD guardrails workflow"
+    slsa_level: 2
+
+# Trusted signing keys and certificates
+trusted_signers:
+  # Cosign public keys
+  - type: "cosign_public_key"
+    key_id: "intelgraph-release-key"
+    public_key: |
+      -----BEGIN PUBLIC KEY-----
+      # This would be the actual cosign public key
+      # Generated with: cosign generate-key-pair
+      -----END PUBLIC KEY-----
+    description: "IntelGraph release signing key"
+
+  # Certificate-based signing (keyless)
+  - type: "certificate_identity"
+    subject_regexp: "^https://github\\.com/BrianCLong/intelgraph/\\.github/workflows/.+\\.yml@refs/heads/main$"
+    issuer: "https://token.actions.githubusercontent.com"
+    description: "GitHub Actions certificate identity for main branch"
+
+  - type: "certificate_identity"
+    subject_regexp: "^https://github\\.com/BrianCLong/intelgraph/\\.github/workflows/.+\\.yml@refs/tags/v.*$"
+    issuer: "https://token.actions.githubusercontent.com"
+    description: "GitHub Actions certificate identity for release tags"
+
+# Repository and artifact trust rules
+repository_rules:
+  # Only allow artifacts from trusted repositories
+  allowed_repositories:
+    - "BrianCLong/intelgraph"
+    - "BrianCLong/maestro"  # If we have dependencies
+
+  # Branch restrictions
+  allowed_branches:
+    - "main"
+    - "release/*"
+    - "hotfix/*"
+
+  # Tag patterns for releases
+  allowed_tag_patterns:
+    - "v*.*.*"
+    - "v*.*.*-rc.*"
+    - "v*.*.*-beta.*"
+
+# Artifact verification policies
+verification_policies:
+  containers:
+    # Require SLSA provenance for all container images
+    require_slsa_provenance: true
+    minimum_slsa_level: 2
+
+    # Require signature verification
+    require_signature: true
+
+    # Allowed registries
+    allowed_registries:
+      - "ghcr.io/brianlong"
+      - "ghcr.io/intelgraph"
+
+    # Require specific attestations
+    required_attestations:
+      - "https://slsa.dev/provenance/v1"
+      - "https://in-toto.io/Statement/v0.1"
+
+  packages:
+    # NPM packages
+    npm:
+      require_signature: false  # NPM doesn't support cosign yet
+      allowed_scopes:
+        - "@intelgraph"
+
+    # Python packages
+    python:
+      require_signature: false  # PyPI doesn't support cosign yet
+      allowed_sources:
+        - "https://pypi.org"
+
+# Enforcement levels
+enforcement:
+  level: "enforce"  # Options: "warn", "enforce", "audit-only"
+
+  # Actions on policy violations
+  on_violation:
+    action: "block"  # Options: "block", "warn", "log"
+    notification:
+      slack: "#security-alerts"
+      email: "security@intelgraph.com"
+
+# Exceptions and emergency procedures
+exceptions:
+  # Emergency bypass (requires manual approval)
+  emergency_bypass:
+    enabled: true
+    requires_approval: true
+    approvers:
+      - "security-lead"
+      - "engineering-director"
+    max_duration_hours: 24
+    audit_trail: true
+
+  # Temporary exceptions for specific artifacts
+  temporary_exceptions: []
+
+# Monitoring and audit
+audit:
+  # Log all verification attempts
+  log_verifications: true
+
+  # Metrics collection
+  metrics:
+    verification_success_rate: true
+    policy_violations: true
+    emergency_bypasses: true
+
+  # Retention policy
+  retention_days: 90
+
+# Integration settings
+integrations:
+  # OPA integration for policy evaluation
+  opa:
+    enabled: true
+    policy_package: "intelgraph.trust.slsa"
+
+  # Falco integration for runtime monitoring
+  falco:
+    enabled: true
+    rules_file: "/etc/falco/slsa-rules.yaml"
+
+  # Grafana dashboard
+  grafana:
+    dashboard_id: "slsa-trust-metrics"

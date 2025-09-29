@@ -1,0 +1,11 @@
+name: labels-validate
+
+permissions:
+  contents: read
+on: [pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node mlops/judgments/validate.ts

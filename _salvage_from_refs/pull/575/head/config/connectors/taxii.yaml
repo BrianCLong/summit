@@ -1,0 +1,3 @@
+rateLimitPerMin: 60
+egress:
+  - taxii.example.com

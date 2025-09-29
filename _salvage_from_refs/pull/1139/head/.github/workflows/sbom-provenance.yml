@@ -1,0 +1,14 @@
+name: SBOM & Provenance
+on: [push, pull_request]
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anchore/sbom-action@v0.16.0
+        with: { path: ".", format: "cyclonedx", output-file: "sbom.json" }
+      - run: |
+          echo '${{ secrets.COSIGN_KEY }}' > cosign.key
+          cosign attest --predicate sbom.json --type cyclonedx ghcr.io/${{ github.repository }}/maestro:${{ github.sha }} --key cosign.key || true
+      - uses: google/osv-scanner-action@v1.6.1
+        with: { path: "." }

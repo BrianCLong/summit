@@ -1,0 +1,8 @@
+# v24_modules/requirements.txt
+# Common Python dependencies for v24 tactical modules
+
+networkx==3.1
+pyyaml==6.0.1
+numpy==1.25.2
+scipy==1.11.1
+pytest==7.4.0

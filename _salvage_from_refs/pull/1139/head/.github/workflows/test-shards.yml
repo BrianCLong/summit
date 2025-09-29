@@ -1,0 +1,252 @@
+name: test-shards
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+concurrency:
+  group: test-shards-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.setup.outputs.matrix }}
+      shard-count: ${{ steps.setup.outputs.shard-count }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup sharding
+        id: setup
+        run: |
+          # Determine optimal shard count based on changed files
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before || 'HEAD~1' }} HEAD | grep -E '\.(test|spec)\.(js|ts|jsx|tsx)$|test_.*\.py$' | wc -l)
+          
+          # Dynamic shard count: 1 shard per 10 test files, min 2, max 8
+          SHARD_COUNT=$(( ($CHANGED_FILES + 9) / 10 ))
+          SHARD_COUNT=$(( $SHARD_COUNT < 2 ? 2 : $SHARD_COUNT ))
+          SHARD_COUNT=$(( $SHARD_COUNT > 8 ? 8 : $SHARD_COUNT ))
+          
+          echo "shard-count=$SHARD_COUNT" >> $GITHUB_OUTPUT
+          echo "matrix=$(seq 1 $SHARD_COUNT | jq -R . | jq -s .)" >> $GITHUB_OUTPUT
+          echo "Using $SHARD_COUNT shards for $CHANGED_FILES test files"
+
+  test-shard:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    
+    services:
+      neo4j:
+        image: neo4j:5
+        ports:
+          - 7687:7687
+        env:
+          NEO4J_AUTH: neo4j/test
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p test 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          
+      postgres:
+        image: postgres:16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: intelgraph_test_shard_${{ matrix.shard }}
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install -r requirements.txt || echo "No requirements.txt"
+          
+      - name: Download timing data
+        continue-on-error: true
+        run: |
+          # Try to get timing data from cache or previous runs
+          curl -sf "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" | \
+            jq -r '.artifacts[] | select(.name=="test-timings") | .archive_download_url' | \
+            head -1 | xargs -I {} curl -sf -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" {} -o timings.zip || true
+          
+          if [ -f timings.zip ]; then
+            unzip -q timings.zip && rm timings.zip
+            echo "📊 Using cached timing data"
+          else
+            echo "⚠️ No cached timing data, using estimates"
+          fi
+
+      - name: Allocate tests for shard
+        id: allocate
+        run: |
+          echo "Allocating tests for shard ${{ matrix.shard }} of ${{ needs.prepare.outputs.shard-count }}"
+          TESTS=$(VERBOSE=1 node scripts/allocate-tests.js ${{ matrix.shard }} ${{ needs.prepare.outputs.shard-count }} 2>&1)
+          
+          # Extract the test list (last line of output)
+          TEST_LIST=$(echo "$TESTS" | tail -1)
+          echo "tests=$TEST_LIST" >> $GITHUB_OUTPUT
+          
+          # Log allocation info
+          echo "$TESTS" | head -n -1 >&2
+          echo "🧪 Tests for shard ${{ matrix.shard }}: $(echo "$TEST_LIST" | wc -w) files"
+
+      - name: Run Jest tests (shard ${{ matrix.shard }})
+        if: steps.allocate.outputs.tests != ''
+        env:
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: test
+          POSTGRES_URI: postgresql://postgres:test@localhost:5432/intelgraph_test_shard_${{ matrix.shard }}
+          REDIS_URL: redis://localhost:6379
+          JEST_JUNIT_OUTPUT_DIR: test-results
+          JEST_JUNIT_OUTPUT_NAME: jest-shard-${{ matrix.shard }}.xml
+        run: |
+          if [ -n "${{ steps.allocate.outputs.tests }}" ]; then
+            echo "Running Jest tests for shard ${{ matrix.shard }}"
+            npx jest --ci --maxWorkers=2 --reporters=default --reporters=jest-junit \
+              --testPathPattern="(${{ steps.allocate.outputs.tests }})" \
+              --coverage --coverageDirectory=coverage-shard-${{ matrix.shard }} \
+              --coverageReporters=lcov --coverageReporters=json-summary || true
+          else
+            echo "No Jest tests allocated to shard ${{ matrix.shard }}"
+          fi
+
+      - name: Run Pytest tests (shard ${{ matrix.shard }})
+        if: steps.allocate.outputs.tests != ''
+        env:
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: test
+          POSTGRES_URI: postgresql://postgres:test@localhost:5432/intelgraph_test_shard_${{ matrix.shard }}
+          REDIS_URL: redis://localhost:6379
+        run: |
+          # Filter for Python tests
+          PYTHON_TESTS=$(echo "${{ steps.allocate.outputs.tests }}" | tr ' ' '\n' | grep '\.py$' | tr '\n' ' ')
+          
+          if [ -n "$PYTHON_TESTS" ]; then
+            echo "Running Pytest tests for shard ${{ matrix.shard }}: $PYTHON_TESTS"
+            python -m pytest -v --maxfail=3 \
+              --junitxml=test-results/pytest-shard-${{ matrix.shard }}.xml \
+              --cov=server --cov-report=xml:coverage-shard-${{ matrix.shard }}/coverage.xml \
+              $PYTHON_TESTS || true
+          else
+            echo "No Python tests allocated to shard ${{ matrix.shard }}"
+          fi
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-shard-${{ matrix.shard }}
+          path: |
+            test-results/
+            coverage-shard-${{ matrix.shard }}/
+            
+      - name: Report shard metrics
+        if: always()
+        run: |
+          TESTS_RUN=$(find test-results -name "*.xml" -exec xmllint --xpath "count(//testcase)" {} \; 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
+          TESTS_PASSED=$(find test-results -name "*.xml" -exec xmllint --xpath "count(//testcase[not(failure) and not(error)])" {} \; 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
+          DURATION=$(find test-results -name "*.xml" -exec xmllint --xpath "sum(//testcase/@time)" {} \; 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
+          
+          echo "::notice title=Shard ${{ matrix.shard }} Results::Tests: $TESTS_RUN | Passed: $TESTS_PASSED | Duration: ${DURATION}s"
+
+  merge-results:
+    needs: [prepare, test-shard]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download all shard results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-shard-*
+          merge-multiple: true
+          
+      - name: Merge test results
+        run: |
+          # Combine all test results
+          mkdir -p merged-results
+          
+          # Merge Jest results
+          find . -name "jest-shard-*.xml" -exec cp {} merged-results/ \;
+          
+          # Merge Pytest results  
+          find . -name "pytest-shard-*.xml" -exec cp {} merged-results/ \;
+          
+          # Merge coverage
+          if command -v npx &> /dev/null && ls coverage-shard-*/coverage-final.json 2>/dev/null; then
+            npx nyc merge coverage-shard-* merged-coverage.json
+            npx nyc report --reporter=lcov --reporter=text-summary --temp-dir=. --report-dir=merged-coverage
+          fi
+
+      - name: Update timing data
+        run: |
+          # Collect timing data from this run
+          node scripts/collect-timings.js > merged-results/test-timings-new.json
+          
+      - name: Upload merged results
+        uses: actions/upload-artifact@v4
+        with:
+          name: merged-test-results
+          path: |
+            merged-results/
+            merged-coverage/
+            
+      - name: Upload timing data
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-timings
+          path: merged-results/test-timings-new.json
+          
+      - name: Calculate shard efficiency
+        run: |
+          echo "📊 Shard Efficiency Report"
+          echo "========================="
+          
+          # Calculate total time and balance
+          for i in $(seq 1 ${{ needs.prepare.outputs.shard-count }}); do
+            if [ -f "test-results/jest-shard-$i.xml" ] || [ -f "test-results/pytest-shard-$i.xml" ]; then
+              TIME=$(find test-results -name "*shard-$i.xml" -exec xmllint --xpath "sum(//testcase/@time)" {} \; 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
+              echo "Shard $i: ${TIME}s"
+            fi
+          done | sort -k2 -n
+          
+          echo "::notice title=Sharding Complete::${{ needs.prepare.outputs.shard-count }} shards processed"

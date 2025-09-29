@@ -1,0 +1,8 @@
+name: auto-assign
+on: [pull_request]
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kentaro-m/auto-assign-action@v1.2.0

@@ -1,0 +1,298 @@
+name: 'Maestro Build Pipeline'
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      budget:
+        description: 'Budget limit (USD)'
+        required: false
+        default: '10.00'
+      parameters:
+        description: 'Additional parameters (JSON)'
+        required: false
+        default: '{}'
+
+env:
+  MAESTRO_API_URL: ${{ vars.MAESTRO_API_URL || 'https://maestro-api.example.com' }}
+
+jobs:
+  validate-pipeline:
+    name: 'Validate Pipeline'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Maestro CLI
+        run: pnpm install -g @intelgraph/maestro
+
+      - name: Validate pipeline syntax
+        run: |
+          if [[ -f ".maestro/pipeline.yaml" ]]; then
+            maestro template lint .maestro/pipeline.yaml
+          elif [[ -f "maestro.yaml" ]]; then
+            maestro template lint maestro.yaml
+          else
+            echo "❌ No Maestro pipeline found"
+            exit 1
+          fi
+
+  security-scan:
+    name: 'Security Scan'
+    runs-on: ubuntu-latest
+    needs: validate-pipeline
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  build-development:
+    name: 'Build (Development)'
+    runs-on: ubuntu-latest
+    needs: [validate-pipeline, security-scan]
+    if: github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Maestro build pipeline
+        uses: ./.github/actions/maestro-run
+        with:
+          pipeline: '.maestro/pipeline.yaml'
+          environment: 'development'
+          budget: '5.00'
+          maestro_token: ${{ secrets.MAESTRO_API_TOKEN }}
+          parameters: |
+            {
+              "git_ref": "${{ github.sha }}",
+              "pr_number": "${{ github.event.number || '' }}",
+              "actor": "${{ github.actor }}"
+            }
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: maestro-build-development
+          path: maestro-artifacts/
+          retention-days: 7
+
+  build-staging:
+    name: 'Build (Staging)'
+    runs-on: ubuntu-latest
+    needs: [validate-pipeline, security-scan]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Maestro build pipeline
+        uses: ./.github/actions/maestro-run
+        with:
+          pipeline: '.maestro/pipeline.yaml'
+          environment: 'staging'
+          budget: '15.00'
+          maestro_token: ${{ secrets.MAESTRO_API_TOKEN }}
+          parameters: |
+            {
+              "git_ref": "${{ github.sha }}",
+              "build_type": "release",
+              "enable_signing": true,
+              "generate_sbom": true
+            }
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: maestro-build-staging
+          path: maestro-artifacts/
+          retention-days: 30
+
+      - name: Create deployment
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'staging',
+              description: 'Maestro automated deployment to staging',
+              auto_merge: false,
+              required_contexts: []
+            });
+
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.data.id,
+              state: 'success',
+              description: 'Deployed via Maestro pipeline'
+            });
+
+  build-production:
+    name: 'Build (Production)'
+    runs-on: ubuntu-latest
+    needs: [validate-pipeline, security-scan]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: https://intelgraph.example.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Maestro production pipeline
+        uses: ./.github/actions/maestro-run
+        with:
+          pipeline: '.maestro/pipeline.yaml'
+          environment: 'production'
+          budget: ${{ github.event.inputs.budget || '25.00' }}
+          timeout: '60'
+          maestro_token: ${{ secrets.MAESTRO_API_TOKEN }}
+          parameters: |
+            {
+              "git_ref": "${{ github.sha }}",
+              "build_type": "production",
+              "enable_signing": true,
+              "generate_sbom": true,
+              "enable_attestation": true,
+              "security_scan": true,
+              "compliance_check": true
+            }
+
+      - name: Upload production artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: maestro-build-production
+          path: maestro-artifacts/
+          retention-days: 90
+
+      - name: Notify deployment
+        if: success()
+        run: |
+          echo "🚀 Production deployment completed successfully"
+          echo "Run ID: ${{ env.MAESTRO_RUN_ID }}"
+          echo "Cost: ${{ env.MAESTRO_COST }}"
+
+  notify-on-failure:
+    name: 'Notify on Failure'
+    runs-on: ubuntu-latest
+    needs: [build-development, build-staging, build-production]
+    if: failure()
+
+    steps:
+      - name: Notify failure
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Maestro Build Failure - ${context.workflow} #${context.runNumber}`,
+              body: `
+            ## 🚨 Maestro Build Pipeline Failed
+
+            **Workflow**: ${context.workflow}
+            **Run Number**: ${context.runNumber}
+            **Commit**: ${context.sha}
+            **Actor**: ${context.actor}
+            **Event**: ${context.eventName}
+
+            ### Failure Details
+            - **Repository**: ${context.repo.owner}/${context.repo.repo}
+            - **Branch**: ${context.ref}
+            - **Timestamp**: ${new Date().toISOString()}
+
+            ### Actions Required
+            1. Review the failed workflow run: [View Run](${context.payload.repository.html_url}/actions/runs/${context.runId})
+            2. Check Maestro pipeline logs and artifacts
+            3. Verify pipeline configuration and dependencies
+            4. Re-run after fixes are applied
+
+            ### Troubleshooting
+            - Check \`.maestro/pipeline.yaml\` for configuration issues
+            - Verify Maestro API connectivity and authentication
+            - Review budget and timeout settings
+            - Check for dependency conflicts or missing requirements
+
+            ---
+            *This issue was automatically created by the Maestro build pipeline.*
+              `,
+              labels: ['bug', 'maestro', 'ci-failure']
+            };
+
+            // Only create issue if this is a main branch failure
+            if (context.ref === 'refs/heads/main') {
+              await github.rest.issues.create(issue);
+            }
+
+  cleanup:
+    name: 'Cleanup'
+    runs-on: ubuntu-latest
+    needs: [build-development, build-staging, build-production]
+    if: always()
+
+    steps:
+      - name: Cleanup workspace
+        run: |
+          echo "🧹 Cleaning up workspace..."
+          # Clean up any temporary files or caches
+          rm -rf /tmp/maestro-* || true
+
+      - name: Report usage
+        run: |
+          echo "📊 Maestro Pipeline Usage Report"
+          echo "================================="
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run Number: ${{ github.run_number }}"
+          echo "Total Jobs: ${{ strategy.job-total || github.job }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"

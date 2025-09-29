@@ -1,0 +1,70 @@
+name: maestro-ci
+on:
+  push: { branches: [main] }
+  pull_request:
+permissions:
+  contents: read
+  id-token: write # for OIDC → cloud registry
+  packages: write
+env:
+  IMAGE_NAME: ghcr.io/brianclong/maestro-control-plane
+  NODE_OPTIONS: --max-old-space-size=4096
+jobs:
+  test_build_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - run: npm run lint && npm test -- --ci --reporters=default
+      - name: Build image
+        run: |
+          docker build --pull -t $IMAGE_NAME:${{ github.sha }} .
+      - name: Vulnerability scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+      - name: SBOM (Syft)
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          artifact-name: sbom.spdx.json
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push image
+        run: docker push $IMAGE_NAME:${{ github.sha }}
+      - name: Cosign sign
+        uses: sigstore/cosign-installer@v3
+      - run: cosign sign --yes $IMAGE_NAME@$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE_NAME:${{ github.sha }} | cut -d'@' -f2)
+
+  deploy_dev:
+    if: github.ref == 'refs/heads/main'
+    needs: [test_build_scan]
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-helm@v4
+      - name: Kube Auth
+        run: |
+          # use OIDC to get a short-lived token or import kubeconfig from secret
+          mkdir -p ~/.kube && echo "${KUBECONFIG_YAML}" > ~/.kube/config
+        env:
+          KUBECONFIG_YAML: ${{ secrets.DEV_KUBECONFIG }}
+      - name: Helm upgrade
+        run: |
+          helm upgrade --install maestro charts/maestro \
+            --namespace intelgraph-dev --create-namespace \
+            --set image.repository=${IMAGE_NAME} \
+            --set image.tag=${{ github.sha }} \
+            --values charts/maestro/values-dev.yaml

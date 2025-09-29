@@ -1,0 +1,49 @@
+name: Release GA Kit
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  build-ga-kit:
+    runs-on: ubuntu-latest
+    container: pandoc/latex:3.1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build GA Kit PDF (deterministic)
+        run: |
+          mkdir -p dist
+          # combine multiple docs if needed; adjust list accordingly
+          pandoc docs/ga-kit.md docs/run-of-show.md -o dist/GA-Kit-${{ github.ref_name }}.pdf
+
+      - name: Generate SBOM (SPDX)
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          output-file: dist/sbom-spdx.json
+
+      - name: Vulnerability scan (warn-only for docs)
+        uses: anchore/scan-action@v4
+        with:
+          sbom: dist/sbom-spdx.json
+          fail-build: false
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-kit
+          path: dist/*
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: "dist/*.pdf"

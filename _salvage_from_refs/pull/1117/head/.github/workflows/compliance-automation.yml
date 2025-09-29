@@ -1,0 +1,490 @@
+name: Compliance Automation
+
+on:
+  push:
+    branches: [main, develop, 'release/*']
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Daily compliance checks at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  NODE_VERSION: '18'
+  CONDUCTOR_ENV: 'ci'
+  COMPLIANCE_REPORT_RETENTION_DAYS: 90
+
+jobs:
+  security-scan:
+    name: Security Vulnerability Scan
+    runs-on: ubuntu-latest
+    outputs:
+      security-score: ${{ steps.security-analysis.outputs.score }}
+      critical-findings: ${{ steps.security-analysis.outputs.critical }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci --audit-level moderate
+        
+      - name: Run npm audit
+        id: npm-audit
+        run: |
+          npm audit --json > npm-audit-report.json || true
+          echo "audit-report=$(cat npm-audit-report.json)" >> $GITHUB_OUTPUT
+          
+      - name: Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=medium --json-file-output=snyk-report.json
+          
+      - name: CodeQL analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: typescript, javascript
+          config-file: ./.github/codeql/codeql-config.yml
+          
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        
+      - name: Run Semgrep SAST
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/owasp-top-ten
+            p/nodejs
+          publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
+          publishDeployment: production
+          
+      - name: Security analysis summary
+        id: security-analysis
+        run: |
+          # Aggregate security findings
+          node .github/scripts/aggregate-security-findings.js \
+            --npm-audit npm-audit-report.json \
+            --snyk snyk-report.json \
+            --output security-summary.json
+          
+          SCORE=$(jq -r '.overall_score' security-summary.json)
+          CRITICAL=$(jq -r '.critical_count' security-summary.json)
+          
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports-${{ github.sha }}
+          path: |
+            npm-audit-report.json
+            snyk-report.json
+            security-summary.json
+          retention-days: ${{ env.COMPLIANCE_REPORT_RETENTION_DAYS }}
+
+  policy-validation:
+    name: OPA Policy Validation
+    runs-on: ubuntu-latest
+    outputs:
+      policy-score: ${{ steps.opa-test.outputs.score }}
+      policy-coverage: ${{ steps.opa-test.outputs.coverage }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: 'v0.58.0'
+          
+      - name: Validate policy syntax
+        run: |
+          find policy/ -name "*.rego" -exec opa fmt --diff {} \;
+          find policy/ -name "*.rego" -exec opa parse {} \;
+          
+      - name: Run policy tests
+        id: opa-test
+        run: |
+          # Run all policy tests
+          opa test policy/ --coverage --format json > opa-test-results.json
+          
+          # Calculate policy coverage and score
+          COVERAGE=$(jq -r '.coverage.percentage' opa-test-results.json)
+          PASS_COUNT=$(jq -r '.results | map(select(.pass == true)) | length' opa-test-results.json)
+          TOTAL_COUNT=$(jq -r '.results | length' opa-test-results.json)
+          
+          if [ "$TOTAL_COUNT" -eq 0 ]; then
+            SCORE=0
+          else
+            SCORE=$(echo "scale=2; ($PASS_COUNT * 100) / $TOTAL_COUNT" | bc)
+          fi
+          
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          
+      - name: Policy simulation tests
+        run: |
+          # Test policies against historical data
+          node .github/scripts/policy-simulation.js \
+            --policy-dir policy/ \
+            --test-data .github/test-data/access-patterns.json \
+            --output policy-simulation.json
+            
+      - name: Validate bundle integrity
+        run: |
+          # Create and verify policy bundle
+          opa build policy/ --bundle
+          tar -tf bundle.tar.gz | head -20
+          
+      - name: Upload policy reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: policy-reports-${{ github.sha }}
+          path: |
+            opa-test-results.json
+            policy-simulation.json
+            bundle.tar.gz
+          retention-days: ${{ env.COMPLIANCE_REPORT_RETENTION_DAYS }}
+
+  data-protection:
+    name: Data Protection Compliance
+    runs-on: ubuntu-latest
+    outputs:
+      gdpr-compliance: ${{ steps.gdpr-check.outputs.compliant }}
+      pii-scan-score: ${{ steps.pii-scan.outputs.score }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: PII detection scan
+        id: pii-scan
+        run: |
+          # Run PII detection on codebase
+          npx @microsoft/presidio-cli scan \
+            --input-dir ./server \
+            --output pii-scan-results.json \
+            --confidence-threshold 0.8 \
+            --include-patterns "*.ts,*.js,*.json" \
+            --exclude-patterns "node_modules/**,*.test.*,*.spec.*"
+          
+          # Calculate PII exposure score
+          PII_COUNT=$(jq '[.results[].entities | length] | add // 0' pii-scan-results.json)
+          
+          if [ "$PII_COUNT" -eq 0 ]; then
+            SCORE=100
+          else
+            # Score inversely related to PII findings
+            SCORE=$(echo "scale=2; 100 - ($PII_COUNT * 2)" | bc | awk '{print ($1 < 0) ? 0 : $1}')
+          fi
+          
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          
+      - name: GDPR compliance check
+        id: gdpr-check
+        run: |
+          # Check for GDPR compliance requirements
+          node .github/scripts/gdpr-compliance-check.js \
+            --source-dir ./server \
+            --output gdpr-report.json
+          
+          COMPLIANT=$(jq -r '.overall_compliant' gdpr-report.json)
+          echo "compliant=$COMPLIANT" >> $GITHUB_OUTPUT
+          
+      - name: Data retention policy validation
+        run: |
+          # Validate data retention configurations
+          node .github/scripts/validate-retention-policies.js \
+            --config ./server/src/config/data-retention.ts \
+            --output retention-validation.json
+            
+      - name: Encryption standards check
+        run: |
+          # Verify encryption implementation
+          grep -r "crypto\." server/ --include="*.ts" --include="*.js" > crypto-usage.txt
+          node .github/scripts/validate-encryption.js \
+            --crypto-usage crypto-usage.txt \
+            --output encryption-validation.json
+            
+      - name: Upload data protection reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-protection-reports-${{ github.sha }}
+          path: |
+            pii-scan-results.json
+            gdpr-report.json
+            retention-validation.json
+            encryption-validation.json
+          retention-days: ${{ env.COMPLIANCE_REPORT_RETENTION_DAYS }}
+
+  infrastructure-compliance:
+    name: Infrastructure Security Compliance
+    runs-on: ubuntu-latest
+    outputs:
+      infra-score: ${{ steps.infra-scan.outputs.score }}
+      k8s-compliance: ${{ steps.k8s-scan.outputs.compliant }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Kubernetes manifest security scan
+        id: k8s-scan
+        uses: azure/k8s-lint@v1
+        with:
+          manifests: |
+            k8s/
+          namespace: conductor-system
+            
+      - name: Docker image security scan
+        uses: anchore/scan-action@v3
+        with:
+          image: "conductor:latest"
+          fail-build: false
+          severity-cutoff: medium
+          
+      - name: Infrastructure as Code scan
+        id: infra-scan
+        run: |
+          # Install tfsec for Terraform scanning
+          curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
+          
+          # Scan Docker compose files
+          docker run --rm -v "$(pwd):/src" \
+            hadolint/hadolint hadolint /src/Dockerfile \
+            --format json > dockerfile-scan.json
+          
+          # Scan Kubernetes manifests
+          docker run --rm -v "$(pwd):/src" \
+            kubesec/kubesec:latest scan /src/k8s/*.yaml \
+            --format json > k8s-security-scan.json
+          
+          # Calculate infrastructure security score
+          node .github/scripts/calculate-infra-score.js \
+            --docker-scan dockerfile-scan.json \
+            --k8s-scan k8s-security-scan.json \
+            --output infra-score.json
+          
+          SCORE=$(jq -r '.overall_score' infra-score.json)
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          
+      - name: Network policy validation
+        run: |
+          # Validate network policies exist and are restrictive
+          find k8s/ -name "*networkpolicy*" -type f | \
+            xargs -I {} node .github/scripts/validate-network-policies.js {}
+            
+      - name: Upload infrastructure reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: infrastructure-reports-${{ github.sha }}
+          path: |
+            dockerfile-scan.json
+            k8s-security-scan.json
+            infra-score.json
+          retention-days: ${{ env.COMPLIANCE_REPORT_RETENTION_DAYS }}
+
+  compliance-aggregation:
+    name: Compliance Score Aggregation
+    runs-on: ubuntu-latest
+    needs: [security-scan, policy-validation, data-protection, infrastructure-compliance]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: compliance-reports/
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Generate compliance dashboard
+        run: |
+          # Create comprehensive compliance report
+          node .github/scripts/generate-compliance-report.js \
+            --security-score "${{ needs.security-scan.outputs.security-score }}" \
+            --security-critical "${{ needs.security-scan.outputs.critical-findings }}" \
+            --policy-score "${{ needs.policy-validation.outputs.policy-score }}" \
+            --policy-coverage "${{ needs.policy-validation.outputs.policy-coverage }}" \
+            --gdpr-compliant "${{ needs.data-protection.outputs.gdpr-compliance }}" \
+            --pii-score "${{ needs.data-protection.outputs.pii-scan-score }}" \
+            --infra-score "${{ needs.infrastructure-compliance.outputs.infra-score }}" \
+            --k8s-compliant "${{ needs.infrastructure-compliance.outputs.k8s-compliance }}" \
+            --reports-dir compliance-reports/ \
+            --output compliance-dashboard.html
+            
+      - name: Calculate overall compliance score
+        id: compliance-score
+        run: |
+          # Calculate weighted compliance score
+          OVERALL_SCORE=$(node -e "
+            const scores = {
+              security: ${{ needs.security-scan.outputs.security-score || 0 }},
+              policy: ${{ needs.policy-validation.outputs.policy-score || 0 }},
+              dataProtection: ${{ needs.data-protection.outputs.pii-scan-score || 0 }},
+              infrastructure: ${{ needs.infrastructure-compliance.outputs.infra-score || 0 }}
+            };
+            
+            const weights = { security: 0.3, policy: 0.25, dataProtection: 0.25, infrastructure: 0.2 };
+            const overall = Object.entries(scores).reduce((acc, [key, score]) => 
+              acc + (score * weights[key]), 0);
+            console.log(Math.round(overall));
+          ")
+          
+          echo "overall-score=$OVERALL_SCORE" >> $GITHUB_OUTPUT
+          
+          # Set compliance status
+          if [ "$OVERALL_SCORE" -ge 85 ]; then
+            echo "status=COMPLIANT" >> $GITHUB_OUTPUT
+            echo "badge-color=green" >> $GITHUB_OUTPUT
+          elif [ "$OVERALL_SCORE" -ge 70 ]; then
+            echo "status=PARTIAL" >> $GITHUB_OUTPUT
+            echo "badge-color=yellow" >> $GITHUB_OUTPUT
+          else
+            echo "status=NON_COMPLIANT" >> $GITHUB_OUTPUT
+            echo "badge-color=red" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Update compliance badge
+        run: |
+          # Generate dynamic compliance badge
+          curl -s "https://img.shields.io/badge/Compliance-${{ steps.compliance-score.outputs.overall-score }}%25-${{ steps.compliance-score.outputs.badge-color }}" \
+            -o compliance-badge.svg
+            
+      - name: Generate compliance attestation
+        run: |
+          # Create signed compliance attestation
+          node .github/scripts/generate-attestation.js \
+            --overall-score "${{ steps.compliance-score.outputs.overall-score }}" \
+            --status "${{ steps.compliance-score.outputs.status }}" \
+            --commit-sha "${{ github.sha }}" \
+            --output compliance-attestation.json
+            
+      - name: Comment PR with compliance report
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'compliance-dashboard.html';
+            
+            if (fs.existsSync(reportPath)) {
+              const report = fs.readFileSync(reportPath, 'utf8');
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 🛡️ Compliance Automation Report
+                
+**Overall Compliance Score: ${{ steps.compliance-score.outputs.overall-score }}% (${{ steps.compliance-score.outputs.status }})**
+
+### Component Scores
+- 🔒 Security: ${{ needs.security-scan.outputs.security-score }}% (${{ needs.security-scan.outputs.critical-findings }} critical findings)
+- 📋 Policy: ${{ needs.policy-validation.outputs.policy-score }}% (Coverage: ${{ needs.policy-validation.outputs.policy-coverage }}%)
+- 🔐 Data Protection: ${{ needs.data-protection.outputs.pii-scan-score }}% (GDPR: ${{ needs.data-protection.outputs.gdpr-compliance }})
+- 🏗️ Infrastructure: ${{ needs.infrastructure-compliance.outputs.infra-score }}%
+
+[View Detailed Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+                `
+              });
+            }
+            
+      - name: Fail on non-compliance
+        if: steps.compliance-score.outputs.status == 'NON_COMPLIANT'
+        run: |
+          echo "❌ Compliance check failed with score: ${{ steps.compliance-score.outputs.overall-score }}" 
+          echo "Minimum required score: 70%"
+          exit 1
+          
+      - name: Upload final compliance artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-final-report-${{ github.sha }}
+          path: |
+            compliance-dashboard.html
+            compliance-badge.svg
+            compliance-attestation.json
+          retention-days: ${{ env.COMPLIANCE_REPORT_RETENTION_DAYS }}
+
+  audit-log:
+    name: Audit Trail Generation
+    runs-on: ubuntu-latest
+    needs: [compliance-aggregation]
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Generate audit trail
+        run: |
+          # Create immutable audit record
+          cat > audit-record.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "event_type": "compliance_check",
+            "repository": "${{ github.repository }}",
+            "commit_sha": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "actor": "${{ github.actor }}",
+            "workflow_run_id": "${{ github.run_id }}",
+            "compliance_score": "${{ needs.compliance-aggregation.outputs.overall-score || 'N/A' }}",
+            "compliance_status": "${{ needs.compliance-aggregation.outputs.status || 'FAILED' }}",
+            "component_scores": {
+              "security": "${{ needs.security-scan.outputs.security-score || 'N/A' }}",
+              "policy": "${{ needs.policy-validation.outputs.policy-score || 'N/A' }}",
+              "data_protection": "${{ needs.data-protection.outputs.pii-scan-score || 'N/A' }}",
+              "infrastructure": "${{ needs.infrastructure-compliance.outputs.infra-score || 'N/A' }}"
+            },
+            "evidence_artifacts": [
+              "security-reports-${{ github.sha }}",
+              "policy-reports-${{ github.sha }}",
+              "data-protection-reports-${{ github.sha }}",
+              "infrastructure-reports-${{ github.sha }}",
+              "compliance-final-report-${{ github.sha }}"
+            ]
+          }
+          EOF
+          
+      - name: Sign audit record
+        run: |
+          # Sign the audit record for tamper-evidence
+          echo "${{ secrets.AUDIT_SIGNING_KEY }}" | base64 -d > signing_key.pem
+          openssl dgst -sha256 -sign signing_key.pem -out audit-record.sig audit-record.json
+          rm signing_key.pem
+          
+      - name: Store audit record
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-trail-${{ github.sha }}
+          path: |
+            audit-record.json
+            audit-record.sig
+          retention-days: 2555  # 7 years retention for audit records

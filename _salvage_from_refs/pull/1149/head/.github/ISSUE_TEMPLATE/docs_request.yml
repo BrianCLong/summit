@@ -1,0 +1,22 @@
+name: Docs request
+description: Ask for a new doc or update
+labels: [docs]
+body:
+  - type: input
+    id: area
+    attributes: { label: Area/Feature, placeholder: "ZIP Export" }
+  - type: textarea
+    id: need
+    attributes: { label: Need/Gap, placeholder: "Users don’t know how to…" }
+  - type: checkboxes
+    id: artifacts
+    attributes:
+      label: Which artifacts?
+      options:
+        - label: How-to
+        - label: Tutorial
+        - label: Reference
+        - label: Concept
+  - type: input
+    id: owner
+    attributes: { label: Owner team }
