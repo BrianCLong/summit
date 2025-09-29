@@ -1,0 +1,61 @@
+image:
+  registry: ghcr.io/example
+  repository: golden-path-hello-service
+  tag: "latest"
+  fullRef: ""
+  pullPolicy: IfNotPresent
+
+service:
+  port: 80
+  targetPort: 8080
+
+replicaCount: 2
+deploymentStrategy: canary
+canary:
+  steps:
+    - setWeight: 25
+    - pause: { duration: 2m }
+    - setWeight: 50
+    - pause: { duration: 5m }
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  readOnlyRootFilesystem: true
+
+env:
+  - name: PORT
+    value: "8080"
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 3
+  periodSeconds: 5
+
+serviceAccount:
+  create: true
+  name: ""

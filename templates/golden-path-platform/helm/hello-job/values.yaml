@@ -1,0 +1,35 @@
+image:
+  registry: ghcr.io/example
+  repository: golden-path-hello-job
+  tag: "latest"
+  fullRef: ""
+  pullPolicy: IfNotPresent
+
+schedule: "*/1 * * * *"
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  readOnlyRootFilesystem: true
+
+env:
+  - name: SCHEDULE
+    value: "@every 1m"
+
+serviceAccount:
+  create: true
+  name: ""

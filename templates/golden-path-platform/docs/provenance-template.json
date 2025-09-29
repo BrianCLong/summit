@@ -1,0 +1,21 @@
+{
+  "_type": "https://slsa.dev/provenance/v1",
+  "buildDefinition": {
+    "buildType": "https://github.com/slsa-framework/slsa-github-generator/actions/build-type@v1",
+    "externalParameters": {
+      "runner": "github-actions",
+      "workflow": "ci.yml"
+    },
+    "internalParameters": {
+      "gitSha": "${GITHUB_SHA:-local}"
+    }
+  },
+  "runDetails": {
+    "builder": {
+      "id": "https://github.com/actions"
+    },
+    "metadata": {
+      "invocationId": "${GITHUB_RUN_ID:-local}"
+    }
+  }
+}
