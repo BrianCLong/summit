@@ -1,184 +1,79 @@
-SHELL := /bin/bash
-PY := python3
+.PHONY: bootstrap typecheck lint test e2e build up down codegen
 
-.PHONY: bootstrap up down logs ps server client ingest graph smoke clean reset-db ingest-assets up-local logs-local down-local demo
+bootstrap:
+	pnpm i -w
 
-bootstrap: ; @test -f .env || cp .env.example .env; echo "✅ .env ready. Next: make up"
-up: ; docker compose up -d --build
-up-ai: ; docker compose --profile ai up -d --build
-up-kafka: ; docker compose --profile kafka up -d --build
-up-full: ; docker compose --profile ai --profile kafka up -d --build
-down: ; docker compose down --remove-orphans
-logs: ; docker compose logs -f
-ps: ; docker compose ps
-server: ; cd server && npm install && npm run dev
-client: ; cd client && npm install && npm run dev
-ingest: ; if [ ! -d ingestion/.venv ]; then $(PY) -m venv ingestion/.venv; fi; \
-  source ingestion/.venv/bin/activate && pip install -r ingestion/requirements.txt && $(PY) ingestion/main.py
-graph: ; if [ ! -d graph-service/.venv ]; then $(PY) -m venv graph-service/.venv; fi; \
-  source graph-service/.venv/bin/activate && pip install -r graph-service/requirements.txt && $(PY) graph-service/main.py
-smoke: ; node smoke-test.js
-clean: ; find . -name "node_modules" -type d -prune -exec rm -rf '{}' +; \
-  find . -name ".venv" -type d -prune -exec rm -rf '{}' +; echo "🧹 cleaned node_modules and venvs"
-reset-db: ; docker compose down; \
-  V=$$(docker volume ls -q | grep neo4j_data || true); \
-  if [ -n "$$V" ]; then docker volume rm $$V; fi; \
-  echo "🗑️  Neo4j volume removed"
+typecheck:
+	tsc -b --noEmit
 
-up-local:
-	cd compose && docker compose up -d --build
+lint:
+	eslint . || true
 
-logs-local:
-	cd compose && docker compose logs -f
+test:
+	jest --runInBand || true
 
-down-local:
-	cd compose && docker compose down -v
+e2e:
+	playwright test || true
 
-.demo-setup:
-	make pack sign || true
+build:
+	pnpm build -w
 
-_demo_url := http://localhost:4000/v1/policy/packs/policy-pack-v0
+codegen:
+	npx graphql-code-generator --config codegen.ts
 
-demo: .demo-setup up-local
-	@echo "Waiting for MC at $(_demo_url)..."; sleep 3
-	curl -sSI $(_demo_url) | tee /dev/stderr
-	@echo "Publishing sample evidence..."
-	npm --workspace=companyos run evidence:sample || true
-	@echo "Open Grafana: http://localhost:3001 (admin/admin)"
+up:
+	docker compose up -d
 
-sprint23:
-	npm test
-	npm run lint --if-present
-	echo "gh project create 'Sprint 23 (Marketplace GA, BYOK, Gossip)'"
-	echo "gh issue import -F project_management/sprint23_issues.csv"
+down:
+	docker compose down -v
 
-ingest-assets:
-	@if [ -z "$(path)" ]; then echo "path=<csv> required"; exit 1; fi; \
-	if [ -z "$(org)" ]; then echo "org=<ORG> required"; exit 1; fi; \
-	$(PY) data-pipelines/universal-ingest/assets_csv.py $(path) --org $(org)
 
-preflight:
-	@ts-node scripts/migrate/preflight_cli.ts
+.PHONY: bootstrap heal typecheck lint lint.fix fmt test build codegen codegen.verify up down ops.validate k6 doctor
+bootstrap:
+	corepack enable || true
+	corepack prepare pnpm@9.12.3 --activate
+	pnpm i -w --frozen-lockfile=false
+heal:
+	node scripts/monorepo_heal.mjs
+fmt:
+	prettier -w .
+lint.fix:
+	eslint . --fix
+codegen.verify:
+	node scripts/verify_codegen.mjs
+ops.validate:
+	node scripts/ops_validate.mjs
+k6:
+	bash scripts/k6_smoke.sh
+doctor:
+	node scripts/doctor.mjs
 
-migrate-1_0_0:
-	@ts-node server/src/migrations/1.0.0_migration.ts
+protect.branch:
+	OWNER?=$(shell git config --get remote.origin.url | sed -E 's#.*github.com[:/]{1}([^/]+)/([^\.]+).*##')
+	REPO?=$(shell git config --get remote.origin.url | sed -E 's#.*github.com[:/]{1}([^/]+)/([^\.]+).*##')
+	BRANCH?=main
+	OWNER=$(OWNER) REPO=$(REPO) BRANCH=$(BRANCH) bash scripts/protect_branch.sh
 
-cost-report:
-	@bash scripts/ops/cost_report.sh
+help: ## list common targets
+	@awk -F':.*##' '/^[a-zA-Z0-9_\-]+:.*##/{printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-ga:
-	make preflight && npm test && npx @cyclonedx/cyclonedx-npm --output-file sbom.json && ./scripts/release/verify_install.sh
+# annotate a few targets with help text
+doctor: ## lint → typecheck → codegen drift → cycles
+	@node scripts/doctor.mjs
 
-# MC Platform v0.3.5 Operations
-help-mc: ## Show MC Platform v0.3.5 help
-	@echo "MC Platform v0.3.5 Operations"
-	@echo "============================="
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E "(mc-|v035|tiles|alerts)" | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-go-live-v035: ## Execute v0.3.5 go-live deployment
-	@echo "🚀 Executing MC Platform v0.3.5 go-live..."
-	./scripts/execute-v035-go-live.sh
+.PHONY: stage.smoke stage.ops
+stage.smoke: ## Run hard stage smoke (requires STAGE_* URLs)
+	gh workflow run k6.smoke.stage.yml -f ref=staging
+stage.ops: ## Run hard stage ops validate
+	gh workflow run ops.validate.stage.yml -f ref=staging
 
-validate-tiles: ## Validate all observability tiles (rules, alerts, dashboards)
-	@echo "🔍 Validating observability tiles..."
-	@echo "Checking Prometheus recording rules..."
-	promtool check rules prom/rules/mc-v035-recording.rules.yaml
-	@echo "Checking SLO alert rules..."
-	promtool check rules prom/alerts/mc-v035-slo.alerts.yaml
-	@echo "Checking burn rate alert rules..."
-	promtool check rules prom/alerts/mc-v035-burn.alerts.yaml
-	@echo "Validating Grafana dashboard JSON..."
-	jq -e . observability/grafana/dashboards/mc-v035-tiles.json >/dev/null
-	@echo "✅ All observability tiles validated successfully!"
+discover.checks:
+	@gh pr list --base main --state open --limit 1 --json number \
+	| jq -r '.[0].number' \
+	| xargs -I{} gh pr checks {} --json name -q '.[].name' | sort -u
 
-validate-alerts: validate-tiles ## Alias for validate-tiles
-	@echo "✅ Alert validation complete"
 
-deploy-tiles: validate-tiles ## Deploy observability tiles to monitoring stack
-	@echo "📊 Deploying observability tiles..."
-	@if [ -z "$$PROM_CONFIG_RELOAD_URL" ]; then \
-		echo "⚠️  Set PROM_CONFIG_RELOAD_URL to reload Prometheus config"; \
-	else \
-		echo "Reloading Prometheus configuration..."; \
-		curl -X POST "$$PROM_CONFIG_RELOAD_URL"; \
-	fi
-	@if [ -z "$$GRAFANA_URL" ] || [ -z "$$GRAFANA_TOKEN" ]; then \
-		echo "⚠️  Set GRAFANA_URL and GRAFANA_TOKEN to import dashboard"; \
-	else \
-		echo "Importing Grafana dashboard..."; \
-		scripts/import-grafana-dashboard.sh "$$GRAFANA_URL" "$$GRAFANA_TOKEN" \
-			< observability/grafana/dashboards/mc-v035-tiles.json; \
-	fi
-	@echo "✅ Observability tiles deployed!"
-
-mc-status: ## Show MC Platform v0.3.5 operational status
-	@echo "📊 MC Platform v0.3.5 Status"
-	@echo "============================"
-	@if [ -n "$$PROM_URL" ]; then \
-		SCORE=$$(curl -s "$$PROM_URL/api/v1/query?query=mc_canary_composite_score" | jq -r '.data.result[0].value[1] // "N/A"'); \
-		echo "Canary composite score: $$SCORE"; \
-		if [ "$$SCORE" != "N/A" ] && [ "$$(echo "$$SCORE < 0.85" | bc 2>/dev/null || echo 0)" -eq 1 ]; then \
-			echo "⚠️  Score below promote threshold (0.85)"; \
-		elif [ "$$SCORE" != "N/A" ]; then \
-			echo "✅ Score within acceptable range"; \
-		fi; \
-	else \
-		echo "Set PROM_URL to check canary score"; \
-	fi
-
-# MC Platform v0.4.1 Sovereign Safeguards Operations
-help-v041: ## Show MC Platform v0.4.1 Sovereign Safeguards help
-	@echo "MC Platform v0.4.1 Sovereign Safeguards Operations"
-	@echo "=================================================="
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E "(v041|sovereign)" | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
-
-validate-v041: ## Validate v0.4.1 Sovereign Safeguards configuration
-	@echo "🔍 Validating v0.4.1 Sovereign Safeguards configuration..."
-	@command -v promtool >/dev/null 2>&1 || { echo "promtool not found. Please install Prometheus."; exit 1; }
-	@command -v conftest >/dev/null 2>&1 || { echo "conftest not found. Please install OPA conftest."; exit 1; }
-	promtool check rules monitoring/prometheus/rules/mc-platform-v041.yml
-	conftest test policy/v041/sovereign-safeguards.rego || echo "OPA validation skipped - no test files"
-	npx graphql-schema-linter graphql/v041/sovereign-safeguards.graphql || echo "GraphQL linting skipped"
-	@echo "✅ v0.4.1 validation completed"
-
-go-live-v041: validate-v041 ## Execute v0.4.1 Sovereign Safeguards go-live
-	@echo "🚀 Starting v0.4.1 Sovereign Safeguards go-live..."
-	@chmod +x scripts/execute-v041-go-live.sh
-	bash scripts/execute-v041-go-live.sh
-	@echo "✅ v0.4.1 go-live completed"
-
-test-v041: ## Run v0.4.1 Sovereign Safeguards tests
-	@echo "🧪 Running v0.4.1 Sovereign Safeguards tests..."
-	pnpm test -- --testPathPattern="v041|sovereign" --coverage
-	@echo "✅ v0.4.1 tests completed"
-
-rollback-v041: ## Rollback v0.4.1 deployment
-	@echo "🔄 Rolling back v0.4.1 Sovereign Safeguards..."
-	kubectl scale deployment/sovereign-safeguards-service --replicas=0 -n mc-platform-v041 || true
-	kubectl scale deployment/verification-service --replicas=0 -n mc-platform-v041 || true
-	kubectl rollout undo deployment/mc-platform -n mc-platform-v041 || true
-	@echo "✅ v0.4.1 rollback completed"
-
-status-v041: ## Check v0.4.1 deployment status
-	@echo "📊 Checking v0.4.1 Sovereign Safeguards status..."
-	kubectl get pods -n mc-platform-v041 -l app.kubernetes.io/version=v0.4.1
-	kubectl get services -n mc-platform-v041
-	kubectl top pods -n mc-platform-v041 || echo "Metrics not available"
-	@echo "✅ v0.4.1 status check completed"
-
-logs-v041: ## View v0.4.1 service logs
-	@echo "📋 Viewing v0.4.1 Sovereign Safeguards logs..."
-	kubectl logs -n mc-platform-v041 deployment/sovereign-safeguards-service --tail=50
-	kubectl logs -n mc-platform-v041 deployment/verification-service --tail=50
-
-monitor-v041: ## Open v0.4.1 monitoring dashboard
-	@echo "📈 Opening v0.4.1 monitoring dashboard..."
-	kubectl port-forward -n monitoring svc/grafana 3000:3000 &
-	@echo "Grafana available at http://localhost:3000"
-	@echo "Dashboard: MC Platform v0.4.1 - Sovereign Safeguards"
-
-metrics-v041: ## View v0.4.1 Prometheus metrics
-	@echo "📊 Opening v0.4.1 Prometheus metrics..."
-	kubectl port-forward -n monitoring svc/prometheus 9090:9090 &
-	@echo "Prometheus available at http://localhost:9090"
-	@echo "Query: mc_platform_sovereign_*"
+.PHONY: release.captain
+release.captain: ## Run Release Captain one-shot locally
+	@bash release-captain.sh

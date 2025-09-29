@@ -1,7 +1,20 @@
-frontend: { - 'apps/frontend/**' }
-backend: { - 'apps/api/**' }
-analytics: { - 'apps/worker/**' }
-graphql: { - 'packages/graphql/**' }
-db: { - 'packages/db/**' }
-neo4j: { - 'packages/neo4j/**' }
-infra: { - 'infra/**' }
+ui:smoke:
+  - 'apps/**'
+  - '.github/k6/**'
+
+ops:strict:
+  - 'charts/**'
+  - 'helm/**'
+  - 'deploy/**'
+  - 'infra/**'
+
+audit:strict:
+  - '**/tsconfig*.json'
+  - 'pnpm-workspace.yaml'
+  - 'package.json'
+  - 'scripts/monorepo_heal.mjs'
+  - '.github/workflows/**'
+
+perf:strict:
+  - 'apps/**'
+  - 'services/**'
