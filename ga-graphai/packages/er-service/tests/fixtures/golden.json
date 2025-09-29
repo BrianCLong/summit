@@ -1,0 +1,33 @@
+{
+  "tenantId": "tenant-alpha",
+  "entities": [
+    {
+      "id": "p-1",
+      "type": "person",
+      "name": "Alice Carter",
+      "tenantId": "tenant-alpha",
+      "attributes": { "location": "Berlin", "email": "alice@example.com" }
+    },
+    {
+      "id": "p-2",
+      "type": "person",
+      "name": "Alyce Carter",
+      "tenantId": "tenant-alpha",
+      "attributes": { "location": "Berlin", "email": "alice@example.com" }
+    },
+    {
+      "id": "p-3",
+      "type": "person",
+      "name": "Bob Stone",
+      "tenantId": "tenant-alpha",
+      "attributes": { "location": "Paris", "email": "bob@example.com" }
+    },
+    {
+      "id": "org-1",
+      "type": "organization",
+      "name": "Helios Analytics",
+      "tenantId": "tenant-alpha",
+      "attributes": { "sector": "energy" }
+    }
+  ]
+}

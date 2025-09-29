@@ -1,0 +1,2 @@
+- Entity resolution service package.
+- Run `npm test` in this directory after changes.

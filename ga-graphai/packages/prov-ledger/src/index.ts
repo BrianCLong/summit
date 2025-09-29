@@ -468,3 +468,5 @@ export class CoopProvenanceLedger {
     return this.secret;
   }
 }
+
+export * from './manifest.js';
