@@ -1,0 +1,40 @@
+{
+  "generated_at": "2025-09-28T15:50:37.350045+00:00",
+  "images": [
+    {
+      "attestations_verified": true,
+      "digest": "sha256:111aaa",
+      "image": "registry.intelgraph.dev/conductor-api:2025.09.01",
+      "issues": [],
+      "sbom_present": true,
+      "service": "conductor-api",
+      "signed": true
+    },
+    {
+      "attestations_verified": false,
+      "digest": "sha256:222bbb",
+      "image": "registry.intelgraph.dev/inference-worker:2025.09.01",
+      "issues": [
+        "missing verified signature",
+        "attestation not verified",
+        "sbom missing",
+        "attestation slsa failed: bundle missing"
+      ],
+      "sbom_present": false,
+      "service": "inference-worker",
+      "signed": false
+    }
+  ],
+  "policy": {
+    "all_attested": false,
+    "all_sbom_present": false,
+    "all_signed": false
+  },
+  "release": "summit-2025-09-01",
+  "totals": {
+    "attested": 1,
+    "images": 2,
+    "sbom_attached": 1,
+    "signed": 1
+  }
+}
