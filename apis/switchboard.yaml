@@ -1,0 +1,25 @@
+openapi: 3.0.3
+info:
+  title: CompanyOS Switchboard API
+  version: 0.1.0
+paths:
+  /agents:
+    get:
+      summary: List registered agents
+      responses:
+        "200":
+          description: OK
+  /actions/dispatch:
+    post:
+      summary: Send structured action to agent with policy check
+      requestBody:
+        required: true
+      responses:
+        "202":
+          description: Accepted
+  /meetings/token:
+    post:
+      summary: Mint ephemeral meeting token
+      responses:
+        "200":
+          description: OK
