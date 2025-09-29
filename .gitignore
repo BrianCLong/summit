@@ -123,3 +123,11 @@ conflicts/
 __pycache__/
 *.pyc
 
+
+# Securiteyes IG artifacts
+.securiteyes/
+policy-input.json
+sbom.json
+secrets.json
+polygraph.json
+provenance.json

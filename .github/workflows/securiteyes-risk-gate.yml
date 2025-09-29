@@ -1,0 +1,97 @@
+name: Securiteyes IG — Risk Gate
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "angleton or dzerzhinsky"
+        required: false
+        default: "angleton"
+
+permissions:
+  contents: read
+  security-events: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  risk-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install CLI dependencies
+        run: npm install --no-save ts-node typescript
+
+      - name: Set Mode
+        run: npx ts-node scripts/securiteyes/mode.ts "${{ github.event.inputs.mode || 'angleton' }}"
+
+      - name: Generate SBOM (CycloneDX)
+        run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json || true
+
+      - name: Secret Scan (trufflehog)
+        run: |
+          python -m pip install --upgrade pip || true
+          python -m pip install trufflehog || true
+          trufflehog filesystem --no-update --json . > secrets.json || true
+
+      - name: Install OPA
+        run: |
+          curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          sudo mv opa /usr/local/bin/opa
+          opa version
+
+      - name: Polygraph (advisory only)
+        run: |
+          git log -1 --pretty=%B > polygraph_input.txt || true
+          npx ts-node scripts/securiteyes/polygraph.ts
+
+      - name: Build Policy Input
+        run: |
+          UNIT_COVERAGE=$(node -e "try{console.log(require('./coverage/summary.json').total.lines.pct)}catch{console.log(0)}")
+          echo "UNIT_COVERAGE=$UNIT_COVERAGE" >> $GITHUB_ENV
+          npx ts-node scripts/securiteyes/build-policy-input.ts
+
+      - name: OPA Tests
+        run: opa test contracts/policy/securiteyes -v
+
+      - name: Evaluate Risk Gate
+        run: |
+          opa eval -f json -d contracts/policy/securiteyes -i policy-input.json "data.securiteyes.export.result" > policy-result.json
+          cat policy-result.json
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: Securiteyes IG
+          message: |
+            **Securiteyes IG Risk Gate — Mode:** `${{ github.event.inputs.mode || 'angleton' }}`
+            ```json
+            $(cat policy-result.json)
+            ```
+
+      - name: Enforce when in Dzerzhinsky Mode
+        run: |
+          node -e '
+            const result = require("./policy-result.json");
+            const value = result.result?.[0]?.expressions?.[0]?.value || {};
+            const pass = !!value.gate_pass;
+            const mode = (require("./policy-input.json")._securiteyes?.mode || "angleton").toLowerCase();
+            const advisory = mode !== "dzerzhinsky" || require("./policy-input.json")._securiteyes?.enforcement?.advisory_only;
+            if (!pass && !advisory) {
+              console.error("Gate failed (ENFORCING mode).");
+              process.exit(1);
+            }
+            console.log(pass ? "Gate pass" : "Gate failed (advisory)");
+          '

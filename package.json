@@ -62,6 +62,10 @@
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
     "precommit": "lint-staged",
+    "securiteyes:mode:angleton": "ts-node scripts/securiteyes/mode.ts angleton",
+    "securiteyes:mode:dzerzhinsky": "ts-node scripts/securiteyes/mode.ts dzerzhinsky",
+    "securiteyes:polygraph": "ts-node scripts/securiteyes/polygraph.ts",
+    "securiteyes:policy-input": "ts-node scripts/securiteyes/build-policy-input.ts",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
     "prov:dev": "ts-node packages/prov-ledger/src/server.ts",
@@ -106,6 +110,7 @@
     "prettier": "^3.6.2",
     "semantic-release": "^24.2.7",
     "ts-jest": "^29.2.6",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   },
   "husky": {
