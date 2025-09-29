@@ -1,0 +1,5 @@
+serviceName: ''
+mode: qa
+port: 80
+database:
+  url: http:/invalid

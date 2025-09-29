@@ -1,0 +1,37 @@
+{
+  "name": "@summit/configguard",
+  "version": "0.1.0",
+  "description": "Schema-validated configuration loader with env interpolation for Summit services.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config jest.config.cjs --runInBand"
+  },
+  "bin": {
+    "configguard": "dist/cli.js"
+  },
+  "keywords": [
+    "config",
+    "json-schema",
+    "validation",
+    "ci"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "fast-glob": "^3.3.2",
+    "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/fast-glob": "^3.2.13",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.1",
+    "chalk": "^5.3.0",
+    "ts-jest": "^29.2.6",
+    "typescript": "^5.7.3"
+  }
+}
