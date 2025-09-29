@@ -2,11 +2,138 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, Iterable, List, Optional
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence
+
+from automation import (
+    AutomationOrchestrator,
+    LLMWebPrompter,
+    WebNavigator,
+    WorkProductCapture,
+)
+from prompt_engineering import PromptEngineer, PromptTuning
+from routing import Ticket, TicketRouter, WorkerProfile
 
 
 def ping() -> str:
     return "pong"
+
+
+class Command:
+    """Simple callable wrapper providing a ``run`` method for orchestration commands."""
+
+    def __init__(self, func: Callable[..., Any]) -> None:
+        self._func = func
+
+    def run(self, *args: Any, **kwargs: Any) -> Any:
+        return self._func(*args, **kwargs)
+
+
+_DEFAULT_WORKERS: Sequence[WorkerProfile] = (
+    WorkerProfile(
+        identifier="navigator-1",
+        display_name="Navigator One",
+        capabilities=frozenset({"navigation"}),
+        max_concurrent=2,
+    ),
+    WorkerProfile(
+        identifier="navigator-2",
+        display_name="Navigator Two",
+        capabilities=frozenset({"navigation", "compliance"}),
+        max_concurrent=1,
+    ),
+    WorkerProfile(
+        identifier="analyst-1",
+        display_name="Analyst One",
+        capabilities=frozenset({"analysis", "compliance"}),
+        max_concurrent=1,
+    ),
+)
+
+_DEFAULT_PROMPT_TUNING = PromptTuning(
+    system_instruction=(
+        "You are the Summit automation co-pilot. Produce clear, policy-compliant"
+        " findings for every ticket."
+    ),
+    style_guide=("Summaries should be concise", "Highlight next actions when possible"),
+    safety_clauses=(
+        "Do not disclose restricted data.",
+        "Escalate if compliance guidance is unclear.",
+    ),
+    max_prompt_chars=4000,
+    temperature=0.3,
+    max_tokens=512,
+)
+
+
+def _build_router() -> TicketRouter:
+    return TicketRouter(_DEFAULT_WORKERS, _DEFAULT_PROMPT_TUNING)
+
+
+def _build_orchestrator() -> AutomationOrchestrator:
+    return AutomationOrchestrator(WebNavigator(), LLMWebPrompter(), WorkProductCapture())
+
+
+def _normalise_ticket(ticket: Mapping[str, Any]) -> Ticket:
+    summary = ticket.get("summary") or ticket.get("prompt") or ticket["id"]
+    capabilities = frozenset(ticket.get("required_capabilities", []))
+    context_mapping = ticket.get("context") or {}
+    return Ticket(
+        identifier=ticket["id"],
+        summary=summary,
+        priority=int(ticket.get("priority", 3)),
+        required_capabilities=capabilities,
+        entry_url=ticket.get("entry_url", ""),
+        prompt=ticket["prompt"],
+        llm_endpoint=ticket["llm_endpoint"],
+        automation_mode=ticket.get("automation_mode", "auto"),
+        context=dict(context_mapping),
+    )
+
+
+def _plan_ticket_payloads(tickets: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    router = _build_router()
+    parcels = router.plan(_normalise_ticket(ticket) for ticket in tickets)
+    plan: list[dict[str, Any]] = []
+    for parcel in parcels:
+        plan.append(
+            {
+                "ticket_id": parcel.ticket.identifier,
+                "worker_id": parcel.worker.identifier,
+                "worker_name": parcel.worker.display_name,
+                "automation_mode": parcel.manual_control.mode,
+                "prompt_tuning": {
+                    "system_instruction": parcel.prompt_tuning.system_instruction,
+                    "temperature": parcel.prompt_tuning.temperature,
+                    "max_tokens": parcel.prompt_tuning.max_tokens,
+                },
+            }
+        )
+    return plan
+
+
+def _execute_ticket_payload(
+    ticket: Mapping[str, Any],
+    *,
+    overrides: Mapping[str, str] | None = None,
+) -> dict[str, Any]:
+    router = _build_router()
+    if overrides:
+        for ticket_id, worker_id in overrides.items():
+            router.register_manual_override(ticket_id, worker_id)
+
+    parcels = router.plan([_normalise_ticket(ticket)])
+    if not parcels:
+        raise RuntimeError(f"No eligible worker available for ticket {ticket.get('id')}")
+
+    parcel = parcels[0]
+    orchestrator = _build_orchestrator()
+    engineer = PromptEngineer(parcel.prompt_tuning)
+    product = orchestrator.execute(parcel, engineer)
+    return product.to_dict()
+
+
+plan_tickets = Command(_plan_ticket_payloads)
+execute_ticket = Command(_execute_ticket_payload)
 
 
 @dataclass(frozen=True)
