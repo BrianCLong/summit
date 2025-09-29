@@ -1,0 +1,23 @@
+{
+  "dataset-alpha": {
+    "id": "dataset-alpha",
+    "tenantId": "tenantA",
+    "residency": "us",
+    "classification": "confidential",
+    "tags": ["pii", "financial"]
+  },
+  "dataset-beta": {
+    "id": "dataset-beta",
+    "tenantId": "tenantB",
+    "residency": "eu",
+    "classification": "restricted",
+    "tags": ["analytics"]
+  },
+  "dataset-gamma": {
+    "id": "dataset-gamma",
+    "tenantId": "tenantA",
+    "residency": "us",
+    "classification": "secret",
+    "tags": ["mna", "board"]
+  }
+}

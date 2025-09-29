@@ -1,0 +1,22 @@
+{
+  "alice": {
+    "id": "alice",
+    "email": "alice@example.com",
+    "tenantId": "tenantA",
+    "residency": "us",
+    "clearance": "confidential",
+    "loa": "loa1",
+    "groups": ["research", "dataset-alpha"],
+    "lastSynced": "2025-01-07T12:00:00Z"
+  },
+  "bob": {
+    "id": "bob",
+    "email": "bob@example.com",
+    "tenantId": "tenantB",
+    "residency": "eu",
+    "clearance": "restricted",
+    "loa": "loa1",
+    "groups": ["finance", "dataset-beta"],
+    "lastSynced": "2025-01-07T12:05:00Z"
+  }
+}

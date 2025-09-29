@@ -1,0 +1,38 @@
+{
+  "name": "abac-step-up-flow",
+  "description": "Validates ABAC decision latency and WebAuthn step-up flow",
+  "steps": [
+    {
+      "name": "authorize baseline",
+      "request": {
+        "method": "POST",
+        "url": "${GATEWAY_URL}/authorize",
+        "body": {
+          "subject": { "id": "alice" },
+          "action": "dataset:read",
+          "resource": { "id": "dataset-alpha" }
+        }
+      },
+      "assertions": [
+        { "type": "status", "value": 200 },
+        { "type": "jsonBody", "path": "$.reason", "value": "allow" }
+      ]
+    },
+    {
+      "name": "step-up challenge",
+      "request": {
+        "method": "POST",
+        "url": "${GATEWAY_URL}/auth/webauthn/challenge",
+        "headers": { "Authorization": "Bearer ${PRIMARY_TOKEN}" }
+      },
+      "assertions": [
+        { "type": "status", "value": 200 },
+        {
+          "type": "jsonBody",
+          "path": "$.allowCredentials[0].type",
+          "value": "public-key"
+        }
+      ]
+    }
+  ]
+}
