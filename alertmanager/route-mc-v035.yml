@@ -10,6 +10,10 @@ route:
         - alertname=~"AttestationJWSFailureBudget|BudgetV2NoiseHigh|CanaryCompositeScoreLow|GraphQLFastBurn|GraphQLSlowBurn"
       continue: false
       receiver: slack-mc-threaded
+    - matchers:
+        - service="disclosure-packager"
+      continue: false
+      receiver: slack-mc
 
 receivers:
   - name: slack-mc
