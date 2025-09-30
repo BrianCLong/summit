@@ -29,6 +29,10 @@ export const config = {
     python: {
       scriptPath: process.env.PYTHON_SCRIPT_PATH || './src/python',
       pythonExecutable: process.env.PYTHON_EXECUTABLE || 'python3',
+      serviceUrl: process.env.PYTHON_SERVICE_URL || 'http://localhost:8001',
+      predictEndpoint: process.env.PYTHON_SERVICE_PREDICT_PATH || '/predict',
+      ingestEndpoint: process.env.PYTHON_SERVICE_INGEST_PATH || '/ingest-wizard/run',
+      defaultFramework: (process.env.ML_PYTHON_DEFAULT_FRAMEWORK || 'auto').toLowerCase(),
     },
 
     models: {
@@ -42,6 +46,10 @@ export const config = {
       maxBatchSize: parseInt(process.env.MAX_BATCH_SIZE || '1000'),
       trainingDataRetentionDays: parseInt(process.env.TRAINING_DATA_RETENTION_DAYS || '30'),
     },
+  },
+
+  ingest: {
+    wizardDefaultLimit: parseInt(process.env.INGEST_WIZARD_DEFAULT_LIMIT || '100'),
   },
 
   redis: {

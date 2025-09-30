@@ -276,6 +276,42 @@ services:
         value: '{{ .Values.external.redis.host }}'
       - name: MODEL_CACHE_DIR
         value: '/app/.cache/models'
+      - name: PYTHON_SERVICE_URL
+        value: '{{ .Values.services.mlEngine.pythonServiceUrl | default "http://ml-engine-python:8001" }}'
+      - name: PYTHON_SERVICE_PREDICT_PATH
+        value: '{{ .Values.services.mlEngine.pythonPredictPath | default "/predict" }}'
+      - name: PYTHON_SERVICE_INGEST_PATH
+        value: '{{ .Values.services.mlEngine.pythonIngestPath | default "/ingest-wizard/run" }}'
+      - name: INGEST_WIZARD_DEFAULT_LIMIT
+        value: '{{ .Values.services.mlEngine.ingestDefaultLimit | default "100" }}'
+      - name: POSTGRES_HOST
+        value: '{{ .Values.external.postgres.host }}'
+      - name: POSTGRES_PORT
+        value: '{{ .Values.external.postgres.port | default 5432 }}'
+      - name: POSTGRES_DB
+        value: '{{ .Values.external.postgres.database }}'
+      - name: POSTGRES_USER
+        valueFrom:
+          secretKeyRef:
+            name: '{{ .Values.external.postgres.userSecretRef }}'
+            key: username
+      - name: POSTGRES_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: '{{ .Values.external.postgres.userSecretRef }}'
+            key: password
+      - name: NEO4J_URI
+        value: '{{ .Values.external.neo4j.uri }}'
+      - name: NEO4J_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: '{{ .Values.external.neo4j.userSecretRef }}'
+            key: username
+      - name: NEO4J_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: '{{ .Values.external.neo4j.userSecretRef }}'
+            key: password
 
   graphAnalytics:
     enabled: true
