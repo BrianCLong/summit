@@ -1,7 +1,7 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 import torch
 import numpy as np
 from datetime import datetime
@@ -21,6 +21,7 @@ from .quantum.quantum_ml import (
 from .training.distributed_trainer import DistributedTrainingManager, TrainingConfig
 from .monitoring.metrics import MLMetrics
 from .monitoring.health import HealthCheck
+from .retraining import RetrainingManager, RetrainingJobStatus
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,52 @@ class InferenceResponse(BaseModel):
     confidence_scores: Optional[List[float]] = None
     device: str
 
+
+class RetrainingTriggerRequest(BaseModel):
+    """Optional payload for triggering retraining."""
+
+    reason: Optional[str] = Field(
+        None,
+        description="Human readable context for why retraining was requested.",
+    )
+
+
+class RetrainingUpdateRequest(BaseModel):
+    """Payload used by background jobs to update retraining status."""
+
+    status: Optional[str] = Field(
+        None,
+        description="Updated job status (scheduled, running, completed, failed).",
+    )
+    metrics: Optional[Dict[str, float]] = Field(
+        None,
+        description="Training metrics to persist alongside the job.",
+    )
+    error: Optional[str] = Field(None, description="Failure reason, if applicable.")
+
+
+class RetrainingJobResponse(BaseModel):
+    """Serialized retraining job details returned by the API."""
+
+    id: str = Field(..., alias="id")
+    model_id: str = Field(..., alias="modelId")
+    status: str
+    scheduled_at: datetime = Field(..., alias="scheduledAt")
+    data_window_start: Optional[datetime] = Field(None, alias="dataWindowStart")
+    data_window_end: Optional[datetime] = Field(None, alias="dataWindowEnd")
+    records: int
+    reason: Optional[str] = None
+    kubernetes_job_name: Optional[str] = Field(None, alias="kubernetesJobName")
+    kubernetes_namespace: Optional[str] = Field(None, alias="kubernetesNamespace")
+    mlflow_run_id: Optional[str] = Field(None, alias="mlflowRunId")
+    metrics: Dict[str, float] = Field(default_factory=dict)
+    error: Optional[str] = None
+    started_at: Optional[datetime] = Field(None, alias="startedAt")
+    completed_at: Optional[datetime] = Field(None, alias="completedAt")
+
+    class Config:
+        populate_by_name = True
+
 # Global state management
 class MLServiceState:
     def __init__(self):
@@ -99,6 +146,7 @@ class MLServiceState:
 
 # Global state instance
 ml_state = MLServiceState()
+retraining_manager = RetrainingManager()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -386,6 +434,28 @@ def _create_dummy_dataset(size: int):
     # This would be replaced with real dataset loading
     return [torch.randn(10) for _ in range(size)]
 
+
+def _serialize_retraining_job(job: RetrainingJobStatus) -> RetrainingJobResponse:
+    """Convert internal job status to API response model."""
+
+    return RetrainingJobResponse(
+        id=job.job_id,
+        model_id=job.model_id,
+        status=job.status,
+        scheduled_at=job.scheduled_at,
+        data_window_start=job.data_window_start,
+        data_window_end=job.data_window_end,
+        records=job.records,
+        reason=job.reason,
+        kubernetes_job_name=job.kubernetes_job_name,
+        kubernetes_namespace=job.kubernetes_namespace,
+        mlflow_run_id=job.mlflow_run_id,
+        metrics=job.metrics,
+        error=job.error,
+        started_at=job.started_at,
+        completed_at=job.completed_at,
+    )
+
 # Inference endpoints
 @app.post("/models/{model_id}/predict", response_model=InferenceResponse)
 async def predict(model_id: str, request: InferenceRequest):
@@ -549,6 +619,70 @@ async def quantum_feature_mapping(data: Dict[str, List[List[float]]]):
     except Exception as e:
         logger.error(f"Quantum feature mapping failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Quantum feature mapping failed: {str(e)}")
+
+@app.post(
+    "/models/{model_id}/retrain",
+    response_model=RetrainingJobResponse,
+)
+async def schedule_retraining(
+    model_id: str,
+    request: Optional[RetrainingTriggerRequest] = None,
+):
+    """Schedule automated retraining for the specified model."""
+
+    reason = request.reason if request else None
+    try:
+        status = await retraining_manager.trigger_retraining(model_id, reason=reason)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logger.exception("Failed to schedule retraining", extra={"model_id": model_id})
+        raise HTTPException(status_code=500, detail="Unable to schedule retraining") from exc
+
+    return _serialize_retraining_job(status)
+
+
+@app.get("/retraining/jobs", response_model=List[RetrainingJobResponse])
+async def list_retraining_jobs():
+    """Return the recent retraining jobs."""
+
+    jobs = await retraining_manager.list_jobs()
+    return [_serialize_retraining_job(job) for job in jobs]
+
+
+@app.get(
+    "/retraining/jobs/{job_id}",
+    response_model=RetrainingJobResponse,
+)
+async def get_retraining_job(job_id: str):
+    """Fetch a single retraining job."""
+
+    job = await retraining_manager.get_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Retraining job not found")
+    return _serialize_retraining_job(job)
+
+
+@app.post(
+    "/retraining/jobs/{job_id}/events",
+    response_model=RetrainingJobResponse,
+)
+async def update_retraining_job(
+    job_id: str,
+    request: RetrainingUpdateRequest,
+):
+    """Update retraining job status from asynchronous workers."""
+
+    job = await retraining_manager.update_job_status(
+        job_id,
+        status=request.status,
+        metrics=request.metrics,
+        error=request.error,
+    )
+    if job is None:
+        raise HTTPException(status_code=404, detail="Retraining job not found")
+    return _serialize_retraining_job(job)
+
 
 # Metrics and monitoring endpoints
 @app.get("/metrics")
