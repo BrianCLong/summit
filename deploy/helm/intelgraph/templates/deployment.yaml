@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-api-gateway
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.services.apiGateway.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "intelgraph.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: api-gateway
+  template:
+    metadata:
+      {{- with .Values.common.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "intelgraph.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: api-gateway
+    spec:
+      {{- with .Values.global.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: api-gateway
+          securityContext:
+            {{- toYaml .Values.global.securityContext | nindent 12 }}
+          image: "{{ .Values.global.imageRegistry }}/{{ .Values.services.apiGateway.image }}:{{ .Values.global.tag }}"
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.services.apiGateway.port }}
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.common.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.common.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.services.apiGateway.resources | nindent 12 }}
+          env:
+            {{- toYaml .Values.common.env | nindent 12 }}
+            {{- toYaml .Values.services.apiGateway.env | nindent 12 }}
+            - name: GCP_PROJECT
+              value: {{ .Values.vertex.projectId | quote }}
+            - name: VERTEX_LOCATION
+              value: {{ .Values.vertex.location | quote }}
+            - name: VERTEX_CHAT_MODEL
+              value: {{ .Values.vertex.chatModel | quote }}
+            - name: VERTEX_EMBED_MODEL
+              value: {{ .Values.vertex.embedModel | quote }}
+            - name: VERTEX_VECTOR_ENABLED
+              value: {{ .Values.vertex.vector.enabled | quote }}
+            - name: VERTEX_INDEX_RESOURCE
+              value: {{ .Values.vertex.vector.indexResource | quote }}
+            - name: VERTEX_UPSERT_ENDPOINT
+              value: {{ .Values.vertex.vector.upsertEndpoint | quote }}
+            - name: VERTEX_QUERY_ENDPOINT
+              value: {{ .Values.vertex.vector.queryEndpoint | quote }}
+          volumeMounts:
+            {{- toYaml .Values.common.volumeMounts | nindent 12 }}
+      volumes:
+        {{- toYaml .Values.common.volumes | nindent 8 }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,20 @@
+[Unit]
+Description=CompanyOS Gmail Pub/Sub Watch Registrar
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/companyos/app
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node ./dist/server/src/dev/registerGmailWatchAll.js
+User=companyos
+Group=companyos
+# optional: sandboxing
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whisper
+  namespace: companyos-media
+  labels: { app: whisper }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: whisper }
+  template:
+    metadata:
+      labels: { app: whisper }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9000"
+        prometheus.io/path: "/metrics"   # upstream exposes simple metrics; ok if missing
+    spec:
+      containers:
+        - name: whisper
+          image: ghcr.io/aarnphm/whisper-asr-webservice:latest
+          ports:
+            - containerPort: 9000
+          envFrom:
+            - configMapRef: { name: whisper-config }
+          resources:
+            requests: { cpu: "500m", memory: "1Gi" }
+            limits:   { cpu: "2",    memory: "4Gi" }
+          readinessProbe:
+            httpGet: { path: /, port: 9000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /, port: 9000 }
+            initialDelaySeconds: 20
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whisper
+  namespace: companyos-media
+  labels: { app: whisper }
+spec:
+  selector: { app: whisper }
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000
+  type: ClusterIP

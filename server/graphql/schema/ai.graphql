@@ -1,0 +1,31 @@
+type AIPreview {
+  text: String!
+  model: String!
+  tokensIn: Int!
+  tokensOut: Int!
+  latencyMs: Int!
+  provenanceId: ID!
+}
+
+type RAGAnswer {
+  answer: String!
+  citations: [Citation!]!
+  model: String!
+  provenanceId: ID!
+}
+
+type Citation {
+  docId: ID!
+  chunkId: String!
+  score: Float!
+  title: String
+}
+
+extend type Mutation {
+  nlToCypher(prompt: String!, caseId: ID!): AIPreview!
+  draftNarrative(instructions: String!, caseId: ID!): AIPreview!
+}
+
+extend type Query {
+  ragAsk(question: String!, caseId: ID!, k: Int = 6): RAGAnswer!
+}

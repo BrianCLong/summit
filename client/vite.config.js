@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import mdx from '@mdx-js/rollup';
 import babel from 'vite-plugin-babel'; // Added import
 import path from 'path';
 
 export default defineConfig({
-  plugins: [
-    react(),
+  plugins: [mdx(), react(),
     babel({
       filter: /react-speech-recognition/, // Only apply to this module
       babelConfig: {

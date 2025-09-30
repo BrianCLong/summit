@@ -217,19 +217,30 @@ function NavigationDrawer({ open, onClose }) {
 }
 
 // App Bar
+import TopbarSetupButton from "./components/TopbarSetupButton";
+
 function AppHeader({ onMenuClick }) {
   const location = useLocation();
-  const currentPage = navigationItems.find((item) => item.path === location.pathname);
+  const currentPage = navigationItems.find(
+    (item) => item.path === location.pathname,
+  );
 
   return (
     <AppBar position="fixed">
       <Toolbar>
-        <IconButton edge="start" color="inherit" onClick={onMenuClick} sx={{ mr: 2 }}>
+        <IconButton
+          edge="start"
+          color="inherit"
+          onClick={onMenuClick}
+          sx={{ mr: 2 }}
+        >
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          IntelGraph Platform - {currentPage?.label || 'Unknown'}
+          IntelGraph Platform - {currentPage?.label || "Unknown"}
         </Typography>
+        <div style={{ flex: 1 }} />
+        <TopbarSetupButton />
       </Toolbar>
     </AppBar>
   );
@@ -621,11 +632,14 @@ function NotFoundPage() {
 }
 
 // Main Layout Component
+import TopBar from "./components/TopBar";
+
 function MainLayout() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <TopBar />
       <AppHeader onMenuClick={() => setDrawerOpen(true)} />
       <NavigationDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 

@@ -1,0 +1,40 @@
+{
+  "package": {
+    "productName": "CompanyOS Switchboard",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "shell": { "all": false },
+      "dialog": { "open": true, "save": true, "message": true },
+      "fs": {
+        "all": false,
+        "writeFile": true,
+        "readFile": true,
+        "scope": ["$APPDATA/*", "$APP/*", "$RESOURCE/*"]
+      },
+      "clipboard": { "writeText": true },
+      "window": { "all": true },
+      "path": { "all": true },
+      "http": {
+        "all": false,
+        "request": true,
+        "scope": ["http://localhost/*", "https://*/*"]
+      },
+      "invoke": true
+    },
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      { "label": "main", "title": "CompanyOS Presenter", "width": 1280, "height": 800 },
+      { "label": "audience", "title": "CompanyOS Audience", "width": 1280, "height": 800, "visible": false }
+    ]
+  },
+  "build": {
+    "beforeDevCommand": "npm run dev --prefix client",
+    "devPath": "http://localhost:5173",
+    "distDir": "client/dist",
+    "beforeBuildCommand": "npm run build --prefix client"
+  }
+}

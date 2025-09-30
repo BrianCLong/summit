@@ -1,0 +1,286 @@
+1858,6,MEDIUM_FAIL,3,test: main-to-green — clean discovery
+1853,81,HIGH_FAIL,4,chore: restore repo baseline for scoped PRs
+1851,82,HIGH_FAIL,4,feat: introduce securiteyes ig risk gate bundle
+1846,4,MEDIUM_FAIL,3,[PREP] [AUTO] feature/model-card-registry
+1845,4,MEDIUM_FAIL,3,[AUTO] feature/model-card-registry
+1840,64,HIGH_FAIL,4,chore: automate scoped pr open flow
+1831,64,HIGH_FAIL,4,feat: add DocForge documentation generator
+1828,4,MEDIUM_FAIL,3,Feature/gateway tariff
+1827,4,MEDIUM_FAIL,3,Feature/aer ledger
+1826,4,MEDIUM_FAIL,3,Feature/crsp
+1824,4,MEDIUM_FAIL,3,Feature/agent gateway wiring
+1818,64,HIGH_FAIL,4,chore: ignore binary lock artifacts
+1810,66,HIGH_FAIL,4,fix: replace wasm sample with text source
+1809,66,HIGH_FAIL,4,chore: ignore psb sdk lockfile
+1807,67,HIGH_FAIL,4,feat: deliver railhead automation pack
+1806,71,HIGH_FAIL,4,feat: add developer devkit and smoke guardrails
+1804,64,HIGH_FAIL,4,chore: ignore railhead lock artifacts
+1795,66,HIGH_FAIL,4,feat: launch observability first telemetry kit
+1794,67,HIGH_FAIL,4,feat: implement data spine governance controls
+1793,68,HIGH_FAIL,4,feat(reliability): orchestrate canary guardrails
+1791,63,HIGH_FAIL,4,feat: integrate IntelCraft tradecraft into IntelGraph
+1783,8,MEDIUM_FAIL,3,Feat/asset inventory hardening and validation
+1782,62,HIGH_FAIL,4,chore: ignore fcs generated artifacts
+1781,62,HIGH_FAIL,4,chore: avoid binary diffs for srlc outputs
+1780,62,HIGH_FAIL,4,chore: ignore sdk typescript lockfile
+1778,62,HIGH_FAIL,4,chore: ignore binary lock artifacts
+1777,6,MEDIUM_FAIL,3,chore: ignore binary lock artifacts
+1776,6,MEDIUM_FAIL,3,feat: integrate opa policy enforcement
+1773,62,HIGH_FAIL,4,feat: add s3 csv ingest pipeline
+1772,62,HIGH_FAIL,4,feat: add unified slo observability instrumentation
+1771,62,HIGH_FAIL,4,feat: add unified slo observability instrumentation
+1770,63,HIGH_FAIL,4,feat: add neo4j-backed graph subgraph service
+1769,67,HIGH_FAIL,4,feat(ci): enforce supply chain security gates
+1768,64,HIGH_FAIL,4,feat: add airgap bundle tooling and region overlays
+1767,62,HIGH_FAIL,4,feat: add streaming fairness monitor service and dashboard
+1766,62,HIGH_FAIL,4,feat: add policy impact causal analyzer toolkit
+1763,73,HIGH_FAIL,4,chore(deps): bump canvas from 2.11.2 to 3.2.0
+1762,73,HIGH_FAIL,4,chore(deps): bump @turf/area from 7.1.0 to 7.2.0
+1760,62,HIGH_FAIL,4,feat: add iftc static analyzer
+1759,62,HIGH_FAIL,4,feat: add data mutation chaos lab harness
+1758,61,HIGH_FAIL,4,feat: add governance requirement test corpus compiler
+1757,61,HIGH_FAIL,4,feat: add prompt context attribution reporting
+1754,61,HIGH_FAIL,4,feat: add QSET quorum-based tool secret escrow service
+1753,62,HIGH_FAIL,4,feat: add policy-constrained backfill orchestrator
+1752,61,HIGH_FAIL,4,feat: add provenance-preserving etl generator
+1751,61,HIGH_FAIL,4,feat: add opld leakage delta harness
+1750,61,HIGH_FAIL,4,feat: add canonical semantic schema mapper
+1749,61,HIGH_FAIL,4,feat: add model output safety budgets
+1748,61,HIGH_FAIL,4,feat: add coec cross-org experiment coordination
+1747,67,HIGH_FAIL,4,feat: add context window sanitizer middleware for GraphRAG
+1746,61,HIGH_FAIL,4,feat: add RAALO policy aware active learning orchestrator
+1745,61,HIGH_FAIL,4,feat: add consent drift forecaster
+1744,61,HIGH_FAIL,4,feat: add dataset end-of-life registrar service
+1743,61,HIGH_FAIL,4,feat: add streaming join auditor operator
+1742,62,HIGH_FAIL,4,feat: add audit log succinctness proofs library
+1741,66,HIGH_FAIL,4,feat: add data license derivation planner
+1740,67,HIGH_FAIL,4,feat: add cross-modal origin linker core
+1739,61,HIGH_FAIL,4,feat: add residency-aware DR planner
+1738,68,HIGH_FAIL,4,feat: add query intent policy mapper service
+1737,62,HIGH_FAIL,4,feat: add JTDL taxonomy drift linter
+1736,66,HIGH_FAIL,4,feat: add csrs retention simulator
+1735,61,HIGH_FAIL,4,feat: add multi-stage query explainer middleware
+1734,68,HIGH_FAIL,4,feat: add cross-modal origin linker core
+1733,66,HIGH_FAIL,4,feat: introduce OHIE opt-out analytics library and UI panel
+1732,61,HIGH_FAIL,4,feat: introduce deterministic toolchain hasher CLI
+1731,61,HIGH_FAIL,4,feat: add Go mpes runner with sandboxed multi-party evaluations
+1730,61,HIGH_FAIL,4,feat: add ACDC consent-aware dataflow compiler
+1729,62,HIGH_FAIL,4,feat: add outcome-safe rollout planner and dashboard
+1728,63,HIGH_FAIL,4,chore(deps): bump nvidia/cuda from 13.0.0-devel-ubuntu22.04 to 13.0.1-devel-ubuntu22.04
+1727,66,HIGH_FAIL,4,chore(deps): bump node from 20-alpine to 24-alpine
+1726,68,HIGH_FAIL,4,chore(deps): bump scikit-learn from 1.3.0 to 1.5.0 in /server
+1725,68,HIGH_FAIL,4,chore(deps): bump torch from 2.1.0 to 2.8.0 in /server
+1724,63,HIGH_FAIL,4,chore(deps): bump python from 3.12-slim to 3.13-slim
+1723,68,HIGH_FAIL,4,chore(deps): bump requests from 2.31.0 to 2.32.4 in /server
+1722,67,HIGH_FAIL,4,chore(deps): bump tqdm from 4.66.1 to 4.66.3 in /server
+1721,68,HIGH_FAIL,4,chore(deps): bump nltk from 3.8.1 to 3.9 in /server
+1720,63,HIGH_FAIL,4,chore(deps): bump anchore/syft from v0.105.1 to v1.33.0
+1719,63,HIGH_FAIL,4,chore(deps): bump aquasec/trivy from 0.51.1 to 0.66.0
+1718,68,HIGH_FAIL,4,chore(deps): bump pandas from 2.0.3 to 2.3.2
+1717,62,HIGH_FAIL,4,chore(deps): bump redis from 4.3.4 to 6.4.0
+1716,62,HIGH_FAIL,4,chore(deps): bump pytest from 7.4.3 to 8.4.2
+1715,63,HIGH_FAIL,4,chore(deps): bump fastapi from 0.78.0 to 0.117.1
+1714,62,HIGH_FAIL,4,chore(deps): bump pytest-cov from 4.1.0 to 7.0.0
+1713,24,HIGH_FAIL,4,feat: implement remote forensic capture pipelines
+1712,23,HIGH_FAIL,4,Add FHE micro-analytics service and client
+1711,23,HIGH_FAIL,4,refactor: streamline clsl stress lab
+1710,24,HIGH_FAIL,4,feat: advance companyos patent intelligence
+1709,23,HIGH_FAIL,4,feat: add PFPT prompt diffing library
+1708,23,HIGH_FAIL,4,feat: add policy-gated vector router core and SDK
+1707,22,HIGH_FAIL,4,feat: add attested dataset delivery network
+1706,23,HIGH_FAIL,4,feat: add data lease controller service
+1705,23,HIGH_FAIL,4,feat: add pacdc policy-aware cdc replicator
+1704,25,HIGH_FAIL,4,feat: add djce-pb join risk estimator
+1703,19,HIGH_FAIL,4,docs: integrate legal agreements into onboarding
+1702,24,HIGH_FAIL,4,feat: launch Topicality Collective marketing microsites
+1701,24,HIGH_FAIL,4,feat: add RTGH governance gate fuzzer
+1700,23,HIGH_FAIL,4,feat(streaming): add event-time compliance window enforcer
+1699,23,HIGH_FAIL,4,feat: add mocc contract validation library
+1698,24,HIGH_FAIL,4,feat: add consent state reconciler service
+1697,25,HIGH_FAIL,4,feat: add consent state reconciler service
+1696,22,HIGH_FAIL,4,feat: add federated attribution evaluator
+1695,23,HIGH_FAIL,4,feat: add rare-event synthetic booster toolkit
+1694,24,HIGH_FAIL,4,feat: add immutable training run capsule toolkit
+1693,24,HIGH_FAIL,4,feat: add semantic PII ontology mapper service
+1692,24,HIGH_FAIL,4,feat: introduce policy backtest simulator engine and dashboard
+1691,23,HIGH_FAIL,4,feat: add deterministic prompt execution cache package
+1690,24,HIGH_FAIL,4,feat: add csdb broker service and client sdk
+1689,23,HIGH_FAIL,4,feat: add aql audit query engine
+1688,24,HIGH_FAIL,4,feat: add data diff governance mapper tool
+1687,25,HIGH_FAIL,4,feat: add adaptive consent experience sdk
+1686,23,HIGH_FAIL,4,feat: add HAPL ledger with verification CLI
+1685,24,HIGH_FAIL,4,feat: add access path minimizer planner and SDK
+1684,24,HIGH_FAIL,4,feat: add legal hold orchestrator and UI
+1683,26,HIGH_FAIL,4,feat: add emergency containment controller UI and API
+1682,24,HIGH_FAIL,4,feat: introduce KRPCP rotation planner and coverage UI
+1681,23,HIGH_FAIL,4,feat: add metric definition registry
+1680,23,HIGH_FAIL,4,feat: add AGSM synthetic governance probes
+1679,25,HIGH_FAIL,4,feat: add MTIF STIX/TAXII service
+1678,25,HIGH_FAIL,4,feat: add csiks idempotency service and clients
+1677,27,HIGH_FAIL,4,feat: add consent graph explorer service and ui
+1676,22,HIGH_FAIL,4,feat: add adaptive consistency controller sidecar and sdk
+1675,23,HIGH_FAIL,4,feat: add adaptive consistency controller sidecar and sdk
+1674,22,HIGH_FAIL,4,feat: add mobile ODPS SDKs for Android and iOS
+1673,25,HIGH_FAIL,4,feat: add immutable business rules sandbox engine
+1672,26,HIGH_FAIL,4,feat: add explainable sampling auditor toolkit
+1671,25,HIGH_FAIL,4,feat: add Data Residency Shadow Tester tool
+1670,23,HIGH_FAIL,4,feat: add SRPL macros and lint rule for safe retrieval
+1669,25,HIGH_FAIL,4,feat: add tenant isolation prover
+1668,26,HIGH_FAIL,4,feat: add knowledge purge orchestrator
+1667,24,HIGH_FAIL,4,feat: add redaction consistent search indexer service
+1666,23,HIGH_FAIL,4,feat: add governed chargeback metering service
+1665,23,HIGH_FAIL,4,feat: add bayesian fusion to early warning ensemble
+1664,24,HIGH_FAIL,4,feat: add regulator self-service proof portal
+1663,23,HIGH_FAIL,4,feat: add pseudonym linkage risk auditor library
+1662,24,HIGH_FAIL,4,feat: add hardware determinism guard toolkit
+1661,22,HIGH_FAIL,4,feat: add side-channel budget auditor harness
+1660,23,HIGH_FAIL,4,feat: add query-time pseudonymization gateway service
+1659,24,HIGH_FAIL,4,feat: introduce data embargo scheduler and CLI
+1658,23,HIGH_FAIL,4,feat: add consent-aware feature flag platform
+1657,24,HIGH_FAIL,4,feat: add cryptographic cohort sampler
+1656,23,HIGH_FAIL,4,feat: add differential lineage replayer planner
+1655,24,HIGH_FAIL,4,feat: add spar artifact registry
+1654,19,HIGH_FAIL,4,Expand interventional countermeasure briefing with patentable innovations
+1653,26,HIGH_FAIL,4,feat: add LTDIM legal diff impact mapper
+1652,25,HIGH_FAIL,4,feat: add cdqd service and ui
+1651,24,HIGH_FAIL,4,feat: add CRKRE jurisdiction-aware key management service
+1650,26,HIGH_FAIL,4,Add DSAR fulfillment engine with proofs and reviewer UI
+1649,24,HIGH_FAIL,4,feat: add slice registry service and SDKs
+1648,23,HIGH_FAIL,4,feat: add multi-tenant fairness scheduler
+1647,24,HIGH_FAIL,4,feat: add purpose drift auditor service and UI
+1646,23,HIGH_FAIL,4,feat: add consent-compliant messaging orchestrator service
+1645,27,HIGH_FAIL,4,feat: add SCPE supply chain gate
+1644,24,HIGH_FAIL,4,feat: add policy-constrained distillation framework
+1643,25,HIGH_FAIL,4,feat: add deterministic embedding store
+1642,26,HIGH_FAIL,4,feat: add privacy incident tabletop drill engine
+1641,23,HIGH_FAIL,4,feat: add drift root-cause explorer toolkit
+1640,24,HIGH_FAIL,4,feat: add qawe quorum approval engine
+1639,25,HIGH_FAIL,4,feat: add robust prompt template compiler
+1638,26,HIGH_FAIL,4,feat: add Feature Lineage Impact Analyzer
+1637,26,HIGH_FAIL,4,Refine quality gate evidence packs
+1636,20,HIGH_FAIL,4,Add CompanyOS initiative build playbooks
+1635,24,HIGH_FAIL,4,feat: add knowledge cutoff router library
+1634,23,HIGH_FAIL,4,feat: add mfue unlearning evaluation framework
+1633,23,HIGH_FAIL,4,feat: add consent revocation propagator service
+1632,22,HIGH_FAIL,4,feat: add jitae dual-control access service
+1631,22,HIGH_FAIL,4,feat: add risk-adaptive limiter sidecar and sdk
+1630,22,HIGH_FAIL,4,Add inference cost optimizer planner and orchestration toolkit
+1629,21,HIGH_FAIL,4,feat: add agql attestation graph workspace
+1628,23,HIGH_FAIL,4,feat: add data minimization planner service
+1627,23,HIGH_FAIL,4,feat: add federated schema registry with policy tags
+1626,24,HIGH_FAIL,4,feat: introduce categorical privacy validator tooling
+1625,23,HIGH_FAIL,4,feat: introduce multicloud egress governor sidecar
+1624,24,HIGH_FAIL,4,feat: deliver human feedback arbitration workbench
+1623,24,HIGH_FAIL,4,feat: add pipeline flakiness detector toolkit
+1622,23,HIGH_FAIL,4,feat: add policy-aware synthetic log generator
+1621,24,HIGH_FAIL,4,feat: add consent-aware experiment allocator
+1620,25,HIGH_FAIL,4,feat: define graphql contract scaffolding
+1619,23,HIGH_FAIL,4,feat: add provenance CLI and export manifest spec
+1618,28,HIGH_FAIL,4,feat: add sre guardrails and observability automation
+1617,25,HIGH_FAIL,4,feat: add explainable ranking auditor toolkit
+1616,25,HIGH_FAIL,4,feat: add zero trust security controls
+1615,24,HIGH_FAIL,4,feat: define graph data model and ingestion policies
+1614,20,HIGH_FAIL,4,docs: add Conductor workstream planning artifacts
+1613,20,HIGH_FAIL,4,docs: add day-1 architecture and security governance
+1612,26,HIGH_FAIL,4,feat: add bgpr rollout controller and dashboard
+1611,25,HIGH_FAIL,4,feat: add secrets spill sentinel service
+1610,26,HIGH_FAIL,4,fix: correct intelgraph api package metadata
+1609,20,HIGH_FAIL,4,docs: add conductor summary backlog and raci for workstream 1
+1608,25,HIGH_FAIL,4,feat: add temporal access token service
+1607,30,HIGH_FAIL,4,feat: add schema evolution simulator tool
+1606,26,HIGH_FAIL,4,feat: add q3c resource cost service
+1605,19,HIGH_FAIL,4,docs: add influence network detection framework blueprint
+1604,26,HIGH_FAIL,4,feat: orchestrate patent-grade prompt innovation suite
+1603,25,HIGH_FAIL,4,feat: add otel observability and slo dashboards
+1602,25,HIGH_FAIL,4,fix: sync provenance runtime surfaces
+1601,20,HIGH_FAIL,4,feat: redesign companyos control surface
+1600,23,HIGH_FAIL,4,feat: add fairness constrained trainer toolkit
+1599,29,HIGH_FAIL,4,feat: add public GraphQL contracts
+1598,26,HIGH_FAIL,4,feat(security): enforce tenant abac and webauthn controls
+1597,25,HIGH_FAIL,4,Add platform SRE pipeline and observability guardrails
+1596,28,HIGH_FAIL,4,feat: enforce retention tiers and rtbf workflow
+1595,23,HIGH_FAIL,4,feat: harden intelgraph helm runtime configuration
+1594,25,HIGH_FAIL,4,test: add automated quality gates evidence
+1593,22,HIGH_FAIL,4,feat: add observability pipeline assets
+1592,23,HIGH_FAIL,4,feat: add policy-aware cross-silo query planner
+1591,19,HIGH_FAIL,4,Add Conductor release planning summary
+1590,23,HIGH_FAIL,4,feat: publish MC evidence from IG-RL releases
+1589,26,HIGH_FAIL,4,feat: enforce tenant ABAC with OIDC and SCIM
+1588,23,HIGH_FAIL,4,feat: add plan mode to agent orchestrator
+1587,20,HIGH_FAIL,4,feat: gate rollout promotion with mission control evidence
+1586,24,HIGH_FAIL,4,feat: add integrity guards to compliance exports
+1585,19,HIGH_FAIL,4,docs: capture day-1 topology and decision records
+1584,22,HIGH_FAIL,4,Add canonical Neo4j ingest schema
+1583,22,HIGH_FAIL,4,Add canonical Neo4j ingest schema
+1582,25,HIGH_FAIL,4,feat: add c2pa provenance bridge toolkit
+1581,23,HIGH_FAIL,4,feat: add secure udf marketplace service
+1580,22,HIGH_FAIL,4,feat: add rollback orchestrator tooling
+1579,24,HIGH_FAIL,4,feat: introduce causal feature store validator toolkit
+1578,26,HIGH_FAIL,4,feat: add streaming dp window aggregator library
+1577,24,HIGH_FAIL,4,feat: add bitemporal knowledge graph library
+1576,24,HIGH_FAIL,4,feat: add policy-aware edge cache
+1575,24,HIGH_FAIL,4,feat: add obligation tracker service
+1574,25,HIGH_FAIL,4,test(kkp): add audience enforcement integration test
+1573,20,HIGH_FAIL,4,Expand intention imputation implementation blueprint
+1572,23,HIGH_FAIL,4,Add MCC model card compiler tooling
+1571,25,HIGH_FAIL,4,feat: mature prompt policy composer guard orchestration
+1570,25,HIGH_FAIL,4,feat: add enclave feature store with attestation
+1569,23,HIGH_FAIL,4,feat: add redaction quality benchmark toolkit
+1568,24,HIGH_FAIL,4,feat: add responsible evaluation orchestrator framework
+1567,23,HIGH_FAIL,4,feat: add CTPT service and SDK clients
+1566,21,HIGH_FAIL,4,feat: add dp-sql compiler for privacy-aware queries
+1565,21,HIGH_FAIL,4,feat: add prompt policy composer framework
+1564,22,HIGH_FAIL,4,feat: add IDTL transparency log service
+1563,23,HIGH_FAIL,4,feat: add contextual access broker service
+1562,24,HIGH_FAIL,4,feat: add tabular perceptual fingerprinting registry service
+1561,23,HIGH_FAIL,4,feat: add verifiable consent receipt toolkit
+1560,24,HIGH_FAIL,4,feat: add stochastic actor awareness simulation
+1559,24,HIGH_FAIL,4,feat: add reproducible notebook freezer tooling
+1558,23,HIGH_FAIL,4,feat: add transformation canon codegen suite
+1557,23,HIGH_FAIL,4,feat: add data residency optimizer and UI
+1556,23,HIGH_FAIL,4,feat: add preregistered experiment registry service
+1555,24,HIGH_FAIL,4,feat: add prompt diff impact lab toolkit
+1554,23,HIGH_FAIL,4,feat: add differential privacy release scheduler
+1553,25,HIGH_FAIL,4,feat: add synthetic entity graph forge generator
+1552,22,HIGH_FAIL,4,feat: add ESCP erasure service and verifier
+1551,24,HIGH_FAIL,4,feat: add TESQ sandbox package
+1550,23,HIGH_FAIL,4,feat: add governance SLO monitoring service
+1549,25,HIGH_FAIL,4,Add Leakage Red-Team Tournament harness
+1548,24,HIGH_FAIL,4,feat: introduce jurisdictional policy resolver tooling
+1547,25,HIGH_FAIL,4,feat: add model usage ledger SDK and API
+1546,23,HIGH_FAIL,4,feat: add hil-review appeals triage workbench
+1545,24,HIGH_FAIL,4,feat: add client-side telemetry redaction pipeline
+1544,24,HIGH_FAIL,4,feat: introduce retentiond service and dashboard
+1543,25,HIGH_FAIL,4,feat: add safejoin psi service and clients
+1542,25,HIGH_FAIL,4,feat: add counterfactual evaluation harness
+1541,25,HIGH_FAIL,4,feat: add freshness scoring library and reranking middleware
+1540,28,HIGH_FAIL,4,feat: add incident attestation bundler CLI
+1539,24,HIGH_FAIL,4,feat: add contract gate cli for data contract ci
+1538,23,HIGH_FAIL,4,feat: add federated t-secure metrics aggregator
+1537,25,HIGH_FAIL,4,feat: add retrieval safety router library and demo
+1536,25,HIGH_FAIL,4,feat: add verifiable synthetic data forge package
+1535,23,HIGH_FAIL,4,feat: introduce drift-sentinel shadow model monitoring daemon
+1534,24,HIGH_FAIL,4,feat: add differential privacy budget bank service
+1533,24,HIGH_FAIL,4,feat: add consent constraint compiler
+1532,25,HIGH_FAIL,4,feat: add explain decision overlay component
+1531,26,HIGH_FAIL,4,Add GW-DE dual-entropy watermark suite
+1530,25,HIGH_FAIL,4,feat: add policy sealed computation prototype
+1529,24,HIGH_FAIL,4,feat: add LAC compiler and enforcement suite
+1528,23,HIGH_FAIL,4,feat: add zk selector overlap service
+1527,29,HIGH_FAIL,4,feat: add data profiling tool for ingestion
+1526,23,HIGH_FAIL,4,feat: add semantic delta network library
+1525,25,HIGH_FAIL,4,Add PNC attestation tooling and reports
+1524,25,HIGH_FAIL,4,feat: add proof-carrying analytics verifier CLI
+1523,29,HIGH_FAIL,4,feat: add customizable keyboard shortcuts
+1522,27,HIGH_FAIL,4,feat: enforce per-user GraphQL concurrency limits
+1521,25,HIGH_FAIL,4,Add workflow-engine load testing automation assets
+1520,28,HIGH_FAIL,4,feat: integrate sentiment analysis pipeline
+1519,21,HIGH_FAIL,4,Add database failover operators and monitoring
+1518,29,HIGH_FAIL,4,feat: add custom graph metric execution pipeline
+1517,29,HIGH_FAIL,4,feat: add neo4j graph deduplication workflow
+1516,29,HIGH_FAIL,4,Add Postgres-backed graph annotations
+1515,20,HIGH_FAIL,4,feat: optimize argo workflow resource efficiency
+1514,27,HIGH_FAIL,4,feat: add user activity analytics dashboard
+1513,20,HIGH_FAIL,4,chore(deps): bump tar-fs from 2.1.3 to 2.1.4 in /conductor-ui/frontend
+1512,25,HIGH_FAIL,4,Add environment-specific synthetic CI checks
+1511,23,HIGH_FAIL,4,feat: add schema validation for feed processor ingestion

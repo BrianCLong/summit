@@ -1,0 +1,50 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: asr-bridge-hpa
+  namespace: companyos-media
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: asr-bridge
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: asr-bridge-pdb
+  namespace: companyos-media
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: { app: asr-bridge }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: asr-bridge-allow-server
+  namespace: companyos-media
+spec:
+  podSelector:
+    matchLabels: { app: asr-bridge }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector: {}     # tighten to your server NS/labels
+          podSelector: {}           # or label match (app: api)
+      ports:
+        - port: 9000
+  egress:
+    - to:
+        - podSelector: { matchLabels: { app: whisper } }
+      ports:
+        - port: 9000

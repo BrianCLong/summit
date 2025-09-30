@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Graph subscriptions maintainer every 6 hours
+
+[Timer]
+OnBootSec=5m
+OnUnitActiveSec=6h
+Unit=graph-subs.service
+AccuracySec=1m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

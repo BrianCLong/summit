@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  whisper:
+    image: ghcr.io/aarnphm/whisper-asr-webservice:latest
+    environment:
+      - ASR_MODEL=medium.en            # pick: tiny/base/small/medium/large
+      - ASR_ENGINE=faster_whisper
+      - ASR_DEVICE=cpu                 # "cuda" if GPU available
+      - ASR_BEAM=1
+      - ASR_COMPUTE_TYPE=int8
+    ports:
+      - "9001:9000"  # upstream listens on 9000; we expose 9001
+    restart: unless-stopped
+
+  asr-bridge:
+    build:
+      context: ../../
+      dockerfile: server/asr-bridge/Dockerfile
+    environment:
+      - UPSTREAM_URL=http://whisper:9000
+    depends_on:
+      - whisper
+    ports:
+      - "9000:9000"      # our stable bridge endpoint
+    restart: unless-stopped

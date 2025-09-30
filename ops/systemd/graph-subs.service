@@ -1,0 +1,20 @@
+[Unit]
+Description=CompanyOS Microsoft Graph Subscriptions Maintainer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/companyos/app
+Environment=NODE_ENV=production
+# Ensure MS_GRAPH_NOTIFY_URL is in environment or .env file loaded
+ExecStart=/usr/bin/node ./dist/server/src/dev/ensureGraphSubsAll.js
+User=companyos
+Group=companyos
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target

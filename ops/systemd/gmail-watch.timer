@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Gmail watch registrar every 12 hours
+
+[Timer]
+OnBootSec=5m
+OnUnitActiveSec=12h
+Unit=gmail-watch.service
+AccuracySec=1m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

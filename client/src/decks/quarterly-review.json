@@ -1,0 +1,9 @@
+{
+  "id": "quarterly-review",
+  "title": "Quarterly Review",
+  "slides": [
+    { "title": "Welcome", "content": "Q1 Review\n\n- Wins\n- Risks\n- Next Steps", "notes": "Greet, set context." },
+    { "title": "Metrics", "content": "MRR: $120k\nChurn: 2.1%\nNPS: 48", "notes": "Call out churn improvement." },
+    { "title": "Roadmap", "content": "• Federated Search\n• Meeting Stage v2\n• OPA everywhere", "notes": "Ask for owners." }
+  ]
+}

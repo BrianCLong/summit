@@ -160,6 +160,18 @@ common:
     prometheus.io/port: '{{ .Values.global.prometheus.port }}'
     prometheus.io/path: '{{ .Values.global.prometheus.path }}'
 
+vertex:
+  enabled: false
+  projectId: ""
+  location: "us-central1"
+  chatModel: "gemini-1.5-pro"
+  embedModel: "text-embedding-004"
+  vector:
+    enabled: false
+    indexResource: ""         # projects/..../indexes/INDEX_ID
+    upsertEndpoint: ""        # projects/.../indexEndpoints/ENDPOINT_ID:upsertDatapoints
+    queryEndpoint: ""         # projects/.../indexEndpoints/ENDPOINT_ID:findNeighbors
+
 # Service-specific configurations
 services:
   apiGateway:

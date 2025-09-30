@@ -1,0 +1,437 @@
+1858,test: main-to-green — clean discovery, env split, core mocks, suite f…,BrianCLong
+1853,chore: restore repo baseline for scoped PRs,BrianCLong
+1851,feat: introduce securiteyes ig risk gate bundle,BrianCLong
+1846,[PREP] [AUTO] feature/model-card-registry,BrianCLong
+1845,[AUTO] feature/model-card-registry,BrianCLong
+1840,chore: automate scoped pr open flow,BrianCLong
+1831,feat: add DocForge documentation generator,BrianCLong
+1828,Feature/gateway tariff,BrianCLong
+1827,Feature/aer ledger,BrianCLong
+1826,Feature/crsp,BrianCLong
+1824,Feature/agent gateway wiring,BrianCLong
+1818,chore: ignore binary lock artifacts,BrianCLong
+1810,fix: replace wasm sample with text source,BrianCLong
+1809,chore: ignore psb sdk lockfile,BrianCLong
+1807,feat: deliver railhead automation pack,BrianCLong
+1806,feat: add developer devkit and smoke guardrails,BrianCLong
+1804,chore: ignore railhead lock artifacts,BrianCLong
+1795,feat: launch observability first telemetry kit,BrianCLong
+1794,feat: implement data spine governance controls,BrianCLong
+1793,feat(reliability): orchestrate canary guardrails,BrianCLong
+1791,feat: integrate IntelCraft tradecraft into IntelGraph,BrianCLong
+1783,Feat/asset inventory hardening and validation,BrianCLong
+1782,chore: ignore fcs generated artifacts,BrianCLong
+1781,chore: avoid binary diffs for srlc outputs,BrianCLong
+1780,chore: ignore sdk typescript lockfile,BrianCLong
+1778,chore: ignore binary lock artifacts,BrianCLong
+1777,chore: ignore binary lock artifacts,BrianCLong
+1776,feat: integrate opa policy enforcement,BrianCLong
+1773,feat: add s3 csv ingest pipeline,BrianCLong
+1772,feat: add unified slo observability instrumentation,BrianCLong
+1771,feat: add unified slo observability instrumentation,BrianCLong
+1770,feat: add neo4j-backed graph subgraph service,BrianCLong
+1769,feat(ci): enforce supply chain security gates,BrianCLong
+1768,feat: add airgap bundle tooling and region overlays,BrianCLong
+1767,feat: add streaming fairness monitor service and dashboard,BrianCLong
+1766,feat: add policy impact causal analyzer toolkit,BrianCLong
+1763,chore(deps): bump canvas from 2.11.2 to 3.2.0,app/dependabot
+1762,chore(deps): bump @turf/area from 7.1.0 to 7.2.0,app/dependabot
+1760,feat: add iftc static analyzer,BrianCLong
+1759,feat: add data mutation chaos lab harness,BrianCLong
+1758,feat: add governance requirement test corpus compiler,BrianCLong
+1757,feat: add prompt context attribution reporting,BrianCLong
+1754,feat: add QSET quorum-based tool secret escrow service,BrianCLong
+1753,feat: add policy-constrained backfill orchestrator,BrianCLong
+1752,feat: add provenance-preserving etl generator,BrianCLong
+1751,feat: add opld leakage delta harness,BrianCLong
+1750,feat: add canonical semantic schema mapper,BrianCLong
+1749,feat: add model output safety budgets,BrianCLong
+1748,feat: add coec cross-org experiment coordination,BrianCLong
+1747,feat: add context window sanitizer middleware for GraphRAG,BrianCLong
+1746,feat: add RAALO policy aware active learning orchestrator,BrianCLong
+1745,feat: add consent drift forecaster,BrianCLong
+1744,feat: add dataset end-of-life registrar service,BrianCLong
+1743,feat: add streaming join auditor operator,BrianCLong
+1742,feat: add audit log succinctness proofs library,BrianCLong
+1741,feat: add data license derivation planner,BrianCLong
+1740,feat: add cross-modal origin linker core,BrianCLong
+1739,feat: add residency-aware DR planner,BrianCLong
+1738,feat: add query intent policy mapper service,BrianCLong
+1737,feat: add JTDL taxonomy drift linter,BrianCLong
+1736,feat: add csrs retention simulator,BrianCLong
+1735,feat: add multi-stage query explainer middleware,BrianCLong
+1734,feat: add cross-modal origin linker core,BrianCLong
+1733,feat: introduce OHIE opt-out analytics library and UI panel,BrianCLong
+1732,feat: introduce deterministic toolchain hasher CLI,BrianCLong
+1731,feat: add Go mpes runner with sandboxed multi-party evaluations,BrianCLong
+1730,feat: add ACDC consent-aware dataflow compiler,BrianCLong
+1729,feat: add outcome-safe rollout planner and dashboard,BrianCLong
+1728,chore(deps): bump nvidia/cuda from 13.0.0-devel-ubuntu22.04 to 13.0.1-devel-ubuntu22.04,app/dependabot
+1727,chore(deps): bump node from 20-alpine to 24-alpine,app/dependabot
+1726,chore(deps): bump scikit-learn from 1.3.0 to 1.5.0 in /server,app/dependabot
+1725,chore(deps): bump torch from 2.1.0 to 2.8.0 in /server,app/dependabot
+1724,chore(deps): bump python from 3.12-slim to 3.13-slim,app/dependabot
+1723,chore(deps): bump requests from 2.31.0 to 2.32.4 in /server,app/dependabot
+1722,chore(deps): bump tqdm from 4.66.1 to 4.66.3 in /server,app/dependabot
+1721,chore(deps): bump nltk from 3.8.1 to 3.9 in /server,app/dependabot
+1720,chore(deps): bump anchore/syft from v0.105.1 to v1.33.0,app/dependabot
+1719,chore(deps): bump aquasec/trivy from 0.51.1 to 0.66.0,app/dependabot
+1718,chore(deps): bump pandas from 2.0.3 to 2.3.2,app/dependabot
+1717,chore(deps): bump redis from 4.3.4 to 6.4.0,app/dependabot
+1716,chore(deps): bump pytest from 7.4.3 to 8.4.2,app/dependabot
+1715,chore(deps): bump fastapi from 0.78.0 to 0.117.1,app/dependabot
+1714,chore(deps): bump pytest-cov from 4.1.0 to 7.0.0,app/dependabot
+1713,feat: implement remote forensic capture pipelines,BrianCLong
+1712,Add FHE micro-analytics service and client,BrianCLong
+1711,refactor: streamline clsl stress lab,BrianCLong
+1710,feat: advance companyos patent intelligence,BrianCLong
+1709,feat: add PFPT prompt diffing library,BrianCLong
+1708,feat: add policy-gated vector router core and SDK,BrianCLong
+1707,feat: add attested dataset delivery network,BrianCLong
+1706,feat: add data lease controller service,BrianCLong
+1705,feat: add pacdc policy-aware cdc replicator,BrianCLong
+1704,feat: add djce-pb join risk estimator,BrianCLong
+1703,docs: integrate legal agreements into onboarding,BrianCLong
+1702,feat: launch Topicality Collective marketing microsites,BrianCLong
+1701,feat: add RTGH governance gate fuzzer,BrianCLong
+1700,feat(streaming): add event-time compliance window enforcer,BrianCLong
+1699,feat: add mocc contract validation library,BrianCLong
+1698,feat: add consent state reconciler service,BrianCLong
+1697,feat: add consent state reconciler service,BrianCLong
+1696,feat: add federated attribution evaluator,BrianCLong
+1695,feat: add rare-event synthetic booster toolkit,BrianCLong
+1694,feat: add immutable training run capsule toolkit,BrianCLong
+1693,feat: add semantic PII ontology mapper service,BrianCLong
+1692,feat: introduce policy backtest simulator engine and dashboard,BrianCLong
+1691,feat: add deterministic prompt execution cache package,BrianCLong
+1690,feat: add csdb broker service and client sdk,BrianCLong
+1689,feat: add aql audit query engine,BrianCLong
+1688,feat: add data diff governance mapper tool,BrianCLong
+1687,feat: add adaptive consent experience sdk,BrianCLong
+1686,feat: add HAPL ledger with verification CLI,BrianCLong
+1685,feat: add access path minimizer planner and SDK,BrianCLong
+1684,feat: add legal hold orchestrator and UI,BrianCLong
+1683,feat: add emergency containment controller UI and API,BrianCLong
+1682,feat: introduce KRPCP rotation planner and coverage UI,BrianCLong
+1681,feat: add metric definition registry,BrianCLong
+1680,feat: add AGSM synthetic governance probes,BrianCLong
+1679,feat: add MTIF STIX/TAXII service,BrianCLong
+1678,feat: add csiks idempotency service and clients,BrianCLong
+1677,feat: add consent graph explorer service and ui,BrianCLong
+1676,feat: add adaptive consistency controller sidecar and sdk,BrianCLong
+1675,feat: add adaptive consistency controller sidecar and sdk,BrianCLong
+1674,feat: add mobile ODPS SDKs for Android and iOS,BrianCLong
+1673,feat: add immutable business rules sandbox engine,BrianCLong
+1672,feat: add explainable sampling auditor toolkit,BrianCLong
+1671,feat: add Data Residency Shadow Tester tool,BrianCLong
+1670,feat: add SRPL macros and lint rule for safe retrieval,BrianCLong
+1669,feat: add tenant isolation prover,BrianCLong
+1668,feat: add knowledge purge orchestrator,BrianCLong
+1667,feat: add redaction consistent search indexer service,BrianCLong
+1666,feat: add governed chargeback metering service,BrianCLong
+1665,feat: add bayesian fusion to early warning ensemble,BrianCLong
+1664,feat: add regulator self-service proof portal,BrianCLong
+1663,feat: add pseudonym linkage risk auditor library,BrianCLong
+1662,feat: add hardware determinism guard toolkit,BrianCLong
+1661,feat: add side-channel budget auditor harness,BrianCLong
+1660,feat: add query-time pseudonymization gateway service,BrianCLong
+1659,feat: introduce data embargo scheduler and CLI,BrianCLong
+1658,feat: add consent-aware feature flag platform,BrianCLong
+1657,feat: add cryptographic cohort sampler,BrianCLong
+1656,feat: add differential lineage replayer planner,BrianCLong
+1655,feat: add spar artifact registry,BrianCLong
+1654,Expand interventional countermeasure briefing with patentable innovations,BrianCLong
+1653,feat: add LTDIM legal diff impact mapper,BrianCLong
+1652,feat: add cdqd service and ui,BrianCLong
+1651,feat: add CRKRE jurisdiction-aware key management service,BrianCLong
+1650,Add DSAR fulfillment engine with proofs and reviewer UI,BrianCLong
+1649,feat: add slice registry service and SDKs,BrianCLong
+1648,feat: add multi-tenant fairness scheduler,BrianCLong
+1647,feat: add purpose drift auditor service and UI,BrianCLong
+1646,feat: add consent-compliant messaging orchestrator service,BrianCLong
+1645,feat: add SCPE supply chain gate,BrianCLong
+1644,feat: add policy-constrained distillation framework,BrianCLong
+1643,feat: add deterministic embedding store,BrianCLong
+1642,feat: add privacy incident tabletop drill engine,BrianCLong
+1641,feat: add drift root-cause explorer toolkit,BrianCLong
+1640,feat: add qawe quorum approval engine,BrianCLong
+1639,feat: add robust prompt template compiler,BrianCLong
+1638,feat: add Feature Lineage Impact Analyzer,BrianCLong
+1637,Refine quality gate evidence packs,BrianCLong
+1636,Add CompanyOS initiative build playbooks,BrianCLong
+1635,feat: add knowledge cutoff router library,BrianCLong
+1634,feat: add mfue unlearning evaluation framework,BrianCLong
+1633,feat: add consent revocation propagator service,BrianCLong
+1632,feat: add jitae dual-control access service,BrianCLong
+1631,feat: add risk-adaptive limiter sidecar and sdk,BrianCLong
+1630,Add inference cost optimizer planner and orchestration toolkit,BrianCLong
+1629,feat: add agql attestation graph workspace,BrianCLong
+1628,feat: add data minimization planner service,BrianCLong
+1627,feat: add federated schema registry with policy tags,BrianCLong
+1626,feat: introduce categorical privacy validator tooling,BrianCLong
+1625,feat: introduce multicloud egress governor sidecar,BrianCLong
+1624,feat: deliver human feedback arbitration workbench,BrianCLong
+1623,feat: add pipeline flakiness detector toolkit,BrianCLong
+1622,feat: add policy-aware synthetic log generator,BrianCLong
+1621,feat: add consent-aware experiment allocator,BrianCLong
+1620,feat: define graphql contract scaffolding,BrianCLong
+1619,feat: add provenance CLI and export manifest spec,BrianCLong
+1618,feat: add sre guardrails and observability automation,BrianCLong
+1617,feat: add explainable ranking auditor toolkit,BrianCLong
+1616,feat: add zero trust security controls,BrianCLong
+1615,feat: define graph data model and ingestion policies,BrianCLong
+1614,docs: add Conductor workstream planning artifacts,BrianCLong
+1613,docs: add day-1 architecture and security governance,BrianCLong
+1612,feat: add bgpr rollout controller and dashboard,BrianCLong
+1611,feat: add secrets spill sentinel service,BrianCLong
+1610,fix: correct intelgraph api package metadata,BrianCLong
+1609,docs: add conductor summary backlog and raci for workstream 1,BrianCLong
+1608,feat: add temporal access token service,BrianCLong
+1607,feat: add schema evolution simulator tool,BrianCLong
+1606,feat: add q3c resource cost service,BrianCLong
+1605,docs: add influence network detection framework blueprint,BrianCLong
+1604,feat: orchestrate patent-grade prompt innovation suite,BrianCLong
+1603,feat: add otel observability and slo dashboards,BrianCLong
+1602,fix: sync provenance runtime surfaces,BrianCLong
+1601,feat: redesign companyos control surface,BrianCLong
+1600,feat: add fairness constrained trainer toolkit,BrianCLong
+1599,feat: add public GraphQL contracts,BrianCLong
+1598,feat(security): enforce tenant abac and webauthn controls,BrianCLong
+1597,Add platform SRE pipeline and observability guardrails,BrianCLong
+1596,feat: enforce retention tiers and rtbf workflow,BrianCLong
+1595,feat: harden intelgraph helm runtime configuration,BrianCLong
+1594,test: add automated quality gates evidence,BrianCLong
+1593,feat: add observability pipeline assets,BrianCLong
+1592,feat: add policy-aware cross-silo query planner,BrianCLong
+1591,Add Conductor release planning summary, backlog, and RACI,BrianCLong
+1590,feat: publish MC evidence from IG-RL releases,BrianCLong
+1589,feat: enforce tenant ABAC with OIDC and SCIM,BrianCLong
+1588,feat: add plan mode to agent orchestrator,BrianCLong
+1587,feat: gate rollout promotion with mission control evidence,BrianCLong
+1586,feat: add integrity guards to compliance exports,BrianCLong
+1585,docs: capture day-1 topology and decision records,BrianCLong
+1584,Add canonical Neo4j ingest schema, mappings, and fixtures,BrianCLong
+1583,Add canonical Neo4j ingest schema, mappings, and fixtures,BrianCLong
+1582,feat: add c2pa provenance bridge toolkit,BrianCLong
+1581,feat: add secure udf marketplace service,BrianCLong
+1580,feat: add rollback orchestrator tooling,BrianCLong
+1579,feat: introduce causal feature store validator toolkit,BrianCLong
+1578,feat: add streaming dp window aggregator library,BrianCLong
+1577,feat: add bitemporal knowledge graph library,BrianCLong
+1576,feat: add policy-aware edge cache,BrianCLong
+1575,feat: add obligation tracker service,BrianCLong
+1574,test(kkp): add audience enforcement integration test,BrianCLong
+1573,Expand intention imputation implementation blueprint,BrianCLong
+1572,Add MCC model card compiler tooling,BrianCLong
+1571,feat: mature prompt policy composer guard orchestration,BrianCLong
+1570,feat: add enclave feature store with attestation,BrianCLong
+1569,feat: add redaction quality benchmark toolkit,BrianCLong
+1568,feat: add responsible evaluation orchestrator framework,BrianCLong
+1567,feat: add CTPT service and SDK clients,BrianCLong
+1566,feat: add dp-sql compiler for privacy-aware queries,BrianCLong
+1565,feat: add prompt policy composer framework,BrianCLong
+1564,feat: add IDTL transparency log service,BrianCLong
+1563,feat: add contextual access broker service,BrianCLong
+1562,feat: add tabular perceptual fingerprinting registry service,BrianCLong
+1561,feat: add verifiable consent receipt toolkit,BrianCLong
+1560,feat: add stochastic actor awareness simulation,BrianCLong
+1559,feat: add reproducible notebook freezer tooling,BrianCLong
+1558,feat: add transformation canon codegen suite,BrianCLong
+1557,feat: add data residency optimizer and UI,BrianCLong
+1556,feat: add preregistered experiment registry service,BrianCLong
+1555,feat: add prompt diff impact lab toolkit,BrianCLong
+1554,feat: add differential privacy release scheduler,BrianCLong
+1553,feat: add synthetic entity graph forge generator,BrianCLong
+1552,feat: add ESCP erasure service and verifier,BrianCLong
+1551,feat: add TESQ sandbox package,BrianCLong
+1550,feat: add governance SLO monitoring service,BrianCLong
+1549,Add Leakage Red-Team Tournament harness,BrianCLong
+1548,feat: introduce jurisdictional policy resolver tooling,BrianCLong
+1547,feat: add model usage ledger SDK and API,BrianCLong
+1546,feat: add hil-review appeals triage workbench,BrianCLong
+1545,feat: add client-side telemetry redaction pipeline,BrianCLong
+1544,feat: introduce retentiond service and dashboard,BrianCLong
+1543,feat: add safejoin psi service and clients,BrianCLong
+1542,feat: add counterfactual evaluation harness,BrianCLong
+1541,feat: add freshness scoring library and reranking middleware,BrianCLong
+1540,feat: add incident attestation bundler CLI,BrianCLong
+1539,feat: add contract gate cli for data contract ci,BrianCLong
+1538,feat: add federated t-secure metrics aggregator,BrianCLong
+1537,feat: add retrieval safety router library and demo,BrianCLong
+1536,feat: add verifiable synthetic data forge package,BrianCLong
+1535,feat: introduce drift-sentinel shadow model monitoring daemon,BrianCLong
+1534,feat: add differential privacy budget bank service,BrianCLong
+1533,feat: add consent constraint compiler,BrianCLong
+1532,feat: add explain decision overlay component,BrianCLong
+1531,Add GW-DE dual-entropy watermark suite,BrianCLong
+1530,feat: add policy sealed computation prototype,BrianCLong
+1529,feat: add LAC compiler and enforcement suite,BrianCLong
+1528,feat: add zk selector overlap service,BrianCLong
+1527,feat: add data profiling tool for ingestion,BrianCLong
+1526,feat: add semantic delta network library,BrianCLong
+1525,Add PNC attestation tooling and reports,BrianCLong
+1524,feat: add proof-carrying analytics verifier CLI,BrianCLong
+1523,feat: add customizable keyboard shortcuts,BrianCLong
+1522,feat: enforce per-user GraphQL concurrency limits,BrianCLong
+1521,Add workflow-engine load testing automation assets,BrianCLong
+1520,feat: integrate sentiment analysis pipeline,BrianCLong
+1519,Add database failover operators and monitoring,BrianCLong
+1518,feat: add custom graph metric execution pipeline,BrianCLong
+1517,feat: add neo4j graph deduplication workflow,BrianCLong
+1516,Add Postgres-backed graph annotations,BrianCLong
+1515,feat: optimize argo workflow resource efficiency,BrianCLong
+1514,feat: add user activity analytics dashboard,BrianCLong
+1513,chore(deps): bump tar-fs from 2.1.3 to 2.1.4 in /conductor-ui/frontend,app/dependabot
+1512,Add environment-specific synthetic CI checks,BrianCLong
+1511,feat: add schema validation for feed processor ingestion,BrianCLong
+1510,Add guided tours with persisted onboarding state,BrianCLong
+1509,feat: add streaming ML inference over GraphQL,BrianCLong
+1508,feat: add graph snapshot compression utilities,BrianCLong
+1507,chore: add automated security scans to CI,BrianCLong
+1506,feat: add workflow monitoring dashboard UI,BrianCLong
+1505,feat: add ML observability alerting assets,BrianCLong
+1504,feat: optimize graph metadata search indexing,BrianCLong
+1503,feat: add federated training support,BrianCLong
+1502,feat: add data preview step to ingest wizard,BrianCLong
+1501,feat: add GraphQL query observability logging,BrianCLong
+1500,feat: add graph migration tooling,BrianCLong
+1499,chore: establish incremental lint baseline,BrianCLong
+1498,Switch generated API docs to markdown outputs,BrianCLong
+1497,feat: add onboarding wizard with persisted progress,BrianCLong
+1496,feat: add graph anonymization mutation and tooling,BrianCLong
+1495,feat: add dataloaders for graphql resolvers,BrianCLong
+1494,feat: add customizable email templates for notifications,BrianCLong
+1493,feat: add distributed tracing for workflows,BrianCLong
+1492,feat: enable bulk graph selection operations,BrianCLong
+1491,feat: automate ml retraining pipeline,BrianCLong
+1490,feat: add real-time collaboration observability assets,BrianCLong
+1489,feat: add graph version control snapshots,BrianCLong
+1488,feat: add customizable graph visualization preferences,BrianCLong
+1487,feat: add mock data generator for testing,BrianCLong
+1486,feat: add GraphQL API key management system,BrianCLong
+1485,feat: integrate graph anomaly detection into analytics dashboard,BrianCLong
+1484,feat: automate postgres and neo4j backup verification,BrianCLong
+1483,feat: add realtime graph query preview,BrianCLong
+1482,feat: add realtime graph query preview,BrianCLong
+1481,feat: add rate limited ingestion controls,BrianCLong
+1480,feat: add image detection pipeline to ingest wizard,BrianCLong
+1479,feat: add custom workflow template support,BrianCLong
+1478,feat: add Evidently drift monitoring,BrianCLong
+1477,feat: add graph query debugging tooling,BrianCLong
+1476,feat: add cross-region database replication artifacts,BrianCLong
+1475,Add Neo4j graph ingestion validation framework,BrianCLong
+1474,feat: add graphql playground to docs site,BrianCLong
+1473,feat: add cross-channel notifications,BrianCLong
+1472,feat: add dashboard layout experimentation,BrianCLong
+1471,feat: right-size k8s workloads with vpa,BrianCLong
+1470,Add offline ingestion queue to feed-processor,BrianCLong
+1469,feat(ai): add explainability pipeline for entity recognition,BrianCLong
+1468,feat: add dynamic rbac management api,BrianCLong
+1467,feat: add graph snapshotting service and mutations,BrianCLong
+1466,Add automated security compliance checks to CI,BrianCLong
+1465,feat: add Python batching workers for feed-processor,BrianCLong
+1464,feat: add GraphQL OpenTelemetry metrics and alerts,BrianCLong
+1463,Add TOTP-based MFA enforcement,BrianCLong
+1462,feat: improve graph cache invalidation and observability,BrianCLong
+1461,feat: improve dashboard and search accessibility,BrianCLong
+1460,feat: implement data retention automation,BrianCLong
+1459,feat: integrate Argo orchestration for workflow engine,BrianCLong
+1458,feat: enable gpu acceleration for ml engine,BrianCLong
+1457,feat(search): add advanced graphql filters,BrianCLong
+1456,feat: add audit log export graphql query,BrianCLong
+1455,feat: enhance alerting workflow with pagerduty integration,BrianCLong
+1454,test: add k6 rollout canary scenario,BrianCLong
+1453,feat: add Dask preprocessing pipeline for ingest wizard,BrianCLong
+1452,feat: add interactive tutorials for ingest and graph workflows,BrianCLong
+1451,feat: implement session revocation and idle timeouts,BrianCLong
+1450,feat(graph): add Graph CSV import mutation,BrianCLong
+1449,feat: enable argocd blue-green deployments,BrianCLong
+1448,Add MLflow model versioning and deployment APIs,BrianCLong
+1447,feat: improve graph cache invalidation and observability,BrianCLong
+1446,feat(feedback): add dashboard feedback workflows,BrianCLong
+1445,Add frontend CI/CD workflows with S3 and ArgoCD integration,BrianCLong
+1444,feat: add predictive analytics forecasting,BrianCLong
+1443,Add TOTP-based MFA enforcement,BrianCLong
+1442,feat: configure ml autoscaling metrics and validation assets,BrianCLong
+1441,feat: add streaming graph export mutation,BrianCLong
+1440,feat: add natural language graph query interface,BrianCLong
+1439,feat: add role-based dashboards for RBAC personas,BrianCLong
+1438,feat: add Kafka streaming pipeline for feed processor,BrianCLong
+1437,feat: add compliance reporting dashboard,BrianCLong
+1436,feat: add automl pipeline and graphql integration,BrianCLong
+1435,chore: deliver code quality audit assets,BrianCLong
+1434,docs: correct persona onboarding guides,BrianCLong
+1433,docs: correct persona onboarding guides,BrianCLong
+1432,Add edge export pipeline and benchmarking support,BrianCLong
+1431,feat: implement tenant theming engine,BrianCLong
+1430,feat: add gds-backed graph analytics queries,BrianCLong
+1429,feat: add federated learning orchestration,BrianCLong
+1428,docs: add onboarding tutorial scripts and transcripts,BrianCLong
+1427,Add SAML federated identity support and policy enforcement,BrianCLong
+1426,perf: optimize audit and compensation history lookups,BrianCLong
+1425,feat: add automl pipeline and graphql integration,BrianCLong
+1424,feat: add visual graph query builder with validation,BrianCLong
+1423,feat: integrate Vault-driven secrets workflows,BrianCLong
+1422,feat: integrate Vault-driven secrets workflows,BrianCLong
+1421,feat: add versioned graphql api endpoints,BrianCLong
+1420,feat: add customizable dashboards,BrianCLong
+1419,chore: deliver code quality audit assets,BrianCLong
+1418,Add edge export pipeline and benchmarking support,BrianCLong
+1417,feat: integrate external identity providers into auth flow,BrianCLong
+1416,Add data lineage tracking and dashboard visualization,BrianCLong
+1415,Add Swagger-based GraphQL API documentation site,BrianCLong
+1414,feat: add milvus vector search support,BrianCLong
+1413,feat(ui): implement dark mode theme support,BrianCLong
+1412,feat: add milvus vector search support,BrianCLong
+1411,feat: add milvus-backed vector search integration,BrianCLong
+1410,feat: implement apollo federation gateway,BrianCLong
+1409,Add chaos resiliency testing assets,BrianCLong
+1408,feat: improve frontend accessibility across dashboard, wizard, and graph,BrianCLong
+1407,feat: improve frontend accessibility across dashboard, wizard, and graph,BrianCLong
+1406,feat: add sandboxed plugin loader for custom integrations,BrianCLong
+1405,Add offline caching for dashboards and ingest wizard,BrianCLong
+1404,chore: shrink service docker images,BrianCLong
+1403,Add GDPR anonymization tooling and mutation,BrianCLong
+1402,feat: add elasticsearch-backed full text search,BrianCLong
+1401,feat: enable graphql subscriptions over websockets,BrianCLong
+1400,feat: automate database backups with CronJobs,BrianCLong
+1399,feat: enhance collaboration heartbeat handling,BrianCLong
+1398,feat: add summit CLI for local development,BrianCLong
+1397,feat: add customizable graph style persistence,BrianCLong
+1396,feat: add batch Neo4j graph mutation with transaction support,BrianCLong
+1395,feat: add customizable graph style persistence,BrianCLong
+1394,feat: add graph export downloads,BrianCLong
+1393,chore: automate dependency maintenance,BrianCLong
+1392,feat(frontend): add localization support with i18next,BrianCLong
+1391,feat: add GraphQL rate limiting plugin,BrianCLong
+1390,feat: add structured logging and log observability,BrianCLong
+1389,feat: implement backend multi-tenancy support,BrianCLong
+1388,feat: implement backend multi-tenancy support,BrianCLong
+1387,Refactor ingest wizard into modular components,BrianCLong
+1386,Add OWASP ZAP and Trivy security regression tests,BrianCLong
+1385,feat: add Grafana observability for ml engine and disclosure packager,BrianCLong
+1384,perf: cache graphql resolvers,BrianCLong
+1383,Add Playwright E2E coverage for critical UI flows,BrianCLong
+1382,Automate staging ArgoCD deployment pipeline,BrianCLong
+1381,feat: integrate huggingface sentiment service into ML engine,BrianCLong
+1380,perf: add graph traversal load benchmarks,BrianCLong
+1379,Expand IO resilience predictive intelligence,BrianCLong
+1378,ci: add Deploy Dev (AWS) workflow,BrianCLong
+1377,ci(mc): add staleness check and publish catalog doc,BrianCLong
+1376,docs(mc): bootstrap Model Catalog (schema + validator),BrianCLong
+1375,docs(mc): add Zhipu GLM-4.5 suite card,BrianCLong
+1374,docs(ci): add merge queue playbook,BrianCLong
+1373,ci: add nightly docker-enabled integration workflow,BrianCLong
+1372,ci: pin Node 18.20.4; run Jest in-band,BrianCLong
+1368,feat: extend ingest wizard data quality insights,BrianCLong
+1367,feat: extend disclosure packager resiliency,BrianCLong
+1366,fix: re-enable diffs for lockfiles,BrianCLong
+1365,Add coverage tests for prov-ledger service,BrianCLong
+1364,feat: broaden connector catalog with wave two metadata,BrianCLong
+1363,Release 2025.09.23.1710,BrianCLong
+1362,Add coverage tests for prov-ledger service,BrianCLong
+1361,feat: enforce cost guard query budgets,BrianCLong
+1360,feat(er): deliver explainable entity resolution service,BrianCLong
+1359,feat: add nlq engine with sandbox endpoints,BrianCLong
+1358,test: expand policy reasoner coverage,BrianCLong
+1330,feat: enrich counter-response agent orchestration,BrianCLong

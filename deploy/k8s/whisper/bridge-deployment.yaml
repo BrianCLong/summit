@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asr-bridge
+  namespace: companyos-media
+  labels: { app: asr-bridge }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: asr-bridge }
+  template:
+    metadata:
+      labels: { app: asr-bridge }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9000"
+        prometheus.io/path: "/metrics"     # we’ll add a basic /metrics in bridge if needed
+    spec:
+      containers:
+        - name: asr-bridge
+          image: your-registry/asr-bridge:latest   # build from server/asr-bridge/Dockerfile
+          ports:
+            - containerPort: 9000
+          env:
+            - name: UPSTREAM_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: whisper-config
+                  key: UPSTREAM_URL
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits:   { cpu: "500m", memory: "512Mi" }
+          readinessProbe:
+            httpGet: { path: /healthz, port: 9000 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 9000 }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: asr-bridge
+  namespace: companyos-media
+  labels: { app: asr-bridge }
+spec:
+  selector: { app: asr-bridge }
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000
+  type: ClusterIP
