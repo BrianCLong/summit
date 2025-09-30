@@ -4,7 +4,7 @@
  */
 
 import { Pool, PoolClient } from 'pg';
-import { Driver, Session } from 'neo4j-driver';
+import { Driver, Session, Integer } from 'neo4j-driver';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
 
@@ -32,6 +32,19 @@ export interface EntityUpdateInput {
   id: string;
   labels?: string[];
   props?: Record<string, any>;
+}
+
+export interface SentimentInsight {
+  entityId: string;
+  label: string;
+  confidence: number;
+  score: number;
+  method: string;
+  model?: string;
+  probabilities?: Record<string, number>;
+  computedAt: string;
+  textSample?: string;
+  jobId?: string;
 }
 
 interface EntityRow {
@@ -286,6 +299,35 @@ export class EntityRepo {
     return rows.map(this.mapRow);
   }
 
+  async getSentimentForEntity(entityId: string, tenantId: string): Promise<SentimentInsight | null> {
+    const session = this.neo4j.session();
+
+    const parameters: Record<string, any> = { entityId, tenantId };
+    const matchClause = tenantId
+      ? 'MATCH (e:Entity {id: $entityId, tenantId: $tenantId})-[:HAS_SENTIMENT]->(s:SentimentResult)'
+      : 'MATCH (e:Entity {id: $entityId})-[:HAS_SENTIMENT]->(s:SentimentResult)';
+
+    try {
+      const result = await session.run(
+        `${matchClause}
+         RETURN s
+         ORDER BY s.computed_at DESC
+         LIMIT 1`,
+        parameters,
+      );
+
+      if (result.records.length === 0) {
+        return null;
+      }
+
+      const node = result.records[0].get('s');
+      const properties = node?.properties || {};
+      return this.mapSentiment(properties, entityId);
+    } finally {
+      await session.close();
+    }
+  }
+
   /**
    * Batch load entities by IDs (for DataLoader)
    */
@@ -375,5 +417,42 @@ export class EntityRepo {
       updatedAt: row.updated_at,
       createdBy: row.created_by,
     };
+  }
+
+  private mapSentiment(properties: Record<string, any>, entityId: string): SentimentInsight {
+    const confidence = this.toNumber(properties.confidence);
+    const score = this.toNumber(properties.score);
+
+    return {
+      entityId,
+      label: properties.label || 'neutral',
+      confidence,
+      score,
+      method: properties.method || 'unknown',
+      model: properties.model || undefined,
+      probabilities: properties.probabilities || undefined,
+      computedAt: typeof properties.computed_at === 'string'
+        ? properties.computed_at
+        : new Date().toISOString(),
+      textSample: properties.text_sample || undefined,
+      jobId: properties.ingestion_job || undefined,
+    };
+  }
+
+  private toNumber(value: any): number {
+    if (value == null) {
+      return 0;
+    }
+
+    if (typeof value === 'number') {
+      return value;
+    }
+
+    if (Integer.isInteger(value)) {
+      return (value as Integer).toNumber();
+    }
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
   }
 }
