@@ -1,14 +1,26 @@
 from intelgraph_py.celery_app import celery_app
 from intelgraph_py.database import get_db
-from intelgraph_py.models import Schedule, AlertLog, Subscription
+from intelgraph_py.models import (
+    Schedule,
+    AlertLog,
+    Subscription,
+    FederatedTrainingJob,
+)
 from sqlalchemy.orm import Session
 from datetime import datetime
 import time
 import json
 import os
+from pathlib import Path
+from typing import Any, Dict, List
 from neo4j import GraphDatabase
 # from intelgraph_py.analytics.explainability_engine import generate_explanation # Temporarily commented out
 from intelgraph_py.models import ExplanationTaskResult
+from intelgraph_py.ml.federated import (
+    FederatedLearningEngine,
+    FederatedTrainingConfig,
+    build_default_model_fn,
+)
 
 
 _sentiment_pipeline = None
@@ -72,6 +84,31 @@ def analyze_sentiment(self, node_id: str, text: str, node_label: str = "Report")
     driver.close()
 
     return {"node_id": node_id, "sentimentScore": score, "sentimentLabel": label}
+
+
+def _load_client_examples(entry: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Load per-client examples from inline payloads or JSON files."""
+
+    records: List[Dict[str, Any]] = []
+    if entry.get("records"):
+        records = entry["records"]
+    elif entry.get("path"):
+        path = Path(entry["path"]).expanduser().resolve()
+        if not path.exists():
+            raise FileNotFoundError(f"Client dataset not found at {path}")
+        loaded = json.loads(path.read_text())
+        if isinstance(loaded, dict) and "records" in loaded:
+            records = loaded["records"]
+        elif isinstance(loaded, list):
+            records = loaded
+        else:
+            raise ValueError("Unsupported client dataset format")
+    else:
+        raise ValueError("Client entry must include 'records' or 'path'")
+
+    if not isinstance(records, list) or not records:
+        raise ValueError("Client dataset must be a non-empty list of records")
+    return records
 
 @celery_app.task(bind=True)
 def run_ai_analytics_task(self, schedule_id: int):
@@ -166,3 +203,65 @@ def send_alerts_to_subscribers(self, graph_id: str, alert_log_id: int):
     db.add(alert_log)
     db.commit()
     db.close()
+
+
+@celery_app.task(bind=True)
+def run_federated_training_job(self, job_id: int):
+    """Execute a federated learning job asynchronously via Celery."""
+
+    db: Session = next(get_db())
+    job = db.query(FederatedTrainingJob).filter(FederatedTrainingJob.id == job_id).first()
+
+    if not job:
+        print(f"Federated training job {job_id} not found")
+        db.close()
+        return
+
+    job.status = "RUNNING"
+    job.updated_at = datetime.now()
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+
+    try:
+        job_config: Dict[str, Any] = job.config or {}
+        training_conf = job_config.get("training", {})
+        clients_conf = job_config.get("clients", [])
+
+        config = FederatedTrainingConfig(**training_conf)
+        client_examples = [_load_client_examples(entry) for entry in clients_conf]
+
+        if not client_examples:
+            raise ValueError("At least one client dataset is required for federated training")
+
+        if not FederatedLearningEngine.is_supported():
+            raise ImportError(
+                "TensorFlow Federated is not installed in this runtime. "
+                "Install the optional dependency to execute training jobs."
+            )
+
+        feature_dim = len(client_examples[0][0]["features"])
+        first_label = client_examples[0][0]["label"]
+        num_classes = len(first_label) if isinstance(first_label, (list, tuple)) else 1
+
+        datasets = FederatedLearningEngine.prepare_datasets(client_examples, config.batch_size)
+
+        engine = FederatedLearningEngine(
+            model_fn=build_default_model_fn(feature_dim, num_classes=num_classes),
+            config=config,
+        )
+        result = engine.run(datasets)
+
+        job.status = "SUCCEEDED"
+        job.metrics = result.metrics
+        job.privacy_budget = result.privacy
+        job.rounds_completed = result.rounds_completed
+        job.error = None
+    except Exception as exc:  # noqa: BLE001 - propagate message to DB
+        job.status = "FAILED"
+        job.error = str(exc)
+    finally:
+        job.updated_at = datetime.now()
+        db.add(job)
+        db.commit()
+        db.close()
