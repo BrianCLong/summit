@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kkp-client"
+version = "0.1.0"
+description = "Keyless KMS Proxy Python client"
+authors = [{ name = "Summit Platform" }]
+dependencies = [
+  "PyNaCl>=1.5",
+  "requests>=2.31"
+]
+requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://example.com/kkp-client"
