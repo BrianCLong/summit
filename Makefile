@@ -75,3 +75,21 @@ all: capture stabilize set-protection harvest-untracked batch-prs finalize audit
 	@echo "  3. Gradually re-enable full CI checks"
 	@echo "  4. Enable merge queue in GitHub settings"
 	@echo ""
+
+# Green-Lock Acceptance Pack Targets
+acceptance: verify recover auto-merge monitor ## Run complete acceptance workflow
+
+verify: ## Run septuple verification matrix
+	@./scripts/verify_greenlock.sh
+
+recover: ## Recover all 799 dangling commits as rescue/* branches
+	@./scripts/recover_orphans_from_bundle.sh
+
+auto-merge: ## Enable auto-merge on all open PRs
+	@./scripts/auto_merge_all_open_prs.sh
+
+monitor: ## Monitor stabilization workflow execution
+	@./scripts/monitor_stabilization.sh
+
+reenable-ci: ## Show CI re-enablement guide
+	@./scripts/gradual_reenable_ci.sh
