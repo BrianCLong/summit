@@ -1,0 +1,9 @@
+{
+  "name": "rest-api-sample",
+  "version": "1.0.0",
+  "description": "Sample plugin that fetches data from a REST API using the sandboxed plugin runtime.",
+  "entry": "./index.js",
+  "timeoutMs": 5000,
+  "allowedEnv": ["SAMPLE_REST_API_URL", "SAMPLE_REST_API_TOKEN"],
+  "cacheKeyPrefix": "rest-api-sample"
+}
