@@ -32,3 +32,38 @@ spec:
           query: |
             histogram_quantile(0.95,
               sum(rate(http_request_duration_seconds_bucket{job="{{args.service}}", namespace="{{args.namespace}}"}[2m])) by (le))
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: mc-evidence-ok
+spec:
+  args:
+    - name: releaseId
+    - name: evidenceQuery
+      valueFrom:
+        configMapKeyRef:
+          name: mc-evidence-queries
+          key: evidenceOkEndpoint
+    - name: token
+      valueFrom:
+        secretKeyRef:
+          name: mc-evidence-token
+          key: token
+  metrics:
+    - name: evidence-ok
+      successCondition: result.ok == true
+      failureCondition: result.ok == false
+      failureLimit: 1
+      failureMessage: result.reason
+      provider:
+        web:
+          url: "{{args.evidenceQuery}}?releaseId={{args.releaseId}}"
+          method: GET
+          timeoutSeconds: 20
+          jqFilter: "."
+          headers:
+            - key: Authorization
+              value: "Bearer {{args.token}}"
+            - key: Accept
+              value: application/json
