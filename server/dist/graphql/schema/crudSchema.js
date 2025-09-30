@@ -354,6 +354,9 @@ export const crudTypeDefs = gql `
     # Graph data for investigation
     graphData(investigationId: ID!, filter: GraphDataFilter): GraphData!
 
+    # Persisted visualization preferences for the active analyst
+    graphStyleSettings: GraphStyleSettings!
+
     # Related entities query
     relatedEntities(entityId: ID!): [RelatedEntity!]!
 
@@ -373,6 +376,22 @@ export const crudTypeDefs = gql `
     edges: [Relationship!]!
     nodeCount: Int!
     edgeCount: Int!
+  }
+
+  # Saved visualization preferences for an analyst
+  type GraphStyleSettings {
+    nodeTypeColors: JSON!
+    nodeSize: Int!
+    edgeColor: String!
+    edgeWidth: Int!
+    updatedAt: DateTime!
+  }
+
+  input GraphStyleSettingsInput {
+    nodeTypeColors: JSON
+    nodeSize: Int
+    edgeColor: String
+    edgeWidth: Int
   }
 
   # Core Mutations
@@ -399,6 +418,9 @@ export const crudTypeDefs = gql `
     deleteInvestigation(id: ID!): Boolean!
     assignUserToInvestigation(investigationId: ID!, userId: ID!): Investigation!
     unassignUserFromInvestigation(investigationId: ID!, userId: ID!): Investigation!
+
+    # Visualization preferences
+    updateGraphStyleSettings(input: GraphStyleSettingsInput!): GraphStyleSettings!
 
     # Authentication mutations (placeholder - handled separately)
     login(email: String!, password: String!): AuthPayload!
