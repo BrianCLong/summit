@@ -1,17 +1,17 @@
 # IntelGraph Development Makefile
 # Production-ready targets for monorepo development, testing, and deployment
 
-.PHONY: help dev test lint typecheck security docs clean install build deploy release-ga
+.PHONY: help dev test lint typecheck security docs clean install build deploy release-ga bundle publish-s3 publish-gcs
 
 # Default target
 .DEFAULT_GOAL := help
 
 # Colors for output
-RED    := \033[31m
-GREEN  := \033[32m
-YELLOW := \033[33m
-BLUE   := \033[34m
-RESET  := \033[0m
+RED    := [31m
+GREEN  := [32m
+YELLOW := [33m
+BLUE   := [34m
+RESET  := [0m
 
 ##@ Development
 
@@ -19,7 +19,7 @@ help: ## Display this help message
 	@echo "$(BLUE)IntelGraph Development Commands$(RESET)"
 	@echo "$(YELLOW)Usage: make <target>$(RESET)"
 	@echo ""
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make [36m<target>[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  [36m%-15s[0m %s\n", $$1, $$2 } /^##@/ { printf "\n[1m%s[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 install: ## Install all dependencies using pnpm
 	@echo "$(GREEN)Installing dependencies...$(RESET)"
@@ -110,6 +110,7 @@ docs-dev: ## Start documentation development server
 		pnpm dlx turbo run docs:dev --cache-dir .turbo; \
 	fi
 
+
 docs-check: ## Check documentation for issues
 	@echo "$(GREEN)Checking documentation...$(RESET)"
 	@if command -v vale >/dev/null 2>&1; then \
@@ -156,6 +157,8 @@ docker-down: ## Stop all Docker Compose services
 	@echo "$(YELLOW)Stopping all services...$(RESET)"
 	docker compose down
 	@echo "$(GREEN)✅ All services stopped$(RESET)"
+	docker compose -f deploy/local/docker-compose.whisper.yml down
+	@echo "$(GREEN)✅ Whisper services stopped$(RESET)"
 
 docker-logs: ## Show Docker Compose logs
 	docker compose logs -f
@@ -165,8 +168,8 @@ docker-logs: ## Show Docker Compose logs
 helm-lint: ## Lint Helm charts
 	@echo "$(GREEN)Linting Helm charts...$(RESET)"
 	@if command -v helm >/dev/null 2>&1; then \
-		helm lint infra/helm/intelgraph; \
-		helm dependency update infra/helm/intelgraph; \
+		hel m lint infra/helm/intelgraph; \
+		hel m dependency update infra/helm/intelgraph; \
 	else \
 		echo "$(RED)❌ Helm not installed$(RESET)"; \
 		exit 1; \
@@ -176,9 +179,9 @@ helm-lint: ## Lint Helm charts
 helm-template: ## Generate Kubernetes manifests from Helm chart
 	@echo "$(GREEN)Generating Helm templates...$(RESET)"
 	@if command -v helm >/dev/null 2>&1; then \
-		helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml > /tmp/intelgraph-dev.yaml; \
+		hel m template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml > /tmp/intelgraph-dev.yaml; \
 		echo "$(BLUE)📄 Dev manifests: /tmp/intelgraph-dev.yaml$(RESET)"; \
-		helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > /tmp/intelgraph-prod.yaml; \
+		hel m template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > /tmp/intelgraph-prod.yaml; \
 		echo "$(BLUE)📄 Prod manifests: /tmp/intelgraph-prod.yaml$(RESET)"; \
 	else \
 		echo "$(RED)❌ Helm not installed$(RESET)"; \
@@ -188,11 +191,11 @@ helm-template: ## Generate Kubernetes manifests from Helm chart
 
 helm-template-dev: ## Generate dev environment Kubernetes manifests
 	@echo "$(GREEN)Generating dev Helm templates...$(RESET)"
-	helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml
+	hel m template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml
 
 helm-template-prod: ## Generate prod environment Kubernetes manifests
 	@echo "$(GREEN)Generating prod Helm templates...$(RESET)"
-	helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml
+	hel m template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml
 
 ##@ Policy & Security
 
@@ -308,11 +311,27 @@ k6-soak:
 	k6 run maestro/tests/k6/soak.js  -e BASE_URL=${BASE_URL:-$STAGE_URL} -e STAGE=${STAGE:-stage}
 
 helm-render-stage:
-	helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-stage.yaml > stage.yaml
+	hel m template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-stage.yaml > stage.yaml
 
 helm-render-prod:
-	helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > prod.yaml
+	hel m template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > prod.yaml
 
 policy-test: helm-render-stage helm-render-prod
-	conftest test stage.yaml --policy policies/opa
+	conftest test infra/helm/intelgraph --policy policies/opa
 	conftest test prod.yaml  --policy policies/opa
+
+# New targets for bundle publishing
+bundle: ## Build client bundle
+	@echo "$(GREEN)Building client bundle...$(RESET)"
+	pnpm --filter client run build
+	@echo "$(GREEN)✅ Client bundle built$(RESET)"
+
+publish-s3: bundle ## Publish client bundle to S3
+	@echo "$(GREEN)Publishing client bundle to S3...$(RESET)"
+	bash scripts/publish-bundle.sh client/dist s3://companyos-cdn/bundles --provider s3
+	@echo "$(GREEN)✅ Client bundle published to S3$(RESET)"
+
+publish-gcs: bundle ## Publish client bundle to GCS
+	@echo "$(GREEN)Publishing client bundle to GCS...$(RESET)"
+	bash scripts/publish-bundle.sh client/dist gs://companyos-cdn/bundles --provider gcs
+	@echo "$(GREEN)✅ Client bundle published to GCS$(RESET)"

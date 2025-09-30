@@ -1,0 +1,36 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: companyos-core-alerts
+  namespace: observability
+  labels: { release: kube-prometheus-stack }
+spec:
+  groups:
+    - name: webhooks
+      rules:
+        - alert: WebhookVerifyFailures
+          expr: |
+            100 * sum(increase(companyos_webhook_verify_total{result="fail"}[10m]))
+            /
+            clamp_min(sum(increase(companyos_webhook_verify_total[10m])), 1)
+            > 5
+          for: 5m
+          labels: { severity: warning }
+          annotations:
+            summary: "Webhook verify failures >5%"
+            description: "Twilio/SendGrid signature rejects rising."
+    - name: rag
+      rules:
+        - alert: RAGLatencyHighP95
+          expr: histogram_quantile(0.95, sum by (le) (rate(companyos_rag_latency_seconds_bucket[5m]))) > 3
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "RAG p95 latency > 3s"
+        - alert: RAGContextTooLow
+          expr: histogram_quantile(0.10, sum by (le) (rate(companyos_rag_context_snippets_bucket[5m]))) < 2
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "RAG context snippets too low"
+            description: "Policy filtering or retrieval issues leading to <2 snippets."

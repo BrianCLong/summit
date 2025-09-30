@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-egress-allow
+  namespace: companyos-core
+spec:
+  podSelector: { matchLabels: { app: api } }
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - namespaceSelector: { matchLabels: { name: companyos-db } }
+      ports: [{ protocol: TCP, port: 5432 }]
+    - to:
+        - namespaceSelector: { matchLabels: { name: companyos-ml } }
+      ports: [{ protocol: TCP, port: 8080 }]
