@@ -27,6 +27,21 @@
           "expr": "histogram_quantile(0.95, sum(rate(otel_ingest_duration_seconds_bucket[5m])) by (le)) * 1000"
         }
       ]
+    },
+    {
+      "type": "table",
+      "title": "Alert History (24h)",
+      "transformations": [],
+      "targets": [
+        {
+          "expr": "sum by (alertname, service, severity) (count_over_time(ALERTS{alertstate!=\"inactive\"}[24h]))",
+          "legendFormat": "{{alertname}}"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
     }
   ]
 }
