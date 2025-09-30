@@ -11,3 +11,7 @@ passlib[bcrypt]==1.7.4
 python-dotenv==1.1.*
 httpx==0.28.*
 jinja2==3.1.*
+networkx==3.4.*
+numpy==1.26.*
+pandas==2.2.*
+pyarrow==18.1.*
