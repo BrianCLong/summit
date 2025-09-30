@@ -1,13 +1,22 @@
 import { useEffect, useRef } from 'react';
-import { DataSet, Timeline } from 'vis-timeline/standalone';
+import * as visTimeline from 'vis-timeline/standalone';
 import $ from 'jquery';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchGraph } from '../data/mockGraph';
 import { RootState, selectNode, setTimeRange } from '../store';
 
+const timelineModule = visTimeline as unknown as {
+  DataSet: new (...args: any[]) => any;
+  Timeline: new (...args: any[]) => any;
+};
+
+const { DataSet, Timeline: TimelineCtor } = timelineModule;
+
+type TimelineInstance = InstanceType<typeof TimelineCtor>;
+
 export function TimelinePane() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<Timeline | null>(null);
+  const timelineRef = useRef<TimelineInstance | null>(null);
   const dispatch = useDispatch();
   const selectedNode = useSelector(
     (s: RootState) => s.selection.selectedNodeId,
@@ -22,7 +31,7 @@ export function TimelinePane() {
           start: n.timestamp,
         })),
       );
-      const timeline = new Timeline(containerRef.current!, items, {});
+      const timeline = new TimelineCtor(containerRef.current!, items, {});
       timelineRef.current = timeline;
 
       timeline.on('select', (props) => {
