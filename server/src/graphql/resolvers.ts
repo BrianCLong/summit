@@ -1,3 +1,7 @@
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import { spawn } from 'child_process';
 import { neo } from '../db/neo4j';
 import { pg } from '../db/pg';
 import { getUser } from '../auth/context';
@@ -7,6 +11,95 @@ import { redactionService } from '../redaction/redact';
 import { gqlDuration, subscriptionFanoutLatency } from '../metrics';
 import { makePubSub } from '../subscriptions/pubsub';
 import Redis from 'ioredis';
+
+const PYTHON_EXECUTABLE = process.env.GRAPH_ANONYMIZER_PYTHON || process.env.PYTHON_BIN || 'python3';
+
+const resolveAnonymizerScript = (): string => {
+  const configuredPath = process.env.GRAPH_ANONYMIZER_PATH;
+  const candidates = [
+    configuredPath,
+    path.resolve(process.cwd(), 'python', 'anonymization', 'anonymize_graph.py'),
+    path.resolve(process.cwd(), 'server', 'python', 'anonymization', 'anonymize_graph.py'),
+    path.resolve(__dirname, '..', '..', 'python', 'anonymization', 'anonymize_graph.py'),
+    path.resolve(__dirname, '..', '..', '..', 'python', 'anonymization', 'anonymize_graph.py'),
+    path.resolve(__dirname, '..', '..', '..', 'server', 'python', 'anonymization', 'anonymize_graph.py')
+  ].filter(Boolean) as string[];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  throw new Error('Unable to locate graph anonymization script');
+};
+
+const parseScriptOutput = (output: string) => {
+  const lines = output
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  for (let i = lines.length - 1; i >= 0; i -= 1) {
+    try {
+      return JSON.parse(lines[i]);
+    } catch (error) {
+      continue; // Look for the last JSON object in output
+    }
+  }
+
+  throw new Error('Anonymization script did not return JSON output');
+};
+
+const runAnonymizerScript = (config: any): Promise<any> =>
+  new Promise((resolve, reject) => {
+    const scriptPath = resolveAnonymizerScript();
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'graph-anon-'));
+    const configPath = path.join(tmpDir, 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+
+    const child = spawn(PYTHON_EXECUTABLE, [scriptPath, '--config', configPath], {
+      env: { ...process.env },
+    });
+
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', (chunk) => {
+      stdout += chunk.toString();
+    });
+
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    const cleanup = () => {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    };
+
+    child.on('error', (error) => {
+      cleanup();
+      reject(error);
+    });
+
+    child.on('close', (code) => {
+      cleanup();
+      if (code !== 0) {
+        reject(
+          new Error(
+            `Anonymization script exited with code ${code}: ${stderr || stdout}`,
+          ),
+        );
+        return;
+      }
+
+      try {
+        resolve(parseScriptOutput(stdout));
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
 
 const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
 
@@ -89,7 +182,7 @@ export const resolvers = {
       }
     }
   },
-  Mutation: { 
+  Mutation: {
     async publishCoherenceSignal(_: any, { input }: any, ctx: any) {
       const end = gqlDuration.startTimer({ op: 'publishCoherenceSignal' });
       try {
@@ -116,7 +209,82 @@ export const resolvers = {
       } finally {
         end();
       }
-    }
+    },
+
+    async anonymizeGraphData(_: any, { input }: any, ctx: any) {
+      const end = gqlDuration.startTimer({ op: 'anonymizeGraphData' });
+      try {
+        const user = getUser(ctx);
+        const requestedPurpose = (ctx?.purpose as Purpose) || 'analytics';
+        const tenantId = input?.tenantId || user?.tenant || null;
+        const policyTenant = tenantId || user?.tenant || 'system';
+
+        const decision = await policyEnforcer.enforce({
+          tenantId: policyTenant,
+          userId: user?.id,
+          action: 'update',
+          resource: 'graph_anonymization',
+          purpose: requestedPurpose,
+          clientIP: ctx.req?.ip,
+          userAgent: ctx.req?.get?.('user-agent'),
+        });
+
+        if (!decision.allow) {
+          throw new Error(`Access denied: ${decision.reason || 'policy denied'}`);
+        }
+
+        opa.enforce('graph:anonymize', {
+          tenantId: policyTenant,
+          user,
+          residency: user?.residency,
+        });
+
+        const config: any = {
+          tenant_id: tenantId,
+          dry_run: Boolean(input?.dryRun),
+          node_properties: (input?.nodeProperties || []).map((node: any) => ({
+            label: node.label,
+            properties: node.properties || [],
+            tenant_property: node.tenantProperty || 'tenant_id',
+          })),
+          table_columns: (input?.tableColumns || []).map((table: any) => ({
+            table: table.table,
+            columns: table.columns || [],
+            primary_key: table.primaryKey || 'id',
+            tenant_column: table.tenantColumn || 'tenant_id',
+          })),
+        };
+
+        if (process.env.GRAPH_ANONYMIZATION_SALT) {
+          config.salt = process.env.GRAPH_ANONYMIZATION_SALT;
+        }
+
+        const result: any = await runAnonymizerScript(config);
+
+        const nodeSummary = (result?.node_summary || []).map((entry: any) => ({
+          label: entry.label,
+          properties: entry.properties || [],
+          nodesProcessed: entry.nodes_processed ?? 0,
+        }));
+
+        const tableSummary = (result?.table_summary || []).map((entry: any) => ({
+          table: entry.table,
+          columns: entry.columns || [],
+          rowsProcessed: entry.rows_processed ?? 0,
+        }));
+
+        return {
+          dryRun: result?.dry_run ?? config.dry_run,
+          tenantId: result?.tenant_id ?? tenantId,
+          nodeSummary,
+          tableSummary,
+          startedAt: result?.started_at ?? new Date().toISOString(),
+          completedAt: result?.completed_at ?? new Date().toISOString(),
+        };
+      } finally {
+        end();
+      }
+    },
   },
   Subscription: {
     coherenceEvents: {
