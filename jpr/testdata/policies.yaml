@@ -1,0 +1,51 @@
+version: v1
+defaultEffect: deny
+variables:
+  EU: "DE,FR,ES"
+precedenceRules:
+  - id: eu-sensitive
+    priority: 90
+    match:
+      jurisdictions: [DE,FR,ES]
+      dataClasses: [sensitive]
+  - id: marketing-allow
+    priority: 40
+    match:
+      purposes: [marketing]
+      actions: [share]
+policies:
+  - id: rule-deny-sensitive
+    jurisdictions: [EU]
+    dataClasses: [sensitive]
+    purposes: [marketing]
+    actions: [share]
+    effect: deny
+    precedence: 100
+    effectiveFrom: 2024-01-01
+    effectiveTo: 2024-12-31
+    description: EU sensitive marketing ban
+  - id: rule-allow-generic
+    jurisdictions: ["*"]
+    dataClasses: ["*"]
+    purposes: [marketing]
+    actions: [share]
+    effect: allow
+    effectiveFrom: 2023-01-01
+    description: Generic marketing permission
+  - id: rule-defer
+    jurisdictions: [US]
+    dataClasses: [sensitive]
+    purposes: [research]
+    actions: [process]
+    effect: allow
+    precedence: 70
+    effectiveFrom: 2024-06-01
+  - id: rule-deny-us-research
+    jurisdictions: [US]
+    dataClasses: [sensitive]
+    purposes: [research]
+    actions: [process]
+    effect: deny
+    precedence: 80
+    effectiveFrom: 2024-01-01
+    effectiveTo: 2024-05-31
