@@ -37,6 +37,7 @@ dev = [
   "pyvis>=0.3.2",
   "networkx>=3.3",
   "dask[distributed]>=2024.5.0",
+  "fakeredis>=2.23",
 ]
 
 [tool.pytest.ini_options]
