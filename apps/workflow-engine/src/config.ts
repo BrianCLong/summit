@@ -86,4 +86,32 @@ export const config = {
     logLevel: process.env.LOG_LEVEL || 'info',
     enableTracing: process.env.ENABLE_TRACING === 'true',
   },
+
+  argo: {
+    enabled: process.env.ARGO_ENABLED !== 'false',
+    baseUrl: process.env.ARGO_BASE_URL || 'http://argo-server.argo-workflows:2746',
+    namespace: process.env.ARGO_NAMESPACE || 'maestro-workflows',
+    serviceAccountTokenPath:
+      process.env.ARGO_SA_TOKEN_PATH || '/var/run/secrets/kubernetes.io/serviceaccount/token',
+    workflowTemplateRef: process.env.ARGO_WORKFLOW_TEMPLATE || undefined,
+    parallelism: parseInt(process.env.ARGO_PARALLELISM || '100'),
+    workflowExecutionTimeoutSeconds: parseInt(
+      process.env.ARGO_WORKFLOW_TIMEOUT_SECONDS || '7200',
+    ),
+    submitQueue: process.env.ARGO_SUBMIT_QUEUE || 'maestro-priority',
+    tlsVerify: process.env.ARGO_TLS_VERIFY !== 'false',
+  },
+
+  maestro: {
+    persona: process.env.MAESTRO_PERSONA || 'maestro-conductor',
+    version: process.env.MAESTRO_PERSONA_VERSION || 'v2.0',
+    mode: (process.env.MAESTRO_PERSONA_MODE as 'standard' | 'expedited') || 'standard',
+    mission:
+      process.env.MAESTRO_PERSONA_MISSION ||
+      'Coordinate IntelGraph release orchestration with policy guardrails.',
+    defaultImage:
+      process.env.MAESTRO_TASK_IMAGE || 'ghcr.io/intelgraph/maestro-task-runner:stable',
+    priorityClassName: process.env.MAESTRO_PRIORITY_CLASS || 'maestro-critical',
+    telemetryChannel: process.env.MAESTRO_TELEMETRY_CHANNEL || 'maestro-orchestration-events',
+  },
 };
