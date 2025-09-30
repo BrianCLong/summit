@@ -33,6 +33,7 @@ const sidebars = {
         'ARCHITECTURE',
         'DATA_MODEL',
         'ENV_VARS',
+        'api/graphql-playground',
         { type: 'link', label: 'Maestro API', href: '/intelgraph/api/maestro/1.0.0' },
         { type: 'link', label: 'Core API', href: '/intelgraph/api/core/1.0.0' },
       ],
