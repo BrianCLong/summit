@@ -408,13 +408,24 @@ export class CompensationManager {
         params.toDate = filters.toDate;
       }
 
+      const indexHints: string[] = [];
+      if (filters.tenantId && filters.status) {
+        indexHints.push('USING INDEX log:CompensationLog(tenantId, status)');
+      }
+      if (filters.tenantId && (filters.fromDate || filters.toDate)) {
+        indexHints.push('USING INDEX log:CompensationLog(tenantId, timestamp)');
+      }
+      const indexHint = indexHints.length > 0 ? indexHints.join('\n        ') : '';
+
       const result = await session.run(`
         MATCH (log:CompensationLog)
+        ${indexHint}
         ${whereClause}
-        OPTIONAL MATCH (log)-[:HAS_COMPENSATOR]->(c:Compensator)
-        RETURN log, collect(c) as compensators
+        WITH log
         ORDER BY log.timestamp DESC
         LIMIT $limit
+        OPTIONAL MATCH (log)-[:HAS_COMPENSATOR]->(c:Compensator)
+        RETURN log, collect(c) as compensators
       `, params);
 
       return result.records.map(record => ({
