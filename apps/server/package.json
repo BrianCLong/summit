@@ -1,5 +1,6 @@
 {
-  "name": "intelgraph-server",
+  "name": "apps-server",
+  "private": true,
   "version": "1.0.0",
   "description": "IntelGraph GraphQL Server",
   "main": "src/index.ts",

@@ -4,15 +4,21 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": false,
+    "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": false,
     "skipLibCheck": true,
-    "noEmit": true
+    "useUnknownInCatchVariables": false,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "composite": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    "typeRoots": ["./node_modules/@types"],
+    "allowImportingTsExtensions": true,
+    "types": ["node", "jest", "dom", "dom.iterable"]
   },
-  "exclude": [
-    "**/*.updated.ts",
-    "**/*.updated.tsx",
-    "archive_*/**",
-    "out/**",
-    "ui/build/**"
-  ]
+  "exclude": ["**/dist", "**/build", "**/.turbo", "**/.next"]
 }
