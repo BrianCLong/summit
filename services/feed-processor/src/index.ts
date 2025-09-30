@@ -3,13 +3,23 @@
  * Data ingestion worker with OpenLineage integration and license enforcement
  */
 
-import Queue from 'bull';
+import Queue, { type Job } from 'bull';
 import Redis from 'ioredis';
 import neo4j from 'neo4j-driver';
 import { Pool } from 'pg';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import pino from 'pino';
+import {
+  ROOT_CONTEXT,
+  SpanStatusCode,
+  context as otelContext,
+  propagation,
+  trace,
+  type Span
+} from '@opentelemetry/api';
+
+import './tracing';
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -45,7 +55,9 @@ const IngestionJobSchema = z.object({
   target_graph: z.string().default('main'),
   transform_rules: z.array(z.record(z.any())).optional(),
   authority_id: z.string(),
-  reason_for_access: z.string()
+  reason_for_access: z.string(),
+  traceparent: z.string().optional(),
+  tracestate: z.string().optional()
 });
 
 const LineageEventSchema = z.object({
@@ -86,10 +98,14 @@ class OpenLineageClient {
 
   async emitEvent(event: LineageEvent): Promise<void> {
     try {
+      const carrier: Record<string, string> = {};
+      propagation.inject(otelContext.active(), carrier);
       const response = await fetch(`${this.baseUrl}/api/v1/lineage`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(carrier.traceparent ? { traceparent: carrier.traceparent } : {}),
+          ...(carrier.tracestate ? { tracestate: carrier.tracestate } : {})
         },
         body: JSON.stringify(event)
       });
@@ -171,12 +187,17 @@ class LicenseEnforcer {
     reasonForAccess: string
   ): Promise<{ allowed: boolean; reason?: string }> {
     try {
+      const carrier: Record<string, string> = {};
+      propagation.inject(otelContext.active(), carrier);
+
       const response = await fetch(`${this.baseUrl}/compliance/check`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Authority-ID': authorityId,
-          'X-Reason-For-Access': reasonForAccess
+          'X-Reason-For-Access': reasonForAccess,
+          ...(carrier.traceparent ? { traceparent: carrier.traceparent } : {}),
+          ...(carrier.tracestate ? { tracestate: carrier.tracestate } : {})
         },
         body: JSON.stringify({
           operation,
@@ -312,15 +333,69 @@ class GraphStorage {
 
 const graphStorage = new GraphStorage();
 
+function extractJobContext(carrier?: { traceparent?: string; tracestate?: string }) {
+  if (!carrier?.traceparent) {
+    return otelContext.active();
+  }
+  return propagation.extract(ROOT_CONTEXT, carrier);
+}
+
+async function withJobSpan<T>(
+  spanName: string,
+  job: Job,
+  attributes: Record<string, unknown>,
+  handler: (span: Span) => Promise<T>
+): Promise<T> {
+  const carrier = {
+    traceparent: (job.data as { traceparent?: string }).traceparent,
+    tracestate: (job.data as { tracestate?: string }).tracestate
+  };
+  const parentContext = extractJobContext(carrier);
+
+  return await otelContext.with(parentContext, async () => {
+    const span = trace.getTracer('feed-processor').startSpan(spanName, { attributes });
+
+    return await otelContext.with(trace.setSpan(otelContext.active(), span), async () => {
+      try {
+        return await handler(span);
+      } catch (error) {
+        span.recordException(error as Error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
+        throw error;
+      } finally {
+        span.end();
+      }
+    });
+  });
+}
+
+function injectCurrentTrace(): Record<string, string> {
+  const carrier: Record<string, string> = {};
+  propagation.inject(otelContext.active(), carrier);
+  return carrier;
+}
+
 // Job processors
 ingestionQueue.process('ingest-data', 5, async (job) => {
   const jobData = IngestionJobSchema.parse(job.data);
   const runId = uuidv4();
 
-  try {
-    // Emit START event
-    await lineageClient.emitEvent(
-      lineageClient.createRunEvent('START', `ingest-${jobData.source_type}`, runId, [
+  return withJobSpan(
+    'workflow.ingestion',
+    job,
+    {
+      'messaging.system': 'redis',
+      'messaging.operation': 'process',
+      'messaging.destination': 'data-ingestion',
+      'workflow.job_id': jobData.job_id,
+      'workflow.run_id': runId,
+      'workflow.source_type': jobData.source_type
+    },
+    async (span) => {
+      try {
+        // Emit START event
+        await lineageClient.emitEvent(
+          lineageClient.createRunEvent('START', `ingest-${jobData.source_type}`, runId, [
         {
           name: jobData.data_source_id,
           source_name: jobData.source_type,
@@ -353,76 +428,97 @@ ingestionQueue.process('ingest-data', 5, async (job) => {
 
     // Transform data if rules provided
     let transformedData = rawData;
-    if (jobData.transform_rules && jobData.transform_rules.length > 0) {
-      // Add to transform queue
-      await transformQueue.add('transform-data', {
-        job_id: jobData.job_id,
-        raw_data: rawData,
-        transform_rules: jobData.transform_rules,
-        run_id: runId
-      });
-    } else {
-      // Store directly
-      await graphStorage.storeEntities(transformedData, jobData.job_id);
+        span.addEvent('connector.complete', {
+          records: rawData.length
+        });
+
+        const traceHeaders = injectCurrentTrace();
+
+        if (jobData.transform_rules && jobData.transform_rules.length > 0) {
+          // Add to transform queue
+          await transformQueue.add('transform-data', {
+            job_id: jobData.job_id,
+            raw_data: rawData,
+            transform_rules: jobData.transform_rules,
+            run_id: runId,
+            ...(traceHeaders.traceparent ? { traceparent: traceHeaders.traceparent } : {}),
+            ...(traceHeaders.tracestate ? { tracestate: traceHeaders.tracestate } : {})
+          });
+        } else {
+          // Store directly
+          await graphStorage.storeEntities(transformedData, jobData.job_id);
+        }
+
+        // Emit COMPLETE event
+        await lineageClient.emitEvent(
+          lineageClient.createRunEvent('COMPLETE', `ingest-${jobData.source_type}`, runId, [
+            {
+              name: jobData.data_source_id,
+              source_name: jobData.source_type,
+              source_uri: JSON.stringify(jobData.source_config),
+              schema: { type: 'unknown' }
+            }
+          ], [
+            {
+              name: `${jobData.target_graph}-entities`,
+              schema: { entities: transformedData.length },
+              quality_metrics: {
+                completeness: 1.0,
+                validity: 1.0,
+                uniqueness: 1.0
+              }
+            }
+          ])
+        );
+
+        logger.info('Ingestion job completed', {
+          jobId: jobData.job_id,
+          recordsProcessed: rawData.length,
+          runId
+        });
+      } catch (error) {
+        logger.error('Ingestion job failed', {
+          jobId: jobData.job_id,
+          error: (error as Error).message,
+          runId
+        });
+
+        // Emit FAIL event
+        await lineageClient.emitEvent(
+          lineageClient.createRunEvent('FAIL', `ingest-${jobData.source_type}`, runId)
+        );
+
+        throw error;
+      }
     }
-
-    // Emit COMPLETE event
-    await lineageClient.emitEvent(
-      lineageClient.createRunEvent('COMPLETE', `ingest-${jobData.source_type}`, runId, [
-        {
-          name: jobData.data_source_id,
-          source_name: jobData.source_type,
-          source_uri: JSON.stringify(jobData.source_config),
-          schema: { type: 'unknown' }
-        }
-      ], [
-        {
-          name: `${jobData.target_graph}-entities`,
-          schema: { entities: transformedData.length },
-          quality_metrics: {
-            completeness: 1.0,
-            validity: 1.0,
-            uniqueness: 1.0
-          }
-        }
-      ])
-    );
-
-    logger.info('Ingestion job completed', {
-      jobId: jobData.job_id,
-      recordsProcessed: rawData.length,
-      runId
-    });
-
-  } catch (error) {
-    logger.error('Ingestion job failed', {
-      jobId: jobData.job_id,
-      error: (error as Error).message,
-      runId
-    });
-
-    // Emit FAIL event
-    await lineageClient.emitEvent(
-      lineageClient.createRunEvent('FAIL', `ingest-${jobData.source_type}`, runId)
-    );
-
-    throw error;
-  }
+  );
 });
 
 transformQueue.process('transform-data', 3, async (job) => {
   const { job_id, raw_data, transform_rules, run_id } = job.data;
 
-  try {
-    logger.info('Starting data transformation', { jobId: job_id, runId: run_id });
+  return withJobSpan(
+    'workflow.transform',
+    job,
+    {
+      'messaging.system': 'redis',
+      'messaging.operation': 'process',
+      'messaging.destination': 'data-transform',
+      'workflow.job_id': job_id,
+      'workflow.run_id': run_id
+    },
+    async (span) => {
+      try {
+        logger.info('Starting data transformation', { jobId: job_id, runId: run_id });
 
-    // Apply transformation rules
-    let transformedData = raw_data;
+        // Apply transformation rules
+        let transformedData = raw_data;
+        const rules = transform_rules || [];
 
-    for (const rule of transform_rules) {
-      switch (rule.type) {
-        case 'entity_extraction':
-          transformedData = transformedData.map((record: any) => ({
+        for (const rule of rules) {
+          switch (rule.type) {
+            case 'entity_extraction':
+              transformedData = transformedData.map((record: any) => ({
             ...record,
             entity_type: rule.entity_type || 'unknown',
             extracted_at: new Date().toISOString()
@@ -450,29 +546,36 @@ transformQueue.process('transform-data', 3, async (job) => {
       }
     }
 
-    // Store transformed data
-    await graphStorage.storeEntities(transformedData, job_id);
+        // Store transformed data
+        await graphStorage.storeEntities(transformedData, job_id);
 
-    // Extract relationships if configured
-    const relationships = extractRelationships(transformedData);
-    if (relationships.length > 0) {
-      await graphStorage.createRelationships(relationships, job_id);
+        // Extract relationships if configured
+        const relationships = extractRelationships(transformedData);
+        if (relationships.length > 0) {
+          await graphStorage.createRelationships(relationships, job_id);
+        }
+
+        span.setAttributes({
+          'workflow.transform.records_in': raw_data.length,
+          'workflow.transform.records_out': transformedData.length,
+          'workflow.transform.relationships': relationships.length
+        });
+
+        logger.info('Transformation completed', {
+          jobId: job_id,
+          inputRecords: raw_data.length,
+          outputRecords: transformedData.length,
+          relationships: relationships.length
+        });
+      } catch (error) {
+        logger.error('Transformation failed', {
+          jobId: job_id,
+          error: (error as Error).message
+        });
+        throw error;
+      }
     }
-
-    logger.info('Transformation completed', {
-      jobId: job_id,
-      inputRecords: raw_data.length,
-      outputRecords: transformedData.length,
-      relationships: relationships.length
-    });
-
-  } catch (error) {
-    logger.error('Transformation failed', {
-      jobId: job_id,
-      error: (error as Error).message
-    });
-    throw error;
-  }
+  );
 });
 
 function extractRelationships(data: any[]): any[] {

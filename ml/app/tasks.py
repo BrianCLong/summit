@@ -17,8 +17,11 @@ from .cache import (
     get_cached_communities,
     set_cached_communities,
 )
+from .tracing import instrument_worker
 
 logger = logging.getLogger(__name__)
+
+instrument_worker()
 
 _NLP_PIPE = None
 try:
