@@ -1,0 +1,146 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "postgres.fullname" . }}-writer
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
+    app.kubernetes.io/component: writer
+  annotations:
+    replication.summit.sh/role: primary
+spec:
+  serviceName: {{ include "postgres.fullname" . }}-writer
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "postgres.matchLabels" (dict "root" . "component" "writer") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "postgres.matchLabels" (dict "root" . "component" "writer") | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        replication.summit.sh/region: {{ .Values.primaryRegion | quote }}
+    spec:
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+        {{- range .Values.tolerations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - {{ .Values.primaryRegion }}
+        {{- with .Values.extraAffinity }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- if .Values.init.s3WalArchive.enabled }}
+      initContainers:
+        - name: wal-restore
+          image: amazon/aws-cli:2.15.16
+          command:
+            - /bin/sh
+            - -c
+            - |
+              aws s3 sync {{ .Values.init.s3WalArchive.bucket | quote }} /wal-archive --exact-timestamps
+          env:
+            - name: AWS_REGION
+              value: {{ .Values.init.s3WalArchive.awsRegion | default .Values.primaryRegion | quote }}
+          volumeMounts:
+            - name: wal-archive
+              mountPath: /wal-archive
+      {{- end }}
+      containers:
+        - name: postgres
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: postgres
+              containerPort: {{ .Values.service.port }}
+          env:
+            - name: POSTGRESQL_PORT_NUMBER
+              value: {{ .Values.service.port | quote }}
+            - name: POSTGRESQL_REPLICATION_MODE
+              value: primary
+            - name: POSTGRESQL_REPLICATION_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgres.fullname" . }}-replication
+                  key: username
+            - name: POSTGRESQL_REPLICATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgres.fullname" . }}-replication
+                  key: password
+            - name: AURORA_GLOBAL_DB_ID
+              value: {{ .Values.clusterName | quote }}
+            - name: AURORA_APPLY_DELAY
+              value: {{ .Values.replication.applyDelaySeconds | default "0" | quote }}
+            - name: AURORA_MAX_LAG
+              value: {{ .Values.replication.maximumLagSeconds | default "30" | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "postgres.fullname" . }}-config
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+          args:
+            - "-c"
+            - "config_file=/conf/postgresql.conf"
+        {{- if .Values.monitoring.enabled }}
+        - name: exporter
+          image: {{ .Values.monitoring.exporter.image }}:{{ .Values.monitoring.exporter.tag }}
+          imagePullPolicy: {{ .Values.monitoring.exporter.pullPolicy }}
+          ports:
+            - name: metrics
+              containerPort: 9187
+          env:
+            - name: DATA_SOURCE_URI
+              value: localhost:{{ .Values.service.port }}?sslmode=disable
+            - name: DATA_SOURCE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgres.fullname" . }}-replication
+                  key: username
+            - name: DATA_SOURCE_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgres.fullname" . }}-replication
+                  key: password
+          resources:
+            {{- toYaml .Values.monitoring.exporter.resources | nindent 12 }}
+        {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "postgres.fullname" . }}-config
+        {{- if .Values.init.s3WalArchive.enabled }}
+        - name: wal-archive
+          emptyDir: {}
+        {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        annotations:
+          replication.summit.sh/wal-archive-retention-hours: {{ .Values.init.s3WalArchive.retentionHours | quote }}
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: {{ .Values.storage.className | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.storage.size | quote }}
