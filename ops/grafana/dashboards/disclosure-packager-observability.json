@@ -1,0 +1,327 @@
+{
+  "title": "Disclosure Packager \u2014 Pipeline Health",
+  "uid": "disclosure-packager-observability",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "tags": [
+    "packager",
+    "compliance",
+    "otel"
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "env",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(disclosure_packager_jobs_total, env)",
+        "refresh": 2,
+        "current": {
+          "text": "prod",
+          "value": "prod"
+        }
+      },
+      {
+        "name": "pipeline",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(disclosure_packager_jobs_total{env=\"$env\"}, pipeline)",
+        "refresh": 2,
+        "current": {
+          "text": "all",
+          "value": ".*"
+        },
+        "regex": ".*"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "SLO Compliance (99.9% Uptime)",
+      "id": 1,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 0.999
+              },
+              {
+                "color": "green",
+                "value": 0.9995
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg_over_time(up{job=\"disclosure-packager\", env=\"$env\"}[30m])",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Batch Processing Latency (p95, s)",
+      "id": 2,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 6,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(disclosure_packager_batch_duration_seconds_bucket{env=\"$env\", pipeline=~\"$pipeline\"}[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Ratio (5m)",
+      "id": 3,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 15,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        }
+      },
+      "targets": [
+        {
+          "expr": "(sum(rate(disclosure_packager_errors_total{env=\"$env\", pipeline=~\"$pipeline\"}[5m])) / sum(rate(disclosure_packager_jobs_total{env=\"$env\", pipeline=~\"$pipeline\"}[5m])))",
+          "legendFormat": "Error %",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Queue Depth",
+      "id": 4,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
+      "targets": [
+        {
+          "expr": "avg(disclosure_packager_queue_depth{env=\"$env\", pipeline=~\"$pipeline\"}) by (pipeline)",
+          "legendFormat": "{{pipeline}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Retry Attempts (5m)",
+      "id": 5,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(disclosure_packager_retry_total{env=\"$env\", pipeline=~\"$pipeline\"}[5m])) by (reason)",
+          "legendFormat": "{{reason}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Slowest Packages (p99 Latency, s)",
+      "id": 6,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
+      "targets": [
+        {
+          "expr": "topk(5, histogram_quantile(0.99, sum(rate(disclosure_packager_batch_duration_seconds_bucket{env=\"$env\", pipeline=~\"$pipeline\", package_id!\"\"}[5m])) by (package_id, le)))",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "OTel Exported Spans (5m)",
+      "id": 7,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(otelcol_exporter_sent_spans{service_name=\"disclosure-packager\", env=\"$env\"}[5m])) by (exporter)",
+          "legendFormat": "{{exporter}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Jaeger Trace Volume (5m)",
+      "id": 8,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 12,
+        "y": 13
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(jaeger_span_written_total{service=\"disclosure-packager\", env=\"$env\"}[5m]))",
+          "legendFormat": "Spans",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "jaeger-trace",
+      "title": "Trace Explorer",
+      "id": 9,
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 13
+      },
+      "datasource": {
+        "type": "jaeger",
+        "uid": "Jaeger"
+      },
+      "options": {
+        "query": {
+          "service": "disclosure-packager"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Output Size (MB)",
+      "id": 10,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(disclosure_packager_output_bytes_total{env=\"$env\", pipeline=~\"$pipeline\"}[5m])) / 1000000",
+          "legendFormat": "MB/s",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Pending SLAs",
+      "id": 11,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 12,
+        "y": 20
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(disclosure_packager_sla_breaches{env=\"$env\", pipeline=~\"$pipeline\"})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Active Workers",
+      "id": 12,
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 20
+      },
+      "targets": [
+        {
+          "expr": "avg(disclosure_packager_active_workers{env=\"$env\", pipeline=~\"$pipeline\"})",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
