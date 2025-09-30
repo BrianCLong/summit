@@ -1,0 +1,84 @@
+apiVersion: chaos.intelgraph.io/v1
+kind: ChaosExperimentSuite
+metadata:
+  name: companyos-blue-green-resiliency
+  version: "1.0.0"
+spec:
+  global:
+    timeout: "25m"
+    steady_state_timeout: "2m"
+    rollback_timeout: "5m"
+    abort_on_failure: true
+  baseline:
+    slo_compliance: 0.97
+    max_error_rate: 0.02
+    recovery_time: "90s"
+experiments:
+  - name: "preview_pod_failure"
+    description: "Ensure rollout abort restores blue traffic when preview pods fail"
+    type: "pod_kill"
+    target:
+      service: "intelgraph-api"
+      namespace: "companyos"
+      percentage: 100
+      phase: "preview"
+    fault_injection:
+      type: "pod_delete"
+      duration: "2m"
+    expected_behavior:
+      - rollout_aborts: true
+      - active_service_intact: true
+      - ingress_switches_to_blue: true
+    success_criteria:
+      - rollout_status: "Degraded"
+      - active_pod_availability: 1.0
+      - abort_duration: "<2m"
+  - name: "ingress_weight_flip"
+    description: "Validate ingress annotations change traffic weighting without downtime"
+    type: "configuration"
+    target:
+      resource: "Ingress/intelgraph-api-preview"
+      namespace: "companyos"
+    fault_injection:
+      type: "annotation_patch"
+      patch:
+        nginx.ingress.kubernetes.io/canary-weight: "20"
+      duration: "5m"
+    expected_behavior:
+      - http_success_rate: 0.99
+      - preview_metrics_recorded: true
+    success_criteria:
+      - prometheus_query: "rate(http_requests_total{ingress='intelgraph-api-preview',status=~'5..'}[1m]) < 0.01"
+      - slo_analysis_passed: true
+  - name: "post_promotion_latency_spike"
+    description: "Introduce latency on green pods to verify automatic rollback"
+    type: "latency"
+    target:
+      service: "companyos-console"
+      namespace: "companyos"
+      phase: "active"
+    fault_injection:
+      type: "latency_injection"
+      delay: "3s"
+      duration: "4m"
+    expected_behavior:
+      - post_promotion_analysis_fails: true
+      - rollback_triggered: true
+      - preview_pods_scaled: true
+    success_criteria:
+      - alertmanager_notification_sent: true
+      - rollout_status: "Degraded"
+      - traffic_restored_to_previous_hash: true
+validation:
+  pre_experiment:
+    - verify_rollout_healthy: true
+    - confirm_preview_ingress_ready: true
+    - ensure_alerts_silenced: false
+  during_experiment:
+    - monitor_argocd_app_health: true
+    - track_rollout_metric: true
+    - capture_ingress_metrics: true
+  post_experiment:
+    - verify_rollout_promoted: false
+    - confirm_abort_completed: true
+    - archive_grafana_snapshot: true
