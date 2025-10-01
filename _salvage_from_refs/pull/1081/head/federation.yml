@@ -1,5 +1,0 @@
-peers:
-  loopback:
-    endpoint: "http://localhost:8080/federation"
-    shared_claims: ["status", "metrics"]
-    hmac_secret_env: "SYMPHONY_FED_SECRET"
