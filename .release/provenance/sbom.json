@@ -1,0 +1,61 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:v2025.09.30-golden",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-09-30T00:00:00Z",
+    "tools": [
+      {
+        "vendor": "IntelGraph",
+        "name": "Greenline Validation Program",
+        "version": "1.0.0"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:github/BrianCLong/summit@v2025.09.30-golden",
+      "name": "IntelGraph Platform",
+      "version": "v2025.09.30-golden",
+      "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/axios@1.11.0",
+      "name": "axios",
+      "version": "1.11.0",
+      "purl": "pkg:npm/axios@1.11.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/neo4j-driver@5.28.1",
+      "name": "neo4j-driver",
+      "version": "5.28.1",
+      "purl": "pkg:npm/neo4j-driver@5.28.1"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/pg@8.16.3",
+      "name": "pg",
+      "version": "8.16.3",
+      "purl": "pkg:npm/pg@8.16.3"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/redis@5.8.1",
+      "name": "redis",
+      "version": "5.8.1",
+      "purl": "pkg:npm/redis@5.8.1"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/ws@8.18.3",
+      "name": "ws",
+      "version": "8.18.3",
+      "purl": "pkg:npm/ws@8.18.3"
+    }
+  ]
+}
