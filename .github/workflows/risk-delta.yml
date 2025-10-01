@@ -1,0 +1,80 @@
+name: risk-delta
+
+on:
+  workflow_run:
+    workflows: ["deception-simulation"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download deception simulation report
+        uses: actions/download-artifact@v4
+        with:
+          name: deception-sim-report
+          path: reports/deception
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Calculate risk delta score
+        id: risk
+        run: |
+          # Run risk delta calculator
+          if [ -f "reports/deception/baseline.json" ] && [ -f "reports/deception/current.json" ]; then
+            node scripts/risk-delta-score.js | tee /tmp/risk.txt
+
+            # Extract score for later use
+            SCORE=$(grep "RISK-DELTA:" /tmp/risk.txt | cut -d: -f2)
+            echo "score=$SCORE" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️  Deception simulation reports not found" | tee /tmp/risk.txt
+            echo "score=N/A" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR
+        if: ${{ github.event.workflow_run.event == 'pull_request' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BODY="$(cat /tmp/risk.txt)"
+
+          # Find PR number for the head branch
+          PR=$(gh pr list --state open --json number,headRefName | \
+            jq -r '.[] | select(.headRefName=="${{ github.event.workflow_run.head_branch }}") | .number' || true)
+
+          if [ -n "$PR" ]; then
+            echo "Commenting on PR #$PR"
+            gh pr comment "$PR" --body "$BODY"
+          else
+            echo "No open PR found for branch ${{ github.event.workflow_run.head_branch }}"
+          fi
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## 🎯 Risk Delta Score" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "/tmp/risk.txt" ]; then
+            cat /tmp/risk.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Risk delta calculation was skipped." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow Run:** ${{ github.event.workflow_run.html_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.event.workflow_run.head_branch }}" >> $GITHUB_STEP_SUMMARY

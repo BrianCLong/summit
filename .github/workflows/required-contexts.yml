@@ -1,0 +1,95 @@
+name: required-contexts
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  checks: read
+  actions: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enforce required checks
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Define policy-backed soft-fail workflows
+            const allowedSoftFail = ['deception-simulation'];
+
+            // Define all required workflows
+            const required = [
+              'k6-slo',
+              'review-sla',
+              'stale-prs',
+              'chatops',
+              'deception-simulation'
+            ];
+
+            const { owner, repo } = context.repo;
+            const ref = context.sha;
+
+            // Get all check runs for this commit
+            const checks = await github.paginate(github.rest.checks.listForRef, {
+              owner,
+              repo,
+              ref
+            });
+
+            // Build status map
+            const status = Object.fromEntries(
+              checks.map(r => [r.name, r.conclusion || r.status])
+            );
+
+            // Find hard failures (required checks that aren't in soft-fail list)
+            const hardFail = required.filter(n => {
+              const checkStatus = status[n];
+              const isPresent = checkStatus !== undefined;
+              const isSoftFail = allowedSoftFail.includes(n);
+              const hasSucceeded = checkStatus === 'success';
+
+              // Fail if: check is missing OR (not soft-fail AND not success)
+              return !isPresent || (!isSoftFail && !hasSucceeded);
+            });
+
+            // Report results
+            if (hardFail.length > 0) {
+              core.setFailed(`Required checks failed: ${hardFail.join(', ')}`);
+            } else {
+              const softFailedChecks = allowedSoftFail.filter(n =>
+                status[n] && status[n] !== 'success'
+              );
+
+              if (softFailedChecks.length > 0) {
+                core.notice(
+                  `Required checks OK; tolerated soft-fail: ${softFailedChecks.join(', ')}`
+                );
+              } else {
+                core.notice('All required checks passed successfully');
+              }
+            }
+
+            // Generate summary
+            core.summary
+              .addHeading('Required Contexts Check', 2)
+              .addTable([
+                [
+                  { data: 'Workflow', header: true },
+                  { data: 'Status', header: true },
+                  { data: 'Policy', header: true }
+                ],
+                ...required.map(name => [
+                  name,
+                  status[name] || 'missing',
+                  allowedSoftFail.includes(name) ? 'soft-fail allowed' : 'required'
+                ])
+              ])
+              .write();
