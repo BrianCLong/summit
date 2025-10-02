@@ -1,0 +1,67 @@
+{
+  "schema_version": "2024-09-01",
+  "engine_version": "0.1.0",
+  "deterministic_run_id": "a1722d1fd487acec2c982a635d3de0f807fe99c9b00ee98228c56829c91b4e0e",
+  "policy": {
+    "name": "baseline-policy",
+    "version": "2024-08-15",
+    "digest": "27d7201862a820bd7c75197810956a6d2870b6a07e109258d3481d04acb09a0b"
+  },
+  "inputs": {
+    "history_digest": "eb1c39a396d249b81c017ba14464f178859221f93a4d89a6aba244ff218c551a",
+    "total_decisions": 5,
+    "source": "historical-log"
+  },
+  "summary": {
+    "total_decisions": 5,
+    "original_block_rate": 0.4,
+    "new_block_rate": 0.6,
+    "block_rate_delta": 0.2,
+    "original_average_latency_ms": 21.4,
+    "new_average_latency_ms": 27.2,
+    "average_latency_delta_ms": 5.8,
+    "false_negative_canary_catchers": 1
+  },
+  "rule_impacts": [
+    {
+      "rule_id": "__default__",
+      "matches": 2,
+      "block_escalations": 0,
+      "relaxations": 0,
+      "resulting_action": "allow",
+      "average_latency_ms": 19.5
+    },
+    {
+      "rule_id": "rule-payment-redact",
+      "matches": 1,
+      "block_escalations": 0,
+      "relaxations": 0,
+      "resulting_action": "redact",
+      "average_latency_ms": 38
+    },
+    {
+      "rule_id": "rule-ru-deny",
+      "matches": 1,
+      "block_escalations": 1,
+      "relaxations": 0,
+      "resulting_action": "deny",
+      "average_latency_ms": 29
+    },
+    {
+      "rule_id": "rule-us-image-transform",
+      "matches": 1,
+      "block_escalations": 0,
+      "relaxations": 0,
+      "resulting_action": "transform",
+      "average_latency_ms": 30
+    }
+  ],
+  "signatures": [
+    {
+      "key_id": "local-dev",
+      "algorithm": "ed25519",
+      "digest": "eb528ef40d025b3a40ffc2df9401679f278f9039ae0cf7dee013cda4b534f97c",
+      "signature": "nqnmxfI79qUE5sVMOua7mAm+J5BFBZfUGhdvVZCzwB91qRp9s91EwltJx3HSFs4DOgp8bDQBuu0pJ/BmUT2uBQ=="
+    }
+  ]
+}

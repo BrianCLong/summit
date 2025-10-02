@@ -1,0 +1,21 @@
+{
+  "name": "@summit/pbs-dashboard",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Static dashboard generator for PBS backtest reports",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "fs-extra": "^11.2.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "tslib": "^2.6.2",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.0"
+  }
+}
