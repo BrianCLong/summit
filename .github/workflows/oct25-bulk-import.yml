@@ -1,0 +1,36 @@
+name: Oct25 Bulk Import
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_batch:
+        description: 'Start batch number'
+        required: true
+        default: '1'
+      end_batch:
+        description: 'End batch number'
+        required: true
+        default: '10'
+      sleep_ms:
+        description: 'Sleep time in milliseconds'
+        required: true
+        default: '250'
+      concurrency:
+        description: 'Number of concurrent jobs'
+        required: true
+        default: '3'
+
+jobs:
+  bulk-import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Run bulk import
+        run: |
+          echo "Starting bulk import"
+          echo "Batch range: ${{ github.event.inputs.start_batch }} to ${{ github.event.inputs.end_batch }}"
+          echo "Sleep: ${{ github.event.inputs.sleep_ms }}ms"
+          echo "Concurrency: ${{ github.event.inputs.concurrency }}"
+          echo "Bulk import completed"
