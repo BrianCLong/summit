@@ -28,9 +28,14 @@ jobs:
         uses: actions/checkout@v3
       
       - name: Run bulk import
+        env:
+          GH_TOKEN: ${{ secrets.PAT_PROJECT }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          PROJECT_ID: "PVT_kwHOAGG3w84BEh1S"
+          START_BATCH: ${{ github.event.inputs.start_batch }}
+          END_BATCH: ${{ github.event.inputs.end_batch }}
+          SLEEP_MS: ${{ github.event.inputs.sleep_ms }}
+          CONCURRENCY: ${{ github.event.inputs.concurrency }}
         run: |
-          echo "Starting bulk import"
-          echo "Batch range: ${{ github.event.inputs.start_batch }} to ${{ github.event.inputs.end_batch }}"
-          echo "Sleep: ${{ github.event.inputs.sleep_ms }}ms"
-          echo "Concurrency: ${{ github.event.inputs.concurrency }}"
-          echo "Bulk import completed"
+          node scripts/oct25_bulk_issue_import.cjs
