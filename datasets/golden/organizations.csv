@@ -1,0 +1,4 @@
+org_id,name,category,jurisdiction,residency_zone,purpose_tags,provenance_ref
+ORG-100,Summit Global HQ,enterprise,US,us-east,operations|compliance,s3csv/organizations/2025-09-01T15:30:00Z
+ORG-200,Summit Europe GmbH,subsidiary,DE,eu-central,operations|analytics,s3csv/organizations/2025-09-01T15:30:00Z
+ORG-300,CloudHoster Partners,vendor,US,us-east,operations|security-monitoring,s3csv/organizations/2025-09-01T15:30:00Z

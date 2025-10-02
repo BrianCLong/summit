@@ -1,0 +1,235 @@
+version: 1
+updated_at: 2025-09-02T00:00:00Z
+owner: data-architecture@summit.example.com
+
+defaults:
+  timezone: UTC
+  standard_retention_days: 365
+  pii_retention_days: 30
+  review_interval_days: 90
+  legal_hold_extension_days: 0
+
+labels:
+  Person:
+    category: pii
+    retention_days: 30
+    purge_strategy: soft-delete
+    delete_after_purge_days: 7
+    legal_hold_propagation: cascade
+    purpose_tags_required:
+      - operations
+      - security-monitoring
+    residency:
+      enforced: true
+      zone: from-record
+      column: residency_zone
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.person_provenance_audit
+
+  Account:
+    category: mixed
+    retention_days: 365
+    purge_strategy: anonymize
+    anonymize_fields:
+      - pii_level
+      - risk_score
+    legal_hold_propagation: cascade
+    purpose_tags_required:
+      - security-monitoring
+    residency:
+      enforced: true
+      zone: derived
+      source: linked_person
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.account_provenance_audit
+
+  Organization:
+    category: operational
+    retention_days: 365
+    purge_strategy: retain
+    legal_hold_propagation: propagate
+    purpose_tags_required:
+      - operations
+    residency:
+      enforced: true
+      zone: from-record
+      column: residency_zone
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.organization_provenance_audit
+
+  DataAsset:
+    category: operational
+    retention_days: 365
+    purge_strategy: hard-delete
+    legal_hold_propagation: propagate
+    purpose_tags_required:
+      - compliance
+    residency:
+      enforced: true
+      zone: from-record
+      column: residency_zone
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.dataasset_provenance_audit
+
+  Event:
+    category: telemetry
+    retention_days: 365
+    purge_strategy: hard-delete
+    legal_hold_propagation: propagate
+    purpose_tags_required:
+      - security-monitoring
+    pii_scrub:
+      enabled: true
+      drop_fields:
+        - raw_payload
+    residency:
+      enforced: true
+      zone: derived
+      source: linked_assets
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.event_provenance_audit
+
+  Location:
+    category: reference
+    retention_days: 1095
+    purge_strategy: retain
+    legal_hold_propagation: none
+    purpose_tags_required:
+      - compliance
+    residency:
+      enforced: true
+      zone: global-reference
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.location_provenance_audit
+
+  SourceSystem:
+    category: reference
+    retention_days: 1095
+    purge_strategy: retain
+    legal_hold_propagation: none
+    purpose_tags_required:
+      - operations
+    residency:
+      enforced: true
+      zone: global-reference
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.sourcesystem_provenance_audit
+
+relationships:
+  MEMBER_OF:
+    retention_days: 365
+    purge_strategy: hard-delete
+    legal_hold_propagation: cascade
+    purpose_tags_required:
+      - operations
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.member_of_provenance_audit
+
+  USES:
+    retention_days: 365
+    purge_strategy: hard-delete
+    legal_hold_propagation: cascade
+    purpose_tags_required:
+      - security-monitoring
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.uses_provenance_audit
+
+  ACCOUNT_OF:
+    retention_days: 365
+    purge_strategy: retain
+    legal_hold_propagation: propagate
+    purpose_tags_required:
+      - operations
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.account_of_provenance_audit
+
+  OWNS:
+    retention_days: 365
+    purge_strategy: hard-delete
+    legal_hold_propagation: propagate
+    purpose_tags_required:
+      - compliance
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.owns_provenance_audit
+
+  HOSTED_BY:
+    retention_days: 365
+    purge_strategy: hard-delete
+    legal_hold_propagation: propagate
+    purpose_tags_required:
+      - compliance
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.hosted_by_provenance_audit
+
+  OCCURRED_AT:
+    retention_days: 365
+    purge_strategy: hard-delete
+    legal_hold_propagation: propagate
+    purpose_tags_required:
+      - security-monitoring
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.occurred_at_provenance_audit
+
+  OBSERVED_ON:
+    retention_days: 365
+    purge_strategy: hard-delete
+    legal_hold_propagation: propagate
+    purpose_tags_required:
+      - security-monitoring
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.observed_on_provenance_audit
+
+  TRIGGERED:
+    retention_days: 365
+    purge_strategy: hard-delete
+    legal_hold_propagation: cascade
+    purpose_tags_required:
+      - security-monitoring
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.triggered_provenance_audit
+
+  EMITTED_EVENT:
+    retention_days: 1095
+    purge_strategy: retain
+    legal_hold_propagation: propagate
+    purpose_tags_required:
+      - operations
+    lineage:
+      provenance_property: provenance_ref
+      audit_log: neo4j.emitted_event_provenance_audit
+
+legal_holds:
+  propagation_rules:
+    cascade: [Person, Account, MEMBER_OF, USES, TRIGGERED]
+    propagate: [Organization, Account, DataAsset, OWNS, HOSTED_BY, OCCURRED_AT, OBSERVED_ON]
+
+residency:
+  zones:
+    us-east:
+      storage_endpoint: neo4j://cluster.us-east.summit
+      backup_bucket: s3://summit-us-east-backup
+    eu-central:
+      storage_endpoint: neo4j://cluster.eu-central.summit
+      backup_bucket: s3://summit-eu-central-backup
+    ap-southeast:
+      storage_endpoint: neo4j://cluster.ap-southeast.summit
+      backup_bucket: s3://summit-ap-southeast-backup
+    global-reference:
+      storage_endpoint: neo4j://cluster.global.summit
+      backup_bucket: s3://summit-global-reference
+

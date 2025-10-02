@@ -1,0 +1,4 @@
+account_id,org_id,purpose_tags,provenance_ref
+ACCT-9001,ORG-100,operations|security-monitoring,s3csv/relationships/2025-09-01T15:30:00Z
+ACCT-9002,ORG-100,operations|analytics,s3csv/relationships/2025-09-01T15:30:00Z
+ACCT-9003,ORG-200,operations|security-monitoring,s3csv/relationships/2025-09-01T15:30:00Z
