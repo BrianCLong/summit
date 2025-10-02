@@ -15,27 +15,91 @@ on:
         description: 'Sleep time in milliseconds'
         required: true
         default: '250'
-      concurrency:
-        description: 'Number of concurrent jobs'
+      max_parallel:
+        description: 'Maximum number of parallel jobs'
         required: true
         default: '3'
 
+concurrency:
+  group: bulk-import-${{ github.run_id }}
+  cancel-in-progress: false
+
 jobs:
-  bulk-import:
+  setup:
+    name: Setup batch matrix
     runs-on: ubuntu-latest
+    outputs:
+      batches: ${{ steps.generate.outputs.batches }}
+    steps:
+      - name: Generate batch matrix
+        id: generate
+        run: |
+          start=${{ github.event.inputs.start_batch }}
+          end=${{ github.event.inputs.end_batch }}
+          batches=$(seq $start $end | jq -R . | jq -s -c .)
+          echo "batches=$batches" >> $GITHUB_OUTPUT
+
+  bulk-import:
+    name: Import batch ${{ matrix.batch }}
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: ${{ fromJson(github.event.inputs.max_parallel) }}
+      fail-fast: false
+      matrix:
+        batch: ${{ fromJson(needs.setup.outputs.batches) }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
-      - name: Run bulk import
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run bulk import for batch ${{ matrix.batch }}
         env:
           GH_TOKEN: ${{ secrets.PAT_PROJECT }}
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
           PROJECT_ID: "PVT_kwHOAGG3w84BEh1S"
-          START_BATCH: ${{ github.event.inputs.start_batch }}
-          END_BATCH: ${{ github.event.inputs.end_batch }}
+          BATCH_NUMBER: ${{ matrix.batch }}
           SLEEP_MS: ${{ github.event.inputs.sleep_ms }}
-          CONCURRENCY: ${{ github.event.inputs.concurrency }}
         run: |
-          node scripts/oct25_bulk_issue_import.cjs
+          echo "Processing batch ${{ matrix.batch }}..."
+          if [ -f "scripts/oct25_bulk_issue_import.cjs" ]; then
+            node scripts/oct25_bulk_issue_import.cjs
+          else
+            echo "Warning: scripts/oct25_bulk_issue_import.cjs not found"
+            echo "Please ensure the import script exists in the repository"
+            exit 1
+          fi
+      
+      - name: Upload batch results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: batch-${{ matrix.batch }}-results
+          path: |
+            logs/
+            results/
+          retention-days: 7
+
+  summary:
+    name: Import summary
+    needs: bulk-import
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "### Bulk Import Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Start Batch: ${{ github.event.inputs.start_batch }}" >> $GITHUB_STEP_SUMMARY
+          echo "- End Batch: ${{ github.event.inputs.end_batch }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Max Parallel: ${{ github.event.inputs.max_parallel }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Sleep (ms): ${{ github.event.inputs.sleep_ms }}" >> $GITHUB_STEP_SUMMARY
