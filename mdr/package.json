@@ -1,0 +1,28 @@
+{
+  "name": "mdr",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Metric Definition Registry for versioned KPI specs and SQL compilation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "mdr": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "compile": "ts-node src/cli.ts compile",
+    "diff": "ts-node src/cli.ts diff",
+    "test": "ts-node src/cli.ts test"
+  },
+  "dependencies": {
+    "diff": "^5.1.0",
+    "yaml": "^2.4.5"
+  },
+  "devDependencies": {
+    "@types/diff": "^5.0.8",
+    "@types/node": "^20.11.19",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
+  }
+}
