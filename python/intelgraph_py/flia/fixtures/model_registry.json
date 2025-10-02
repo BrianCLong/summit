@@ -1,0 +1,118 @@
+{
+  "models": [
+    {
+      "id": "model:marketing_segmentation",
+      "name": "marketing_segmentation",
+      "owners": ["growth-ml"],
+      "depends_on": ["feature:user_profile.email_domain"],
+      "metrics": ["segment_purity", "coverage_rate"],
+      "tests": [
+        {
+          "id": "tests::model_marketing_segmentation",
+          "description": "MLflow validation for marketing segmentation",
+          "handler": "run_pytest",
+          "args": ["tests/models/test_marketing_segmentation.py"]
+        }
+      ],
+      "backfills": [
+        {
+          "id": "backfill::model_marketing_segmentation",
+          "description": "Refresh marketing segment assignments",
+          "handler": "backfill_pipeline",
+          "args": ["model_marketing_segmentation"]
+        }
+      ],
+      "cache_invalidation": [
+        {
+          "id": "cache::segment_store",
+          "description": "Purge marketing segment store",
+          "handler": "invalidate_cache",
+          "args": ["segments:store"]
+        }
+      ]
+    },
+    {
+      "id": "model:churn_predictor",
+      "name": "churn_predictor",
+      "owners": ["retention-ml"],
+      "depends_on": [
+        "feature:user_profile.email_domain",
+        "feature:session.engagement_7d",
+        "model:marketing_segmentation"
+      ],
+      "metrics": ["roc_auc", "f1"],
+      "tests": [
+        {
+          "id": "tests::model_churn_predictor",
+          "description": "Regression tests for churn model",
+          "handler": "run_pytest",
+          "args": ["tests/models/test_churn_predictor.py"]
+        }
+      ],
+      "backfills": [
+        {
+          "id": "backfill::model_churn_predictor",
+          "description": "Recompute churn training snapshots",
+          "handler": "backfill_pipeline",
+          "args": ["model_churn_predictor"]
+        }
+      ],
+      "cache_invalidation": [
+        {
+          "id": "cache::churn_scores",
+          "description": "Drop cached churn scores",
+          "handler": "invalidate_cache",
+          "args": ["churn:scores"]
+        }
+      ]
+    },
+    {
+      "id": "model:customer_lifetime_value",
+      "name": "customer_lifetime_value",
+      "owners": ["finance-ml"],
+      "depends_on": ["model:churn_predictor", "feature:session.engagement_7d"],
+      "metrics": ["clv_mae"],
+      "tests": [
+        {
+          "id": "tests::model_customer_lifetime_value",
+          "description": "Sanity checks for CLV model",
+          "handler": "run_pytest",
+          "args": ["tests/models/test_customer_lifetime_value.py"]
+        }
+      ],
+      "backfills": [
+        {
+          "id": "backfill::model_customer_lifetime_value",
+          "description": "Refresh CLV inference tables",
+          "handler": "backfill_pipeline",
+          "args": ["model_customer_lifetime_value"]
+        }
+      ],
+      "cache_invalidation": []
+    },
+    {
+      "id": "model:revenue_forecaster",
+      "name": "revenue_forecaster",
+      "owners": ["finance-ml"],
+      "depends_on": ["feature:session.net_spend"],
+      "metrics": ["mape"],
+      "tests": [
+        {
+          "id": "tests::model_revenue_forecaster",
+          "description": "Forecast sanity checks",
+          "handler": "run_pytest",
+          "args": ["tests/models/test_revenue_forecaster.py"]
+        }
+      ],
+      "backfills": [
+        {
+          "id": "backfill::model_revenue_forecaster",
+          "description": "Rebuild revenue training dataset",
+          "handler": "backfill_pipeline",
+          "args": ["model_revenue_forecaster"]
+        }
+      ],
+      "cache_invalidation": []
+    }
+  ]
+}
