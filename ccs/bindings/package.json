@@ -1,0 +1,18 @@
+{
+  "name": "@summit/ccs-bindings",
+  "version": "0.1.0",
+  "description": "TypeScript bindings for the CCS cohort sampler",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "ts-node --transpile-only test/replay.test.ts"
+  },
+  "dependencies": {
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
+  }
+}
