@@ -1,0 +1,29 @@
+listenAddr: ":8080"
+signingKey: "change-me"
+providers:
+  aws:
+    name: "AWS S3"
+    pricePerGiB: 0.09
+  gcp:
+    name: "GCP Storage"
+    pricePerGiB: 0.085
+  azure:
+    name: "Azure Blob"
+    pricePerGiB: 0.087
+policies:
+  - id: "restricted-us"
+    description: "Restricted data to US buckets"
+    dataClasses: ["restricted", "confidential"]
+    destinations:
+      - provider: "aws"
+        bucket: "corp-restricted"
+        region: "us-east-1"
+      - provider: "azure"
+        bucket: "corp-restricted"
+        region: "eastus"
+    maxBytes: 107374182400 # 100 GiB
+    maxCost: 500
+    rateLimit:
+      bytesPerSecond: 5242880 # 5 MiB/s
+      burstBytes: 10485760
+    windowSeconds: 86400
