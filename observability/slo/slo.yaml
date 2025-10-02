@@ -1,7 +1,72 @@
 services:
-  web:
+  api-gateway:
+    description: GraphQL and REST edge
     objective: 99.9
     window: 30d
+    budgeting_method: occurrences
     indicator:
-      errors: sum(rate(http_requests_total{code=~"5..",job="web"}[5m]))
-      total: sum(rate(http_requests_total{job="web"}[5m]))
+      availability:
+        good: sum(rate(http_requests_total{service="api-gateway",status!~"5.."}[5m]))
+        total: sum(rate(http_requests_total{service="api-gateway"}[5m]))
+      latency_p99:
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum by (le) (rate(http_request_duration_seconds_bucket{service="api-gateway"}[5m]))
+          )
+        threshold_ms: 450
+    error_budget:
+      monthly_budget_fraction: 0.001
+      burn_alerts:
+        fast_burn_window: 1h
+        slow_burn_window: 6h
+  ingest-pipeline:
+    description: Streaming + batch ingestion
+    objective: 99.5
+    window: 30d
+    budgeting_method: occurrences
+    indicator:
+      availability:
+        good: sum(rate(ingest_batch_processed_total{status="success"}[5m]))
+        total: sum(rate(ingest_batch_processed_total[5m]))
+      lag_seconds_p95:
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(ingest_backlog_lag_seconds_bucket[5m]))
+          )
+        threshold_s: 120
+      throughput_per_min:
+        expr: sum(rate(ingest_records_total[1m]))
+        min: 800
+    error_budget:
+      monthly_budget_fraction: 0.005
+      burn_alerts:
+        fast_burn_window: 30m
+        slow_burn_window: 12h
+  llm-adapter:
+    description: Downstream LLM proxy requests
+    objective: 99.0
+    window: 30d
+    budgeting_method: occurrences
+    indicator:
+      availability:
+        good: sum(rate(llm_proxy_requests_total{status="ok"}[5m]))
+        total: sum(rate(llm_proxy_requests_total[5m]))
+      provider_latency_p95:
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (provider, le) (rate(llm_provider_request_duration_seconds_bucket[5m]))
+          )
+        threshold_ms: 2500
+    error_budget:
+      monthly_budget_fraction: 0.01
+      burn_alerts:
+        fast_burn_window: 2h
+        slow_burn_window: 24h
+
+shared_error_budget_policies:
+  fast_burn_factor: 14.4   # Spend 2% budget in 1h equivalent
+  slow_burn_factor: 6      # Spend 5% budget in 6h equivalent
+

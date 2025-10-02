@@ -1,99 +1,180 @@
-# Prometheus recording + alerting rules for SLO error-budget burn
-# NOTE: Replace metric names/labels to match your exporters.
+# Prometheus recording & alerting rules for Summit SLO guardrails
+# Ensure metric names are aligned with exporters instrumenting the services.
 
 groups:
-  - name: slo-burn
+  - name: slo-recordings
     interval: 30s
     rules:
-      # Define error ratio over rolling windows for each expert/tier
-      - record: slo:error_ratio:rate5m
+      - record: slo:api:error_ratio:5m
         expr: |
-          1 - (sum by (expert, tenant_tier) (rate(conductor_request_success_total[5m]))
-               /
-               sum by (expert, tenant_tier) (rate(conductor_request_total[5m])))
-
-      - record: slo:error_ratio:rate30m
+          1 - (
+            sum(rate(http_requests_total{service="api-gateway",status!~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{service="api-gateway"}[5m]))
+          )
+      - record: slo:api:error_ratio:30m
         expr: |
-          1 - (sum by (expert, tenant_tier) (rate(conductor_request_success_total[30m]))
-               /
-               sum by (expert, tenant_tier) (rate(conductor_request_total[30m])))
-
-      - record: slo:error_ratio:rate1h
+          1 - (
+            sum(rate(http_requests_total{service="api-gateway",status!~"5.."}[30m]))
+            /
+            sum(rate(http_requests_total{service="api-gateway"}[30m]))
+          )
+      - record: slo:ingest:error_ratio:5m
         expr: |
-          1 - (sum by (expert, tenant_tier) (rate(conductor_request_success_total[1h]))
-               /
-               sum by (expert, tenant_tier) (rate(conductor_request_total[1h])))
-
-      - record: slo:error_ratio:rate6h
+          1 - (
+            sum(rate(ingest_batch_processed_total{status="success"}[5m]))
+            /
+            sum(rate(ingest_batch_processed_total[5m]))
+          )
+      - record: slo:ingest:error_ratio:2h
         expr: |
-          1 - (sum by (expert, tenant_tier) (rate(conductor_request_success_total[6h]))
-               /
-               sum by (expert, tenant_tier) (rate(conductor_request_total[6h])))
+          1 - (
+            sum(rate(ingest_batch_processed_total{status="success"}[2h]))
+            /
+            sum(rate(ingest_batch_processed_total[2h]))
+          )
+      - record: slo:llm:error_ratio:30m
+        expr: |
+          1 - (
+            sum(rate(llm_proxy_requests_total{status="ok"}[30m]))
+            /
+            sum(rate(llm_proxy_requests_total[30m]))
+          )
+      - record: slo:api:target_error_ratio
+        expr: 0.001
+      - record: slo:ingest:target_error_ratio
+        expr: 0.005
+      - record: slo:llm:target_error_ratio
+        expr: 0.01
+      - record: slo:api:latency_p99
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum by (le) (rate(http_request_duration_seconds_bucket{service="api-gateway"}[5m]))
+          )
+      - record: slo:ingest:lag_p95
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(ingest_backlog_lag_seconds_bucket[5m]))
+          )
+      - record: slo:ingest:throughput_per_min
+        expr: sum(rate(ingest_records_total[1m]))
 
   - name: slo-burn-alerts
     interval: 30s
     rules:
-      # Fast burn (page) — 2% budget in 1h or 5% in 6h equivalent
-      - alert: SLOErrorBudgetBurnFast
+      - alert: APIAvailabilityFastBurn
         expr: |
-          (slo:error_ratio:rate5m > on(expert, tenant_tier) group_left slo:target_error_ratio)
+          (slo:api:error_ratio:5m > 14.4 * slo:api:target_error_ratio)
           and
-          (slo:error_ratio:rate1h > on(expert, tenant_tier) group_left slo:target_error_ratio)
+          (slo:api:error_ratio:30m > 14.4 * slo:api:target_error_ratio)
         for: 10m
         labels:
           severity: page
+          service: api
         annotations:
-          summary: 'Fast SLO burn for {{ $labels.expert }} ({{ $labels.tenant_tier }})'
+          summary: 'API SLO budget burning fast (>14.4x)'
           description: |
-            Error ratio breaching target over 5m and 1h. Investigate acute incidents, rollbacks, or hot tenants.
-          runbook_url: 'https://docs.example.com/runbooks/slo-fast-burn.html'
-
-      # Slow burn (ticket) — 1% budget in 24h equivalent
-      - alert: SLOErrorBudgetBurnSlow
+            The API gateway consumed the 30-day error budget too quickly.
+            Investigate recent deploys or upstream dependencies before continuing the rollout.
+          runbook_url: 'https://docs.summit.example.com/runbooks/api-5xx-burst'
+      - alert: APIAvailabilitySlowBurn
         expr: |
-          (slo:error_ratio:rate30m > on(expert, tenant_tier) group_left slo:target_error_ratio)
-          and
-          (slo:error_ratio:rate6h > on(expert, tenant_tier) group_left slo:target_error_ratio)
+          (slo:api:error_ratio:30m > 6 * slo:api:target_error_ratio)
         for: 2h
         labels:
           severity: ticket
+          service: api
         annotations:
-          summary: 'Slow SLO burn for {{ $labels.expert }} ({{ $labels.tenant_tier }})'
+          summary: 'API SLO slow burn exceeding 6x budget'
           description: |
-            Sustained burn above target. Plan remediation; consider feature freeze for affected scope.
-          runbook_url: 'https://docs.example.com/runbooks/slo-slow-burn.html'
-
-  - name: slo-targets
-    rules:
-      # Target error ratios per expert/tier derived from SLOs
-      # For example, rag_retrieval with 99% SLO => target_error_ratio=0.01
-      # Provision these as static metrics via the pushgateway or sidecar exporter if desired.
-      # This is a placeholder vector to enable rule wiring; replace with your target source.
-      - record: slo:target_error_ratio
+            Sustained degradation over the past 30 minutes. Coordinate with feature teams and
+            consider halting promotions to production.
+          runbook_url: 'https://docs.summit.example.com/runbooks/api-5xx-burst'
+      - alert: IngestAvailabilityFastBurn
         expr: |
-          0.01
+          (slo:ingest:error_ratio:5m > 12 * slo:ingest:target_error_ratio)
+          and
+          (slo:ingest:error_ratio:2h > 12 * slo:ingest:target_error_ratio)
+        for: 15m
         labels:
-          expert: 'rag_retrieval'
-          tenant_tier: 'gold'
+          severity: page
+          service: ingest
+        annotations:
+          summary: 'Ingest pipeline SLO fast burn'
+          description: |
+            Ingestion error ratio is above the 12x burn threshold. Backlogs likely to grow rapidly.
+          runbook_url: 'https://docs.summit.example.com/runbooks/ingest-backlog'
+      - alert: IngestAvailabilitySlowBurn
+        expr: |
+          (slo:ingest:error_ratio:2h > 6 * slo:ingest:target_error_ratio)
+        for: 4h
+        labels:
+          severity: warn
+          service: ingest
+        annotations:
+          summary: 'Ingest pipeline slow burn (>6x budget)'
+          description: |
+            Moderate degradation observed over the last 2h. Investigate backlog and scaling levers.
+          runbook_url: 'https://docs.summit.example.com/runbooks/ingest-backlog'
+      - alert: LLMBurnFast
+        expr: |
+          (slo:llm:error_ratio:30m > 10 * slo:llm:target_error_ratio)
+        for: 30m
+        labels:
+          severity: warn
+          service: llm
+        annotations:
+          summary: 'LLM adapter error budget burning fast'
+          description: |
+            Vendor responses exceeding error budget. Consider traffic shifting or provider failover.
+          runbook_url: 'https://docs.summit.example.com/runbooks/provider-failover'
+      - alert: APIHighLatencyP99
+        expr: slo:api:latency_p99 > 0.45
+        for: 10m
+        labels:
+          severity: page
+          service: api
+        annotations:
+          summary: 'API p99 latency above 450ms'
+          description: 'P99 latency breached target for 10m; evaluate canary rollout or upstream dependencies.'
+          runbook_url: 'https://docs.summit.example.com/runbooks/api-5xx-burst'
+      - alert: IngestLagBreaching
+        expr: slo:ingest:lag_p95 > 120
+        for: 15m
+        labels:
+          severity: page
+          service: ingest
+        annotations:
+          summary: 'Ingest backlog lag above 120s'
+          description: 'Lag exceeds agreed guardrail; auto rollback recommended for active deploys.'
+          runbook_url: 'https://docs.summit.example.com/runbooks/ingest-backlog'
+      - alert: IngestThroughputDrop
+        expr: slo:ingest:throughput_per_min < 800
+        for: 15m
+        labels:
+          severity: warn
+          service: ingest
+        annotations:
+          summary: 'Ingest throughput fell below 800 rec/min'
+          description: 'Check Kafka, Kinesis, and worker autoscaling parameters.'
+          runbook_url: 'https://docs.summit.example.com/runbooks/ingest-backlog'
 
-  - name: tenant-cost-guards
+  - name: cost-guardrails
     interval: 1m
     rules:
-      - record: tenant_cost_rate
-        expr: |
-          sum by (tenant_id) (rate(maestro_cost_total_usd[1h])) # Assuming a metric for total cost
+      - record: cost:platform:usage_ratio
+        expr: sum(billing_monthly_spend_usd{scope="platform"}) / sum(billing_monthly_budget_usd{scope="platform"})
+      - alert: CostBudgetAtRisk
+        expr: cost:platform:usage_ratio >= 0.8
+        for: 30m
         labels:
-          unit: usd_per_hour
-
-      - alert: TenantCostExceedsBudget
-        expr: |
-          tenant_cost_rate > (0.8 * tenant_budget_usd) # Assuming tenant_budget_usd is a metric
-        for: 2h
-        labels:
-          severity: critical
-          alert_type: cost_guard
+          severity: warn
+          service: cost
         annotations:
-          summary: 'Tenant {{ $labels.tenant_id }} cost exceeds 80% of budget'
-          description: 'Current cost rate for tenant {{ $labels.tenant_id }} is {{ $value }} USD/hour, exceeding 80% of their allocated budget.'
-          runbook_url: 'https://docs.example.com/runbooks/tenant-cost-exceeds-budget.html'
-          grafana_deep_link: 'https://grafana.example.com/d/budget-panel?var-tenant={{ $labels.tenant_id }}'
+          summary: 'Platform spend above 80% of monthly budget'
+          description: |
+            Billing metrics show the platform will exceed 80% of budget within the month. Track in GitHub issue and
+            evaluate savings levers.
+          runbook_url: 'https://docs.summit.example.com/runbooks/cost-guardrails'
