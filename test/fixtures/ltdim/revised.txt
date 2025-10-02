@@ -1,0 +1,17 @@
+Clause 1: Scope
+These Data Processing Terms govern the handling of customer data on the IntelGraph platform.
+
+Clause 2: Data Usage
+We use customer data solely to provide contracted services and to improve threat intelligence relevancy.
+
+Clause 3: Cross-Border Transfers
+Cross-border transfers of personal data outside the EU or EEA are prohibited except where mandated by an EU supervisory authority. Processing must remain within EU sovereign regions with geo-fenced routing and logging.
+
+Clause 4: Data Retention
+We retain personal data for 90 days to support customer investigations while still meeting legal obligations.
+
+Clause 5: Incident Reporting
+We notify the customer of any personal data incident without undue delay and no later than twenty-four (24) hours after confirmation.
+
+Clause 6: AI Transparency
+We will provide AI decision transparency packs, maintain audit trails for automated processing, and make audit results available on a quarterly cadence.
