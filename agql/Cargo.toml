@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "agql-core",
+    "agql-server",
+    "agql-cli"
+]
+resolver = "2"
