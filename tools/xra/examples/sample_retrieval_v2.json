@@ -1,0 +1,128 @@
+{
+  "version": "v2",
+  "queries": [
+    {
+      "id": "q1",
+      "query": "renewable energy storage",
+      "results": [
+        {
+          "doc_id": "d1",
+          "rank": 1,
+          "score": 12.3,
+          "group": "majority",
+          "features": {"relevance": 0.94, "authority": 0.84, "recency": 0.38}
+        },
+        {
+          "doc_id": "d3",
+          "rank": 2,
+          "score": 11.5,
+          "group": "majority",
+          "features": {"relevance": 0.88, "authority": 0.80, "recency": 0.34}
+        },
+        {
+          "doc_id": "d5",
+          "rank": 3,
+          "score": 10.6,
+          "group": "majority",
+          "features": {"relevance": 0.84, "authority": 0.76, "recency": 0.31}
+        },
+        {
+          "doc_id": "d2",
+          "rank": 4,
+          "score": 9.8,
+          "group": "minority",
+          "features": {"relevance": 0.80, "authority": 0.71, "recency": 0.49}
+        },
+        {
+          "doc_id": "d4",
+          "rank": 5,
+          "score": 9.0,
+          "group": "minority",
+          "features": {"relevance": 0.74, "authority": 0.66, "recency": 0.55}
+        }
+      ]
+    },
+    {
+      "id": "q2",
+      "query": "ai fairness overview",
+      "results": [
+        {
+          "doc_id": "d7",
+          "rank": 1,
+          "score": 13.2,
+          "group": "majority",
+          "features": {"relevance": 0.96, "authority": 0.86, "recency": 0.45}
+        },
+        {
+          "doc_id": "d6",
+          "rank": 2,
+          "score": 12.5,
+          "group": "minority",
+          "features": {"relevance": 0.93, "authority": 0.84, "recency": 0.53}
+        },
+        {
+          "doc_id": "d9",
+          "rank": 3,
+          "score": 11.9,
+          "group": "majority",
+          "features": {"relevance": 0.87, "authority": 0.82, "recency": 0.42}
+        },
+        {
+          "doc_id": "d8",
+          "rank": 4,
+          "score": 11.0,
+          "group": "minority",
+          "features": {"relevance": 0.85, "authority": 0.77, "recency": 0.57}
+        },
+        {
+          "doc_id": "d10",
+          "rank": 5,
+          "score": 10.4,
+          "group": "minority",
+          "features": {"relevance": 0.83, "authority": 0.73, "recency": 0.50}
+        }
+      ]
+    },
+    {
+      "id": "q3",
+      "query": "climate policy briefing",
+      "results": [
+        {
+          "doc_id": "d11",
+          "rank": 1,
+          "score": 12.2,
+          "group": "majority",
+          "features": {"relevance": 0.93, "authority": 0.88, "recency": 0.35}
+        },
+        {
+          "doc_id": "d13",
+          "rank": 2,
+          "score": 11.6,
+          "group": "majority",
+          "features": {"relevance": 0.88, "authority": 0.81, "recency": 0.33}
+        },
+        {
+          "doc_id": "d15",
+          "rank": 3,
+          "score": 10.9,
+          "group": "majority",
+          "features": {"relevance": 0.84, "authority": 0.75, "recency": 0.30}
+        },
+        {
+          "doc_id": "d12",
+          "rank": 4,
+          "score": 10.2,
+          "group": "minority",
+          "features": {"relevance": 0.81, "authority": 0.73, "recency": 0.47}
+        },
+        {
+          "doc_id": "d14",
+          "rank": 5,
+          "score": 9.5,
+          "group": "minority",
+          "features": {"relevance": 0.77, "authority": 0.69, "recency": 0.51}
+        }
+      ]
+    }
+  ]
+}
