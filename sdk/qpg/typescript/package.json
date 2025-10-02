@@ -1,0 +1,17 @@
+{
+  "name": "@summit/qpg-client",
+  "version": "0.1.0",
+  "description": "TypeScript client for the Query-Time Pseudonymization Gateway",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "keywords": ["qpg", "tokenization", "pseudonymization"],
+  "author": "Summit",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

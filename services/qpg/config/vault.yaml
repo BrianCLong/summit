@@ -1,0 +1,8 @@
+threshold: 2
+shares:
+  - id: ops
+    hash: 677509799af78b2efa2f2af71d0f906e0a0c50c048efd3b515625f788e92b99a
+  - id: risk
+    hash: 7a3d637bc601f7000cc2c33141c8c8a7554e02e319fa8b293a0c88c613b77620
+  - id: privacy
+    hash: 36c2c0e2d54b8df7e21c9f9afc50a206f2595fc23531fe933e4788e699e0e59d
