@@ -373,8 +373,11 @@ async function main() {
       process.exit(1);
     }
 
-    const batches = fs
-      .readdirSync(BATCH_DIR)
+    console.log(`DEBUG: BATCH_DIR: ${BATCH_DIR}`);
+    const rawBatches = fs.readdirSync(BATCH_DIR);
+    console.log(`DEBUG: Raw batches in directory: ${JSON.stringify(rawBatches)}`);
+
+    const batches = rawBatches
       .filter((f) => /^batch_\d+\.json$/.test(f))
       .sort((a, b) => a.localeCompare(b));
 
