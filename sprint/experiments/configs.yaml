@@ -1,14 +1,16 @@
 run_id: "baseline-$(date +%Y%m%d)-001"
 seed: 1337
 targets:
-  - name: "api-latency"
+  - name: api-latency
     cmd: ["node", "scripts/bench_api.js"]
     metrics: ["latency_ms_p50","latency_ms_p95","throughput_rps","error_rate"]
-    warmup_s: 10
-    duration_s: 60
-  - name: "graph-query-neo4j"
+    warmup_s: 5
+    duration_s: 30
+  - name: graph-query-neo4j
     cmd: ["node", "scripts/bench_graph.js", "--query", "MATCH (n)-[r]->(m) RETURN count(r) LIMIT 1000"]
-    metrics: ["latency_ms_p95","rows_per_s"]
+    metrics: ["latency_ms_p95","latency_ms_p99","iters"]
+    warmup_s: 5
+    duration_s: 30
 ablations:
   - name: "cache_on_vs_off"
     vary: { CACHE_ENABLED: [false, true] }
