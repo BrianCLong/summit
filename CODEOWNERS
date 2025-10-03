@@ -1,48 +1,40 @@
-# CODEOWNERS file for IntelGraph Platform
-# This file defines code ownership and auto-assigns reviewers for different parts of the codebase
+# IntelGraph Platform - CODEOWNERS
 
-# Global fallback - at least one approval required
-* @BrianCLong
+# This file maps files and directories to responsible teams/maintainers
 
-# Client/Frontend - React, UI, UX
-client/** @BrianCLong
-*.tsx @BrianCLong  
-*.jsx @BrianCLong
+# Core platform components
+/sprint/** @brianclong
+/scripts/** @brianclong
+/server/** @brianclong
+/client/** @brianclong
+/api/** @brianclong
 
-# Server/Backend - Node.js, GraphQL, APIs
-server/** @BrianCLong
-*.ts @BrianCLong
+# Documentation and README files
+/README.md @brianclong
+/docs/** @brianclong
+/LICENSE @brianclong
+/CONTRIBUTING.md @brianclong
 
-# Database & Schema
-server/src/db/** @BrianCLong
-server/src/graphql/schemas/** @BrianCLong
-**/migrations/** @BrianCLong
+# CI/CD and deployment configurations
+/.github/workflows/** @brianclong
+/docker-compose*.yml @brianclong
+/Dockerfile* @brianclong
+/Makefile @brianclong
+/package.json @brianclong
 
-# AI/ML Services - Require AI domain expertise
-server/src/services/aiAnalysis.ts @BrianCLong
-server/src/graphql/resolvers/aiAnalysis.ts @BrianCLong
-client/src/components/ai/** @BrianCLong
+# Compliance and security
+/sprint/compliance/** @brianclong
+/sprint/ip/** @brianclong
+/SECURITY.md @brianclong
 
-# Security & Authentication - Require security review
-server/src/lib/auth.ts @BrianCLong
-**/auth/** @BrianCLong
-**/security/** @BrianCLong
+# Benchmarks and performance
+/sprint/benchmark/** @brianclong
+/sprint/experiments/** @brianclong
 
-# Infrastructure & DevOps
-.github/** @BrianCLong
-docker* @BrianCLong
-*.yml @BrianCLong
-*.yaml @BrianCLong
+# Database configurations
+/db/** @brianclong
+/migrations/** @brianclong
 
-# Configuration files
-package.json @BrianCLong
-*.config.* @BrianCLong
-.env* @BrianCLong
-
-# Documentation - Anyone can review
-*.md
-docs/** 
-
-# High-impact files requiring architect approval
-CODEOWNERS @BrianCLong
-.github/workflows/** @BrianCLong
+# Testing
+/__tests__/** @brianclong
+/test/** @brianclong
