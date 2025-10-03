@@ -1,10 +1,9 @@
 name: Error Budget Monitoring
 
 on:
-  # Disabled scheduled trigger until production environment is configured
-  # schedule:
-  #   # Every 15 minutes during business hours
-  #   - cron: '*/15 8-18 * * 1-5'
+  schedule:
+    # Every 15 minutes during business hours (CT)
+    - cron: '*/15 14-24 * * 1-5'  # 08:00-18:00 CT (UTC-6)
   workflow_dispatch:
 
 permissions:
@@ -13,11 +12,12 @@ permissions:
 
 env:
   GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+  PROM_URL: ${{ secrets.PROM_URL }}
+  PROM_BASIC_AUTH: ${{ secrets.PROM_BASIC_AUTH }}
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 jobs:
   error-budget-check:
-    if: false  # Belt-and-suspenders guard during stabilization
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,9 +35,18 @@ jobs:
           P95_THRESHOLD="1.5"  # 1.5 seconds
           ERROR_RATE_THRESHOLD="0.5"  # 0.5%
 
-          # Simulate metrics check (replace with actual Prometheus query)
-          CURRENT_P95="1.2"
-          CURRENT_ERROR_RATE="0.3"
+          # PromQL: GraphQL P95 latency over 5m window
+          P95_QUERY='histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket[5m])) by (le))'
+          ERROR_QUERY='sum(rate(graphql_errors_total[5m])) / sum(rate(graphql_requests_total[5m])) * 100'
+
+          # Query Prometheus
+          CURRENT_P95=$(curl -s -H "Authorization: Basic ${PROM_BASIC_AUTH}" \
+            "${PROM_URL}/api/v1/query?query=${P95_QUERY}" | \
+            jq -r '.data.result[0].value[1] // "0"')
+
+          CURRENT_ERROR_RATE=$(curl -s -H "Authorization: Basic ${PROM_BASIC_AUTH}" \
+            "${PROM_URL}/api/v1/query?query=${ERROR_QUERY}" | \
+            jq -r '.data.result[0].value[1] // "0"')
 
           echo "graphql-p95=${CURRENT_P95}" >> $GITHUB_OUTPUT
           echo "graphql-error-rate=${CURRENT_ERROR_RATE}" >> $GITHUB_OUTPUT

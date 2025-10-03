@@ -59,52 +59,111 @@ jobs:
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
 
-    - name: Export Release Captain metrics
-      run: |
-        echo "📊 Exporting Release Captain metrics..."
-
-        # Check if metrics exporter exists, if not create a stub
-        if [[ ! -f ".github/scripts/metrics-exporter.cjs" ]]; then
-          echo "⚠️ Metrics exporter not found, creating stub"
-          mkdir -p .github/scripts
-          cat > .github/scripts/metrics-exporter.cjs << 'EOF'
-#!/usr/bin/env node
-// Stub metrics exporter
-const fs = require('fs');
-const metrics = `# HELP rc_workflow_runs_total Total workflow runs
-# TYPE rc_workflow_runs_total counter
-rc_workflow_runs_total 100
-# HELP rc_deploy_health_ratio Deploy health ratio
-# TYPE rc_deploy_health_ratio gauge
-rc_deploy_health_ratio 0.99
-# HELP rc_circuit_state Circuit breaker state
-# TYPE rc_circuit_state gauge
-rc_circuit_state 0
-`;
-fs.writeFileSync('/tmp/release-captain-metrics.prom', metrics);
-console.log('✅ Stub metrics generated');
-EOF
-          chmod +x .github/scripts/metrics-exporter.cjs
-        fi
-
-        # Export metrics based on input type
-        export_type="${{ inputs.export_type || 'all' }}"
-
-        case "$export_type" in
-          "health")
-            echo "🏥 Exporting health metrics only"
-            node .github/scripts/metrics-exporter.cjs health
-            ;;
-          "all"|*)
-            echo "📈 Exporting all metrics"
-            node .github/scripts/metrics-exporter.cjs export
-            ;;
-        esac
-
-        echo "✅ Metrics export completed"
+    - name: Export Maestro & Summit metrics
+      uses: actions/github-script@v7
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITHUB_REPOSITORY: ${{ github.repository }}
+        EXPORT_TYPE: ${{ inputs.export_type || 'all' }}
+      with:
+        script: |
+          const fs = require('fs');
+
+          console.log('📊 Exporting Maestro & Summit metrics...');
+
+          // Fetch recent workflow runs
+          const { data: workflows } = await github.rest.actions.listWorkflowRunsForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            per_page: 100,
+            created: `>${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()}`
+          });
+
+          // Calculate metrics
+          const totalRuns = workflows.workflow_runs.length;
+          const successfulRuns = workflows.workflow_runs.filter(r => r.conclusion === 'success').length;
+          const failedRuns = workflows.workflow_runs.filter(r => r.conclusion === 'failure').length;
+          const healthRatio = totalRuns > 0 ? (successfulRuns / totalRuns).toFixed(4) : '1.0000';
+
+          // Fetch recent deployments (via deployment API)
+          let deployCount = 0;
+          let deploySuccessCount = 0;
+          try {
+            const { data: deployments } = await github.rest.repos.listDeployments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 50
+            });
+            deployCount = deployments.length;
+
+            for (const deploy of deployments.slice(0, 20)) {
+              const { data: statuses } = await github.rest.repos.listDeploymentStatuses({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: deploy.id
+              });
+              if (statuses[0]?.state === 'success') deploySuccessCount++;
+            }
+          } catch (e) {
+            console.log('⚠️ Deployment metrics unavailable:', e.message);
+          }
+
+          // Fetch PR metrics
+          const { data: recentPRs } = await github.rest.pulls.list({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'all',
+            per_page: 50,
+            sort: 'updated',
+            direction: 'desc'
+          });
+
+          const mergedPRs = recentPRs.filter(pr => pr.merged_at).length;
+          const openPRs = recentPRs.filter(pr => pr.state === 'open').length;
+
+          // Build Prometheus metrics
+          const timestamp = Date.now();
+          const metrics = `# Maestro & Summit Platform Metrics
+# Generated at ${new Date().toISOString()}
+
+# HELP maestro_workflow_runs_total Total workflow runs (7d)
+# TYPE maestro_workflow_runs_total counter
+maestro_workflow_runs_total ${totalRuns}
+
+# HELP maestro_workflow_success_total Successful workflow runs (7d)
+# TYPE maestro_workflow_success_total counter
+maestro_workflow_success_total ${successfulRuns}
+
+# HELP maestro_workflow_failed_total Failed workflow runs (7d)
+# TYPE maestro_workflow_failed_total counter
+maestro_workflow_failed_total ${failedRuns}
+
+# HELP maestro_health_ratio Workflow success ratio
+# TYPE maestro_health_ratio gauge
+maestro_health_ratio ${healthRatio}
+
+# HELP maestro_deployments_total Recent deployments
+# TYPE maestro_deployments_total gauge
+maestro_deployments_total ${deployCount}
+
+# HELP maestro_deploy_success_total Successful deployments
+# TYPE maestro_deploy_success_total gauge
+maestro_deploy_success_total ${deploySuccessCount}
+
+# HELP summit_prs_merged_total Merged PRs (recent 50)
+# TYPE summit_prs_merged_total gauge
+summit_prs_merged_total ${mergedPRs}
+
+# HELP summit_prs_open Open PRs
+# TYPE summit_prs_open gauge
+summit_prs_open ${openPRs}
+
+# HELP summit_metrics_export_timestamp_seconds Last export timestamp
+# TYPE summit_metrics_export_timestamp_seconds gauge
+summit_metrics_export_timestamp_seconds ${Math.floor(timestamp / 1000)}
+`;
+
+          fs.writeFileSync('/tmp/release-captain-metrics.prom', metrics);
+          console.log('✅ Metrics exported successfully');
+          console.log(`📊 Total runs: ${totalRuns}, Success: ${successfulRuns}, Health: ${healthRatio}`)
 
     - name: Upload metrics artifact
       uses: actions/upload-artifact@v4
