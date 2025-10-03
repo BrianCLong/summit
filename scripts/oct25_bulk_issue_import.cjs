@@ -392,7 +392,7 @@ async function main() {
     sources = selected.map((file) => {
       const filePath = path.join(BATCH_DIR, file);
       const raw = fs.readFileSync(filePath, 'utf8');
-      const entries = JSON.parse(raw);
+      const { entries } = JSON.parse(raw);
       return { label: file, entries };
     });
   }
