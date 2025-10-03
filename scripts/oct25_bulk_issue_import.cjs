@@ -403,6 +403,7 @@ async function main() {
   let totalSkipped = 0;
   for (const source of sources) {
     console.log(`\n==> Processing ${source.label}`);
+    console.log(`   Batch file: ${source.label}`); // New debug line
     const result = await processEntries(source.entries, existingTitles, source.label);
     console.log(
       `   ${result.label} summary: created ${result.created}, skipped ${result.skipped}, total ${result.total}`
