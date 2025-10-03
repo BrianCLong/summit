@@ -1,1 +1,9 @@
-{"title":"Test Issue","body":"This is a test issue for bulk import.","labels":["test"]}
+{
+  "entries": [
+    {
+      "title": "Test Issue",
+      "body": "This is a test issue for bulk import.",
+      "labels": ["test"]
+    }
+  ]
+}
