@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "title": "IG Oct25 | Workstream 5-1",
+      "body": "Automated issue for batch 5, issue 1 \u2014 checkpoint, notes, and actions.",
+      "labels": ["oct25", "autogen", "test"]
+    },
+    {
+      "title": "IG Oct25 | Workstream 5-2",
+      "body": "Automated issue for batch 5, issue 2 \u2014 checkpoint, notes, and actions.",
+      "labels": ["oct25", "autogen", "test"]
+    },
+    {
+      "title": "IG Oct25 | Workstream 5-3",
+      "body": "Automated issue for batch 5, issue 3 \u2014 checkpoint, notes, and actions.",
+      "labels": ["oct25", "autogen", "test"]
+    }
+  ]
+}
