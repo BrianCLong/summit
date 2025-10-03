@@ -1,0 +1,10 @@
+diff --git a/README.md b/README.md
+index 04be35b16..3ff98bfa0 100644
+--- a/README.md
++++ b/README.md
+@@ -901,3 +901,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+ ---
+ 
+ **IntelGraph Platform** - Next-Generation Intelligence Analysis
++
++<!-- AURELIUS: demo patch marker; safe to keep/remove -->

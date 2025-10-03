@@ -19,6 +19,14 @@ jobs:
         run: |
           test -f sprint/compliance/SBOM.spdx.json
           ! grep -E "GPL|AGPL" sprint/compliance/LICENSE_REPORT.md || (echo "License risk" && exit 1)
+      - name: Validate patches (non-blocking if none)
+        run: |
+          set -e
+          if ls sprint/impl/diffs/*.patch >/dev/null 2>&1; then
+            bash sprint/impl/diffs/apply.sh --check || (echo "Patch check failed"; exit 1)
+          else
+            echo "No patches present; skipping."
+          fi
       - name: Artifacts
         uses: actions/upload-artifact@v4
         with:
