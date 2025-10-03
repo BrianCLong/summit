@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "14.2.5",
+    "next": "14.2.32",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "framer-motion": "^11.0.0",
