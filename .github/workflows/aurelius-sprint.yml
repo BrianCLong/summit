@@ -3,12 +3,19 @@ on: [pull_request, workflow_dispatch]
 jobs:
   sprint-pack:
     runs-on: ubuntu-latest
+    env:
+      BENCH_URL: http://localhost:4000/health
+      NEO4J_URL: bolt://localhost:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASS: password
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
-        with: { python-version: '3.11' }
+        with:
+          python-version: '3.11'
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with:
+          node-version: '20'
       - name: Bootstrap
         run: make -f sprint/impl/Makefile bootstrap
       - name: Test & Smoke
@@ -33,9 +40,16 @@ jobs:
           pip install PyYAML
           python3 sprint/experiments/harness/run.py --config sprint/experiments/configs.yaml || true
       - name: Enforce SLOs
+        id: slo-check
         run: |
           python3 -m pip install pyyaml >/dev/null 2>&1 || true
           python3 sprint/experiments/evaluate.py
+      - name: Label on SLO failure
+        if: failure()
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: performance-regression
       - name: Upload metrics
         uses: actions/upload-artifact@v4
         with:

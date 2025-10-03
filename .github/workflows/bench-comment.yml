@@ -3,12 +3,19 @@ on: { pull_request: { types: [opened, synchronize, reopened] } }
 jobs:
   bench:
     runs-on: ubuntu-latest
+    env:
+      BENCH_URL: http://localhost:4000/health
+      NEO4J_URL: bolt://localhost:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASS: password
     steps:
-      - uses: actions/checkout @v4/**
-      - uses: actions/setup-python @db/migrations/V5__create_secrets_vault_envelope.sql
-        with: { python-version: '3.11' }
-      - uses: actions/setup-node @v4/**
-        with: { node-version: '20' }
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       - name: Run harness
         run: |
           make -f sprint/impl/Makefile run || true
@@ -26,7 +33,16 @@ jobs:
           jq -r 'to_entries[] | "| \(.key) | \(.value.current.p95 // "n/a") | \(.value.current.error_rate // "n/a") |"' eval.json >> bench.md || true
           echo "" >> bench.md
           echo "_Artifacts: \`sprint/benchmark/metrics/*\`_" >> bench.md
-      - uses: thollander/actions-comment-pull-request @db/migrations/V2__create_qos_overrides.sql
-        with: { filePath: bench.md }
-      - uses: actions/upload-artifact @v4/**
-        with: { name: bench-metrics, path: sprint/benchmark/metrics/** }
+      - name: Label on SLO failure
+        if: failure()
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: performance-regression
+      - uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: bench.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bench-metrics
+          path: sprint/benchmark/metrics/**

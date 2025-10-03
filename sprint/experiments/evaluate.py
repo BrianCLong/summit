@@ -34,6 +34,22 @@ def main():
         out = {t: results[t]["current"] for t in slo["targets"].keys()}
         Path(base_path).parent.mkdir(parents=True, exist_ok=True)
         json.dump(out, open(base_path,"w"), indent=2)
+    
+    # --- GitHub step summary (nice PR UI) ---
+    summary_lines = ["| target | p95 (ms) | err | p95 SLO | result |",
+                     "|---|---:|---:|---:|:--:|"]
+    for t, r in results.items():
+        cur = r["current"]; rules = r["rules"]; ok = True
+        p95 = cur["p95"]; er = cur["error_rate"]
+        if p95 is not None and p95 > rules["p95_ms_max"]: ok = False
+        if er is not None and er > rules.get("error_rate_max", 1.0): ok = False
+        icon = "✅" if ok else "❌"
+        summary_lines.append(f"| {t} | {p95 or 'n/a'} | {er or 0:.3f} | {rules['p95_ms_max']} | {icon} |")
+    summary = "\n".join(summary_lines) + "\n"
+    if os.getenv("GITHUB_STEP_SUMMARY"):
+        with open(os.getenv("GITHUB_STEP_SUMMARY"), "a") as fh: fh.write("### SLO Check\n\n" + summary)
+    print(summary)
+    
     sys.exit(1 if fail else 0)
 
 if __name__ == "__main__": main()
