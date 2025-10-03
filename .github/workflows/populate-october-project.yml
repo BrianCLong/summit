@@ -143,17 +143,19 @@ jobs:
           fi
 
           if [[ "$ADD_TO_PROJECT" == "1" && -z "$PROJECT_ID" ]]; then
-            echo "::error::Project ID required when add_to_project is true"
+            echo "::error::Project ID required when add_to_PROJECT is true"
             exit 1
           fi
 
           export OWNER REPO START_BATCH END_BATCH SLEEP_MS PROJECT_ID ADD_TO_PROJECT
 
-          echo "OWNER=$OWNER"
-          echo "REPO=$REPO"
-          echo "START_BATCH=$START_BATCH"
-          echo "END_BATCH=$END_BATCH"
-          echo "ADD_TO_PROJECT=$ADD_TO_PROJECT"
+          echo "DEBUG: OWNER=$OWNER"
+          echo "DEBUG: REPO=$REPO"
+          echo "DEBUG: START_BATCH=$START_BATCH"
+          echo "DEBUG: END_BATCH=$END_BATCH"
+          echo "DEBUG: SLEEP_MS=$SLEEP_MS"
+          echo "DEBUG: PROJECT_ID=$PROJECT_ID"
+          echo "DEBUG: ADD_TO_PROJECT=$ADD_TO_PROJECT"
 
           node scripts/oct25_bulk_issue_import.cjs
 

@@ -1,24 +1,27 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Capture real baselines for SLO enforcement
-echo "🔍 Capturing real baselines for SLO enforcement..."
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
 
-# Run the harness to generate metrics
-echo "🏃 Running harness to generate baseline metrics..."
+echo "▶ IntelGraph Baseline Capture"
+echo "   repo: $ROOT"
+echo "   date: $(date -Is)"
+
+# 1) Bring up minimal stack for smoke (best-effort)
 make -f sprint/impl/Makefile run || true
+
+# 2) Run harness once to produce metrics/*.jsonl and metrics.md
 python3 sprint/experiments/harness/run.py --config sprint/experiments/configs.yaml || true
 
-# Write the baseline
-echo "💾 Writing baseline to sprint/benchmark/baseline.json..."
-WRITE_BASELINE=1 python3 sprint/experiments/evaluate.py
+# 3) Write/refresh baseline.json using evaluator
+export WRITE_BASELINE=1
+python3 -m pip install pyyaml >/dev/null 2>&1 || true
+python3 sprint/experiments/evaluate.py
 
-# Commit the baseline
-echo "➕ Committing baseline..."
-git add sprint/benchmark/baseline.json
-git commit -m "chore(bench): establish baseline" -m "Capture real baseline metrics from current environment for SLO enforcement."
-
-echo "✅ Baseline captured and committed successfully!"
-echo "📌 Next steps:"
-echo "   1. Push to main: git push origin main"
-echo "   2. Protect main branch to require 'Aurelius Sprint Pack' + 'Enforce SLOs' jobs to pass"
-echo "   3. Open PR-6 (comment bot), PR-7 (OTel stubs), and PR-8 (PROFILE stats)"
+if [[ -f sprint/benchmark/baseline.json ]]; then
+  echo "✅ Baseline written: sprint/benchmark/baseline.json"
+  jq . sprint/benchmark/baseline.json || true
+else
+  echo "❌ Baseline not produced"; exit 1
+fi

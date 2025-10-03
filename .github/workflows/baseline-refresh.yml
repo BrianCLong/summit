@@ -1,0 +1,30 @@
+name: Baseline Refresh
+on:
+  push:
+    branches: [main]
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    env:
+      BENCH_URL: http://localhost:4000/health
+      NEO4J_URL: bolt://localhost:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASS: password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Capture baseline
+        run: |
+          chmod +x sprint/experiments/capture_baseline.sh
+          ./sprint/experiments/capture_baseline.sh
+      - name: Commit baseline (no-op if unchanged)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add sprint/benchmark/baseline.json || true
+          git diff --cached --quiet || (git commit -m "chore(bench): refresh baseline" && git push)

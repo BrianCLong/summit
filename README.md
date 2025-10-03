@@ -905,5 +905,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <!-- AURELIUS: demo patch marker; safe to keep/remove -->
 
 ![Bench (smoke)](https://img.shields.io/github/actions/workflow/status/BrianCLong/summit/bench-comment.yml?label=bench%20smoke)
-
-![Bench (smoke)](https://img.shields.io/badge/bench-smoke-blue)

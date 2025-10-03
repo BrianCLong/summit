@@ -11,6 +11,11 @@ targets:
     metrics: ["latency_ms_p95","latency_ms_p99","iters"]
     warmup_s: 5
     duration_s: 30
+  - name: graph-query-neo4j-profile
+    cmd: ["node", "scripts/bench_graph_profile.js", "--query", "MATCH (n)-[r]->(m) RETURN count(r) LIMIT 1000"]
+    metrics: ["latency_ms_p95","profile.avgDbHits","profile.avgRows"]
+    warmup_s: 5
+    duration_s: 30
 ablations:
   - name: "cache_on_vs_off"
     vary: { CACHE_ENABLED: [false, true] }
