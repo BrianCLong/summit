@@ -1,8 +1,0 @@
-title,body,labels,assignees,milestone,estimate,priority,epic,component
-Pre-ingest deepfake checks,Stub pHash/MFCC checks,sprint7,Starkey,Sprint 7,3,high,Threat Assessment v1,server
-ATT&CK tagging & confidence bands,Map detections to ATT&CK IDs,sprint7,Starkey,Sprint 7,3,high,Threat Assessment v1,server
-Neo4j health metrics panels,Add Grafana panels,sprint7,Magruder,Sprint 7,2,medium,Threat Assessment v1,monitoring
-Audit logging for AI Task Manager actions,Scoped logging with DLP,sprint7,Foster,Sprint 7,3,high,AI Task Manager,server
-Splunk sanitized exports + saved searches,Docs and exporter,sprint7,Foster,Sprint 7,2,medium,AI Task Manager,server
-Fix audit logging on entity view,Ensure events are recorded,sprint7,Foster,Sprint 7,1,high,Threat Assessment v1,server
-Clean test placeholders & config,Remove unused tests,sprint7,Stribol,Sprint 7,1,medium,AI Task Manager,server

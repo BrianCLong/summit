@@ -17,7 +17,8 @@
     "packages/hit-protocol",
     "packages/canary-lattice",
     "packages/mcp-core",
-    "apps/server"
+    "apps/server",
+    "packages/afl-store"
   ],
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",

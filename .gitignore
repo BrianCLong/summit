@@ -85,6 +85,7 @@ poetry.lock
 **/.gradle/
 
 # Archive files
+archive_legacy/
 *.zip
 *.tar
 *.gz
