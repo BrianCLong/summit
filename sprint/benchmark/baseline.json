@@ -1,0 +1,10 @@
+{
+  "api-latency": {
+    "p95": 150.0,
+    "error_rate": 0.01
+  },
+  "graph-query-neo4j": {
+    "p95": 200.0,
+    "error_rate": 0.01
+  }
+}
