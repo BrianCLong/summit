@@ -1,0 +1,300 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "IntelGraph-Platform-SBOM",
+  "documentNamespace": "https://github.com/BrianCLong/summit/SPDXRef-DOCUMENT",
+  "creationInfo": {
+    "created": "2025-10-02T18:00:00Z",
+    "creators": ["Tool: AURELIUS-AI-SBOM-Generator-1.0"]
+  },
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-IntelGraph-Platform",
+      "name": "IntelGraph Platform",
+      "downloadLocation": "https://github.com/BrianCLong/summit.git",
+      "filesAnalyzed": true,
+      "homepage": "https://github.com/BrianCLong/intelgraph",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "Copyright (c) 2025 IntelGraph Platform",
+      "versionInfo": "1.0.0",
+      "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-React",
+      "name": "react",
+      "downloadLocation": "http://github.com/facebook/react.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "18.x",
+      "description": "React is a JavaScript library for building user interfaces"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-NodeJS",
+      "name": "nodejs",
+      "downloadLocation": "http://github.com/nodejs/node.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "20.x",
+      "description": "Node.js JavaScript runtime"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-Neo4j",
+      "name": "neo4j",
+      "downloadLocation": "http://github.com/neo4j/neo4j.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "GPL-3.0",
+      "licenseDeclared": "GPL-3.0",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "5.8",
+      "description": "Graph database management system"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-GraphQL",
+      "name": "graphql",
+      "downloadLocation": "http://github.com/graphql/graphql-spec.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "16.11.0",
+      "description": "A query language for APIs"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-TypeScript",
+      "name": "typescript",
+      "downloadLocation": "http://github.com/Microsoft/TypeScript.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "5.7.3",
+      "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-MaterialUI",
+      "name": "MaterialUI",
+      "downloadLocation": "http://github.com/mui/material-ui.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "5.x",
+      "description": "React components for faster and easier web development"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-Axios",
+      "name": "axios",
+      "downloadLocation": "http://github.com/axios/axios.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "1.11.0",
+      "description": "Promise based HTTP client for the browser and node.js"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-Neo4j-Driver",
+      "name": "neo4j-driver",
+      "downloadLocation": "http://github.com/neo4j/neo4j-javascript-driver.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "5.28.1",
+      "description": "Neo4j JavaScript driver for Node.js and browser applications"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-PG",
+      "name": "pg",
+      "downloadLocation": "http://github.com/brianc/node-postgres.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "8.16.3",
+      "description": "PostgreSQL client for Node.js"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-Redis",
+      "name": "redis",
+      "downloadLocation": "http://github.com/redis/node-redis.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "5.8.1",
+      "description": "Redis client for Node.js"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-Dotenv",
+      "name": "dotenv",
+      "downloadLocation": "http://github.com/motdotla/dotenv.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "17.2.1",
+      "description": "Loads environment variables from .env file"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-Jest",
+      "name": "jest",
+      "downloadLocation": "http://github.com/facebook/jest.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "29.7.0",
+      "description": "Delightful JavaScript Testing Framework with a focus on simplicity"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-Express",
+      "name": "express",
+      "downloadLocation": "http://github.com/expressjs/express.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "4.x",
+      "description": "Fast, unopinionated, minimalist web framework for node"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-Apollo-Server",
+      "name": "apollo-server",
+      "downloadLocation": "http://github.com/apollographql/apollo-server.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "3.13.0",
+      "description": "Fully-featured GraphQL server implementation"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-OpenTelemetry",
+      "name": "OpenTelemetry",
+      "downloadLocation": "http://github.com/open-telemetry/opentelemetry-js.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "1.x",
+      "description": "Observability framework for cloud-native software"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-PostgreSQL",
+      "name": "PostgreSQL",
+      "downloadLocation": "https://git.postgresql.org/git/postgresql.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "PostgreSQL",
+      "licenseDeclared": "PostgreSQL",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "16",
+      "description": "Object-relational database management system"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-TimescaleDB",
+      "name": "TimescaleDB",
+      "downloadLocation": "https://github.com/timescale/timescaledb.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "2.x",
+      "description": "Time-series database built on PostgreSQL"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-Docker",
+      "name": "Docker",
+      "downloadLocation": "https://github.com/docker/docker-ce.git",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "20.x",
+      "description": "Platform for developing, shipping, and running applications in containers"
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relatedSpdxElement": "SPDXRef-Package-IntelGraph-Platform",
+      "relationshipType": "DESCRIBES"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-React",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-NodeJS",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-GraphQL",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-TypeScript",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-MaterialUI",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-Axios",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-Neo4j-Driver",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-PG",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-Redis",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-Dotenv",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-Jest",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-Express",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-Apollo-Server",
+      "relationshipType": "DEPENDS_ON"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-IntelGraph-Platform",
+      "relatedSpdxElement": "SPDXRef-Package-OpenTelemetry",
+      "relationshipType": "DEPENDS_ON"
+    }
+  ]
+}

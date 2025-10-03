@@ -23,6 +23,7 @@
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
+    "write-tests": "node scripts/dev/write_tests_scaffold.cjs",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
     "server:dev": "npm run --workspace=apps/server dev",
     "client:dev": "cd client && npm run dev",
@@ -33,6 +34,7 @@
     "docker:prod": "docker-compose up",
     "test:jest": "jest --config jest.projects.cjs --maxWorkers=50% --detectOpenHandles",
     "test:e2e": "playwright test",
+    "test:oct25": "jest -c jest.oct25.config.cjs",
     "test:ci": "pnpm run test:jest && pnpm run test:e2e",
     "test": "pnpm run test:jest",
     "test:server": "cd server && npm test",

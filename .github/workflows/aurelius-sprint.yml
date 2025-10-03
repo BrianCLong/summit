@@ -1,0 +1,26 @@
+name: Aurelius Sprint Pack
+on: [pull_request, workflow_dispatch]
+jobs:
+  sprint-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with: { python-version: '3.11' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Bootstrap
+        run: make -f sprint/impl/Makefile bootstrap
+      - name: Test & Smoke
+        run: |
+          make -f sprint/impl/Makefile test
+          make -f sprint/impl/Makefile run || true
+      - name: SBOM + License Check
+        run: |
+          test -f sprint/compliance/SBOM.spdx.json
+          ! grep -E "GPL|AGPL" sprint/compliance/LICENSE_REPORT.md || (echo "License risk" && exit 1)
+      - name: Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sprint-pack
+          path: sprint/**

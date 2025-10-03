@@ -1,7 +1,12 @@
 module.exports = {
-  testEnvironment: 'node',
   testMatch: ['**/__tests__/**/*.test.cjs'],
-  restoreMocks: true,
-  resetMocks: true,
-  clearMocks: true,
+  testEnvironment: 'node',
+  collectCoverageFrom: ['scripts/**/*.cjs'],
+  verbose: false,
+  modulePathIgnorePatterns: [
+    '<rootDir>/archive_legacy',
+    '<rootDir>/intelgraph',
+    '<rootDir>/.disabled',
+  ],
+  transform: {},
 };
