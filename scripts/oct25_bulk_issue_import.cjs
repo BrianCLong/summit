@@ -383,6 +383,9 @@ async function main() {
       return batchNumber >= START_INDEX && batchNumber <= END_INDEX;
     });
 
+    console.log(`DEBUG: All batches found: ${JSON.stringify(batches)}`);
+    console.log(`DEBUG: Selected batches: ${JSON.stringify(selected)}`);
+
     if (selected.length === 0) {
       console.log('No batches selected. Check START_BATCH/END_BATCH values.');
       return;
