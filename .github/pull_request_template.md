@@ -1,17 +1,24 @@
 ## Summary
 
-## Type
+- What changed and why?
 
-- [ ] Feature - [ ] Bug - [ ] Chore - [ ] Security - [ ] Docs
+## Evidence & Performance
+
+- **Bench Table:** (added by CI comment)
+- **Status:** ☐ PASS ☐ FAIL | **Δ tolerance:** 10% default
+
+## Compliance & IP
+
+- See CI comment summary
+- Data handling notes (if any): <!-- e.g., PII touched? -->
+
+## Risk & Rollback
+
+- Risk class: ☐ Low ☐ Med ☐ High
+- Rollback: `git revert -m 1 <merge-commit>` + re-run SLO pipeline
 
 ## Checklist
 
-- [ ] Conventional Commit title
-- [ ] Linked issue(s): #
-- [ ] Tests added/updated
-- [ ] Telemetry added (logs/metrics/traces)
-- [ ] Docs updated
-- [ ] No secrets/keys in diff
-- [ ] Feature flag checklist completed (if applicable, see `docs/flags.md`)
-
-## Screenshots/Notes
+- [ ] Tests updated
+- [ ] SLO impact considered (`sprint/benchmark/slo.yaml`)
+- [ ] Neo4j PROFILE reviewed for new/changed queries (if applicable)
