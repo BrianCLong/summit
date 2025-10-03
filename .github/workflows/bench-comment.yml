@@ -1,0 +1,47 @@
+name: Bench & Comment
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with: { python-version: '3.11' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Run harness
+        run: |
+          make -f sprint/impl/Makefile run || true
+          python3 sprint/experiments/harness/run.py --config sprint/experiments/configs.yaml || true
+      - name: Evaluate SLOs
+        id: eval
+        run: |
+          python3 -m pip install pyyaml >/dev/null 2>&1 || true
+          python3 sprint/experiments/evaluate.py > eval.json || true
+          cat eval.json
+      - name: Build PR Comment
+        id: md
+        run: |
+          P95_API=$(jq -r '."api-latency".current.p95 // "n/a"' eval.json)
+          P95_GQL=$(jq -r '."graph-query-neo4j".current.p95 // "n/a"' eval.json)
+          ER_API=$(jq -r '."api-latency".current.error_rate // "n/a"' eval.json)
+          ER_GQL=$(jq -r '."graph-query-neo4j".current.error_rate // "n/a"' eval.json)
+          echo "### Bench (smoke)" > bench.md
+          echo "" >> bench.md
+          echo "| target | p95 (ms) | error rate |" >> bench.md
+          echo "|---|---:|---:|" >> bench.md
+          echo "| api-latency | ${P95_API} | ${ER_API} |" >> bench.md
+          echo "| graph-query-neo4j | ${P95_GQL} | ${ER_GQL} |" >> bench.md
+          echo "" >> bench.md
+          echo "_Artifacts in sprint/benchmark/metrics/_ :package:" >> bench.md
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: bench.md
+      - name: Upload metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-metrics
+          path: sprint/benchmark/metrics/**

@@ -1,0 +1,7 @@
+targets:
+  api-latency:
+    p95_ms_max: 150
+    error_rate_max: 0.01
+  graph-query-neo4j:
+    p95_ms_max: 200
+baseline_path: "sprint/benchmark/baseline.json"

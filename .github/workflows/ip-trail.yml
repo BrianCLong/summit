@@ -1,0 +1,16 @@
+name: IP/Compliance Trail
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  ip-trail:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: IP/Compliance trail (summary)
+        run: |
+          python3 sprint/experiments/ip_trail.py > ip.md
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: ip.md

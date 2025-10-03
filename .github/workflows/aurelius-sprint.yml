@@ -32,6 +32,9 @@ jobs:
           make -f sprint/impl/Makefile run || true
           pip install PyYAML
           python3 sprint/experiments/harness/run.py --config sprint/experiments/configs.yaml || true
+      - name: Enforce SLOs
+        run: |
+          python3 sprint/experiments/evaluate.py
       - name: Upload metrics
         uses: actions/upload-artifact@v4
         with:
