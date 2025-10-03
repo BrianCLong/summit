@@ -1,0 +1,105 @@
+tracker_id,workstream,start_date,end_date,source_path,description
+001_maestro-conductor_sprint-20250929-to-20251010,maestro-conductor,2025-09-29,2025-10-10,october2025/mc_sprint_q_425_sprint_21_2025_09_29_→_2025_10_10_v_1_0.md,sprint-20250929-to-20251010
+002_documentation_sprint-20250930-to-20251010,documentation,2025-09-30,2025-10-10,october2025/documentation_docs_intelgraph_maestro_2025_09_30_to_2025_10_10_01.md,sprint-20250930-to-20251010
+003_maestro-conductor_sprint-20250930-to-20251014,maestro-conductor,2025-09-30,2025-10-14,october2025/maestro_conductor_orchestration_2025_09_30_to_2025_10_14_01.md,sprint-20250930-to-20251014
+004_aurelius-ai_sprint-october-2025,aurelius-ai,,,october2025/aurelius_workstream_sprint_plan_oct_dec_2025 (1).md,sprint-october-2025
+005_aurelius-ai_sprint-october-2025,aurelius-ai,,,october2025/aurelius_workstream_sprint_plan_oct_dec_2025 (2).md,sprint-october-2025
+006_aurelius-ai_sprint-october-2025,aurelius-ai,,,october2025/aurelius_workstream_sprint_plan_oct_dec_2025 (3).md,sprint-october-2025
+007_aurelius-ai_sprint-october-2025,aurelius-ai,,,october2025/aurelius_workstream_sprint_plan_oct_dec_2025 (4).md,sprint-october-2025
+008_aurelius-ai_sprint-october-2025,aurelius-ai,,,october2025/aurelius_workstream_sprint_plan_oct_dec_2025 (5).md,sprint-october-2025
+009_aurelius-ai_sprint-october-2025,aurelius-ai,,,october2025/aurelius_workstream_sprint_plan_oct_dec_2025 (6).md,sprint-october-2025
+010_aurelius-ai_sprint-october-2025,aurelius-ai,,,october2025/aurelius_workstream_sprint_plan_oct_dec_2025 (7).md,sprint-october-2025
+011_aurelius-ai_sprint-october-2025,aurelius-ai,,,october2025/aurelius_workstream_sprint_plan_oct_dec_2025 (8).md,sprint-october-2025
+012_aurelius-ai_sprint-october-2025,aurelius-ai,,,october2025/aurelius_workstream_sprint_plan_oct_dec_2025.md,sprint-october-2025
+013_council-platform_sprint-20251001,council-platform,2025-10-01,2025-10-01,october2025/council_intelgraph_platform_q_4_2025_sprint_01_2025_10_01.md,sprint-20251001
+014_covert-intel_sprint-20251001-to-20251014,covert-intel,2025-10-01,2025-10-14,october2025/covert_intel_cybersec_intel_sec_2025_10_01_to_2025_10_14_sprint_01.md,sprint-20251001-to-20251014
+015_counter-threat_sprint-20251001,counter-threat,2025-10-01,2025-10-01,october2025/dirk_ig_counter_threat_q_4_2025_sprint_2025_10_01_01.md,sprint-20251001
+016_durga-directorate_sprint-october-2025,durga-directorate,,,october2025/durga_ig_directorate_j_∑_workstream_sprint_cadence_oct_dec_2025 (1).md,sprint-october-2025
+017_durga-directorate_sprint-october-2025,durga-directorate,,,october2025/durga_ig_directorate_j_∑_workstream_sprint_cadence_oct_dec_2025 (2).md,sprint-october-2025
+018_durga-directorate_sprint-october-2025,durga-directorate,,,october2025/durga_ig_directorate_j_∑_workstream_sprint_cadence_oct_dec_2025 (3).md,sprint-october-2025
+019_durga-directorate_sprint-october-2025,durga-directorate,,,october2025/durga_ig_directorate_j_∑_workstream_sprint_cadence_oct_dec_2025 (4).md,sprint-october-2025
+020_durga-directorate_sprint-october-2025,durga-directorate,,,october2025/durga_ig_directorate_j_∑_workstream_sprint_cadence_oct_dec_2025 (5).md,sprint-october-2025
+021_durga-directorate_sprint-october-2025,durga-directorate,,,october2025/durga_ig_directorate_j_∑_workstream_sprint_cadence_oct_dec_2025 (6).md,sprint-october-2025
+022_durga-directorate_sprint-october-2025,durga-directorate,,,october2025/durga_ig_directorate_j_∑_workstream_sprint_cadence_oct_dec_2025 (7).md,sprint-october-2025
+023_durga-directorate_sprint-october-2025,durga-directorate,,,october2025/durga_ig_directorate_j_∑_workstream_sprint_cadence_oct_dec_2025.md,sprint-october-2025
+024_execution-ops_sprint-october-2025,execution-ops,,,october2025/execution_assets_2025_10.md,sprint-october-2025
+025_groves-governance_sprint-20251001,groves-governance,2025-10-01,2025-10-01,october2025/groves_security_governance_provenance_2025_10_01_10_14_sprint_01.md,sprint-20251001
+026_igac-governance_sprint-20251001,igac-governance,2025-10-01,2025-10-01,october2025/igac_chair_governance_prov_ledger_2025_10_01_10_15_sprint_01.md,sprint-20251001
+027_maestro-conductor_sprint-october-2025,maestro-conductor,,,docs/sprints/intel_graph_mc_frontend_sprint_13_plan_sep_29_oct_10_2025.md,sprint-october-2025
+028_maestro-conductor_sprint-october-2025,maestro-conductor,,,docs/sprints/intel_graph_mc_frontend_sprint_14_plan_oct_13_24_2025.md,sprint-october-2025
+029_maestro-conductor_sprint-october-2025,maestro-conductor,,,docs/sprints/intel_graph_mc_frontend_sprint_15_plan_oct_27_nov_7_2025.md,sprint-october-2025
+030_maestro-conductor_sprint-20251001,maestro-conductor,2025-10-01,2025-10-01,october2025/intelgraph_mc_sprint_2025_10_01_v_1_0.md,sprint-20251001
+031_company-os_sprint-october-2025,company-os,,,october2025/next_sprint_company_os_switchboard_sprint_21_oct_6_oct_17_2025.md,sprint-october-2025
+032_documentation_sprint-october-2025,documentation,,,docs/sprints/sprint_plan_oct_20_31_2025_america_denver.md,sprint-october-2025
+033_documentation_sprint-october-2025,documentation,,,docs/sprints/sprint_plan_oct_6_17_2025_america_denver.md,sprint-october-2025
+034_program-management_sprint-october-2025,program-management,,,october2025/october_2025_tracking_automation_kit_full_coverage_→_git_hub_project.md,sprint-october-2025
+035_program-management_sprint-october-2025,program-management,,,october2025/october_master_plan.md,sprint-october-2025
+036_octoberminimum_sprint-october-2025,octoberminimum,,,october2025/octoberminimum.md,sprint-october-2025
+037_documentation_sprint-october-2025,documentation,,,docs/sprints/sprint_plan_sep_22_oct_3_2025_america_denver.md,sprint-october-2025
+038_summit-program_sprint-october-2025,summit-program,,,october2025/exported-assets/summit_aggressive_gap_closing_sprint_oct_2_16_2025.md,sprint-october-2025
+039_summit-program_sprint-october-2025,summit-program,,,october2025/exported-assets/summit_sprint_operation_polaris_oct_4_nov_7_2027.md,sprint-october-2025
+040_summit-program_sprint-october-2025,summit-program,,,october2025/exported-assets/summit_sprint_operation_sentinel_sep_8_oct_11_2026.md,sprint-october-2025
+041_summit-program_sprint-october-2025,summit-program,,,october2025/exported-assets/summit_sprint_operation_vanguard_oct_20_nov_22_2026.md,sprint-october-2025
+042_topicality_sprint-october-2025,topicality,,,october2025/exported-assets/topicality_aggressive_gap_closing_sprint_oct_2_16_2025.md,sprint-october-2025
+043_secdevops-angleton_sprint-20251006,secdevops-angleton,2025-10-06,2025-10-06,october2025/angleton_ig_secdevops_q_4_cadence_2025_10_06_10_17_sprint_1.md,sprint-20251006
+044_architecture_sprint-20251006-to-20251017,architecture,2025-10-06,2025-10-17,october2025/architect_general_golden_path_switchboard_hardened_2025_10_06_2025_10_17_sprint_21.md,sprint-20251006-to-20251017
+045_confidential-design_sprint-20251006,confidential-design,2025-10-06,2025-10-06,october2025/confidential_design_analyst_experience_2025_10_06_v_1 (1).md,sprint-20251006
+046_confidential-design_sprint-20251006,confidential-design,2025-10-06,2025-10-06,october2025/confidential_design_analyst_experience_2025_10_06_v_1.md,sprint-20251006
+047_durga-directorate_sprint-20251006-to-20251017,durga-directorate,2025-10-06,2025-10-17,october2025/durga_ig_intelgraph_q_4_2025_2025_10_06_2025_10_17_sprint_01.md,sprint-20251006-to-20251017
+048_gc-legal_sprint-20251006-to-20251017,gc-legal,2025-10-06,2025-10-17,october2025/gc_legal_governance_q_4_2025_10_06_to_2025_10_17_sprint_01.md,sprint-20251006-to-20251017
+049_intelgraph-platform_sprint-20251006,intelgraph-platform,2025-10-06,2025-10-06,october2025/guy_intelgraph_platform_auditable_core_2025_10_06_sprint_01.md,sprint-20251006
+050_intelgraph-core_sprint-20251006,intelgraph-core,2025-10-06,2025-10-06,october2025/intelgraph_sprint_2025_10_06_auto_seed_pack_v_1_0 (1).md,sprint-20251006
+051_intelgraph-core_sprint-20251006,intelgraph-core,2025-10-06,2025-10-06,october2025/intelgraph_sprint_2025_10_06_auto_seed_pack_v_1_0.md,sprint-20251006
+052_intelgraph-core_sprint-20251006,intelgraph-core,2025-10-06,2025-10-06,october2025/intelgraph_sprint_2025_10_06_subtasks_and_projects_v_1_0 (1).md,sprint-20251006
+053_intelgraph-core_sprint-20251006,intelgraph-core,2025-10-06,2025-10-06,october2025/intelgraph_sprint_2025_10_06_subtasks_and_projects_v_1_0.md,sprint-20251006
+054_intelgraph-core_sprint-20251006,intelgraph-core,2025-10-06,2025-10-06,october2025/intelgraph_sprint_2025_10_06_v_1_0 (1).md,sprint-20251006
+055_intelgraph-core_sprint-20251006,intelgraph-core,2025-10-06,2025-10-06,october2025/intelgraph_sprint_2025_10_06_v_1_0.md,sprint-20251006
+056_product-ops_sprint-20251006-to-20251017,product-ops,2025-10-06,2025-10-17,october2025/product_ops_trust_fabric_pcq_lac_zk_tx_2025_10_06_to_2025_10_17_sprint_01.md,sprint-20251006-to-20251017
+057_aurelius-ai_sprint-20251013,aurelius-ai,2025-10-13,2025-10-13,october2025/aurelius_aiml_intelgraph_q_425_sprint_22_2025_10_13_01.md,sprint-20251013
+058_charlie_sprint-20251013,charlie,2025-10-13,2025-10-13,october2025/sprint_2025_10_13_charlie.md,sprint-20251013
+059_devops-platform_sprint-20251013,devops-platform,2025-10-13,2025-10-13,october2025/devops_platform_summit_2025_10_13_sprint_02.md,sprint-20251013
+060_documentation_sprint-20251013-to-20251024,documentation,2025-10-13,2025-10-24,october2025/documentation_docs_intelgraph_maestro_2025_10_13_to_2025_10_24_02.md,sprint-20251013-to-20251024
+061_intelgraph-core_sprint-20251013,intelgraph-core,2025-10-13,2025-10-13,october2025/sprint_2025_10_13_intelgraph_v_0 (1).md,sprint-20251013
+062_intelgraph-core_sprint-20251013,intelgraph-core,2025-10-13,2025-10-13,october2025/sprint_2025_10_13_intelgraph_v_0.md,sprint-20251013
+063_maestro-conductor_sprint-20251013,maestro-conductor,2025-10-13,2025-10-13,october2025/mc_sprint_2025_10_13_v_1 (1).md,sprint-20251013
+064_maestro-conductor_sprint-20251013,maestro-conductor,2025-10-13,2025-10-13,october2025/mc_sprint_2025_10_13_v_1.md,sprint-20251013
+065_maestro-conductor_sprint-20251013-to-20251024,maestro-conductor,2025-10-13,2025-10-24,october2025/mc_sprint_q_425_sprint_22_2025_10_13_→_2025_10_24_v_1_0.md,sprint-20251013-to-20251024
+066_topicality_sprint-20251013,topicality,2025-10-13,2025-10-13,october2025/topicality_next_sprint_2025_10_13_v_0_1.md,sprint-20251013
+067_council-platform_sprint-20251015,council-platform,2025-10-15,2025-10-15,october2025/council_intelgraph_platform_q_4_2025_sprint_02_2025_10_15.md,sprint-20251015
+068_covert-intel_sprint-20251015-to-20251028,covert-intel,2025-10-15,2025-10-28,october2025/covert_intel_cybersec_intel_sec_2025_10_15_to_2025_10_28_sprint_02.md,sprint-20251015-to-20251028
+069_counter-threat_sprint-20251015,counter-threat,2025-10-15,2025-10-15,october2025/dirk_ig_counter_threat_q_4_2025_sprint_2025_10_15_02.md,sprint-20251015
+070_groves-governance_sprint-20251015,groves-governance,2025-10-15,2025-10-15,october2025/groves_security_governance_provenance_2025_10_15_10_28_sprint_02.md,sprint-20251015
+071_maestro-conductor_sprint-20251015,maestro-conductor,2025-10-15,2025-10-15,october2025/intelgraph_mc_sprint_2025_10_15_v_1.md,sprint-20251015
+072_maestro-conductor_sprint-20251015-to-20251029,maestro-conductor,2025-10-15,2025-10-29,october2025/maestro_conductor_orchestration_2025_10_15_to_2025_10_29_02.md,sprint-20251015-to-20251029
+073_summit-program_sprint-20251015,summit-program,2025-10-15,2025-10-15,october2025/sprint_2025_10_15_summit_next.md,sprint-20251015
+074_bizdev-growth_sprint-20251016,bizdev-growth,2025-10-16,2025-10-16,october2025/bizdev_growth_summit_sales_workstream_2025_10_16_02.md,sprint-20251016
+075_igac-governance_sprint-20251016,igac-governance,2025-10-16,2025-10-16,october2025/igac_chair_governance_prov_ledger_2025_10_16_10_30_sprint_02.md,sprint-20251016
+076_secdevops-angleton_sprint-20251020,secdevops-angleton,2025-10-20,2025-10-20,october2025/angleton_ig_secdevops_q_4_cadence_2025_10_20_10_31_sprint_2.md,sprint-20251020
+077_app-team_sprint-20251020,app-team,2025-10-20,2025-10-20,october2025/app_team_2025_10_20_switchboard_approvals_rationale_v_2_022.md,sprint-20251020
+078_architecture_sprint-20251020-to-20251031,architecture,2025-10-20,2025-10-31,october2025/architect_general_switchboard_stepup_audit_dlp_2025_10_20_2025_10_31_sprint_22.md,sprint-20251020-to-20251031
+079_executive-office_sprint-20251020,executive-office,2025-10-20,2025-10-20,october2025/co_ceo_governance_workstream_2025_10_20_02.md,sprint-20251020
+080_confidential-design_sprint-20251020,confidential-design,2025-10-20,2025-10-20,october2025/confidential_design_analyst_experience_2025_10_20_v_2.md,sprint-20251020
+081_company-os_sprint-20251020,company-os,2025-10-20,2025-10-20,october2025/core_platform_2025_10_20_company_os_graph_policy_provenance_022.md,sprint-20251020
+082_durga-directorate_sprint-20251020-to-20251031,durga-directorate,2025-10-20,2025-10-31,october2025/durga_ig_intelgraph_q_4_2025_2025_10_20_2025_10_31_sprint_02.md,sprint-20251020-to-20251031
+083_gc-legal_sprint-20251020-to-20251031,gc-legal,2025-10-20,2025-10-31,october2025/gc_legal_governance_q_4_2025_10_20_to_2025_10_31_sprint_02.md,sprint-20251020-to-20251031
+084_intelgraph-platform_sprint-20251020,intelgraph-platform,2025-10-20,2025-10-20,october2025/guy_intelgraph_platform_analyst_assist_2025_10_20_sprint_02.md,sprint-20251020
+085_intelgraph-core_sprint-20251020,intelgraph-core,2025-10-20,2025-10-20,october2025/intelgraph_sprint_2025_10_20_v_1_0 (1).md,sprint-20251020
+086_intelgraph-core_sprint-20251020,intelgraph-core,2025-10-20,2025-10-20,october2025/intelgraph_sprint_2025_10_20_v_1_0.md,sprint-20251020
+087_product-ops_sprint-20251020-to-20251031,product-ops,2025-10-20,2025-10-31,october2025/product_ops_trust_fabric_pcq_lac_zk_tx_2025_10_20_to_2025_10_31_sprint_02.md,sprint-20251020-to-20251031
+088_aurelius-ai_sprint-20251027,aurelius-ai,2025-10-27,2025-10-27,october2025/aurelius_aiml_intelgraph_q_425_sprint_23_2025_10_27_02.md,sprint-20251027
+089_delta_sprint-20251027,delta,2025-10-27,2025-10-27,october2025/sprint_2025_10_27_delta.md,sprint-20251027
+090_devops-platform_sprint-20251027,devops-platform,2025-10-27,2025-10-27,october2025/devops_platform_summit_2025_10_27_sprint_03.md,sprint-20251027
+091_documentation_sprint-20251027-to-20251107,documentation,2025-10-27,2025-11-07,october2025/documentation_docs_intelgraph_maestro_2025_10_27_to_2025_11_07_03.md,sprint-20251027-to-20251107
+092_intelgraph-core_sprint-20251027,intelgraph-core,2025-10-27,2025-10-27,october2025/sprint_2025_10_27_intelgraph_v_0.md,sprint-20251027
+093_maestro-conductor_sprint-20251027,maestro-conductor,2025-10-27,2025-10-27,october2025/mc_sprint_2025_10_27_v_1 (1).md,sprint-20251027
+094_maestro-conductor_sprint-20251027,maestro-conductor,2025-10-27,2025-10-27,october2025/mc_sprint_2025_10_27_v_1.md,sprint-20251027
+095_maestro-conductor_sprint-20251027-to-20251107,maestro-conductor,2025-10-27,2025-11-07,october2025/mc_sprint_q_425_sprint_23_2025_10_27_→_2025_11_07_v_1_0.md,sprint-20251027-to-20251107
+096_topicality_sprint-20251027,topicality,2025-10-27,2025-10-27,october2025/topicality_next_sprint_2025_10_27_v_0_1.md,sprint-20251027
+097_council-platform_sprint-20251029,council-platform,2025-10-29,2025-10-29,october2025/council_intelgraph_platform_q_4_2025_sprint_03_2025_10_29.md,sprint-20251029
+098_covert-intel_sprint-20251029-to-20251111,covert-intel,2025-10-29,2025-11-11,october2025/covert_intel_cybersec_intel_sec_2025_10_29_to_2025_11_11_sprint_03.md,sprint-20251029-to-20251111
+099_groves-governance_sprint-20251029,groves-governance,2025-10-29,2025-10-29,october2025/groves_security_governance_provenance_2025_10_29_11_11_sprint_03.md,sprint-20251029
+100_maestro-conductor_sprint-20251029,maestro-conductor,2025-10-29,2025-10-29,october2025/intelgraph_mc_sprint_2025_10_29_v_1.md,sprint-20251029
+101_counter-threat_sprint-20251030,counter-threat,2025-10-30,2025-10-30,october2025/dirk_ig_counter_threat_q_4_2025_sprint_2025_10_30_03.md,sprint-20251030
+102_maestro-conductor_sprint-20251030-to-20251113,maestro-conductor,2025-10-30,2025-11-13,october2025/maestro_conductor_orchestration_2025_10_30_to_2025_11_13_03.md,sprint-20251030-to-20251113
+103_summit-program_sprint-20251030,summit-program,2025-10-30,2025-10-30,october2025/sprint_2025_10_30_summit_next.md,sprint-20251030
+104_igac-governance_sprint-20251031,igac-governance,2025-10-31,2025-10-31,october2025/igac_chair_governance_prov_ledger_2025_10_31_11_14_sprint_03.md,sprint-20251031
