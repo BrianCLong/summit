@@ -42,7 +42,6 @@ jobs:
     permissions:
       contents: read
       issues: write
-      projects: write
 
     steps:
       - name: Checkout repository
