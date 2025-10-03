@@ -29,7 +29,7 @@ on:
       add_to_project:
         description: 'Attach created issues to the Project'
         required: false
-        default: 'false'
+        default: 'true'
       sleep_ms:
         description: 'Delay in milliseconds between GitHub API calls'
         required: false
@@ -93,25 +93,22 @@ jobs:
             echo "project_id=$PROJECT_ID_INPUT" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-
           if [[ -z "$PROJECT_NUMBER_INPUT" ]]; then
             echo "::error::Provide either project_id or project_number when add_to_project is enabled."
             exit 1
           fi
-
           if ! command -v gh >/dev/null; then
             echo "::error::GitHub CLI (gh) not available"
             exit 1
           fi
-
           QUERY='query($owner:String!,$number:Int!){ organization(login:$owner){ projectV2(number:$number){ id } } user(login:$owner){ projectV2(number:$number){ id } } }'
-          PROJECT_ID=$(gh api graphql -f query="$QUERY" -F owner="$PROJECT_OWNER" -F number="$PROJECT_NUMBER_INPUT" --jq '.data.organization.projectV2.id // .data.user.projectV2.id')
-
+          GRAPHQL_RESPONSE=$(gh api graphql -f query="$QUERY" -F owner="$PROJECT_OWNER" -F number="$PROJECT_NUMBER_INPUT" || true)
+          echo "GRAPHQL_RESPONSE: $GRAPHQL_RESPONSE"
+          PROJECT_ID=$(echo "$GRAPHQL_RESPONSE" | jq -r '.data.organization.projectV2.id // .data.user.projectV2.id')
           if [[ -z "$PROJECT_ID" || "$PROJECT_ID" == "null" ]]; then
             echo "::error::Unable to resolve project ID for owner=$PROJECT_OWNER number=$PROJECT_NUMBER_INPUT"
             exit 1
           fi
-
           echo "Resolved project ID: $PROJECT_ID"
           echo "project_id=$PROJECT_ID" >> "$GITHUB_OUTPUT"
 
