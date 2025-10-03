@@ -105,8 +105,9 @@ jobs:
           fi
 
           QUERY='query($owner:String!,$number:Int!){ organization(login:$owner){ projectV2(number:$number){ id } } user(login:$owner){ projectV2(number:$number){ id } } }'
-          GRAPHQL_RESPONSE=$(gh api graphql -f query="$QUERY" -F owner="$PROJECT_OWNER" -F number="$PROJECT_NUMBER_INPUT" || echo '{}')
+          GRAPHQL_RESPONSE=$(gh api graphql -f query="$QUERY" -F owner="$PROJECT_OWNER" -F number="$PROJECT_NUMBER_INPUT" 2>/dev/null || echo '{}')
           PROJECT_ID=$(echo "$GRAPHQL_RESPONSE" | jq -r '.data.organization.projectV2.id // .data.user.projectV2.id')
+          echo "DEBUG: PROJECT_ID after jq: $PROJECT_ID"
 
           if [[ -z "$PROJECT_ID" || "$PROJECT_ID" == "null" ]]; then
             echo "::error::Unable to resolve project ID for owner=$PROJECT_OWNER number=$PROJECT_NUMBER_INPUT"
