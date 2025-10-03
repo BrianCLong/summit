@@ -34,6 +34,17 @@ This analysis evaluates potential freedom to operate risks for the IntelGraph pl
 | Graph-based intelligence analysis               | US8,713,456B2 (IBM i2) - graph visualization   | Our web-based approach with real-time collaboration                        | Low        |
 | AI-augmented recommendation engine              | US9,760,834B2 (Haystax) - predictive analytics | Our approach learns from analyst behavior patterns                         | Low        |
 
+## Comprehensive Feature vs Reference Claim Chart
+
+| IntelGraph Feature                | Palantir (US9,892,489B1) | IBM i2 (US8,713,456B2) | GraphSQL (US10,216,794B2) | Haystax (US9,760,834B2) | Luciad (US9,569,878B2)   |
+| --------------------------------- | ------------------------ | ---------------------- | ------------------------- | ----------------------- | ------------------------ |
+| Web-based collaborative interface | Desktop-focused workflow | Desktop application    | GUI interface             | Security-focused UI     | Geospatial visualization |
+| Multi-modal AI processing         | Text-only analysis       | Limited AI             | Text-focused              | Predictive only         | Visual analysis only     |
+| Real-time concurrent editing      | Batch processing         | Single-user            | Batch processing          | Asynchronous            | Sequential workflow      |
+| Cross-modal entity resolution     | Within-modal only        | Text-based             | Text-based                | Risk-focused            | Geospatial only          |
+| Vector embedding analytics        | Traditional methods      | Rule-based             | Simple matching           | Statistical models      | Geospatial algorithms    |
+| Graph neural network inference    | Rule-based analysis      | Pattern matching       | Simple graphs             | Statistical models      | Visual pattern matching  |
+
 ## Design-Around Opportunities
 
 ### 1. Graph Database Licensing

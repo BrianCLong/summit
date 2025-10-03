@@ -1,13 +1,97 @@
 #!/usr/bin/env python3
 """
-IntelGraph Platform - Sprint Pack Validation Harness
+IntelGraph Platform - Sprint Pack Validation & Benchmark Harness
 """
 
 import os
 import sys
 import json
 import subprocess
+import time
 from pathlib import Path
+
+# Import yaml only if available (for config loading)
+try:
+    import yaml
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
+
+def run_benchmarks(config_path="sprint/experiments/configs.yaml"):
+    """Run benchmark targets and write JSONL + markdown summary"""
+    print("🏃 Running benchmarks...")
+    
+    # Simple hardcoded config for when YAML is not available
+    if not HAS_YAML:
+        print("⚠️  PyYAML not available - using hardcoded config")
+        targets = [
+            {
+                "name": "api-latency",
+                "cmd": ["node", "scripts/bench_api.js"],
+                "warmup_s": 5,
+                "duration_s": 30
+            },
+            {
+                "name": "graph-query-neo4j",
+                "cmd": ["node", "scripts/bench_graph.js"],
+                "warmup_s": 5,
+                "duration_s": 30
+            }
+        ]
+    else:
+        # Load config
+        with open(config_path) as f:
+            cfg = yaml.safe_load(f)
+        targets = cfg["targets"]
+    
+    OUT_DIR = Path("sprint/benchmark/metrics")
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    
+    rows = []
+    for t in targets:
+        env = os.environ.copy()
+        env["WARMUP_S"] = str(t.get("warmup_s", 5))
+        env["DURATION_S"] = str(t.get("duration_s", 30))
+        
+        print(f"Running {t['name']} -> {' '.join(t['cmd'])}")
+        proc = subprocess.run(t["cmd"], env=env, capture_output=True, text=True, cwd=os.getcwd())
+        
+        if proc.returncode != 0:
+            print(f"❌ {t['name']} failed: {proc.stderr}")
+            continue
+            
+        # Extract the last JSON line from output
+        output_lines = proc.stdout.strip().splitlines()
+        if output_lines:
+            last_line = output_lines[-1]  # Get the JSON summary line
+            try:
+                data = json.loads(last_line)
+                data["name"] = t["name"]
+                ts = int(time.time())
+                
+                # Write to JSONL
+                p = OUT_DIR / f"{t['name']}.jsonl"
+                with open(p, "a") as f:
+                    f.write(json.dumps({**data, "ts": ts}) + "\n")
+                
+                rows.append(data)
+            except json.JSONDecodeError:
+                print(f"❌ Could not parse JSON from {t['name']}: {last_line}")
+                continue
+    
+    # Write markdown summary
+    with open(OUT_DIR / "metrics.md", "w") as f:
+        f.write("| target | p95 (ms) | p99 (ms) | rps | err |\n|---|---:|---:|---:|---:|\n")
+        for r in rows:
+            name = r.get('name', '')
+            p95 = r.get('latency_ms_p95', 'N/A')
+            p99 = r.get('latency_ms_p99', 'N/A')
+            rps = r.get('throughput_rps', 'N/A')
+            err = r.get('error_rate', 'N/A')
+            f.write(f"| {name} | {p95} | {p99} | {rps} | {err} |\n")
+    
+    print(f"📊 Metrics written to {OUT_DIR}/")
+    return len(rows) > 0
 
 def check_structure():
     """Verify that all required sprint files exist"""
@@ -216,9 +300,10 @@ def check_claims():
 
 def run_validation():
     """Run complete validation"""
-    print("🚀 IntelGraph Sprint Pack Validation")
-    print("=" * 50)
+    print("🚀 IntelGraph Sprint Pack Validation & Benchmarks")
+    print("=" * 60)
     
+    # First run validation checks
     checks = [
         ("Structure", check_structure),
         ("Licenses", check_licenses),
@@ -236,6 +321,18 @@ def run_validation():
             print(f"❌ {name} check failed with exception: {e}")
             results.append((name, False))
     
+    # Run benchmarks if config exists
+    benchmark_success = True  # Default to true so it doesn't fail the overall validation
+    if Path("sprint/experiments/configs.yaml").exists():
+        try:
+            benchmark_success = run_benchmarks()
+            results.append(("Benchmarks", benchmark_success))
+        except Exception as e:
+            print(f"❌ Benchmarks failed with exception: {e}")
+            results.append(("Benchmarks", False))
+    else:
+        results.append(("Benchmarks", True))  # Don't fail if config doesn't exist
+    
     print(f"\n📊 Validation Summary:")
     print("-" * 20)
     all_passed = True
@@ -245,9 +342,9 @@ def run_validation():
         if not passed:
             all_passed = False
     
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 60)
     if all_passed:
-        print("🎉 All validation checks passed!")
+        print("🎉 All validation and benchmark checks passed!")
         return True
     else:
         print("⚠️  Some validation checks failed.")

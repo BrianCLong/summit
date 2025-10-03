@@ -903,3 +903,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **IntelGraph Platform** - Next-Generation Intelligence Analysis
 
 <!-- AURELIUS: demo patch marker; safe to keep/remove -->
+
+![Bench (smoke)](https://img.shields.io/badge/bench-smoke-blue)

@@ -1,0 +1,2 @@
+{"target": "simulated-neo4j", "query": "MATCH (n)-[r]->(m) RETURN count(r) LIMIT 1000", "iters": 482, "latency_ms_p50": 62, "latency_ms_p95": 106, "latency_ms_p99": 109, "throughput_rps": 16.066666666666666, "name": "graph-query-neo4j", "ts": 1759475461}
+{"target": "simulated-neo4j", "query": "MATCH (n)-[r]->(m) RETURN count(r) LIMIT 1000", "iters": 477, "latency_ms_p50": 66, "latency_ms_p95": 107, "latency_ms_p99": 110, "throughput_rps": 15.9, "name": "graph-query-neo4j", "ts": 1759475870}
