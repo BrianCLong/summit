@@ -470,3 +470,4 @@ export class CoopProvenanceLedger {
 }
 
 export * from './manifest.js';
+export * from './globalProvenanceGraph.js';
