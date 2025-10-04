@@ -1,0 +1,4 @@
+- Segments: SMB & Mid-Market
+- Channels: Self-serve, SDR
+- Cost Structure: Cloud, People, Vendors
+- Revenue: Subscriptions, Add-ons

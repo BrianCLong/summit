@@ -1,0 +1,3 @@
+req_id,role,seniority,start_by,status,budget,notes
+REQ-001,Site Reliability Engineer,Senior,2025-11-01,Open,185000,"24x7 support; on-call"
+REQ-002,Product Designer,Mid,2026-01-15,Planned,145000,"Design System upkeep"

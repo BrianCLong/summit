@@ -1,0 +1,4 @@
+workstream,task,responsible,accountable,consulted,informed
+Launch,Create press kit,Marketing Lead,VP Marketing,"PM;Design","Sales;Support"
+Launch,Run load test,DevOps Lead,Head of Eng,QA,"PM;Support"
+Feature,Define acceptance criteria,PM,Head of Product,"Design;QA",Eng

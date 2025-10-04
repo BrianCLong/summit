@@ -1,0 +1,2 @@
+uid,date,participant,study,method,notes,insights,tags
+UI-001,2025-09-28,Alice,Search UX,Interview,"Struggled with filters, expected fuzzy search",Users want more intuitive filtering,search,ux

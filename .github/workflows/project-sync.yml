@@ -1,0 +1,80 @@
+name: Sync GitHub Projects
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled]
+  pull_request:
+    types: [opened, edited, closed, reopened, labeled, unlabeled]
+  schedule:
+    - cron: "0 8 * * 1-5" # Run every weekday at 8 AM
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ORG_NAME: "brianlong" # Replace with your organization name
+
+jobs:
+  triage-new-issues:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened' && github.event_name == 'issues'
+    steps:
+      - name: Add to Project based on Label
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const labels = issue.labels.map(l => l.name);
+            let projectId;
+
+            if (labels.includes("type:bug")) {
+              // Bug Tracker Project
+              projectId = "PVT_kwDOA-g-pc4A_hU_"; // Replace with your Bug Tracker Project ID
+              console.log(`Routing issue #${issue.number} to Bug Tracker`);
+            } else if (labels.includes("type:feature")) {
+              // Feature Release Project
+              projectId = "PVT_kwDOA-g-pc4A_hUa"; // Replace with your Feature Release Project ID
+              console.log(`Routing issue #${issue.number} to Feature Release`);
+            } else {
+              // Default to Kanban
+              projectId = "PVT_kwDOA-g-pc4A_hUX"; // Replace with your Kanban Project ID
+              console.log(`Routing issue #${issue.number} to Kanban`);
+            }
+
+            if (projectId) {
+              const mutation = `mutation($projectId:ID!, $contentId:ID!) {
+                addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
+                  item { id }
+                }
+              }`;
+              await github.graphql(mutation, { projectId, contentId: issue.node_id });
+            }
+
+  update-item-status:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    steps:
+      - name: Update Status on PR Merge
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // This script is complex and requires finding the linked issue from the PR,
+            // then finding the project item for that issue, and finally updating its status.
+            // This is a placeholder for the logic.
+            console.log(`PR #${context.payload.pull_request.number} merged. Updating linked issue status to 'Done'.`);
+            // 1. Get PR body, find "Closes #<issue_number>"
+            // 2. Use issue number to get issue node_id
+            // 3. Find project item by content_node_id
+            // 4. Get project item's `Status` field ID
+            // 5. Update the status field to "Done"
+
+  nightly-sla-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for SLA Breaches
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // This script would query projects for items with a due date in the past
+            // and a status that is not "Done" or "Review".
+            console.log("Checking for items past their due date...");
+            // 1. GraphQL query to find items in Bug Tracker where Due < today and Status != Done
+            // 2. For each item, add a comment and @-mention the owner.

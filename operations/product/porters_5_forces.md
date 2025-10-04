@@ -1,0 +1,5 @@
+- Rivalry: High
+- Threat of New Entrants: Medium
+- Supplier Power: Medium
+- Buyer Power: High
+- Substitutes: Medium

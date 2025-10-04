@@ -1,0 +1,8 @@
+tracker_id,workstream,start_date,end_date,md_path,desc
+001_maestro-conductor_sprint-20251103-to-20251114,maestro-conductor,2025-11-03,2025-11-14,november2025/maestro_conductor_2025_11_03_to_2025_11_14.md,sprint-20251103-to-20251114
+002_documentation_sprint-20251103-to-20251114,documentation,2025-11-03,2025-11-14,november2025/documentation_2025_11_03_to_2025_11_14.md,sprint-20251103-to-20251114
+003_devops-platform_sprint-20251103,devops-platform,2025-11-03,2025-11-03,november2025/devops_platform_2025_11_03.md,sprint-20251103
+004_company-os_sprint-20251110,company-os,2025-11-10,2025-11-10,november2025/company_os_2025_11_10.md,sprint-20251110
+005_intelgraph-core_sprint-20251110,intelgraph-core,2025-11-10,2025-11-10,november2025/intelgraph_core_2025_11_10.md,sprint-20251110
+006_topicality_sprint-20251117-to-20251127,topicality,2025-11-17,2025-11-27,november2025/topicality_2025_11_17_to_2025_11_27.md,sprint-20251117-to-20251127
+007_gc-legal_sprint-20251117-to-20251127,gc-legal,2025-11-17,2025-11-27,november2025/gc_legal_2025_11_17_to_2025_11_27.md,sprint-20251117-to-20251127

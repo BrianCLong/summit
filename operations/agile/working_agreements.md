@@ -1,0 +1,3 @@
+- Daily standup 15 min, cameras on
+- WIP limits respected; swarming encouraged
+- Slack > Email for blockers; 4-hour PR review SLA

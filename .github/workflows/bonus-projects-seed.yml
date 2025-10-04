@@ -1,0 +1,16 @@
+name: Bonus Projects Seed
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - 'bonus_projects/seed/*.json'
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create/Update Bonus Projects
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          bash scripts/bonus/seed_projects.sh

@@ -1,0 +1,2 @@
+uid,date,change,driver,requested_by,approved_by,rollback_plan,issue_number,project
+CHG-200,2025-10-02,Increase API rate limit 10k->15k,SLA breaches,Support,CTO,"Revert nginx conf, redeploy",,

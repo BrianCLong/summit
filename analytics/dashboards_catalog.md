@@ -1,0 +1,4 @@
+- Burndown: Iterations — <Program>
+- Burnup: Feature Release — <Feature>
+- Throughput: Kanban — Platform
+- Cycle Time: Bug Tracker — All Products

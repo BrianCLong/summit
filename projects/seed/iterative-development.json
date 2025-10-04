@@ -1,0 +1,29 @@
+{
+  "name": "Iterations — Core Platform",
+  "template": "Iterative development",
+  "fields": [
+    {"name": "Status", "type": "single-select", "options": ["Backlog", "Todo", "In Progress", "Done"]},
+    {"name": "Priority", "type": "single-select", "options": ["p0", "p1", "p2"]},
+    {"name": "Estimate", "type": "number"},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Iteration", "type": "iteration"}
+  ],
+  "views": [
+    {
+      "name": "Current Sprint",
+      "layout": "board",
+      "group_by": "Status",
+      "filter": "Iteration = @current"
+    },
+    {
+      "name": "Next Sprint",
+      "layout": "table",
+      "filter": "Iteration = @next"
+    },
+    {
+      "name": "Burndown",
+      "layout": "chart",
+      "chart_type": "burndown"
+    }
+  ]
+}

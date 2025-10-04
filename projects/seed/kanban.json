@@ -1,0 +1,34 @@
+{
+  "name": "Kanban — Platform",
+  "template": "Kanban",
+  "fields": [
+    {"name": "Status", "type": "single-select", "options": ["Triage", "Ready", "In Progress", "Review", "Blocked", "Done"]},
+    {"name": 'Priority', "type": 'single-select', "options": ["p0", "p1", "p2"]},
+    {"name": 'Area', "type": 'single-select', "options": ["web", "api", "mobile", "infra"]},
+    {"name": "Estimate", "type": "number"},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Blocked by", "type": "text"}
+  ],
+  "views": [
+    {
+      "name": "Flow Board",
+      "layout": "board",
+      "columns": ["Triage", "Ready", "In Progress", "Review", "Blocked", "Done"],
+      "wip_limits": {
+        "Ready": 10,
+        "In Progress": 8,
+        "Review": 6
+      }
+    },
+    {
+      "name": "Throughput",
+      "layout": "chart",
+      "chart_type": "throughput"
+    },
+    {
+      "name": "Cycle Time",
+      "layout": "chart",
+      "chart_type": "cycle_time"
+    }
+  ]
+}

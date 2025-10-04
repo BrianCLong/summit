@@ -1,0 +1,4 @@
+name,role,influence,interest,communication_cadence,preferred_channel
+CTO,Exec Sponsor,High,High,Weekly,Slack
+Head of Sales,Revenue,Medium,High,Biweekly,Email
+Legal Counsel,Compliance,Medium,Medium,On demand,Ticket

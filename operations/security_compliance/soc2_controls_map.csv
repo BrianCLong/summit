@@ -1,0 +1,3 @@
+control,owner,evidence_source,frequency,status
+CC1.1,Security,Access reviews,quarterly,Green
+CC2.2,IT,Backup restore tests,monthly,Amber

@@ -1,0 +1,4 @@
+okr_id,level,parent,title,metric,target,owner,quarter,project
+O-1,Company,,Delight users,NPS,60,CEO,Q4-2025,Roadmap — FY2025
+KR-1.1,KR,O-1,Improve search satisfaction,CSAT-Search,4.5,PM,Q4-2025,Feature Release — Cross-Platform Search
+KR-1.2,KR,O-1,Reduce crash rate,Crash-free %,99.7,Eng,Q4-2025,Kanban — Platform

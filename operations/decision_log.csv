@@ -1,0 +1,3 @@
+uid,date,context,decision,alternatives,owner,approvers,links,issue_number,project
+DEC-101,2025-10-03,Search ranking model,Adopt BM25+semantic re-rank,Exact BM25 only; LLM-only,CTO,"PM;Eng Lead","[PRD; RFC-12]",,
+DEC-102,2025-10-03,Mobile architecture,Keep Kotlin Multiplatform for cache,Swift shared core,Mobile Lead,"Architect;QA","[Tech Spec]",,

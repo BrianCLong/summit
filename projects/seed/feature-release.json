@@ -1,0 +1,29 @@
+{
+  "name": "Feature Release — Cross-Platform Sync",
+  "template": "Feature release",
+  "fields": [
+    {"name": "Status", "type": "single-select", "options": ["Todo", "In Progress", "Done"]},
+    {"name": "Phase", "type": "single-select", "options": ["Discovery", "Design", "Build", "Test", "Beta", "GA"]},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Due", "type": "date"},
+    {"name": "DoD Checklist", "type": "text"}
+  ],
+  "views": [
+    {
+      "name": "Roadmap",
+      "layout": "timeline",
+      "group_by": "Phase",
+      "date_field": "Due"
+    },
+    {
+      "name": "Release Checklist",
+      "layout": "table"
+    },
+    {
+      "name": "QA Matrix",
+      "layout": "matrix",
+      "rows": "Feature",
+      "cols": "Platform"
+    }
+  ]
+}

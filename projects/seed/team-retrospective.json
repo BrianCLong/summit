@@ -1,0 +1,21 @@
+{
+  "name": "Retro — Sprint 1",
+  "template": "Team retrospective",
+  "fields": [
+    {"name": "Section", "type": "single-select", "options": ["kudos", "went-well", "to-improve", "ideas", "actions"]},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Due", "type": "date"}
+  ],
+  "views": [
+    {
+      "name": "Retro Board",
+      "layout": "board",
+      "group_by": "Section"
+    },
+    {
+      "name": "Action Items",
+      "layout": "table",
+      "filter": "Section = actions"
+    }
+  ]
+}

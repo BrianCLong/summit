@@ -1,0 +1,3 @@
+uid,source,blocked_by,relationship,owner,status,notes,issue_number,project
+DEP-01,Feature: Query Suggestions,Maps SDK v12,hard,Platform,At Risk,Vendor timeline uncertain,,Feature Release — Cross-Platform Sync
+DEP-02,Launch v2.0,Legal approval,hard,PM,Open,Review ToS updates,,Launch — Summit v2.0

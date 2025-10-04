@@ -1,22 +1,45 @@
-name: Feature request
-labels: ["prio:P1"]
+name: "🚀 Feature Request"
+description: "Suggest an idea for this project"
+title: "[FEAT] <title>"
+labels: ["type:feature", "status:triage"]
 body:
-  - type: textarea
-    id: context
+  - type: markdown
     attributes:
-      label: Context & problem
-      description: Who needs this and why?
+      value: "Thanks for suggesting an idea!"
   - type: textarea
-    id: acceptance
+    id: description
     attributes:
-      label: Acceptance criteria
-      description: Gherkin-style tests or measurable outcomes
+      label: "Description"
+      description: "A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]"
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Proposed Solution"
+      description: "A clear and concise description of what you want to happen."
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternatives Considered"
+      description: "A clear and concise description of any alternative solutions or features you've considered."
   - type: dropdown
-    id: area
+    id: priority
     attributes:
-      label: Area
-      options: [Graph, Ingest, ER, Analytics, Copilot, Governance, Prov-Ledger, Ops, UI, Docs, Fuzzer]
+      label: Priority
+      description: "How important is this feature to you?"
+      options:
+        - P2 (Low)
+        - P1 (Medium)
+        - P0 (High)
+      default: 0
+    validations:
+      required: true
   - type: input
-    id: exit
+    id: okr
     attributes:
-      label: Exit Criteria
+      label: "Associated OKR"
+      description: "Which Objective and Key Result does this feature support?"
+      placeholder: "e.g., O: Increase user engagement, KR: 10% MAU growth"

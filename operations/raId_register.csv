@@ -1,0 +1,5 @@
+uid,type,title,description,owner,severity,probability,impact,mitigation,trigger,status,due,issue_number,project
+R-001,Risk,Third-party auth rate limits,IdP throttles token refresh during peak,DevOps,High,Medium,High,Implement token cache + backoff,5xx auth spikes,Open,2025-10-28,,Bug Tracker — All Products
+A-014,Assumption,Usage will peak on Mondays,Planning assumes weekday spikes,PM,Low,Medium,Low,Monitor weekly cohorts,Dashboard anomaly,Open,2025-10-20,,Roadmap — FY2025
+I-022,Issue,Mobile build flaky on CI,Intermittent test runner crash,Mobile Lead,High,High,High,Pin versions + isolate flaky tests,>3 flaky runs/day,In Progress,2025-10-08,,Kanban — Platform
+D-005,Dependency,Maps SDK v12 release,Vendor API changes breaking,Platform,Medium,Medium,Medium,Pin v11,Vendor releases v12,Open,2025-11-15,,Feature Release — Cross-Platform Sync

@@ -2,6 +2,14 @@
 import json, sys, time, os, yaml
 from pathlib import Path
 
+# Choose API health URL from common env vars; fallback to local stub.
+API_HEALTH_URL = (
+    os.getenv("EVAL_API_URL")
+    or os.getenv("API_HEALTH_URL")
+    or os.getenv("API_URL")
+    or "http://127.0.0.1:8765/"
+)
+
 def load_jsonl(path):
     if not Path(path).exists(): return []
     return [json.loads(l) for l in open(path) if l.strip().startswith("{")]

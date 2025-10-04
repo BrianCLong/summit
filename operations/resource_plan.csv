@@ -1,0 +1,4 @@
+team,role,name,fte,allocation,notes
+Frontend,Engineer,A. Lee,1.0,"Feature Release — Cross-Platform Sync 60%; Kanban 40%",New hire ramping
+Backend,Engineer,B. Gomez,0.8,"Bug Tracker; Iterations",DB expert
+QA,Engineer,C. Patel,1.0,"Feature Release; Launch",Test automation lead

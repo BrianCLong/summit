@@ -1,0 +1,35 @@
+{
+  "name": "Team Planning — Q4 2025",
+  "template": "Team planning",
+  "fields": [
+    {"name": "Status", "type": "single-select", "options": ["Backlog", "Ready", "In Progress", "Review", "Done"]},
+    {"name": "Priority", "type": "single-select", "options": ["p0", "p1", "p2"]},
+    {"name": "Area", "type": "single-select", "options": ["web", "api", "mobile", "infra"]},
+    {"name": "Estimate", "type": "number"},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Iteration", "type": "iteration"},
+    {"name": "Due", "type": "date"},
+    {"name": "Risk", "type": "single-select", "options": ["low", "med", "high"]},
+    {"name": "OKR", "type": "text"}
+  ],
+  "views": [
+    {
+      "name": "Sprint Board",
+      "layout": "board",
+      "group_by": "Status",
+      "swimlanes": "Team",
+      "filter": "Iteration = @current"
+    },
+    {
+      "name": "Capacity Plan",
+      "layout": "table",
+      "group_by": "Owner",
+      "sum_fields": ["Estimate"]
+    },
+    {
+      "name": "Risks",
+      "layout": "table",
+      "filter": "Risk in (med, high)"
+    }
+  ]
+}

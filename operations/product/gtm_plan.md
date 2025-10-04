@@ -1,0 +1,4 @@
+- ICP: Product-led teams, 50–500 FTE
+- Messaging: "Ship smarter, faster"
+- Tactics: Launch webinar, case studies, partner marketplace
+- Funnel: MQL→SQL→Win with SLA targets

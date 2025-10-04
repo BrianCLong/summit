@@ -1,0 +1,27 @@
+{
+  "name": "Launch — Summit v2.0",
+  "template": "Product launch",
+  "fields": [
+    {"name": "Status", "type": "single-select", "options": ["Not Started", "In Progress", "Complete"]},
+    {"name": "Track", "type": "single-select", "options": ["Eng", "PM", "Design", "Docs", "Marketing", "Sales", "Support", "Legal", "Data"]},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Due", "type": "date"}
+  ],
+  "views": [
+    {
+      "name": "Gantt",
+      "layout": "timeline",
+      "group_by": "Track",
+      "date_field": "Due"
+    },
+    {
+      "name": "Go/No-Go Checklist",
+      "layout": "table",
+      "filter": "Status != Complete"
+    },
+    {
+      "name": "Launch Comms Matrix",
+      "layout": "table"
+    }
+  ]
+}

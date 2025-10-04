@@ -1,24 +1,27 @@
-## Summary
+## Description
 
-- What changed and why?
+A brief description of the changes in this pull request.
 
-## Evidence & Performance
+## Related Issues
 
-- **Bench Table:** (added by CI comment)
-- **Status:** ☐ PASS ☐ FAIL | **Δ tolerance:** 10% default
+- Closes #<issue_number>
 
-## Compliance & IP
+## Type of Change
 
-- See CI comment summary
-- Data handling notes (if any): <!-- e.g., PII touched? -->
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] This change requires a documentation update
 
-## Risk & Rollback
+## Definition of Done
 
-- Risk class: ☐ Low ☐ Med ☐ High
-- Rollback: `git revert -m 1 <merge-commit>` + re-run SLO pipeline
-
-## Checklist
-
-- [ ] Tests updated
-- [ ] SLO impact considered (`sprint/benchmark/slo.yaml`)
-- [ ] Neo4j PROFILE reviewed for new/changed queries (if applicable)
+- [ ] My code follows the style guidelines of this project
+- [ ] I have performed a self-review of my own code
+- [ ] I have commented my code, particularly in hard-to-understand areas
+- [ ] I have made corresponding changes to the documentation
+- [ ] My changes generate no new warnings
+- [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] New and existing unit tests pass locally with my changes
+- [ ] Any dependent changes have been merged and published in downstream modules
+- [ ] Merged to default branch
+- [ ] Release notes added

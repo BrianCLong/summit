@@ -1,0 +1,4 @@
+category,item,owner,freq,amount,capex_opex,cost_center,start,end,notes
+Cloud,Compute scale-up,DevOps,monthly,12000,OpEx,PLAT,2025-10-01,2025-12-31,Peak season
+Vendors,Maps SDK,PM,annual,18000,OpEx,PROD,2025-11-15,2026-11-14,Contract renewal
+Equipment,Load test rigs,DevOps,one-time,35000,CapEx,ENG,2025-10-20,,Purchase order

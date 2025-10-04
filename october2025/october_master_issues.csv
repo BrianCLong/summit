@@ -1,0 +1,166 @@
+Title,Body,Labels,Milestone
+[P0][CI/Policy] Add OPA Release Gate (fail-closed) to PRs & Releases,"**Goal**: Enforce `policies/release_gate.rego` in CI and block merges on deny.
+**Why**: Non-negotiable governance control; proves policy-aware releases.
+**Scope**
+- Add reusable workflow `.github/workflows/policy.check.release-gate.yml`
+- `opa eval` against release inputs; publish results as a check + artifact
+- Branch protection: require `release-gate` check
+**Acceptance**
+- PR with a contrived violation is blocked
+- Successful run uploads result artifact and summary
+**Artifacts**
+- CI logs, artifact URL
+**Owner**: DevOps/SecEng
+**Due (target)**: 2025-10-02
+","prd:october,lane:gov-ops,prio:p0,type:feature,gate",October-2025
+[P0][SupplyChain] Emit SBOM (CycloneDX) + Provenance Attestations on Build,"**Goal**: Produce SBOM + SLSA-style provenance for every build; attach to Releases.
+**Scope**
+- Add CycloneDX generation (`sbom.json`) for services/images
+- Create provenance attestations; verify signatures
+- Upload to release assets and print **hashes** in GH Actions summary
+**Acceptance**
+- Release page shows SBOM + attestation assets
+- Hashes copied into Release Notes
+**Owner**: DevOps
+**Due (target)**: 2025-10-03
+","prd:october,lane:security,prio:p0,type:feature,artifact",October-2025
+[P0][Observability] Commit Grafana JSON + Panel UIDs for core SLO dashboards,"**Goal**: Materialize dashboards and commit JSON to repo.
+**Panels**
+- API p95 latency
+- OPA decision p95 latency
+- Queue lag
+- Ingest failure rate
+- Golden-flow pass %
+**Acceptance**
+- JSON committed under `/observability/grafana/`
+- README lists panel **UIDs**; screenshots exported
+**Owner**: SRE
+**Due (target)**: 2025-10-03
+","prd:october,lane:observability,prio:p0,type:feature,docs",October-2025
+[P0][Synthetics] Add k6 Golden-Flow Suite + PR/Nightly Jobs + Alerts,"**User Journeys**
+- Login → Query → Graph render → Export
+**Thresholds**
+- Align with SLOs (e.g., p95 < 1.5s for critical paths)
+**Scope**
+- k6 tests + GH Action jobs (PR + nightly schedule)
+- Store JUnit + HTML artifacts
+- Alert to Slack/Teams on threshold breach
+**Acceptance**
+- Nightly green with artifacts stored 7d
+- Threshold breach opens a failing check on PR
+**Owner**: QA/SRE
+**Due (target)**: 2025-10-03
+","prd:october,lane:observability,prio:p0,type:test,gate",October-2025
+[P0][Security] Implement WebAuthn Step-Up for Risky Routes + DLP Policy Bindings,"**Risky Routes**
+- Export, delete, privileged mutations
+**Scope**
+- WebAuthn server config; UI prompt for step-up
+- Bind OPA policies to trigger step-up
+- Emit audit event with policy evidence
+**Acceptance**
+- Attempt risky action without step-up → blocked with “Why blocked?”
+- With step-up → allowed; audit contains evidence + attestation reference
+**Owner**: Platform + Frontend + Security
+**Due (target)**: 2025-10-09
+","prd:october,lane:security,lane:frontend,prio:p0,type:feature,gate",October-2025
+[P0][E2E] Golden-Path CI Job (seed→query→export→audit+provenance asserts),"**Goal**: One-command validation of the end-to-end flow.
+**Scope**
+- `make e2e:golden` task seeds data; runs NL→Cypher/query; attempts export
+- Asserts audit/provenance entries and policy outcomes (block/allow) as expected
+**Acceptance**
+- CI job passes; artifacts include proof objects and logs
+**Owner**: QA + Platform
+**Due (target)**: 2025-10-10
+","prd:october,lane:platform,prio:p0,type:test,gate",October-2025
+[P1][Docs] Runbooks + Threat Model Delta + Pilot Guide + Filled Release Notes,"**Docs Pack**
+- CI scopes & release gate runbook
+- Synthetics & dashboards runbook
+- Threat model delta (October improvements)
+- Pilot deployment guide
+- **Filled** Release Notes: SBOM hash, provenance ID, panel UIDs, synthetics link, known issues, rollback
+**Acceptance**
+- Reviewer reproduces steps end-to-end
+- Release Notes complete and linked from the tag
+**Owner**: Tech Writer + TL
+**Due (target)**: 2025-10-17
+","prd:october,lane:docs,prio:p1,type:doc,artifact",October-2025
+[P1][Observability] Wire Alerts + Trace Exemplars for OPA decision latency,"**Scope**
+- Configure alerts for SLO panels
+- Add trace exemplars to OPA p95 panel
+**Acceptance**
+- Firing test alert visible in Slack/Teams
+- Panel shows exemplars linkable to traces
+**Owner**: SRE
+**Due (target)**: 2025-10-15
+","prd:october,lane:observability,prio:p1,type:feature",October-2025
+"[P1][Analyst UX] Analyst Assist v0.2 (query builder, explainability, policy-aware export request)","**Scope**
+- Query builder UX
+- “Why blocked?” explanation object wired to policy outcomes
+- Export request that previews policy impact
+**Acceptance**
+- Demo walkthrough: assist → explain → export; blocked/allowed as per policy
+**Owner**: Frontend + Design
+**Due (target)**: 2025-10-17
+","prd:october,lane:frontend,prio:p1,type:feature,ux",October-2025
+[P0][Security] CodeQL + Trivy + Dep Scans → SARIF + Waiver Register,"**Scope**
+- Add CodeQL, Trivy, and dependency scans
+- Publish SARIF to GH code scanning
+- Maintain `SECURITY_WAIVERS.md` with expiry/mitigation
+**Acceptance**
+- 0 critical vulns outstanding
+- Waivers (if any) tracked with expiry and owner
+**Owner**: Security Eng
+**Due (target)**: 2025-10-22
+","prd:october,lane:security,prio:p0,type:hardening,gate",October-2025
+"[P1][Air-Gap] Offline Deploy v1 (images+digests, registry steps, config injection, checksums, transcript)","**Scope**
+- Offline bundle folder with image list + digests
+- Private registry mirror steps
+- Config/secret injection approach
+- Checksum manifest + dry-run transcript
+**Acceptance**
+- Transcript passes; checksums match; rollback documented
+**Owner**: Platform + Infra
+**Due (target)**: 2025-10-23
+","prd:october,lane:platform,prio:p1,type:feature,runbook",October-2025
+[P1][Governance] IGAC/Provenance sign-off + policy bundle SHAs pinned to release,"**Scope**
+- IGAC chair notes for October release
+- Policy bundle SHAs recorded and pinned to tag
+**Acceptance**
+- Sign-off doc linked in Release Notes
+- Policy SHAs reproducible
+**Owner**: TL + Governance
+**Due (target)**: 2025-10-24
+","prd:october,lane:gov-ops,prio:p1,type:doc,gate",October-2025
+"[P0][Delta] Burn down criticals/warnings, flaky tests, perf hiccups","**Scope**
+- Close all blocking issues surfaced by scans, synthetics, E2E
+- Stabilize flaky tests
+- Tune performance hotspots on critical path
+**Acceptance**
+- CI green across required checks for 7 consecutive runs
+- Thresholds respected under load
+**Owner**: TL + QA + SRE
+**Due (target)**: 2025-10-29
+","prd:october,lane:platform,prio:p0,type:hardening",October-2025
+[P0][BizDev] At least one signed Pilot SOW + Features→SOW mapping table + value metric,"**Scope**
+- Finalize & sign ≥1 pilot SOW
+- Commit mapping table (features → SOW acceptance)
+- Capture value before/after metric for pilot
+**Acceptance**
+- Signed SOW on file
+- Mapping committed under `/pilot/`
+**Owner**: BizDev + You
+**Due (target)**: 2025-10-29
+","prd:october,lane:bizdev,prio:p0,type:doc",October-2025
+[P0][Release] Tag 2025.10.HALLOWEEN + publish filled Release Notes with artifacts,"**Scope**
+- Create tag `2025.10.HALLOWEEN`
+- Attach SBOM + provenance artifacts
+- Include dashboard JSON paths, panel UIDs, k6 report link
+- Security summary + waivers table
+- Air-gap pointer + checksums
+- Rollback plan
+**Acceptance**
+- Release page complete; all links valid
+- All required checks green
+**Owner**: Release Captain
+**Due (target)**: 2025-10-30
+","prd:october,lane:gov-ops,prio:p0,type:release,gate",October-2025

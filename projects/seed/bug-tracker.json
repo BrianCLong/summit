@@ -1,0 +1,36 @@
+{
+  "name": "Bug Tracker — All Products",
+  "template": "Bug tracker",
+  "fields": [
+    {"name": "Status", "type": "single-select", "options": ["Triage", "Confirmed", "In Progress", "Fix Sent", "Done"]},
+    {"name": "Severity", "type": "single-select", "options": ["S0", "S1", "S2", "S3"]},
+    {"name": "Impact (users)", "type": "number"},
+    {"name": "Env", "type": "single-select", "options": ["dev", "stage", "prod"]},
+    {"name": "Area", "type": "single-select", "options": ["web", "api", "mobile", "infra"]},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Due", "type": "date"}
+  ],
+  "views": [
+    {
+      "name": "Intake",
+      "layout": "table",
+      "filter": "Status = Triage"
+    },
+    {
+      "name": "SLA Breaches",
+      "layout": "table",
+      "filter": "Due < @today AND Status != Done"
+    },
+    {
+      "name": "Hotlist",
+      "layout": "table",
+      "filter": "Severity in (S0, S1)"
+    },
+    {
+      "name": "Defect Trends",
+      "layout": "chart",
+      "chart_type": "line",
+      "group_by": "created_at"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "Roadmap — FY2025",
+  "template": "Roadmap",
+  "fields": [
+    {"name": "Horizon", "type": "single-select", "options": ["Now", "Next", "Later"]},
+    {"name": "Confidence", "type": "single-select", "options": ["low", "med", "high"]},
+    {"name": "T-shirt Size", "type": "single-select", "options": ["S", "M", "L", "XL"]},
+    {"name": "Strategic Pillar", "type": "text"},
+    {"name": "Success Metrics", "type": "text"}
+  ],
+  "views": [
+    {
+      "name": "Now/Next/Later",
+      "layout": "board",
+      "group_by": "Horizon"
+    },
+    {
+      "name": "Quarterly Timeline",
+      "layout": "timeline"
+    },
+    {
+      "name": "Risks & Bets",
+      "layout": "table",
+      "filter": "Confidence = low"
+    }
+  ]
+}

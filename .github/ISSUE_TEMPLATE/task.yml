@@ -1,0 +1,31 @@
+name: "✅ Task"
+description: "A general task or chore."
+title: "[TASK] <title>"
+labels: ["type:chore"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: "Task Description"
+      description: "What needs to be done?"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: "Acceptance Criteria"
+      description: "How do we know this task is complete?"
+      placeholder: |
+        - [ ] Criteria 1
+        - [ ] Criteria 2
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: "Which area of the project does this task relate to?"
+      options:
+        - web
+        - api
+        - mobile
+        - infra
+        - docs

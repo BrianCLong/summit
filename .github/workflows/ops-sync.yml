@@ -1,0 +1,24 @@
+name: Ops Sync
+on:
+  push:
+    paths:
+      - 'operations/**/*.csv'
+  workflow_dispatch: {}
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.x' }
+      - run: pip install requests pyyaml
+      - name: Sync CSVs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          bash scripts/sync_csv_to_issues.sh operations/raId_register.csv "RAID"
+          bash scripts/sync_csv_to_issues.sh operations/decision_log.csv "DECISION"
+          bash scripts/sync_csv_to_issues.sh operations/dependency_map.csv "DEPENDENCY"
+          bash scripts/sync_csv_to_issues.sh operations/change_log.csv "CHANGE"
+          bash scripts/sync_csv_to_issues.sh operations/stakeholder_map.csv "STAKEHOLDER"
+          bash scripts/sync_csv_to_issues.sh operations/vendor_tracker.csv "VENDOR"

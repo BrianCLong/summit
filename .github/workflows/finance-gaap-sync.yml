@@ -1,0 +1,14 @@
+name: Finance & GAAP Sync
+on:
+  schedule: [{ cron: '0 1 * * *' }]
+  workflow_dispatch: {}
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update GAAP Close from CSV
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/bonus/gaap_flux_refresh.py operations/budget_capex_opex.csv bonus_projects/seed/gaap_close.json

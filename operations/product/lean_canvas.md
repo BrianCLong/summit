@@ -1,0 +1,5 @@
+- Problem: Slow, irrelevant search results
+- Solution: Hybrid retrieval + semantic re-rank
+- UVP: "Find in 1s or less"
+- Metrics: CSAT-Search, Time-to-Result, Retention
+- Unfair Advantage: Proprietary signals

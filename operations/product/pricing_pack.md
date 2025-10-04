@@ -1,0 +1,3 @@
+- Packages: Free, Pro, Enterprise
+- Metering: Seats + usage
+- Discount Policy: Volume-tiered, time-bound

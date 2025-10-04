@@ -1,0 +1,50 @@
+name: Project Audit (Nightly)
+on:
+  schedule:
+    - cron: "17 8 * * *"   # daily 08:17 UTC
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: GH auth
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh auth status || true
+      - name: Verify Project #8 == 104 and CSV bijection
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TARGET=104
+          OWNER="BrianCLong"
+          CSV="project_management/october2025_sprint_tracker.csv"
+
+          count=$(gh project item-list 8 --owner "$OWNER" --limit 500 --format json | jq '.items | length')
+          echo "Project #8: $count items"
+          if [[ "$count" -ne "$TARGET" ]]; then
+            echo "::warning::Project #8 count != 104 (is $count)"
+          fi
+
+          csv_titles=$(tail -n +2 "$CSV" | awk -F, '{print "["$2"] "$6}' | sed 's/\r$//' \
+            | awk '{print tolower($0)}' | sed -E 's/[[:space:]]+/_/g' | sort)
+          proj_titles=$(gh project item-list 8 --owner "$OWNER" --limit 500 --format json \
+            | jq -r '.items[]?.title // empty' \
+            | awk '{print tolower($0)}' | sed -E 's/[[:space:]]+/_/g' | sort)
+
+          diff=$(comm -3 <(printf "%s\n" "$csv_titles") <(printf "%s\n" "$proj_titles") || true)
+          if [[ -n "$diff" ]]; then
+            echo "::warning::CSV <-> Project #8 diff detected"
+            echo "$diff"
+          fi
+      - name: Comment on tracking issue if drift
+        if: failure() || contains(steps.audit.outputs, 'warning')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment 9883 --body "Nightly audit detected drift in Project #8 or CSV bijection. Please run \`scripts/fill-missing-from-october.sh\` and \`scripts/verify-project8-104.sh\`."

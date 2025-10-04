@@ -1,0 +1,6 @@
+- Political: Data residency
+- Economic: Cloud cost volatility
+- Social: Privacy expectations
+- Tech: LLM advances
+- Legal: SOC2, GDPR
+- Environmental: Data center efficiency
