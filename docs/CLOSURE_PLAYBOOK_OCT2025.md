@@ -476,6 +476,37 @@ gh issue create \
 
 ---
 
+## One-Pass Orchestrator (Safe-by-Default)
+
+**Run all six steps end-to-end with guardrails.** Default is **dry-run**; set `APPLY=1` to perform writes after review.
+
+**Prerequisites:** `git`, `python3`, `maestro`, `intelgraph`, `cosign`, `gh`, `jq`, access to repos and calendars.
+
+### Quick Start
+
+```bash
+export RUN_ID="oct-2025-delivery-final"
+export RELEASE_TAG="release-2025-10"
+export ROLLBACK_TAG="oct-2025-delivery"
+export PR_NUMBER="9800"
+export PROJECT_ID="8"
+export OWNER="BrianCLong"
+export CAL_ICS="calendar/Topicality_Dependency_Sync_Wednesdays.ics"
+export MERGE_STRATEGY="cherry-pick"   # or "rebase"
+export APPLY=0                         # 0=dry-run, 1=apply after review
+
+./tools/run_one_pass.sh
+```
+
+### Safety Gates (auto-block)
+
+* Abort if **API health** fails unless `FORCE=1`
+* Halt on CI failures after merge/cherry-pick
+* Prevent tag creation if `verify_index` reports missing artifacts
+* On any policy violation or p95 SLO breach, stop and require manual approval or run `rollback`
+
+---
+
 ## Appendices
 
 ### Appendix A: Command Reference
@@ -522,6 +553,14 @@ artifacts/
   ├── disclosure-pack-2025-10.tar.gz
   ├── project8_post_dedup_20251003.json
   └── project7_final_20251003.json
+
+tools/
+  ├── run_one_pass.sh
+  ├── api_health.sh
+  ├── dedupe.py
+  ├── make_review_pack.py
+  ├── apply_dedupe.py
+  └── verify_index.py
 
 .github/workflows/
   ├── error-budget-monitoring.yml
