@@ -33,7 +33,7 @@ projects-destroy: ## Destroy all GitHub projects (requires YES confirmation)
 .PHONY: bonus-seed
 bonus-seed: ## Create the 9 bonus projects
 	@chmod +x scripts/bonus/seed_projects.sh
-	@scripts/bonus/seed_projects.sh
+	@scripts/bonus/seed_projects.sh BrianCLong
 
 .PHONY: bonus-apply
 bonus-apply: ## Apply fields/views/items via GraphQL

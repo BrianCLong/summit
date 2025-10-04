@@ -1,0 +1,36 @@
+{
+  "name": "Startup Ops — Company-Building Playbook",
+  "fields": [
+    {"name": "Workstream", "type": "single-select", "options": ["Fundraising", "Hiring", "Legal", "Ops", "Board"]},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Status", "type": "single-select", "options": ["Todo", "In Progress", "Done", "Blocked"]},
+    {"name": "Due", "type": "date"},
+    {"name": "Risk", "type": "single-select", "options": ["low", "med", "high"]},
+    {"name": "Doc Link", "type": "text"}
+  ],
+  "views": [
+    {
+      "name": "Fundraising Timeline",
+      "layout": "timeline",
+      "group_by": "Workstream",
+      "filter": "Workstream = Fundraising"
+    },
+    {
+      "name": "Hiring Pipeline",
+      "layout": "board",
+      "group_by": "Status",
+      "filter": "Workstream = Hiring"
+    },
+    {
+      "name": "Board Prep",
+      "layout": "table",
+      "filter": "Workstream = Board AND Status != Done"
+    }
+  ],
+  "items": [
+    {"Workstream":"Fundraising","Owner":"CEO","Status":"In Progress","Due":"2025-11-30","Risk":"high","Doc Link":"Data Room"},
+    {"Workstream":"Hiring","Owner":"HR","Status":"Todo","Due":"2025-10-31","Risk":"med","Doc Link":"SRE Job Desc"},
+    {"Workstream":"Legal","Owner":"Legal Counsel","Status":"Done","Due":"2025-09-30","Risk":"low","Doc Link":"Term Sheet"},
+    {"Workstream":"Board","Owner":"CEO","Status":"Todo","Due":"2025-12-15","Risk":"med","Doc Link":"Board Deck"}
+  ]
+}

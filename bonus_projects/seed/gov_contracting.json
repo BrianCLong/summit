@@ -1,0 +1,36 @@
+{
+  "name": "Gov Contracting — FAR/DFARS Pipeline",
+  "fields": [
+    {"name": "Vehicle", "type": "single-select", "options": ["SBIR", "IDIQ", "BPA", "Other"]},
+    {"name": "Agency", "type": "text"},
+    {"name": "NAICS", "type": "text"},
+    {"name": "Set-aside", "type": "single-select", "options": ["8(a)", "SDVOSB", "WOSB", "None"]},
+    {"name": "Status", "type": "single-select", "options": ["Sources Sought", "RFP", "Proposal Submitted", "Awarded", "Lost"]},
+    {"name": "Due", "type": "date"},
+    {"name": "Corr ID", "type": "text"},
+    {"name": "Compliance Tags", "type": "text"}
+  ],
+  "views": [
+    {
+      "name": "Opportunities Board",
+      "layout": "board",
+      "group_by": "Status"
+    },
+    {
+      "name": "Compliance Readiness",
+      "layout": "table",
+      "group_by": "Compliance Tags"
+    },
+    {
+      "name": "Proposal Calendar",
+      "layout": "timeline",
+      "date_field": "Due",
+      "filter": "Status = RFP OR Status = Proposal Submitted"
+    }
+  ],
+  "items": [
+    {"Vehicle":"SBIR","Agency":"AFWERX","NAICS":"541511","Set-aside":"SB","Status":"Sources Sought","Due":"2025-11-01","Corr ID":"AF-2025-001","Compliance Tags":"CMMC"},
+    {"Vehicle":"IDIQ","Agency":"GSA","NAICS":"541519","Set-aside":"None","Status":"RFP","Due":"2025-12-15","Corr ID":"GSA-2025-002","Compliance Tags":"NIST 800-171"},
+    {"Vehicle":"BPA","Agency":"DoD","NAICS":"541511","Set-aside":"SDVOSB","Status":"Awarded","Due":"2025-09-01","Corr ID":"DoD-2025-003","Compliance Tags":"CMMC"}
+  ]
+}

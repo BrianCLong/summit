@@ -1,0 +1,37 @@
+{
+  "name": "Design System — Tokens, Components, Adoption",
+  "fields": [
+    {"name": "Component", "type": "text"},
+    {"name": "Token", "type": "text"},
+    {"name": "Platform", "type": "single-select", "options": ["web", "ios", "android"]},
+    {"name": "Status", "type": "single-select", "options": ["Draft", "In Review", "Published", "Deprecated"]},
+    {"name": "Adoption %", "type": "number"},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Repo", "type": "text"}
+  ],
+  "views": [
+    {
+      "name": "Component Kanban",
+      "layout": "board",
+      "group_by": "Status"
+    },
+    {
+      "name": "Token Changes",
+      "layout": "table",
+      "filter": "Token != null"
+    },
+    {
+      "name": "Adoption Heatmap",
+      "layout": "chart",
+      "chart_type": "bar",
+      "group_by": "Component",
+      "value_field": "Adoption %"
+    }
+  ],
+  "items": [
+    {"Component":"Button","Token":"color-primary","Platform":"web","Status":"Published","Adoption %":85,"Owner":"frontend","Repo":"web"},
+    {"Component":"TextInput","Token":"spacing-md","Platform":"ios","Status":"In Review","Adoption %":30,"Owner":"mobile","Repo":"mobile"},
+    {"Component":"Avatar","Token":"border-radius-full","Platform":"android","Status":"Published","Adoption %":70,"Owner":"mobile","Repo":"mobile"},
+    {"Component":"Card","Token":"shadow-elevation-1","Platform":"web","Status":"Draft","Adoption %":10,"Owner":"frontend","Repo":"web"}
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "GAAP Close — Financial Reporting",
+  "fields": [
+    {"name": "Month", "type": "text"},
+    {"name": "Task", "type": "text"},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Status", "type": "single-select", "options": ["Open", "In Progress", "Completed", "Blocked"]},
+    {"name": "Due", "type": "date"},
+    {"name": "GL Module", "type": "single-select", "options": ["AR", "AP", "RevRec", "FixedAssets", "Cash", "Payroll", "Intercompany"]},
+    {"name": "Policy Ref", "type": "text"},
+    {"name": "Evidence", "type": "text"},
+    {"name": "JE#", "type": "text"}
+  ],
+  "views": [
+    {
+      "name": "Month-End Checklist",
+      "layout": "timeline",
+      "date_field": "Due",
+      "group_by": "GL Module"
+    },
+    {
+      "name": "Close Readiness",
+      "layout": "table",
+      "group_by": "Status"
+    }
+  ],
+  "items": [
+    {"Month":"2025-09","Task":"Revenue cutoff testing","Owner":"Controller","Status":"Completed","Due":"2025-10-03","GL Module":"RevRec","Policy Ref":"ASC 606","Evidence":"RevRec Memo","JE#":"JE-001"},
+    {"Month":"2025-09","Task":"Bank reconciliation","Owner":"Accountant","Status":"In Progress","Due":"2025-10-05","GL Module":"Cash","Policy Ref":"Internal Policy","Evidence":"Bank Statement"},
+    {"Month":"2025-09","Task":"Fixed assets depreciation","Owner":"Accountant","Status":"Open","Due":"2025-10-07","GL Module":"FixedAssets","Policy Ref":"ASC 360","Evidence":"Depreciation Schedule"},
+    {"Month":"2025-09","Task":"Intercompany eliminations","Owner":"Controller","Status":"Blocked","Due":"2025-10-10","GL Module":"Intercompany","Policy Ref":"ASC 810","Evidence":"Interco Report"}
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "name": "Regulatory — GDPR/CCPA/HIPAA",
+  "fields": [
+    {"name": "Regime", "type": "single-select", "options": ["GDPR", "CCPA", "HIPAA", "Other"]},
+    {"name": "Data Type", "type": "text"},
+    {"name": "Process", "type": "text"},
+    {"name": "DPIA?", "type": "single-select", "options": ["Yes", "No", "N/A"]},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Status", "type": "single-select", "options": ["Compliant", "Non-Compliant", "In Review"]},
+    {"name": "Due", "type": "date"},
+    {"name": "Evidence", "type": "text"},
+    {"name": "System", "type": "text"}
+  ],
+  "views": [
+    {
+      "name": "DPIA Queue",
+      "layout": "table",
+      "filter": "DPIA? = Yes AND Status = In Review"
+    },
+    {
+      "name": "Data Mapping",
+      "layout": "table",
+      "group_by": "System"
+    },
+    {
+      "name": "Breach Playbook",
+      "layout": "table",
+      "filter": "Process = Incident Response"
+    }
+  ],
+  "items": [
+    {"Regime":"GDPR","Data Type":"Customer PII","Process":"User Registration","DPIA?":"Yes","Owner":"Legal","Status":"Compliant","Due":"2025-10-01","Evidence":"DPIA-001","System":"Auth Service"},
+    {"Regime":"CCPA","Data Type":"Marketing Data","Process":"Ad Targeting","DPIA?":"No","Owner":"Marketing","Status":"In Review","Due":"2025-11-15","Evidence":"Privacy Policy","System":"Marketing Platform"},
+    {"Regime":"HIPAA","Data Type":"Health Records","Process":"Data Storage","DPIA?":"Yes","Owner":"Compliance","Status":"Non-Compliant","Due":"2025-12-01","Evidence":"Audit Report","System":"Health App Backend"}
+  ]
+}

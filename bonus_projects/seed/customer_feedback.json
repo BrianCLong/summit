@@ -1,0 +1,42 @@
+{
+  "name": "Customer Feedback — Intake & Insights",
+  "fields": [
+    {"name": "Source", "type": "single-select", "options": ["CS", "Sales", "App", "Forum"]},
+    {"name": "Customer", "type": "text"},
+    {"name": "ARR", "type": "number"},
+    {"name": "Theme", "type": "text"},
+    {"name": "Sentiment", "type": "single-select", "options": ["pos", "neg", "neu"]},
+    {"name": "Impact", "type": "single-select", "options": ["low", "med", "high"]},
+    {"name": "Linked Issue", "type": "text"},
+    {"name": "Status", "type": "single-select", "options": ["New", "Triaged", "Actioned", "Archived"]}
+  ],
+  "views": [
+    {
+      "name": "Intake",
+      "layout": "table",
+      "filter": "Status = New"
+    },
+    {
+      "name": "Themes",
+      "layout": "table",
+      "group_by": "Theme"
+    },
+    {
+      "name": "Top $ Impact",
+      "layout": "table",
+      "sort_by": "ARR desc"
+    },
+    {
+      "name": "Voice of Customer",
+      "layout": "chart",
+      "chart_type": "pie",
+      "group_by": "Sentiment"
+    }
+  ],
+  "items": [
+    {"Source":"Sales","Customer":"Acme Co","ARR":220000,"Theme":"Search speed","Sentiment":"neg","Impact":"high","Status":"New"},
+    {"Source":"CS","Customer":"Beta Inc","ARR":54000,"Theme":"Mobile crashes","Sentiment":"neg","Impact":"med","Status":"New"},
+    {"Source":"App","Customer":"Gamma LLC","ARR":10000,"Theme":"New feature X","Sentiment":"pos","Impact":"low","Status":"Triaged"},
+    {"Source":"Forum","Customer":"Delta Corp","ARR":150000,"Theme":"Integration Y","Sentiment":"neu","Impact":"high","Status":"New"}
+  ]
+}

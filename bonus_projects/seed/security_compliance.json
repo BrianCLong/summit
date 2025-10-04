@@ -1,0 +1,41 @@
+{
+  "name": "Security & Compliance — Controls & Audits",
+  "fields": [
+    {"name": "Control", "type": "text"},
+    {"name": "Framework", "type": "single-select", "options": ["SOC2", "ISO27001", "HIPAA"]},
+    {"name": "Evidence Source", "type": "text"},
+    {"name": "Evidence Due", "type": "date"},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Status", "type": "single-select", "options": ["Open", "In Progress", "Closed", "Risk Accepted"]},
+    {"name": "Severity", "type": "single-select", "options": ["S0", "S1", "S2", "S3"]},
+    {"name": "Finding Id", "type": "text"}
+  ],
+  "views": [
+    {
+      "name": "Controls Map",
+      "layout": "table",
+      "group_by": "Framework"
+    },
+    {
+      "name": "Audit Calendar",
+      "layout": "timeline",
+      "date_field": "Evidence Due"
+    },
+    {
+      "name": "Findings Hotlist",
+      "layout": "table",
+      "filter": "Severity in (S0, S1)"
+    },
+    {
+      "name": "Policy Gaps",
+      "layout": "table",
+      "filter": "Status = Open AND Control = null"
+    }
+  ],
+  "items": [
+    {"Control":"CC1.1","Framework":"SOC2","Evidence Source":"Access Reviews","Evidence Due":"2025-12-31","Owner":"Security","Status":"Open","Severity":"S2"},
+    {"Control":"CC2.2","Framework":"SOC2","Evidence Source":"Backup Tests","Evidence Due":"2025-11-15","Owner":"IT","Status":"In Progress","Severity":"S2"},
+    {"Control":"A.5.1","Framework":"ISO27001","Evidence Source":"Info Sec Policy","Evidence Due":"2025-10-31","Owner":"Security","Status":"Closed","Severity":"S3"},
+    {"Control":"164.308(a)(1)(ii)(A)","Framework":"HIPAA","Evidence Source":"Risk Analysis","Evidence Due":"2025-12-01","Owner":"Compliance","Status":"Open","Severity":"S1","Finding Id":"HIPAA-001"}
+  ]
+}

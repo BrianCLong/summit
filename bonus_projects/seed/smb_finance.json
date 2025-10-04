@@ -1,0 +1,44 @@
+{
+  "name": "SMB Finance — AP/AR/Procurement",
+  "fields": [
+    {"name": "Type", "type": "single-select", "options": ["AP", "AR", "PO"]},
+    {"name": "Counterparty", "type": "text"},
+    {"name": "Amount", "type": "number"},
+    {"name": "Due", "type": "date"},
+    {"name": "Status", "type": "single-select", "options": ["Open", "Approved", "Paid", "Overdue"]},
+    {"name": "GL Account", "type": "text"},
+    {"name": "Cost Center", "type": "text"},
+    {"name": "Invoice Link", "type": "text"},
+    {"name": "PO#", "type": "text"}
+  ],
+  "views": [
+    {
+      "name": "AP Aging",
+      "layout": "table",
+      "filter": "Type = AP",
+      "group_by": "Status"
+    },
+    {
+      "name": "AR Aging",
+      "layout": "table",
+      "filter": "Type = AR",
+      "group_by": "Status"
+    },
+    {
+      "name": "Open POs",
+      "layout": "table",
+      "filter": "Type = PO AND Status = Open"
+    },
+    {
+      "name": "Month-End Blocking",
+      "layout": "table",
+      "filter": "Status = Open AND Due < @today"
+    }
+  ],
+  "items": [
+    {"Type":"AP","Counterparty":"Vendor A","Amount":1500,"Due":"2025-10-15","Status":"Open","GL Account":"5000","Cost Center":"ENG","Invoice Link":"link-to-invoice-A"},
+    {"Type":"AR","Counterparty":"Client X","Amount":5000,"Due":"2025-09-30","Status":"Overdue","GL Account":"4000","Cost Center":"SALES","Invoice Link":"link-to-invoice-X"},
+    {"Type":"PO","Counterparty":"Supplier B","Amount":2500,"Due":"2025-11-01","Status":"Approved","GL Account":"6000","Cost Center":"OPS","PO#":"PO-001"},
+    {"Type":"AP","Counterparty":"Vendor C","Amount":800,"Due":"2025-10-25","Status":"Paid","GL Account":"5000","Cost Center":"ENG","Invoice Link":"link-to-invoice-C"}
+  ]
+}

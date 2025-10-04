@@ -1,0 +1,35 @@
+{
+  "name": "Content Calendar — GTM, Docs, Social",
+  "fields": [
+    {"name": "Asset Type", "type": "single-select", "options": ["blog", "doc", "release-note", "social", "video"]},
+    {"name": "Channel", "type": "text"},
+    {"name": "Owner", "type": "assignee"},
+    {"name": "Due", "type": "date"},
+    {"name": "Campaign", "type": "text"},
+    {"name": "Status", "type": "single-select", "options": ["Draft", "In Review", "Published", "Archived"]},
+    {"name": "Release Link", "type": "text"}
+  ],
+  "views": [
+    {
+      "name": "Monthly Calendar",
+      "layout": "timeline",
+      "date_field": "Due"
+    },
+    {
+      "name": "Campaign Board",
+      "layout": "board",
+      "group_by": "Campaign"
+    },
+    {
+      "name": "Asset Status",
+      "layout": "table",
+      "group_by": "Status"
+    }
+  ],
+  "items": [
+    {"Asset Type":"blog","Channel":"Website","Owner":"Marketing","Due":"2025-10-20","Campaign":"Launch Summit v2.0","Status":"In Review","Release Link":"Launch — Summit v2.0"},
+    {"Asset Type":"release-note","Channel":"GitHub","Owner":"PM","Due":"2025-11-01","Campaign":"Launch Summit v2.0","Status":"Draft","Release Link":"Launch — Summit v2.0"},
+    {"Asset Type":"social","Channel":"LinkedIn","Owner":"Marketing","Due":"2025-10-25","Campaign":"Launch Summit v2.0","Status":"Published"},
+    {"Asset Type":"doc","Channel":"Docs Site","Owner":"Technical Writer","Due":"2025-11-10","Campaign":"Feature X","Status":"Draft"}
+  ]
+}
