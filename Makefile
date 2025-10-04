@@ -5,6 +5,11 @@ help: ## Show this help message
 	@echo "Available targets:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: e2e\:golden
+e2e\:golden: ## Run Golden Path E2E test (seed→query→export→audit+provenance)
+	@chmod +x scripts/e2e/golden-path.sh
+	@scripts/e2e/golden-path.sh
+
 .PHONY: projects-seed
 projects-seed: ## Seed all GitHub projects
 	@echo "Seeding all GitHub projects..."

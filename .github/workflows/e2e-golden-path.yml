@@ -1,0 +1,217 @@
+name: E2E Golden Path Test
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  schedule:
+    # Run daily at 6 AM UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  e2e-golden-path:
+    name: Golden Path E2E
+    runs-on: ubuntu-latest
+    services:
+      # OPA service for policy evaluation
+      opa:
+        image: openpolicyagent/opa:latest
+        ports:
+          - 8181:8181
+        options: >-
+          --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:8181/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        env:
+          OPA_LOG_LEVEL: info
+
+      # Neo4j for graph database
+      neo4j:
+        image: neo4j:5-community
+        ports:
+          - 7687:7687
+          - 7474:7474
+        env:
+          NEO4J_AUTH: neo4j/testpassword
+          NEO4J_PLUGINS: '["apoc"]'
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p testpassword 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Load OPA policies
+        run: |
+          # Load WebAuthn step-up policy
+          curl -X PUT http://localhost:8181/v1/policies/webauthn_stepup \
+            --data-binary @policies/webauthn_stepup.rego
+
+          # Load release gate policy
+          curl -X PUT http://localhost:8181/v1/policies/release_gate \
+            --data-binary @policies/release_gate.rego
+
+          # Verify policies loaded
+          curl -s http://localhost:8181/v1/policies | jq '.'
+
+      - name: Start application
+        run: |
+          # Start backend server
+          npm run start:backend &
+          BACKEND_PID=$!
+          echo "BACKEND_PID=$BACKEND_PID" >> $GITHUB_ENV
+
+          # Wait for backend to be ready
+          timeout 60 bash -c 'until curl -f http://localhost:3000/health; do sleep 2; done' || exit 1
+
+          echo "Backend started successfully (PID: $BACKEND_PID)"
+        env:
+          NODE_ENV: test
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: testpassword
+          OPA_URL: http://localhost:8181
+          WEBAUTHN_RP_ID: localhost
+          WEBAUTHN_ORIGIN: http://localhost:3000
+
+      - name: Run Golden Path E2E Test
+        id: e2e
+        run: make e2e:golden
+        env:
+          BASE_URL: http://localhost:3000
+
+      - name: Upload proof artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-golden-path-proof-${{ github.run_id }}
+          path: e2e-proof/
+          retention-days: 30
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## 🧪 Golden Path E2E Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f e2e-proof/01_seed_response.json ]; then
+            echo "### ✅ Step 1: Data Seeding" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+            jq -C '.' e2e-proof/01_seed_response.json >> $GITHUB_STEP_SUMMARY || echo "No seed data" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f e2e-proof/02_query_response.json ]; then
+            echo "### ✅ Step 2: Query Execution" >> $GITHUB_STEP_SUMMARY
+            echo "Query returned $(jq -r '.data.entities | length' e2e-proof/02_query_response.json || echo '0') entities" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f e2e-proof/03a_export_blocked.json ]; then
+            echo "### ✅ Step 3a: Export Blocked (No Step-Up)" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+            jq -C '.message' e2e-proof/03a_export_blocked.json >> $GITHUB_STEP_SUMMARY || echo "No block message" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f e2e-proof/03c_export_allowed.json ]; then
+            echo "### ✅ Step 3c: Export Allowed (With Step-Up)" >> $GITHUB_STEP_SUMMARY
+            echo "Export completed successfully with step-up authentication" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f e2e-proof/04_audit_logs.json ]; then
+            echo "### ✅ Step 4: Audit Verification" >> $GITHUB_STEP_SUMMARY
+            DENIED_COUNT=$(jq -r '[.events[] | select(.action == "denied_missing_stepup")] | length' e2e-proof/04_audit_logs.json || echo '0')
+            ALLOWED_COUNT=$(jq -r '[.events[] | select(.action == "allowed_with_stepup")] | length' e2e-proof/04_audit_logs.json || echo '0')
+            echo "- Denied events: $DENIED_COUNT" >> $GITHUB_STEP_SUMMARY
+            echo "- Allowed events: $ALLOWED_COUNT" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f e2e-proof/06_opa_deny.json ] && [ -f e2e-proof/06_opa_allow.json ]; then
+            echo "### ✅ Step 5: OPA Policy Verification" >> $GITHUB_STEP_SUMMARY
+            DENY_RESULT=$(jq -r '.result' e2e-proof/06_opa_deny.json)
+            ALLOW_RESULT=$(jq -r '.result' e2e-proof/06_opa_allow.json)
+            echo "- Policy denies without step-up: $DENY_RESULT" >> $GITHUB_STEP_SUMMARY
+            echo "- Policy allows with step-up: $ALLOW_RESULT" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ steps.e2e.outcome }}" = "success" ]; then
+            echo "**✅ All Golden Path tests PASSED**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**❌ Some Golden Path tests FAILED**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Cleanup
+        if: always()
+        run: |
+          if [ -n "${BACKEND_PID:-}" ]; then
+            kill $BACKEND_PID || true
+          fi
+
+  verify-proof-artifacts:
+    name: Verify Proof Artifacts
+    runs-on: ubuntu-latest
+    needs: e2e-golden-path
+    if: always()
+    steps:
+      - name: Download proof artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e-golden-path-proof-${{ github.run_id }}
+          path: proof/
+
+      - name: Verify required artifacts exist
+        run: |
+          REQUIRED_FILES=(
+            "01_seed_response.json"
+            "02_query_response.json"
+            "03a_export_blocked.json"
+            "03c_export_allowed.json"
+            "04_audit_logs.json"
+            "05_provenance.json"
+            "06_opa_deny.json"
+            "06_opa_allow.json"
+          )
+
+          MISSING_FILES=()
+
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "proof/$file" ]; then
+              MISSING_FILES+=("$file")
+            fi
+          done
+
+          if [ ${#MISSING_FILES[@]} -eq 0 ]; then
+            echo "✅ All required proof artifacts present"
+            exit 0
+          else
+            echo "❌ Missing proof artifacts:"
+            printf '  - %s\n' "${MISSING_FILES[@]}"
+            exit 1
+          fi
