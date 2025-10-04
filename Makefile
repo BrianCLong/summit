@@ -1,95 +1,61 @@
-.PHONY: help capture stabilize set-protection harvest-untracked batch-prs finalize audit all
+.DEFAULT_GOAL := help
 
-SHELL := /bin/bash
-ORCHESTRATOR := ./scripts/greenlock_orchestrator.sh
-
+.PHONY: help
 help: ## Show this help message
-	@echo "Green-Lock Orchestrator Makefile"
-	@echo "================================="
-	@echo ""
-	@echo "Complete workflow:"
-	@echo "  make all              - Run complete green-lock sequence"
-	@echo ""
-	@echo "Individual steps:"
-	@echo "  make capture          - Snapshot broken repo (untracked, reflogs, fsck, bundle)"
-	@echo "  make stabilize        - Create minimal stabilization gate workflow"
-	@echo "  make set-protection   - Set branch protection to require only stabilization check"
-	@echo "  make harvest-untracked- Import untracked files from broken repo"
-	@echo "  make batch-prs        - Process and auto-merge all open PRs"
-	@echo "  make finalize         - Tag stabilized state and rerun failed checks"
-	@echo "  make audit            - Generate provenance ledger"
-	@echo ""
-	@echo "Safety:"
-	@echo "  All operations run from clean-room clone (not iCloud)"
-	@echo "  Provenance tracking ensures zero data loss"
-	@echo ""
+	@echo "Available targets:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-capture: ## Snapshot everything from broken repo
-	@echo "📸 Capturing complete state from broken repository..."
-	@$(ORCHESTRATOR) capture
-	@echo "✅ Capture complete - see green-lock-ledger/ for artifacts"
+.PHONY: projects-seed
+projects-seed: ## Seed all GitHub projects
+	@echo "Seeding all GitHub projects..."
+	@chmod +x scripts/projects/*.sh
+	@scripts/projects/create-kanban.sh
+	@scripts/projects/create-team-planning.sh
+	@scripts/projects/create-feature-release.sh
+	@scripts/projects/create-bug-tracker.sh
+	@scripts/projects/create-iterative-development.sh
+	@scripts/projects/create-product-launch.sh
+	@scripts/projects/create-roadmap.sh
+	@scripts/projects/create-team-retrospective.sh
+	@echo "All projects seeded."
 
-stabilize: ## Create minimal stabilization gate
-	@echo "🛡️ Creating stabilization workflow..."
-	@$(ORCHESTRATOR) stabilize
-	@echo "✅ Stabilization gate deployed"
+.PHONY: projects-destroy
+projects-destroy: ## Destroy all GitHub projects (requires YES confirmation)
+	@echo "This is a destructive action. Type 'YES' to confirm."
+	@read confirmation; \
+	if [ "$$confirmation" = "YES" ]; then \
+	  chmod +x scripts/projects/destroy.sh; \
+	  scripts/projects/destroy.sh; \
+	else \
+	  echo "Aborted."; \
+	fi
 
-set-protection: ## Configure branch protection for minimal check
-	@echo "🔒 Configuring branch protection..."
-	@$(ORCHESTRATOR) set-protection
-	@echo "✅ Branch protection updated - only 'Stabilization: Build & Unit Tests' required"
+.PHONY: bonus-seed
+bonus-seed: ## Create the 9 bonus projects
+	@chmod +x scripts/bonus/seed_projects.sh
+	@scripts/bonus/seed_projects.sh
 
-harvest-untracked: ## Import untracked files into ops/untracked-import/
-	@echo "🌾 Harvesting untracked files..."
-	@$(ORCHESTRATOR) harvest-untracked
-	@echo "✅ Untracked files preserved in ops/untracked-import/"
+.PHONY: bonus-apply
+bonus-apply: ## Apply fields/views/items via GraphQL
+	@export GH_TOKEN=$$(gh auth token 2>/dev/null) && \
+	if [ -z "$$GH_TOKEN" ]; then \
+	  echo "❌ GH_TOKEN not available. Run 'gh auth login' first." >&2; \
+	  exit 1; \
+	fi && \
+	python3 scripts/bonus/apply_schema.py bonus_projects/seed/security_compliance.json --owner BrianCLong --create-missing && \
+	python3 scripts/bonus/apply_schema.py bonus_projects/seed/design_system.json --owner BrianCLong --create-missing && \
+	python3 scripts/bonus/apply_schema.py bonus_projects/seed/content_calendar.json --owner BrianCLong --create-missing && \
+	python3 scripts/bonus/apply_schema.py bonus_projects/seed/customer_feedback.json --owner BrianCLong --create-missing && \
+	python3 scripts/bonus/apply_schema.py bonus_projects/seed/startup_ops.json --owner BrianCLong --create-missing && \
+	python3 scripts/bonus/apply_schema.py bonus_projects/seed/smb_finance.json --owner BrianCLong --create-missing && \
+	python3 scripts/bonus/apply_schema.py bonus_projects/seed/gov_contracting.json --owner BrianCLong --create-missing && \
+	python3 scripts/bonus/apply_schema.py bonus_projects/seed/regulatory.json --owner BrianCLong --create-missing && \
+	python3 scripts/bonus/apply_schema.py bonus_projects/seed/gaap_close.json --owner BrianCLong --create-missing
 
-batch-prs: ## Process all open PRs with auto-merge
-	@echo "🔄 Processing all open PRs..."
-	@$(ORCHESTRATOR) batch-prs
-	@echo "✅ PRs queued for auto-merge when stabilization passes"
-
-finalize: ## Tag and finalize stabilized state
-	@echo "🏁 Finalizing stabilization..."
-	@$(ORCHESTRATOR) finalize
-	@echo "✅ Green-lock complete - main is bright green"
-
-audit: ## Generate complete provenance ledger
-	@echo "📋 Generating audit trail..."
-	@$(ORCHESTRATOR) audit
-	@echo "✅ Provenance ledger written to green-lock-ledger/provenance.csv"
-
-all: capture stabilize set-protection harvest-untracked batch-prs finalize audit ## Run complete green-lock sequence
-	@echo ""
-	@echo "🎉 GREEN-LOCK MISSION COMPLETE 🎉"
-	@echo "=================================="
-	@echo ""
-	@echo "✅ Main branch: BRIGHT GREEN"
-	@echo "✅ All PRs: Processed and auto-merging"
-	@echo "✅ Untracked files: Preserved in ops/untracked-import/"
-	@echo "✅ Provenance: Complete audit trail in green-lock-ledger/"
-	@echo ""
-	@echo "Next steps:"
-	@echo "  1. Monitor PR auto-merges: gh pr list"
-	@echo "  2. Review untracked imports: ls -la ops/untracked-import/"
-	@echo "  3. Gradually re-enable full CI checks"
-	@echo "  4. Enable merge queue in GitHub settings"
-	@echo ""
-
-# Green-Lock Acceptance Pack Targets
-acceptance: verify recover auto-merge monitor ## Run complete acceptance workflow
-
-verify: ## Run septuple verification matrix
-	@./scripts/verify_greenlock.sh
-
-recover: ## Recover all 799 dangling commits as rescue/* branches
-	@./scripts/recover_orphans_from_bundle.sh
-
-auto-merge: ## Enable auto-merge on all open PRs
-	@./scripts/auto_merge_all_open_prs.sh
-
-monitor: ## Monitor stabilization workflow execution
-	@./scripts/monitor_stabilization.sh
-
-reenable-ci: ## Show CI re-enablement guide
-	@./scripts/gradual_reenable_ci.sh
+.PHONY: bonus-destroy
+bonus-destroy: ## Remove bonus projects (gated)
+	@[ "$$CONFIRM" = "YES" ] || (echo "Set CONFIRM=YES" && exit 1)
+	# destructive: list and delete by exact name
+	@echo "Destroying bonus projects... (Manual deletion required for now)"
+	@echo "Please manually delete the following projects from GitHub:"
+	@jq -r '.name' bonus_projects/seed/*.json
