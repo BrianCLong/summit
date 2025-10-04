@@ -988,6 +988,21 @@ export interface WorkflowEstimates {
   criticalPath: string[];
 }
 
+export interface TimelineStatusCounts {
+  total: number;
+  completed: number;
+  succeeded: number;
+  skipped: number;
+  failed: number;
+  running: number;
+  queued: number;
+}
+
+export interface TimelineDelta {
+  nodeId: string;
+  status: NodeRunStatus;
+}
+
 export interface ObserverTimelineFrame {
   index: number;
   timestamp: string;
@@ -995,6 +1010,9 @@ export interface ObserverTimelineFrame {
   costUSD?: number;
   latencyMs?: number;
   criticalPath?: string[];
+  statusCounts: TimelineStatusCounts;
+  progressPercent: number;
+  delta?: TimelineDelta;
 }
 
 export interface ObserverTimeline {
