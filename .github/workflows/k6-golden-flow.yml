@@ -1,0 +1,179 @@
+name: k6 Golden Flow Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  k6-golden-flow:
+    name: k6 Golden Flow Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Start test environment
+        run: |
+          # Start local services for testing
+          docker-compose -f docker-compose.test.yml up -d || echo "No test compose file, skipping"
+          sleep 10
+
+      - name: Run k6 Golden Flow Test
+        id: k6
+        continue-on-error: true
+        run: |
+          k6 run \
+            --out json=k6-results.json \
+            --out csv=k6-results.csv \
+            --summary-export=k6-summary.json \
+            tests/k6/golden-flow.k6.js
+
+          # Capture exit code
+          K6_EXIT=$?
+          echo "exit_code=$K6_EXIT" >> $GITHUB_OUTPUT
+
+          # Extract metrics
+          if [ -f k6-summary.json ]; then
+            SUCCESS_RATE=$(jq -r '.metrics.golden_flow_success.values.rate // 0' k6-summary.json)
+            PASS_COUNT=$(jq -r '.metrics.golden_flow_success_total.values.count // 0' k6-summary.json)
+            TOTAL_COUNT=$(jq -r '.metrics.golden_flow_total.values.count // 0' k6-summary.json)
+
+            echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
+            echo "pass_count=$PASS_COUNT" >> $GITHUB_OUTPUT
+            echo "total_count=$TOTAL_COUNT" >> $GITHUB_OUTPUT
+
+            echo "## 📊 k6 Golden Flow Results" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Success Rate**: $(echo "$SUCCESS_RATE * 100" | bc)%" >> $GITHUB_STEP_SUMMARY
+            echo "**Passed**: $PASS_COUNT / $TOTAL_COUNT flows" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # Check SLO (99% pass rate)
+            if (( $(echo "$SUCCESS_RATE >= 0.99" | bc -l) )); then
+              echo "✅ **SLO MET** (>99% success rate)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **SLO FAILED** (<99% success rate)" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+      - name: Upload k6 results
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-golden-flow-results-${{ github.run_id }}
+          path: |
+            k6-results.json
+            k6-results.csv
+            k6-summary.json
+            k6-golden-flow-results.json
+            k6-golden-flow-results.html
+          retention-days: 7
+
+      - name: Check thresholds
+        if: steps.k6.outputs.exit_code != '0'
+        run: |
+          echo "❌ k6 test failed - thresholds not met"
+          cat k6-summary.json | jq '.'
+          exit 1
+
+      - name: Alert on failure (Slack)
+        if: failure() && github.event_name == 'schedule'
+        run: |
+          curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": "🚨 k6 Golden Flow Test Failed",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚨 k6 Golden Flow SLO Breach"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Success Rate*: ${{ steps.k6.outputs.success_rate }}%\n*Run*: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Results>"
+                  }
+                }
+              ]
+            }' || echo "Slack webhook not configured"
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const successRate = parseFloat('${{ steps.k6.outputs.success_rate }}') * 100;
+            const passCount = '${{ steps.k6.outputs.pass_count }}';
+            const totalCount = '${{ steps.k6.outputs.total_count }}';
+            const exitCode = '${{ steps.k6.outputs.exit_code }}';
+
+            const status = exitCode === '0' ? '✅ PASSED' : '❌ FAILED';
+            const sloStatus = successRate >= 99 ? '✅ SLO MET' : '⚠️ SLO WARNING';
+
+            const body = `## k6 Golden Flow Test Results
+
+            **Status**: ${status}
+            **SLO**: ${sloStatus}
+
+            ### Metrics
+            - **Success Rate**: ${successRate.toFixed(2)}%
+            - **Flows**: ${passCount}/${totalCount} passed
+            - **Threshold**: >99% success rate
+
+            [View detailed results](${context.payload.repository.html_url}/actions/runs/${context.runId})
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  store-baseline:
+    name: Store Baseline Metrics
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: k6-golden-flow
+    steps:
+      - name: Download results
+        uses: actions/download-artifact@v4
+        with:
+          name: k6-golden-flow-results-${{ github.run_id }}
+
+      - name: Store baseline
+        run: |
+          mkdir -p baselines
+          cp k6-summary.json baselines/k6-baseline-$(date +%Y%m%d).json
+          echo "Baseline stored for $(date +%Y-%m-%d)"
+
+      - name: Upload baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-baseline-${{ github.run_id }}
+          path: baselines/
+          retention-days: 90
