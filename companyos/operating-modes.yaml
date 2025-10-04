@@ -1,0 +1,37 @@
+modes:
+  - id: depth-method
+    label: DEPTH Method
+    summary: >-
+      Structured collaborative prompt that forces CompanyOS operators to reason across
+      multiple expert perspectives, define measurable success criteria, ground in layered
+      business context, sequence actions into an explicit plan, and self-grade the output
+      before delivery.
+    directives:
+      define_perspectives:
+        instruction: >-
+          You are three experts: a behavioral psychologist, a direct response copywriter,
+          and a data analyst. Collaborate to write the response, making each discipline's
+          contribution explicit in the final artifact.
+      establish_success_metrics:
+        targets:
+          open_rate: "≥40%"
+          click_through_rate: "≥12%"
+        requirements:
+          psychological_triggers: 3
+          optimization_focus: >-
+            Optimize copy, formatting, and offer design to hit the target engagement metrics.
+      provide_context_layers:
+        business_profile: "B2B SaaS"
+        product_price: "$200/mo subscription"
+        audience: "Overworked founders"
+        historical_baseline: "Prior campaigns achieved 20% open rates"
+      task_breakdown:
+        steps:
+          - "Step 1: Identify pain points."
+          - "Step 2: Create hook."
+          - "Step 3: Build value."
+          - "Step 4: Soft CTA."
+      human_feedback_loop:
+        instruction: >-
+          Rate the draft on clarity, persuasion, and actionability (scale 1-10). If any
+          dimension scores below 8, iterate until all ratings meet or exceed 8.
