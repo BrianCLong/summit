@@ -1,0 +1,65 @@
+{
+  "projects": [
+    {
+      "name": "IntelGraph – GA Q4 2025",
+      "number": 1,
+      "status_field": "Status",
+      "defaults": {
+        "Priority": "P1",
+        "Risk": "Medium"
+      },
+      "items": [
+        {"title": "IntelGraph: Canonical Schema & Policy Labels", "status": "In Progress", "area": "Graph", "priority": "P0", "milestone": "M1: Graph Core & API"},
+        {"title": "IntelGraph: Bitemporal Model & Time Travel", "status": "Backlog", "area": "Graph", "priority": "P0", "milestone": "M1: Graph Core & API"},
+        {"title": "IntelGraph: ER v1 Service & Queue", "status": "Backlog", "area": "ER", "priority": "P0", "milestone": "M2: Ingest & ER v1"},
+        {"title": "IntelGraph: Ten GA Connectors", "status": "Backlog", "area": "Ingest", "priority": "P0", "milestone": "M2: Ingest & ER v1"},
+        {"title": "IntelGraph: Provenance & Claim Ledger", "status": "Backlog", "area": "Prov-Ledger", "priority": "P0", "milestone": "M5: Prov-Ledger (beta)"},
+        {"title": "IntelGraph Copilot: NL→Cypher Sandbox", "status": "Backlog", "area": "Copilot", "priority": "P0", "milestone": "M3: Copilot v1"},
+        {"title": "IntelGraph Copilot: GraphRAG Evidence-first", "status": "Backlog", "area": "Copilot", "priority": "P1", "milestone": "M3: Copilot v1"},
+        {"title": "IntelGraph Guardrails & Model Cards", "status": "Backlog", "area": "Governance", "priority": "P0", "milestone": "M4: Governance & Security"},
+        {"title": "IntelGraph Analytics Suite", "status": "Backlog", "area": "Analytics", "priority": "P1", "milestone": "M4: Governance & Security"},
+        {"title": "IntelGraph Pattern Miner Templates", "status": "Backlog", "area": "Analytics", "priority": "P1", "milestone": "M5: Prov-Ledger (beta)"},
+        {"title": "IntelGraph UI: Tri-pane Shell", "status": "In Progress", "area": "UI", "priority": "P0", "milestone": "M2: Ingest & ER v1"},
+        {"title": "IntelGraph UI: XAI Overlays", "status": "Backlog", "area": "UI", "priority": "P1", "milestone": "M3: Copilot v1"},
+        {"title": "IntelGraph UI: ER Adjudication", "status": "Backlog", "area": "ER", "priority": "P0", "milestone": "M2: Ingest & ER v1"},
+        {"title": "IntelGraph Policy: OPA ABAC", "status": "Backlog", "area": "Governance", "priority": "P0", "milestone": "M4: Governance & Security"},
+        {"title": "IntelGraph Policy: License & Export Controls", "status": "Backlog", "area": "Governance", "priority": "P0", "milestone": "M4: Governance & Security"},
+        {"title": "IntelGraph Ops: Observability & SLO Dashboards", "status": "Backlog", "area": "Ops", "priority": "P0", "milestone": "M2: Ingest & ER v1"},
+        {"title": "IntelGraph Ops: Cost Guardrails", "status": "Backlog", "area": "Ops", "priority": "P0", "milestone": "M3: Copilot v1"},
+        {"title": "IntelGraph Ops: DR/BCP Offline Kit", "status": "Backlog", "area": "Resilience", "priority": "P1", "milestone": "M5: Prov-Ledger (beta)"}
+      ]
+    },
+    {
+      "name": "Maestro – MVP/GA 2025",
+      "status_field": "Status",
+      "items": [
+        {"title": "Maestro MVP: Control Plane Foundation", "status": "Backlog", "area": "Platform", "priority": "P0", "milestone": "MVP"},
+        {"title": "Maestro MVP: Workflow Compiler & DAG Engine", "status": "Backlog", "area": "Platform", "priority": "P0", "milestone": "MVP"},
+        {"title": "Maestro MVP: Execution Runners", "status": "Backlog", "area": "Platform", "priority": "P0", "milestone": "MVP"},
+        {"title": "Maestro GA: Provenance & Disclosure", "status": "Backlog", "area": "Evidence", "priority": "P0", "milestone": "GA"},
+        {"title": "Maestro GA: Observability & FinOps", "status": "Backlog", "area": "Ops", "priority": "P0", "milestone": "GA"},
+        {"title": "Maestro Q1: DAG Caching & Replay", "status": "Backlog", "area": "Platform", "priority": "P1", "milestone": "Q1"},
+        {"title": "Maestro Q2: Contained L3 Playbooks", "status": "Backlog", "area": "Playbooks", "priority": "P1", "milestone": "Q2"}
+      ]
+    },
+    {
+      "name": "Conductor – 30/60/90",
+      "status_field": "Status",
+      "items": [
+        {"title": "Conductor 30-Day Hardening", "status": "Backlog", "area": "Platform", "priority": "P0", "milestone": "30-Day"},
+        {"title": "Conductor 60-Day Multi-region Plan", "status": "Backlog", "area": "Platform", "priority": "P0", "milestone": "60-Day"},
+        {"title": "Conductor 90-Day Growth & GTM", "status": "Backlog", "area": "GTM", "priority": "P1", "milestone": "90-Day"}
+      ]
+    },
+    {
+      "name": "CompanyOS – Org Mesh 2026",
+      "status_field": "Status",
+      "items": [
+        {"title": "CompanyOS Q0: Autonomy Safety Loop", "status": "Backlog", "area": "Autonomy", "priority": "P0", "milestone": "Q0"},
+        {"title": "CompanyOS Q1: SDK Parity & Ecosystem Bridges", "status": "Backlog", "area": "Platform", "priority": "P0", "milestone": "Q1"},
+        {"title": "CompanyOS Q2: Contained L3 Playbooks", "status": "Backlog", "area": "Playbooks", "priority": "P0", "milestone": "Q2"},
+        {"title": "CompanyOS H2: Autonomy Credit Market", "status": "Backlog", "area": "Economy", "priority": "P1", "milestone": "H2"}
+      ]
+    }
+  ]
+}
