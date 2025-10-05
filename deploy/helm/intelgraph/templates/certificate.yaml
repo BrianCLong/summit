@@ -1,0 +1,32 @@
+{{- $tls := .Values.global.ingress.tls -}}
+{{- $certManager := $tls.certManager | default dict -}}
+{{- $issuer := $certManager.issuerRef | default dict -}}
+{{- if and $tls.enabled $certManager.enabled $issuer.name }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $tls.secretName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+spec:
+  secretName: {{ $tls.secretName }}
+  issuerRef:
+    name: {{ $issuer.name }}
+    kind: {{ $issuer.kind | default "ClusterIssuer" }}
+  {{- with $certManager.duration }}
+  duration: {{ . }}
+  {{- end }}
+  {{- with $certManager.renewBefore }}
+  renewBefore: {{ . }}
+  {{- end }}
+  dnsNames:
+    {{- if $certManager.dnsNames }}
+    {{- range $certManager.dnsNames }}
+    - {{ . }}
+    {{- end }}
+    {{- else }}
+    - {{ .Values.global.ingress.host }}
+    {{- end }}
+{{- end }}

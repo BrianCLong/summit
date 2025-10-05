@@ -61,7 +61,7 @@ spec:
             severity: warning
           annotations:
             summary: "IntelGraph service has high error rate"
-            description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.service }}"
+            description: {{ printf "Error rate is {{ $value | humanizePercentage }} for {{ $labels.service }}" | quote }}
         
         # High response time
         - alert: IntelGraphHighLatency
@@ -74,7 +74,7 @@ spec:
             severity: warning
           annotations:
             summary: "IntelGraph service has high latency"
-            description: "95th percentile latency is {{ $value }}s for {{ $labels.service }}"
+            description: {{ printf "95th percentile latency is {{ $value }}s for {{ $labels.service }}" | quote }}
         
         # Pod crash loop
         - alert: IntelGraphPodCrashLooping
@@ -85,7 +85,7 @@ spec:
             severity: critical
           annotations:
             summary: "IntelGraph pod is crash looping"
-            description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting frequently"
+            description: {{ printf "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting frequently" | quote }}
         
         # Low replica count
         - alert: IntelGraphLowReplicas
@@ -96,7 +96,7 @@ spec:
             severity: warning
           annotations:
             summary: "IntelGraph service has low replica count"
-            description: "Service {{ $labels.deployment }} has only {{ $value }} replicas available"
+            description: {{ printf "Service {{ $labels.deployment }} has only {{ $value }} replicas available" | quote }}
         
         # Database connection issues
         - alert: IntelGraphDatabaseConnectionFails
@@ -107,7 +107,7 @@ spec:
             severity: critical
           annotations:
             summary: "IntelGraph database connection failures"
-            description: "Database connection errors detected for {{ $labels.service }}"
+            description: {{ printf "Database connection errors detected for {{ $labels.service }}" | quote }}
         
         # Memory usage high
         - alert: IntelGraphHighMemoryUsage
@@ -121,7 +121,7 @@ spec:
             severity: warning
           annotations:
             summary: "IntelGraph container high memory usage"
-            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory"
+            description: {{ printf "Container {{ $labels.container }} in pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory" | quote }}
         
         # CPU throttling
         - alert: IntelGraphCPUThrottling
@@ -132,5 +132,5 @@ spec:
             severity: warning
           annotations:
             summary: "IntelGraph container CPU throttling"
-            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is being CPU throttled"
+            description: {{ printf "Container {{ $labels.container }} in pod {{ $labels.pod }} is being CPU throttled" | quote }}
 {{- end }}

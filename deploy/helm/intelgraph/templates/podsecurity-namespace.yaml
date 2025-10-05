@@ -1,0 +1,12 @@
+{{- if .Values.podSecurityStandards.enabled }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Release.Namespace }}
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+    pod-security.kubernetes.io/enforce: {{ .Values.podSecurityStandards.enforce | default "restricted" | quote }}
+    pod-security.kubernetes.io/audit: {{ .Values.podSecurityStandards.audit | default "restricted" | quote }}
+    pod-security.kubernetes.io/warn: {{ .Values.podSecurityStandards.warn | default "restricted" | quote }}
+{{- end }}

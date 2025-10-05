@@ -1,0 +1,23 @@
+checks:
+  include:
+    - run-as-non-root
+    - drop-net-raw-capability
+    - no-read-only-root-fs
+    - privileged-container
+    - host-network
+    - host-pid
+    - host-ipc
+    - required-labels
+    - stable-image-tag
+  exclude: []
+overrides:
+  required-labels:
+    parameters:
+      allowedLabels:
+        - app.kubernetes.io/name
+        - app.kubernetes.io/instance
+        - app.kubernetes.io/managed-by
+        - app.kubernetes.io/part-of
+        - helm.sh/chart
+output:
+  format: plain

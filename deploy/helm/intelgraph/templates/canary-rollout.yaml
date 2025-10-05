@@ -1,3 +1,9 @@
+{{- $service := deepCopy .Values.services.apiGateway -}}
+{{- if not $service.name }}
+  {{- $_ := set $service "name" "api-gateway" }}
+{{- end }}
+{{- $ctx := dict "service" $service "root" . }}
+{{- $serviceAccountConfig := (include "intelgraph.serviceAccountConfig" $ctx | fromYaml) -}}
 # Canary Deployment with Auto-Rollback and Cooldown
 # GREEN TRAIN Week-4 Hardening: Prevents rollback flaps
 
@@ -85,6 +91,10 @@ spec:
         last-rollback-timestamp: ""
         consecutive-failures: "0"
     spec:
+      serviceAccountName: {{ include "intelgraph.serviceAccountName" $ctx }}
+      automountServiceAccountToken: {{ $serviceAccountConfig.automount | default false }}
+      securityContext:
+        {{- include "intelgraph.podSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -94,7 +104,7 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
             - name: metrics
-              containerPort: 9090
+              containerPort: {{ .Values.global.prometheus.port | default 9090 }}
               protocol: TCP
 
           # Health checks with extended timeout for canary
@@ -118,8 +128,24 @@ spec:
 
           # Environment variables
           env:
-            - name: NODE_ENV
-              value: {{ .Values.environment }}
+            {{- range $env := .Values.common.env }}
+            - name: {{ $env.name }}
+              {{- if $env.value }}
+              value: {{ $env.value | quote }}
+              {{- else if $env.valueFrom }}
+              valueFrom:
+                {{- toYaml $env.valueFrom | nindent 16 }}
+              {{- end }}
+            {{- end }}
+            {{- range $env := $service.env }}
+            - name: {{ $env.name }}
+              {{- if $env.value }}
+              value: {{ $env.value | quote }}
+              {{- else if $env.valueFrom }}
+              valueFrom:
+                {{- toYaml $env.valueFrom | nindent 16 }}
+              {{- end }}
+            {{- end }}
             - name: CANARY_DEPLOYMENT
               value: "true"
             - name: ROLLOUT_NAME
@@ -129,7 +155,13 @@ spec:
 
           # Resource constraints
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- include "intelgraph.resources" $ctx | nindent 12 }}
+          securityContext:
+            {{- include "intelgraph.securityContext" . | nindent 12 }}
+          volumeMounts:
+            {{- include "intelgraph.volumeMounts" . | nindent 12 }}
+      volumes:
+        {{- include "intelgraph.volumes" . | nindent 8 }}
 
       # Pod disruption budget for canary stability
       topologySpreadConstraints:
