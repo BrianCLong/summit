@@ -1,0 +1,119 @@
+# UTC is the system time. User timezone: America/Denver.
+station_profiles:
+  buzzer:
+    name: "The Buzzer"
+    tags: [uvb76, buzzer, 4625khz, usb]
+    freq_khz: 4625.0
+    day_night: none
+  pip_day:
+    name: "The Pip (day)"
+    tags: [pip, 5448khz, usb]
+    freq_khz: 5448.0
+  pip_night:
+    name: "The Pip (night)"
+    tags: [pip, 3756khz, usb]
+    freq_khz: 3756.0
+  squeak_day:
+    name: "The Squeaky Wheel (day)"
+    tags: [squeaky, 5367khz, usb]
+    freq_khz: 5367.0
+  squeak_night:
+    name: "The Squeaky Wheel (night)"
+    tags: [squeaky, 3363_5khz, usb]
+    freq_khz: 3363.5
+  d_marker:
+    name: "D Marker"
+    tags: [marker, d, 5292khz]
+    freq_khz: 5292.0
+  t_marker:
+    name: "T Marker"
+    tags: [marker, t, 4325khz]
+    freq_khz: 4325.0
+  air_horn:
+    name: "The Air Horn"
+    tags: [airhorn, 4930khz]
+    freq_khz: 4930.0
+  goose:
+    name: "The Goose"
+    tags: [goose, 4310khz]
+    freq_khz: 4310.0
+  alarm:
+    name: "The Alarm"
+    tags: [alarm, 4770khz]
+    freq_khz: 4770.0
+
+recorders:
+  eu_primary:
+    label: EU-NL-01
+    type: kiwi
+    host: kiwisdr.example.net:8073
+    freq_khz: 4625.0
+    mode: usb
+  me_backup:
+    label: ME-XX-01
+    type: kiwi
+    host: kiwisdr.me.example.org:8073
+    freq_khz: 5448.0
+    mode: usb
+  na_witness:
+    label: NA-US-EC-01
+    type: http
+    stream: https://websdr.example.com:8901/stream.mp3?f=4625usb
+
+paths:
+  captures: ./captures
+  clips: ./clips
+  specs: ./specs
+  events: ./events/events.jsonl
+
+retention_days: 30
+
+vad:
+  frame_ms: 30
+  energy_floor_db: -50.0
+  speech_min_sec: 3.0
+
+marker:
+  tone_hz_approx: 1000
+  expected_rate_per_min: 25
+  rate_tolerance_pct: 20
+  snr_trigger_db: 3.0
+
+clip_padding_sec: 90
+
+upload:
+  enabled: false
+  provider: s3
+  s3:
+    bucket: your-bucket-name
+    prefix: uvb76/
+    region: us-east-1
+  azure:
+    container: your-container
+    prefix: uvb76/
+  gcs:
+    bucket: your-gcs-bucket
+    prefix: uvb76/
+
+scanner:
+  enabled: false
+  start_khz: 2000
+  end_khz: 30000
+  step_khz: 5
+  dwell_sec: 4
+  max_parallel: 1
+  known_avoid:
+    - 4625.0
+    - 5448.0
+    - 3756.0
+    - 5367.0
+    - 3363.5
+
+enrichment:
+  enabled: false
+  sources:
+    - priyom_numbers
+    - spynumbers_db
+  freq_tolerance_khz: 3
+  time_window_min: 30
+  cache_dir: ./cache

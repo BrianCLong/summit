@@ -1,0 +1,27 @@
+title: UVB-76 / Pip / Squeaky Wheel HF Event
+id: 5c6d7f84-8b62-44d2-9a6a-uvb76
+status: experimental
+description: Detects voice bursts or valid marker cadence near target frequencies.
+author: UNIT 83M
+date: 2025/10/01
+logsource:
+  product: custom
+  service: hf-monitor
+  category: application
+detection:
+  selection_voice:
+    type: "voice"
+  selection_marker:
+    type: "marker"
+  selection_burst:
+    type: "burst"
+  condition: selection_voice or selection_marker or selection_burst
+fields:
+  - utc
+  - type
+  - marker_rate_est_per_min
+  - sha256
+  - candidate_station
+falsepositives:
+  - Local QRM, adjacent channel interference
+level: medium

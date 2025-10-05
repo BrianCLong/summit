@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["utc", "file", "type", "sha256"],
+  "properties": {
+    "utc": {"type": "string", "format": "date-time"},
+    "file": {"type": "string"},
+    "type": {"type": "string", "enum": ["marker", "voice", "burst"]},
+    "snr_trigger_db": {"type": "number"},
+    "marker_rate_est_per_min": {"type": "number"},
+    "freq_khz_hint": {"type": ["number", "null"]},
+    "sensor_id_hint": {"type": ["string", "null"]},
+    "sha256": {"type": "string"},
+    "candidate_station": {"type": ["string", "null"]},
+    "source_hint": {"type": ["string", "null"]}
+  }
+}
