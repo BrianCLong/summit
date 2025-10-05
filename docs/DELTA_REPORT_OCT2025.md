@@ -26,8 +26,8 @@ Identified and resolved **3 critical CI failures** blocking the October 2025 del
 **Symptom**: CI workflow `gitleaks` failing with 2 detected secrets
 
 **Root Cause**: Documentation files contained example passwords that triggered gitleaks scanner:
-- `docs/PILOT_DEPLOYMENT_GUIDE.md:482` - `export TEST_USER_PASSWORD="<pilot-user-password>"`
-- `docs/runbooks/SYNTHETICS_DASHBOARDS_RUNBOOK.md:89` - `export TEST_USER_PASSWORD="testpassword"`
+- `docs/PILOT_DEPLOYMENT_GUIDE.md:482` - Hardcoded password in example
+- `docs/runbooks/SYNTHETICS_DASHBOARDS_RUNBOOK.md:89` - Hardcoded password in example
 
 **Impact**:
 - Blocking all PRs and pushes to main
@@ -37,11 +37,11 @@ Identified and resolved **3 critical CI failures** blocking the October 2025 del
 **Resolution**:
 ```diff
 # docs/PILOT_DEPLOYMENT_GUIDE.md:482
-- export TEST_USER_PASSWORD="<pilot-user-password>"
+- export TEST_USER_PASSWORD="[REDACTED]"
 + export TEST_USER_PASSWORD="$PILOT_USER_PASSWORD"  # Set via environment or secrets
 
 # docs/runbooks/SYNTHETICS_DASHBOARDS_RUNBOOK.md:89
-- export TEST_USER_PASSWORD="testpassword"
+- export TEST_USER_PASSWORD="[REDACTED]"
 + export TEST_USER_PASSWORD="$TEST_PASSWORD"  # Set via environment or secrets
 ```
 
@@ -308,13 +308,13 @@ If CI instability continues after merging PR #10079:
 ### Run #18253578186 (gitleaks - FAILED)
 
 **Detected Secrets**:
-1. **Finding**: `export TEST_USER_PASSWORD="<pilot-user-password>"`
+1. **Finding**: Hardcoded password in documentation example
    - File: `docs/PILOT_DEPLOYMENT_GUIDE.md:482`
    - RuleID: `generic-password`
    - Entropy: 4.476410
    - Commit: `bc0e824fad368703c5d14646d436d1fb8f0e0692`
 
-2. **Finding**: `export TEST_USER_PASSWORD="testpassword"`
+2. **Finding**: Hardcoded password in documentation example
    - File: `docs/runbooks/SYNTHETICS_DASHBOARDS_RUNBOOK.md:89`
    - RuleID: `generic-password`
    - Entropy: 4.055958
