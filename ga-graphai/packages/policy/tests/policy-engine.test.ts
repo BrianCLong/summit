@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PolicyEvaluationRequest, PolicyRule } from 'common-types';
-import { PolicyEngine, buildDefaultPolicyEngine } from '../src/index';
+import { PolicyEngine, buildDefaultPolicyEngine } from '../src/index.ts';
 
 describe('PolicyEngine', () => {
   const baseRules: PolicyRule[] = [

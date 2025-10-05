@@ -26,6 +26,8 @@ function runTest(name: string, fn: TestFn) {
   }
 }
 
+const pendingTests: Array<[string, TestFn]> = [];
+
 function createWorkflow(): WorkflowDefinition {
   return {
     workflowId: "wf_valid",
@@ -72,16 +74,16 @@ function createWorkflow(): WorkflowDefinition {
   };
 }
 
-runTest("validateWorkflow passes healthy graph", () => {
+pendingTests.push(["validateWorkflow passes healthy graph", () => {
   const result = validateWorkflow(createWorkflow());
   assert.equal(result.analysis.issues.length, 0);
   assert.equal(result.analysis.suggestions.length, 0);
   assert.deepEqual(result.analysis.sources, ["n1"]);
   assert.deepEqual(result.analysis.sinks, ["n3"]);
   assert.ok(result.analysis.estimated.latencyP95Ms > 0);
-});
+}]);
 
-runTest("policy retention enforced for PII", () => {
+pendingTests.push(["policy retention enforced for PII", () => {
   const workflow = createWorkflow();
   workflow.policy.pii = true;
   workflow.policy.retention = "standard-365d";
@@ -90,9 +92,9 @@ runTest("policy retention enforced for PII", () => {
     (issue: WorkflowValidationIssue) => issue.code === "policy.retention"
   );
   assert.ok(retentionIssue);
-});
+}]);
 
-runTest("what-if planner adjusts estimates", () => {
+pendingTests.push(["what-if planner adjusts estimates", () => {
   const workflow = createWorkflow();
   const original = computeWorkflowEstimates(workflow);
   const scenario = planWhatIf(workflow, {
@@ -103,9 +105,9 @@ runTest("what-if planner adjusts estimates", () => {
   });
   assert.ok(scenario.latencyP95Ms < original.latencyP95Ms);
   assert.ok(scenario.costUSD <= original.costUSD);
-});
+}]);
 
-runTest("budget suggestions trigger when near threshold", () => {
+pendingTests.push(["budget suggestions trigger when near threshold", () => {
   const workflow = createWorkflow();
   const estimates = {
     latencyP95Ms: 1000,
@@ -116,23 +118,23 @@ runTest("budget suggestions trigger when near threshold", () => {
   };
   const suggestions = suggestBudgetActions(workflow, estimates, 0.8);
   assert.ok(suggestions.some((item) => item.code === "budget.watch"));
-});
+}]);
 
-runTest("artifact catalog aggregates producer bindings", () => {
+pendingTests.push(["artifact catalog aggregates producer bindings", () => {
   const workflow = createWorkflow();
   const artifacts = collectArtifactCatalog(workflow);
   assert.equal(artifacts.length, 1);
   assert.equal(artifacts[0]?.type, "generic");
-});
+}]);
 
-runTest("topological sort orders nodes", () => {
+pendingTests.push(["topological sort orders nodes", () => {
   const workflow = createWorkflow();
   const topology = topologicalSort(workflow);
   assert.deepEqual(topology.order, ["n1", "n2", "n3"]);
   assert.equal(topology.cycles.length, 0);
-});
+}]);
 
-runTest("validateWorkflow flags cyclic graphs", () => {
+pendingTests.push(["validateWorkflow flags cyclic graphs", () => {
   const workflow = createWorkflow();
   workflow.edges.push({ from: "n3", to: "n2", on: "success" });
   const result = validateWorkflow(workflow);
@@ -141,16 +143,38 @@ runTest("validateWorkflow flags cyclic graphs", () => {
   );
   assert.ok(cycleIssue);
   assert.equal(cycleIssue?.severity, "error");
-});
+}]);
 
-runTest("topological sort surfaces cycles without infinite loop", () => {
+pendingTests.push(["topological sort surfaces cycles without infinite loop", () => {
   const workflow = createWorkflow();
   workflow.edges.push({ from: "n3", to: "n2", on: "success" });
   const topology = topologicalSort(workflow);
   assert.ok(topology.cycles.length > 0);
   assert.ok(topology.cycles.some((cycle) => cycle.includes("n2") && cycle.includes("n3")));
-});
+}]);
 
-if (!process.exitCode) {
-  console.log("All policy assertions passed.");
+function executePendingTests(): void {
+  for (const [name, fn] of pendingTests) {
+    runTest(name, fn);
+  }
+}
+
+const isNodeTestRunner =
+  typeof process !== "undefined" && process.argv.some((arg) => arg.includes("--test"));
+
+if (isNodeTestRunner) {
+  void import("node:test")
+    .then(({ test }) => {
+      test("policy validator compliance suite", () => {
+        executePendingTests();
+      });
+    })
+    .catch(() => {
+      executePendingTests();
+    });
+} else {
+  executePendingTests();
+  if (!process.exitCode) {
+    console.log("All policy assertions passed.");
+  }
 }

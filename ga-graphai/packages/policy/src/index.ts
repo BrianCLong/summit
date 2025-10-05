@@ -1,4 +1,17 @@
 import { createHash, createHmac } from "node:crypto";
+import {
+  mergeDataClasses,
+  MODEL_ALLOWLIST,
+  PURPOSE_ALLOWLIST,
+  SHORT_RETENTION,
+  analyzeEvidence,
+  derivePolicyInput,
+  ensureSecret,
+  enumerateArtifacts,
+  listSinkNodes,
+  listSourceNodes,
+  normalizeWorkflow
+} from "common-types";
 import type {
   PolicyCondition,
   PolicyEvaluationRequest,
@@ -11,17 +24,6 @@ import type {
   CursorPurpose,
   PolicyDecision,
   PolicyEvaluationContext,
-  mergeDataClasses,
-  MODEL_ALLOWLIST,
-  PURPOSE_ALLOWLIST,
-  SHORT_RETENTION,
-  analyzeEvidence,
-  derivePolicyInput,
-  ensureSecret,
-  enumerateArtifacts,
-  listSinkNodes,
-  listSourceNodes,
-  normalizeWorkflow,
   ArtifactBinding,
   PolicyInput,
   ValidationDefaults,
@@ -34,8 +36,19 @@ import type {
   WorkflowStaticAnalysis,
   WorkflowSuggestion,
   WorkflowValidationIssue,
-  WorkflowValidationResult
-} from 'common-types';
+  WorkflowValidationResult,
+  PolicySimulationScenario,
+  PolicySimulationReport,
+  PolicySimulationFrame,
+  PolicySimulationMetrics,
+  PolicyMitigationAction,
+  PolicyTestCase,
+  PolicyImpactDelta,
+  PolicySimulationAgent,
+  PolicySimulationWorkload,
+  PolicyCompliancePosture,
+  PolicySimulationFrameMetrics
+} from "common-types";
 
 // ============================================================================
 // RUNTIME POLICY ENGINE - From HEAD
@@ -245,10 +258,32 @@ export interface PolicyEvaluatorOptions {
   now?: () => Date;
 }
 
+const RUNTIME_PURPOSE_ALLOWLIST: CursorPurpose[] = (() => {
+  try {
+    if (typeof PURPOSE_ALLOWLIST !== "undefined" && Array.isArray(PURPOSE_ALLOWLIST)) {
+      return [...PURPOSE_ALLOWLIST];
+    }
+  } catch {
+    // ignore resolution mismatch
+  }
+  return ["development", "research", "governance"] as CursorPurpose[];
+})();
+
+const RUNTIME_MODEL_ALLOWLIST: string[] = (() => {
+  try {
+    if (typeof MODEL_ALLOWLIST !== "undefined") {
+      return Array.from(MODEL_ALLOWLIST as Iterable<string>);
+    }
+  } catch {
+    // ignore resolution mismatch
+  }
+  return [];
+})();
+
 const DEFAULT_CONFIG: PolicyConfig = {
   allowedLicenses: ["MIT", "Apache-2.0"],
-  allowedPurposes: [...PURPOSE_ALLOWLIST],
-  modelAllowList: Array.from(MODEL_ALLOWLIST),
+  allowedPurposes: [...RUNTIME_PURPOSE_ALLOWLIST],
+  modelAllowList: [...RUNTIME_MODEL_ALLOWLIST],
   deniedDataClasses: ["production-PII", "secrets", "proprietary-client"],
   redactableDataClasses: ["production-PII"],
   requireRedactionForDeniedDataClasses: true,
@@ -1084,3 +1119,648 @@ export function collectArtifactCatalog(
 }
 
 export { analyzeEvidence } from "common-types";
+
+const DEFAULT_ITERATIONS = 256;
+
+interface EventTracking {
+  id: string;
+  name: string;
+  action: string;
+  resource: string;
+  roles: string[];
+  compliancePenalty: number;
+  baselineRisk: number;
+  proposedRisk: number;
+  baselineMitigated: number;
+  proposedMitigated: number;
+  occurrences: number;
+  baselineAllows: number;
+  proposedAllows: number;
+  recommendedAgentId?: string;
+  maxCoverage?: number;
+  automationCandidate?: boolean;
+  nodeId?: string;
+}
+
+interface AgentImpact {
+  agent: PolicySimulationAgent | null;
+  coverage: number;
+  cost: number;
+  automationCandidate: boolean;
+}
+
+class DeterministicRandom {
+  private state: number;
+
+  constructor(seed: number) {
+    this.state = seed >>> 0;
+  }
+
+  next(): number {
+    this.state = (1664525 * this.state + 1013904223) >>> 0;
+    return this.state / 0xffffffff;
+  }
+}
+
+function clampNumber(value: number, min: number, max: number): number {
+  if (Number.isNaN(value)) {
+    return min;
+  }
+  if (value < min) {
+    return min;
+  }
+  if (value > max) {
+    return max;
+  }
+  return value;
+}
+
+function computePercentile(values: number[], percentile: number): number {
+  if (values.length === 0) {
+    return 0;
+  }
+  const sorted = [...values].sort((left, right) => left - right);
+  const clamped = clampNumber(percentile, 0, 1);
+  const rank = clamped * (sorted.length - 1);
+  const lower = Math.floor(rank);
+  const upper = Math.ceil(rank);
+  if (lower === upper) {
+    return sorted[lower];
+  }
+  const weight = rank - lower;
+  return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+}
+
+function mean(values: number[]): number {
+  if (values.length === 0) {
+    return 0;
+  }
+  return values.reduce((total, value) => total + value, 0) / values.length;
+}
+
+function safeDivide(numerator: number, denominator: number): number {
+  if (denominator === 0) {
+    return 0;
+  }
+  return numerator / denominator;
+}
+
+function computePostureScore(
+  averageRisk: number,
+  incidentProbability: number,
+  mitigatedRisk: number
+): number {
+  const normalizedRisk = 1 - Math.tanh(Math.max(0, averageRisk) / 100000);
+  const normalizedIncident = clampNumber(1 - incidentProbability, 0, 1);
+  const normalizedMitigation = clampNumber(
+    mitigatedRisk / (averageRisk + mitigatedRisk + 1),
+    0,
+    1
+  );
+  const score =
+    normalizedRisk * 0.5 + normalizedIncident * 0.3 + normalizedMitigation * 0.2;
+  return clampNumber(score, 0, 1);
+}
+
+function scoreToPosture(score: number): PolicyCompliancePosture {
+  if (score < 0.35) {
+    return "fragile";
+  }
+  if (score < 0.6) {
+    return "guarded";
+  }
+  if (score < 0.85) {
+    return "resilient";
+  }
+  return "transformational";
+}
+
+function countApprovals(
+  graph: PolicySimulationScenario["graph"]
+): number {
+  return graph.edges.filter((edge) =>
+    edge.relation.toLowerCase().includes("approval")
+  ).length;
+}
+
+function inferNodeId(workload: PolicySimulationWorkload): string | undefined {
+  const attributes = workload.context.attributes;
+  if (!attributes) {
+    return undefined;
+  }
+  const candidate =
+    attributes.nodeId ?? attributes.node ?? attributes.graphNode ?? attributes.stage;
+  return typeof candidate === "string" ? candidate : undefined;
+}
+
+function getOrCreateStats(
+  map: Map<string, EventTracking>,
+  workload: PolicySimulationWorkload,
+  nodeId?: string
+): EventTracking {
+  const existing = map.get(workload.id);
+  if (existing) {
+    if (!existing.nodeId && nodeId) {
+      existing.nodeId = nodeId;
+    }
+    return existing;
+  }
+  const created: EventTracking = {
+    id: workload.id,
+    name: workload.name,
+    action: workload.action,
+    resource: workload.resource,
+    roles: [...workload.context.roles],
+    compliancePenalty: workload.compliancePenalty,
+    baselineRisk: 0,
+    proposedRisk: 0,
+    baselineMitigated: 0,
+    proposedMitigated: 0,
+    occurrences: 0,
+    baselineAllows: 0,
+    proposedAllows: 0,
+    nodeId
+  };
+  map.set(workload.id, created);
+  return created;
+}
+
+export interface PolicyComplianceSimulatorOptions {
+  iterations?: number;
+  seed?: number;
+  frameInterval?: number;
+}
+
+export class PolicyComplianceSimulator {
+  private readonly scenario: PolicySimulationScenario;
+  private readonly iterations: number;
+  private readonly random: DeterministicRandom;
+  private readonly frameInterval: number;
+  private readonly workloadIndex: Map<string, PolicySimulationWorkload>;
+
+  constructor(
+    scenario: PolicySimulationScenario,
+    options?: PolicyComplianceSimulatorOptions
+  ) {
+    this.scenario = scenario;
+    this.iterations =
+      options?.iterations ?? scenario.assumptions?.iterations ?? DEFAULT_ITERATIONS;
+    const seed = options?.seed ?? scenario.assumptions?.seed ?? Date.now();
+    this.random = new DeterministicRandom(seed);
+    const defaultFrameInterval = Math.max(1, Math.ceil(this.iterations / 24));
+    this.frameInterval = Math.max(
+      1,
+      options?.frameInterval ?? defaultFrameInterval
+    );
+    this.workloadIndex = new Map(
+      scenario.workloads.map((workload) => [workload.id, workload] as const)
+    );
+  }
+
+  run(): PolicySimulationReport {
+    const baselineEngine = new PolicyEngine(this.scenario.baselineRules);
+    const proposedEngine = new PolicyEngine(this.scenario.proposedRules);
+
+    const baselineRisks: number[] = [];
+    const proposedRisks: number[] = [];
+    const baselineCosts: number[] = [];
+    const proposedCosts: number[] = [];
+    let cumulativeBaselineRisk = 0;
+    let cumulativeProposedRisk = 0;
+    let cumulativeBaselineCost = 0;
+    let cumulativeProposedCost = 0;
+    let baselineIncidents = 0;
+    let proposedIncidents = 0;
+    let baselineMitigatedTotal = 0;
+    let proposedMitigatedTotal = 0;
+    const frames: PolicySimulationFrame[] = [];
+    const eventStats = new Map<string, EventTracking>();
+    const nodeRisk = new Map<string, { baseline: number; proposed: number }>();
+
+    for (let iteration = 1; iteration <= this.iterations; iteration += 1) {
+      let iterationBaselineRisk = 0;
+      let iterationProposedRisk = 0;
+      let iterationBaselineCost = 0;
+      let iterationProposedCost = 0;
+      let iterationBaselineIncidents = 0;
+      let iterationProposedIncidents = 0;
+
+      for (const workload of this.scenario.workloads) {
+        const roll = this.random.next();
+        const probability = clampNumber(workload.probability, 0, 1);
+        if (roll > probability) {
+          continue;
+        }
+
+        const request: PolicyEvaluationRequest = {
+          action: workload.action,
+          resource: workload.resource,
+          context: workload.context
+        };
+
+        const baselineEval = baselineEngine.evaluate(request);
+        const proposedEval = proposedEngine.evaluate(request);
+
+        const detectionDifficulty = clampNumber(
+          workload.detectionDifficulty ?? 0.5,
+          0,
+          1
+        );
+        const denialResidualMultiplier = 0.05 + detectionDifficulty * 0.1;
+        const riskExposure = workload.potentialLossUsd;
+        const nodeId = inferNodeId(workload);
+        const stats = getOrCreateStats(eventStats, workload, nodeId);
+
+        const baselineAgentImpact = this.estimateAgentImpact(workload, false);
+        const proposedAgentImpact = this.estimateAgentImpact(
+          workload,
+          !proposedEval.allowed
+        );
+
+        let baselineResidualRisk: number;
+        let proposedResidualRisk: number;
+        let baselineMitigated = 0;
+        let proposedMitigated = 0;
+        let baselineCostImpact = workload.costUsd ?? 0;
+        let proposedCostImpact = workload.costUsd ?? 0;
+
+        if (baselineEval.allowed) {
+          baselineMitigated = riskExposure * baselineAgentImpact.coverage;
+          baselineResidualRisk = riskExposure - baselineMitigated;
+          baselineCostImpact += baselineAgentImpact.cost;
+        } else {
+          baselineResidualRisk = riskExposure * denialResidualMultiplier;
+          baselineMitigated = riskExposure - baselineResidualRisk;
+          baselineCostImpact += (workload.costUsd ?? 0) * 0.2;
+        }
+
+        if (proposedEval.allowed) {
+          proposedMitigated = riskExposure * proposedAgentImpact.coverage;
+          proposedResidualRisk = riskExposure - proposedMitigated;
+          proposedCostImpact += proposedAgentImpact.cost;
+        } else {
+          const augmentedCoverage = clampNumber(
+            proposedAgentImpact.coverage + 0.15,
+            0,
+            1
+          );
+          proposedResidualRisk =
+            riskExposure * denialResidualMultiplier * (1 - augmentedCoverage * 0.5);
+          proposedMitigated = riskExposure - proposedResidualRisk;
+          proposedCostImpact += (workload.costUsd ?? 0) * 0.25;
+        }
+
+        if (baselineEval.allowed && workload.compliancePenalty >= 0.3) {
+          iterationBaselineIncidents += 1;
+        }
+        if (proposedEval.allowed && workload.compliancePenalty >= 0.3) {
+          iterationProposedIncidents += 1;
+        }
+
+        iterationBaselineRisk += baselineResidualRisk;
+        iterationProposedRisk += proposedResidualRisk;
+        iterationBaselineCost += baselineCostImpact;
+        iterationProposedCost += proposedCostImpact;
+
+        baselineMitigatedTotal += baselineMitigated;
+        proposedMitigatedTotal += proposedMitigated;
+
+        stats.baselineRisk += baselineResidualRisk;
+        stats.proposedRisk += proposedResidualRisk;
+        stats.baselineMitigated += baselineMitigated;
+        stats.proposedMitigated += proposedMitigated;
+        stats.occurrences += 1;
+        if (baselineEval.allowed) {
+          stats.baselineAllows += 1;
+        }
+        if (proposedEval.allowed) {
+          stats.proposedAllows += 1;
+        }
+        if (
+          baselineAgentImpact.agent &&
+          baselineAgentImpact.coverage > (stats.maxCoverage ?? 0)
+        ) {
+          stats.recommendedAgentId = baselineAgentImpact.agent.id;
+          stats.maxCoverage = baselineAgentImpact.coverage;
+          stats.automationCandidate = baselineAgentImpact.automationCandidate;
+        }
+        if (
+          proposedAgentImpact.agent &&
+          proposedAgentImpact.coverage > (stats.maxCoverage ?? 0)
+        ) {
+          stats.recommendedAgentId = proposedAgentImpact.agent.id;
+          stats.maxCoverage = proposedAgentImpact.coverage;
+          stats.automationCandidate = proposedAgentImpact.automationCandidate;
+        }
+
+        if (nodeId) {
+          const risk = nodeRisk.get(nodeId) ?? { baseline: 0, proposed: 0 };
+          risk.baseline += baselineResidualRisk;
+          risk.proposed += proposedResidualRisk;
+          nodeRisk.set(nodeId, risk);
+        }
+      }
+
+      baselineIncidents += iterationBaselineIncidents;
+      proposedIncidents += iterationProposedIncidents;
+
+      baselineRisks.push(iterationBaselineRisk);
+      proposedRisks.push(iterationProposedRisk);
+      baselineCosts.push(iterationBaselineCost);
+      proposedCosts.push(iterationProposedCost);
+
+      cumulativeBaselineRisk += iterationBaselineRisk;
+      cumulativeProposedRisk += iterationProposedRisk;
+      cumulativeBaselineCost += iterationBaselineCost;
+      cumulativeProposedCost += iterationProposedCost;
+
+      if (iteration % this.frameInterval === 0 || iteration === this.iterations) {
+        const baselineIncidentRate = safeDivide(
+          baselineIncidents,
+          iteration * this.scenario.workloads.length
+        );
+        const proposedIncidentRate = safeDivide(
+          proposedIncidents,
+          iteration * this.scenario.workloads.length
+        );
+        const baselinePostureScore = computePostureScore(
+          safeDivide(cumulativeBaselineRisk, iteration),
+          baselineIncidentRate,
+          safeDivide(baselineMitigatedTotal, iteration)
+        );
+        const proposedPostureScore = computePostureScore(
+          safeDivide(cumulativeProposedRisk, iteration),
+          proposedIncidentRate,
+          safeDivide(proposedMitigatedTotal, iteration)
+        );
+
+        frames.push({
+          iteration,
+          baseline: {
+            cumulativeRiskUsd: Number(cumulativeBaselineRisk.toFixed(2)),
+            cumulativeCostUsd: Number(cumulativeBaselineCost.toFixed(2)),
+            incidentRate: Number(baselineIncidentRate.toFixed(4)),
+            postureScore: Number(baselinePostureScore.toFixed(4))
+          },
+          proposed: {
+            cumulativeRiskUsd: Number(cumulativeProposedRisk.toFixed(2)),
+            cumulativeCostUsd: Number(cumulativeProposedCost.toFixed(2)),
+            incidentRate: Number(proposedIncidentRate.toFixed(4)),
+            postureScore: Number(proposedPostureScore.toFixed(4))
+          },
+          delta: {
+            riskUsd: Number(
+              (cumulativeBaselineRisk - cumulativeProposedRisk).toFixed(2)
+            ),
+            costUsd: Number(
+              (cumulativeBaselineCost - cumulativeProposedCost).toFixed(2)
+            ),
+            postureShift: Number(
+              (proposedPostureScore - baselinePostureScore).toFixed(4)
+            )
+          }
+        });
+      }
+    }
+
+    const baselineMetrics = this.buildMetrics(
+      baselineRisks,
+      baselineCosts,
+      baselineMitigatedTotal,
+      baselineIncidents
+    );
+    const proposedMetrics = this.buildMetrics(
+      proposedRisks,
+      proposedCosts,
+      proposedMitigatedTotal,
+      proposedIncidents
+    );
+    const delta: PolicyImpactDelta = {
+      riskDeltaUsd: Number(
+        (baselineMetrics.averageRiskUsd - proposedMetrics.averageRiskUsd).toFixed(2)
+      ),
+      costDeltaUsd: Number(
+        (baselineMetrics.costUsd - proposedMetrics.costUsd).toFixed(2)
+      ),
+      complianceDelta: Number(
+        (proposedMetrics.scenarioScore - baselineMetrics.scenarioScore).toFixed(2)
+      ),
+      incidentDelta: Number(
+        (baselineMetrics.incidentProbability - proposedMetrics.incidentProbability).toFixed(4)
+      )
+    };
+
+    const mitigations = this.buildMitigations(eventStats, proposedMetrics);
+    const testCases = this.buildTestCases(eventStats);
+    const graphInsights = this.buildGraphInsights(nodeRisk, eventStats);
+
+    return {
+      baseline: baselineMetrics,
+      proposed: proposedMetrics,
+      delta,
+      mitigations,
+      testCases,
+      frames,
+      graphInsights,
+      agents: this.scenario.agents,
+      workloads: this.scenario.workloads
+    };
+  }
+
+  private buildMetrics(
+    risks: number[],
+    costs: number[],
+    mitigatedSum: number,
+    incidents: number
+  ): PolicySimulationMetrics {
+    const averageRisk = mean(risks);
+    const averageCost = mean(costs);
+    const mitigated = safeDivide(mitigatedSum, this.iterations);
+    const incidentProbability = safeDivide(
+      incidents,
+      this.iterations * this.scenario.workloads.length
+    );
+    const postureScore = computePostureScore(
+      averageRisk,
+      incidentProbability,
+      mitigated
+    );
+    return {
+      averageRiskUsd: Number(averageRisk.toFixed(2)),
+      riskP95Usd: Number(computePercentile(risks, 0.95).toFixed(2)),
+      costUsd: Number(averageCost.toFixed(2)),
+      compliancePosture: scoreToPosture(postureScore),
+      approvalsRequired: countApprovals(this.scenario.graph),
+      mitigatedRiskUsd: Number(mitigated.toFixed(2)),
+      incidentProbability: Number(incidentProbability.toFixed(4)),
+      scenarioScore: Number((postureScore * 100).toFixed(2))
+    };
+  }
+
+  private buildMitigations(
+    eventStats: Map<string, EventTracking>,
+    proposedMetrics: PolicySimulationMetrics
+  ): PolicyMitigationAction[] {
+    const mitigations: PolicyMitigationAction[] = [];
+    const sorted = [...eventStats.values()].sort(
+      (left, right) => right.baselineRisk - left.baselineRisk
+    );
+    for (const stat of sorted) {
+      if (stat.baselineRisk <= 0) {
+        continue;
+      }
+      const agent = stat.recommendedAgentId
+        ? this.scenario.agents.find((candidate) => candidate.id === stat.recommendedAgentId)
+        : this.scenario.agents[0];
+      if (!agent) {
+        continue;
+      }
+      const coverage = clampNumber(stat.maxCoverage ?? agent.effectiveness, 0, 1);
+      const expectedReduction = Math.max(0, stat.baselineRisk - stat.proposedRisk);
+      const residual = Math.max(0, stat.proposedRisk);
+      mitigations.push({
+        id: `mit-${this.scenario.id}-${stat.id}`,
+        agentId: agent.id,
+        description: `${agent.name} orchestrates guardrails for ${stat.name} to enforce ${this.scenario.change.summary}`,
+        expectedRiskReductionUsd: Number(expectedReduction.toFixed(2)),
+        residualRiskUsd: Number(residual.toFixed(2)),
+        automationCandidate: stat.automationCandidate ?? false,
+        coverage: Number(coverage.toFixed(3)),
+        playbook: `Sandbox rehearsal for change ${this.scenario.change.id}`,
+        validationSteps: [
+          `Replay ${stat.name} across sandbox graph to confirm risk delta ≥ ${expectedReduction.toFixed(2)} USD.`,
+          `Capture mitigation ledger entries for ${agent.name} interventions.`,
+          `Validate posture uplift reaching ≥ ${proposedMetrics.scenarioScore.toFixed(1)} score units.`
+        ]
+      });
+    }
+    return mitigations;
+  }
+
+  private buildTestCases(eventStats: Map<string, EventTracking>): PolicyTestCase[] {
+    const cases: PolicyTestCase[] = [];
+    const sorted = [...eventStats.values()].sort(
+      (left, right) => right.proposedRisk - left.proposedRisk
+    );
+    for (const stat of sorted) {
+      const workload = this.workloadIndex.get(stat.id);
+      if (!workload) {
+        continue;
+      }
+      const agent = stat.recommendedAgentId
+        ? this.scenario.agents.find((candidate) => candidate.id === stat.recommendedAgentId)
+        : undefined;
+      const expectedDecision = stat.proposedRisk < stat.baselineRisk ? "deny" : "allow-with-guardrails";
+      const requiredAgents = agent ? [agent.id] : [];
+      const steps = [
+        `Seed sandbox graph with node ${stat.nodeId ?? "policy-entry"} and workloads for ${stat.name}.`,
+        `Issue ${workload.action} on ${workload.resource} using roles ${stat.roles.join(", ")}.`,
+        `Assert policy decision is ${expectedDecision} with residual risk ≤ ${stat.proposedRisk.toFixed(2)} USD.`,
+        `Capture mitigation telemetry and obligations for regression evidence.`
+      ];
+      cases.push({
+        id: `tc-${this.scenario.id}-${stat.id}`,
+        title: `${stat.name} ${this.scenario.change.summary} regression`,
+        steps,
+        expectedOutcome: `Policy returns ${expectedDecision} and maintains compliance uplift of ${(stat.baselineRisk - stat.proposedRisk).toFixed(2)} USD.`,
+        targetAction: workload.action,
+        targetResource: workload.resource,
+        requiredAgents,
+        tags: [this.scenario.change.type, stat.nodeId ? `node:${stat.nodeId}` : "graph"]
+      });
+    }
+    return cases;
+  }
+
+  private buildGraphInsights(
+    nodeRisk: Map<string, { baseline: number; proposed: number }>,
+    eventStats: Map<string, EventTracking>
+  ) {
+    const highRiskNodes = [...nodeRisk.entries()]
+      .sort((left, right) => right[1].baseline - left[1].baseline)
+      .slice(0, 5)
+      .map(([nodeId]) => nodeId);
+
+    const chokePoints = this.scenario.graph.edges
+      .map((edge) => ({
+        edge,
+        score: (edge.weight ?? 1) * (edge.risk ?? 0.5)
+      }))
+      .filter((entry) => entry.score > 0)
+      .sort((left, right) => right.score - left.score)
+      .slice(0, 5)
+      .map((entry) => `${entry.edge.from}->${entry.edge.to}`);
+
+    const sandboxFindings = [...eventStats.values()]
+      .sort((left, right) => right.baselineRisk - left.baselineRisk)
+      .slice(0, Math.min(10, eventStats.size || 10))
+      .map((stat) => ({
+        eventId: stat.id,
+        name: stat.name,
+        baselineRiskUsd: Number(stat.baselineRisk.toFixed(2)),
+        proposedRiskUsd: Number(stat.proposedRisk.toFixed(2)),
+        occurrences: stat.occurrences,
+        recommendedAgentId: stat.recommendedAgentId,
+        postureLiftUsd: Number((stat.baselineRisk - stat.proposedRisk).toFixed(2)),
+        nodeId: stat.nodeId,
+        automationCandidate: stat.automationCandidate ?? false
+      }));
+
+    return {
+      highRiskNodes,
+      chokePoints,
+      sandboxFindings
+    };
+  }
+
+  private estimateAgentImpact(
+    workload: PolicySimulationWorkload,
+    preferAutomation: boolean
+  ): AgentImpact {
+    if (this.scenario.agents.length === 0) {
+      return { agent: null, coverage: 0, cost: 0, automationCandidate: false };
+    }
+    const ranked = [...this.scenario.agents].sort(
+      (left, right) =>
+        this.computeAgentPriority(right, workload, preferAutomation) -
+        this.computeAgentPriority(left, workload, preferAutomation)
+    );
+    const agent = ranked[0];
+    const automationTrait = agent.traits?.automation ?? 0.5;
+    const agility = clampNumber(1 - agent.responsivenessMinutes / 240, 0.1, 1);
+    const variability = 1 - (preferAutomation ? automationTrait : agent.effectiveness) * 0.1;
+    const jitter = 1 - this.random.next() * 0.2;
+    const capacityBoost = clampNumber(agent.capacityPerHour / 50, 0, 1) * 0.1;
+    const baseCoverage = clampNumber(
+      agent.effectiveness * agility * variability * jitter + capacityBoost,
+      0,
+      1
+    );
+    return {
+      agent,
+      coverage: baseCoverage,
+      cost: agent.costPerAction,
+      automationCandidate: baseCoverage > 0.65 && automationTrait >= 0.6
+    };
+  }
+
+  private computeAgentPriority(
+    agent: PolicySimulationAgent,
+    workload: PolicySimulationWorkload,
+    preferAutomation: boolean
+  ): number {
+    const specializationKey = `focus:${workload.resource}`;
+    const specialization = agent.traits?.[specializationKey] ?? agent.traits?.focus ?? 0.5;
+    const automation = agent.traits?.automation ?? 0.5;
+    const responsiveness = clampNumber(1 - agent.responsivenessMinutes / 480, 0, 1);
+    const workloadPressure = clampNumber(workload.compliancePenalty, 0, 1);
+    const automationBias = preferAutomation ? automation * 0.3 : automation * 0.1;
+    return (
+      agent.effectiveness * 0.5 +
+      specialization * 0.2 +
+      workloadPressure * 0.2 +
+      responsiveness * 0.1 +
+      automationBias
+    );
+  }
+}

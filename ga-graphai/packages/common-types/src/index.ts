@@ -148,6 +148,174 @@ export interface PolicyEvaluationResult {
   trace: PolicyEvaluationTrace[];
 }
 
+export type PolicyGraphNodeType =
+  | 'actor'
+  | 'system'
+  | 'data'
+  | 'control'
+  | 'policy'
+  | 'process';
+
+export interface PolicyGraphNode {
+  id: string;
+  label: string;
+  type: PolicyGraphNodeType;
+  criticality?: number;
+  attributes?: Record<string, unknown>;
+}
+
+export interface PolicyGraphEdge {
+  id: string;
+  from: string;
+  to: string;
+  relation: string;
+  weight?: number;
+  risk?: number;
+  metadata?: Record<string, unknown>;
+}
+
+export type PolicyScenarioChangeType = 'contract' | 'policy' | 'regulation';
+
+export interface PolicyScenarioChangeSet {
+  id: string;
+  summary: string;
+  type: PolicyScenarioChangeType;
+  rationale?: string;
+  modifications: Record<string, unknown>;
+  tags?: string[];
+}
+
+export type PolicyAgentArchetype = 'defender' | 'adversary' | 'auditor' | 'operator';
+
+export interface PolicySimulationAgent {
+  id: string;
+  name: string;
+  role: string;
+  archetype: PolicyAgentArchetype;
+  effectiveness: number;
+  responsivenessMinutes: number;
+  costPerAction: number;
+  capacityPerHour: number;
+  traits?: Record<string, number>;
+}
+
+export interface PolicySimulationWorkload {
+  id: string;
+  name: string;
+  action: string;
+  resource: string;
+  probability: number;
+  potentialLossUsd: number;
+  compliancePenalty: number;
+  costUsd?: number;
+  detectionDifficulty?: number;
+  tags?: string[];
+  context: PolicyActorContext;
+}
+
+export interface PolicySimulationAssumptions {
+  iterations: number;
+  seed?: number;
+  confidenceLevels?: number[];
+}
+
+export interface PolicySimulationScenario {
+  id: string;
+  name: string;
+  description: string;
+  change: PolicyScenarioChangeSet;
+  baselineRules: PolicyRule[];
+  proposedRules: PolicyRule[];
+  graph: {
+    nodes: PolicyGraphNode[];
+    edges: PolicyGraphEdge[];
+  };
+  workloads: PolicySimulationWorkload[];
+  agents: PolicySimulationAgent[];
+  assumptions?: PolicySimulationAssumptions;
+}
+
+export type PolicyCompliancePosture =
+  | 'fragile'
+  | 'guarded'
+  | 'resilient'
+  | 'transformational';
+
+export interface PolicySimulationMetrics {
+  averageRiskUsd: number;
+  riskP95Usd: number;
+  costUsd: number;
+  compliancePosture: PolicyCompliancePosture;
+  approvalsRequired: number;
+  mitigatedRiskUsd: number;
+  incidentProbability: number;
+  scenarioScore: number;
+}
+
+export interface PolicyMitigationAction {
+  id: string;
+  agentId: string;
+  description: string;
+  expectedRiskReductionUsd: number;
+  residualRiskUsd: number;
+  automationCandidate: boolean;
+  coverage: number;
+  playbook?: string;
+  validationSteps: string[];
+}
+
+export interface PolicyTestCase {
+  id: string;
+  title: string;
+  steps: string[];
+  expectedOutcome: string;
+  targetAction: string;
+  targetResource: string;
+  requiredAgents: string[];
+  tags?: string[];
+}
+
+export interface PolicySimulationFrameMetrics {
+  cumulativeRiskUsd: number;
+  cumulativeCostUsd: number;
+  incidentRate: number;
+  postureScore: number;
+}
+
+export interface PolicySimulationFrame {
+  iteration: number;
+  baseline: PolicySimulationFrameMetrics;
+  proposed: PolicySimulationFrameMetrics;
+  delta: {
+    riskUsd: number;
+    costUsd: number;
+    postureShift: number;
+  };
+}
+
+export interface PolicyImpactDelta {
+  riskDeltaUsd: number;
+  costDeltaUsd: number;
+  complianceDelta: number;
+  incidentDelta: number;
+}
+
+export interface PolicySimulationReport {
+  baseline: PolicySimulationMetrics;
+  proposed: PolicySimulationMetrics;
+  delta: PolicyImpactDelta;
+  mitigations: PolicyMitigationAction[];
+  testCases: PolicyTestCase[];
+  frames: PolicySimulationFrame[];
+  graphInsights: {
+    highRiskNodes: string[];
+    chokePoints: string[];
+    sandboxFindings: Record<string, unknown>[];
+  };
+  agents: PolicySimulationAgent[];
+  workloads: PolicySimulationWorkload[];
+}
+
 export interface LedgerFactInput {
   id: string;
   category: string;
