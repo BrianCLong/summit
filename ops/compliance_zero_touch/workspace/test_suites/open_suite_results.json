@@ -1,0 +1,28 @@
+{
+  "suite": "OpenControl",
+  "version": "2025.2",
+  "cases": [
+    {
+      "id": "gdpr-32-encryption",
+      "status": "fail",
+      "evidence": ["terraform/modules/storage.tf"],
+      "details": "S3 buckets lacking server-side encryption",
+      "framework": "GDPR",
+      "citation": "Article 32"
+    },
+    {
+      "id": "hipaa-audit-logging",
+      "status": "pass",
+      "evidence": ["cloudtrail/config.json"],
+      "framework": "HIPAA",
+      "citation": "164.312(b)"
+    },
+    {
+      "id": "fedramp-cm-2-baseline",
+      "status": "fail",
+      "evidence": ["runtime/guardduty.json"],
+      "framework": "FedRAMP",
+      "citation": "CM-2"
+    }
+  ]
+}

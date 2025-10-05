@@ -1,0 +1,18 @@
+{
+  "controls": [
+    {
+      "id": "MC-CUST-001",
+      "title": "Customer data isolation",
+      "description": "Ensure MC data is isolated from Summit tenants via network segmentation and IAM scoping.",
+      "targets": ["kubernetes.prod", "terraform.iam"],
+      "requirements": ["GDPR Art. 32", "HIPAA 164.308(a)(4)"]
+    },
+    {
+      "id": "SUM-OPS-014",
+      "title": "Economic auto-scaling guardrails",
+      "description": "Maintain auto-scaling budgets below 5% monthly variance with automated anomaly remediation.",
+      "targets": ["runtime"],
+      "requirements": ["ISO 27001 A.12.1", "FedRAMP CM-2"]
+    }
+  ]
+}

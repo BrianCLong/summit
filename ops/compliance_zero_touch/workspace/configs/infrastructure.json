@@ -1,0 +1,42 @@
+{
+  "terraform": {
+    "s3_encryption": false,
+    "iam_policies": [
+      {
+        "name": "admin",
+        "permissions": "*"
+      },
+      {
+        "name": "developer",
+        "permissions": "ec2:Describe*,s3:GetObject"
+      }
+    ],
+    "cost_center_tags": false
+  },
+  "kubernetes": {
+    "namespaces": [
+      {
+        "name": "prod",
+        "network_policy": false,
+        "image_pull_policy": "IfNotPresent",
+        "opa_gatekeeper": false
+      },
+      {
+        "name": "dev",
+        "network_policy": true,
+        "image_pull_policy": "Always",
+        "opa_gatekeeper": true
+      }
+    ],
+    "kyverno_policies": ["require-labels", "validate-images"],
+    "runtime_scans": {
+      "high_vulnerabilities": 2,
+      "critical_vulnerabilities": 1
+    }
+  },
+  "runtime": {
+    "cloudtrail_enabled": true,
+    "guardduty_findings": 1,
+    "shield_advanced": false
+  }
+}
