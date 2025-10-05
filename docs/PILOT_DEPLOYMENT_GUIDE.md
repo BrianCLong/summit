@@ -479,7 +479,7 @@ brew install k6
 # Set API URL
 export API_URL="https://pilot.intelgraph.example.com"
 export TEST_USER_EMAIL="pilot@example.com"
-export TEST_USER_PASSWORD="<pilot-user-password>"
+export TEST_USER_PASSWORD="$PILOT_USER_PASSWORD"  # Set via environment or secrets
 
 # Run k6 test
 k6 run tests/k6/golden-flow.k6.js

@@ -86,7 +86,7 @@ brew install k6
 # Set environment variables
 export API_URL="http://localhost:3000"
 export TEST_USER_EMAIL="test@example.com"
-export TEST_USER_PASSWORD="testpassword"
+export TEST_USER_PASSWORD="$TEST_PASSWORD"  # Set via environment or secrets
 
 # Run test
 k6 run tests/k6/golden-flow.k6.js
