@@ -1,109 +1,521 @@
-name: CI Security
+name: Security and Compliance Suite
 
 on:
   pull_request:
   push:
     branches: [ main ]
+  workflow_dispatch:
   schedule:
-    - cron: '0 2 * * 1' # Weekly scan
+    - cron: '0 2 * * 1'
+  workflow_call:
+    inputs:
+      run_dast:
+        description: 'Enable or disable dynamic application security testing.'
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      snyk_token:
+        description: 'Snyk API token when invoking as a reusable workflow.'
+        required: false
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+  checks: write
+  issues: read
+
+env:
+  REPORT_DIR: security-reports
+  SNYK_FAIL_THRESHOLD: high
 
 jobs:
-  gitleaks:
+  context:
+    name: Determine execution context
     runs-on: ubuntu-latest
+    outputs:
+      run_dast: ${{ steps.flags.outputs.run_dast }}
     steps:
-      - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
+      - id: flags
+        run: |
+          set -euo pipefail
+          RUN_DAST="true"
+          if command -v jq >/dev/null 2>&1 && [ -f "$GITHUB_EVENT_PATH" ]; then
+            VALUE=$(jq -r '.inputs.run_dast // empty' "$GITHUB_EVENT_PATH")
+            if [ "$VALUE" = "false" ]; then
+              RUN_DAST="false"
+            fi
+          fi
+          echo "run_dast=$RUN_DAST" >> "$GITHUB_OUTPUT"
+
+  secret-scan:
+    name: Secret scanning (Gitleaks)
+    runs-on: ubuntu-latest
+    needs: context
+    steps:
+      - name: Checkout
+        uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
         with:
           fetch-depth: 0
-      - name: Check for changes
-        id: changes
-        uses: dorny/paths-filter@4512585
-        with:
-          filters: |
-            client: 
-              - 'client/**'
-            server: 
-              - 'server/**'
-            python: 
-              - 'python/**'
-            dockerfile: 
-              - '**/Dockerfile*'
-
+      - name: Prepare report directory
+        run: mkdir -p "$REPORT_DIR"
       - name: Run Gitleaks
-        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' || steps.changes.outputs.python == 'true'
-        uses: zricethezav/gitleaks-action@v2 # No specific SHA found
-        continue-on-error: false
+        uses: zricethezav/gitleaks-action@v2
+        with:
+          args: detect --source . --report-format sarif --report-path ${{ env.REPORT_DIR }}/gitleaks.sarif
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ env.REPORT_DIR }}/gitleaks.sarif
+      - name: Persist report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: ${{ env.REPORT_DIR }}/gitleaks.sarif
 
-  codeql:
+  sast:
+    name: Static application security testing (CodeQL)
     runs-on: ubuntu-latest
+    needs: context
     permissions:
-      security-events: write
+      actions: read
       contents: read
+      security-events: write
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        language: [ 'javascript', 'python' ] # Limiting to JS/TS and Python as per brief
+        language: [ javascript, python ]
     steps:
-      - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
-      - uses: github/codeql-action/init@v3 # No specific SHA found
-        with: { languages: ${{ matrix.language }} }
-      - uses: github/codeql-action/analyze@v3 # No specific SHA found
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+      - name: Autobuild (best effort)
+        uses: github/codeql-action/autobuild@v3
+        continue-on-error: true
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:${{ matrix.language }}'
 
-  trivy-fs:
+  dependency-scan:
+    name: Dependency vulnerability scan (Snyk)
     runs-on: ubuntu-latest
+    needs: context
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || secrets.snyk_token }}
     steps:
-      - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
-      - name: Run Trivy filesystem scan
-        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' || steps.changes.outputs.python == 'true'
-        uses: aquasecurity/trivy-action@77137e9
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - name: Prepare report directory
+        run: mkdir -p "$REPORT_DIR"
+      - name: Ensure SNYK_TOKEN is configured
+        run: |
+          if [ -z "${SNYK_TOKEN:-}" ]; then
+            echo "SNYK_TOKEN secret is required for dependency scanning." >&2
+            echo "Define repository secret 'SNYK_TOKEN' or provide one via workflow_call.snyk_token." >&2
+            exit 1
+          fi
+      - name: Run Snyk test across all manifests
+        uses: snyk/actions/node@b98d498629f1c368650224d6d212bf7dfa89e4bf # 0.4.0
         with:
-          scan-type: 'fs'
-          severity: 'HIGH,CRITICAL'
-          format: 'github'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' || steps.changes.outputs.python == 'true'
-        uses: github/codeql-action/upload-sarif@v3 # No specific SHA found
+          command: test
+          args: >-
+            --all-projects
+            --severity-threshold=${{ env.SNYK_FAIL_THRESHOLD }}
+            --fail-on=all
+            --sarif-file-output=${{ env.REPORT_DIR }}/snyk.sarif
+      - name: Upload Snyk SARIF
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
+      - name: Persist Snyk report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: ${{ env.REPORT_DIR }}/snyk.sarif
 
-  trivy-image:
+  filesystem-scan:
+    name: File system vulnerability scan (Trivy)
     runs-on: ubuntu-latest
-    needs: [trivy-fs] # Depends on image being built and pushed
+    needs: context
+    permissions:
+      contents: read
+      security-events: write
     steps:
-      - name: Login to GHCR
-        uses: docker/login-action@184bdaa
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
+      - name: Prepare report directory
+        run: mkdir -p "$REPORT_DIR"
+      - name: Run Trivy FS scan
+        run: |
+          trivy fs \
+            --scanners vuln,secret,misconfig \
+            --ignore-unfixed \
+            --exit-code 1 \
+            --format sarif \
+            --output "$REPORT_DIR/trivy-fs.sarif" \
+            .
+      - name: Upload filesystem SARIF
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          sarif_file: ${{ env.REPORT_DIR }}/trivy-fs.sarif
+      - name: Persist filesystem report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: ${{ env.REPORT_DIR }}/trivy-fs.sarif
 
-      - name: Run Trivy image scan (server)
-        if: steps.changes.outputs.server == 'true' || steps.changes.outputs.dockerfile == 'true'
-        uses: aquasecurity/trivy-action@77137e9
+  container-scan:
+    name: Container image scan (Trivy)
+    runs-on: ubuntu-latest
+    needs: context
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - name: Prepare report directory
+        run: mkdir -p "$REPORT_DIR"
+      - name: Build server image for scanning
+        run: docker build -t security-suite/server ./server
+      - name: Build client image for scanning
+        run: docker build -t security-suite/client ./client
+      - name: Scan server image
+        uses: aquasecurity/trivy-action@b95621a837499832c705591a4924e4b10b34332e # 0.16.0
         with:
-          image-ref: ghcr.io/${{ github.repository }}-server:${{ github.sha }}
-          format: 'github'
-          output: 'trivy-server-image-results.sarif'
-          severity: 'HIGH,CRITICAL'
+          image-ref: security-suite/server
+          format: sarif
+          output: ${{ env.REPORT_DIR }}/trivy-server.sarif
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+      - name: Upload server SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ env.REPORT_DIR }}/trivy-server.sarif
+      - name: Scan client image
+        uses: aquasecurity/trivy-action@b95621a837499832c705591a4924e4b10b34332e # 0.16.0
+        with:
+          image-ref: security-suite/client
+          format: sarif
+          output: ${{ env.REPORT_DIR }}/trivy-client.sarif
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+      - name: Upload client SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ env.REPORT_DIR }}/trivy-client.sarif
+      - name: Persist container reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            ${{ env.REPORT_DIR }}/trivy-server.sarif
+            ${{ env.REPORT_DIR }}/trivy-client.sarif
 
-      - name: Upload Trivy server image scan results to GitHub Security tab
-        if: steps.changes.outputs.server == 'true' || steps.changes.outputs.dockerfile == 'true'
-        uses: github/codeql-action/upload-sarif@v3 # No specific SHA found
+  license-compliance:
+    name: License compliance verification
+    runs-on: ubuntu-latest
+    needs: context
+    steps:
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
+      - name: Prepare report directory
+        run: mkdir -p "$REPORT_DIR"
+      - name: Evaluate license policy
+        run: |
+          trivy fs \
+            --scanners license \
+            --exit-code 1 \
+            --format json \
+            --output "$REPORT_DIR/trivy-license.json" \
+            .
+      - name: Persist license report
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          sarif_file: 'trivy-server-image-results.sarif'
+          name: security-reports
+          path: ${{ env.REPORT_DIR }}/trivy-license.json
 
-      - name: Run Trivy image scan (client)
-        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
-        uses: aquasecurity/trivy-action@77137e9
+  iac-scan:
+    name: Infrastructure-as-code scan (Checkov)
+    runs-on: ubuntu-latest
+    needs: context
+    steps:
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - name: Install Checkov
+        run: pip install --no-cache-dir checkov==3.2.23
+      - name: Run Checkov across Terraform and Helm assets
+        run: |
+          mkdir -p "$REPORT_DIR"
+          checkov -d . \
+            --framework terraform,kubernetes,helm,cloudformation \
+            --quiet \
+            --download-external-modules true \
+            --output-file-path "$REPORT_DIR" \
+            --output sarif
+      - name: Upload Checkov SARIF
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          image-ref: ghcr.io/${{ github.repository }}-client:${{ github.sha }}
-          format: 'github'
-          output: 'trivy-client-image-results.sarif'
-          severity: 'HIGH,CRITICAL'
+          sarif_file: ${{ env.REPORT_DIR }}/results.sarif
+      - name: Persist Checkov report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: ${{ env.REPORT_DIR }}/results.sarif
 
-      - name: Upload Trivy client image scan results to GitHub Security tab
-        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
-        uses: github/codeql-action/upload-sarif@v3 # No specific SHA found
+  opa-policy:
+    name: Policy enforcement (OPA/Conftest)
+    runs-on: ubuntu-latest
+    needs: context
+    steps:
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - name: Install Helm
+        uses: azure/setup-helm@v4
         with:
-          sarif_file: 'trivy-client-image-results.sarif'
+          version: '3.12.0'
+      - name: Install Conftest
+        run: |
+          set -euo pipefail
+          curl -sSL -o conftest.tar.gz https://github.com/open-policy-agent/conftest/releases/download/v0.46.0/conftest_0.46.0_Linux_x86_64.tar.gz
+          tar -xzf conftest.tar.gz
+          sudo mv conftest /usr/local/bin/conftest
+      - name: Render Helm manifests
+        run: |
+          set -euo pipefail
+          mkdir -p rendered
+          helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml > rendered/dev.yaml
+          helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > rendered/prod.yaml
+      - name: Conftest policy checks
+        run: conftest test rendered --policy policies/opa
+      - name: Persist rendered manifests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: rendered
+
+  cis-benchmark:
+    name: CIS benchmark validation
+    runs-on: ubuntu-latest
+    needs:
+      - context
+      - opa-policy
+    steps:
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: '3.12.0'
+      - uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
+      - name: Render manifests for CIS evaluation
+        run: |
+          set -euo pipefail
+          mkdir -p rendered
+          helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml > rendered/dev.yaml
+          helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > rendered/prod.yaml
+      - name: Run Kubernetes CIS benchmark
+        run: |
+          set -euo pipefail
+          mkdir -p "$REPORT_DIR"
+          trivy config rendered \
+            --compliance kubernetes-cis-1.23 \
+            --format json \
+            --output "$REPORT_DIR/trivy-cis.json"
+          if jq '([.Results[]?.Results[]?] | length) > 0' "$REPORT_DIR/trivy-cis.json" | grep -q true; then
+            echo "CIS benchmark violations detected" >&2
+            exit 1
+          fi
+      - name: Persist CIS report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: ${{ env.REPORT_DIR }}/trivy-cis.json
+
+  baseline:
+    name: Security baseline verification
+    runs-on: ubuntu-latest
+    needs: context
+    steps:
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - name: Execute baseline checks
+        run: |
+          chmod +x scripts/security/baseline-check.sh
+          REPORT_DIR="$REPORT_DIR" scripts/security/baseline-check.sh
+      - name: Persist baseline report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: ${{ env.REPORT_DIR }}/baseline-report.json
+
+  dast:
+    name: Dynamic application security testing (OWASP ZAP)
+    runs-on: ubuntu-latest
+    needs: context
+    if: ${{ needs.context.outputs.run_dast == 'true' }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - name: Prepare report directory
+        run: mkdir -p "$REPORT_DIR"
+      - name: Boot application stack
+        run: |
+          docker compose -f docker-compose.yml up -d server client
+      - name: Wait for application
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:3000 >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Application did not become ready in time" >&2
+          exit 1
+      - name: OWASP ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: 'http://localhost:3000'
+          cmd_options: '-a -m 5'
+          rules_file_name: '.zap/rules.tsv'
+      - name: Collect ZAP artifacts
+        if: always()
+        run: |
+          mv report_html.html "$REPORT_DIR/zap-report.html"
+          mv report_md.md "$REPORT_DIR/zap-report.md"
+          mv report_json.json "$REPORT_DIR/zap-report.json"
+      - name: Shutdown application stack
+        if: always()
+        run: docker compose -f docker-compose.yml down
+      - name: Persist ZAP reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            ${{ env.REPORT_DIR }}/zap-report.html
+            ${{ env.REPORT_DIR }}/zap-report.md
+            ${{ env.REPORT_DIR }}/zap-report.json
+
+  security-summary:
+    name: Aggregate security coverage
+    runs-on: ubuntu-latest
+    needs:
+      - secret-scan
+      - sast
+      - dependency-scan
+      - filesystem-scan
+      - container-scan
+      - license-compliance
+      - iac-scan
+      - opa-policy
+      - cis-benchmark
+      - baseline
+      - dast
+    if: ${{ always() }}
+    outputs:
+      dashboard_url: ${{ steps.dashboard.outputs.dashboard_url }}
+    steps:
+      - name: Download all security reports
+        uses: actions/download-artifact@v4
+        with:
+          name: security-reports
+          path: aggregated-security
+          merge-multiple: true
+          if-no-artifact-found: warn
+      - name: Generate coverage metrics
+        id: metrics
+        env:
+          SECRET_STATUS: ${{ needs.secret-scan.result }}
+          SAST_STATUS: ${{ needs.sast.result }}
+          DEP_STATUS: ${{ needs.dependency-scan.result }}
+          FS_STATUS: ${{ needs.filesystem-scan.result }}
+          IMG_STATUS: ${{ needs.container-scan.result }}
+          LIC_STATUS: ${{ needs.license-compliance.result }}
+          IAC_STATUS: ${{ needs.iac-scan.result }}
+          OPA_STATUS: ${{ needs.opa-policy.result }}
+          CIS_STATUS: ${{ needs.cis-benchmark.result }}
+          BASELINE_STATUS: ${{ needs.baseline.result }}
+          DAST_STATUS: ${{ needs.dast.result }}
+        run: |
+          python - <<'PY'
+import json
+import os
+from pathlib import Path
+
+report_root = Path('aggregated-security')
+files = sorted(str(p.relative_to(report_root)) for p in report_root.rglob('*') if p.is_file())
+status = {
+    "Secret scanning": os.environ.get('SECRET_STATUS', 'unknown'),
+    "SAST": os.environ.get('SAST_STATUS', 'unknown'),
+    "Dependencies": os.environ.get('DEP_STATUS', 'unknown'),
+    "Filesystem": os.environ.get('FS_STATUS', 'unknown'),
+    "Container": os.environ.get('IMG_STATUS', 'unknown'),
+    "Licenses": os.environ.get('LIC_STATUS', 'unknown'),
+    "IaC": os.environ.get('IAC_STATUS', 'unknown'),
+    "OPA policies": os.environ.get('OPA_STATUS', 'unknown'),
+    "CIS benchmark": os.environ.get('CIS_STATUS', 'unknown'),
+    "Baseline": os.environ.get('BASELINE_STATUS', 'unknown'),
+    "DAST": os.environ.get('DAST_STATUS', 'skipped'),
+}
+summary = {
+    "reportCount": len(files),
+    "reports": files,
+    "statuses": status,
+}
+report_root.mkdir(parents=True, exist_ok=True)
+with (report_root / 'security-summary.json').open('w', encoding='utf-8') as fh:
+    json.dump(summary, fh, indent=2)
+PY
+      - name: Publish job summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const summaryFile = path.join(process.cwd(), 'aggregated-security', 'security-summary.json');
+            const payload = JSON.parse(fs.readFileSync(summaryFile, 'utf8'));
+            const rows = Object.entries(payload.statuses).map(([k, v]) => ({status: v, name: k}));
+            core.summary
+              .addHeading('Security & Compliance Coverage')
+              .addTable([
+                [{data: 'Control', header: true}, {data: 'Status', header: true}],
+                ...rows.map(({name, status}) => [name, status])
+              ])
+              .addHeading('Artifacts')
+              .addList(payload.reports)
+              .write();
+      - name: Upload aggregated summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: aggregated-security/security-summary.json
+      - name: Record dashboard location
+        id: dashboard
+        env:
+          DASHBOARD_URL: https://github.com/${{ github.repository }}/security/code-scanning
+        run: echo "dashboard_url=$DASHBOARD_URL" >> "$GITHUB_OUTPUT"
+
+  production-approval:
+    name: Security gate approval for deployments
+    runs-on: ubuntu-latest
+    needs: security-summary
+    if: ${{ github.event_name == 'workflow_call' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    environment:
+      name: production-security-gate
+      url: ${{ needs.security-summary.outputs.dashboard_url }}
+    steps:
+      - name: Await approval
+        env:
+          DASHBOARD_URL: ${{ needs.security-summary.outputs.dashboard_url }}
+        run: |
+          echo "All security controls succeeded. Approvers can review ${DASHBOARD_URL} before promoting to production."
