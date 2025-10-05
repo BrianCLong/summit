@@ -7,6 +7,11 @@ import { pool } from '../db/pg';
 import { EventEmitter } from 'events';
 import crypto from 'crypto';
 import { execSync } from 'child_process';
+import {
+  CryptoPipeline,
+  createDefaultCryptoPipeline,
+  type SignatureBundle,
+} from '../security/crypto/index.js';
 
 const tracer = trace.getTracer('provenance-ledger', '24.4.0');
 
@@ -96,11 +101,44 @@ export interface LedgerVerification {
 export class ProvenanceLedgerV2 extends EventEmitter {
   private readonly genesisHash = '0000000000000000000000000000000000000000000000000000000000000000';
   private rootSigningInterval: NodeJS.Timeout | null = null;
-  
+  private cryptoPipeline?: CryptoPipeline;
+  private cryptoPipelineInit?: Promise<void>;
+
   constructor() {
     super();
     this.initializeTables();
+    this.initializeCryptoPipeline();
     this.startRootSigning();
+  }
+
+  setCryptoPipeline(pipeline: CryptoPipeline | null): void {
+    this.cryptoPipeline = pipeline ?? undefined;
+    this.cryptoPipelineInit = Promise.resolve();
+  }
+
+  private initializeCryptoPipeline(): void {
+    if (this.cryptoPipelineInit) return;
+    this.cryptoPipelineInit = createDefaultCryptoPipeline({
+      timestampingEndpointEnv: 'CRYPTO_TIMESTAMP_ENDPOINT',
+      auditSubsystem: 'provenance-ledger',
+      trustAnchorsEnv: 'CRYPTO_TRUST_ANCHORS',
+    })
+      .then(pipeline => {
+        this.cryptoPipeline = pipeline ?? undefined;
+      })
+      .catch(error => {
+        console.warn('Failed to initialize cryptographic pipeline', error);
+        this.cryptoPipeline = undefined;
+      });
+  }
+
+  private async ensureCryptoPipeline(): Promise<void> {
+    this.initializeCryptoPipeline();
+    try {
+      await this.cryptoPipelineInit;
+    } catch {
+      // initialization already logged
+    }
   }
 
   async appendEntry(entry: Omit<ProvenanceEntry, 'id' | 'sequenceNumber' | 'previousHash' | 'currentHash'>): Promise<ProvenanceEntry> {
@@ -629,6 +667,22 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   private async signWithCosign(data: string): Promise<string> {
+    await this.ensureCryptoPipeline();
+    if (this.cryptoPipeline) {
+      try {
+        const keyId = process.env.LEDGER_SIGNING_KEY_ID || 'ledger-root';
+        const bundle = await this.cryptoPipeline.signPayload(Buffer.from(data), keyId, {
+          includeTimestamp: true,
+          metadata: {
+            subsystem: 'provenance-ledger',
+          },
+        });
+        return JSON.stringify(bundle);
+      } catch (error) {
+        console.warn('Crypto pipeline signing failed, falling back to cosign/HMAC:', error);
+      }
+    }
+
     try {
       // Use cosign to sign the data
       // This requires cosign to be installed and configured
@@ -653,6 +707,27 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   async verifySignature(rootHash: string, signature: string): Promise<boolean> {
+    await this.ensureCryptoPipeline();
+    if (this.cryptoPipeline) {
+      try {
+        const maybeBundle = JSON.parse(signature) as SignatureBundle;
+        if (maybeBundle?.signature && maybeBundle?.keyId) {
+          const result = await this.cryptoPipeline.verifySignature(Buffer.from(rootHash), maybeBundle, {
+            expectedKeyId: maybeBundle.keyId,
+            payloadDescription: 'provenance-ledger-root',
+          });
+          if (result.valid) {
+            return true;
+          }
+        }
+      } catch (error) {
+        if (signature.trim().startsWith('{')) {
+          console.warn('Failed to verify cryptographic pipeline signature, falling back:', error);
+        }
+        // Non-JSON signatures fall through to legacy verification
+      }
+    }
+
     try {
       // Verify cosign signature
       const tempFile = `/tmp/verify_${Date.now()}.txt`;
