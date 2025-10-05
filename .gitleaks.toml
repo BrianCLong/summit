@@ -8,7 +8,8 @@ title = "intelgraph-hardening"
   files = [
     "^tests/fixtures/.*",
     "^perf/fixtures/.*",
-    "^docs/examples/.*"
+    "^docs/examples/.*",
+    "^docs/DELTA_REPORT_OCT2025\\.md$"
   ]
   regexes = [
     "REDACTED-PLACEHOLDER-ONLY"
