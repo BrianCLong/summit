@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "intelgraph-analytics-api"
+version = "0.2.0"
+description = "Analytics delivery API for IntelGraph powering scoring pipelines, anomaly detection, and mission dashboards."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "IntelGraph Platform Team", email = "platform@intelgraph.ai" }
+]
+maintainers = [
+  { name = "IntelGraph Platform Operations", email = "ops@intelgraph.ai" }
+]
+keywords = ["intelgraph", "analytics", "fastapi", "machine-learning", "graph"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Framework :: FastAPI",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Information Analysis"
+]
+dependencies = [
+  "fastapi>=0.111.0,<0.112.0",
+  "uvicorn[standard]>=0.30.1,<0.31.0",
+  "pydantic>=2.7,<3.0",
+  "pandas>=2.2,<2.3",
+  "numpy>=1.26,<2.0",
+  "scikit-learn>=1.5,<1.6",
+  "networkx>=3.3,<3.4",
+  "sqlalchemy>=2.0,<2.1",
+  "asyncpg>=0.29,<0.30"
+]
+
+[project.urls]
+Documentation = "https://intelgraph.ai/docs/analytics-api"
+Repository = "https://github.com/BrianCLong/intelgraph"
+Issues = "https://github.com/BrianCLong/intelgraph/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["analytics_api*"]

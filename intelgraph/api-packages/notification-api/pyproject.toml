@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "intelgraph-notification-api"
+version = "0.2.0"
+description = "Notification and alerting API for IntelGraph delivering multi-channel messaging and runbook automation triggers."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "IntelGraph Platform Team", email = "platform@intelgraph.ai" }
+]
+maintainers = [
+  { name = "IntelGraph Platform Operations", email = "ops@intelgraph.ai" }
+]
+keywords = ["intelgraph", "notifications", "fastapi", "alerts", "celery"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Framework :: FastAPI",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Communications :: Email",
+  "Topic :: System :: Monitoring"
+]
+dependencies = [
+  "fastapi>=0.111.0,<0.112.0",
+  "uvicorn[standard]>=0.30.1,<0.31.0",
+  "pydantic>=2.7,<3.0",
+  "redis>=5.0,<6.0",
+  "celery>=5.3,<5.4",
+  "jinja2>=3.1,<3.2",
+  "httpx>=0.27,<0.28",
+  "boto3>=1.34,<1.35",
+  "sqlalchemy>=2.0,<2.1"
+]
+
+[project.urls]
+Documentation = "https://intelgraph.ai/docs/notification-api"
+Repository = "https://github.com/BrianCLong/intelgraph"
+Issues = "https://github.com/BrianCLong/intelgraph/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["notification_api*"]
