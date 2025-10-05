@@ -148,6 +148,134 @@ export interface PolicyEvaluationResult {
   trace: PolicyEvaluationTrace[];
 }
 
+export type ConsentStateStatus = 'granted' | 'denied' | 'revoked' | 'expired';
+
+export interface ConsentSourceRef {
+  domain: string;
+  service: string;
+  endpoint?: string;
+  environment?: string;
+  topologyPath?: readonly string[];
+}
+
+export interface ConsentPolicyBinding {
+  id: string;
+  version: string;
+  hash?: string;
+}
+
+export interface ConsentState {
+  subjectId: string;
+  policyId: string;
+  status: ConsentStateStatus;
+  scopes: readonly string[];
+  jurisdiction: string;
+  updatedAt: string;
+  version: number;
+  lawfulBasis?: string;
+  proofUri?: string;
+  expiresAt?: string;
+  overrides?: readonly string[];
+  metadata?: Readonly<Record<string, unknown>>;
+}
+
+export interface ConsentStateEnvelope {
+  state: ConsentState;
+  source: ConsentSourceRef;
+  policyBinding: ConsentPolicyBinding;
+  evidence?: readonly string[];
+}
+
+export type ConsentConflictSeverity = 'info' | 'warning' | 'error';
+
+export interface ConsentConflict {
+  subjectId: string;
+  policyId: string;
+  severity: ConsentConflictSeverity;
+  reason: string;
+  candidates: readonly ConsentStateEnvelope[];
+  resolvedState?: ConsentState;
+}
+
+export interface ConsentResolution {
+  finalState: ConsentState;
+  conflict?: ConsentConflict;
+  adoptedFrom: ConsentSourceRef;
+  appliedOverrides: readonly string[];
+}
+
+export interface ConsentAuditRecord {
+  eventId: string;
+  timestamp: string;
+  action: 'ingest' | 'conflict-generated' | 'auto-resolution' | 'module-sync' | 'validation';
+  subjectId: string;
+  policyId: string;
+  details: Readonly<Record<string, unknown>>;
+}
+
+export type ConsentResolutionStrategy =
+  | 'prefer-strictest'
+  | 'prefer-latest'
+  | 'prefer-source-weight';
+
+export interface ConsentReconcilerConfig {
+  strictStatusOrder?: readonly ConsentStateStatus[];
+  conflictStrategy?: ConsentResolutionStrategy;
+  sourceWeights?: Readonly<Record<string, number>>;
+  clock?: () => Date;
+}
+
+export interface ConsentIntegrationModule {
+  name: string;
+  supportedDomains: readonly string[];
+  sync: (resolution: ConsentResolution, auditTrail: readonly ConsentAuditRecord[]) =>
+    | Promise<void>
+    | void;
+}
+
+export interface ConsentValidationExpectation {
+  subjectId: string;
+  policyId: string;
+  expectedStatus: ConsentStateStatus;
+  expectedConflicts?: number;
+}
+
+export interface ConsentValidationScenario {
+  id: string;
+  description: string;
+  setup: readonly ConsentStateEnvelope[];
+  expectation: ConsentValidationExpectation;
+  notes?: string;
+}
+
+export interface ConsentValidationReportEntry {
+  scenarioId: string;
+  passed: boolean;
+  actualStatus?: ConsentStateStatus;
+  actualConflicts: number;
+  details: Readonly<Record<string, unknown>>;
+}
+
+export interface ConsentValidationReport {
+  generatedAt: string;
+  scenarios: readonly ConsentValidationReportEntry[];
+}
+
+export interface ConsentTopologyNode {
+  domain: string;
+  service: string;
+  endpoint?: string;
+  environment?: string;
+  topologyPath?: readonly string[];
+  totalSubjects: number;
+  statuses: Readonly<Record<ConsentStateStatus, number>>;
+}
+
+export interface ConsentTopologySnapshot {
+  generatedAt: string;
+  nodes: readonly ConsentTopologyNode[];
+}
+
 export interface LedgerFactInput {
   id: string;
   category: string;
