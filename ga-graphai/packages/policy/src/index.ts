@@ -1,4 +1,16 @@
 import { createHash, createHmac } from "node:crypto";
+import {
+  MODEL_ALLOWLIST,
+  PURPOSE_ALLOWLIST,
+  SHORT_RETENTION,
+  analyzeEvidence,
+  derivePolicyInput,
+  ensureSecret,
+  enumerateArtifacts,
+  listSinkNodes,
+  listSourceNodes,
+  normalizeWorkflow
+} from "common-types";
 import type {
   PolicyCondition,
   PolicyEvaluationRequest,
@@ -12,16 +24,6 @@ import type {
   PolicyDecision,
   PolicyEvaluationContext,
   mergeDataClasses,
-  MODEL_ALLOWLIST,
-  PURPOSE_ALLOWLIST,
-  SHORT_RETENTION,
-  analyzeEvidence,
-  derivePolicyInput,
-  ensureSecret,
-  enumerateArtifacts,
-  listSinkNodes,
-  listSourceNodes,
-  normalizeWorkflow,
   ArtifactBinding,
   PolicyInput,
   ValidationDefaults,
@@ -35,7 +37,7 @@ import type {
   WorkflowSuggestion,
   WorkflowValidationIssue,
   WorkflowValidationResult
-} from 'common-types';
+} from "common-types";
 
 // ============================================================================
 // RUNTIME POLICY ENGINE - From HEAD
@@ -1081,6 +1083,486 @@ export function collectArtifactCatalog(
   workflow: WorkflowDefinition
 ): ArtifactBinding[] {
   return enumerateArtifacts(workflow.nodes);
+}
+
+// ============================================================================
+// POLICY BACKTESTING ENGINE
+// ============================================================================
+
+type PolicySnapshotInputDate = Date | string;
+
+export interface PolicySnapshot {
+  policyId: string;
+  version: string;
+  capturedAt: PolicySnapshotInputDate;
+  rules: PolicyRule[];
+  metadata?: Record<string, unknown>;
+}
+
+export interface PolicyHistory {
+  policyId: string;
+  snapshots: PolicySnapshot[];
+}
+
+export interface HistoricalPolicyEvent {
+  id?: string;
+  occurredAt: Date | string;
+  request: PolicyEvaluationRequest;
+  expectedEffect?: PolicyEffect;
+  expectedAllowed?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export interface TemporalQueryOptions {
+  from?: Date | string;
+  to?: Date | string;
+}
+
+export interface ComplianceResult {
+  event: HistoricalPolicyEvent;
+  snapshot: PolicySnapshot;
+  decision: PolicyEvaluationResult;
+  compliant: boolean;
+  expectedEffect?: PolicyEffect;
+}
+
+export interface ImpactAnalysisReport {
+  policyId: string;
+  totalEvaluations: number;
+  effectCounts: Record<PolicyEffect, number>;
+  versionBreakdown: Record<
+    string,
+    {
+      evaluated: number;
+      allows: number;
+      denies: number;
+    }
+  >;
+  ruleHits: Record<string, number>;
+  obligationCounts: Record<string, number>;
+}
+
+export interface PolicyVersionDiff {
+  policyId: string;
+  fromVersion: string;
+  toVersion: string;
+  addedRules: PolicyRule[];
+  removedRules: PolicyRule[];
+  changedRules: Array<{ ruleId: string; from: PolicyRule; to: PolicyRule }>;
+}
+
+export interface RetroactiveComplianceReport {
+  policyId: string;
+  evaluatedEvents: number;
+  compliantEvents: ComplianceResult[];
+  nonCompliantEvents: ComplianceResult[];
+  skippedEvents: HistoricalPolicyEvent[];
+  impact: ImpactAnalysisReport;
+}
+
+export interface RollbackDivergence {
+  event: HistoricalPolicyEvent;
+  baselineSnapshot: PolicySnapshot;
+  rollbackSnapshot: PolicySnapshot;
+  baselineDecision: PolicyEvaluationResult;
+  rollbackDecision: PolicyEvaluationResult;
+}
+
+export interface RollbackSimulationReport {
+  policyId: string;
+  targetVersion: string;
+  baselineVersions: string[];
+  evaluatedEvents: number;
+  skippedEvents: HistoricalPolicyEvent[];
+  divergingEvents: RollbackDivergence[];
+  impact: ImpactAnalysisReport;
+}
+
+export interface AuditRecord {
+  policyId: string;
+  eventId: string;
+  occurredAt: Date;
+  evaluatedAt: Date;
+  policyVersion: string;
+  effect: PolicyEffect;
+  allowed: boolean;
+  matchedRules: string[];
+  reasons: string[];
+  simulationType: "retroactive" | "rollback";
+  compliant?: boolean;
+  expectedEffect?: PolicyEffect;
+  metadata?: Record<string, unknown>;
+}
+
+export interface AuditTrailQuery {
+  policyId?: string;
+  simulationType?: AuditRecord["simulationType"];
+  from?: Date | string;
+  to?: Date | string;
+}
+
+export type MissingSnapshotStrategy = "error" | "skip";
+
+export interface PolicyBacktestEngineOptions {
+  missingSnapshotStrategy?: MissingSnapshotStrategy;
+}
+
+interface EvaluationEntry {
+  snapshot: PolicySnapshot;
+  decision: PolicyEvaluationResult;
+}
+
+function normalizeDate(input: Date | string | undefined): Date | undefined {
+  if (!input) {
+    return undefined;
+  }
+  return input instanceof Date ? input : new Date(input);
+}
+
+function cloneSnapshot(snapshot: PolicySnapshot): PolicySnapshot {
+  return {
+    ...snapshot,
+    capturedAt: new Date(snapshot.capturedAt),
+    rules: snapshot.rules.map((rule) => ({ ...rule }))
+  };
+}
+
+function resolveExpectedEffect(event: HistoricalPolicyEvent): PolicyEffect | undefined {
+  if (event.expectedEffect) {
+    return event.expectedEffect;
+  }
+  if (event.expectedAllowed === undefined) {
+    return undefined;
+  }
+  return event.expectedAllowed ? "allow" : "deny";
+}
+
+export class PolicyBacktestEngine {
+  private readonly history: Map<string, PolicySnapshot[]> = new Map();
+  private readonly auditTrail: AuditRecord[] = [];
+  private readonly missingSnapshotStrategy: MissingSnapshotStrategy;
+
+  constructor(history: PolicyHistory[], options: PolicyBacktestEngineOptions = {}) {
+    this.missingSnapshotStrategy = options.missingSnapshotStrategy ?? "error";
+    history.forEach((item) => {
+      const snapshots = item.snapshots
+        .map((snapshot) => ({
+          ...snapshot,
+          capturedAt: new Date(snapshot.capturedAt)
+        }))
+        .sort((a, b) => a.capturedAt.getTime() - b.capturedAt.getTime());
+      this.history.set(item.policyId, snapshots);
+    });
+  }
+
+  registerSnapshot(policyId: string, snapshot: PolicySnapshot): void {
+    const normalized = {
+      ...snapshot,
+      capturedAt: new Date(snapshot.capturedAt)
+    };
+    const existing = this.history.get(policyId) ?? [];
+    existing.push(normalized);
+    existing.sort((a, b) => a.capturedAt.getTime() - b.capturedAt.getTime());
+    this.history.set(policyId, existing);
+  }
+
+  listPolicies(): string[] {
+    return Array.from(this.history.keys());
+  }
+
+  getSnapshots(policyId: string): PolicySnapshot[] {
+    const snapshots = this.history.get(policyId) ?? [];
+    return snapshots.map((snapshot) => cloneSnapshot(snapshot));
+  }
+
+  querySnapshots(policyId: string, options: TemporalQueryOptions = {}): PolicySnapshot[] {
+    const from = normalizeDate(options.from)?.getTime();
+    const to = normalizeDate(options.to)?.getTime();
+    return this.getSnapshots(policyId).filter((snapshot) => {
+      const ts = snapshot.capturedAt.getTime();
+      if (from !== undefined && ts < from) {
+        return false;
+      }
+      if (to !== undefined && ts > to) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  getSnapshotAt(policyId: string, timestamp: Date | string): PolicySnapshot | undefined {
+    const snapshots = this.history.get(policyId);
+    if (!snapshots || snapshots.length === 0) {
+      return undefined;
+    }
+    const target = normalizeDate(timestamp)?.getTime();
+    if (target === undefined) {
+      return undefined;
+    }
+    let candidate: PolicySnapshot | undefined;
+    for (const snapshot of snapshots) {
+      if (snapshot.capturedAt.getTime() <= target) {
+        candidate = snapshot;
+      } else {
+        break;
+      }
+    }
+    return candidate ? cloneSnapshot(candidate) : undefined;
+  }
+
+  compareVersions(policyId: string, fromVersion: string, toVersion: string): PolicyVersionDiff {
+    const snapshots = this.history.get(policyId) ?? [];
+    const fromSnapshot = snapshots.find((snapshot) => snapshot.version === fromVersion);
+    const toSnapshot = snapshots.find((snapshot) => snapshot.version === toVersion);
+    if (!fromSnapshot || !toSnapshot) {
+      throw new Error(`Unable to locate versions ${fromVersion} or ${toVersion} for policy ${policyId}`);
+    }
+    const diff: PolicyVersionDiff = {
+      policyId,
+      fromVersion,
+      toVersion,
+      addedRules: [],
+      removedRules: [],
+      changedRules: []
+    };
+    const fromMap = new Map(fromSnapshot.rules.map((rule) => [rule.id, rule]));
+    const toMap = new Map(toSnapshot.rules.map((rule) => [rule.id, rule]));
+    toMap.forEach((rule, id) => {
+      if (!fromMap.has(id)) {
+        diff.addedRules.push(rule);
+      } else {
+        const baseline = fromMap.get(id)!;
+        if (JSON.stringify(baseline) !== JSON.stringify(rule)) {
+          diff.changedRules.push({ ruleId: id, from: baseline, to: rule });
+        }
+      }
+    });
+    fromMap.forEach((rule, id) => {
+      if (!toMap.has(id)) {
+        diff.removedRules.push(rule);
+      }
+    });
+    return diff;
+  }
+
+  retroactiveComplianceCheck(
+    policyId: string,
+    events: HistoricalPolicyEvent[]
+  ): RetroactiveComplianceReport {
+    const snapshots = this.history.get(policyId) ?? [];
+    if (snapshots.length === 0) {
+      throw new Error(`No history recorded for policy ${policyId}`);
+    }
+    const orderedEvents = [...events].sort(
+      (a, b) => new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime()
+    );
+    const compliantEvents: ComplianceResult[] = [];
+    const nonCompliantEvents: ComplianceResult[] = [];
+    const skippedEvents: HistoricalPolicyEvent[] = [];
+    const evaluationEntries: EvaluationEntry[] = [];
+    for (const event of orderedEvents) {
+      const snapshot = this.getSnapshotAt(policyId, event.occurredAt);
+      if (!snapshot) {
+        if (this.missingSnapshotStrategy === "skip") {
+          skippedEvents.push(event);
+          continue;
+        }
+        throw new Error(
+          `No snapshot available for policy ${policyId} at ${new Date(event.occurredAt).toISOString()}`
+        );
+      }
+      const engine = new PolicyEngine(snapshot.rules);
+      const decision = engine.evaluate(event.request);
+      const expectedEffect = resolveExpectedEffect(event);
+      const compliant = expectedEffect ? decision.effect === expectedEffect : true;
+      const result: ComplianceResult = {
+        event,
+        snapshot,
+        decision,
+        compliant,
+        expectedEffect
+      };
+      evaluationEntries.push({ snapshot, decision });
+      this.recordAuditEntry("retroactive", policyId, event, snapshot, decision, compliant, expectedEffect);
+      if (compliant) {
+        compliantEvents.push(result);
+      } else {
+        nonCompliantEvents.push(result);
+      }
+    }
+    const impact = this.buildImpactReport(policyId, evaluationEntries);
+    return {
+      policyId,
+      evaluatedEvents: compliantEvents.length + nonCompliantEvents.length,
+      compliantEvents,
+      nonCompliantEvents,
+      skippedEvents,
+      impact
+    };
+  }
+
+  simulateRollback(
+    policyId: string,
+    targetVersion: string,
+    events: HistoricalPolicyEvent[]
+  ): RollbackSimulationReport {
+    const snapshots = this.history.get(policyId) ?? [];
+    if (snapshots.length === 0) {
+      throw new Error(`No history recorded for policy ${policyId}`);
+    }
+    const rollbackSnapshot = snapshots.find((snapshot) => snapshot.version === targetVersion);
+    if (!rollbackSnapshot) {
+      throw new Error(`Target version ${targetVersion} not found for policy ${policyId}`);
+    }
+    const orderedEvents = [...events].sort(
+      (a, b) => new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime()
+    );
+    const baselineVersions = new Set<string>();
+    const skippedEvents: HistoricalPolicyEvent[] = [];
+    const divergingEvents: RollbackDivergence[] = [];
+    const evaluationEntries: EvaluationEntry[] = [];
+    for (const event of orderedEvents) {
+      const baselineSnapshot = this.getSnapshotAt(policyId, event.occurredAt);
+      if (!baselineSnapshot) {
+        if (this.missingSnapshotStrategy === "skip") {
+          skippedEvents.push(event);
+          continue;
+        }
+        throw new Error(
+          `No snapshot available for policy ${policyId} at ${new Date(event.occurredAt).toISOString()}`
+        );
+      }
+      baselineVersions.add(baselineSnapshot.version);
+      const baselineEngine = new PolicyEngine(baselineSnapshot.rules);
+      const rollbackEngine = new PolicyEngine(rollbackSnapshot.rules);
+      const baselineDecision = baselineEngine.evaluate(event.request);
+      const rollbackDecision = rollbackEngine.evaluate(event.request);
+      evaluationEntries.push({ snapshot: rollbackSnapshot, decision: rollbackDecision });
+      const diverges =
+        baselineDecision.allowed !== rollbackDecision.allowed ||
+        baselineDecision.effect !== rollbackDecision.effect ||
+        baselineDecision.matchedRules.join(",") !== rollbackDecision.matchedRules.join(",");
+      this.recordAuditEntry(
+        "rollback",
+        policyId,
+        event,
+        rollbackSnapshot,
+        rollbackDecision,
+        undefined,
+        resolveExpectedEffect(event)
+      );
+      if (diverges) {
+        divergingEvents.push({
+          event,
+          baselineSnapshot: cloneSnapshot(baselineSnapshot),
+          rollbackSnapshot: cloneSnapshot(rollbackSnapshot),
+          baselineDecision,
+          rollbackDecision
+        });
+      }
+    }
+    const impact = this.buildImpactReport(policyId, evaluationEntries);
+    return {
+      policyId,
+      targetVersion,
+      baselineVersions: Array.from(baselineVersions),
+      evaluatedEvents: evaluationEntries.length,
+      skippedEvents,
+      divergingEvents,
+      impact
+    };
+  }
+
+  getAuditTrail(query: AuditTrailQuery = {}): AuditRecord[] {
+    const from = normalizeDate(query.from)?.getTime();
+    const to = normalizeDate(query.to)?.getTime();
+    return this.auditTrail
+      .filter((record) => {
+        if (query.policyId && record.policyId !== query.policyId) {
+          return false;
+        }
+        if (query.simulationType && record.simulationType !== query.simulationType) {
+          return false;
+        }
+        const ts = record.occurredAt.getTime();
+        if (from !== undefined && ts < from) {
+          return false;
+        }
+        if (to !== undefined && ts > to) {
+          return false;
+        }
+        return true;
+      })
+      .map((record) => ({
+        ...record,
+        occurredAt: new Date(record.occurredAt),
+        evaluatedAt: new Date(record.evaluatedAt),
+        matchedRules: [...record.matchedRules],
+        reasons: [...record.reasons]
+      }));
+  }
+
+  private recordAuditEntry(
+    simulationType: AuditRecord["simulationType"],
+    policyId: string,
+    event: HistoricalPolicyEvent,
+    snapshot: PolicySnapshot,
+    decision: PolicyEvaluationResult,
+    compliant?: boolean,
+    expectedEffect?: PolicyEffect
+  ): void {
+    const eventId = event.id ?? `${policyId}:${new Date(event.occurredAt).toISOString()}`;
+    this.auditTrail.push({
+      policyId,
+      eventId,
+      occurredAt: new Date(event.occurredAt),
+      evaluatedAt: new Date(),
+      policyVersion: snapshot.version,
+      effect: decision.effect,
+      allowed: decision.allowed,
+      matchedRules: [...decision.matchedRules],
+      reasons: [...decision.reasons],
+      simulationType,
+      compliant,
+      expectedEffect,
+      metadata: event.metadata
+    });
+  }
+
+  private buildImpactReport(policyId: string, entries: EvaluationEntry[]): ImpactAnalysisReport {
+    const effectCounts: Record<PolicyEffect, number> = { allow: 0, deny: 0 };
+    const versionBreakdown: ImpactAnalysisReport["versionBreakdown"] = {};
+    const ruleHits: Record<string, number> = {};
+    const obligationCounts: Record<string, number> = {};
+    entries.forEach((entry) => {
+      effectCounts[entry.decision.effect] += 1;
+      if (!versionBreakdown[entry.snapshot.version]) {
+        versionBreakdown[entry.snapshot.version] = { evaluated: 0, allows: 0, denies: 0 };
+      }
+      const breakdown = versionBreakdown[entry.snapshot.version];
+      breakdown.evaluated += 1;
+      if (entry.decision.allowed) {
+        breakdown.allows += 1;
+      } else {
+        breakdown.denies += 1;
+      }
+      entry.decision.matchedRules.forEach((ruleId) => {
+        ruleHits[ruleId] = (ruleHits[ruleId] ?? 0) + 1;
+      });
+      entry.decision.obligations.forEach((obligation) => {
+        const key = obligation.type ?? "unknown";
+        obligationCounts[key] = (obligationCounts[key] ?? 0) + 1;
+      });
+    });
+    return {
+      policyId,
+      totalEvaluations: entries.length,
+      effectCounts,
+      versionBreakdown,
+      ruleHits,
+      obligationCounts
+    };
+  }
 }
 
 export { analyzeEvidence } from "common-types";
