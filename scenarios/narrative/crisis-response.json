@@ -1,0 +1,85 @@
+{
+  "name": "Metro Area Power Outage",
+  "themes": ["stability", "infrastructure", "public sentiment"],
+  "tickIntervalMinutes": 60,
+  "initialEntities": [
+    {
+      "id": "city_emergency_ops",
+      "name": "Emergency Operations Center",
+      "type": "group",
+      "alignment": "ally",
+      "influence": 0.75,
+      "sentiment": 0.1,
+      "volatility": 0.3,
+      "resilience": 0.7,
+      "themes": { "stability": 0.9, "infrastructure": 0.8, "public sentiment": 0.4 },
+      "relationships": [{ "targetId": "citizen_watch", "strength": 0.6 }]
+    },
+    {
+      "id": "citizen_watch",
+      "name": "Neighborhood Watch Coalition",
+      "type": "group",
+      "alignment": "neutral",
+      "influence": 0.5,
+      "sentiment": -0.2,
+      "volatility": 0.5,
+      "resilience": 0.5,
+      "themes": { "stability": 0.5, "infrastructure": 0.4, "public sentiment": 0.7 },
+      "relationships": [{ "targetId": "regional_media", "strength": 0.5 }]
+    },
+    {
+      "id": "regional_media",
+      "name": "Regional Media Syndicate",
+      "type": "group",
+      "alignment": "opposition",
+      "influence": 0.65,
+      "sentiment": -0.1,
+      "volatility": 0.6,
+      "resilience": 0.4,
+      "themes": { "stability": 0.3, "infrastructure": 0.6, "public sentiment": 0.8 },
+      "relationships": []
+    }
+  ],
+  "initialParameters": [
+    { "name": "grid_restoration_progress", "value": 0.2 },
+    { "name": "public_trust", "value": 0.5 }
+  ],
+  "events": [
+    {
+      "id": "crisis-briefing",
+      "type": "information",
+      "actorId": "city_emergency_ops",
+      "targetIds": ["citizen_watch"],
+      "theme": "stability",
+      "intensity": 1,
+      "sentimentShift": 0.25,
+      "influenceShift": 0.1,
+      "parameterAdjustments": [{ "name": "public_trust", "delta": 0.1 }],
+      "description": "Mayor delivers verified briefing on repair timelines",
+      "scheduledTick": 1
+    },
+    {
+      "id": "viral-rumor",
+      "type": "information",
+      "actorId": "regional_media",
+      "targetIds": ["citizen_watch"],
+      "theme": "public sentiment",
+      "intensity": 0.8,
+      "sentimentShift": -0.3,
+      "influenceShift": 0.05,
+      "description": "Speculative article suggests sabotage",
+      "scheduledTick": 2
+    },
+    {
+      "id": "community-briefing",
+      "type": "social",
+      "actorId": "citizen_watch",
+      "targetIds": ["city_emergency_ops"],
+      "theme": "stability",
+      "intensity": 0.6,
+      "sentimentShift": 0.15,
+      "description": "Community leaders amplify verified updates",
+      "scheduledTick": 3
+    }
+  ]
+}

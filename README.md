@@ -90,6 +90,7 @@ cd intelgraph
 - [Architecture](#-architecture)
 - [Development](#-development)
 - [Production Deployment](#-production-deployment)
+- [Real-Time Narrative Simulation Engine](#-real-time-narrative-simulation-engine)
 - [API Documentation](#-api-documentation)
 - [Security](#-security)
 - [Contributing](#-contributing)
@@ -119,6 +120,7 @@ cd intelgraph
 - **⚡ Performance**: LOD rendering + graph clustering + viewport optimization
 - **🛡️ Security Hardening**: Persisted queries + tenant isolation + audit logging
 - **🔄 DevOps**: Docker + CI/CD + smoke testing + deployment automation
+- **🧠 Real-Time Narrative Simulation Engine**: Tick-based narrative propagation with rule-based + LLM generation and event injection APIs
 
 ### 🎮 User Interface Features
 
@@ -141,6 +143,61 @@ cd intelgraph
 - **⏱️ Temporal Analysis**: Time-series investigation and pattern recognition
 - **🌍 GEOINT Support**: Geographic analysis with Leaflet integration
 - **📊 Quality Scoring**: AI confidence metrics and validation workflows
+
+## 🧠 Real-Time Narrative Simulation Engine
+
+The simulation engine keeps evolving story arcs in lockstep with injected events, streaming data, and policy interventions. It runs alongside the IntelGraph API server and exposes REST controls under `/api/narrative-sim`.
+
+### Capabilities
+
+- **Dual Narrative Generators** – Hybrid rule-based heuristics and pluggable LLM adapters (ships with an echo adapter for offline environments).
+- **Entity, Event, and Parameter Modeling** – Actors, groups, and network relationships influence sentiment, momentum, and time-varying parameters such as trust or reach.
+- **Real-Time Tick Loop** – Deterministic tick advancement recomputes momentum, arc outlooks, and story summaries, enabling daily/hourly playback.
+- **Operational Interventions** – Inject events or actor actions, adjust parameters on the fly, and observe ripple effects across related entities.
+- **Scenario Library** – Ready-made crisis, election, and information operations scripts in `scenarios/narrative/` demonstrate multi-step responsiveness.
+
+### REST API Surface
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/api/narrative-sim/simulations` | Create a simulation (rule-based or LLM-driven) from entity/parameter definitions. |
+| `GET` | `/api/narrative-sim/simulations` | List active simulations with tick metadata. |
+| `GET` | `/api/narrative-sim/simulations/:id` | Fetch the full narrative state (entities, arcs, parameters, recent events). |
+| `POST` | `/api/narrative-sim/simulations/:id/events` | Queue time-stepped events or parameter perturbations. |
+| `POST` | `/api/narrative-sim/simulations/:id/actions` | Inject actor actions that auto-expand into events. |
+| `POST` | `/api/narrative-sim/simulations/:id/tick` | Advance the clock by one or more ticks and recalculate story arcs. |
+| `DELETE` | `/api/narrative-sim/simulations/:id` | Tear down a running simulation. |
+
+### Quickstart Example
+
+```bash
+# 1. Create a simulation using the crisis scenario
+curl -sS -X POST http://localhost:4000/api/narrative-sim/simulations \
+  -H 'Content-Type: application/json' \
+  --data @scenarios/narrative/crisis-response.json | jq '.id' > /tmp/sim_id
+
+# 2. Inject scripted events
+jq -c '.events[]' scenarios/narrative/crisis-response.json | while read evt; do
+  curl -sS -X POST "http://localhost:4000/api/narrative-sim/simulations/$(cat /tmp/sim_id)/events" \
+    -H 'Content-Type: application/json' \
+    --data "$evt" >/dev/null
+done
+
+# 3. Advance the simulation three ticks and fetch the current arc summaries
+curl -sS -X POST "http://localhost:4000/api/narrative-sim/simulations/$(cat /tmp/sim_id)/tick" \
+  -H 'Content-Type: application/json' --data '{"steps":3}' >/tmp/state.json
+
+jq '.arcs[] | {theme, momentum, outlook}' /tmp/state.json
+```
+
+Run dedicated tests with:
+
+```bash
+cd server
+npm test -- --config jest.config.ts narrative
+```
+
+This executes focused Jest suites for the engine core and REST endpoints while keeping broader CI runs unchanged.
 
 ## 🏗️ Architecture
 
