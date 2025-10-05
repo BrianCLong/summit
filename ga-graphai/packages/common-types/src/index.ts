@@ -317,6 +317,138 @@ export interface ValueDensityMetrics {
   latency: number;
 }
 
+export type FallbackTrigger =
+  | 'cost-spike'
+  | 'latency-breach'
+  | 'policy-violation'
+  | 'execution-failure';
+
+export interface CloudProviderDescriptor {
+  name: string;
+  regions: string[];
+  services: string[];
+  reliabilityScore: number;
+  sustainabilityScore?: number;
+  securityCertifications: string[];
+  maxThroughputPerMinute: number;
+  baseLatencyMs: number;
+  policyTags?: string[];
+}
+
+export interface PricingSignal {
+  provider: string;
+  region: string;
+  service: string;
+  pricePerUnit: number;
+  currency: string;
+  unit: string;
+  effectiveAt: string;
+}
+
+export interface StageExecutionGuardrail {
+  maxErrorRate: number;
+  recoveryTimeoutSeconds: number;
+}
+
+export interface StageFallbackStrategy {
+  provider: string;
+  region: string;
+  trigger: FallbackTrigger;
+}
+
+export interface PipelineStageDefinition {
+  id: string;
+  name: string;
+  description?: string;
+  requiredCapabilities: string[];
+  complianceTags: string[];
+  minThroughputPerMinute: number;
+  slaSeconds: number;
+  guardrail?: StageExecutionGuardrail;
+  fallbackStrategies?: StageFallbackStrategy[];
+}
+
+export interface PlannerRewardWeights {
+  cost: number;
+  throughput: number;
+  reliability: number;
+  compliance: number;
+  sustainability?: number;
+}
+
+export interface PlannerRewardSignal {
+  stageId: string;
+  observedThroughput: number;
+  observedCost: number;
+  observedErrorRate: number;
+  recovered: boolean;
+}
+
+export interface PlannerObservation {
+  pricing: PricingSignal[];
+  rewards: PlannerRewardSignal[];
+}
+
+export interface PlannerDecision {
+  provider: string;
+  region: string;
+  expectedCost: number;
+  expectedThroughput: number;
+  expectedLatency: number;
+}
+
+export interface PlannerExplanation {
+  stageId: string;
+  provider: string;
+  narrative: string;
+  scoreBreakdown: Record<string, number>;
+  constraints: string[];
+}
+
+export interface ExplainablePlanStep {
+  stageId: string;
+  primary: PlannerDecision;
+  fallbacks: PlannerDecision[];
+  explanation: PlannerExplanation;
+}
+
+export interface ExplainablePlan {
+  pipelineId: string;
+  generatedAt: string;
+  steps: ExplainablePlanStep[];
+  aggregateScore: number;
+  metadata: Record<string, unknown>;
+}
+
+export interface ExecutionTraceEntry {
+  stageId: string;
+  provider: string;
+  status: 'success' | 'failed' | 'recovered';
+  startedAt: string;
+  finishedAt: string;
+  logs: string[];
+  fallbackTriggered?: FallbackTrigger;
+}
+
+export interface ExecutionOutcome {
+  plan: ExplainablePlan;
+  trace: ExecutionTraceEntry[];
+  rewards: PlannerRewardSignal[];
+}
+
+export interface SelfHealingPolicy {
+  maxRetries: number;
+  backoffSeconds: number;
+  triggers: FallbackTrigger[];
+}
+
+export interface MetaOrchestratorTelemetry {
+  throughputPerMinute: number;
+  costPerThroughputUnit: number;
+  auditCompleteness: number;
+  selfHealingRate: number;
+}
+
 // ============================================================================
 // CURSOR GOVERNANCE TYPES - Added from PR 1299
 // ============================================================================

@@ -1,0 +1,3 @@
+- Meta orchestrator service code.
+- Use 2 spaces for indentation.
+- Run `npm test` inside this package after modifications.
