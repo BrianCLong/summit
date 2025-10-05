@@ -121,6 +121,7 @@ declare module 'prom-client' {
     observe(...args: any[]): void;
     [key: string]: any;
   }
+  export const register: Registry;
   export const collectDefaultMetrics: any;
 }
 declare module 'child_process' { export const spawn: any; export const exec: any; export const execFile: any; }
