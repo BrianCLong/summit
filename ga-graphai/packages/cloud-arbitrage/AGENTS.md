@@ -1,0 +1,3 @@
+- Multi-cloud arbitrage package.
+- Use 2 spaces for indentation in TypeScript files.
+- Run `npm test` in this directory after making changes.
