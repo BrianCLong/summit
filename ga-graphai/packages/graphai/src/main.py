@@ -5,7 +5,19 @@ from typing import List
 
 from fastapi import FastAPI, HTTPException
 from features import build_degree_features
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+
+from federated_attribution import (
+    AttributionExplanation,
+    AttributionFactor,
+    AttributionLink,
+    DomainSnapshot,
+    FederatedAttributionEngine,
+    ModelDesign,
+    ObservedBehavior,
+    PrivacyTradeoff,
+    ThreatScenario,
+)
 
 
 class FeatureBuildRequest(BaseModel):
@@ -82,6 +94,171 @@ class RouteDecision(BaseModel):
 
 
 app = FastAPI()
+engine = FederatedAttributionEngine()
+
+
+class BehaviorEventModel(BaseModel):
+    actor_id: str
+    target_id: str
+    action: str
+    timestamp: int
+    risk: float
+    privacy_tags: list[str] = []
+    domain_id: str
+
+    @field_validator("risk")
+    @classmethod
+    def _validate_risk(cls, value: float) -> float:
+        if not 0.0 <= value <= 1.0:
+            raise ValueError("risk must be between 0 and 1")
+        return value
+
+    def to_observed(self) -> ObservedBehavior:
+        return ObservedBehavior(
+            actor_id=self.actor_id,
+            target_id=self.target_id,
+            action=self.action,
+            timestamp=self.timestamp,
+            risk=self.risk,
+            privacy_tags=frozenset(self.privacy_tags),
+            domain_id=self.domain_id,
+        )
+
+
+class DomainSnapshotModel(BaseModel):
+    domain_id: str
+    classification: str
+    sensitivity_tier: int
+    controls: list[str] = []
+    behaviors: list[BehaviorEventModel]
+
+    @field_validator("sensitivity_tier")
+    @classmethod
+    def _validate_tier(cls, value: int) -> int:
+        if value < 1 or value > 5:
+            raise ValueError("sensitivity_tier must be between 1 and 5")
+        return value
+
+    def to_snapshot(self) -> DomainSnapshot:
+        return DomainSnapshot(
+            domain_id=self.domain_id,
+            classification=self.classification,
+            sensitivity_tier=self.sensitivity_tier,
+            controls=self.controls,
+            behaviors=tuple(behavior.to_observed() for behavior in self.behaviors),
+        )
+
+
+class FederationRequest(BaseModel):
+    snapshots: list[DomainSnapshotModel]
+
+
+class AttributionLinkModel(BaseModel):
+    source: str
+    target: str
+    confidence: float
+    domains: list[str]
+    narrative: str
+    privacy_delta: float
+
+    @classmethod
+    def from_domain(cls, link: AttributionLink) -> "AttributionLinkModel":
+        return cls(
+            source=link.source,
+            target=link.target,
+            confidence=link.confidence,
+            domains=list(link.domains),
+            narrative=link.narrative,
+            privacy_delta=link.privacy_delta,
+        )
+
+
+class FederationResponse(BaseModel):
+    total_entities: int
+    cross_domain_links: list[AttributionLinkModel]
+    privacy_delta: float
+    pamag_score: float
+
+
+class ThreatScenarioModel(BaseModel):
+    actor: str
+    pattern: str
+    severity: str
+    detection_confidence: float
+    recommended_actions: list[str]
+
+    @classmethod
+    def from_domain(cls, scenario: ThreatScenario) -> "ThreatScenarioModel":
+        return cls(
+            actor=scenario.actor,
+            pattern=scenario.pattern,
+            severity=scenario.severity,
+            detection_confidence=scenario.detection_confidence,
+            recommended_actions=list(scenario.recommended_actions),
+        )
+
+
+class PrivacyTradeoffModel(BaseModel):
+    privacy_score: float
+    utility_score: float
+    tradeoff_index: float
+    rationale: str
+
+    @classmethod
+    def from_domain(cls, tradeoff: PrivacyTradeoff) -> "PrivacyTradeoffModel":
+        return cls(
+            privacy_score=tradeoff.privacy_score,
+            utility_score=tradeoff.utility_score,
+            tradeoff_index=tradeoff.tradeoff_index,
+            rationale=tradeoff.rationale,
+        )
+
+
+class ModelDesignModel(BaseModel):
+    name: str
+    novelty: str
+    claims: list[str]
+
+    @classmethod
+    def from_domain(cls, design: ModelDesign) -> "ModelDesignModel":
+        return cls(name=design.name, novelty=design.novelty, claims=list(design.claims))
+
+
+class AnalysisResponse(BaseModel):
+    tradeoff: PrivacyTradeoffModel
+    threat_scenarios: list[ThreatScenarioModel]
+    model_design: ModelDesignModel
+
+
+class AttributionFactorModel(BaseModel):
+    label: str
+    weight: float
+
+    @classmethod
+    def from_domain(cls, factor: AttributionFactor) -> "AttributionFactorModel":
+        return cls(label=factor.label, weight=factor.weight)
+
+
+class ExplanationRequest(BaseModel):
+    entity_id: str
+
+
+class ExplanationResponse(BaseModel):
+    focus: str
+    domains: list[str]
+    top_factors: list[AttributionFactorModel]
+    residual_risk: float
+    supporting_links: list[AttributionLinkModel]
+
+    @classmethod
+    def from_domain(cls, explanation: AttributionExplanation) -> "ExplanationResponse":
+        return cls(
+            focus=explanation.focus,
+            domains=list(explanation.domains),
+            top_factors=[AttributionFactorModel.from_domain(factor) for factor in explanation.top_factors],
+            residual_risk=explanation.residual_risk,
+            supporting_links=[AttributionLinkModel.from_domain(link) for link in explanation.supporting_links],
+        )
 
 
 @app.get("/health")
@@ -142,3 +319,34 @@ def route_model(request: RouteRequest) -> RouteDecision:
         cost_per_1k_tokens=best.cost_per_1k_tokens,
         reason=reason,
     )
+
+
+@app.post("/attribution/federate", response_model=FederationResponse)
+def federate(request: FederationRequest) -> FederationResponse:
+    for snapshot in request.snapshots:
+        engine.ingest(snapshot.to_snapshot())
+    total_entities, links, privacy_delta, pamag_score = engine.summarize()
+    return FederationResponse(
+        total_entities=total_entities,
+        cross_domain_links=[AttributionLinkModel.from_domain(link) for link in links],
+        privacy_delta=privacy_delta,
+        pamag_score=pamag_score,
+    )
+
+
+@app.get("/attribution/analysis", response_model=AnalysisResponse)
+def analyze() -> AnalysisResponse:
+    tradeoff = engine.evaluate_tradeoff()
+    scenarios = engine.simulate_adversaries()
+    design = engine.describe_model_design()
+    return AnalysisResponse(
+        tradeoff=PrivacyTradeoffModel.from_domain(tradeoff),
+        threat_scenarios=[ThreatScenarioModel.from_domain(scenario) for scenario in scenarios],
+        model_design=ModelDesignModel.from_domain(design),
+    )
+
+
+@app.post("/attribution/explain", response_model=ExplanationResponse)
+def explain(request: ExplanationRequest) -> ExplanationResponse:
+    explanation = engine.explain(request.entity_id)
+    return ExplanationResponse.from_domain(explanation)

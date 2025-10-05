@@ -1528,3 +1528,52 @@ export function validateTaskSpec(spec: TaskSpec): ValidationResult {
     warnings,
   };
 }
+export interface FederatedAttributionLink {
+  readonly source: string;
+  readonly target: string;
+  readonly confidence: number;
+  readonly domains: readonly string[];
+  readonly narrative: string;
+  readonly privacyDelta: number;
+}
+
+export interface FederatedThreatScenario {
+  readonly actor: string;
+  readonly pattern: string;
+  readonly severity: 'low' | 'medium' | 'high';
+  readonly detectionConfidence: number;
+  readonly recommendedActions: readonly string[];
+}
+
+export interface FederatedTradeoff {
+  readonly privacyScore: number;
+  readonly utilityScore: number;
+  readonly tradeoffIndex: number;
+  readonly rationale: string;
+}
+
+export interface PatentModelDesign {
+  readonly name: string;
+  readonly novelty: string;
+  readonly claims: readonly string[];
+}
+
+export interface FederatedAttributionSummary {
+  readonly totalEntities: number;
+  readonly crossDomainLinks: readonly FederatedAttributionLink[];
+  readonly privacyDelta: number;
+  readonly pamagScore: number;
+}
+
+export interface FederatedAttributionExplanationFactor {
+  readonly label: string;
+  readonly weight: number;
+}
+
+export interface FederatedAttributionExplanation {
+  readonly focus: string;
+  readonly domains: readonly string[];
+  readonly topFactors: readonly FederatedAttributionExplanationFactor[];
+  readonly residualRisk: number;
+  readonly supportingLinks: readonly FederatedAttributionLink[];
+}
