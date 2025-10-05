@@ -21,7 +21,7 @@ function httpMetricsMiddleware(req, res, next) {
   res.end = function(...args) {
     const duration = (Date.now() - start) / 1000;
     const route = req.route?.path || req.path || 'unknown';
-    
+
     // Update metrics
     metrics.httpRequestDuration.observe(
       {
@@ -38,7 +38,17 @@ function httpMetricsMiddleware(req, res, next) {
       route,
       status_code: res.statusCode,
     });
-    
+
+    if (route.startsWith('/api') || route.startsWith('/graphql') || route.startsWith('/monitoring')) {
+      const tenantId = (req.headers['x-tenant-id'] || req.headers['x-tenant']) ?? 'unknown';
+      metrics.businessApiCallsTotal.inc({
+        service: req.baseUrl || 'maestro-api',
+        route,
+        status_code: String(res.statusCode),
+        tenant: Array.isArray(tenantId) ? tenantId[0] : String(tenantId || 'unknown'),
+      });
+    }
+
     originalEnd.apply(this, args);
   };
   

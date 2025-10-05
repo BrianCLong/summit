@@ -1,0 +1,132 @@
+groups:
+  - name: business-kpis
+    interval: 1m
+    rules:
+      - record: business:user_signup_rate_per_minute
+        expr: sum by (tenant, plan)(increase(business_user_signups_total[5m])) / 5
+      - record: business:api_call_rate_per_minute
+        expr: sum by (tenant, service, route)(increase(business_api_calls_total[5m])) / 5
+      - record: business:revenue_per_minute
+        expr: sum by (tenant, currency)(increase(business_revenue_total[5m])) / 5
+      - record: business:revenue_annual_run_rate
+        expr: business:revenue_per_minute * 60 * 24 * 365
+      - alert: BusinessSignupAnomaly
+        expr: |
+          abs(
+            (business:user_signup_rate_per_minute - avg_over_time(business:user_signup_rate_per_minute[1h]))
+            /
+            clamp_min(stddev_over_time(business:user_signup_rate_per_minute[1h]), 0.1)
+          ) > 3
+        for: 10m
+        labels:
+          severity: ticket
+          service: growth
+        annotations:
+          summary: 'User signup volume deviated more than 3σ from the trailing hour baseline'
+          description: |
+            Investigate growth funnels and acquisition partners. Check marketing spend and auth provider status.
+      - alert: ApiCallVolumeAnomaly
+        expr: |
+          abs(
+            (business:api_call_rate_per_minute - avg_over_time(business:api_call_rate_per_minute[2h]))
+            /
+            clamp_min(stddev_over_time(business:api_call_rate_per_minute[2h]), 0.1)
+          ) > 4
+        for: 15m
+        labels:
+          severity: page
+          service: api
+        annotations:
+          summary: 'API call volume anomaly detected'
+          description: |
+            API volume departed from the two hour rolling baseline. Validate rollout status and rate-limiters.
+      - alert: RevenueRunRateShortfall
+        expr: business:revenue_annual_run_rate < 1000000
+        for: 30m
+        labels:
+          severity: ticket
+          service: finance
+        annotations:
+          summary: 'Annualized revenue run rate trending below target'
+          description: |
+            Annualized revenue run rate dropped below the configured floor ($1M). Review billing pipeline health and churn signals.
+      - alert: SignupZeroTraffic
+        expr: sum(increase(business_user_signups_total[1h])) == 0
+        for: 6h
+        labels:
+          severity: page
+          service: growth
+        annotations:
+          summary: 'No signups observed in the last six hours'
+          description: |
+            No signup events were received in six hours. Inspect auth endpoints, marketing attribution and telemetry ingestion.
+
+  - name: platform-slis
+    interval: 30s
+    rules:
+      - alert: ApiLatencySLOBreach
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 1.5
+        for: 10m
+        labels:
+          severity: page
+          service: api
+        annotations:
+          summary: 'HTTP p95 latency above 1.5s'
+          description: |
+            The control-plane API is breaching the 1.5s p95 latency SLO. Check recent deployments and database health.
+      - alert: ApiErrorBudgetBurn
+        expr: |
+          (sum(rate(http_requests_total{status_code=~"5.."}[5m])) /
+            clamp_min(sum(rate(http_requests_total[5m])), 1)) > 0.02
+        for: 10m
+        labels:
+          severity: page
+          service: api
+        annotations:
+          summary: 'HTTP 5xx ratio > 2%'
+          description: |
+            The error budget burn rate exceeded 2% over the last ten minutes. Inspect recent deploys and error logs.
+      - alert: JaegerCollectorDown
+        expr: up{job="jaeger"} == 0
+        for: 5m
+        labels:
+          severity: ticket
+          service: tracing
+        annotations:
+          summary: 'Jaeger collector offline'
+          description: |
+            Distributed tracing spans are no longer being accepted. Restart the collector or scale up the deployment.
+
+  - name: capacity-planning
+    interval: 5m
+    rules:
+      - record: capacity:cpu_two_week_forecast
+        expr: |
+          predict_linear(sum(rate(container_cpu_usage_seconds_total{container!="",pod!=""}[5m]))[2h], 3600 * 24 * 14)
+      - record: capacity:memory_two_week_forecast_bytes
+        expr: |
+          predict_linear(sum(container_memory_working_set_bytes{container!="",pod!=""})[2h], 3600 * 24 * 14)
+      - alert: CapacityCPUForecastCritical
+        expr: capacity:cpu_two_week_forecast > 0.8
+        for: 15m
+        labels:
+          severity: ticket
+          service: platform
+        annotations:
+          summary: 'CPU utilization forecast breaching 80% in <14 days'
+          description: |
+            Forecasted cluster CPU usage will exceed 80% within two weeks. Initiate capacity expansion planning.
+      - alert: CapacityMemoryForecastCritical
+        expr: capacity:memory_two_week_forecast_bytes > (0.85 * sum(node_memory_MemTotal_bytes))
+        for: 15m
+        labels:
+          severity: ticket
+          service: platform
+        annotations:
+          summary: 'Memory utilization forecast breaching 85% in <14 days'
+          description: |
+            Forecasted memory demand will exceed 85% of installed capacity inside two weeks. Coordinate with infrastructure.
