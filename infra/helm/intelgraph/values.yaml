@@ -28,11 +28,31 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 1000
 
+server:
+  enabled: true
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 4000
+    targetPort: 4000
+  probes:
+    enabled: true
+    liveness:
+      path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    readiness:
+      path: /health
+      initialDelaySeconds: 5
+      periodSeconds: 5
+  metrics:
+    enabled: true
+    prometheusScrape: true
+    path: /metrics
+
 service:
   type: ClusterIP
-  port: 80
-  server:
-    targetPort: 8080
+  port: 4000
   client:
     targetPort: 3000
 
@@ -78,6 +98,7 @@ global:
   environment: development
   prometheus:
     path: /metrics
+    port: 4000
   cluster:
     name: intelgraph-dev
   ingress:
@@ -260,4 +281,4 @@ networkPolicy:
 healthCheck:
   enabled: true
   path: /health
-  port: 8080
+  port: 4000

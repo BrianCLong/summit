@@ -28,7 +28,7 @@ recently_fixed:
   #   test_name: "WebAuthn authentication with biometric fallback"
   #   fixed_date: "2024-09-15"
   #   fix_description: "Added explicit wait for biometric prompt"
-  #   pr_link: "https://github.com/BrianCLong/intelgraph/pull/1234"
+  #   pr_link: "https://github.com/BrianCLong/summit/pull/1234"
   #   monitoring_until: "2024-10-15"
 
 # Retry strategies for different test categories

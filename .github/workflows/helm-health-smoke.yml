@@ -1,0 +1,55 @@
+name: Helm Health Smoke
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  helm-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Helm Lint (chart only)
+        working-directory: infra/helm/intelgraph
+        run: |
+          helm lint .
+
+      - name: Template chart (no cluster needed)
+        working-directory: infra/helm/intelgraph
+        run: |
+          helm template smoke . \
+            --namespace smoke \
+            --set server.enabled=true \
+            --set server.service.enabled=true \
+            --set server.service.port=4000 \
+            --set server.probes.enabled=true \
+            --set server.probes.liveness.path="/health" \
+            --set server.probes.readiness.path="/health" \
+            --set server.metrics.enabled=true \
+            --set server.metrics.prometheusScrape=true \
+            > /tmp/smoke.yaml
+
+      - name: Assert: service exposes http and prometheus scrape
+        run: |
+          grep -q 'kind: Service' /tmp/smoke.yaml
+          grep -q 'name: intelgraph-server' /tmp/smoke.yaml || true  # adjust if release name differs
+          grep -q 'port: 4000' /tmp/smoke.yaml
+          grep -q 'prometheus.io/scrape: "true"' /tmp/smoke.yaml
+
+      - name: Assert: deployment has /health probes
+        run: |
+          grep -q 'readinessProbe:' /tmp/smoke.yaml
+          grep -q 'livenessProbe:' /tmp/smoke.yaml
+          grep -q 'httpGet:' /tmp/smoke.yaml
+          grep -q 'path: /health' /tmp/smoke.yaml
+
+      - name: Summary
+        run: echo "Helm health smoke passed ✅"

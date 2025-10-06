@@ -37,7 +37,7 @@ The backend changes involve new GraphQL schema definitions, resolvers, and conce
 
 1.  **Navigate to the server directory:**
     ```bash
-    cd intelgraph/server
+    cd summit/server
     ```
 2.  **Install dependencies (if not already done):**
     ```bash
@@ -65,7 +65,7 @@ This service provides NLP and LLM functionalities, now with OpenTelemetry and Re
 
 1.  **Navigate to the API directory:**
     ```bash
-    cd intelgraph/api
+    cd summit/api
     ```
 2.  **Install Python dependencies:**
     You will need to install `fastapi`, `uvicorn`, `spacy`, `sentence-transformers`, and OpenTelemetry packages.
@@ -109,7 +109,7 @@ The frontend changes involve new React components and routing.
 
 1.  **Navigate to the client directory:**
     ```bash
-    cd intelgraph/client
+    cd summit/client
     ```
 2.  **Install dependencies (if not already done):**
     ```bash
