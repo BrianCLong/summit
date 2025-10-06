@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [2025.11.2] - 2025-11-06
+
+### Added
+
+- IntelGraph November 2025 Release (v2025.11.2)
+- Policy Intelligence v1: AUC ≥0.80, drift ≤5m SLO, 1-click rollback w/ audit, multi-channel notifs.
+- Inventory Graph UI v1: GraphQL schema, force-directed viz, attack path preview, ownership context, PNG export.
+- SOAR v1.4 Scale & Safety: 100 ops/sec idempotent bulk, circuit breakers, retries w/ exp backoff, priority queues.
+- Intel v4 Active Learning Beta: privacy-safe feedback, batch retrain (Brier ≤0.15), canary 10→100%, model registry v4.
+- Observability & Enablement: 15+ SLO alerts with runbooks, PD/Slack routing, comprehensive monitoring.
+
+### Changed
+
+- CI/CD Pipeline: Enhanced with k6 perf tests, Playwright E2E smoke tests, and policy checks.
+- Grafana Dashboards: Added new SLO monitoring dashboard for IntelGraph metrics.
+- Deployment: Implemented canary deployment with 10%→50%→100% rollout strategy.
+- Alerting: Added PolicyDriftDetectionSlow and ChangeRiskAUCRegressed alert rules.
+
+### Security
+
+- Production-ready release with 70/70 points across five epics.
+- Auto-rollback mechanisms with audit trail and provenance tracking.
+
 ## [1.0.0] - 2025-08-18
 
 ### Added

@@ -1,0 +1,166 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "IntelGraph SLO Dashboard - November 2025 Release",
+    "tags": ["slo", "intelgraph", "release-2025.11"],
+    "style": "dark",
+    "timezone": "utc",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Policy Drift Detection Latency (p95)",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum by (le)(rate(policy_drift_detection_latency_seconds_bucket[5m])))",
+            "legendFormat": "p95 Latency"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "format": "s"
+          }
+        ],
+        "alert": {
+          "name": "Policy Drift Detection Slow alert",
+          "conditions": [
+            {
+              "type": "query",
+              "evaluator": {
+                "type": "gt",
+                "params": [300]
+              }
+            }
+          ],
+          "frequency": "60s",
+          "noDataState": "no_data",
+          "for": "3m"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Change-risk AUC",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "change_risk_auc{model=\"v1\"}",
+            "legendFormat": "AUC Score"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "AUC Score",
+            "format": "none"
+          }
+        ],
+        "alert": {
+          "name": "Change Risk AUC Regressed alert",
+          "conditions": [
+            {
+              "type": "query",
+              "evaluator": {
+                "type": "lt",
+                "params": [0.8]
+              }
+            }
+          ],
+          "frequency": "60s",
+          "noDataState": "no_data",
+          "for": "10m"
+        }
+      },
+      {
+        "id": 3,
+        "title": "Intel v4 Brier Score",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "intel_v4.brier",
+            "legendFormat": "Brier Score"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Brier Score",
+            "format": "none"
+          }
+        ],
+        "alert": {
+          "name": "Intel v4 Brier Regressed alert",
+          "conditions": [
+            {
+              "type": "query",
+              "evaluator": {
+                "type": "gt",
+                "params": [0.15]
+              }
+            }
+          ],
+          "frequency": "60s",
+          "noDataState": "no_data",
+          "for": "10m"
+        }
+      },
+      {
+        "id": 4,
+        "title": "SOAR Bulk Operations Throughput",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{path=\"/soar/bulk\"}[1m])",
+            "legendFormat": "Requests/sec"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec",
+            "format": "reqps"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "API Error Rate",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{code=~\"5..\"}[1m]) / rate(http_requests_total[1m])",
+            "legendFormat": "Error Rate"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Error Rate",
+            "format": "percentunit"
+          }
+        ],
+        "alert": {
+          "name": "API Error Spike alert",
+          "conditions": [
+            {
+              "type": "query",
+              "evaluator": {
+                "type": "gt",
+                "params": [0.01]
+              }
+            }
+          ],
+          "frequency": "60s",
+          "noDataState": "no_data",
+          "for": "2m"
+        }
+      }
+    ],
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

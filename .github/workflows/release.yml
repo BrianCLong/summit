@@ -1,29 +1,58 @@
-name: Release Utilities
-
+name: Release 2025.11
 on:
+  pull_request:
+    branches: [main]
+    paths-ignore: ['**/*.md']
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'RC version tag (e.g., v1.0.0-rc.1)'
-        required: true
-        default: 'v1.0.0-rc.1'
-
 jobs:
-  release-utils:
+  test-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - name: Tag RC
-        run: scripts/release/rc_tag.sh ${{ github.event.inputs.version }}
-      - name: Generate SBOM
-        run: scripts/release/generate_sbom.sh sbom.json
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-artifacts
-          path: |
-            CHANGELOG_RC.md
-            sbom.json
+        with: { node-version: 18 }
+      - name: Install
+        run: |
+          npm ci
+          npx playwright install --with-deps
+      - name: Lint & Unit
+        run: npm run lint && npm test -- --ci --reporters=default
+      - name: Build
+        run: npm run build
+  perf-k6:
+    needs: test-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/setup-k6@v0.3.2
+      - name: Bulk ops @docs/legacy-top100.txt ops/sec + idempotency
+        run: k6 run tests/k6/soar_bulk_100rps.js
+  e2e-playwright:
+    needs: test-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 18 }
+      - name: Start app
+        run: npm run start:web & sleep 10
+      - name: E2E
+        run: npx playwright test
+  policy-checks:
+    needs: test-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: OPA / license checks
+        run: npm run policy:check
+  release:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true }}
+    needs: [perf-k6, e2e-playwright, policy-checks]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag and notify
+        run: |
+          git tag v2025.11.2
+          git push origin v2025.11.2
+          echo "Release v2025.11.2 cut"
