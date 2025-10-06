@@ -5,7 +5,7 @@ This package contains copy‑pasteable patches, shell scripts, and `gh` commands
 2) **PR-2:** Graph Core & API skeleton with persisted queries + cost guard stubs.
 3) **PR-3:** Ingest Wizard skeleton + two connectors (CSV, STIX/TAXII) with golden tests.
 
-> Assumptions: Node 20, Python 3.12, Docker, Neo4j test container, OPA, Kafka (via docker‑compose for local integration). Repo root: `github.com/BrianCLong/intelgraph`.
+> Assumptions: Node 20, Python 3.12, Docker, Neo4j test container, OPA, Kafka (via docker‑compose for local integration). Repo root: `github.com/BrianCLong/summit`.
 
 ---
 

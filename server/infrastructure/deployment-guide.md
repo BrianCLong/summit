@@ -23,7 +23,7 @@ This guide provides step-by-step instructions for deploying IntelGraph to produc
 
 ### 1.1 Clone Repository
 ```bash
-git clone https://github.com/your-org/intelgraph-server.git
+git clone https://github.com/your-org/summit-server.git
 cd intelgraph-server
 ```
 

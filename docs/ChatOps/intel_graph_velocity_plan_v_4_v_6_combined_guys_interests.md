@@ -1,6 +1,6 @@
 # IntelGraph Velocity Plan v4–v6 (Combined) — Guy’s Interests
 
-**Owner:** Guy (IntelGraph Platform Engineer) **Repo:** `github.com/BrianCLong/intelgraph` **Context:** v2 tie-offs complete; v3 in flight (AI explainability + similarity). This combined doc sets the next 3 sprints with ready-to-cut branches/PRs.
+**Owner:** Guy (IntelGraph Platform Engineer) **Repo:** `github.com/BrianCLong/summit` **Context:** v2 tie-offs complete; v3 in flight (AI explainability + similarity). This combined doc sets the next 3 sprints with ready-to-cut branches/PRs.
 
 ---
 

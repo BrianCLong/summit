@@ -109,8 +109,8 @@ server/policies/           # Security policies
 
 **30-Second Start:**
 ```bash
-git clone https://github.com/brianlong/intelgraph.git
-cd intelgraph && cp .env.example .env
+git clone https://github.com/BrianCLong/summit.git
+cd summit && cp .env.example .env
 make up                    # Full environment in Docker
 make smoke                 # Verify everything works
 # ✅ Ready to code!
@@ -261,7 +261,7 @@ curl localhost:9090/metrics # Check resource usage
 **Getting Help:**
 - 📖 **Documentation**: Complete guides in `docs/`
 - 🧪 **Smoke Tests**: Built-in validation and diagnostics
-- 🎫 **Issues**: [GitHub Issues](https://github.com/brianlong/intelgraph/issues)
+- 🎫 **Issues**: [GitHub Issues](https://github.com/BrianCLong/summit/issues)
 - 💬 **Discussions**: Team chat or GitHub Discussions
 
 ---

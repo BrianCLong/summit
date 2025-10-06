@@ -76,6 +76,81 @@ all: capture stabilize set-protection harvest-untracked batch-prs finalize audit
 	@echo "  4. Enable merge queue in GitHub settings"
 	@echo ""
 
+# ------------------------------------------------------------
+# Deployable-first developer workflow targets
+# ------------------------------------------------------------
+
+.PHONY: bootstrap up up-ai up-kafka up-full smoke down clean logs ps
+
+COMPOSE_FILE ?= docker-compose.yml
+SMOKE_SCRIPT ?= scripts/golden-smoke.sh
+SMOKE_MAX_WAIT ?= 60
+COMPOSE := docker compose -f $(COMPOSE_FILE)
+COMPOSE_PROFILES ?=
+
+bootstrap: ## Verify prerequisites and prepare environment
+	@set -euo pipefail
+	@echo "🔍 Checking local prerequisites"
+	@command -v docker >/dev/null || { echo "Docker is required" >&2; exit 1; }
+	@docker info >/dev/null 2>&1 || { echo "Docker daemon is not running" >&2; exit 1; }
+	@command -v docker compose >/dev/null || { echo "Docker Compose v2 plugin is required" >&2; exit 1; }
+	@command -v curl >/dev/null || { echo "curl is required" >&2; exit 1; }
+	@if ! command -v jq >/dev/null; then echo "jq is required for smoke validation" >&2; exit 1; fi
+	@command -v node >/dev/null && node --version >/dev/null || true
+	@command -v npm >/dev/null && npm --version >/dev/null || true
+	@if [ -f .env.example ] && [ ! -f .env ]; then cp .env.example .env; echo "📄 Created .env from .env.example"; fi
+	@echo "📦 Pulling container images (if available)"
+	@$(COMPOSE) pull --ignore-pull-failures >/dev/null || true
+	@echo "✅ Bootstrap complete"
+
+up: ## Start core services and run smoke validation
+	@set -euo pipefail
+	@echo "🚀 Starting IntelGraph core stack"
+	@$(COMPOSE) up -d
+	@$(MAKE) smoke
+
+up-ai: ## Start core services plus AI profile and run smoke validation
+	@set -euo pipefail
+	@echo "🤖 Starting IntelGraph with AI profile"
+	@$(COMPOSE) --profile ai up -d
+	@$(MAKE) smoke
+
+up-kafka: ## Start core services plus Kafka profile and run smoke validation
+	@set -euo pipefail
+	@echo "📡 Starting IntelGraph with Kafka profile"
+	@$(COMPOSE) --profile kafka up -d
+	@$(MAKE) smoke
+
+up-full: ## Start all services (core + AI + Kafka) and run smoke validation
+	@set -euo pipefail
+	@echo "🌐 Starting IntelGraph full platform"
+	@$(COMPOSE) --profile ai --profile kafka up -d
+	@$(MAKE) smoke
+
+smoke: ## Run golden-path smoke checks (fails on first error)
+	@set -euo pipefail
+	@[ -x $(SMOKE_SCRIPT) ] || { echo "Smoke script $(SMOKE_SCRIPT) not found or not executable" >&2; exit 1; }
+	@echo "🩺 Running golden-path smoke validation"
+	@INTELGRAPH_SMOKE_MAX_WAIT=$(SMOKE_MAX_WAIT) bash $(SMOKE_SCRIPT)
+	@echo "✅ Smoke checks passed"
+
+down: ## Stop running services and remove containers
+	@set -euo pipefail
+	@echo "🛑 Stopping IntelGraph services"
+	@$(COMPOSE) --profile ai --profile kafka down --remove-orphans
+
+clean: down ## Stop services and prune local Docker resources
+	@set -euo pipefail
+	@echo "🧹 Pruning dangling Docker resources"
+	@docker volume prune -f >/dev/null || true
+	@docker image prune -f >/dev/null || true
+
+logs: ## Tail aggregate logs from running services
+	@$(COMPOSE) logs -f
+
+ps: ## Show status of running services
+	@$(COMPOSE) ps
+
 # Green-Lock Acceptance Pack Targets
 acceptance: verify recover auto-merge monitor ## Run complete acceptance workflow
 

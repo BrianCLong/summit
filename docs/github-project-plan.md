@@ -1,6 +1,6 @@
 # IntelGraph GA Q4 2025 – GitHub Project Plan
 
-> Repo: `github.com/BrianCLong/intelgraph`  ·  Timeframe: **Sep 29 – Dec 19, 2025** (6 sprints × 2 weeks)  ·  Goal: **GA Core** + **Prov‑Ledger (beta)** + **Predictive (alpha)** with governance-by-design.
+> Repo: `github.com/BrianCLong/summit`  ·  Timeframe: **Sep 29 – Dec 19, 2025** (6 sprints × 2 weeks)  ·  Goal: **GA Core** + **Prov‑Ledger (beta)** + **Predictive (alpha)** with governance-by-design.
 
 ---
 

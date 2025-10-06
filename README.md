@@ -64,8 +64,8 @@ Historical plans and reports are kept in [docs/archive](docs/archive/README.md).
 
 ```bash
 # Clone and start the platform
-git clone https://github.com/BrianCLong/intelgraph.git
-cd intelgraph
+git clone https://github.com/BrianCLong/summit.git
+cd summit
 ./start.sh
 ```
 
@@ -77,6 +77,14 @@ cd intelgraph
 - **Adminer**: http://localhost:8080 (Database Admin)
 
 ## 🎯 Golden Path Demo
+
+Bring the stack online and validate the golden flow end to end:
+
+```bash
+make bootstrap
+make up           # launches core stack and runs smoke validation
+make smoke        # re-run golden-path checks at any time
+```
 
 1. **Open Frontend**: Navigate to http://localhost:3000
 2. **Create Investigation**: Click "New Investigation" from Dashboard
@@ -217,8 +225,8 @@ cd intelgraph
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/BrianCLong/intelgraph.git
-cd intelgraph
+git clone https://github.com/BrianCLong/summit.git
+cd summit
 
 # 2. Start all services (recommended)
 ./start.sh
@@ -843,12 +851,17 @@ Access Grafana dashboards at http://localhost:3100:
 - [Architecture Decision Records](docs/adr/README.md)
 - [Troubleshooting Guide](docs/troubleshooting/README.md)
 - [Archived Documents](docs/archive/README.md)
+- [Reconciliation Report (October 2025)](docs/RECONCILIATION_REPORT.md)
+
+### Releases
+
+- [2025.10.HALLOWEEN Release Notes](docs/RELEASE_NOTES_2025.10.HALLOWEEN.md)
+- [Changelog](CHANGELOG.md)
 
 ### Community
 
-- [GitHub Discussions](https://github.com/BrianCLong/intelgraph/discussions)
-- [Issue Tracker](https://github.com/BrianCLong/intelgraph/issues)
-- [Release Notes](CHANGELOG.md)
+- [GitHub Discussions](https://github.com/BrianCLong/summit/discussions)
+- [Issue Tracker](https://github.com/BrianCLong/summit/issues)
 
 ### Learning Resources
 
@@ -861,8 +874,8 @@ Access Grafana dashboards at http://localhost:3100:
 ### Getting Help
 
 - **Documentation**: Check [docs/](docs/) directory
-- **Issues**: [GitHub Issues](https://github.com/BrianCLong/intelgraph/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/BrianCLong/intelgraph/discussions)
+- **Issues**: [GitHub Issues](https://github.com/BrianCLong/summit/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/BrianCLong/summit/discussions)
 - **Email**: support@intelgraph.com
 
 ### Reporting Bugs
@@ -878,7 +891,7 @@ Please include:
 
 ### Feature Requests
 
-Use the [Feature Request template](https://github.com/BrianCLong/intelgraph/issues/new?template=feature_request.md) and include:
+Use the [Feature Request template](https://github.com/BrianCLong/summit/issues/new?template=feature_request.md) and include:
 
 - Clear description of the feature
 - Use case and business value

@@ -347,7 +347,7 @@ tools = [
      "Integrate into your OSINT stack","Investigation graphing",
      "CSV/JSON","Graphs/Exports","","Local/Cloud",
      "Project-scale","Maltego/OpenCTI (custom)","","MIT/OSS",
-     "Practitioners","", "","https://github.com/BrianCLong/intelgraph","","",""),
+     "Practitioners","", "","https://github.com/BrianCLong/summit","","",""),
 
     # CYBINT / SIEM / DFIR / EDR
     ("Splunk Enterprise Security","CYBINT","SIEM","Splunk","Commercial","Server",

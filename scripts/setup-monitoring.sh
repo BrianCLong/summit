@@ -651,7 +651,7 @@ print_access_info() {
     echo
     echo "🚨 Alerting:"
     echo "   AlertManager: kubectl port-forward -n $NAMESPACE svc/prometheus-stack-kube-prom-alertmanager 9093:9093"
-    echo "   Runbooks: https://github.com/BrianCLong/intelgraph/tree/main/charts/monitoring/runbooks"
+    echo "   Runbooks: https://github.com/BrianCLong/summit/tree/main/charts/monitoring/runbooks"
     
     echo
     echo "🔍 Troubleshooting:"

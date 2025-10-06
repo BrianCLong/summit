@@ -16,8 +16,8 @@ spec:
     matchNames:
       - {{ .Release.Namespace }}
   endpoints:
-    - port: metrics
-      path: {{ .Values.global.prometheus.path | default "/metrics" }}
+    - port: http
+      path: {{ default (.Values.global.prometheus.path | default "/metrics") .Values.server.metrics.path }}
       interval: {{ .Values.serviceMonitor.interval | default "30s" }}
       scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout | default "10s" }}
       relabelings:

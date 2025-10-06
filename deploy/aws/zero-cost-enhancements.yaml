@@ -514,10 +514,10 @@ data:
 
     # Clone repository if needed
     if [[ ! -d "intelgraph" ]]; then
-        git clone https://github.com/brianclong/intelgraph
+        git clone https://github.com/BrianCLong/summit
     fi
 
-    cd intelgraph/deploy/aws
+    cd summit/deploy/aws
 
     # Run deployment
     ./zero-cost-production-setup.sh

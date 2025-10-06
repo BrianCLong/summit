@@ -4,9 +4,9 @@ description: IntelGraph Enterprise Intelligence Analysis Platform
 type: application
 version: 2025.09.19
 appVersion: "2025.09.19"
-home: https://github.com/BrianCLong/intelgraph
+home: https://github.com/BrianCLong/summit
 sources:
-  - https://github.com/BrianCLong/intelgraph
+  - https://github.com/BrianCLong/summit
 maintainers:
   - name: IntelGraph Team
     email: team@intelgraph.dev

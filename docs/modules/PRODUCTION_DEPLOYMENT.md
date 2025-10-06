@@ -94,7 +94,7 @@ This guide contains everything needed to deploy IntelGraph to production environ
 
 ```bash
 git clone <repository>
-cd intelgraph/server
+cd summit/server
 cp .env.production .env
 ```
 
