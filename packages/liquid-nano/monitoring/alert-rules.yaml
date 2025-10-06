@@ -1,0 +1,19 @@
+groups:
+  - name: liquid-nano
+    rules:
+      - alert: LiquidNanoHighErrorRate
+        expr: rate(plugin_failed_total[5m]) > 0.05 * rate(plugin_processed_total[5m])
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Liquid Nano plugin failure rate high"
+          description: "More than 5% of plugin executions failed in the last 5 minutes."
+      - alert: LiquidNanoBacklogGrowing
+        expr: increase(runtime_events_total[10m]) > increase(plugin_processed_total[10m])
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Liquid Nano event backlog detected"
+          description: "Events are being ingested faster than plugins can process them."

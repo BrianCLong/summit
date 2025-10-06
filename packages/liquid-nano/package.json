@@ -1,0 +1,26 @@
+{
+  "name": "@summit/liquid-nano",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Liquid Nano pilot runtime with sample applications and deployment tooling.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "lint": "eslint \"**/*.{ts,tsx}\"",
+    "test": "jest --config ./jest.config.ts --runInBand",
+    "test:coverage": "jest --config ./jest.config.ts --coverage",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "format": "prettier --check .",
+    "prepare": "npm run build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.17.6",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.6",
+    "typescript": "^5.7.3"
+  }
+}

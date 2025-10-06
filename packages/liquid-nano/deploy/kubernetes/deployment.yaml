@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: liquid-nano
+  labels:
+    app: liquid-nano
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: liquid-nano
+  template:
+    metadata:
+      labels:
+        app: liquid-nano
+    spec:
+      serviceAccountName: liquid-nano
+      containers:
+        - name: runtime
+          image: ghcr.io/example/liquid-nano:pilot
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: LIQUID_NANO_CONFIG_PATH
+              value: /opt/liquid-nano/config/liquid-nano.config.json
+          volumeMounts:
+            - name: config
+              mountPath: /opt/liquid-nano/config/liquid-nano.config.json
+              subPath: liquid-nano.config.json
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+      volumes:
+        - name: config
+          configMap:
+            name: liquid-nano-config
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: liquid-nano

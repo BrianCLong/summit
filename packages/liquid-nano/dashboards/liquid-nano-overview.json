@@ -1,0 +1,29 @@
+{
+  "$schema": "https://grafana.com/schemas/dashboard/v1.json",
+  "title": "Liquid Nano Overview",
+  "tags": ["liquid-nano", "pilot"],
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Runtime Events",
+      "targets": [
+        {
+          "expr": "sum(rate(runtime_events_total[1m]))",
+          "legendFormat": "events/sec"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Failed Plugins",
+      "targets": [
+        {
+          "expr": "sum(rate(plugin_failed_total[5m]))",
+          "legendFormat": "failures/min"
+        }
+      ]
+    }
+  ]
+}

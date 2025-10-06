@@ -1,0 +1,5 @@
+scrape_configs:
+  - job_name: 'liquid-nano'
+    static_configs:
+      - targets: ['liquid-nano-runtime.default.svc:8080']
+    metrics_path: /metrics

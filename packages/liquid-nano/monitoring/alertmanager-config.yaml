@@ -1,0 +1,13 @@
+route:
+  receiver: 'liquid-nano-default'
+  routes:
+    - matchers:
+        - severity="critical"
+      receiver: 'liquid-nano-pagerduty'
+receivers:
+  - name: 'liquid-nano-default'
+    webhook_configs:
+      - url: 'https://hooks.slack.com/services/T000/B000/XXXX'
+  - name: 'liquid-nano-pagerduty'
+    pagerduty_configs:
+      - routing_key: 'PAGERDUTY_ROUTING_KEY'
