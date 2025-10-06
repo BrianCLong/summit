@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 18 }
+        with: { node-version: 18, cache: 'npm' }
       - name: Install
         run: |
           npm ci
@@ -22,14 +22,18 @@ jobs:
   perf-k6:
     needs: test-build
     runs-on: ubuntu-latest
+    env:
+      API: ${{ secrets.PERF_API_BASE }}
     steps:
       - uses: actions/checkout@v4
-      - uses: grafana/setup-k6@v0.3.2
-      - name: Bulk ops @docs/legacy-top100.txt ops/sec + idempotency
+      - uses: grafana/setup-k6@server/src/migrations/020_v110_confcompute_privacy.ts
+      - name: Bulk ops @tests/k6/soar_bulk_100rps.js ops/sec + idempotency
         run: k6 run tests/k6/soar_bulk_100rps.js
   e2e-playwright:
     needs: test-build
     runs-on: ubuntu-latest
+    env:
+      WEB_URL: ${{ vars.WEB_URL || 'http://localhost:3000' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -41,6 +45,8 @@ jobs:
   policy-checks:
     needs: test-build
     runs-on: ubuntu-latest
+    env:
+      METRICS_ENDPOINT: ${{ secrets.METRICS_JSON_URL }}
     steps:
       - uses: actions/checkout@v4
       - name: OPA / license checks
