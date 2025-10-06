@@ -8,4 +8,17 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Hello from ci-core"
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Toolchain
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install (tolerant)
+        run: |
+          if [ -f package.json ]; then
+            npm ci --ignore-scripts || npm i || true
+          else
+            echo "no package.json - skipping install"
+          fi

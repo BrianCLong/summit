@@ -3,8 +3,22 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  security-events: write
+concurrency:
+  group: security-light-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   hygiene:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - run: echo "Hello from security-light"
+      - uses: actions/checkout@v4
+      - name: Secret scan (light; non-blocking)
+        uses: trufflesecurity/trufflehog@v3
+        continue-on-error: true
+      - name: Dependency snapshot (non-blocking)
+        uses: advanced-security/maven-dependency-submission-action@v4
+        continue-on-error: true
