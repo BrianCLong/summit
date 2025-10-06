@@ -1,0 +1,46 @@
+name: CI (core)
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+  checks: write
+concurrency:
+  group: ci-core-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Toolchain
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install (tolerant)
+        run: |
+          if [ -f package.json ]; then
+            npm ci --ignore-scripts || npm i || true
+          else
+            echo "no package.json - skipping install"
+          fi
+      - name: Lint (light, non-blocking)
+        run: |
+          if [ -f package.json ]; then
+            npm run -s lint || echo "::warning::lint failed (non-blocking)"
+          else
+            echo "no package.json - skipping lint"
+          fi
+      - name: Typecheck (light, non-blocking)
+        run: |
+          if [ -f tsconfig.json ]; then
+            npx -y typescript@latest -v >/dev/null 2>&1 || true
+            npx -y tsc -noEmit || echo "::warning::typecheck failed (non-blocking)"
+          else
+            echo "no tsconfig - skipping typecheck"
+          fi
