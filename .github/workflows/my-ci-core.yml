@@ -22,3 +22,10 @@ jobs:
           else
             echo "no package.json - skipping install"
           fi
+      - name: Lint (light, non-blocking)
+        run: |
+          if [ -f package.json ]; then
+            npm run -s lint || echo "::warning::lint failed (non-blocking)"
+          else
+            echo "no package.json - skipping lint"
+          fi
