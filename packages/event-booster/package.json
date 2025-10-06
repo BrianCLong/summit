@@ -1,0 +1,22 @@
+{
+  "name": "@intelgraph/event-booster",
+  "version": "0.1.0",
+  "description": "Synthetic event booster framework with configurable patterns, generators, and benchmarking tools.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config ../../jest.config.cjs --runTestsByPath packages/event-booster/test/EventBooster.test.ts packages/event-booster/test/SyntheticGenerators.test.ts packages/event-booster/test/PerformanceBenchmarks.test.ts --coverage"
+  },
+  "keywords": [
+    "events",
+    "analytics",
+    "synthetic-data",
+    "benchmarking",
+    "timeseries"
+  ],
+  "license": "MIT",
+  "files": ["dist"],
+  "sideEffects": false
+}
