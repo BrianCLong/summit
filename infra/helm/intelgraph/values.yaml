@@ -50,6 +50,28 @@ server:
     prometheusScrape: true
     path: /metrics
 
+dev:
+  dummySecrets: false
+
+database:
+  postgresql:
+    existingSecret: ""
+    usernameKey: username
+    passwordKey: password
+    urlKey: url
+  neo4j:
+    existingSecret: ""
+    username: neo4j
+    usernameKey: username
+    passwordKey: password
+    uriKey: uri
+  redis:
+    existingSecret: ""
+    username: redis
+    usernameKey: username
+    passwordKey: password
+    urlKey: url
+
 service:
   type: ClusterIP
   port: 4000

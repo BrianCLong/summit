@@ -18,9 +18,13 @@ jobs:
           version: v3.14.4
 
       - name: Helm Lint (chart only)
-        working-directory: infra/helm/intelgraph
         run: |
-          helm lint .
+          TMP_DIR=$(mktemp -d)
+          CHART_DIR="$TMP_DIR/intelgraph"
+          mkdir -p "$CHART_DIR"
+          tar -C infra/helm/intelgraph -cf - . | tar -C "$CHART_DIR" -xf -
+          find "$CHART_DIR" -name '*.disabled' -delete
+          helm lint "$CHART_DIR" --set dev.dummySecrets=true
 
       - name: Template chart (no cluster needed)
         working-directory: infra/helm/intelgraph
@@ -35,12 +39,13 @@ jobs:
             --set server.probes.readiness.path="/health" \
             --set server.metrics.enabled=true \
             --set server.metrics.prometheusScrape=true \
+            --set dev.dummySecrets=true \
             > /tmp/smoke.yaml
 
       - name: Assert: service exposes http and prometheus scrape
         run: |
           grep -q 'kind: Service' /tmp/smoke.yaml
-          grep -q 'name: intelgraph-server' /tmp/smoke.yaml || true  # adjust if release name differs
+          grep -q 'name: smoke-intelgraph-server' /tmp/smoke.yaml
           grep -q 'port: 4000' /tmp/smoke.yaml
           grep -q 'prometheus.io/scrape: "true"' /tmp/smoke.yaml
 
