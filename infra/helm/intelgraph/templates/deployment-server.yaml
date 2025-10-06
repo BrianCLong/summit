@@ -1,3 +1,4 @@
+{{- if .Values.server.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,25 +40,28 @@ spec:
           imagePullPolicy: {{ .Values.image.server.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.server.targetPort }}
+              containerPort: {{ .Values.server.service.targetPort }}
               protocol: TCP
-          {{- if .Values.healthCheck.enabled }}
+          {{- $probes := .Values.server.probes }}
+          {{- if and $probes.enabled $probes.liveness }}
           livenessProbe:
             httpGet:
-              path: /health
+              path: {{ default "/health" $probes.liveness.path }}
               port: http
-            initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
-            periodSeconds: {{ .Values.healthCheck.periodSeconds }}
-            timeoutSeconds: {{ .Values.healthCheck.timeoutSeconds }}
-            failureThreshold: {{ .Values.healthCheck.failureThreshold }}
+            initialDelaySeconds: {{ default 10 $probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ default 10 $probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ default 3 $probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ default 3 $probes.liveness.failureThreshold }}
+          {{- end }}
+          {{- if and $probes.enabled $probes.readiness }}
           readinessProbe:
             httpGet:
-              path: /health
+              path: {{ default "/health" $probes.readiness.path }}
               port: http
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 3
+            initialDelaySeconds: {{ default 5 $probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ default 5 $probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ default 3 $probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ default 3 $probes.readiness.failureThreshold }}
           {{- end }}
           resources:
             {{- toYaml .Values.resources.server | nindent 12 }}
@@ -65,7 +69,7 @@ spec:
             - name: NODE_ENV
               value: "production"
             - name: PORT
-              value: "{{ .Values.service.server.targetPort }}"
+              value: "{{ .Values.server.service.targetPort }}"
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -110,3 +114,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+{{- end }}

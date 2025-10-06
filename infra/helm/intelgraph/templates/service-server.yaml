@@ -1,0 +1,26 @@
+{{- if and .Values.server.enabled .Values.server.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-server
+  labels:
+    app.kubernetes.io/name: {{ include "intelgraph.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: server
+  {{- if and .Values.server.metrics.enabled .Values.server.metrics.prometheusScrape }}
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ .Values.server.service.port }}"
+    prometheus.io/path: "{{ .Values.server.metrics.path }}"
+  {{- end }}
+spec:
+  type: {{ default "ClusterIP" .Values.server.service.type }}
+  selector:
+    app.kubernetes.io/name: {{ include "intelgraph.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: server
+  ports:
+    - name: http
+      port: {{ .Values.server.service.port }}
+      targetPort: {{ .Values.server.service.targetPort }}
+{{- end }}

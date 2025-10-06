@@ -16,7 +16,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/BrianCLong/intelgraph
+    repoURL: https://github.com/BrianCLong/summit
     targetRevision: HEAD
     path: charts/monitoring
     helm:

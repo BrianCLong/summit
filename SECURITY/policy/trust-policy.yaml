@@ -124,7 +124,7 @@ spec:
 
     allowed_repositories:
       - "github.com/BrianCLong/summit"
-      - "github.com/BrianCLong/intelgraph"
+      - "github.com/BrianCLong/summit"
 
     blocked_repositories:
       - "github.com/suspicious-org/*"

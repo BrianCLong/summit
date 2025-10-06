@@ -1,8 +1,8 @@
 # IntelGraph Platform - Production Ready MVP
 
-[![CI/CD Pipeline](https://github.com/brianlong/intelgraph/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/brianlong/intelgraph/actions)
+[![CI/CD Pipeline](https://github.com/BrianCLong/summit/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/BrianCLong/summit/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green.svg)](https://github.com/brianlong/intelgraph)
+[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green.svg)](https://github.com/BrianCLong/summit)
 
 A next-generation intelligence analysis platform that synthesizes and surpasses Maltego and Palantir capabilities with AI-augmented graph analytics, real-time collaboration, and enterprise-grade security.
 
@@ -22,8 +22,8 @@ All critical MVP-0 features implemented with enterprise-grade security, observab
 ### Development Setup
 ```bash
 # 1. Clone and setup
-git clone https://github.com/brianlong/intelgraph.git
-cd intelgraph
+git clone https://github.com/BrianCLong/summit.git
+cd summit
 cp .env.example .env
 
 # 2. Start development environment
@@ -245,7 +245,7 @@ python scripts/create-github-issues.py
 
 ### Getting Help
 - **Documentation**: Complete guides in `docs/` directory
-- **Issues**: [GitHub Issues](https://github.com/brianlong/intelgraph/issues)
+- **Issues**: [GitHub Issues](https://github.com/BrianCLong/summit/issues)
 - **Smoke Tests**: Built-in validation and troubleshooting
 
 ### Development Workflow

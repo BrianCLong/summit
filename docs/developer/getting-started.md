@@ -60,8 +60,8 @@ code --install-extension ms-vscode-remote.remote-containers
 
 ```bash
 # Clone the repository
-git clone https://github.com/BrianCLong/intelgraph.git
-cd intelgraph
+git clone https://github.com/BrianCLong/summit.git
+cd summit
 
 # Set up Git hooks
 git config core.hooksPath .githooks

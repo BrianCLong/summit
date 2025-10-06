@@ -1,15 +1,57 @@
-name: Trivy Container Scan
-on: [pull_request]
+name: Trivy Security Gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
 jobs:
-  trivy:
+  filesystem:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
     steps:
       - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
-      - uses: aquasecurity/trivy-action@b95621a837499832c705591a4924e4b10b34332e # 0.16.0
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@b95621a837499832c705591a4924e4b10b34332e # 0.16.0
         with:
           scan-type: fs
           ignore-unfixed: true
           severity: HIGH,CRITICAL
+          exit-code: '1'
+          format: table
+
+  config:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - name: Trivy IaC config scan
+        uses: aquasecurity/trivy-action@b95621a837499832c705591a4924e4b10b34332e # 0.16.0
+        with:
+          scan-type: config
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          format: table
+
+  images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build IntelGraph server image
+        run: docker build -f services/server/Dockerfile -t intelgraph-server:ci .
+      - name: Trivy image scan (server)
+        uses: aquasecurity/trivy-action@b95621a837499832c705591a4924e4b10b34332e # 0.16.0
+        with:
+          image-ref: intelgraph-server:ci
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          format: table
