@@ -40,9 +40,21 @@ spec:
           imagePullPolicy: {{ .Values.image.server.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.server.service.targetPort }}
+              containerPort: {{ default .Values.server.service.port .Values.server.service.targetPort }}
               protocol: TCP
           {{- $probes := .Values.server.probes }}
+          {{- $db := .Values.database | default dict }}
+          {{- $pgVals := (get $db "postgresql") | default dict }}
+          {{- $neoVals := (get $db "neo4j") | default dict }}
+          {{- $redisVals := (get $db "redis") | default dict }}
+          {{- $pgSecret := default "postgres" (get $pgVals "existingSecret") }}
+          {{- $pgUrlKey := default "url" (get $pgVals "urlKey") }}
+          {{- $neoSecret := default "neo4j" (get $neoVals "existingSecret") }}
+          {{- $neoUriKey := default "uri" (get $neoVals "uriKey") }}
+          {{- $neoUser := default "neo4j" (get $neoVals "username") }}
+          {{- $neoPassKey := default "password" (get $neoVals "passwordKey") }}
+          {{- $redisSecret := default "redis" (get $redisVals "existingSecret") }}
+          {{- $redisUrlKey := default "url" (get $redisVals "urlKey") }}
           {{- if and $probes.enabled $probes.liveness }}
           livenessProbe:
             httpGet:
@@ -73,25 +85,25 @@ spec:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.postgresql.existingSecret }}
-                  key: url
+                  name: {{ $pgSecret | quote }}
+                  key: {{ $pgUrlKey | quote }}
             - name: NEO4J_URI
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.neo4j.existingSecret }}
-                  key: uri
+                  name: {{ $neoSecret | quote }}
+                  key: {{ $neoUriKey | quote }}
             - name: NEO4J_USERNAME
-              value: {{ .Values.database.neo4j.username }}
+              value: {{ $neoUser | quote }}
             - name: NEO4J_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.neo4j.existingSecret }}
-                  key: password
+                  name: {{ $neoSecret | quote }}
+                  key: {{ $neoPassKey | quote }}
             - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.redis.existingSecret }}
-                  key: url
+                  name: {{ $redisSecret | quote }}
+                  key: {{ $redisUrlKey | quote }}
           volumeMounts:
             - name: tmp
               mountPath: /tmp

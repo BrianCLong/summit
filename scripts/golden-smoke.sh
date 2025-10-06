@@ -135,6 +135,19 @@ assert_no_errors "$start_copilot_response"
 copilot_status=$(printf '%s' "$start_copilot_response" | jq -er '.data.startCopilotRun.status')
 log "Copilot run started with status ${copilot_status}"
 
+log "Requesting Copilot suggestion..."
+copilot_suggest_query='query CopilotSuggest($investigationId: ID!) {
+  copilotSuggest(investigationId: $investigationId) {
+    summary
+    ok
+  }
+}'
+copilot_suggest_vars=$(jq -n --arg inv "$investigation_id" '{investigationId:$inv}')
+copilot_suggest_response=$(graphql_request "$copilot_suggest_query" "$copilot_suggest_vars")
+assert_no_errors "$copilot_suggest_response"
+copilot_ok=$(printf '%s' "$copilot_suggest_response" | jq -er '.data.copilotSuggest.ok')
+log "Copilot suggestion returned ok=${copilot_ok}"
+
 log "Cleaning up smoke data..."
 delete_relationship_query='mutation DeleteRelationship($id: ID!) { deleteRelationship(id: $id) }'
 cleanup_rel_vars=$(jq -n --arg id "$relationship_id" '{id:$id}')
@@ -151,4 +164,4 @@ delete_investigation_query='mutation DeleteInvestigation($id: ID!) { deleteInves
 cleanup_inv=$(graphql_request "$delete_investigation_query" "$(jq -n --arg id "$investigation_id" '{id:$id}')")
 assert_no_errors "$cleanup_inv"
 
-log "GOLDEN_FLOW=PASS"
+echo "GOLDEN_FLOW=PASS INV_ID=${investigation_id}"

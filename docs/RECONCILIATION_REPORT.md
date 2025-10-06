@@ -26,3 +26,17 @@
 - Extend golden smoke coverage for AI/Kafka optional services once compose overlays are finalized
 - Automate SBOM + provenance regeneration in nightly workflows to capture dependency deltas
 - Expand README troubleshooting with environment-specific resource limits observed during smoke runs
+
+## Appendix — Local Helm Quick Commands
+
+- `make helm-lint`
+- `make helm-smoke` (uses `dev.dummySecrets=true` for template-only secrets)
+- `helm template smoke infra/helm/intelgraph --namespace smoke`
+- Inspect output via `less /tmp/smoke.yaml` or `rg -n "Service|/health|prometheus" /tmp/smoke.yaml`
+
+## 🔎 Reviewer Checklist
+
+- [ ] `make helm-lint` and `make helm-smoke` both pass
+- [ ] `/tmp/smoke.yaml` contains the server Service on port 4000, Prometheus scrape annotations, and `/health` probes in the Deployment
+- [ ] CI gates (Trivy, Gitleaks, CodeQL) succeed with no new high-severity findings
+- [ ] `scripts/golden-smoke.sh` reports `GOLDEN_FLOW=PASS INV_ID=<value>`
