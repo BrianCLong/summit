@@ -21,3 +21,17 @@ traefik:
   additionalArguments:
     - '--serverstransport.insecureskipverify=false'
     - '--accesslog=true'
+
+canary:
+  enabled: true
+  steps:
+    - setWeight: 10
+    - pause: { duration: 10m }
+    - setWeight: 50
+    - pause: { duration: 10m }
+    - setWeight: 100
+rollback:
+  enabled: true
+  triggerOn:
+    - alert: PolicyDriftDetectionSlow
+    - alert: http_5xx_spike
