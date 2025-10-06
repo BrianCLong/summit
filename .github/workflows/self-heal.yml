@@ -1,0 +1,33 @@
+name: Self-Heal CI
+
+on:
+  workflow_run:
+    workflows:
+      - Copilot Routing (Staging)
+    types:
+      - completed
+
+jobs:
+  triage:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Summarize failure
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/ci/summarize_failure.py "${{ github.event.workflow_run.id }}" > /tmp/summary.json
+      - name: Generate self-heal plan
+        env:
+          ROUTER_URL: ${{ secrets.ROUTER_URL }}
+          ROUTER_TOKEN: ${{ secrets.ROUTER_TOKEN }}
+        run: python scripts/ci/self_heal.py /tmp/summary.json > /tmp/plan.md
+      - name: Open PR with proposal
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr create --title "Self-heal: Fix proposal" --body-file /tmp/plan.md --base feature/copilot-multi-llm || echo "PR creation skipped"

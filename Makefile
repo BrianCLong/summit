@@ -60,7 +60,7 @@ audit: ## Generate complete provenance ledger
 	@echo "✅ Provenance ledger written to green-lock-ledger/provenance.csv"
 
 all: capture stabilize set-protection harvest-untracked batch-prs finalize audit ## Run complete green-lock sequence
-	@echo ""
+@echo ""
 	@echo "🎉 GREEN-LOCK MISSION COMPLETE 🎉"
 	@echo "=================================="
 	@echo ""
@@ -89,7 +89,24 @@ auto-merge: ## Enable auto-merge on all open PRs
 	@./scripts/auto_merge_all_open_prs.sh
 
 monitor: ## Monitor stabilization workflow execution
-	@./scripts/monitor_stabilization.sh
+@./scripts/monitor_stabilization.sh
 
 reenable-ci: ## Show CI re-enablement guide
-	@./scripts/gradual_reenable_ci.sh
+@./scripts/gradual_reenable_ci.sh
+
+.PHONY: router-test migrate-db seed-neo4j staging-on staging-off
+
+router-test: ## Run LLM router unit tests
+	npm run test --workspaces -- llm-router
+
+migrate-db: ## Apply LLM call ledger migration
+	psql $$DATABASE_URL -f infra/postgres/2025-10-06_llm_calls.sql
+
+seed-neo4j: ## Seed Neo4j with LLM model metadata
+	cypher-shell -f infra/neo4j/2025-10-06_provenance.cql
+
+staging-on: ## Enable multi-LLM flag in staging
+	kubectl set env deploy/copilot COPILOT_MULTI_LLM=true -n staging
+
+staging-off: ## Disable multi-LLM flag in staging
+	kubectl set env deploy/copilot COPILOT_MULTI_LLM=false -n staging
