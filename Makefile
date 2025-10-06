@@ -80,13 +80,22 @@ all: capture stabilize set-protection harvest-untracked batch-prs finalize audit
 # Deployable-first developer workflow targets
 # ------------------------------------------------------------
 
-.PHONY: bootstrap up up-ai up-kafka up-full smoke down clean logs ps helm-lint helm-smoke helm-validate
+.PHONY: bootstrap up up-ai up-kafka up-full smoke down clean logs ps helm-lint helm-smoke helm-validate helm-validate-online
 
 COMPOSE_FILE ?= docker-compose.yml
 SMOKE_SCRIPT ?= scripts/golden-smoke.sh
 SMOKE_MAX_WAIT ?= 60
 COMPOSE := docker compose -f $(COMPOSE_FILE)
 COMPOSE_PROFILES ?=
+
+# --- kubeconform resolver (offline-first) ------------------------------------
+KCF_VERSION ?= 0.6.7
+K8S_VERSION ?= v1.28.0
+KCF_BIN ?= $(shell ./tools/kubeconform/resolve.sh 2>/dev/null || echo "")
+ifeq ($(KCF_BIN),)
+KCF_BIN := $(KUBECONFORM)
+endif
+SCHEMAS_DIR ?= tools/k8s-schemas/$(K8S_VERSION)
 
 bootstrap: ## Verify prerequisites and prepare environment
 	@set -euo pipefail
@@ -169,21 +178,18 @@ helm-smoke: ## Render chart locally and assert service/probe/metrics wiring
 	  > /tmp/smoke.yaml
 	@rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" /tmp/smoke.yaml
 
-helm-validate: ## Render chart and validate manifests with kubeconform
-	@set -euo pipefail
-	@KUBECONFORM_BIN=$$(command -v kubeconform || { \
-		tmp_dir=$$(mktemp -d); \
-		os=$$(uname | tr '[:upper:]' '[:lower:]'); \
-		arch=$$(uname -m); \
-		if [ "$$arch" = "x86_64" ]; then arch=amd64; \
-		elif [ "$$arch" = "arm64" ] || [ "$$arch" = "aarch64" ]; then arch=arm64; \
-		else echo "Unsupported architecture: $$arch" >&2; exit 1; fi; \
-		archive="kubeconform-$${os}-$$arch.tar.gz"; \
-		curl -sSL "https://github.com/yannh/kubeconform/releases/download/v0.6.5/$$archive" \
-		  | tar -xz -C "$$tmp_dir" kubeconform; \
-		echo "$$tmp_dir/kubeconform"; \
-	}); \
-	 helm template smoke infra/helm/intelgraph --namespace smoke \
+helm-validate: ## Validate rendered manifests with kubeconform (offline-friendly)
+	@if [ -z "$(KCF_BIN)" ]; then \
+	  echo "✖ kubeconform not found."; \
+	  echo "  -> Place a binary under tools/kubeconform/<os>-<arch>/kubeconform"; \
+	  echo "     or export KUBECONFORM=/abs/path/to/kubeconform"; \
+	  echo "     or run 'make helm-validate-online' (requires network)."; \
+	  exit 2; \
+	fi
+	@echo "✔ Using kubeconform: $(KCF_BIN)"
+	@echo "ℹ K8s version: $(K8S_VERSION)"
+	@mkdir -p .out/helm
+	@helm template smoke infra/helm/intelgraph --namespace smoke \
 	  --set server.enabled=true \
 	  --set server.service.enabled=true \
 	  --set server.service.port=4000 \
@@ -193,9 +199,25 @@ helm-validate: ## Render chart and validate manifests with kubeconform
 	  --set server.metrics.enabled=true \
 	  --set server.metrics.prometheusScrape=true \
 	  --set dev.dummySecrets=true \
-	  > /tmp/smoke.yaml; \
-	 rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" /tmp/smoke.yaml; \
-	 "$$KUBECONFORM_BIN" -strict -summary /tmp/smoke.yaml
+	  > .out/helm/intelgraph.yaml
+	@rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" .out/helm/intelgraph.yaml
+	@if [ -d "$(SCHEMAS_DIR)" ]; then \
+	  echo "✔ Using vendored schemas: $(SCHEMAS_DIR)"; \
+	  "$(KCF_BIN)" -strict -ignore-missing-schemas \
+	    -schema-location default \
+	    -schema-location file://$(SCHEMAS_DIR)/{{ .NormalizedKubernetesVersion }}-standalone \
+	    .out/helm/intelgraph.yaml; \
+	else \
+	  echo "⚠ No vendored schemas found at $(SCHEMAS_DIR); using kubeconform defaults only."; \
+	  "$(KCF_BIN)" -strict -ignore-missing-schemas -schema-location default \
+	    .out/helm/intelgraph.yaml; \
+	fi
+
+.PHONY: helm-validate-online
+helm-validate-online: ## (Online) Download kubeconform + schemas, then validate
+	@tools/kubeconform/fetch.sh $(KCF_VERSION)
+	@tools/kubeconform/fetch-schemas.sh $(K8S_VERSION)
+	@$(MAKE) helm-validate
 
 # Green-Lock Acceptance Pack Targets
 acceptance: verify recover auto-merge monitor ## Run complete acceptance workflow
