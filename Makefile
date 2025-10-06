@@ -80,7 +80,7 @@ all: capture stabilize set-protection harvest-untracked batch-prs finalize audit
 # Deployable-first developer workflow targets
 # ------------------------------------------------------------
 
-.PHONY: bootstrap up up-ai up-kafka up-full smoke down clean logs ps helm-lint helm-smoke
+.PHONY: bootstrap up up-ai up-kafka up-full smoke down clean logs ps helm-lint helm-smoke helm-validate
 
 COMPOSE_FILE ?= docker-compose.yml
 SMOKE_SCRIPT ?= scripts/golden-smoke.sh
@@ -152,14 +152,7 @@ ps: ## Show status of running services
 	@$(COMPOSE) ps
 
 helm-lint: ## Lint the IntelGraph Helm chart
-	@set -euo pipefail
-	@tmp_dir=$$(mktemp -d); \
-	 chart_dir="$$tmp_dir/intelgraph"; \
-	 mkdir -p "$$chart_dir"; \
-	 tar -C infra/helm/intelgraph -cf - . | tar -C "$$chart_dir" -xf -; \
-	 find "$$chart_dir" -name '*.disabled' -delete; \
-	 helm lint "$$chart_dir" --set dev.dummySecrets=true; \
-	 rm -rf "$$tmp_dir"
+	@helm lint infra/helm/intelgraph --set dev.dummySecrets=true
 
 helm-smoke: ## Render chart locally and assert service/probe/metrics wiring
 	@set -euo pipefail
@@ -175,6 +168,23 @@ helm-smoke: ## Render chart locally and assert service/probe/metrics wiring
 	  --set dev.dummySecrets=true \
 	  > /tmp/smoke.yaml
 	@rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" /tmp/smoke.yaml
+
+helm-validate: ## Render chart and validate manifests with kubeconform
+	@command -v kubeconform >/dev/null || { echo "kubeconform is required (e.g. brew install kubeconform)" >&2; exit 1; }
+	@set -euo pipefail
+	@helm template smoke infra/helm/intelgraph --namespace smoke \
+	  --set server.enabled=true \
+	  --set server.service.enabled=true \
+	  --set server.service.port=4000 \
+	  --set server.probes.enabled=true \
+	  --set server.probes.liveness.path="/health" \
+	  --set server.probes.readiness.path="/health" \
+	  --set server.metrics.enabled=true \
+	  --set server.metrics.prometheusScrape=true \
+	  --set dev.dummySecrets=true \
+	  > /tmp/smoke.yaml
+	@rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" /tmp/smoke.yaml
+	@kubeconform -strict -summary /tmp/smoke.yaml
 
 # Green-Lock Acceptance Pack Targets
 acceptance: verify recover auto-merge monitor ## Run complete acceptance workflow

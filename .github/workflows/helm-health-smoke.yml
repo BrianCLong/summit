@@ -19,12 +19,7 @@ jobs:
 
       - name: Helm Lint (chart only)
         run: |
-          TMP_DIR=$(mktemp -d)
-          CHART_DIR="$TMP_DIR/intelgraph"
-          mkdir -p "$CHART_DIR"
-          tar -C infra/helm/intelgraph -cf - . | tar -C "$CHART_DIR" -xf -
-          find "$CHART_DIR" -name '*.disabled' -delete
-          helm lint "$CHART_DIR" --set dev.dummySecrets=true
+          helm lint infra/helm/intelgraph --set dev.dummySecrets=true
 
       - name: Template chart (no cluster needed)
         working-directory: infra/helm/intelgraph
