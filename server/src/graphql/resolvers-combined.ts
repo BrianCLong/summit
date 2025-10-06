@@ -4,6 +4,7 @@ const copilotResolvers = require('./resolvers.copilot.js');
 const graphResolvers = require('./resolvers.graphops.js');
 const aiResolvers = require('./resolvers.ai.js');
 const annotationsResolvers = require('./resolvers.annotations.js');
+const entityResolvers = require('./resolvers/entity.js');
 import { v040Resolvers } from './resolvers/v040/index';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -59,6 +60,7 @@ export const resolvers = {
     ...(copilotResolvers.Query || {}),
     ...(aiResolvers.Query || {}),
     ...(annotationsResolvers.Query || {}),
+    ...(entityResolvers.Query || {}),
     ...(v040Resolvers.Query || {}),
     me: async (_: any, __: any, { user }: Context): Promise<User> => {
       if (!user) throw new Error('Not authenticated');
