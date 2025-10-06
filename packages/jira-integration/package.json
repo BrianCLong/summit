@@ -1,0 +1,20 @@
+{
+  "name": "@summit/jira-integration",
+  "version": "0.1.0",
+  "description": "PerfTrace Jira automation toolkit with workflow, field mapping, and audit logging.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src __tests__ --ext .ts",
+    "test": "jest --coverage",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2"
+  }
+}
