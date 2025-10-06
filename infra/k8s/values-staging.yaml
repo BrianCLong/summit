@@ -1,0 +1,16 @@
+copilot:
+  env:
+    COPILOT_MULTI_LLM: "true"
+    OPENAI_MODEL: "gpt-4o"
+    PER_BRIEF_CAP_USD: "2.50"
+    OPENAI_BUDGET_USD: "200"
+    ANTHROPIC_BUDGET_USD: "120"
+    PERPLEXITY_BUDGET_USD: "50"
+    GOOGLE_BUDGET_USD: "50"
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "1"
+      memory: "1Gi"

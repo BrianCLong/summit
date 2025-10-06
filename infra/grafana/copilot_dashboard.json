@@ -1,0 +1,53 @@
+{
+  "title": "Copilot Routing",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Cost / Min (USD)",
+      "targets": [
+        {
+          "expr": "sum(rate(intelgraph_llm_cost_usd_total[5m]))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "graph",
+      "title": "p95 Latency",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(intelgraph_llm_latency_ms_bucket[5m])) by (le,provider))"
+        }
+      ],
+      "gridPos": { "x": 6, "y": 0, "w": 12, "h": 6 }
+    },
+    {
+      "type": "table",
+      "title": "OPA Denials (by reason)",
+      "targets": [
+        {
+          "expr": "sum(rate(intelgraph_llm_policy_denials_total[5m])) by (reason)"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 }
+    },
+    {
+      "type": "piechart",
+      "title": "Route Mix",
+      "targets": [
+        {
+          "expr": "sum(rate(intelgraph_llm_calls_total[5m])) by (provider)"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 6 }
+    }
+  ]
+}

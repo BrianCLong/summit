@@ -1,5 +1,13 @@
 const { getGoalById } = require('../services/goalService'); // stub or in-memory from previous ticket
 
+async function loadCopilotRouter() {
+  try {
+    return await import('../services/llm-router.service.js');
+  } catch (error) {
+    return await import('../services/llm-router.service.ts');
+  }
+}
+
 const copilotResolvers = {
   Query: {
     copilotRun: async (_, { id }, { dataSources }) => {
@@ -59,8 +67,43 @@ const copilotResolvers = {
       const { copilotOrchestrator } = dataSources;
       const run = await copilotOrchestrator.store.getRun(runId);
       if (!run) throw new Error('Run not found');
-      
+
       return copilotOrchestrator.resumeRun(run);
+    },
+
+    copilotExecute: async (
+      _,
+      { input },
+      { user }
+    ) => {
+      if (!user?.id) {
+        throw new Error('Authentication required');
+      }
+
+      const router = await loadCopilotRouter();
+      const result = await router.execute({
+        investigationId: input.investigationId,
+        userId: user.id,
+        text: input.prompt,
+        attachments: input.attachments,
+        requireCitations: input.requireCitations,
+        classification: input.classification
+      });
+
+      return {
+        text: result.text,
+        meta: {
+          provider: result.route.provider,
+          model: result.route.model,
+          costUsd: result.costUsd,
+          tokensIn: result.tokensIn,
+          tokensOut: result.tokensOut,
+          latencyMs: result.latencyMs,
+          provenanceId: result.provId,
+          budgetRemaining: result.budgetRemaining
+        },
+        citations: result.citations || []
+      };
     }
   },
 
