@@ -3,7 +3,7 @@ name: Helm Health Smoke
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   helm-smoke:
@@ -21,6 +21,12 @@ jobs:
         run: |
           helm lint infra/helm/intelgraph --set dev.dummySecrets=true
 
+      - name: Install kubeconform
+        run: |
+          curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.6.5/kubeconform-linux-amd64.tar.gz \
+            | tar -xz -C /tmp kubeconform
+          sudo install -m 0755 /tmp/kubeconform /usr/local/bin/kubeconform
+
       - name: Template chart (no cluster needed)
         working-directory: infra/helm/intelgraph
         run: |
@@ -37,14 +43,17 @@ jobs:
             --set dev.dummySecrets=true \
             > /tmp/smoke.yaml
 
-      - name: Assert: service exposes http and prometheus scrape
+      - name: Validate manifests with kubeconform
+        run: kubeconform -strict -summary /tmp/smoke.yaml
+
+      - name: Assert service exposes http and prometheus scrape
         run: |
           grep -q 'kind: Service' /tmp/smoke.yaml
           grep -q 'name: smoke-intelgraph-server' /tmp/smoke.yaml
           grep -q 'port: 4000' /tmp/smoke.yaml
           grep -q 'prometheus.io/scrape: "true"' /tmp/smoke.yaml
 
-      - name: Assert: deployment has /health probes
+      - name: Assert deployment has /health probes
         run: |
           grep -q 'readinessProbe:' /tmp/smoke.yaml
           grep -q 'livenessProbe:' /tmp/smoke.yaml

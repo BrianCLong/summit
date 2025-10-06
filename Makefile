@@ -170,9 +170,20 @@ helm-smoke: ## Render chart locally and assert service/probe/metrics wiring
 	@rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" /tmp/smoke.yaml
 
 helm-validate: ## Render chart and validate manifests with kubeconform
-	@command -v kubeconform >/dev/null || { echo "kubeconform is required (e.g. brew install kubeconform)" >&2; exit 1; }
 	@set -euo pipefail
-	@helm template smoke infra/helm/intelgraph --namespace smoke \
+	@KUBECONFORM_BIN=$$(command -v kubeconform || { \
+		tmp_dir=$$(mktemp -d); \
+		os=$$(uname | tr '[:upper:]' '[:lower:]'); \
+		arch=$$(uname -m); \
+		if [ "$$arch" = "x86_64" ]; then arch=amd64; \
+		elif [ "$$arch" = "arm64" ] || [ "$$arch" = "aarch64" ]; then arch=arm64; \
+		else echo "Unsupported architecture: $$arch" >&2; exit 1; fi; \
+		archive="kubeconform-$${os}-$$arch.tar.gz"; \
+		curl -sSL "https://github.com/yannh/kubeconform/releases/download/v0.6.5/$$archive" \
+		  | tar -xz -C "$$tmp_dir" kubeconform; \
+		echo "$$tmp_dir/kubeconform"; \
+	}); \
+	 helm template smoke infra/helm/intelgraph --namespace smoke \
 	  --set server.enabled=true \
 	  --set server.service.enabled=true \
 	  --set server.service.port=4000 \
@@ -182,9 +193,9 @@ helm-validate: ## Render chart and validate manifests with kubeconform
 	  --set server.metrics.enabled=true \
 	  --set server.metrics.prometheusScrape=true \
 	  --set dev.dummySecrets=true \
-	  > /tmp/smoke.yaml
-	@rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" /tmp/smoke.yaml
-	@kubeconform -strict -summary /tmp/smoke.yaml
+	  > /tmp/smoke.yaml; \
+	 rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" /tmp/smoke.yaml; \
+	 "$$KUBECONFORM_BIN" -strict -summary /tmp/smoke.yaml
 
 # Green-Lock Acceptance Pack Targets
 acceptance: verify recover auto-merge monitor ## Run complete acceptance workflow
