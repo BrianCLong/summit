@@ -1,0 +1,20 @@
+name: Runbook Auto-Gen
+on:
+  push:
+    branches: [main]
+jobs:
+  gen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate runbook
+        env:
+          OUT: docs/runbooks
+          SINCE: ${{ github.event.before }}
+        run: |
+          python3 scripts/generate_runbooks.py
+      - name: Upload runbook artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: runbook
+          path: docs/runbooks/
