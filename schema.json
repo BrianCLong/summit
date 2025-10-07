@@ -1,0 +1,12 @@
+{
+  "properties": {
+    "fastlane": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "artifact_name": { "type": "string" }
+      },
+      "required": ["enabled"]
+    }
+  }
+}

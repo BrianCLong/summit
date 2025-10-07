@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    { "id": "ACME", "label": "ACME Holdings", "type": "Company" },
+    { "id": "BRK1", "label": "Broker One", "type": "Broker" },
+    { "id": "BANKX", "label": "Bank X (Private)", "type": "Bank" }
+  ],
+  "edges": [
+    { "src": "ACME", "dst": "BRK1", "label": "retained_broker" },
+    { "src": "BRK1", "dst": "BANKX", "label": "introduces" }
+  ]
+}

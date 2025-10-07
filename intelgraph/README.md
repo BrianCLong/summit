@@ -1,6 +1,6 @@
 # IntelGraph Platform
 
-[![CI/CD Pipeline](https://github.com/BrianCLong/intelgraph/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/BrianCLong/intelgraph/actions)
+[![CI/CD Pipeline](https://github.com/BrianCLong/summit/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/BrianCLong/summit/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A next-generation intelligence analysis platform that synthesizes and surpasses Maltego and Palantir capabilities with AI-augmented graph analytics, real-time collaboration, and enterprise-grade security.
@@ -239,7 +239,7 @@ npm run deploy:prod
 
 ## 📞 Support
 
-- **GitHub Issues**: [Report bugs and request features](https://github.com/BrianCLong/intelgraph/issues)
+- **GitHub Issues**: [Report bugs and request features](https://github.com/BrianCLong/summit/issues)
 - **Documentation**: Complete guides in `docs/` directory
 - **Email**: support@intelgraph.com
 

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Summit UI (Static)</title>
+    <link rel="preconnect" href="https://unpkg.com" />
+    <!-- React via CDN + Babel for JSX in-browser (simple for a static Space demo) -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@2/css/pico.min.css" />
+    <style>
+      body { max-width: 1000px; margin: 2rem auto; }
+      pre { background: #111; color: #ddd; padding: 1rem; border-radius: 8px; overflow:auto; }
+      .row { display:flex; gap:1rem; align-items:flex-end; }
+      .row > * { flex:1; }
+    </style>
+  </head>
+  <body>
+    <main id="root"></main>
+    <script type="text/babel" src="./assets/app.jsx"></script>
+  </body>
+</html>

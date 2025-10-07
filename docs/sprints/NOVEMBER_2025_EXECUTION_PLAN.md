@@ -1,0 +1,663 @@
+# November 2025 Execution Plan
+
+**Period**: November 3 - November 28, 2025
+**Status**: Ready for Execution
+**Prerequisites**: ✅ October 2025 Master Plan Complete
+
+---
+
+## Executive Summary
+
+Comprehensive execution plan for two November sprints focusing on **policy safety**, **graph intelligence**, **automation scale**, and **ML-powered threat intel**. Builds directly on October's security and governance foundation.
+
+### Overall Goals
+- **Sprint 1 (Nov 3-14)**: RBAC Phase 3, Asset Inventory v1.2, Intel Confidence v3, SOAR v1.3
+- **Sprint 2 (Nov 17-28)**: Policy Intelligence v1, Inventory Graph UI, SOAR v1.4, Intel v4 (active learning)
+
+---
+
+## 🎯 November Sprint 1: Nov 3-14, 2025
+
+### Sprint Goal (SMART)
+Deliver **RBAC Phase 3 (ABAC + Just-In-Time elevation)**, **Asset Inventory v1.2** reaching **93-95% coverage** with lifecycle events + anomaly alerts, **Threat Intel Confidence v3** (ensembles + cross-feed corroboration) cutting analyst triage volume **≥15%**, and **SOAR v1.3** (graph-aware playbooks, batch approvals, safe parallelization) to drive **MTTC P50 ≤15 min / P90 ≤35 min**—**by Nov 14, 2025**.
+
+### Success Metrics
+- **Authz coverage**: 100% sensitive routes under ABAC; 0 critical escapes
+- **JIT elevation safety**: 100% elevation events logged; approvals enforced; revocation ≤5 min
+- **Inventory coverage**: 93-95% entities present; lifecycle event latency ≤5 min
+- **Intel effectiveness**: Triage volume ↓≥15%; Brier ≤0.16; PR-AUC ↑ vs v2
+- **Automation reliability**: SOAR success ≥92% across graph-aware playbooks
+- **Incident MTTC**: P50 ≤15 min, P90 ≤35 min (7-day rolling)
+
+### Deliverables (40 pts commit)
+
+#### Epic V — RBAC Phase 3 (ABAC + JIT) — 12 pts
+**V1 — ABAC policy engine extensions** (5 pts)
+- Attribute conditions (tenant, environment, sensitivity, case ownership)
+- Deny-by-default enforcement
+- Policy test framework
+
+**V2 — JIT elevation flow** (4 pts)
+- Request → approve → time-boxed grant workflow
+- Auto-revocation ≤5 min
+- Full audit trail
+
+**V3 — Policy editor UX + guardrails** (3 pts)
+- Preview mode before apply
+- Diff/rollback capabilities
+- Change log with approval tracking
+
+#### Epic W — Asset Inventory v1.2 — 12 pts
+**W1 — Reconcile & coverage boost** (5 pts)
+- Precision/recall ≥93%
+- Agent↔cloud reconciliation
+- Coverage report with blind sample
+
+**W2 — Lifecycle eventing + alerts** (4 pts)
+- Create/update/delete events
+- Alert latency ≤5 min
+- Webhook integration
+
+**W3 — Anomaly detection (heuristics v1)** (3 pts)
+- Orphan asset detection
+- Owner mismatch alerts
+- High churn detection
+
+#### Epic X — Intel Confidence v3 — 8 pts
+**X1 — Ensemble scorer + calibration** (4 pts)
+- PR-AUC ↑ vs v2
+- Brier score ≤0.16
+- Model registry integration
+
+**X2 — Cross-feed corroboration** (3 pts)
+- Provenance graph tracking
+- Confidence uplift rules
+- Integration tests
+
+**X3 — Analyst override & feedback** (1 pt)
+- Reason codes for overrides
+- Audit trail
+- API to detection systems
+
+#### Epic Y — SOAR v1.3 — 8 pts
+**Y1 — Graph-aware runner (DAG + entity resolution)** (4 pts)
+- Dependency ordering
+- Entity deduplication
+- Step isolation
+
+**Y2 — Batch approvals + parallelization** (4 pts)
+- Low-risk batching
+- Per-step circuit breakers
+- Replay mode for failed branches
+
+#### Epic Z — Operational Analytics & Resilience — 2 pts
+**Z1 — Dashboards & chaos drills** (2 pts)
+- MTTC/authz/inventory/intel panels
+- Monthly chaos runbook
+- Alert configuration
+
+---
+
+## 🚀 November Sprint 2: Nov 17-28, 2025
+
+### Sprint Goal (SMART)
+Launch **Policy Intelligence v1** (change-risk scoring + drift detection), ship **Inventory Graph UI v1** (entity relationships + path preview), upgrade **SOAR v1.4** (bulk ops + safer parallelization + queues), and enable **Intel v4 (active learning loop)** in beta—**by Nov 28, 2025**.
+
+### Success Metrics
+- **Policy safety**: 0 critical misconfig incidents; drift alert MTTA ≤5 min; change-risk model AUC ≥0.80
+- **Graph adoption**: ≥70% of P1/P2 investigations use Graph panel; clicks-to-context ↓30%
+- **Automation scale**: SOAR bulk ops success ≥92%; queue time P95 ≤90s
+- **Intel v4 quality**: Brier ≤0.15, PR-AUC ↑ vs v3; analyst override rate ≤10%
+
+### Capacity (Holiday-Adjusted)
+- **Working days**: 8 (Thanksgiving Nov 27 + Day-after Nov 28 PTO)
+- **Focus factor**: 0.75
+- **Commit**: 30 pts (+ 6 pts stretch)
+
+### Deliverables (30 pts commit)
+
+#### Epic AA — Policy Intelligence v1 — 10 pts
+**AA1 — Change-risk scoring engine** (4 pts)
+- Risk score 0-100
+- Factors: blast radius, privilege, past incident links
+- Preview mode with tests
+
+**AA2 — Drift detection + rollback** (4 pts)
+- Detect policy deltas
+- Alert ≤5 min
+- One-click rollback with audit
+
+**AA3 — Notifications & UX** (2 pts)
+- Slack/Email integration
+- Change summary
+- Approver list + kill-switch
+
+#### Epic AB — Inventory Graph UI v1 — 8 pts
+**AB1 — Graph service & API** (3 pts)
+- Entity nodes/edges (host↔user↔account↔asset)
+- Pagination support
+- Permission-aware
+
+**AB2 — UI panel in alert view** (3 pts)
+- Attack path preview
+- Hover details
+- Link to entity pages
+
+**AB3 — Ownership context** (2 pts)
+- Show owner info
+- Handoff link
+- Export PNG
+
+#### Epic AC — SOAR v1.4 Scale & Safety — 8 pts
+**AC1 — Bulk incident ops + queues** (4 pts)
+- Idempotent operations
+- Retries/backoff
+- Rate limits
+
+**AC2 — Parallelization + circuit breakers** (4 pts)
+- Per-step timeouts
+- Failure isolation
+- Replay failing branch only
+
+#### Epic AD — Intel v4 (Active Learning Beta) — 4 pts
+**AD1 — Feedback capture + labeling** (2 pts)
+- Thumbs up/down + reason codes
+- Label store
+- Privacy review complete
+
+**AD2 — Batch retrain pipeline + canary** (2 pts)
+- Registry v4 entry
+- Evaluation metrics
+- Gated export to detections
+
+#### Epic AE — Observability & Enablement — 2 pts
+**AE1 — Dashboards, alerts, runbooks** (2 pts)
+- Uptime/error/latency panels
+- On-call SOPs
+- Chaos drill checklist
+
+---
+
+## 📋 Technical Architecture
+
+### RBAC Phase 3 Stack
+```
+┌─────────────────────────────────────┐
+│     Policy Editor UI (React)        │
+│  - Preview mode                     │
+│  - Diff/rollback                    │
+│  - Change log                       │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│   ABAC Policy Engine (OPA)          │
+│  - Attribute conditions             │
+│  - Deny-by-default                  │
+│  - Policy tests                     │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│    JIT Elevation Service (Go)       │
+│  - Request/approve workflow         │
+│  - Time-boxed grants                │
+│  - Auto-revocation                  │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│      Audit Trail (PostgreSQL)       │
+│  - Immutable logs                   │
+│  - Policy change tracking           │
+│  - Elevation events                 │
+└─────────────────────────────────────┘
+```
+
+### Asset Inventory v1.2 Stack
+```
+┌─────────────────────────────────────┐
+│    Agent Collectors (host/cloud)    │
+│  - Periodic snapshots               │
+│  - State changes                    │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│   Reconciliation Engine (Python)    │
+│  - Diff detection                   │
+│  - Coverage calculation             │
+│  - Anomaly heuristics               │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│    Lifecycle Event Bus (Kafka)      │
+│  - Create/update/delete events      │
+│  - Webhook delivery                 │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│   Alert Manager (Prometheus)        │
+│  - Anomaly alerts                   │
+│  - SLO tracking                     │
+└─────────────────────────────────────┘
+```
+
+### Intel Confidence v3/v4 Stack
+```
+┌─────────────────────────────────────┐
+│   Threat Feed Connectors (Multi)    │
+│  - Ingest + normalize               │
+│  - Deduplication                    │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│  Ensemble Scorer (Python/scikit)    │
+│  - Rules + ML models                │
+│  - Cross-feed corroboration         │
+│  - Calibration (Platt scaling)      │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│    Active Learning Loop (v4)        │
+│  - Analyst feedback capture         │
+│  - Batch retraining                 │
+│  - Canary validation                │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│   Detection Export (GraphQL)        │
+│  - Confidence scores                │
+│  - Override tracking                │
+└─────────────────────────────────────┘
+```
+
+### SOAR v1.3/v1.4 Stack
+```
+┌─────────────────────────────────────┐
+│    Playbook Definitions (YAML)      │
+│  - Graph-aware actions              │
+│  - Dependency DAG                   │
+│  - Circuit breaker config           │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│   SOAR Orchestrator (Go/Python)     │
+│  - Entity resolution                │
+│  - Dependency ordering              │
+│  - Bulk operations (v1.4)           │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│    Action Queue (RabbitMQ/Kafka)    │
+│  - Idempotent processing            │
+│  - Retry/backoff                    │
+│  - Rate limiting                    │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│   Circuit Breakers (per-step)       │
+│  - Timeout enforcement              │
+│  - Failure isolation                │
+│  - Replay mode                      │
+└─────────────────────────────────────┘
+```
+
+### Policy Intelligence v1 Stack
+```
+┌─────────────────────────────────────┐
+│    Policy Change Detector (Go)      │
+│  - Diff tracking                    │
+│  - Drift detection (≤10 min)        │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│  Change-Risk Scorer (Python)        │
+│  - Blast radius calculation         │
+│  - Privilege analysis               │
+│  - Historical incident correlation  │
+│  - AUC ≥0.80 target                 │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│    Rollback Service (Go)            │
+│  - One-click rollback               │
+│  - Audit trail                      │
+│  - Kill-switch                      │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│   Notification Service (Node.js)    │
+│  - Slack/Email integration          │
+│  - Approver routing                 │
+└─────────────────────────────────────┘
+```
+
+### Inventory Graph UI v1 Stack
+```
+┌─────────────────────────────────────┐
+│    Graph Service (GraphQL)          │
+│  - Entity nodes/edges               │
+│  - Pagination                       │
+│  - Permission-aware                 │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│    Graph Engine (Neo4j)             │
+│  - Host↔user↔account↔asset         │
+│  - Attack path queries              │
+│  - Ownership context                │
+└─────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────┐
+│   Graph UI Panel (React)            │
+│  - Path preview                     │
+│  - Hover details                    │
+│  - Entity links                     │
+│  - Export PNG                       │
+└─────────────────────────────────────┘
+```
+
+---
+
+## 🔒 Security & Compliance
+
+### RBAC Phase 3 Security
+- Least privilege for policy editors
+- Signed policy changes (cryptographic)
+- Immutable audit trails
+- Break-glass procedures documented
+- JIT approval workflow with time-boxing
+
+### Data Privacy
+- No PII in ML model features
+- Retention limits enforced
+- Encryption in transit + at rest
+- Privacy review for feedback capture
+- GDPR compliance maintained
+
+### SOAR Safety
+- Step whitelists enforced
+- Dry-run/simulation required pre-prod
+- Approval gates for destructive operations
+- Per-step circuit breakers
+- Failure isolation with replay
+
+### Policy Intelligence Security
+- Signed policy changes
+- Change-risk model transparency
+- Rollback with audit trail
+- Kill-switch for emergencies
+- Conservative risk calibration
+
+---
+
+## 📊 Observability & Monitoring
+
+### Key Dashboards
+1. **RBAC/Authz Coverage**
+   - Sensitive routes under ABAC
+   - Elevation events timeline
+   - Approval latency P50/P90/P99
+   - Revocation compliance
+
+2. **Asset Inventory Health**
+   - Coverage % (target: 93-95%)
+   - Lifecycle event latency
+   - Anomaly alert volume
+   - Reconciliation drift
+
+3. **Intel Confidence Metrics**
+   - Calibration curves (Brier score)
+   - PR-AUC trends (v2 → v3 → v4)
+   - Analyst override rate
+   - Triage volume reduction
+
+4. **SOAR Performance**
+   - Success rate (target: ≥92%)
+   - Queue time P95 (target: ≤90s)
+   - Parallel step failures
+   - Bulk operation throughput
+
+5. **Policy Intelligence**
+   - Change-risk distribution
+   - Drift alert MTTA
+   - Rollback frequency
+   - AUC trending
+
+6. **Graph Adoption**
+   - Usage % by investigation
+   - Clicks-to-context reduction
+   - Path preview accuracy
+   - Export volume
+
+### SLO Targets
+- **MTTC**: P50 ≤15 min, P90 ≤35 min
+- **Authz Coverage**: 100% sensitive routes
+- **JIT Revocation**: ≤5 min
+- **Inventory Coverage**: 93-95%
+- **Intel Triage Reduction**: ≥15%
+- **SOAR Success Rate**: ≥92%
+- **Policy Drift Alert**: ≤5 min MTTA
+- **Graph Adoption**: ≥70% P1/P2 cases
+
+---
+
+## 🧪 Testing Strategy
+
+### RBAC Phase 3 Testing
+- **Unit Tests**: Policy engine logic, JIT workflow
+- **Integration Tests**: End-to-end elevation flow
+- **Negative Tests**: Privilege escalation attempts
+- **Audit Tests**: Log immutability, timeline accuracy
+- **Performance Tests**: Policy evaluation latency
+
+### Asset Inventory v1.2 Testing
+- **Coverage Tests**: Blind sample validation
+- **Latency Tests**: Event delivery ≤5 min
+- **Anomaly Tests**: Synthetic drift injection
+- **Reconciliation Tests**: Agent↔cloud consistency
+- **Scalability Tests**: 100k+ assets
+
+### Intel Confidence v3/v4 Testing
+- **Calibration Tests**: Reliability diagrams
+- **Corroboration Tests**: Cross-feed logic
+- **Override Tests**: Analyst workflow
+- **Active Learning Tests**: Batch retraining (v4)
+- **A/B Tests**: v3 vs v4 canary
+
+### SOAR v1.3/v1.4 Testing
+- **DAG Tests**: Dependency ordering
+- **Dedup Tests**: Entity resolution accuracy
+- **Bulk Ops Tests**: 1k+ item loads
+- **Circuit Breaker Tests**: Failure isolation
+- **Replay Tests**: Branch recovery
+
+### Policy Intelligence v1 Testing
+- **Risk Model Tests**: Backtest on 100+ changes
+- **Drift Tests**: Synthetic policy mutations
+- **Rollback Tests**: End-to-end recovery
+- **Notification Tests**: Slack/Email delivery
+
+### Graph UI v1 Testing
+- **Path Tests**: Correctness on 100 sampled alerts
+- **Permission Tests**: Cross-tenant isolation
+- **Performance Tests**: Large graph rendering
+- **Export Tests**: PNG generation
+
+---
+
+## 🚨 Risk Register
+
+### Sprint 1 Risks (Nov 3-14)
+| Risk | Prob. | Impact | Owner | Mitigation |
+|------|-------|--------|-------|------------|
+| ABAC misconfig blocks responders | Med | High | V1 | Shadow mode, previews, break-glass |
+| JIT approvals latency | Med | Med | V2 | Escalation path; SLA alerts |
+| Inventory anomalies noisy | Med | Med | W3 | Threshold tuning; feedback loop |
+| Intel v3 over-confident | Low | High | X1 | Reliability diagrams; conservative calibration |
+| Parallel SOAR steps race conditions | Low | High | Y2 | Dependency DAG; per-step circuit breakers |
+
+### Sprint 2 Risks (Nov 17-28)
+| Risk | Prob. | Impact | Owner | Mitigation |
+|------|-------|--------|-------|------------|
+| Holiday PTO reduces throughput | High | Med | PM | Lower commit; strict WIP; clear triage |
+| Risk model mis-scores dangerous change | Low | High | AA1 | Conservative weights; manual gate; previews |
+| Graph inaccuracies confuse analysts | Med | Med | AB1 | "Data freshness" banner; feedback; quick fixes |
+| Bulk ops overload vendor APIs | Med | Med | AC1 | Queues/backoff; rate caps; sandbox tests |
+| Active learning drifts model | Low | Med | AD2 | Canary only; weekly eval; rollback to v3 |
+
+---
+
+## 📅 Timeline
+
+### Sprint 1: Nov 3-14
+- **Mon Nov 3**: Planning & Kickoff; ABAC safety review (30m)
+- **Fri Nov 7**: Mid-sprint demo/checkpoint (30m)
+- **Wed Nov 12**: Grooming for next sprint (45m)
+- **Fri Nov 14**: Demo (45m) + Retro (45m) + Release cut
+
+### Sprint 2: Nov 17-28
+- **Mon Nov 17**: Planning & Kickoff; policy safety review (30m)
+- **Fri Nov 21**: Mid-sprint demo/checkpoint (30m)
+- **Wed Nov 26**: Grooming for next sprint (30m)
+- **Thu Nov 27 - Fri Nov 28**: U.S. Thanksgiving + reduced staffing
+- **Fri Nov 28**: Release cut + Retro moved to Mon Dec 1
+
+---
+
+## 🎯 Success Criteria
+
+### Sprint 1 Success
+- ✅ All Epic V-Z tasks complete (40 pts)
+- ✅ MTTC P50 ≤15 min, P90 ≤35 min
+- ✅ Authz coverage 100% on sensitive routes
+- ✅ Inventory coverage 93-95%
+- ✅ Intel triage reduction ≥15%
+- ✅ SOAR success rate ≥92%
+
+### Sprint 2 Success
+- ✅ All Epic AA-AE tasks complete (30 pts)
+- ✅ Policy change-risk AUC ≥0.80
+- ✅ Graph adoption ≥70% P1/P2 cases
+- ✅ SOAR bulk ops P95 ≤90s
+- ✅ Intel v4 Brier ≤0.15
+
+### Overall November Success
+- ✅ Both sprints delivered on time
+- ✅ Zero critical security incidents
+- ✅ All SLOs met or exceeded
+- ✅ Comprehensive observability deployed
+- ✅ Full documentation and runbooks
+
+---
+
+## 📚 Dependencies
+
+### External Dependencies
+- Cloud & agent telemetry stable
+- Event bus capacity sized
+- SOAR vendor APIs stable
+- ML training data available
+- Legal/privacy sign-offs
+
+### Internal Dependencies
+- October 2025 Master Plan complete ✅
+- Policy owners identified
+- Attribute sources authoritative
+- Approver groups defined
+- Test environments ready
+
+---
+
+## 🔄 Rollback Procedures
+
+### RBAC Phase 3 Rollback
+1. Disable ABAC enforcement flag
+2. Revert to baseline RBAC
+3. Suspend JIT elevation workflow
+4. Notify responders via Slack
+
+### Inventory v1.2 Rollback
+1. Pause lifecycle event bus
+2. Disable anomaly alerts
+3. Revert to v1.1 reconciliation
+4. Clear noisy alert backlog
+
+### Intel v3/v4 Rollback
+1. Pin to previous model version
+2. Disable active learning loop (v4)
+3. Clear feedback queue
+4. Notify analysts of revert
+
+### SOAR v1.3/v1.4 Rollback
+1. Disable graph-aware playbooks
+2. Revert to v1.2 runner
+3. Pause bulk operations
+4. Drain action queues safely
+
+### Policy Intelligence v1 Rollback
+1. Disable change-risk checks
+2. Pause drift detectors
+3. Hide UI components
+4. Revert to manual reviews
+
+### Graph UI v1 Rollback
+1. Disable Graph panel flag
+2. Remove from alert view
+3. Fallback to entity list view
+4. Notify analyst teams
+
+---
+
+## 📝 Documentation Deliverables
+
+### Sprint 1 Docs
+- ABAC policy guide
+- JIT elevation runbook
+- Inventory reconciliation SOP
+- Intel v3 model card
+- SOAR v1.3 playbook reference
+- Operational dashboards guide
+
+### Sprint 2 Docs
+- Policy Intelligence user guide
+- Change-risk scoring documentation
+- Graph UI navigation guide
+- SOAR v1.4 bulk ops manual
+- Intel v4 active learning guide
+- Observability runbooks
+
+---
+
+## 🚀 Next Steps (Post-November)
+
+### December Seeds
+- **Policy Intelligence v1.1**: Learned weights, auto-suggest rules
+- **Graph UI v1.1**: Attack path scoring, remediation hints
+- **SOAR v1.5**: Cross-tenant scopes, HITL dashboard
+- **Intel v4.1**: Annotation quality metrics, disagreement detection
+
+---
+
+**Prepared by**: Claude Code
+**Date**: October 6, 2025
+**Classification**: Internal Execution Plan
+**Status**: Ready for Implementation
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+**END OF EXECUTION PLAN**

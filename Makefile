@@ -1,95 +1,32 @@
-.PHONY: help capture stabilize set-protection harvest-untracked batch-prs finalize audit all
+# ---- Hugging Face Spaces config (override via env) ----
+HF_USER         ?= BrianCLong
+HF_STATIC_SPACE ?= summit-ui-static
+HF_DOCKER_SPACE ?= summit-mock-docker
+HF_DOCS_SPACE   ?= summit-docs
 
-SHELL := /bin/bash
-ORCHESTRATOR := ./scripts/greenlock_orchestrator.sh
+# ---- Folders (relative to repo root) ----
+HF_STATIC_DIR   ?= summit/hf-space-static
+HF_DOCKER_DIR   ?= summit/hf-space-docker
+HF_DOCS_DIR     ?= summit/hf-space-docs
 
-help: ## Show this help message
-	@echo "Green-Lock Orchestrator Makefile"
-	@echo "================================="
-	@echo ""
-	@echo "Complete workflow:"
-	@echo "  make all              - Run complete green-lock sequence"
-	@echo ""
-	@echo "Individual steps:"
-	@echo "  make capture          - Snapshot broken repo (untracked, reflogs, fsck, bundle)"
-	@echo "  make stabilize        - Create minimal stabilization gate workflow"
-	@echo "  make set-protection   - Set branch protection to require only stabilization check"
-	@echo "  make harvest-untracked- Import untracked files from broken repo"
-	@echo "  make batch-prs        - Process and auto-merge all open PRs"
-	@echo "  make finalize         - Tag stabilized state and rerun failed checks"
-	@echo "  make audit            - Generate provenance ledger"
-	@echo ""
-	@echo "Safety:"
-	@echo "  All operations run from clean-room clone (not iCloud)"
-	@echo "  Provenance tracking ensures zero data loss"
-	@echo ""
+.PHONY: deploy-hf deploy-hf-static deploy-hf-docker deploy-hf-docs hf-check
 
-capture: ## Snapshot everything from broken repo
-	@echo "📸 Capturing complete state from broken repository..."
-	@$(ORCHESTRATOR) capture
-	@echo "✅ Capture complete - see green-lock-ledger/ for artifacts"
+# Deploy both Spaces (Static UI + Docker API)
+deploy-hf: hf-check deploy-hf-static deploy-hf-docker deploy-hf-docs
 
-stabilize: ## Create minimal stabilization gate
-	@echo "🛡️ Creating stabilization workflow..."
-	@$(ORCHESTRATOR) stabilize
-	@echo "✅ Stabilization gate deployed"
+# Deploy only Static Space
+deploy-hf-static: hf-check
+	./deploy-hf.sh "$(HF_USER)" "$(HF_STATIC_SPACE)" "$(HF_STATIC_DIR)"
 
-set-protection: ## Configure branch protection for minimal check
-	@echo "🔒 Configuring branch protection..."
-	@$(ORCHESTRATOR) set-protection
-	@echo "✅ Branch protection updated - only 'Stabilization: Build & Unit Tests' required"
+# Deploy only Docker Space
+deploy-hf-docker: hf-check
+	./deploy-hf.sh "$(HF_USER)" "$(HF_DOCKER_SPACE)" "$(HF_DOCKER_DIR)"
 
-harvest-untracked: ## Import untracked files into ops/untracked-import/
-	@echo "🌾 Harvesting untracked files..."
-	@$(ORCHESTRATOR) harvest-untracked
-	@echo "✅ Untracked files preserved in ops/untracked-import/"
+# Deploy only Docs Space
+deploy-hf-docs: hf-check
+	./deploy-hf.sh "$(HF_USER)" "$(HF_DOCS_SPACE)" "$(HF_DOCS_DIR)"
 
-batch-prs: ## Process all open PRs with auto-merge
-	@echo "🔄 Processing all open PRs..."
-	@$(ORCHESTRATOR) batch-prs
-	@echo "✅ PRs queued for auto-merge when stabilization passes"
-
-finalize: ## Tag and finalize stabilized state
-	@echo "🏁 Finalizing stabilization..."
-	@$(ORCHESTRATOR) finalize
-	@echo "✅ Green-lock complete - main is bright green"
-
-audit: ## Generate complete provenance ledger
-	@echo "📋 Generating audit trail..."
-	@$(ORCHESTRATOR) audit
-	@echo "✅ Provenance ledger written to green-lock-ledger/provenance.csv"
-
-all: capture stabilize set-protection harvest-untracked batch-prs finalize audit ## Run complete green-lock sequence
-	@echo ""
-	@echo "🎉 GREEN-LOCK MISSION COMPLETE 🎉"
-	@echo "=================================="
-	@echo ""
-	@echo "✅ Main branch: BRIGHT GREEN"
-	@echo "✅ All PRs: Processed and auto-merging"
-	@echo "✅ Untracked files: Preserved in ops/untracked-import/"
-	@echo "✅ Provenance: Complete audit trail in green-lock-ledger/"
-	@echo ""
-	@echo "Next steps:"
-	@echo "  1. Monitor PR auto-merges: gh pr list"
-	@echo "  2. Review untracked imports: ls -la ops/untracked-import/"
-	@echo "  3. Gradually re-enable full CI checks"
-	@echo "  4. Enable merge queue in GitHub settings"
-	@echo ""
-
-# Green-Lock Acceptance Pack Targets
-acceptance: verify recover auto-merge monitor ## Run complete acceptance workflow
-
-verify: ## Run septuple verification matrix
-	@./scripts/verify_greenlock.sh
-
-recover: ## Recover all 799 dangling commits as rescue/* branches
-	@./scripts/recover_orphans_from_bundle.sh
-
-auto-merge: ## Enable auto-merge on all open PRs
-	@./scripts/auto_merge_all_open_prs.sh
-
-monitor: ## Monitor stabilization workflow execution
-	@./scripts/monitor_stabilization.sh
-
-reenable-ci: ## Show CI re-enablement guide
-	@./scripts/gradual_reenable_ci.sh
+# Quick preflight
+hf-check:
+	@command -v huggingface-cli >/dev/null || (echo "ERROR: huggingface-cli not found. pip install -U 'huggingface_hub[cli]'" && exit 1)
+	@command -v git >/dev/null || (echo "ERROR: git not found." && exit 1)

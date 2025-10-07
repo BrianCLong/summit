@@ -12,7 +12,7 @@ RUN npm run build || pnpm build || yarn build
 FROM nginx:1.27-alpine
 ARG GIT_COMMIT=unknown
 ARG BUILD_DATE=unknown
-LABEL org.opencontainers.image.source="https://github.com/BrianCLong/intelgraph" \
+LABEL org.opencontainers.image.source="https://github.com/BrianCLong/summit" \
       org.opencontainers.image.title="intelgraph-ui" \
       org.opencontainers.image.revision="$GIT_COMMIT" \
       org.opencontainers.image.created="$BUILD_DATE"

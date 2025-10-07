@@ -1,0 +1,13 @@
+{
+  "name": "mcp-bench-harness",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "tsx src/run.ts"
+  },
+  "dependencies": {
+    "k6": "file:./k6"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}
