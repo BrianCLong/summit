@@ -58,11 +58,9 @@ echo "   Grafana URL variables set."
 # --- 4. Make New Workflows Required Checks on Main Branch ---
 echo "4. Configuring branch protection for '$BASE_BRANCH' branch..."
 PAYLOAD=$(jq -n \
-  --argjson required_status_checks '{"strict":true,"contexts":["CI — Green Baseline","Maestro Fast-Lane","Runbook Auto-Gen"]}' \
-  --argjson required_pull_request_reviews '{"dismiss_stale_reviews":true,"required_approving_review_count":1}' \
-  --arg enforce_admins "true" \
-  --arg restrictions "null" \
-  '{ "required_status_checks": $required_status_checks, "enforce_admins": ($enforce_admins | fromjson), "required_pull_request_reviews": $required_pull_request_reviews, "restrictions": ($restrictions | fromjson) }')
+  --argjson required_status_checks_val '{"strict":true,"contexts":["CI — Green Baseline","Maestro Fast-Lane","Runbook Auto-Gen"]}' \
+  --argjson required_pull_request_reviews_val '{"dismiss_stale_reviews":true,"required_approving_review_count":1}' \
+  '{ "required_status_checks": $required_status_checks_val, "enforce_admins": true, "required_pull_request_reviews": $required_pull_request_reviews_val, "restrictions": null }')
 
 gh api \
   --method PUT \
