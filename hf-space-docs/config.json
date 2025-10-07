@@ -1,0 +1,6 @@
+{
+  "spaces": [
+    { "name": "summit-ui-static", "user": "BrianCLong", "type": "static" },
+    { "name": "summit-mock-docker", "user": "BrianCLong", "type": "docker" }
+  ]
+}
