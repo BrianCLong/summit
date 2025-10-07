@@ -1101,7 +1101,7 @@ const graph = await client.graphs.create({
 ### Community and Support
 - **Documentation**: [docs.intelgraph.ai](https://docs.intelgraph.ai)
 - **Discord Community**: [discord.gg/intelgraph](https://discord.gg/intelgraph)
-- **GitHub Issues**: [github.com/BrianCLong/intelgraph/issues](https://github.com/BrianCLong/intelgraph/issues)
+- **GitHub Issues**: [github.com/BrianCLong/summit/issues](https://github.com/BrianCLong/summit/issues)
 - **Stack Overflow**: Tag questions with `intelgraph`
 - **Email Support**: sdk-support@intelgraph.ai
 

@@ -1,0 +1,72 @@
+# Inventory Alerts - Asset Inventory v1.2
+# Alert rules for coverage, lifecycle events, and anomalies
+
+groups:
+  - name: inventory_coverage_alerts
+    interval: 30s
+    rules:
+      - alert: InventoryCoverageBelowTarget
+        expr: inventory_coverage_percentage < 93
+        for: 10m
+        labels:
+          severity: warning
+          component: inventory
+          category: coverage
+        annotations:
+          summary: "Inventory coverage below 93% target"
+          description: "Current coverage: {{ $value }}%. Target: 93-95%. Check agent connectivity and cloud API health."
+          dashboard: "https://grafana.example.com/d/inventory/asset-inventory?orgId=1&var-panel=coverage-001"
+          runbook: "https://wiki.example.com/runbooks/inventory-coverage"
+
+      - alert: InventoryCoverageCriticallyLow
+        expr: inventory_coverage_percentage < 85
+        for: 5m
+        labels:
+          severity: critical
+          component: inventory
+          category: coverage
+        annotations:
+          summary: "Inventory coverage critically low"
+          description: "Current coverage: {{ $value }}%. CRITICAL threshold breached."
+          pagerduty: "true"
+          slack_channel: "#inventory-critical"
+
+  - name: inventory_anomaly_alerts
+    interval: 30s
+    rules:
+      - alert: InventoryOrphanAssetDetected
+        expr: increase(inventory_anomaly_alerts_total{anomaly_type="orphan_asset"}[15m]) > 5
+        for: 5m
+        labels:
+          severity: medium
+          component: inventory
+          category: anomaly
+        annotations:
+          summary: "Orphan assets detected (agent-only, no cloud record)"
+          description: "{{ $value }} orphan assets detected in 15 minutes."
+
+      - alert: InventoryOwnerMismatchDetected
+        expr: increase(inventory_anomaly_alerts_total{anomaly_type="owner_mismatch"}[15m]) > 3
+        for: 5m
+        labels:
+          severity: high
+          component: inventory
+          category: anomaly
+        annotations:
+          summary: "Unexpected asset ownership changes detected"
+          description: "{{ $value }} owner mismatch anomalies detected."
+          slack_channel: "#security-alerts"
+          pagerduty: "true"
+
+      - alert: InventoryHighChurnDetected
+        expr: increase(inventory_anomaly_alerts_total{anomaly_type="high_churn"}[15m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          component: inventory
+          category: anomaly
+        annotations:
+          summary: "High churn detected (>50 events in 15 minutes)"
+          description: "Asset churn rate critically high."
+          slack_channel: "#incident-response"
+          pagerduty: "true"

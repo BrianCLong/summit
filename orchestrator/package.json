@@ -1,0 +1,29 @@
+{
+  "name": "intelgraph-orchestrator",
+  "version": "1.0.0",
+  "description": "IntelGraph Orchestrator with Fastlane and Friction Alerts",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "build": "echo \"No build step required\"",
+    "test": "echo \"No tests implemented yet\""
+  },
+  "keywords": [
+    "orchestrator",
+    "intelgraph",
+    "fastlane",
+    "friction-alerts"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@opentelemetry/api": "^1.8.0",
+    "@opentelemetry/sdk-node": "^0.52.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.52.0",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

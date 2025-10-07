@@ -7997,9 +7997,9 @@ keywords:
   - mlfp
   - analytics
   - intelligence
-home: https://github.com/BrianCLong/intelgraph
+home: https://github.com/BrianCLong/summit
 sources:
-  - https://github.com/BrianCLong/intelgraph
+  - https://github.com/BrianCLong/summit
 maintainers:
   - name: IntelGraph Team
     email: team@intelgraph.com

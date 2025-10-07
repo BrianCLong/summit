@@ -21,8 +21,8 @@ Our mission: **supercharge development of the MVP** while **always keeping a dep
 ## 🔑 Quickstart (30 Minutes to Productive)
 ```bash
 # 1. Clone and enter repo
-git clone https://github.com/BrianCLong/intelgraph.git
-cd intelgraph
+git clone https://github.com/BrianCLong/summit.git
+cd summit
 
 # 2. Copy environment config
 cp .env.example .env

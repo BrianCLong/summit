@@ -1,0 +1,15 @@
+receivers:
+- name: pagerduty-intel
+  pagerduty_configs:
+    - routing_key: ${PD_INTEL_KEY}
+- name: slack-alerts
+  slack_configs:
+    - channel: '#prod-alerts'
+      send_resolved: true
+      title: '{{ .CommonAnnotations.summary }}'
+      text: "Runbook: {{ .CommonAnnotations.runbook }}\nLabels: {{ .CommonLabels }}"
+route:
+  receiver: slack-alerts
+  routes:
+    - match: { severity: 'page' }
+      receiver: pagerduty-intel

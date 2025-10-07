@@ -1,29 +1,95 @@
-name: Release Utilities
-
+name: Release 2025.11
 on:
+  pull_request:
+    branches: [main]
+    paths-ignore: ['**/*.md']
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'RC version tag (e.g., v1.0.0-rc.1)'
-        required: true
-        default: 'v1.0.0-rc.1'
-
 jobs:
-  release-utils:
+  test-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
+        with: { node-version: 18, cache: 'npm' }
+      - name: Install
+        run: |
+          npm ci
+          npx playwright install --with-deps
+      - name: Lint & Unit
+        run: npm run lint && npm test -- --ci --reporters=default
+      - name: Build
+        run: npm run build
+  perf-k6:
+    needs: test-build
+    runs-on: ubuntu-latest
+    env:
+      API: ${{ secrets.PERF_API_BASE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/setup-k6@server/src/migrations/020_v110_confcompute_privacy.ts
+      - name: Bulk ops @tests/k6/soar_bulk_100rps.js ops/sec + idempotency
+        run: k6 run tests/k6/soar_bulk_100rps.js
+  e2e-playwright:
+    needs: test-build
+    runs-on: ubuntu-latest
+    env:
+      WEB_URL: ${{ vars.WEB_URL || 'http://localhost:3000' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 18 }
+      - name: Start app
+        run: npm run start:web & sleep 10
+      - name: E2E
+        run: npx playwright test
+  policy-checks:
+    needs: test-build
+    runs-on: ubuntu-latest
+    env:
+      METRICS_ENDPOINT: ${{ secrets.METRICS_JSON_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: OPA / license checks
+        run: npm run policy:check
+  canary-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Canary deploy
+        run: ./ci/canary_deploy.sh $GITHUB_REF_NAME
+      - name: Validate canary (SLO probe)
+        run: node scripts/probes/slo-validate.mjs --window 10m --minSamples 500
+  promote-or-rollback:
+    needs: canary-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decision
+        id: dec
+        run: |
+          node scripts/probes/decision.mjs --policy scripts/probes/canary.json > decision.txt
+          echo "result=$(cat decision.txt)" >> $GITHUB_OUTPUT
+      - name: Promote
+        if: steps.dec.outputs.result == 'promote'
+        run: ./ci/promote.sh $GITHUB_REF_NAME
+      - name: Rollback
+        if: steps.dec.outputs.result == 'rollback'
+        run: ./ci/rollback.sh $GITHUB_REF_NAME
+      - name: Attach evidence bundle
+        if: always()
+        uses: actions/upload-release-asset@v1
         with:
-          node-version: 18
-      - name: Tag RC
-        run: scripts/release/rc_tag.sh ${{ github.event.inputs.version }}
-      - name: Generate SBOM
-        run: scripts/release/generate_sbom.sh sbom.json
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-artifacts
-          path: |
-            CHANGELOG_RC.md
-            sbom.json
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: evidence/bundle-${{ github.ref_name }}.tar.zst
+          asset_name: evidence-${{ github.ref_name }}.tar.zst
+          asset_content_type: application/zstd
+  release:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true }}
+    needs: [perf-k6, e2e-playwright, policy-checks, promote-or-rollback]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag and notify
+        run: |
+          git tag v2025.11.2
+          git push origin v2025.11.2
+          echo "Release v2025.11.2 cut"
