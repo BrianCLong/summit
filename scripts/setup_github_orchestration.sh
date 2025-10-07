@@ -23,19 +23,25 @@ gh auth status >/dev/null || { echo "ERROR: Not logged into GitHub CLI. Please r
 echo "--- Starting GitHub Orchestration Setup ---"
 
 # --- 1. Create Pull Request ---
-echo "1. Creating Pull Request from $BRANCH to $BASE_BRANCH..."
-PR_URL=$(gh pr create \
-  --base "$BASE_BRANCH" \
-  --head "$BRANCH" \
-  --title "$PR_TITLE" \
-  --body "$PR_BODY" \
-  --repo "$OWNER/$REPO")
+PR_URL=$(gh pr list --head "$BRANCH" --base "$BASE_BRANCH" --json url -q '.[] | .url')
 
 if [ -z "$PR_URL" ]; then
-  echo "ERROR: Failed to create PR. Exiting." >&2
-  exit 1
+  echo "1. Creating Pull Request from $BRANCH to $BASE_BRANCH..."
+  PR_URL=$(gh pr create \
+    --base "$BASE_BRANCH" \
+    --head "$BRANCH" \
+    --title "$PR_TITLE" \
+    --body "$PR_BODY" \
+    --repo "$OWNER/$REPO")
+
+  if [ -z "$PR_URL" ]; then
+    echo "ERROR: Failed to create PR. Exiting." >&2
+    exit 1
+  fi
+  echo "   PR created: $PR_URL"
+else
+  echo "1. PR already exists: $PR_URL"
 fi
-echo "   PR created: $PR_URL"
 
 # --- 2. Enable Auto-Merge (Squash) ---
 echo "2. Enabling auto-merge (squash) for the PR..."
