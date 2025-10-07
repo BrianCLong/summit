@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orchestrator-fast-track
+data:
+  orchestrator-router.fast-track.yaml: |
+    {{ .Files.Get "config/orchestrator-router.fast-track.yaml" | nindent 4 }}

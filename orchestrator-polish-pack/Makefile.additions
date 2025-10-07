@@ -1,0 +1,16 @@
+# Append or merge into existing Makefile
+.PHONY: health smoke budget-test
+
+health:
+	@echo "[health] Checking containers and ports..."
+	@docker ps
+	@curl -sfL http://localhost:3000/health || (echo "UI not healthy" && exit 1)
+	@curl -sfL http://localhost:9090/-/ready  || echo "Prometheus not ready (optional)"
+
+smoke:
+	@echo "[smoke] Exercising minimal router path..."
+	@curl -s -X POST http://localhost:8080/route -H 'content-type: application/json' -d '{"text":"ping"}' | jq .status
+
+budget-test:
+	@echo "[budget-test] Simulating an over-budget request (should be denied)"
+	@curl -s -X POST http://localhost:8080/route -H 'content-type: application/json' -d '{"text":"generate 500k tokens of lorem"}' | jq .decision

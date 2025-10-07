@@ -1,0 +1,16 @@
+name: Metrics & Alerts
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+jobs:
+  burn-alert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check SLO burn (pseudo-example)
+        env:
+          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+          GRAFANA_TOKEN: ${{ secrets.GRAFANA_API_TOKEN }}
+        run: |
+          echo "Query Grafana for p95 > 7s or success < 98.5% and fail if exceeded"
+          # Placeholder: implement with curl to /api/ds/query or Prometheus API

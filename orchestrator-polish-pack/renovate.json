@@ -1,0 +1,19 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":dependencyDashboard"],
+  "timezone": "America/Denver",
+  "labels": ["deps"],
+  "rangeStrategy": "bump",
+  "stabilityDays": 3,
+  "schedule": ["before 9am on monday"],
+  "packageRules": [
+    { "matchManagers": ["npm"], "groupName": "npm minor/patch" },
+    { "matchManagers": ["pip_requirements"], "groupName": "pip minor/patch" },
+    { "matchManagers": ["dockerfile"], "groupName": "Docker base images" }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"],
+    "assignees": []
+  }
+}
