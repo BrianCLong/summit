@@ -55,12 +55,10 @@ gh api \
   --method PUT \
   -H "Accept: application/vnd.github+json" \
   "repos/$OWNER/$REPO/branches/$BASE_BRANCH/protection" \
-  -f required_status_checks.strict=true \
-  -F required_status_checks.contexts="$REQUIRED_CONTEXTS" \
-  -f enforce_admins=true \
-  -f required_pull_request_reviews.dismiss_stale_reviews=true \
-  -f required_pull_request_reviews.required_approving_review_count=1 \
-  -f restrictions='null' \
+  -F required_status_checks='{ "strict": true, "contexts": ["CI — Green Baseline", "Maestro Fast-Lane", "Runbook Auto-Gen"] }' \
+  -F enforce_admins="true" \
+  -F required_pull_request_reviews='{ "dismiss_stale_reviews": true, "required_approving_review_count": 1 }' \
+  -F restrictions="null" \
   --silent || { echo "WARNING: Failed to configure branch protection. Ensure you have admin rights." >&2; }
 echo "   Branch protection configured for '$BASE_BRANCH'."
 
