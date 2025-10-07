@@ -1,7 +1,7 @@
 # IntelGraph — Highest‑Impact Velocity Plan (v2)
 
 **Owner:** Guy (IntelGraph Platform Engineer)\
-**Repo:** `github.com/BrianCLong/intelgraph`\
+**Repo:** `github.com/BrianCLong/summit`\
 **Focus:** tie‑offs from v1 and accelerate multi‑user robustness, similarity search, performance, and security to production‑grade.
 
 ---

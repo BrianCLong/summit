@@ -1,3 +1,23 @@
+type Entity {
+  id: ID!
+  kind: String!
+  name: String
+  owner: OwnerContext
+}
+
+type Edge {
+  id: ID!
+  src: ID!
+  dst: ID!
+  rel: String!
+  risk: Float
+}
+
+type OwnerContext { 
+  team: String, 
+  escalationPath: [String!]! 
+}
+
 type Runbook {
   id: ID!
   name: String!
@@ -20,6 +40,9 @@ type Run {
 type Query {
   runbooks(limit: Int = 50, after: ID): [Runbook!]!
   run(id: ID!): Run
+  entity(id: ID!): Entity
+  neighbors(id: ID!, limit: Int = 50): [Entity!]!
+  attackPaths(from: ID!, to: ID!, k: Int = 3): [[ID!]!]!
 }
 
 input LaunchRunInput { runbookId: ID!, tenantId: String!, params: JSON }

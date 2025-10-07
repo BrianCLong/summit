@@ -1,15 +1,29 @@
-name: Trivy Container Scan
-on: [pull_request]
+name: Trivy Security
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
 jobs:
   trivy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
-      - uses: aquasecurity/trivy-action@b95621a837499832c705591a4924e4b10b34332e # 0.16.0
+      - uses: actions/checkout@v4
+
+      - name: Trivy FS (vuln+misconfig+secrets)
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
-          ignore-unfixed: true
+          scanners: vuln,config,secret
+          exit-code: '1'
           severity: HIGH,CRITICAL
+
+      - name: Trivy SBOM (CycloneDX)
+        run: trivy fs --format cyclonedx --output sbom.cdx.json .
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: sbom.cdx.json

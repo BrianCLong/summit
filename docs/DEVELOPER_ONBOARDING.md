@@ -8,8 +8,8 @@
 ### 1. **Clone & Setup** (2 minutes)
 ```bash
 # Clone repository
-git clone https://github.com/brianlong/intelgraph.git
-cd intelgraph
+git clone https://github.com/BrianCLong/summit.git
+cd summit
 
 # Copy environment configuration
 cp .env.example .env

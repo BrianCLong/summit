@@ -38,7 +38,7 @@ FROM nginx:1.25-alpine AS final
 LABEL org.opencontainers.image.title="IntelGraph Client"
 LABEL org.opencontainers.image.description="IntelGraph intelligence analysis platform client"
 LABEL org.opencontainers.image.vendor="IntelGraph"
-LABEL org.opencontainers.image.source="https://github.com/BrianCLong/intelgraph"
+LABEL org.opencontainers.image.source="https://github.com/BrianCLong/summit"
 LABEL org.opencontainers.image.version="1.0.1"
 LABEL org.opencontainers.image.revision="${VCS_REF:-unknown}"
 LABEL org.opencontainers.image.created="${BUILD_DATE:-unknown}"

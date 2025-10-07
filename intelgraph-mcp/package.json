@@ -1,0 +1,23 @@
+{
+  "name": "intelgraph-mcp",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.6.0",
+  "scripts": {
+    "xpnpm": "node tools/pnpm/run-pnpm.js",
+    "build": "npm run xpnpm -- -r build",
+    "dev": "npm run xpnpm -- -r --parallel dev",
+    "test": "npm run xpnpm -- -r test",
+    "lint": "npm run xpnpm -- -r lint",
+    "typecheck": "npm run xpnpm -- -r typecheck",
+    "conformance": "npm run xpnpm -- --filter conformance-cli start",
+    "bench": "npm run xpnpm -- --filter harness start",
+    "shootout": "npm run xpnpm -- --filter shootout-ui dev"
+  },
+  "workspaces": [
+    "services/*",
+    "packages/*",
+    "tools/*",
+    "benchmarks/*"
+  ]
+}

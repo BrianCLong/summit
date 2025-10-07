@@ -153,7 +153,7 @@
 ### Development Setup
 ```bash
 # Clone and setup
-git clone <repo> && cd intelgraph
+git clone <repo> && cd summit
 npm install && npm run setup
 
 # Start infrastructure

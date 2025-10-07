@@ -1,0 +1,37 @@
+name: CI Green Baseline
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  golden-path:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Bootstrap
+        run: |
+          make bootstrap
+      - name: Up
+        run: |
+          make up
+      - name: Smoke Test
+        run: |
+          make smoke
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: |
+            logs/
+            *.log
+            temp/

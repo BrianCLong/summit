@@ -29,7 +29,7 @@ FROM gcr.io/distroless/nodejs20-debian12:nonroot AS final
 LABEL org.opencontainers.image.title="Maestro Build Hub"
 LABEL org.opencontainers.image.description="WebSocket hub for Maestro Build Plane real-time updates"
 LABEL org.opencontainers.image.vendor="IntelGraph"
-LABEL org.opencontainers.image.source="https://github.com/BrianCLong/intelgraph"
+LABEL org.opencontainers.image.source="https://github.com/BrianCLong/summit"
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.revision="${VCS_REF:-unknown}"
 LABEL org.opencontainers.image.created="${BUILD_DATE:-unknown}"
