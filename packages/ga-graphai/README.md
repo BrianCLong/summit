@@ -13,8 +13,8 @@
 
 ```bash
 # Clone and setup
-git clone https://github.com/BrianCLong/intelgraph.git
-cd intelgraph/packages/ga-graphai
+git clone https://github.com/BrianCLong/summit.git
+cd summit/packages/ga-graphai
 
 # Start services
 docker-compose up -d

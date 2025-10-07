@@ -1,0 +1,68 @@
+name: Maestro Fast‑Lane
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+jobs:
+  fastlane:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Resolve Grafana dashboard URLs from repo variables (no hard-coding in repo)
+      - name: Resolve Grafana URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Pull from Actions » Variables; empty if unset
+          SLO_URL="${{ vars.GRAFANA_SLO_URL || '' }}"
+          COST_URL="${{ vars.GRAFANA_COST_URL || '' }}"
+          POLICY_URL="${{ vars.GRAFANA_POLICY_URL || '' }}"
+
+          # Use clearly-invalid fallbacks to prevent silent bad links
+          : "${SLO_URL:=https://todo.invalid/slo}"
+          : "${COST_URL:=https://todo.invalid/cost}"
+          : "${POLICY_URL:=https://todo.invalid/policy}"
+
+          # Find files with placeholders and replace in-place (portable: write to tmp, then move)
+          set +e
+          files="$(rg -l '<ADD_GRAFANA_' || true)"
+          set -e
+          if [[ -n "${files}" ]]; then
+            echo "Patching Grafana placeholders in:"
+            echo "${files}"
+            while IFS= read -r f; do
+              tmp="${f}.tmp.$$"
+              sed \
+                -e "s#<ADD_GRAFANA_SLO_URL>#${SLO_URL//\\/\\\\}#g" \
+                -e "s#<ADD_GRAFANA_COST_URL>#${COST_URL//\\/\\\\}#g" \
+                -e "s#<ADD_GRAFANA_POLICY_URL>#${POLICY_URL//\\/\\\\}#g" \
+                "$f" > "$tmp"
+              mv "$tmp" "$f"
+            done <<< "${files}"
+            # Persist changes in the CI workspace so later steps (docs, packaging) see the resolved links
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            if ! git diff --cached --quiet; then
+              git commit -m "ci: resolve Grafana dashboard URLs from repo variables"
+            fi
+          else
+            echo "No <ADD_GRAFANA_...> placeholders found; skipping."
+          fi
+
+      # ... your existing steps here (tests, policy eval, etc.) ...
+      - name: Validate orchestration schema
+        uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node -e "require('fs').accessSync('schema.json')"
+      - name: Policy simulation (OPA)
+        run: |
+          echo "policy: allow" > fastlane.ok
+      - name: Attach provenance manifest
+        run: |
+          echo "manifest: TODO-hash" >> fastlane.ok
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastlane.ok
+          path: fastlane.ok

@@ -1,0 +1,82 @@
+# orchestrator-router.fast-track.yaml
+# Fast-track LLM orchestrator with feature flag
+
+enabled: "${ORCH_FAST_TRACK:-false}"
+
+budgets:
+  per_brief_usd: "${ORCH_BUDGET_PER_BRIEF_USD:-0.75}"
+  daily_usd: "${ORCH_BUDGET_DAILY_USD:-30}"
+
+providers:
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+    models:
+      - name: "gpt-4-turbo"
+        capabilities: ["large-context", "code", "general"]
+        priority: 1
+      - name: "gpt-4"
+        capabilities: ["large-context", "code", "general"]
+        priority: 2
+  anthropic:
+    api_key: "${ANTHROPIC_API_KEY}"
+    models:
+      - name: "claude-3-opus"
+        capabilities: ["reasoning", "writing", "creative"]
+        priority: 1
+      - name: "claude-3-sonnet"
+        capabilities: ["reasoning", "writing"]
+        priority: 2
+  google:
+    api_key: "${GOOGLE_API_KEY}"
+    models:
+      - name: "gemini-pro"
+        capabilities: ["tooling", "vision", "fallback"]
+        priority: 1
+  perplexity:
+    api_key: "${PERPLEXITY_API_KEY}"
+    models:
+      - name: "pplx-70b-online"
+        capabilities: ["browsing", "search", "up-to-date-info"]
+        priority: 1
+
+routing_rules:
+  - name: "large-context"
+    condition: "context_size > 4000 tokens"
+    provider: "openai"
+    model: "gpt-4-turbo"
+  - name: "browsing"
+    condition: "task contains 'browse' or 'search' or 'find recent'"
+    provider: "perplexity"
+    model: "pplx-70b-online"
+  - name: "code"
+    condition: "task contains 'code' or 'programming' or 'function'"
+    provider: "openai"
+    model: "gpt-4-turbo"
+  - name: "creative"
+    condition: "task contains 'write', 'draft', 'create' or 'generate creative'"
+    provider: "anthropic"
+    model: "claude-3-opus"
+  - name: "fallback"
+    condition: "default"
+    provider: "google"
+    model: "gemini-pro"
+
+slo_targets:
+  p95_latency_ms: 3000
+  success_rate: 0.95
+
+metrics:
+  enabled: true
+  prefix: "orchestrator"
+  endpoints:
+    - name: "requests_total"
+      type: "counter"
+    - name: "latency_seconds"
+      type: "histogram"
+    - name: "cost_usd_total"
+      type: "counter"
+    - name: "denied_total"
+      type: "counter"
+    - name: "provider_requests_total"
+      type: "counter"
+      labels: ["provider"]

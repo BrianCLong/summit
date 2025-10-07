@@ -23,7 +23,9 @@ import { authMiddleware } from './middleware/auth.js';
 import { tenantMiddleware } from './middleware/tenant.js';
 import { auditMiddleware } from './middleware/audit.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
+import { opaRouterAuthz } from './middleware/opaRouterAuthz.js';
 import { logger } from './utils/logger.js';
+import { register } from './utils/prometheus.js';
 import { ingestRouter } from './routes/ingest.js';
 import { copilotRouter } from './routes/copilot.js';
 import { adminRouter } from './routes/admin.js';
@@ -68,13 +70,9 @@ export async function createApp() {
   });
 
   // Metrics endpoint for monitoring
-  app.get('/metrics', (req, res) => {
-    // TODO: Implement Prometheus metrics
-    res.json({
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-      timestamp: new Date().toISOString(),
-    });
+  app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
   });
 
   // Ingest wizard API (scaffold)
@@ -144,6 +142,7 @@ export async function createApp() {
     rateLimitMiddleware,
     authMiddleware,
     tenantMiddleware,
+    opaRouterAuthz,
     auditMiddleware,
     expressMiddleware(server, {
       context: createContext,

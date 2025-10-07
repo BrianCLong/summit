@@ -1,3 +1,4 @@
+{{- if .Values.server.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,25 +40,40 @@ spec:
           imagePullPolicy: {{ .Values.image.server.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.server.targetPort }}
+              containerPort: {{ default .Values.server.service.port .Values.server.service.targetPort }}
               protocol: TCP
-          {{- if .Values.healthCheck.enabled }}
+          {{- $probes := .Values.server.probes }}
+          {{- $db := .Values.database | default dict }}
+          {{- $pgVals := (get $db "postgresql") | default dict }}
+          {{- $neoVals := (get $db "neo4j") | default dict }}
+          {{- $redisVals := (get $db "redis") | default dict }}
+          {{- $pgSecret := default "postgres" (get $pgVals "existingSecret") }}
+          {{- $pgUrlKey := default "url" (get $pgVals "urlKey") }}
+          {{- $neoSecret := default "neo4j" (get $neoVals "existingSecret") }}
+          {{- $neoUriKey := default "uri" (get $neoVals "uriKey") }}
+          {{- $neoUser := default "neo4j" (get $neoVals "username") }}
+          {{- $neoPassKey := default "password" (get $neoVals "passwordKey") }}
+          {{- $redisSecret := default "redis" (get $redisVals "existingSecret") }}
+          {{- $redisUrlKey := default "url" (get $redisVals "urlKey") }}
+          {{- if and $probes.enabled $probes.liveness }}
           livenessProbe:
             httpGet:
-              path: /health
+              path: {{ default "/health" $probes.liveness.path }}
               port: http
-            initialDelaySeconds: {{ .Values.healthCheck.initialDelaySeconds }}
-            periodSeconds: {{ .Values.healthCheck.periodSeconds }}
-            timeoutSeconds: {{ .Values.healthCheck.timeoutSeconds }}
-            failureThreshold: {{ .Values.healthCheck.failureThreshold }}
+            initialDelaySeconds: {{ default 10 $probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ default 10 $probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ default 3 $probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ default 3 $probes.liveness.failureThreshold }}
+          {{- end }}
+          {{- if and $probes.enabled $probes.readiness }}
           readinessProbe:
             httpGet:
-              path: /health
+              path: {{ default "/health" $probes.readiness.path }}
               port: http
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            timeoutSeconds: 3
-            failureThreshold: 3
+            initialDelaySeconds: {{ default 5 $probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ default 5 $probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ default 3 $probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ default 3 $probes.readiness.failureThreshold }}
           {{- end }}
           resources:
             {{- toYaml .Values.resources.server | nindent 12 }}
@@ -65,29 +81,29 @@ spec:
             - name: NODE_ENV
               value: "production"
             - name: PORT
-              value: "{{ .Values.service.server.targetPort }}"
+              value: "{{ .Values.server.service.targetPort }}"
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.postgresql.existingSecret }}
-                  key: url
+                  name: {{ $pgSecret | quote }}
+                  key: {{ $pgUrlKey | quote }}
             - name: NEO4J_URI
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.neo4j.existingSecret }}
-                  key: uri
+                  name: {{ $neoSecret | quote }}
+                  key: {{ $neoUriKey | quote }}
             - name: NEO4J_USERNAME
-              value: {{ .Values.database.neo4j.username }}
+              value: {{ $neoUser | quote }}
             - name: NEO4J_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.neo4j.existingSecret }}
-                  key: password
+                  name: {{ $neoSecret | quote }}
+                  key: {{ $neoPassKey | quote }}
             - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.redis.existingSecret }}
-                  key: url
+                  name: {{ $redisSecret | quote }}
+                  key: {{ $redisUrlKey | quote }}
           volumeMounts:
             - name: tmp
               mountPath: /tmp
@@ -110,3 +126,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+{{- end }}

@@ -123,7 +123,7 @@ LABEL \
     org.opencontainers.image.version="${BUILD_VERSION}" \
     org.opencontainers.image.created="${BUILD_DATE}" \
     org.opencontainers.image.revision="${VCS_REF}" \
-    org.opencontainers.image.source="https://github.com/BrianCLong/intelgraph" \
+    org.opencontainers.image.source="https://github.com/BrianCLong/summit" \
     org.opencontainers.image.vendor="IntelGraph AI" \
     org.opencontainers.image.licenses="Proprietary" \
     security.scan.trivy="enabled" \

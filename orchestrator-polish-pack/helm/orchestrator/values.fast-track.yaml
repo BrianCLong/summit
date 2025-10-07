@@ -1,0 +1,8 @@
+orchestrator:
+  env:
+    - name: ORCH_FAST_TRACK
+      value: "0" # set to "1" in staging to enable
+    - name: ORCH_BUDGET_PER_BRIEF_USD
+      value: "0.75"
+    - name: ORCH_BUDGET_DAILY_USD
+      value: "30"

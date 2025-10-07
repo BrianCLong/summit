@@ -1,0 +1,87 @@
+groups:
+  - name: slo_alerts
+    interval: 30s
+    rules:
+      # API p95 Latency SLO Alert
+      - alert: APILatencySLOViolation
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="intelgraph-api"}[5m])) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+          slo: api_latency
+          panel_uid: api-p95-latency-001
+        annotations:
+          summary: "API p95 latency exceeds SLO (>1.5s)"
+          description: "API p95 latency is {{ $value | humanizeDuration }} (SLO: <1.5s). Panel: api-p95-latency-001"
+          dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=api-p95-latency-001"
+          runbook_url: "https://runbooks.example.com/slo-alerts/api-latency"
+
+      # OPA Decision p95 Latency SLO Alert
+      - alert: OPADecisionLatencySLOViolation
+        expr: histogram_quantile(0.95, rate(opa_decision_duration_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          slo: opa_latency
+          panel_uid: opa-p95-latency-002
+        annotations:
+          summary: "OPA p95 decision latency exceeds SLO (>500ms)"
+          description: "OPA p95 decision latency is {{ $value | humanizeDuration }} (SLO: <500ms). Panel: opa-p95-latency-002"
+          dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=opa-p95-latency-002"
+          runbook_url: "https://runbooks.example.com/slo-alerts/opa-latency"
+          exemplar_query: 'opa_decision_duration_seconds{quantile="0.95"}'
+
+      # Queue Lag SLO Alert
+      - alert: QueueLagSLOViolation
+        expr: kafka_consumer_lag_total > 10000
+        for: 10m
+        labels:
+          severity: critical
+          slo: queue_lag
+          panel_uid: queue-lag-003
+        annotations:
+          summary: "Queue lag exceeds SLO (>10k messages)"
+          description: "Queue lag is {{ $value }} messages (SLO: <10k). Panel: queue-lag-003"
+          dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=queue-lag-003"
+          runbook_url: "https://runbooks.example.com/slo-alerts/queue-lag"
+
+      # Ingest Failure Rate SLO Alert
+      - alert: IngestFailureRateSLOViolation
+        expr: (rate(ingest_failures_total[5m]) / rate(ingest_attempts_total[5m])) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          slo: ingest_failure_rate
+          panel_uid: ingest-failure-rate-004
+        annotations:
+          summary: "Ingest failure rate exceeds SLO (>1%)"
+          description: "Ingest failure rate is {{ $value | humanizePercentage }} (SLO: <1%). Panel: ingest-failure-rate-004"
+          dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=ingest-failure-rate-004"
+          runbook_url: "https://runbooks.example.com/slo-alerts/ingest-failure-rate"
+
+      # Golden Flow Pass Rate SLO Alert
+      - alert: GoldenFlowPassRateSLOViolation
+        expr: (rate(golden_flow_success_total[5m]) / rate(golden_flow_total[5m])) < 0.99
+        for: 5m
+        labels:
+          severity: critical
+          slo: golden_flow_pass_rate
+          panel_uid: golden-flow-pass-005
+        annotations:
+          summary: "Golden flow pass rate below SLO (<99%)"
+          description: "Golden flow pass rate is {{ $value | humanizePercentage }} (SLO: >99%). Panel: golden-flow-pass-005"
+          dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=golden-flow-pass-005"
+          runbook_url: "https://runbooks.example.com/slo-alerts/golden-flow"
+
+      # Critical: Multiple SLO Violations
+      - alert: MultipleSLOViolations
+        expr: count(ALERTS{alertname=~".*SLOViolation", alertstate="firing"}) >= 2
+        for: 10m
+        labels:
+          severity: critical
+          slo: multiple
+        annotations:
+          summary: "Multiple SLO violations detected"
+          description: "{{ $value }} SLO alerts are currently firing. Investigate system-wide issues."
+          dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards"
+          runbook_url: "https://runbooks.example.com/slo-alerts/multiple-violations"

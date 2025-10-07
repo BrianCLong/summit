@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/BrianCLong/intelgraph'
+    repoURL: 'https://github.com/BrianCLong/summit'
     path: deploy/k8s/environments # Path to your environment-specific Helm charts or K8s manifests
     targetRevision: HEAD
   destination:

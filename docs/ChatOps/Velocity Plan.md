@@ -184,7 +184,7 @@ It preserves Guy’s backbone (Golden Path, explainable GraphRAG, ABAC, persiste
 # IntelGraph — Highest‑Impact Velocity Plan (v1)
 
 **Owner:** Guy (IntelGraph Platform Engineer)  
-**Repo:** github.com/BrianCLong/intelgraph  
+**Repo:** github.com/BrianCLong/summit  
 **Focus:** deliver fast, durable wins across core graph CRUD, AI insights (GraphRAG), real‑time collaboration, security, and productionization.
 
 ---

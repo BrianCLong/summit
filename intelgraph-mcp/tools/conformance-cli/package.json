@@ -1,0 +1,23 @@
+{
+  "name": "@intelgraph/mcp-conformance-cli",
+  "version": "0.1.0",
+  "bin": {
+    "ig-mcp-conformance": "bin/ig-mcp-conformance.ts"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "tsx bin/ig-mcp-conformance.ts",
+    "build": "tsc -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "undici": "^6.19.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4",
+    "@types/node": "^22.5.4"
+  }
+}

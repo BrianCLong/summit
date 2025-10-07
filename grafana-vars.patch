@@ -1,0 +1,51 @@
+--- a/.github/workflows/maestro-fastlane.yml
++++ b/.github/workflows/maestro-fastlane.yml
+@@ -6,6 +6,44 @@
+      steps:
+        - uses: actions/checkout@v4
++      # Resolve Grafana dashboard URLs from repo variables (no hard-coding in repo)
++      - name: Resolve Grafana URLs
++        shell: bash
++        run: |
++          set -euo pipefail
++          # Pull from Actions » Variables; empty if unset
++          SLO_URL="${{ vars.GRAFANA_SLO_URL || '' }}"
++          COST_URL="${{ vars.GRAFANA_COST_URL || '' }}"
++          POLICY_URL="${{ vars.GRAFANA_POLICY_URL || '' }}"
++
++          # Use clearly-invalid fallbacks to prevent silent bad links
++          : "${SLO_URL:=https://todo.invalid/slo}"
++          : "${COST_URL:=https://todo.invalid/cost}"
++          : "${POLICY_URL:=https://todo.invalid/policy}"
++
++          # Find files with placeholders and replace in-place (portable: write to tmp, then move)
++          set +e
++          files="$(rg -l '<ADD_GRAFANA_' || true)"
++          set -e
++          if [[ -n "${files}" ]]; then
++            echo "Patching Grafana placeholders in:"
++            echo "${files}"
++            while IFS= read -r f; do
++              tmp="${f}.tmp.$$"
++              sed \
++                -e "s#<ADD_GRAFANA_SLO_URL>#${SLO_URL//\/\\}#g" \
++                -e "s#<ADD_GRAFANA_COST_URL>#${COST_URL//\/\\}#g" \
++                -e "s#<ADD_GRAFANA_POLICY_URL>#${POLICY_URL//\/\\}#g" \
++                "$f" > "$tmp"
++              mv "$tmp" "$f"
++            done <<< "${files}"
++            # Persist changes in the CI workspace so later steps (docs, packaging) see the resolved links
++            git config user.name "github-actions[bot]"
++            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
++            git add -A
++            if ! git diff --cached --quiet; then
++              git commit -m "ci: resolve Grafana dashboard URLs from repo variables"
++            fi
++          else
++            echo "No <ADD_GRAFANA_...> placeholders found; skipping."
++          fi
++
+       # ... your existing steps here (tests, policy eval, etc.) ...
+       # Example: emit the fast-lane marker artifact when policy is allow
+       - name: Emit Fast-Lane marker
+         run: |

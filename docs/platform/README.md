@@ -10,7 +10,7 @@
 
    ```bash
    git clone <repo>
-   cd intelgraph
+   cd summit
    # Install dependencies per README
    ```
 
