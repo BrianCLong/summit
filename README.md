@@ -47,6 +47,10 @@ Historical plans and reports are kept in [docs/archive](docs/archive/README.md).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com) [![Node.js](https://img.shields.io/badge/Node.js-20+-brightgreen.svg)](https://nodejs.org) [![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org) [![GraphQL](https://img.shields.io/badge/GraphQL-API-E10098.svg)](https://graphql.org)
 
+### Automations
+[![Copilot Context Refresh](https://github.com/BrianCLong/summit/actions/workflows/copilot-refresh.yml/badge.svg)](.github/workflows/copilot-refresh.yml)
+[![Weekly Copilot Adoption Report](https://github.com/BrianCLong/summit/actions/workflows/copilot-adoption-report.yml/badge.svg)](.github/workflows/copilot-adoption-report.yml)
+
 **Production-Ready MVP** • AI-augmented intelligence analysis platform combining graph analytics, real-time collaboration, and enterprise security. Built for the intelligence community with deployability-first principles.
 
 ## 🚀 Quick Start (< 60 Seconds)
@@ -188,7 +192,7 @@ cd intelgraph
 │ • Real-time UI  │    │ • Subscriptions │    │ • Analytics     │
 │ • Material-UI   │    │ • Rate Limiting │    │ • Constraints   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │
+                                
                        ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
                        │  PostgreSQL DB  │    │   TimescaleDB   │    │    Redis Cache  │
                        │                 │    │                 │    │                 │
