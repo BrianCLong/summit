@@ -51,9 +51,40 @@ jobs:
       - uses: actions/checkout@v4
       - name: OPA / license checks
         run: npm run policy:check
+  canary-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Canary deploy
+        run: ./ci/canary_deploy.sh $GITHUB_REF_NAME
+      - name: Validate canary (SLO probe)
+        run: node scripts/probes/slo-validate.mjs --window 10m --minSamples 500
+  promote-or-rollback:
+    needs: canary-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decision
+        id: dec
+        run: |
+          node scripts/probes/decision.mjs --policy scripts/probes/canary.json > decision.txt
+          echo "result=$(cat decision.txt)" >> $GITHUB_OUTPUT
+      - name: Promote
+        if: steps.dec.outputs.result == 'promote'
+        run: ./ci/promote.sh $GITHUB_REF_NAME
+      - name: Rollback
+        if: steps.dec.outputs.result == 'rollback'
+        run: ./ci/rollback.sh $GITHUB_REF_NAME
+      - name: Attach evidence bundle
+        if: always()
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: evidence/bundle-${{ github.ref_name }}.tar.zst
+          asset_name: evidence-${{ github.ref_name }}.tar.zst
+          asset_content_type: application/zstd
   release:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true }}
-    needs: [perf-k6, e2e-playwright, policy-checks]
+    needs: [perf-k6, e2e-playwright, policy-checks, promote-or-rollback]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

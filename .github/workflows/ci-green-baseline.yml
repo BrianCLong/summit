@@ -1,0 +1,81 @@
+name: CI Green Baseline
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      fastlane:
+        description: "Route eligible jobs via fastlane"
+        type: boolean
+        default: true
+
+env:
+  OTL_EXPORTER_OTLP_ENDPOINT: ${{ secrets.OTEL_COLLECTOR }}
+  FASTLANE_DEFAULT: ${{ inputs.fastlane || true }}
+
+jobs:
+  plan-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - id: set
+        run: |
+          echo "matrix={\"fastlane\": [\"eligible\", \"baseline\"]}" >> $GITHUB_OUTPUT
+
+  build-test:
+    needs: plan-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.plan-matrix.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    env:
+      ROUTE: ${{ matrix.fastlane }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ matrix.fastlane }}
+          restore-keys: |
+            pnpm-
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Fastlane eligibility gate
+        if: env.ROUTE == 'eligible' && env.FASTLANE_DEFAULT == 'true'
+        run: |
+          node scripts/fastlane/eligibility-check.mjs
+      - name: Run tests
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+          pnpm test:ci
+      - name: Emit friction annotations
+        if: always()
+        run: |
+          node scripts/friction/emit-annotations.mjs --route $ROUTE
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-${{ matrix.fastlane }}
+          path: reports/junit/**/*.xml
+
+  slo-gate:
+    needs: [ build-test ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: SLO & budget check
+        run: |
+          node scripts/gates/slo-budget-check.mjs \
+            --api-p95 350 --api-p99 900 \
+            --write-p95 700 --write-p99 1500 \
+            --ingest-pps 1000 --ingest-proc-p95 100 \
+            --budget-api-per-1M 2 --budget-ingest-per-1k 0.10

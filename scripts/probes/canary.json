@@ -1,0 +1,13 @@
+{
+  "maxApiLatencyP95": 350,
+  "maxApiLatencyP99": 900,
+  "maxErrorRate": 0.002,
+  "maxErrorBudgetConsumption": 0.8,
+  "minCanaryDuration": "10m",
+  "minSampleSize": 1000,
+  "sloViolationWeight": 10,
+  "errorBudgetWeight": 5,
+  "stabilityWeight": 2,
+  "promoteThreshold": 70,
+  "rollbackThreshold": 30
+}
