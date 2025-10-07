@@ -57,14 +57,18 @@ echo "   Grafana URL variables set."
 
 # --- 4. Make New Workflows Required Checks on Main Branch ---
 echo "4. Configuring branch protection for '$BASE_BRANCH' branch..."
+PAYLOAD=$(jq -n \
+  --argjson required_status_checks '{"strict":true,"contexts":["CI — Green Baseline","Maestro Fast-Lane","Runbook Auto-Gen"]}' \
+  --argjson required_pull_request_reviews '{"dismiss_stale_reviews":true,"required_approving_review_count":1}' \
+  --arg enforce_admins "true" \
+  --arg restrictions "null" \
+  '{ "required_status_checks": $required_status_checks, "enforce_admins": ($enforce_admins | fromjson), "required_pull_request_reviews": $required_pull_request_reviews, "restrictions": ($restrictions | fromjson) }')
+
 gh api \
   --method PUT \
   -H "Accept: application/vnd.github+json" \
   "repos/$OWNER/$REPO/branches/$BASE_BRANCH/protection" \
-  -F required_status_checks='{"strict":true,"contexts":["CI — Green Baseline","Maestro Fast-Lane","Runbook Auto-Gen"]}' \
-  -F enforce_admins="true" \
-  -F required_pull_request_reviews='{"dismiss_stale_reviews":true,"required_approving_review_count":1}' \
-  -F restrictions="null" \
+  --input <(echo "$PAYLOAD") \
   --silent || { echo "WARNING: Failed to configure branch protection. Ensure you have admin rights." >&2; }
 echo "   Branch protection configured for '$BASE_BRANCH'."
 
