@@ -1,11 +1,48 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.base.json",
   "include": [
-    "packages/**/src/**/*",
-    "conductor-ui/**/src/**/*",
-    "gateway/src/**/*",
-    "client/src/**/*",
-    "server/src/**/*"
+    "apps/**/src/**/*.{ts,tsx}",
+    "packages/**/src/**/*.{ts,tsx}",
+    "client/src/**/*.{ts,tsx}",
+    "server/src/**/*.{ts,tsx}",
+    "services/**/src/**/*.{ts,tsx}"
   ],
-  "exclude": ["**/dist/**", "**/build/**", "**/coverage/**", "**/node_modules/**", "docs-site/**"]
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.next/**",
+    "**/build/**",
+    "**/.turbo/**",
+    "**/.cache/**",
+    "**/coverage/**",
+    "**/*.test.{ts,tsx}",
+    "**/*.spec.{ts,tsx}",
+    "**/tests/**",
+    "**/e2e/**"
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@app/*": [
+        "src/*"
+      ],
+      "@ui/*": [
+        "client/src/*"
+      ],
+      "@server/*": [
+        "server/src/*"
+      ],
+      "@client/*": [
+        "client/src/*"
+      ]
+    },
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "node"
+    ]
+  }
 }

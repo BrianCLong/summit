@@ -1,7 +1,13 @@
-dist/
-build/
-coverage/
-node_modules/
+**/node_modules/**
+**/dist/**
+**/.next/**
+**/build/**
+**/.turbo/**
+**/.cache/**
+**/coverage/**
+**/*.gen.ts
+**/*.d.ts
+**/generated/**
 public/
 *.min.js
 .github/workflows/compliance-automation.yml

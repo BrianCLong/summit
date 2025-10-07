@@ -1,22 +1,64 @@
 name: CI
 on:
-  pull_request: { branches: [ main ] }
-  push:         { branches: [ main ] }
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
 permissions:
   contents: read
 jobs:
-  build-test:
+  lint-typecheck:
+    timeout-minutes: 12
     runs-on: ubuntu-latest
-    strategy: { matrix: { node: [18, 20] } }
+    strategy:
+      fail-fast: false
+      matrix:
+        scope: [client, server, apps, packages, services]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: ${{ matrix.node }}, cache: 'pnpm' }
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install
+        run: pnpm i --frozen-lockfile || npm ci
+      - name: Restore ESLint cache
+        uses: actions/cache@v4
+        with:
+          path: .eslintcache
+          key: eslint-${{ runner.os }}-${{ hashFiles('**/*.ts','**/*.tsx','**/*.js','**/*.jsx','eslint.config.js') }}
+      - name: Lint (changed first)
+        run: pnpm run lint:changed || true
+      - name: Lint (scoped, typed only where needed)
+        run: |
+          case "${{ matrix.scope }}" in
+            client) pnpm exec eslint client/src --cache --cache-location .eslintcache ;;
+            server) pnpm exec eslint server/src --cache --cache-location .eslintcache ;;
+            apps) pnpm exec eslint apps --cache --cache-location .eslintcache ;;
+            packages) pnpm exec eslint packages --cache --cache-location .eslintcache ;;
+            services) pnpm exec eslint services --cache --cache-location .eslintcache ;;
+          esac
+      - name: Lint (python)
+        if: matrix.scope == 'client'
+        run: pnpm run lint:python
+      - name: Typecheck (incremental)
+        if: matrix.scope == 'client'
+        run: pnpm run typecheck
+  build-test:
+    needs: lint-typecheck
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'pnpm'
       - run: corepack enable
       - run: pnpm i --frozen-lockfile
-      - name: Typecheck
-        run: pnpm -w run typecheck || npx tsc -p .
-      - name: Lint
-        run: pnpm -w run lint
       - name: Unit tests (Jest+SWC)
         run: pnpm -w exec jest --ci --maxWorkers=50% --coverage
