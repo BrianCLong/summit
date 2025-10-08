@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npm install)",
       "Bash(git -C /home/blong/Developer/summit status apps/web/package-lock.json)",
-      "Bash(make:*)"
+      "Bash(make:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

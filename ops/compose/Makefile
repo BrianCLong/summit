@@ -11,9 +11,9 @@ help: ## List targets
 
 bootstrap: ## Build local images (multi-service)
 	DOCKER_BUILDKIT=1 docker buildx build --load \
-	-t summit/api:$(INTELGRAPH_TAG) -f $(API_DOCKERFILE) $(API_CONTEXT)
+	-t summit/api:$(INTELGRAPH_TAG) -f $(API_CONTEXT)/$(API_DOCKERFILE) $(API_CONTEXT)
 	DOCKER_BUILDKIT=1 docker buildx build --load \
-	-t summit/web:$(WEB_TAG) -f $(WEB_DOCKERFILE) $(WEB_CONTEXT)
+	-t summit/web:$(WEB_TAG) -f $(WEB_CONTEXT)/$(WEB_DOCKERFILE) $(WEB_CONTEXT)
 
 up: ## Start stack (no AWS)
 	docker compose --env-file $(ENV_FILE) up -d
