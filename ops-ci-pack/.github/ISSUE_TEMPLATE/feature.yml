@@ -1,0 +1,17 @@
+name: Feature request
+description: Propose a feature
+title: "[FEAT] "
+labels: ["feature"]
+body:
+  - type: textarea
+    id: value
+    attributes:
+      label: User value
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risks & rollback

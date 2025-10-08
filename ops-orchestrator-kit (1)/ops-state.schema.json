@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ops Orchestrator State",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "current_step": {
+      "type": "string"
+    },
+    "completed_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "release_branch": {
+      "type": "string"
+    },
+    "base_branch": {
+      "type": "string",
+      "default": "main"
+    },
+    "ga_version": {
+      "type": "string"
+    },
+    "dry_run": {
+      "type": "boolean"
+    },
+    "pr_inventory_path": {
+      "type": "string"
+    },
+    "branch_inventory_path": {
+      "type": "string"
+    },
+    "notes_path": {
+      "type": "string"
+    },
+    "changelog_path": {
+      "type": "string"
+    },
+    "tooling": {
+      "type": "object"
+    },
+    "skipped": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "created_at",
+    "updated_at",
+    "current_step",
+    "completed_steps",
+    "dry_run"
+  ]
+}

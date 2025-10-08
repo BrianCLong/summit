@@ -1,0 +1,365 @@
+# Chaos Engineering Experiments
+# Sprint 27E: Reliability testing with controlled failure injection
+
+apiVersion: chaos.intelgraph.io/v1
+kind: ChaosExperimentSuite
+metadata:
+  name: intelgraph-reliability-tests
+  version: "27.0.0"
+
+spec:
+  # Global configuration
+  global:
+    timeout: "30m"
+    rollback_timeout: "5m"
+    steady_state_timeout: "2m"
+    abort_on_failure: false
+
+  # Baseline requirements
+  baseline:
+    slo_compliance: 0.95  # Must maintain 95% SLO during experiments
+    max_error_rate: 0.05  # 5% error rate threshold
+    recovery_time: "2m"   # Max recovery time after experiment
+
+# Service-level experiments
+experiments:
+  # Database resilience
+  - name: "database_connection_loss"
+    description: "Test graceful degradation when primary database becomes unavailable"
+    type: "network"
+    target:
+      service: "postgres"
+      percentage: 100
+
+    fault_injection:
+      type: "network_partition"
+      duration: "5m"
+
+    expected_behavior:
+      - service_degradation: "read_only_mode"
+      - cache_fallback: true
+      - user_notification: "Database maintenance mode"
+      - recovery_automatic: true
+
+    success_criteria:
+      - api_availability: 0.8  # 80% API still functional
+      - data_consistency: true
+      - no_data_loss: true
+
+  - name: "database_slow_queries"
+    description: "Simulate database performance degradation"
+    type: "latency"
+    target:
+      service: "postgres"
+      percentage: 100
+
+    fault_injection:
+      type: "latency_injection"
+      delay: "2s"
+      duration: "10m"
+
+    expected_behavior:
+      - query_timeout_handling: true
+      - connection_pooling_scaling: true
+      - circuit_breaker_activation: true
+
+    success_criteria:
+      - p95_latency: "<5s"
+      - timeout_rate: "<10%"
+      - circuit_breaker_trips: ">0"
+
+  # API Gateway resilience
+  - name: "api_gateway_overload"
+    description: "Test rate limiting and backpressure mechanisms"
+    type: "stress"
+    target:
+      service: "gateway"
+      endpoint: "/api/v1/query"
+
+    fault_injection:
+      type: "traffic_spike"
+      multiplier: 10
+      duration: "5m"
+
+    expected_behavior:
+      - rate_limiting_activation: true
+      - queue_backpressure: true
+      - graceful_degradation: true
+
+    success_criteria:
+      - rate_limit_effective: true
+      - queue_overflow: false
+      - service_recovery: "<2m"
+
+  # Model service resilience
+  - name: "model_service_failure"
+    description: "Test fallback when ML models become unavailable"
+    type: "service_failure"
+    target:
+      service: "nlq-service"
+      percentage: 100
+
+    fault_injection:
+      type: "pod_kill"
+      duration: "3m"
+
+    expected_behavior:
+      - fallback_model_activation: true
+      - cache_response_serving: true
+      - user_degraded_experience: true
+
+    success_criteria:
+      - fallback_success_rate: 0.9
+      - cache_hit_rate: 0.7
+      - service_restart: true
+
+  # Network resilience
+  - name: "inter_service_network_partition"
+    description: "Test service mesh resilience during network partitions"
+    type: "network"
+    target:
+      services: ["api", "gateway", "nlq-service"]
+
+    fault_injection:
+      type: "network_partition"
+      partition_percentage: 50
+      duration: "7m"
+
+    expected_behavior:
+      - service_mesh_routing: true
+      - circuit_breaker_isolation: true
+      - eventual_consistency: true
+
+    success_criteria:
+      - partition_tolerance: true
+      - data_consistency_eventual: true
+      - network_healing: "<3m"
+
+  # Memory pressure
+  - name: "memory_pressure_stress"
+    description: "Test application behavior under memory constraints"
+    type: "resource"
+    target:
+      service: "api"
+      resource: "memory"
+
+    fault_injection:
+      type: "memory_stress"
+      percentage: 90
+      duration: "8m"
+
+    expected_behavior:
+      - garbage_collection_aggressive: true
+      - cache_eviction_lru: true
+      - memory_leak_detection: true
+
+    success_criteria:
+      - no_oom_kills: true
+      - response_time_degradation: "<2x"
+      - memory_recovery: true
+
+  # Disk I/O stress
+  - name: "disk_io_saturation"
+    description: "Test system behavior under disk I/O pressure"
+    type: "resource"
+    target:
+      service: "postgres"
+      resource: "disk"
+
+    fault_injection:
+      type: "io_stress"
+      read_percentage: 70
+      write_percentage: 90
+      duration: "6m"
+
+    expected_behavior:
+      - query_prioritization: true
+      - connection_pooling_adaptive: true
+      - disk_queue_management: true
+
+    success_criteria:
+      - critical_queries_priority: true
+      - disk_recovery: "<4m"
+      - no_data_corruption: true
+
+# Compound failure scenarios
+compound_experiments:
+  - name: "database_and_cache_failure"
+    description: "Test behavior when both database and cache fail simultaneously"
+    experiments:
+      - "database_connection_loss"
+      - "redis_service_failure"
+
+    cascade_delay: "30s"
+    expected_behavior:
+      - read_only_emergency_mode: true
+      - static_response_fallback: true
+      - user_notification_critical: true
+
+    success_criteria:
+      - service_availability: 0.3  # Minimum viable service
+      - data_integrity: true
+      - recovery_coordination: true
+
+  - name: "peak_load_with_service_degradation"
+    description: "Test system under peak load with degraded services"
+    experiments:
+      - "api_gateway_overload"
+      - "model_service_failure"
+      - "database_slow_queries"
+
+    cascade_delay: "1m"
+    expected_behavior:
+      - load_shedding_aggressive: true
+      - priority_queue_activation: true
+      - emergency_caching: true
+
+    success_criteria:
+      - critical_path_preserved: true
+      - graceful_user_experience: true
+      - system_stability: true
+
+# Monitoring and observability
+monitoring:
+  dashboards:
+    - name: "Chaos Experiment Dashboard"
+      url: "/grafana/d/chaos-experiments"
+      panels:
+        - experiment_status
+        - slo_compliance_during_chaos
+        - service_health_matrix
+        - recovery_time_trends
+
+  alerts:
+    - name: "experiment_slo_breach"
+      condition: "slo_compliance < 0.90 during chaos"
+      severity: "critical"
+
+    - name: "recovery_time_exceeded"
+      condition: "recovery_time > baseline.recovery_time"
+      severity: "warning"
+
+    - name: "unexpected_cascade_failure"
+      condition: "failure_propagation > expected_scope"
+      severity: "critical"
+
+# Automated validation
+validation:
+  pre_experiment:
+    - check_system_health: true
+    - verify_monitoring_active: true
+    - confirm_rollback_procedures: true
+    - validate_blast_radius: true
+
+  during_experiment:
+    - monitor_slo_compliance: true
+    - track_error_propagation: true
+    - measure_recovery_metrics: true
+    - observe_user_impact: true
+
+  post_experiment:
+    - verify_system_recovery: true
+    - analyze_failure_patterns: true
+    - update_runbooks: true
+    - document_lessons_learned: true
+
+# Game day scenarios
+game_days:
+  - name: "Black Friday Simulation"
+    description: "High load + service failures during peak business hours"
+    schedule: "quarterly"
+    duration: "4h"
+
+    scenarios:
+      - peak_traffic_simulation: "10x normal load"
+      - random_service_failures: "2-3 services"
+      - database_performance_degradation: "50% slower"
+      - network_intermittency: "5% packet loss"
+
+    participants:
+      - on_call_engineers
+      - product_owners
+      - customer_support
+      - executive_stakeholders
+
+    success_metrics:
+      - incident_response_time: "<15m"
+      - customer_impact_minimization: true
+      - communication_effectiveness: true
+      - business_continuity: true
+
+  - name: "Regional Outage Drill"
+    description: "Simulate complete regional infrastructure failure"
+    schedule: "biannually"
+    duration: "2h"
+
+    scenarios:
+      - primary_region_failure: "complete outage"
+      - failover_to_secondary: "automated"
+      - data_replication_validation: true
+      - dns_switching: "automatic"
+
+    participants:
+      - infrastructure_team
+      - database_administrators
+      - security_team
+      - business_continuity_team
+
+# Failure injection tools
+tools:
+  kubernetes:
+    - chaos_mesh
+    - litmus
+    - pumba
+
+  network:
+    - toxiproxy
+    - comcast
+    - tc (traffic control)
+
+  application:
+    - gremlin
+    - chaos_monkey
+    - custom_fault_injectors
+
+# Safety mechanisms
+safety:
+  circuit_breakers:
+    enabled: true
+    failure_threshold: 5
+    recovery_timeout: "30s"
+
+  blast_radius_limits:
+    max_affected_services: 3
+    max_user_impact: 0.1  # 10% of users
+    max_duration: "15m"
+
+  emergency_stops:
+    - manual_override: true
+    - automated_slo_breach: true
+    - cascading_failure_detection: true
+
+  rollback_procedures:
+    automatic: true
+    manual_override: true
+    timeout: "2m"
+
+# Compliance and governance
+governance:
+  approval_required: true
+  reviewers:
+    - platform_team_lead
+    - sre_manager
+    - security_representative
+
+  documentation:
+    - experiment_plan: required
+    - risk_assessment: required
+    - rollback_plan: required
+    - lessons_learned: required
+
+  audit_trail:
+    - experiment_execution_log: true
+    - participant_actions: true
+    - system_state_snapshots: true
+    - recovery_procedures_used: true

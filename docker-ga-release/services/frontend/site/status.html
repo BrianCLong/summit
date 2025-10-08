@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maestro Conductor - Status</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin: 0;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .status-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-card h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-up {
+            background-color: #4caf50;
+        }
+        .status-down {
+            background-color: #f44336;
+        }
+        .links {
+            margin-top: 20px;
+        }
+        .links a {
+            display: inline-block;
+            margin-right: 20px;
+            color: #1976d2;
+            text-decoration: none;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Maestro Conductor - Status Dashboard</h1>
+            <p>Welcome to the Maestro Conductor platform status page</p>
+        </header>
+
+        <div class="status-grid">
+            <div class="status-card">
+                <h2>Core Services</h2>
+                <p><span class="status-indicator status-up"></span> API Service: UP</p>
+                <p><span class="status-indicator status-up"></span> Frontend: UP</p>
+                <p><span class="status-indicator status-up"></span> Ingest Service: UP</p>
+            </div>
+
+            <div class="status-card">
+                <h2>Data Stores</h2>
+                <p><span class="status-indicator status-up"></span> PostgreSQL: UP</p>
+                <p><span class="status-indicator status-up"></span> Redis: UP</p>
+                <p><span class="status-indicator status-up"></span> Neo4j: UP</p>
+            </div>
+
+            <div class="status-card">
+                <h2>Security & Policy</h2>
+                <p><span class="status-indicator status-up"></span> OPA: UP</p>
+                <p><span class="status-indicator status-up"></span> Policy Enforcement: ACTIVE</p>
+                <p><span class="status-indicator status-up"></span> AuthZ: ENABLED</p>
+            </div>
+
+            <div class="status-card">
+                <h2>Observability</h2>
+                <p><span class="status-indicator status-up"></span> Prometheus: UP</p>
+                <p><span class="status-indicator status-up"></span> Grafana: UP</p>
+                <p><span class="status-indicator status-up"></span> Jaeger: UP</p>
+            </div>
+
+            <div class="status-card">
+                <h2>Release Information</h2>
+                <p><strong>Version:</strong> v2025.10.07</p>
+                <p><strong>Status:</strong> GA (General Availability)</p>
+                <p><strong>Build Date:</strong> 2025-10-07</p>
+            </div>
+
+            <div class="status-card">
+                <h2>Metrics</h2>
+                <p><strong>API Latency:</strong> &lt; 350ms (p95)</p>
+                <p><strong>Ingest Rate:</strong> &gt; 1000 events/s</p>
+                <p><strong>Cache Hit Ratio:</strong> &gt; 85%</p>
+            </div>
+        </div>
+
+        <div class="links">
+            <a href="/graphql">GraphQL API</a>
+            <a href="/healthz">Health Check</a>
+            <a href="http://localhost:3001">Grafana Dashboard</a>
+            <a href="http://localhost:16686">Jaeger Tracing</a>
+            <a href="http://localhost:9090">Prometheus Metrics</a>
+        </div>
+
+        <footer>
+            <p>Maestro Conductor v2025.10.07 - GA Release</p>
+            <p>Powered by IntelGraph Maestro Conductor</p>
+        </footer>
+    </div>
+</body>
+</html>

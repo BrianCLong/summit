@@ -1,0 +1,29 @@
+# Maestro Overview Dashboard
+
+This dashboard provides an overview of the Maestro Conductor platform status and metrics.
+
+## Panels
+
+1. **API Status** - Shows the current status of the API service
+2. **Ingest Status** - Shows the current status of the ingest service
+3. **Database Status** - Shows the current status of the database services
+4. **Cache Hit Ratio** - Shows the cache hit ratio for the platform
+5. **Request Rate** - Shows the request rate for the API
+6. **Error Rate** - Shows the error rate for the API
+7. **Latency** - Shows the latency for API requests
+8. **Resource Usage** - Shows CPU and memory usage for the services
+
+## Metrics
+
+The dashboard displays metrics from:
+- Prometheus (scraped from the API and ingest services)
+- OTEL Collector (traces and metrics from the services)
+- Custom metrics exposed by the services
+
+## Alerts
+
+The dashboard includes alerts for:
+- API downtime
+- High error rates
+- High latency
+- Resource exhaustion

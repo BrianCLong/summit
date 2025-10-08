@@ -1,0 +1,117 @@
+From 58024a06eecfca0e16df4523082ab9ffd320f997 Mon Sep 17 00:00:00 2001
+From: GitHub Actions <github-actions@github.com>
+Date: Mon, 6 Oct 2025 12:22:24 -0600
+Subject: [PATCH 31/38] ci: add workflow_dispatch trigger
+
+---
+ .github/workflows/my-ci-core.yml |  1 +
+ Makefile                         | 60 ++++++++++++++++++++++----------
+ 2 files changed, 42 insertions(+), 19 deletions(-)
+
+diff --git a/.github/workflows/my-ci-core.yml b/.github/workflows/my-ci-core.yml
+index 682c1cbc3..b3187380f 100644
+--- a/.github/workflows/my-ci-core.yml
++++ b/.github/workflows/my-ci-core.yml
+@@ -3,6 +3,7 @@ on:
+   pull_request:
+   push:
+     branches: [main]
++  workflow_dispatch:
+ jobs:
+   setup:
+     runs-on: ubuntu-latest
+diff --git a/Makefile b/Makefile
+index f4197ce9a..8dfc0d01a 100644
+--- a/Makefile
++++ b/Makefile
+@@ -80,7 +80,7 @@ all: capture stabilize set-protection harvest-untracked batch-prs finalize audit
+ # Deployable-first developer workflow targets
+ # ------------------------------------------------------------
+ 
+-.PHONY: bootstrap up up-ai up-kafka up-full smoke down clean logs ps helm-lint helm-smoke helm-validate
++.PHONY: bootstrap up up-ai up-kafka up-full smoke down clean logs ps helm-lint helm-smoke helm-validate helm-validate-online
+ 
+ COMPOSE_FILE ?= docker-compose.yml
+ SMOKE_SCRIPT ?= scripts/golden-smoke.sh
+@@ -88,6 +88,15 @@ SMOKE_MAX_WAIT ?= 60
+ COMPOSE := docker compose -f $(COMPOSE_FILE)
+ COMPOSE_PROFILES ?=
+ 
++# --- kubeconform resolver (offline-first) ------------------------------------
++KCF_VERSION ?= 0.6.7
++K8S_VERSION ?= v1.28.0
++KCF_BIN ?= $(shell ./tools/kubeconform/resolve.sh 2>/dev/null || echo "")
++ifeq ($(KCF_BIN),)
++KCF_BIN := $(KUBECONFORM)
++endif
++SCHEMAS_DIR ?= tools/k8s-schemas/$(K8S_VERSION)
++
+ bootstrap: ## Verify prerequisites and prepare environment
+ 	@set -euo pipefail
+ 	@echo "🔍 Checking local prerequisites"
+@@ -169,21 +178,18 @@ helm-smoke: ## Render chart locally and assert service/probe/metrics wiring
+ 	  > /tmp/smoke.yaml
+ 	@rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" /tmp/smoke.yaml
+ 
+-helm-validate: ## Render chart and validate manifests with kubeconform
+-	@set -euo pipefail
+-	@KUBECONFORM_BIN=$$(command -v kubeconform || { \
+-		tmp_dir=$$(mktemp -d); \
+-		os=$$(uname | tr '[:upper:]' '[:lower:]'); \
+-		arch=$$(uname -m); \
+-		if [ "$$arch" = "x86_64" ]; then arch=amd64; \
+-		elif [ "$$arch" = "arm64" ] || [ "$$arch" = "aarch64" ]; then arch=arm64; \
+-		else echo "Unsupported architecture: $$arch" >&2; exit 1; fi; \
+-		archive="kubeconform-$${os}-$$arch.tar.gz"; \
+-		curl -sSL "https://github.com/yannh/kubeconform/releases/download/v0.6.5/$$archive" \
+-		  | tar -xz -C "$$tmp_dir" kubeconform; \
+-		echo "$$tmp_dir/kubeconform"; \
+-	}); \
+-	 helm template smoke infra/helm/intelgraph --namespace smoke \
++helm-validate: ## Validate rendered manifests with kubeconform (offline-friendly)
++	@if [ -z "$(KCF_BIN)" ]; then \
++	  echo "✖ kubeconform not found."; \
++	  echo "  -> Place a binary under tools/kubeconform/<os>-<arch>/kubeconform"; \
++	  echo "     or export KUBECONFORM=/abs/path/to/kubeconform"; \
++	  echo "     or run 'make helm-validate-online' (requires network)."; \
++	  exit 2; \
++	fi
++	@echo "✔ Using kubeconform: $(KCF_BIN)"
++	@echo "ℹ K8s version: $(K8S_VERSION)"
++	@mkdir -p .out/helm
++	@helm template smoke infra/helm/intelgraph --namespace smoke \
+ 	  --set server.enabled=true \
+ 	  --set server.service.enabled=true \
+ 	  --set server.service.port=4000 \
+@@ -193,9 +199,25 @@ helm-validate: ## Render chart and validate manifests with kubeconform
+ 	  --set server.metrics.enabled=true \
+ 	  --set server.metrics.prometheusScrape=true \
+ 	  --set dev.dummySecrets=true \
+-	  > /tmp/smoke.yaml; \
+-	 rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" /tmp/smoke.yaml; \
+-	 "$$KUBECONFORM_BIN" -strict -summary /tmp/smoke.yaml
++	  > .out/helm/intelgraph.yaml
++	@rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" .out/helm/intelgraph.yaml
++	@if [ -d "$(SCHEMAS_DIR)" ]; then \
++	  echo "✔ Using vendored schemas: $(SCHEMAS_DIR)"; \
++	  "$(KCF_BIN)" -strict -ignore-missing-schemas \
++	    -schema-location default \
++	    -schema-location file://$(SCHEMAS_DIR)/{{ .NormalizedKubernetesVersion }}-standalone \
++	    .out/helm/intelgraph.yaml; \
++	else \
++	  echo "⚠ No vendored schemas found at $(SCHEMAS_DIR); using kubeconform defaults only."; \
++	  "$(KCF_BIN)" -strict -ignore-missing-schemas -schema-location default \
++	    .out/helm/intelgraph.yaml; \
++	fi
++
++.PHONY: helm-validate-online
++helm-validate-online: ## (Online) Download kubeconform + schemas, then validate
++	@tools/kubeconform/fetch.sh $(KCF_VERSION)
++	@tools/kubeconform/fetch-schemas.sh $(K8S_VERSION)
++	@$(MAKE) helm-validate
+ 
+ # Green-Lock Acceptance Pack Targets
+ acceptance: verify recover auto-merge monitor ## Run complete acceptance workflow
+-- 
+2.51.0
+

@@ -1,0 +1,12 @@
+{
+  "bomFormat": "SPDX",
+  "specVersion": "2.3",
+  "name": "inference-worker",
+  "versionInfo": "2025.09.01",
+  "packages": [
+    {"name": "inference-worker", "versionInfo": "2025.09.01"},
+    {"name": "numpy", "versionInfo": "1.26.4"},
+    {"name": "pandas", "versionInfo": "2.0.3"},
+    {"name": "torch", "versionInfo": "2.2.1"}
+  ]
+}

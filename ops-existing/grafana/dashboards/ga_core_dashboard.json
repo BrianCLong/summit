@@ -1,0 +1,77 @@
+{
+  "title": "IntelGraph — SLO & Safety",
+  "timezone": "browser",
+  "editable": true,
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      { "name": "env", "type": "query", "datasource": "Prometheus", "query": "label_values(requests_total, env)", "refresh": 2, "current": {"text": "prod", "value": "prod"} },
+      { "name": "service", "type": "query", "datasource": "Prometheus", "query": "label_values(requests_total, service)", "refresh": 2 }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "NLQ Parse p95 (ms)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum by (le) (rate(nlq_parse_latency_bucket{env=\"$env\",service=\"$service\"}[5m]))) * 1000" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "NLQ Exec p95 (ms)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum by (le) (rate(nlq_exec_latency_bucket{env=\"$env\",service=\"$service\"}[5m]))) * 1000" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Ingest E2E p95 (s)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum by (le) (rate(ingest_e2e_seconds_bucket{env=\"$env\",service=\"$service\"}[5m])))" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Export Decisions (stacked)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 8 },
+      "fieldConfig": { "defaults": { "custom": { "stacking": { "mode": "normal" } } } },
+      "targets": [
+        { "expr": "sum(increase(export_decisions_total{env=\"$env\",service=\"$service\",decision=\"allow\"}[1h]))" , "legendFormat": "allow"},
+        { "expr": "sum(increase(export_decisions_total{env=\"$env\",service=\"$service\",decision=\"deny\"}[1h]))" , "legendFormat": "deny"},
+        { "expr": "sum(increase(export_decisions_total{env=\"$env\",service=\"$service\",decision=\"redact\"}[1h]))" , "legendFormat": "redact"},
+        { "expr": "sum(increase(export_decisions_total{env=\"$env\",service=\"$service\",decision=\"step_up\"}[1h]))" , "legendFormat": "step_up"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "ER Precision/Recall",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 15 },
+      "targets": [
+        { "expr": "avg(er_precision{env=\"$env\",service=\"$service\"})", "legendFormat": "precision" },
+        { "expr": "avg(er_recall{env=\"$env\",service=\"$service\"})", "legendFormat": "recall" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "SLO Burn Rate (99% target)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 15 },
+      "targets": [
+        { "expr": "(sum(rate(requests_total{env=\"$env\",service=\"$service\",status=~\"5..|4..\"}[5m])) / sum(rate(requests_total{env=\"$env\",service=\"$service\"}[5m]))) / (1 - 0.99)", "legendFormat": "burn_5m" }
+      ],
+      "options": { "alertThreshold": true }
+    }
+  ]
+}

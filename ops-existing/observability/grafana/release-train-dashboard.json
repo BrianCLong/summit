@@ -1,0 +1,362 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Release Captain - Release Train",
+    "tags": ["release-captain", "deployment", "ci-cd"],
+    "style": "dark",
+    "timezone": "UTC",
+    "editable": true,
+    "graphTooltip": 1,
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"],
+      "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "custom",
+          "options": [
+            {"text": "All", "value": "$__all", "selected": true},
+            {"text": "Production", "value": "prod", "selected": false},
+            {"text": "Staging", "value": "staging", "selected": false},
+            {"text": "Development", "value": "dev", "selected": false}
+          ],
+          "current": {"text": "All", "value": "$__all"},
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Release Captain Overview",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "increase(rc_workflow_runs_total[24h])",
+            "legendFormat": "Total Runs (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(rc_workflow_success_total[1h]) * 100",
+            "legendFormat": "Success Rate %",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(rc_workflow_duration_seconds_bucket[1h]))",
+            "legendFormat": "P95 Duration (s)",
+            "refId": "C"
+          },
+          {
+            "expr": "increase(rc_pr_merged_total[24h])",
+            "legendFormat": "PRs Merged (24h)",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 80},
+                {"color": "green", "value": 95}
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Success Rate %"},
+              "properties": [
+                {"id": "unit", "value": "percent"},
+                {"id": "max", "value": 100}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "P95 Duration (s)"},
+              "properties": [
+                {"id": "unit", "value": "s"}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "background",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Deployment Frequency",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(rc_workflow_success_total[1h]) * 3600",
+            "legendFormat": "Successful Deployments/hour",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(rc_workflow_failure_total[1h]) * 3600",
+            "legendFormat": "Failed Deployments/hour",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "hertz",
+            "min": 0,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "pointSize": 5,
+              "fillOpacity": 10,
+              "spanNulls": false,
+              "stacking": {"mode": "none", "group": "A"}
+            }
+          }
+        },
+        "options": {
+          "tooltip": {"mode": "multi", "sort": "desc"},
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}
+        }
+      },
+      {
+        "id": 3,
+        "title": "Time to Merge Distribution",
+        "type": "histogram",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(rc_pr_time_to_merge_seconds_bucket[1h]))",
+            "legendFormat": "P50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(rc_pr_time_to_merge_seconds_bucket[1h]))",
+            "legendFormat": "P95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(rc_pr_time_to_merge_seconds_bucket[1h]))",
+            "legendFormat": "P99",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Quality Gate Failures",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(rc_gate_total{result=\"fail\"}[1h]) by (gate)",
+            "legendFormat": "{{gate}} failures/hour",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "hertz",
+            "min": 0,
+            "custom": {
+              "drawStyle": "bars",
+              "pointSize": 5,
+              "fillOpacity": 80
+            }
+          }
+        },
+        "options": {
+          "tooltip": {"mode": "multi", "sort": "desc"},
+          "legend": {"displayMode": "table", "placement": "right"}
+        }
+      },
+      {
+        "id": 5,
+        "title": "Risk Distribution",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "targets": [
+          {
+            "expr": "increase(rc_pr_analyzed_total[24h]) by (risk)",
+            "legendFormat": "{{risk}} Risk",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "hideFrom": {"legend": false, "tooltip": false, "vis": false}
+            },
+            "mappings": [],
+            "color": {
+              "mode": "palette-classic"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "high Risk"},
+              "properties": [
+                {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "medium Risk"},
+              "properties": [
+                {"id": "color", "value": {"mode": "fixed", "fixedColor": "yellow"}}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "low Risk"},
+              "properties": [
+                {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "pieType": "pie",
+          "tooltip": {"mode": "single", "sort": "none"},
+          "legend": {"displayMode": "table", "placement": "right", "values": ["percent"]},
+          "displayLabels": ["name", "percent"]
+        }
+      },
+      {
+        "id": 6,
+        "title": "Auto-Fix Applications",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "rate(rc_autofix_applied_total[1h]) by (type)",
+            "legendFormat": "{{type}} fixes/hour",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "hertz",
+            "min": 0,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "pointSize": 5,
+              "fillOpacity": 20,
+              "stacking": {"mode": "normal", "group": "A"}
+            }
+          }
+        },
+        "options": {
+          "tooltip": {"mode": "multi", "sort": "desc"},
+          "legend": {"displayMode": "table", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 7,
+        "title": "Circuit Breaker State",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+        "targets": [
+          {
+            "expr": "rc_circuit_state",
+            "legendFormat": "Circuit State",
+            "refId": "A"
+          },
+          {
+            "expr": "rc_circuit_failure_count",
+            "legendFormat": "Failure Count",
+            "refId": "B"
+          },
+          {
+            "expr": "rc_recent_deployments",
+            "legendFormat": "Recent Deployments",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 1},
+                {"color": "red", "value": 2}
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Circuit State"},
+              "properties": [
+                {
+                  "id": "mappings",
+                  "value": [
+                    {"options": {"0": {"text": "CLOSED"}}, "type": "value"},
+                    {"options": {"1": {"text": "HALF_OPEN"}}, "type": "value"},
+                    {"options": {"2": {"text": "OPEN"}}, "type": "value"}
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "vertical",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        }
+      }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 30,
+    "version": 1,
+    "links": [
+      {
+        "asDropdown": false,
+        "icon": "external link",
+        "includeVars": false,
+        "keepTime": false,
+        "tags": [],
+        "targetBlank": true,
+        "title": "Release Captain Runbooks",
+        "tooltip": "",
+        "type": "link",
+        "url": "https://github.com/${GITHUB_REPOSITORY}/blob/main/RUNBOOKS/release-captain-verification.md"
+      }
+    ]
+  }
+}

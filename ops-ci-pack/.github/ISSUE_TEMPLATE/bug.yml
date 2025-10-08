@@ -1,0 +1,21 @@
+name: Bug report
+description: Report a reproducible defect
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/metrics/traces

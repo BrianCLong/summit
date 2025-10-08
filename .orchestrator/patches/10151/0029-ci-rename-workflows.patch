@@ -1,0 +1,23 @@
+From d8964c8fd0fb977d050910c194db45e219e0c80a Mon Sep 17 00:00:00 2001
+From: GitHub Actions <github-actions@github.com>
+Date: Mon, 6 Oct 2025 12:15:59 -0600
+Subject: [PATCH 29/38] ci: rename workflows
+
+---
+ .github/workflows/{ci-core.yml => my-ci-core.yml}               | 0
+ .github/workflows/{security-light.yml => my-security-light.yml} | 0
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+ rename .github/workflows/{ci-core.yml => my-ci-core.yml} (100%)
+ rename .github/workflows/{security-light.yml => my-security-light.yml} (100%)
+
+diff --git a/.github/workflows/ci-core.yml b/.github/workflows/my-ci-core.yml
+similarity index 100%
+rename from .github/workflows/ci-core.yml
+rename to .github/workflows/my-ci-core.yml
+diff --git a/.github/workflows/security-light.yml b/.github/workflows/my-security-light.yml
+similarity index 100%
+rename from .github/workflows/security-light.yml
+rename to .github/workflows/my-security-light.yml
+-- 
+2.51.0
+

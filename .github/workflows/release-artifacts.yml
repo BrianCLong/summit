@@ -1,0 +1,52 @@
+name: Release Artifacts
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-artifacts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed to upload to release
+    env:
+      TAG: ${{ github.ref_name }}
+      NODE_OPTIONS: --max-old-space-size=2048
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: pnpm i --frozen-lockfile || npm ci
+
+      - name: Build (optional)
+        run: echo "skip heavy build; manifest uses existing artifacts"
+
+      - name: Generate Release Manifest
+        run: node scripts/gen-release-manifest.mjs --tag=${TAG}
+
+      - name: Generate Release Attestation
+        run: node scripts/gen-release-attestation.mjs --tag=${TAG}
+
+      - name: Verify release manifest digests
+        run: node scripts/verify-release-manifest.mjs --tag=${TAG}
+
+      - name: Upload artifacts to the GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          files: |
+            dist/release-manifest-${{ env.TAG }}.yaml
+            dist/release-attestation-${{ env.TAG }}.jsonld
+            dist/evidence-v0.3.2-mc-nightly.json
+            MAESTRO_CONDUCTOR_GA_SUMMARY.md
+            ops/monitoring/grafana/dashboards/summit-ts-build.json
+            ops/monitoring/prometheus/prometheus.yml

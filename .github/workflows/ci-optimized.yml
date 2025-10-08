@@ -1,0 +1,164 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Keep node from OOMing on large repos
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@v4
+
+      # Detect changed paths (PR vs base) or last commit range on push
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            apps:
+              - 'apps/**'
+            packages:
+              - 'packages/**'
+            libs:
+              - 'libs/**'
+            services:
+              - 'services/**'
+            tools:
+              - 'tools/**'
+            scripts:
+              - 'scripts/**'
+            client:
+              - 'client/**'
+            server:
+              - 'server/**'
+            # Config changes trigger "full" runs
+            config:
+              - 'eslint.config.js'
+              - 'eslint.config.mjs'
+              - 'tsconfig*.json'
+              - '.eslintignore'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'npm-shrinkwrap.json'
+              - '.github/workflows/**'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: pnpm i --frozen-lockfile || npm ci
+
+      # Restore caches
+      - name: Restore ESLint cache
+        uses: actions/cache@v4
+        with:
+          path: .eslintcache
+          key: eslint-${{ runner.os }}-${{ hashFiles('**/*.{ts,tsx,js,jsx}','eslint.config.js','eslint.config.mjs','.eslintignore','package.json') }}
+
+      - name: Restore TypeScript build info
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/*.tsbuildinfo
+          key: tsc-${{ runner.os }}-${{ hashFiles('**/*.{ts,tsx}','tsconfig*.json','package.json') }}
+
+      # Compute target globs
+      - name: Compute lint targets
+        id: targets
+        shell: bash
+        run: |
+          run_full="${{ steps.filter.outputs.config }}"
+          # default to empty list
+          targets=()
+
+          if [[ "$run_full" == "true" ]]; then
+            echo "config changed -> full run"
+            echo "lint_paths=." >> $GITHUB_OUTPUT
+            echo "tc_paths=."   >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # add buckets if changed
+          [[ "${{ steps.filter.outputs.apps }}" == "true" ]] && targets+=("apps/**/src")
+          [[ "${{ steps.filter.outputs.packages }}" == "true" ]] && targets+=("packages/**/src")
+          [[ "${{ steps.filter.outputs.libs }}" == "true" ]] && targets+=("libs/**/src")
+          [[ "${{ steps.filter.outputs.services }}" == "true" ]] && targets+=("services/**/src")
+          [[ "${{ steps.filter.outputs.tools }}" == "true" ]] && targets+=("tools/**/src")
+          [[ "${{ steps.filter.outputs.scripts }}" == "true" ]] && targets+=("scripts/**/src")
+          [[ "${{ steps.filter.outputs.client }}" == "true" ]] && targets+=("client/src")
+          [[ "${{ steps.filter.outputs.server }}" == "true" ]] && targets+=("server/src")
+
+          if [[ ${#targets[@]} -eq 0 ]]; then
+            echo "No relevant path buckets changed. Short-circuit."
+            echo "lint_paths=" >> $GITHUB_OUTPUT
+            echo "tc_paths="   >> $GITHUB_OUTPUT
+          else
+            lint_joined=$(printf " %s" "${targets[@]}")
+            lint_joined=${lint_joined:1}
+            echo "lint_paths=$lint_joined" >> $GITHUB_OUTPUT
+            echo "tc_paths=$lint_joined"   >> $GITHUB_OUTPUT
+          fi
+
+      # Quickly lint only actually changed files first (non-blocking)
+      - name: Lint (changed files quick pass)
+        if: ${{ steps.targets.outputs.lint_paths != '' }}
+        run: npm run lint:changed
+
+      # Main lint scoped to the computed targets
+      - name: Lint (scoped, typed only where needed)
+        if: ${{ steps.targets.outputs.lint_paths != '' }}
+        run: |
+          echo "Linting: ${{ steps.targets.outputs.lint_paths }}"
+          if [[ "${{ steps.targets.outputs.lint_paths }}" == "." ]]; then
+            npm run lint
+          else
+            eslint ${{ steps.targets.outputs.lint_paths }} \
+              --cache --cache-location .eslintcache --max-warnings=0
+          fi
+
+      # Type-check (incremental, references get you speed)
+      - name: Typecheck (incremental)
+        if: ${{ steps.targets.outputs.tc_paths != '' }}
+        run: |
+          echo "Typechecking (incremental) via project references"
+          npm run typecheck
+
+      # If nothing to run, exit gracefully
+      - name: Nothing to do
+        if: ${{ steps.targets.outputs.lint_paths == '' && steps.targets.outputs.tc_paths == '' }}
+        run: echo "✅ No lint/typecheck work required for this change."
+
+  # Run tests in parallel with linting/typechecking
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        node: [18, 20]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'pnpm'
+      - run: corepack enable
+      - run: pnpm i --frozen-lockfile
+      - name: Unit tests (Jest+SWC)
+        run: pnpm -w exec jest --ci --maxWorkers=50% --coverage

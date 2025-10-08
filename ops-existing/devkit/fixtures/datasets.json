@@ -1,0 +1,128 @@
+{
+  "datasets": [
+    {
+      "slug": "mission-snapshots",
+      "name": "Mission Snapshots",
+      "category": "ops-intel",
+      "summary": "Curated mission briefing cards used by the UI golden path and smoke tests.",
+      "ownerTeam": "mission-control",
+      "source": "synthetic",
+      "updateCadence": "hourly",
+      "goldenPath": ["ui", "api"],
+      "sample": {
+        "records": [
+          {
+            "id": "M-4821",
+            "title": "Stabilize Aurora Spoke",
+            "status": "in-flight",
+            "severity": "high",
+            "owner": "Aurora Ops",
+            "updatedAt": "2025-03-11T08:15:00Z"
+          },
+          {
+            "id": "M-4822",
+            "title": "Rollout Sovereign Safeguards",
+            "status": "queued",
+            "severity": "medium",
+            "owner": "Sovereign Safeguards",
+            "updatedAt": "2025-03-11T09:30:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "policy-evaluations",
+      "name": "Policy Evaluation Ledger",
+      "category": "compliance",
+      "summary": "OPA evaluation outcomes mirrored into Postgres for analytics and regression guards.",
+      "ownerTeam": "trust-engineering",
+      "source": "opa",
+      "updateCadence": "on-demand",
+      "goldenPath": ["api", "worker", "opa"],
+      "sample": {
+        "records": [
+          {
+            "id": "P-901",
+            "policy": "residency.snowflake",
+            "decision": "allow",
+            "inputHash": "2b4f78c",
+            "latencyMs": 42,
+            "evaluatedAt": "2025-03-11T08:00:00Z"
+          },
+          {
+            "id": "P-902",
+            "policy": "supply_chain.software_bill",
+            "decision": "deny",
+            "inputHash": "f98a210",
+            "latencyMs": 55,
+            "evaluatedAt": "2025-03-11T08:03:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "slug": "worker-telemetry",
+      "name": "Worker Telemetry",
+      "category": "observability",
+      "summary": "Aggregated worker pulse data powering OTEL smoke assertions.",
+      "ownerTeam": "conductor-platform",
+      "source": "otel",
+      "updateCadence": "streaming",
+      "goldenPath": ["worker", "otel"],
+      "sample": {
+        "records": [
+          {
+            "workerId": "light-worker-1",
+            "queueDepth": 3,
+            "avgLatencyMs": 180,
+            "uptimeSeconds": 86400
+          },
+          {
+            "workerId": "planner-worker-1",
+            "queueDepth": 1,
+            "avgLatencyMs": 95,
+            "uptimeSeconds": 7200
+          }
+        ]
+      }
+    }
+  ],
+  "personas": [
+    {
+      "slug": "fusion-analyst",
+      "name": "Fusion Analyst",
+      "mission": "Correlate multi-domain signals into decision-ready briefs.",
+      "primaryNeeds": [
+        "Graph exploration",
+        "Policy traceability",
+        "Golden path walkthroughs"
+      ]
+    },
+    {
+      "slug": "reliability-engineer",
+      "name": "Reliability Engineer",
+      "mission": "Guarantee smoke test flake stays below one percent.",
+      "primaryNeeds": [
+        "60s smoke dashboard",
+        "Worker saturation alerts",
+        "Parity diff history"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "C-7301",
+      "title": "OTEL Collector Regression",
+      "summary": "Collector dropped traces during hot reload; fixed via batching patch.",
+      "impacts": ["worker", "api"],
+      "status": "closed"
+    },
+    {
+      "id": "C-7302",
+      "title": "OPA bundle drift",
+      "summary": "Nightly parity detected drift between devcontainer and local stack policies.",
+      "impacts": ["opa"],
+      "status": "monitoring"
+    }
+  ]
+}

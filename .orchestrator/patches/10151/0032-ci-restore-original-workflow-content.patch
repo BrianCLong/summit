@@ -1,0 +1,64 @@
+From 4ae9208e16ae3f86484fa6edc6f12805a2e851b4 Mon Sep 17 00:00:00 2001
+From: GitHub Actions <github-actions@github.com>
+Date: Mon, 6 Oct 2025 12:23:42 -0600
+Subject: [PATCH 32/38] ci: restore original workflow content
+
+---
+ .github/workflows/my-ci-core.yml        | 15 ++++++++++++++-
+ .github/workflows/my-security-light.yml | 16 +++++++++++++++-
+ 2 files changed, 29 insertions(+), 2 deletions(-)
+
+diff --git a/.github/workflows/my-ci-core.yml b/.github/workflows/my-ci-core.yml
+index b3187380f..89bc05f31 100644
+--- a/.github/workflows/my-ci-core.yml
++++ b/.github/workflows/my-ci-core.yml
+@@ -8,4 +8,17 @@ jobs:
+   setup:
+     runs-on: ubuntu-latest
+     steps:
+-      - run: echo "Hello from ci-core"
++      - name: Checkout
++        uses: actions/checkout@v4
++      - name: Toolchain
++        uses: actions/setup-node@v4
++        with:
++          node-version: '20'
++          cache: 'npm'
++      - name: Install (tolerant)
++        run: |
++          if [ -f package.json ]; then
++            npm ci --ignore-scripts || npm i || true
++          else
++            echo "no package.json - skipping install"
++          fi
+diff --git a/.github/workflows/my-security-light.yml b/.github/workflows/my-security-light.yml
+index 996608d33..b46fe4147 100644
+--- a/.github/workflows/my-security-light.yml
++++ b/.github/workflows/my-security-light.yml
+@@ -3,8 +3,22 @@ on:
+   pull_request:
+   push:
+     branches: [main]
++  workflow_dispatch:
++permissions:
++  contents: read
++  security-events: write
++concurrency:
++  group: security-light-${{ github.ref }}
++  cancel-in-progress: true
+ jobs:
+   hygiene:
+     runs-on: ubuntu-latest
++    timeout-minutes: 20
+     steps:
+-      - run: echo "Hello from security-light"
++      - uses: actions/checkout@v4
++      - name: Secret scan (light; non-blocking)
++        uses: trufflesecurity/trufflehog@v3
++        continue-on-error: true
++      - name: Dependency snapshot (non-blocking)
++        uses: advanced-security/maven-dependency-submission-action@v4
++        continue-on-error: true
+-- 
+2.51.0
+

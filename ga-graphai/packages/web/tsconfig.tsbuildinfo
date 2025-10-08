@@ -1,0 +1,1 @@
+{"root":["./src/canvas.ts","./src/control-matrix.ts","./src/index.ts","./src/mc-health.ts","./src/tri-pane.ts","./tests/canvas.test.ts","./tests/mchealth.test.ts","./tests/tripane.test.ts"],"errors":true,"version":"5.9.2"}

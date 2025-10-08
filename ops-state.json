@@ -1,0 +1,18 @@
+{
+  "id": null,
+  "created_at": null,
+  "updated_at": null,
+  "current_step": null,
+  "completed_steps": null,
+  "release_branch": null,
+  "base_branch": null,
+  "ga_version": null,
+  "dry_run": null,
+  "pr_inventory_path": null,
+  "branch_inventory_path": null,
+  "notes_path": null,
+  "changelog_path": null,
+  "tooling": null,
+  "skipped": null,
+  "errors": null
+}

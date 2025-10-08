@@ -1,0 +1,27 @@
+name: Security — SBOM + Scan
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  sbom_scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install syft/grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+      - name: Create SBOM (syft)
+        run: syft packages dir:. -o spdx-json > sbom.spdx.json || true
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
+      - name: Scan (grype)
+        run: grype dir:. -o table || true

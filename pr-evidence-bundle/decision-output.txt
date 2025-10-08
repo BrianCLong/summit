@@ -1,0 +1,60 @@
+Using default policy configuration
+Running canary decision analysis with policy: {
+  maxApiLatencyP95: 350,
+  maxApiLatencyP99: 900,
+  maxErrorRate: 0.002,
+  maxErrorBudgetConsumption: 0.8,
+  minCanaryDuration: '10m',
+  minSampleSize: 1000,
+  sloViolationWeight: 10,
+  errorBudgetWeight: 5,
+  stabilityWeight: 2,
+  promoteThreshold: 70,
+  rollbackThreshold: 30
+}
+Evaluating SLO compliance...
+Querying api_latency_p95 over 10m window...
+Querying api_latency_p99 over 10m window...
+Querying api_error_rate over 10m window...
+Evaluating error budget consumption...
+Querying error_budget_consumption over 1h window...
+Evaluating stability requirements...
+Querying canary_duration over current window...
+Querying sample_size over current window...
+Calculating decision score...
+Raw score: 100, Normalized score: 100
+Making decision with score: 100
+
+# Canary Decision Analysis Results
+decision=promote
+reason=Score 100 >= promote threshold 70
+confidence=1
+score=100
+promote_threshold=70
+rollback_threshold=30
+
+# Evaluation 1 Results
+compliant=true
+violations=0
+
+# Evaluation 2 Results
+compliant=true
+violations=0
+
+# Evaluation 3 Results
+compliant=true
+violations=0
+
+# Metrics Summary
+p95_latency_ms=275.1803558921331
+p99_latency_ms=787.4995010162781
+error_rate=0.00046806667389095205
+error_budget_consumption=0.062073505571939025
+canary_duration_min=16
+sample_size=2678
+
+# Decision Summary
+✅ PROMOTE - Canary shows strong performance and stability
+Reason: Score 100 >= promote threshold 70
+Confidence: 100.0%
+promote

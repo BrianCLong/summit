@@ -1,0 +1,62 @@
+{
+  "title": "Summit TypeScript Build",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total Projects",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 3 },
+      "targets": [{ "expr": "summit_tsc_projects_total" }]
+    },
+    {
+      "type": "gauge",
+      "title": "Cache Hit Ratio",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 3 },
+      "targets": [
+        { "expr": "sum(summit_tsc_projects_up_to_date) / clamp_min(sum(summit_tsc_projects_total),1)" }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "stat",
+      "title": "Projects Would Build (Dry)",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 3 },
+      "targets": [{ "expr": "summit_tsc_projects_built" }]
+    },
+    {
+      "type": "stat",
+      "title": "Errors (rate 5m)",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 3 },
+      "targets": [{ "expr": "rate(summit_tsc_errors_total[5m])" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cycle Duration (p95, 15m)",
+      "gridPos": { "x": 0, "y": 3, "w": 12, "h": 7 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(summit_tsc_total_duration_seconds_bucket[15m])) by (le))" }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Slowest Projects (last value)",
+      "gridPos": { "x": 12, "y": 3, "w": 12, "h": 7 },
+      "targets": [
+        { "expr": "topk(15, summit_tsc_project_duration_seconds)", "legendFormat": "{{project}} ({{mode}})" }
+      ],
+      "options": { "showHeader": true }
+    },
+    {
+      "type": "timeseries",
+      "title": "Up-to-date vs Would Build",
+      "gridPos": { "x": 0, "y": 10, "w": 24, "h": 7 },
+      "targets": [
+        { "expr": "summit_tsc_projects_up_to_date", "legendFormat": "up_to_date" },
+        { "expr": "summit_tsc_projects_built", "legendFormat": "would_build" }
+      ]
+    }
+  ],
+  "templating": { "list": [] }
+}

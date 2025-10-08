@@ -1,0 +1,101 @@
+# IntelGraph Helm Chart Values
+
+image:
+  repository: ghcr.io/intelgraph/intelgraph-server
+  # tag: "" # MUST remain empty - use digest only for security
+  digest: sha256:example123 # REQUIRED: Image digest from CI pipeline
+  pullPolicy: IfNotPresent
+
+replicaCount: 3
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: intelgraph.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+# v24 Feature Flags
+featureFlags:
+  v24:
+    coherence: true
+    multiRegion: false
+    advancedPolicy: true
+    chaosEngineering: false
+
+# Performance Configuration
+performance:
+  cache:
+    redis:
+      enabled: true
+      ttl: 3600
+      hitRateTarget: 0.7
+  
+  rateLimiting:
+    enabled: true
+    requestsPerSecond: 1000
+    burstSize: 100
+
+# Observability
+monitoring:
+  metrics:
+    enabled: true
+    port: 9090
+    path: /metrics
+  
+  tracing:
+    enabled: true
+    samplingRate: 0.15
+    jaeger:
+      endpoint: http://jaeger:14268/api/traces
+
+# Security
+security:
+  networkPolicies:
+    enabled: true
+  
+  podSecurityPolicy:
+    enabled: true
+  
+  rbac:
+    enabled: true
+
+# Database connections
+database:
+  postgres:
+    host: postgres-service
+    port: 5432
+    database: intelgraph
+    username: intelgraph
+    passwordSecret: intelgraph-db-secret
+  
+  neo4j:
+    host: neo4j-service
+    port: 7687
+    database: neo4j
+    username: neo4j
+    passwordSecret: neo4j-secret
+
+# Resource limits
+resources:
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+# Autoscaling
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80

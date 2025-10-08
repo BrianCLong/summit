@@ -1,0 +1,66 @@
+name: Orchestrator • Tag GA & Release (manual, protected)
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_branch:
+        description: "Release branch to tag (default: release/* from state)"
+        default: ""
+        required: false
+      ga_version:
+        description: "GA tag (e.g., v2025.10.07) — optional"
+        default: ""
+        required: false
+
+permissions:
+  contents: write
+
+env:
+  ENVIRONMENT_NAME: production
+
+jobs:
+  tag-and-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: ${{ env.ENVIRONMENT_NAME }}   # use environment protection for approval
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tools (jq/yq)
+        run: |
+          set -euxo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y jq yq
+      - name: Prepare ops kit
+        run: |
+          set -euxo pipefail
+          test -f ./ops/ga_orchestrator.sh || (echo "::error::ops kit missing" && exit 1)
+          chmod +x ./ops/ga_orchestrator.sh scripts/*.sh || true
+      - name: Tag GA
+        env:
+          CONFIRM: "1"
+          GA_VERSION: ${{ inputs.ga_version }}
+        run: |
+          set -euxo pipefail
+          if [ -n "${{ inputs.release_branch }}" ]; then
+            export RELEASE_BRANCH="${{ inputs.release_branch }}"
+          fi
+          ./ops/ga_orchestrator.sh tag-ga
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.GA_VERSION || '' }}
+          body_path: ops-logs/RELEASE_NOTES.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload ops artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-ga-artifacts-${{ github.run_id }}
+          path: |
+            ops-logs/**
+            ops-state.json
+          if-no-files-found: warn

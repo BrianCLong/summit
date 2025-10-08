@@ -1,0 +1,12 @@
+# Branch Protection Recommendations
+- Protect `main`/`trunk`:
+  - Require pull request before merge
+  - Require status checks to pass:
+    - CI — Build & Test (polyglot)
+    - Security — SBOM + Scan
+    - Release Drafter (optional)
+  - Require reviews by CODEOWNERS
+  - Require conversation resolution
+  - Require linear history (squash-merge only)
+- Enable merge queue for `main`.
+- Auto-delete branches on merge.
