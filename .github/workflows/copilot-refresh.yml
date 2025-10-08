@@ -1,0 +1,72 @@
+name: Copilot Context Refresh
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'scaffolds/**'
+      - 'policies/**'
+      - 'ops/helm/**'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  summarize-delta:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Compute changed files
+        id: delta
+        run: |
+          git diff --name-status HEAD~1..HEAD | tee /tmp/delta.txt
+          CHANGED=$(git diff --name-only HEAD~1..HEAD | tr '\n' ',' | sed 's/,$//')
+          echo "changed=$CHANGED" >> $GITHUB_OUTPUT
+
+      - name: Build Copilot Context Delta
+        run: |
+          TS=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          {
+            echo "# Copilot Context Delta"
+            echo ""
+            echo "- Repo: $GITHUB_REPOSITORY"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Timestamp (UTC): $TS"
+            echo ""
+            echo "## Changed files (last commit)"
+            echo ""
+            echo '```'
+            cat /tmp/delta.txt || true
+            echo '```'
+            echo ""
+            echo "## Suggested Copilot Chat prompts"
+            echo ""
+            echo "1. 
+/index repository for context"
+            echo "2. 
+/summarize docs & scaffolds changes in this commit"
+            echo "3. 
+/list new or modified OPA policies and generate tests"
+          } > copilot-context-delta.md
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: copilot-context-delta
+          path: copilot-context-delta.md
+          retention-days: 14
+
+      - name: Optional Slack notify
+        if: ${{ env.SLACK_WEBHOOK_URL != '' }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          TEXT="Copilot Context Delta for ${GITHUB_REPOSITORY} @${GITHUB_SHA:0:7}\n$(sed ':a;N;$!ba;s/\n/\\n/g' copilot-context-delta.md)"
+          curl -s -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"$TEXT\"}" \
+            "$SLACK_WEBHOOK_URL" || true

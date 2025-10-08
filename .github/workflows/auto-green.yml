@@ -35,4 +35,4 @@ jobs:
           commit_message: "chore(auto-green): apply safe autofixes"
           branch: ${{ github.head_ref }}
       - name: Note gate
-        run: echo "Gate: Stabilization: Build & Unit Tests"
+        run: echo "Gate - Stabilization - Build and Unit Tests"

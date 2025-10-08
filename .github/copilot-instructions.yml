@@ -1,0 +1,8 @@
+version: 1
+rules:
+  - trigger: /scaffold
+    action: suggest scaffolds/
+  - trigger: /policy
+    action: reference policies/
+  - trigger: /grafana
+    action: reference scaffolds/grafana-panel.json
