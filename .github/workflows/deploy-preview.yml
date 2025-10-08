@@ -4,12 +4,13 @@ on:
 concurrency:
   group: deploy-preview-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   preview:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Verify release tag
+        run: node scripts/verify-release-tag.mjs
       - name: Deploy preview
         run: |
           echo "Deploying preview for PR ${{ github.event.pull_request.number }}"
