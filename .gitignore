@@ -198,4 +198,4 @@ vpc/**/override.tf.json
 webapp/node_modules/
 webapp/.next/
 webapp/dist/
-webapp/.pnpm-store/
+webapp/.pnpm-store/ops/compose/.env
