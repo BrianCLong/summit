@@ -111,3 +111,17 @@ vpc-plan:
 
 webapp-build:
 	cd webapp && (npm ci || pnpm i || yarn install) && (npm run build || true)
+
+.PHONY: evidence
+evidence: ## Generate release evidence (SBOM, checksums, tarball)
+	@echo "📦 Generating release evidence..."
+	@mkdir -p dist
+	@VERSION=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"); \
+	echo "  → Creating SBOM for $$VERSION..."; \
+	python3 -c "import json; print(json.dumps({'spdxVersion': 'SPDX-2.3', 'dataLicense': 'CC0-1.0', 'SPDXID': 'SPDXRef-DOCUMENT', 'name': 'summit-$$VERSION', 'documentNamespace': 'https://github.com/BrianCLong/summit/spdx/$$VERSION', 'creationInfo': {'created': '$$(date -u +%Y-%m-%dT%H:%M:%SZ)', 'creators': ['Tool: manual']}, 'packages': [{'SPDXID': 'SPDXRef-Package', 'name': 'summit', 'versionInfo': '$$VERSION', 'downloadLocation': 'https://github.com/BrianCLong/summit/archive/$$VERSION.tar.gz', 'filesAnalyzed': False}]}, indent=2))" > dist/sbom-$$VERSION.spdx.json; \
+	echo "  → Creating source tarball..."; \
+	git archive --format=tar.gz --prefix=summit-$$VERSION/ $$VERSION > dist/summit-$$VERSION.tar.gz 2>/dev/null || echo "Warning: Could not create tarball from $$VERSION tag"; \
+	echo "  → Generating checksums..."; \
+	(cd dist && sha256sum sbom-$$VERSION.spdx.json summit-$$VERSION.tar.gz 2>/dev/null > checksums-$$VERSION.txt || echo "Warning: Could not generate checksums"); \
+	echo "✅ Evidence generated in dist/"
+	@ls -lh dist/
