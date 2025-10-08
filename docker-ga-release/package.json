@@ -1,0 +1,23 @@
+{
+  "name": "maestro-conductor-docker-ga-release",
+  "version": "2025.10.07",
+  "description": "Docker GA release for Maestro Conductor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "release:manifest": "node scripts/gen-release-manifest.mjs",
+    "release:attest": "node scripts/gen-release-attestation.mjs",
+    "release:verify": "node scripts/verify-release-manifest.mjs",
+    "health:check": "node scripts/health-check.mjs",
+    "verify": "bash scripts/verify-services.sh"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
