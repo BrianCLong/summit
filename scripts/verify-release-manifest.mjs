@@ -4,6 +4,8 @@
  *
  * Usage:
  *   node scripts/verify-release-manifest.mjs --tag=v2025.10.07
+ *   node scripts/verify-release-manifest.mjs --tag=v2025.10.07 --strict
+ *   node scripts/verify-release-manifest.mjs --tag=v2025.10.07 --expect-sha=$GITHUB_SHA
  */
 
 import fs from "fs";
@@ -17,6 +19,9 @@ function arg(name) {
 }
 
 const TAG = arg("tag") || process.env.TAG || "v" + new Date().toISOString().slice(0,10).replace(/-/g,".");
+const strict = process.argv.includes('--strict');                 // require HEAD === tag commit
+const expectSha = arg("expect-sha");  // explicitly expected SHA
+
 const distDir = path.join(process.cwd(), "dist");
 const manifestPath = path.join(distDir, `release-manifest-${TAG}.yaml`);
 
@@ -114,18 +119,39 @@ for (const [key, artifact] of Object.entries(manifest.artifacts || {})) {
   }
 }
 
-// Verify tag commit SHA
-try {
-  const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).toString().trim();
-  if (currentCommit !== manifest.artifacts.tag.commit_sha) {
-    console.warn(`⚠️  Commit SHA mismatch:`);
-    console.warn(`   Manifest: ${manifest.artifacts.tag.commit_sha}`);
-    console.warn(`   Current:  ${currentCommit}`);
-    // Not necessarily an error since manifest might be from different commit
-  }
-} catch (err) {
-  console.warn(`⚠️  Could not get current commit SHA: ${err.message}`);
+// Resolve commits
+const currentSha = execSync('git rev-parse HEAD', {encoding:'utf8'}).trim();
+const tagSha = TAG ? execSync(`git rev-parse ${TAG}^{commit}`, {encoding:'utf8'}).trim() : null;
+const manifestSha = manifest.artifacts?.tag?.commit_sha || null;
+
+// Optional assert against an explicitly expected SHA
+if (expectSha && manifestSha && manifestSha !== expectSha) {
+  console.error(`❌ Manifest commit does not match --expect-sha:
+  Manifest: ${manifestSha}
+  Expected: ${expectSha}`);
+  process.exit(2);
 }
+
+// Report mismatch info (non-fatal by default)
+if (manifestSha && currentSha !== manifestSha) {
+  console.warn(`⚠️  Commit SHA mismatch:
+  Manifest: ${manifestSha}
+  Current:  ${currentSha}`);
+}
+
+// Strict mode: require current checkout to be exactly the tag commit
+if (strict && tagSha && currentSha !== tagSha) {
+  console.error(`❌ --strict: HEAD is not at the tag commit.
+  Tag ${TAG} -> ${tagSha}
+  HEAD      -> ${currentSha}`);
+  process.exit(3);
+}
+
+console.log(tagSha && currentSha === tagSha
+  ? `🔒 Verified at tag ${TAG} (${tagSha})`
+  : TAG
+    ? `ℹ️  Verified manifest for ${TAG}; HEAD is different (use --strict to enforce).`
+    : `ℹ️  Verified manifest (no tag provided).`);
 
 if (allValid) {
   console.log(`\n✅ All artifact hashes verified successfully!`);

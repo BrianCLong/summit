@@ -1,13 +1,8 @@
-TAG ?= v2025.10.07
+.PHONY: verify-release verify-release-strict
+verify-release: ## Verify manifest for TAG (warn on SHA mismatch)
+	@[ -n "$(TAG)" ] || (echo "Usage: make verify-release TAG=vYYYY.MM.DD" && exit 1)
+	node scripts/verify-release-manifest.mjs --tag=$(TAG)
 
-.PHONY: validate-ga
-validate-ga:
-	@TAG=$(TAG) ./scripts/validate-ga.sh
-
-.PHONY: manifest attest verify
-manifest:
-	@TAG=$(TAG) npm run -s release:manifest
-attest:
-	@TAG=$(TAG) npm run -s release:attest
-verify:
-	@TAG=$(TAG) npm run -s release:verify
+verify-release-strict: ## Verify manifest and require HEAD==TAG commit
+	@[ -n "$(TAG)" ] || (echo "Usage: make verify-release-strict TAG=vYYYY.MM.DD" && exit 1)
+	node scripts/verify-release-manifest.mjs --tag=$(TAG) --strict
