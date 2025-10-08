@@ -108,7 +108,6 @@ cognitive_insights_engine/poetry.lock
 
 # JavaScript/TypeScript package manager lockfiles are ignored to prevent
 # accidental binary diffs from blocking PR workflows
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
@@ -199,3 +198,4 @@ webapp/node_modules/
 webapp/.next/
 webapp/dist/
 webapp/.pnpm-store/ops/compose/.env
+!webapp/package-lock.json
