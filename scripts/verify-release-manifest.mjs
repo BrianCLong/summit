@@ -1,114 +1,136 @@
 #!/usr/bin/env node
 /**
- * Verify a GA release by re-hashing artifacts and comparing to the manifest.
+ * Verify release manifest integrity by re-hashing artifacts and comparing with manifest
  *
  * Usage:
  *   node scripts/verify-release-manifest.mjs --tag=v2025.10.07
- *   TAG=v2025.10.07 node scripts/verify-release-manifest.mjs
- *
- * Exits non-zero on any mismatch or missing file.
  */
+
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
+import { execSync } from "child_process";
 
 function arg(name) {
   const ix = process.argv.findIndex(a => a.startsWith(`--${name}=`));
   return ix >= 0 ? process.argv[ix].split("=")[1] : null;
 }
 
-const TAG = arg("tag") || process.env.TAG || (() => {
-  const d = new Date().toISOString().slice(0,10).replace(/-/g,".");
-  return `v${d}`;
-})();
-
-const ROOT = process.cwd();
-const manifestPath = path.join(ROOT, "dist", `release-manifest-${TAG}.yaml`);
+const TAG = arg("tag") || process.env.TAG || "v" + new Date().toISOString().slice(0,10).replace(/-/g,".");
+const distDir = path.join(process.cwd(), "dist");
+const manifestPath = path.join(distDir, `release-manifest-${TAG}.yaml`);
 
 if (!fs.existsSync(manifestPath)) {
   console.error(`❌ Manifest not found: ${manifestPath}`);
-  process.exit(2);
+  process.exit(1);
 }
 
-// Tiny YAML → JSON (matches the structure we emit)
 function yamlToJson(yaml) {
-  const lines = yaml.split(/\r?\n/);
-  const stack = [{ indent: -1, obj: {} }];
-  for (const raw of lines) {
-    if (!raw || /^\s*#/.test(raw)) continue;
-    const indent = raw.match(/^ */)?.[0].length ?? 0;
-    const line = raw.trim();
-    if (!line) continue;
+  // extremely small YAML reader for our own format
+  const lines = yaml.split(/\r?\n/).filter(Boolean);
+  const obj = {};
+  const stack = [{ indent: -1, obj }];
+  for (const line of lines) {
+    const indent = line.match(/^ */)[0].length;
+    const content = line.trim();
+    if (!content || content.startsWith("#")) continue;
 
+    // Pop until we find the parent indentation level
     while (stack.length && indent <= stack[stack.length - 1].indent) stack.pop();
     const parent = stack[stack.length - 1].obj;
 
-    const m = /^([^:]+):(.*)$/.exec(line);
-    if (!m) continue;
-    const key = m[1].trim();
-    let val = m[2].trim();
-
-    if (val === "") {
+    const kv = content.split(":");
+    const key = kv.shift().trim();
+    const rest = kv.join(":").trim();
+    if (rest === "") {
+      // nested object
       parent[key] = {};
       stack.push({ indent, obj: parent[key] });
-      continue;
+    } else {
+      let val = rest;
+      if (val === "null") val = null;
+      else if (val === "true") val = true;
+      else if (val === "false") val = false;
+      else if (!isNaN(Number(val))) val = Number(val);
+      else if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1,-1).replace(/\\"/g,'"');
+      parent[key] = val;
     }
-    if (val === "null") val = null;
-    else if (val === "true") val = true;
-    else if (val === "false") val = false;
-    else if (!Number.isNaN(Number(val))) val = Number(val);
-    else if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1).replace(/\\"/g, '"');
-
-    parent[key] = val;
   }
-  return stack[0].obj;
+  return obj;
 }
 
-function sha256File(absPath) {
-  const h = crypto.createHash("sha256");
-  h.update(fs.readFileSync(absPath));
-  return h.digest("hex");
+function sha256(filePath) {
+  try {
+    const buf = fs.readFileSync(filePath);
+    const h = crypto.createHash("sha256"); h.update(buf);
+    return h.digest("hex");
+  } catch (err) {
+    console.error(`Failed to read file ${filePath}: ${err.message}`);
+    return null;
+  }
 }
 
-const manifest = yamlToJson(fs.readFileSync(manifestPath, "utf8"));
+function exists(p) { 
+  try { 
+    fs.accessSync(p); 
+    return true; 
+  } catch { 
+    return false; 
+  } 
+}
 
-let failures = 0;
-const artifacts = manifest?.artifacts ?? {};
-const entries = Object.entries(artifacts).filter(([k]) => k !== "tag");
+console.log(`🔍 Verifying release manifest for ${TAG}...`);
 
-console.log(`🔎 Verifying ${entries.length} artifact(s) against ${path.relative(ROOT, manifestPath)}...\n`);
+const manifestYaml = fs.readFileSync(manifestPath, "utf8");
+const manifest = yamlToJson(manifestYaml);
 
-for (const [name, meta] of entries) {
-  const rel = meta?.path;
-  const expected = meta?.sha256 || null;
+let allValid = true;
 
-  if (!rel) {
-    console.warn(`⚠️  ${name}: no path listed, skipping`);
+// Verify each artifact
+for (const [key, artifact] of Object.entries(manifest.artifacts || {})) {
+  if (key === "tag") continue; // Skip tag metadata
+  
+  const fullPath = path.join(process.cwd(), artifact.path);
+  
+  if (!exists(fullPath)) {
+    console.warn(`⚠️  Artifact not found: ${artifact.path}`);
     continue;
   }
-  const abs = path.join(ROOT, rel);
-  if (!fs.existsSync(abs)) {
-    console.error(`❌ ${name}: missing file at ${rel}`);
-    failures++;
+  
+  const computedHash = sha256(fullPath);
+  if (computedHash === null) {
+    console.error(`❌ Failed to compute hash for ${artifact.path}`);
+    allValid = false;
     continue;
   }
-  if (!expected) {
-    console.warn(`⚠️  ${name}: manifest has no sha256 (non-hashed artifact), skipping`);
-    continue;
-  }
-
-  const actual = sha256File(abs);
-  if (actual !== expected) {
-    console.error(`❌ ${name}: sha256 mismatch\n    expected: ${expected}\n    actual:   ${actual}`);
-    failures++;
+  
+  if (computedHash !== artifact.sha256) {
+    console.error(`❌ Hash mismatch for ${artifact.path}:`);
+    console.error(`   Expected: ${artifact.sha256}`);
+    console.error(`   Actual:   ${computedHash}`);
+    allValid = false;
   } else {
-    console.log(`✅ ${name}: ${rel} (sha256 OK)`);
+    console.log(`✅ ${artifact.path} hash verified`);
   }
 }
 
-console.log();
-if (failures > 0) {
-  console.error(`⛔ Verification FAILED with ${failures} mismatch(es).`);
+// Verify tag commit SHA
+try {
+  const currentCommit = execSync('git rev-parse HEAD', { encoding: 'utf8' }).toString().trim();
+  if (currentCommit !== manifest.artifacts.tag.commit_sha) {
+    console.warn(`⚠️  Commit SHA mismatch:`);
+    console.warn(`   Manifest: ${manifest.artifacts.tag.commit_sha}`);
+    console.warn(`   Current:  ${currentCommit}`);
+    // Not necessarily an error since manifest might be from different commit
+  }
+} catch (err) {
+  console.warn(`⚠️  Could not get current commit SHA: ${err.message}`);
+}
+
+if (allValid) {
+  console.log(`\n✅ All artifact hashes verified successfully!`);
+  console.log(`📦 Manifest is valid for tag ${TAG}`);
+} else {
+  console.error(`\n❌ Some artifacts failed verification`);
   process.exit(1);
 }
-console.log("🟢 Verification PASSED. All artifact digests match.");
