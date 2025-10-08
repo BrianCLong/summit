@@ -87,7 +87,11 @@
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
     "prov:dev": "ts-node packages/prov-ledger/src/server.ts",
     "lac:compile": "ts-node packages/lac/src/compiler.ts",
-    "kpw:dev": "node packages/kpw-media/dist/server.js"
+    "kpw:dev": "node packages/kpw-media/dist/server.js",
+    "release:manifest": "node scripts/gen-release-manifest.mjs",
+    "release:manifest:tag": "node scripts/gen-release-manifest.mjs --tag=",
+    "release:attest": "node scripts/gen-release-attestation.mjs --tag=",
+    "release:verify": "node scripts/verify-release-manifest.mjs"
   },
   "keywords": [
     "intelligence-analysis",
