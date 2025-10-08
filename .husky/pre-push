@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+npm run lint:changed || true   # quick signal, won't block on warnings
+npm run typecheck              # full graph check (incremental)

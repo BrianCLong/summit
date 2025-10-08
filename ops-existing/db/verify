@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ "${1:-}" != "--shadow" ]]; then
+  echo "Usage: $0 --shadow"; exit 2; fi
+
+# Example shadow verification (replace with real commands)
+echo "[db] Shadow verifying schema against prod snapshot"
+# e.g., create shadow DB, apply migrations, run checksum & critical queries

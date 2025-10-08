@@ -1,0 +1,77 @@
+name: Orchestrator • Merge PRs (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_branch:
+        description: "Base branch (e.g., main)"
+        default: "main"
+        required: true
+      release_branch:
+        description: "Release branch (e.g., release/maestro-ga-YYYYMMDD)"
+        default: ""
+        required: false
+      confirm:
+        description: "Perform merges (CONFIRM=1)?"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: merge-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tools (jq/yq/gh)
+        run: |
+          set -euxo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y jq yq gh || true
+      - name: Prepare ops kit
+        run: |
+          set -euxo pipefail
+          test -f ./ops/ga_orchestrator.sh || (echo "::error::ops kit missing" && exit 1)
+          chmod +x ./ops/ga_orchestrator.sh scripts/*.sh || true
+      - name: Plan (inventory PRs/branches)
+        env:
+          BASE_BRANCH: ${{ inputs.base_branch }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euxo pipefail
+          ./ops/ga_orchestrator.sh init
+          ./ops/ga_orchestrator.sh plan
+      - name: Dry-run merge (no mutations)
+        env:
+          BASE_BRANCH: ${{ inputs.base_branch }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euxo pipefail
+          ./ops/ga_orchestrator.sh merge-prs || true
+      - name: Execute merges (CONFIRM=1) — guarded
+        if: inputs.confirm == true
+        env:
+          BASE_BRANCH: ${{ inputs.base_branch }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CONFIRM: "1"
+        run: |
+          set -euxo pipefail
+          ./ops/ga_orchestrator.sh merge-prs
+      - name: Upload ops artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-merge-artifacts-${{ github.run_id }}
+          path: |
+            ops-logs/**
+            ops-state.json
+          if-no-files-found: warn

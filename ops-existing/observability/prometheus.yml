@@ -1,0 +1,128 @@
+# Prometheus Configuration for IntelGraph Demo Stack
+# Sprint 27C: Complete observability with SLO monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'intelgraph-demo'
+    environment: 'demo'
+
+rule_files:
+  - "/etc/prometheus/rules/*.yml"
+  - "/etc/prometheus/rules/*.yaml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+    scrape_interval: 15s
+
+  # Application services
+  - job_name: 'intelgraph-api'
+    static_configs:
+      - targets: ['api:9464']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    honor_labels: true
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'api'
+
+  - job_name: 'intelgraph-gateway'
+    static_configs:
+      - targets: ['gateway:9465']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    honor_labels: true
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+      - source_labels: [__address__]
+        target_label: service
+        replacement: 'gateway'
+
+  # Infrastructure monitoring
+  - job_name: 'neo4j'
+    static_configs:
+      - targets: ['neo4j:2004']
+    metrics_path: /metrics
+    scrape_interval: 30s
+    honor_labels: true
+
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    metrics_path: /metrics
+    scrape_interval: 30s
+    honor_labels: true
+
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    metrics_path: /metrics
+    scrape_interval: 30s
+    honor_labels: true
+
+  # Docker container metrics (if available)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    metrics_path: /metrics
+    scrape_interval: 30s
+    honor_labels: true
+
+  # Service discovery for dynamic targets
+  - job_name: 'docker-compose-discovery'
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        port: 9464
+    relabel_configs:
+      # Only scrape containers with prometheus.io/scrape=true label
+      - source_labels: [__meta_docker_container_label_prometheus_io_scrape]
+        action: keep
+        regex: true
+      # Use custom port if specified
+      - source_labels: [__meta_docker_container_label_prometheus_io_port]
+        action: replace
+        target_label: __address__
+        regex: (.+)
+        replacement: $1
+      # Use custom metrics path if specified
+      - source_labels: [__meta_docker_container_label_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      # Add container name as instance label
+      - source_labels: [__meta_docker_container_name]
+        target_label: instance
+      # Add service label
+      - source_labels: [__meta_docker_container_label_com_docker_compose_service]
+        target_label: service
+
+# Storage configuration
+storage:
+  tsdb:
+    retention.time: 7d
+    retention.size: 1GB
+    wal-compression: true
+
+# Remote write configuration (optional)
+# remote_write:
+#   - url: "https://prometheus-remote-write-endpoint/api/v1/write"
+#     headers:
+#       Authorization: "Bearer <token>"

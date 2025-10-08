@@ -1,0 +1,197 @@
+# Service Level Objectives Configuration
+# Sprint 27E: Performance targets with 30% headroom
+
+apiVersion: monitoring.intelgraph.io/v1
+kind: SLOConfig
+metadata:
+  name: intelgraph-slos
+  version: "27.0.0"
+
+spec:
+  # Global SLO configuration
+  global:
+    evaluation_window: "5m"
+    alert_window: "2h"
+    burn_rate_threshold: 14.4  # 2% budget burn in 1 hour
+
+  # Service Level Indicators (SLIs)
+  slis:
+    nlq_latency:
+      name: "NL→Cypher Query Latency"
+      description: "Time from NL query to Cypher response"
+      metric: "histogram_quantile(0.95, nlq_duration_seconds_bucket)"
+      unit: "seconds"
+
+    api_error_rate:
+      name: "API Error Rate"
+      description: "Percentage of HTTP 5xx responses"
+      metric: "rate(http_requests_total{status=~'5..'}[5m]) / rate(http_requests_total[5m])"
+      unit: "percentage"
+
+    ingest_latency:
+      name: "Data Ingest Latency"
+      description: "Time to process incoming data"
+      metric: "histogram_quantile(0.95, ingest_duration_seconds_bucket)"
+      unit: "seconds"
+
+    export_latency:
+      name: "Data Export Latency"
+      description: "Time to generate export files"
+      metric: "histogram_quantile(0.95, export_duration_seconds_bucket)"
+      unit: "seconds"
+
+    model_cost_per_1k:
+      name: "Model Cost Per 1K Queries"
+      description: "Average cost per 1000 NL queries"
+      metric: "rate(model_budget_spent_dollars[1h]) / rate(nlq_requests_total[1h]) * 1000"
+      unit: "dollars"
+
+  # Service Level Objectives (SLOs)
+  slos:
+    nlq_latency_slo:
+      sli: "nlq_latency"
+      target: 0.9   # 90ms target with 30% headroom from 1.3s
+      threshold: 0.9  # 900ms actual threshold
+      description: "95% of NL→Cypher queries complete within 900ms"
+      priority: "P0"
+
+    api_availability_slo:
+      sli: "api_error_rate"
+      target: 0.999  # 99.9% availability
+      threshold: 0.001  # 0.1% error rate threshold
+      description: "API error rate below 0.1%"
+      priority: "P0"
+
+    ingest_latency_slo:
+      sli: "ingest_latency"
+      target: 0.95   # 95% within threshold
+      threshold: 1.05  # 1.05s (30% headroom from 1.5s)
+      description: "95% of data ingestion completes within 1.05s"
+      priority: "P1"
+
+    export_latency_slo:
+      sli: "export_latency"
+      target: 0.95   # 95% within threshold
+      threshold: 0.84  # 840ms (30% headroom from 1.2s)
+      description: "95% of exports complete within 840ms"
+      priority: "P1"
+
+    cost_efficiency_slo:
+      sli: "model_cost_per_1k"
+      target: 0.95   # 95% under budget
+      threshold: 0.05  # $0.05 per 1K queries
+      description: "Model costs stay under $0.05 per 1K queries"
+      priority: "P2"
+
+  # Environment-specific targets
+  environments:
+    dev:
+      slo_multiplier: 2.0  # Relaxed targets for dev
+      budget_multiplier: 0.5  # Smaller budget
+
+    staging:
+      slo_multiplier: 1.2  # Slightly relaxed
+      budget_multiplier: 0.8
+
+    prod:
+      slo_multiplier: 1.0  # Full targets
+      budget_multiplier: 1.0
+
+  # Alert policies
+  alerting:
+    burn_rate_alerts:
+      - name: "fast_burn"
+        severity: "critical"
+        burn_rate: 14.4  # 2% budget in 1 hour
+        duration: "2m"
+
+      - name: "slow_burn"
+        severity: "warning"
+        burn_rate: 6.0   # 1% budget in 1 hour
+        duration: "15m"
+
+    threshold_alerts:
+      - name: "slo_breach"
+        severity: "critical"
+        threshold_multiplier: 1.0
+        duration: "5m"
+
+      - name: "slo_warning"
+        severity: "warning"
+        threshold_multiplier: 0.8
+        duration: "10m"
+
+  # Error budgets
+  error_budgets:
+    calculation_window: "30d"  # 30-day rolling window
+
+    budgets:
+      nlq_latency:
+        budget_percentage: 1.0  # 1% of requests can exceed SLO
+        alert_thresholds:
+          - percentage: 75
+            severity: "warning"
+          - percentage: 90
+            severity: "critical"
+
+      api_availability:
+        budget_percentage: 0.1  # 0.1% error budget
+        alert_thresholds:
+          - percentage: 50
+            severity: "warning"
+          - percentage: 75
+            severity: "critical"
+
+  # SLO reporting
+  reporting:
+    enabled: true
+    dashboard_refresh: "1m"
+    export_metrics: true
+
+    dashboards:
+      - name: "SLO Overview"
+        path: "/grafana/d/slo-overview"
+        panels:
+          - sli_current_values
+          - slo_compliance_status
+          - error_budget_remaining
+          - burn_rate_trends
+
+      - name: "Performance Deep Dive"
+        path: "/grafana/d/perf-deepdive"
+        panels:
+          - latency_percentiles
+          - throughput_trends
+          - resource_utilization
+          - cost_efficiency
+
+  # Compliance tracking
+  compliance:
+    track_slo_violations: true
+    violation_ticket_integration: true
+    monthly_slo_report: true
+
+    remediation:
+      auto_scale_on_breach: true
+      circuit_breaker_integration: true
+      cost_throttling: true
+
+# Baseline measurements (captured during Sprint 27E)
+baseline:
+  measurement_period: "2025-09-19T00:00:00Z to 2025-09-21T00:00:00Z"
+  workload: "k6_mixed_profile_sustained_50_vus"
+
+  measurements:
+    nlq_latency_p95: 1.247  # seconds
+    nlq_latency_p99: 2.891  # seconds
+    api_error_rate: 0.0008  # 0.08%
+    ingest_latency_p95: 1.423  # seconds
+    export_latency_p95: 1.156  # seconds
+    cost_per_1k_queries: 0.067  # dollars
+
+  targets_with_headroom:
+    nlq_latency_target: 0.900    # 28% improvement from baseline
+    api_error_target: 0.001      # 25% improvement from baseline
+    ingest_latency_target: 1.050  # 26% improvement from baseline
+    export_latency_target: 0.840  # 27% improvement from baseline
+    cost_target: 0.050           # 25% cost reduction

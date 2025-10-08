@@ -1,0 +1,21 @@
+Analyzing friction for route: baseline
+Collecting build metrics for friction analysis...
+Analyzing friction points...
+Emitting friction annotations...
+::info file=ci-analysis,title=CACHE_MISS::[INFO] CACHE_MISS: Cache miss detected, may impact build performance
+# Friction Analysis Results
+route=baseline
+build_time_ms=10000
+cache_hit=undefined
+tests_pass=0
+tests_fail=0
+tests_skip=0
+test_time_ms=0
+ci_run_id=unknown
+ci_job_id=unknown
+ci_repo=unknown
+ci_sha=unknown
+ci_route=baseline
+friction_signals=1
+Friction analysis complete. Signals detected: 1
+Critical friction detected: false

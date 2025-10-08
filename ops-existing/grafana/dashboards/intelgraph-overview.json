@@ -1,0 +1,405 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "GraphQL Error Rate (5m)",
+      "datasource": { "type": "prometheus" },
+      "gridPos": { "x": 0, "y": 0, "w": 8, "h": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(apollo_request_errors_total[5m])) / sum(rate(apollo_request_total[5m]))",
+          "legendFormat": "error_rate"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green" }, { "color": "red", "value": 0.02 }]
+          }
+        },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false } }
+    },
+    {
+      "type": "stat",
+      "title": "GraphQL p95 Latency (5m)",
+      "datasource": { "type": "prometheus" },
+      "gridPos": { "x": 8, "y": 0, "w": 8, "h": 6 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(apollo_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false } }
+    },
+    {
+      "type": "stat",
+      "title": "Cache Invalidations (5m)",
+      "datasource": { "type": "prometheus" },
+      "gridPos": { "x": 16, "y": 0, "w": 8, "h": 6 },
+      "targets": [{ "expr": "sum(rate(cache_invalidations_total[5m]))", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "ops" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Resolver Hotspots (avg)",
+      "datasource": { "type": "prometheus" },
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "topk(10, sum by (parent, field) (rate(apollo_resolver_duration_seconds_sum[5m]) / rate(apollo_resolver_duration_seconds_count[5m])))",
+          "legendFormat": "{{parent}}.{{field}}"
+        }
+      ],
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "options": { "legend": { "showLegend": true } }
+    },
+    {
+      "type": "row",
+      "title": "Tenant Breakdown",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 }
+    },
+    {
+      "type": "stat",
+      "title": "p95 Latency by Tenant (5m)",
+      "gridPos": { "x": 0, "y": 15, "w": 12, "h": 6 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+      "fieldConfig": { "defaults": { "unit": "s" } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, tenant) (rate(apollo_request_duration_seconds_bucket{tenant=~\"$tenant\"}[5m])))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error Ratio by Tenant (5m)",
+      "gridPos": { "x": 12, "y": 15, "w": 12, "h": 6 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2 }, "overrides": [] },
+      "targets": [
+        {
+          "expr": "sum by (tenant) (rate(apollo_request_errors_total{tenant=~\"$tenant\"}[5m])) / sum by (tenant) (rate(apollo_request_total{tenant=~\"$tenant\"}[5m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Cache Hit % by Tenant (5m)",
+      "gridPos": { "x": 0, "y": 21, "w": 12, "h": 6 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "unit": "percentunit" } },
+      "targets": [
+        {
+          "expr": "sum by (tenant) (rate(cache_hits_total{tenant=~\"$tenant\"}[5m])) / (sum by (tenant) (rate(cache_hits_total{tenant=~\"$tenant\"}[5m])) + sum by (tenant) (rate(cache_misses_total{tenant=~\"$tenant\"}[5m])))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error Ratio (5m) — Tenant×Status",
+      "description": "rate(errors)/rate(total) filtered by $tenant and $status (All = no filter on that label).",
+      "gridPos": { "x": 12, "y": 21, "w": 12, "h": 6 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "unit": "percentunit" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "clamp_min( sum by (tenant, status) (rate(apollo_request_errors_total{tenant=~\"$tenant\",status=~\"$status\"}[5m])) / sum by (tenant, status) (rate(apollo_request_total{tenant=~\"$tenant\",status=~\"$status\"}[5m])) , 0)"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Errors by Tenant×Status (5m)",
+      "gridPos": { "x": 0, "y": 27, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (tenant, status) (rate(apollo_request_errors_total{tenant=~\"$tenant\", status=~\"$status\"}[5m]))"
+        }
+      ],
+      "transformations": [{ "id": "labelsToFields", "options": { "mode": "columns" } }],
+      "options": { "showHeader": true }
+    },
+    {
+      "type": "stat",
+      "title": "p95 Latency (5m) — Tenant×Status",
+      "description": "histogram_quantile over apollo_request_duration_seconds_bucket, sliced by $tenant and $status",
+      "gridPos": { "x": 0, "y": 35, "w": 12, "h": 6 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "clamp_min(1000 * histogram_quantile( 0.95, sum by (le, tenant, status) ( rate(apollo_request_duration_seconds_bucket{tenant=~\"$tenant\",status=~\"$status\"}[5m]) ) ), 0)"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "p95 Trend (5m) — Tenant×Status",
+      "gridPos": { "x": 12, "y": 35, "w": 12, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "1000 * histogram_quantile( 0.95, sum by (le, tenant, status) ( rate(apollo_request_duration_seconds_bucket{tenant=~\"$tenant\",status=~\"$status\"}[5m]) ) )"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right" }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "p95 by Operation (5m) — Tenant×Status",
+      "description": "p95 from apollo_request_duration_seconds_bucket grouped by operation; filter by $tenant/$status",
+      "gridPos": { "x": 0, "y": 43, "w": 24, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "1000 * histogram_quantile(\n  0.95,\n  sum by (le, operation, tenant, status) (\n    rate(apollo_request_duration_seconds_bucket{tenant=~\"$tenant\",status=~\"$status\",operation=~\"$operation\"}[5m])\n  )\n)",
+          "legendFormat": "{{operation}}"
+        }
+      ],
+      "options": { "legend": { "displayMode": "list", "placement": "right" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "p95 by Type (5m) — Tenant×Status",
+      "description": "p95 grouped by GraphQL operation type (query/mutation/subscription)",
+      "gridPos": { "x": 0, "y": 51, "w": 24, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "1000 * histogram_quantile(0.95, sum by (le, type, tenant, status) (rate(apollo_request_duration_seconds_bucket{tenant=~\"$tenant\",status=~\"$status\"}[5m])))",
+          "legendFormat": "{{type}}"
+        }
+      ],
+      "options": { "legend": { "displayMode": "list", "placement": "right" } }
+    },
+    {
+      "type": "table",
+      "title": "Top-5 Slowest Resolvers (5m)",
+      "gridPos": { "x": 0, "y": 59, "w": 24, "h": 7 },
+      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "topk(5, 1000 * (sum by (parent, field) (rate(apollo_resolver_duration_seconds_sum[5m])) / sum by (parent, field) (rate(apollo_resolver_duration_seconds_count[5m]))))"
+        }
+      ],
+      "transformations": [{ "id": "labelsToFields", "options": { "mode": "columns" } }],
+      "options": { "showHeader": true },
+      "links": [
+        {
+          "title": "Open in Jaeger",
+          "url": "${jaeger_base}/search?service=${jaeger_service}&operation=${__field.labels.parent}.${__field.labels.field}&lookback=${jaeger_lookback}",
+          "targetBlank": true
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "SLO Burn (5m) — vs ${slo_target}",
+      "description": "Burn = current error rate / allowed error rate",
+      "gridPos": { "x": 0, "y": 66, "w": 12, "h": 6 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 2 }, "overrides": [] },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "clamp_min( (sum(rate(apollo_request_errors_total{tenant=~\"$tenant\",status=~\"$status\"}[5m])) / sum(rate(apollo_request_total{tenant=~\"$tenant\",status=~\"$status\"}[5m]))) / (1 - ${slo_target}) , 0)"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error Ratio (5m) — Operation",
+      "description": "rate(errors)/rate(total) filtered by $tenant, $status, and $operation",
+      "gridPos": { "x": 0, "y": 72, "w": 12, "h": 6 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2 } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "clamp_min( sum by (operation) (rate(apollo_request_errors_total{tenant=~\"$tenant\",status=~\"$status\",operation=~\"$operation\"}[5m])) / sum by (operation) (rate(apollo_request_total{tenant=~\"$tenant\",status=~\"$status\",operation=~\"$operation\"}[5m])) , 0)"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Top Operations by Error Ratio (5m)",
+      "gridPos": { "x": 12, "y": 72, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "topk(10, ( sum by (operation) (rate(apollo_request_errors_total{tenant=~\"$tenant\",status=~\"$status\"}[5m])) / sum by (operation) (rate(apollo_request_total{tenant=~\"$tenant\",status=~\"$status\"}[5m])) ))"
+        }
+      ],
+      "transformations": [{ "id": "labelsToFields", "options": { "mode": "columns" } }],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2 } },
+      "options": { "showHeader": true }
+    },
+    {
+      "type": "stat",
+      "title": "p95 Latency (5m) — Mutations",
+      "description": "type=\"mutation\" only; sliced by $tenant/$status",
+      "gridPos": { "x": 0, "y": 78, "w": 12, "h": 6 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "clamp_min(1000 * histogram_quantile(0.95, sum by (le, tenant, status) (rate(apollo_request_duration_seconds_bucket{type=\"mutation\",tenant=~\"$tenant\",status=~\"$status\"}[5m]))), 0)"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "p95 Trend (5m) — Mutations by Operation",
+      "gridPos": { "x": 12, "y": 78, "w": 12, "h": 8 },
+      "fieldConfig": { "defaults": { "unit": "ms", "decimals": 1 } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "1000 * histogram_quantile(0.95, sum by (le, operation, tenant, status) (rate(apollo_request_duration_seconds_bucket{type=\"mutation\",tenant=~\"$tenant\",status=~\"$status\",operation=~\"$operation\"}[5m])))"
+        }
+      ],
+      "options": { "legend": { "displayMode": "list", "placement": "right" } }
+    },
+    {
+      "type": "stat",
+      "title": "Error Ratio (5m) — Mutations",
+      "description": "rate(errors)/rate(total) for type=\"mutation\", sliced by $tenant / $status",
+      "gridPos": { "x": 0, "y": 86, "w": 12, "h": 6 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2 } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "clamp_min( sum by (tenant, status) (rate(apollo_request_errors_total{type=\"mutation\",tenant=~\"$tenant\",status=~\"$status\"}[5m])) / sum by (tenant, status) (rate(apollo_request_total{type=\"mutation\",tenant=~\"$tenant\",status=~\"$status\"}[5m])) , 0)"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Top Mutation Operations by Error Ratio (5m)",
+      "gridPos": { "x": 12, "y": 86, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "topk(10, ( sum by (operation) (rate(apollo_request_errors_total{type=\"mutation\",tenant=~\"$tenant\",status=~\"$status\"}[5m])) / sum by (operation) (rate(apollo_request_total{type=\"mutation\",tenant=~\"$tenant\",status=~\"$status\"}[5m])) ))"
+        }
+      ],
+      "transformations": [{ "id": "labelsToFields", "options": { "mode": "columns" } }],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2 } },
+      "options": { "showHeader": true }
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["intelgraph"],
+  "templating": {
+    "list": [
+      {
+        "type": "query",
+        "name": "tenant",
+        "label": "Tenant",
+        "hide": 0,
+        "datasource": "Prometheus",
+        "query": "label_values(apollo_request_total, tenant)",
+        "refresh": 2,
+        "includeAll": true,
+        "current": { "text": "All", "value": "$__all", "selected": true }
+      },
+      {
+        "type": "query",
+        "name": "status",
+        "label": "Status",
+        "hide": 0,
+        "datasource": "Prometheus",
+        "query": "label_values(apollo_request_total, status)",
+        "refresh": 2,
+        "includeAll": true,
+        "current": { "text": "All", "value": "$__all", "selected": true }
+      },
+      {
+        "type": "query",
+        "name": "operation",
+        "label": "Operation",
+        "hide": 0,
+        "datasource": "Prometheus",
+        "query": "label_values(apollo_request_duration_seconds_bucket, operation)",
+        "refresh": 2,
+        "includeAll": true,
+        "current": { "text": "All", "value": "$__all", "selected": true }
+      },
+      {
+        "type": "constant",
+        "name": "slo_target",
+        "label": "SLO",
+        "hide": 0,
+        "query": "0.9995",
+        "current": { "text": "99.95%", "value": "0.9995", "selected": true }
+      },
+      {
+        "type": "custom",
+        "name": "jaeger_env",
+        "label": "Jaeger Env",
+        "query": "dev,staging,prod",
+        "current": { "text": "dev", "value": "dev", "selected": true },
+        "includeAll": false
+      },
+      {
+        "type": "constant",
+        "name": "jaeger_service",
+        "label": "Jaeger Service",
+        "hide": 0,
+        "query": "intelgraph-${jaeger_env}",
+        "current": { "text": "intelgraph-dev", "value": "intelgraph-dev", "selected": true }
+      },
+      {
+        "type": "constant",
+        "name": "jaeger_base",
+        "label": "Jaeger URL",
+        "hide": 0,
+        "query": "${jaeger_env} == 'dev' ? 'http://localhost:16686' : 'https://jaeger.${jaeger_env}.example.com'",
+        "current": {
+          "text": "http://localhost:16686",
+          "value": "http://localhost:16686",
+          "selected": true
+        }
+      },
+      {
+        "type": "constant",
+        "name": "jaeger_lookback",
+        "label": "Jaeger Lookback",
+        "hide": 0,
+        "query": "1h",
+        "current": { "text": "1h", "value": "1h", "selected": true }
+      }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "",
+  "title": "IntelGraph Overview",
+  "version": 1
+}

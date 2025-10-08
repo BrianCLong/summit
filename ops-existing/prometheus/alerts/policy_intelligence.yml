@@ -1,0 +1,18 @@
+groups:
+- name: policy-intel
+  rules:
+  - alert: PolicyDriftDetectionSlow
+    expr: histogram_quantile(0.95, sum by (le)(rate(policy_drift_detection_latency_seconds_bucket[5m]))) > 300
+    for: 3m
+    labels: { severity: page, team: intel }
+    annotations:
+      summary: "Policy drift detection breaching 5m SLO (p95)"
+      runbook: "runbooks/policy-drift.md"
+
+  - alert: ChangeRiskAUCRegressed
+    expr: (change_risk_auc{model="v1"} < 0.80)
+    for: 10m
+    labels: { severity: ticket, team: ml }
+    annotations:
+      summary: "AUC dropped below 0.80"
+      runbook: "runbooks/model-quality.md"

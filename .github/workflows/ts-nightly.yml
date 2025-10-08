@@ -1,0 +1,13 @@
+name: TS Nightly
+on:
+  schedule: [{ cron: "0 8 * * *" }]
+jobs:
+  force-rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: pnpm i --frozen-lockfile
+      - run: tsc -b --force --pretty false

@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: 'summit-tsc'
+    static_configs:
+      # If you run the exporter locally/VM with: PORT=9464 npm run metrics:tsc:dry
+      - targets: ['localhost:9464']

@@ -1,0 +1,5 @@
+# Keep current and adjust as needed
+* @org/maestro-core @org/platform @org/qa
+ops/** @org/platform
+helm/** @org/platform @org/sre
+terraform/** @org/platform

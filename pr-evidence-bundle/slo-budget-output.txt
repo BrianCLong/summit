@@ -1,0 +1,28 @@
+Running SLO & Budget validation with config: {
+  api_p95_ms: 350,
+  api_p99_ms: 900,
+  write_p95_ms: 700,
+  write_p99_ms: 1500,
+  ingest_pps: 1000,
+  ingest_proc_p95_ms: 100,
+  budget_api_per_1M: 2,
+  budget_ingest_per_1k: 0.1
+}
+Collecting metrics for SLO validation...
+Validating SLOs against thresholds...
+Validating error budgets...
+
+# SLO & Budget Metrics
+api_p95_latency_ms{threshold="350"} 320
+api_p99_latency_ms{threshold="900"} 850
+api_errors{budget="2"} 1
+api_calls_total 1000000
+write_p95_latency_ms{threshold="700"} 650
+ingest_packets_per_second{threshold="1000"} 950
+api_error_rate{budget="2"} 0.000001
+ingest_error_rate{budget="0.1"} 0
+
+🚨 1 SLO/Budget violations detected:
+  ❌ [WARNING] INGEST_PACKET_RATE: Ingest packet rate (950/sec) below SLO (1000/sec)
+
+⚠️ WARNING VIOLATIONS DETECTED - Proceeding with caution

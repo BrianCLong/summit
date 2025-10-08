@@ -1,0 +1,355 @@
+# IntelGraph Safe Mutations - SLOs and Alert Configuration
+# Grafana/Prometheus configuration for canary GA monitoring
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: intelgraph-slos-alerts
+  namespace: monitoring
+data:
+  slos.yaml: |
+    # Service Level Objectives for Safe Mutations
+    slos:
+      - name: "budget-guard-latency"
+        description: "Budget guard latency p95 ≤ 30ms per mutation"
+        sli_query: 'histogram_quantile(0.95, rate(mutation_latency_ms_bucket{stage="budget"}[5m]))'
+        objective: 30
+        unit: "ms"
+        warning_threshold: 60
+        critical_threshold: 120
+        evaluation_window: "5m"
+        alert_duration: "15m"
+        
+      - name: "reconciliation-freshness"
+        description: "Reconciliation freshness ≤ 24h for 95% of entries"
+        sli_query: 'reconciled_entries_total / ledger_entries_total'
+        objective: 0.95
+        unit: "ratio"
+        warning_threshold: 0.90
+        critical_threshold: 0.85
+        evaluation_window: "1d"
+        alert_duration: "30m"
+        
+      - name: "false-positive-denials"
+        description: "False-positive denials < 0.1% of mutation requests"
+        sli_query: 'budget_denials_total{reason="misconfig"} / mutation_requests_total'
+        objective: 0.001
+        unit: "ratio"
+        warning_threshold: 0.005
+        critical_threshold: 0.01
+        evaluation_window: "7d"
+        alert_duration: "1h"
+        
+      - name: "rollback-success-rate"
+        description: "Rollback success ≥ 99.9% (comp-log executes without error)"
+        sli_query: 'rollback_success_total / rollback_events_total'
+        objective: 0.999
+        unit: "ratio"
+        warning_threshold: 0.995
+        critical_threshold: 0.99
+        evaluation_window: "30d"
+        alert_duration: "5m"
+
+  alerts.yaml: |
+    # Prometheus Alert Rules for Safe Mutations
+    groups:
+      - name: intelgraph_safe_mutations
+        rules:
+          # SLO-1: Budget Guard Latency
+          - alert: BudgetGuardLatencyWarning
+            expr: histogram_quantile(0.95, rate(mutation_latency_ms_bucket{stage="budget"}[5m])) > 60
+            for: 15m
+            labels:
+              severity: warning
+              service: intelgraph-api
+              component: budget-guard
+              slo: budget-guard-latency
+            annotations:
+              summary: "Budget guard latency exceeding warning threshold"
+              description: "Budget guard p95 latency is {{ $value }}ms for 15+ minutes (threshold: 60ms)"
+              runbook_url: "https://docs.intelgraph.dev/runbooks/budget-guard-latency"
+              
+          - alert: BudgetGuardLatencyCritical
+            expr: histogram_quantile(0.95, rate(mutation_latency_ms_bucket{stage="budget"}[5m])) > 120
+            for: 15m
+            labels:
+              severity: critical
+              service: intelgraph-api
+              component: budget-guard
+              slo: budget-guard-latency
+            annotations:
+              summary: "Budget guard latency critically high"
+              description: "Budget guard p95 latency is {{ $value }}ms for 15+ minutes (threshold: 120ms)"
+              runbook_url: "https://docs.intelgraph.dev/runbooks/budget-guard-latency"
+              
+          # SLO-2: Reconciliation Freshness
+          - alert: ReconciliationLagging
+            expr: (reconciled_entries_total / ledger_entries_total) < 0.90
+            for: 30m
+            labels:
+              severity: warning
+              service: intelgraph-reconciler
+              component: budget-reconciliation
+              slo: reconciliation-freshness
+            annotations:
+              summary: "Budget reconciliation falling behind"
+              description: "Only {{ $value | humanizePercentage }} of ledger entries reconciled (target: 95%)"
+              runbook_url: "https://docs.intelgraph.dev/runbooks/reconciliation-lag"
+              
+          - alert: ReconciliationCritical
+            expr: (reconciled_entries_total / ledger_entries_total) < 0.85
+            for: 30m
+            labels:
+              severity: critical
+              service: intelgraph-reconciler
+              component: budget-reconciliation
+              slo: reconciliation-freshness
+            annotations:
+              summary: "Budget reconciliation critically behind"
+              description: "Only {{ $value | humanizePercentage }} of ledger entries reconciled (target: 95%)"
+              runbook_url: "https://docs.intelgraph.dev/runbooks/reconciliation-lag"
+              
+          # SLO-3: False Positive Denials
+          - alert: HighFalsePositiveDenials
+            expr: rate(budget_denials_total{reason="misconfig"}[7d]) / rate(mutation_requests_total[7d]) > 0.005
+            for: 1h
+            labels:
+              severity: warning
+              service: intelgraph-api
+              component: budget-enforcement
+              slo: false-positive-denials
+            annotations:
+              summary: "High rate of false-positive budget denials"
+              description: "{{ $value | humanizePercentage }} of mutations falsely denied (target: <0.1%)"
+              runbook_url: "https://docs.intelgraph.dev/runbooks/false-positive-denials"
+              
+          # Canary-Specific Alerts
+          - alert: CanaryDailyBudgetApproaching
+            expr: |
+              (intelgraph_daily_spend_usd{tenant=~"demo|test|maestro-internal"} / 
+               intelgraph_daily_limit_usd{tenant=~"demo|test|maestro-internal"}) > 0.8
+            for: 5m
+            labels:
+              severity: warning
+              service: intelgraph-api
+              component: canary-budget
+              tenant: "{{ $labels.tenant }}"
+            annotations:
+              summary: "Canary tenant approaching daily budget limit"
+              description: "Tenant {{ $labels.tenant }} at {{ $value | humanizePercentage }} of daily budget"
+              runbook_url: "https://docs.intelgraph.dev/runbooks/canary-budget-limits"
+              
+          - alert: CanaryDailyBudgetExceeded
+            expr: |
+              (intelgraph_daily_spend_usd{tenant=~"demo|test|maestro-internal"} / 
+               intelgraph_daily_limit_usd{tenant=~"demo|test|maestro-internal"}) >= 1.0
+            for: 1m
+            labels:
+              severity: critical
+              service: intelgraph-api
+              component: canary-budget
+              tenant: "{{ $labels.tenant }}"
+            annotations:
+              summary: "Canary tenant exceeded daily budget limit"
+              description: "Tenant {{ $labels.tenant }} at {{ $value | humanizePercentage }} of daily budget - mutations blocked"
+              runbook_url: "https://docs.intelgraph.dev/runbooks/canary-budget-exceeded"
+              
+          # Persisted Query Violations
+          - alert: PersistentQueryViolations
+            expr: rate(pq_violations_total[5m]) > 10
+            for: 10m
+            labels:
+              severity: warning
+              service: intelgraph-api
+              component: persisted-queries
+            annotations:
+              summary: "High rate of persisted query violations"
+              description: "{{ $value }} PQ violations per second - check client implementations"
+              runbook_url: "https://docs.intelgraph.dev/runbooks/persisted-query-violations"
+              
+          # Four-Eyes Approval Bottlenecks
+          - alert: ApprovalBottleneck
+            expr: approval_pending_total > 50
+            for: 30m
+            labels:
+              severity: warning
+              service: intelgraph-api
+              component: approval-system
+            annotations:
+              summary: "Large backlog of pending approvals"
+              description: "{{ $value }} mutations pending approval for 30+ minutes"
+              runbook_url: "https://docs.intelgraph.dev/runbooks/approval-bottleneck"
+              
+          # System Health
+          - alert: SafeMutationsDown
+            expr: up{job="intelgraph-api"} == 0
+            for: 1m
+            labels:
+              severity: critical
+              service: intelgraph-api
+            annotations:
+              summary: "IntelGraph API completely down"
+              description: "No healthy API instances detected"
+              runbook_url: "https://docs.intelgraph.dev/runbooks/api-down"
+              
+          - alert: RedisLatencyHigh
+            expr: redis_latency_p95_ms > 5
+            for: 10m
+            labels:
+              severity: warning
+              service: redis
+              component: rate-limiting
+            annotations:
+              summary: "Redis latency impacting rate limiting"
+              description: "Redis p95 latency is {{ $value }}ms (threshold: 5ms)"
+              runbook_url: "https://docs.intelgraph.dev/runbooks/redis-latency"
+
+  dashboards.json: |
+    {
+      "dashboard": {
+        "title": "IntelGraph Safe Mutations - SLOs",
+        "tags": ["intelgraph", "slo", "safe-mutations"],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "panels": [
+          {
+            "title": "SLO-1: Budget Guard Latency p95",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, rate(mutation_latency_ms_bucket{stage=\"budget\"}[5m]))",
+                "legendFormat": "p95 Latency"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "ms",
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 30},
+                    {"color": "red", "value": 60}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "title": "SLO-2: Reconciliation Freshness",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "reconciled_entries_total / ledger_entries_total",
+                "legendFormat": "Reconciliation %"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percentunit",
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "yellow", "value": 0.90},
+                    {"color": "green", "value": 0.95}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "title": "Canary Budget Utilization",
+            "type": "bargauge",
+            "targets": [
+              {
+                "expr": "intelgraph_daily_spend_usd{tenant=~\"demo|test|maestro-internal\"} / intelgraph_daily_limit_usd{tenant=~\"demo|test|maestro-internal\"}",
+                "legendFormat": "{{ tenant }}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percentunit",
+                "max": 1,
+                "thresholds": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 0.8},
+                    {"color": "red", "value": 1.0}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "title": "Mutation Flow Health",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "rate(mutation_requests_total[5m])",
+                "legendFormat": "Total Requests/sec"
+              },
+              {
+                "expr": "rate(mutation_requests_total{status=\"denied\"}[5m])",
+                "legendFormat": "Denied/sec"
+              },
+              {
+                "expr": "rate(pq_violations_total[5m])",
+                "legendFormat": "PQ Violations/sec"
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+  notification_channels.yaml: |
+    # Alertmanager Routing Configuration
+    route:
+      group_by: ['alertname', 'severity', 'service']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      receiver: 'default'
+      routes:
+        - match:
+            component: budget-guard
+          receiver: 'sre-and-finops'
+          routes:
+            - match:
+                severity: critical
+              receiver: 'oncall-page'
+        - match:
+            component: canary-budget
+          receiver: 'finops-team'
+        - match:
+            severity: critical
+          receiver: 'oncall-page'
+          
+    receivers:
+      - name: 'default'
+        slack_configs:
+          - api_url: '{{ .SlackWebhookURL }}'
+            channel: '#intelgraph-alerts'
+            title: 'IntelGraph Alert: {{ .GroupLabels.alertname }}'
+            text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+            
+      - name: 'sre-and-finops'
+        slack_configs:
+          - api_url: '{{ .SlackWebhookURL }}'
+            channel: '#sre-alerts'
+            title: 'Budget System Alert: {{ .GroupLabels.alertname }}'
+          - api_url: '{{ .SlackWebhookURL }}'
+            channel: '#finops-alerts'
+            title: 'Budget Impact: {{ .GroupLabels.alertname }}'
+            
+      - name: 'finops-team'
+        slack_configs:
+          - api_url: '{{ .SlackWebhookURL }}'
+            channel: '#finops-alerts'
+            title: 'Canary Budget Alert: {{ .GroupLabels.alertname }}'
+            
+      - name: 'oncall-page'
+        pagerduty_configs:
+          - service_key: '{{ .PagerDutyServiceKey }}'
+            description: 'CRITICAL: {{ .GroupLabels.alertname }} - {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'

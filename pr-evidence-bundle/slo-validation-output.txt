@@ -1,0 +1,25 @@
+Running SLO validation with config: {
+  window: '10m',
+  minSamples: 500,
+  apiLatencyP95: 350,
+  apiLatencyP99: 900,
+  errorRateThreshold: 0.002
+}
+Validating SLO over 10m window...
+Querying metrics: api_request_duration_seconds over 10m
+Querying metrics: api_request_errors_total over 10m
+Querying metrics: api_requests_total over 10m
+SLO validation failed: Insufficient samples: 60 < 500
+
+# SLO Validation Results
+valid=false
+violations=1
+sample_count=0
+
+# Violations Detected (1)
+violation_0_type=VALIDATION_ERROR
+violation_0_message=SLO validation failed: Insufficient samples: 60 < 500
+violation_0_value=N/A
+violation_0_threshold=N/A
+
+❌ SLO validation FAILED - Release should NOT proceed

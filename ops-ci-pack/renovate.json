@@ -1,0 +1,8 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommits"],
+  "prHourlyLimit": 2,
+  "rangeStrategy": "auto",
+  "npm": { "enabled": true },
+  "pip_requirements": { "enabled": true }
+}

@@ -1,0 +1,58 @@
+name: TS Metrics (dry)
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  tsc-metrics-dry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NODE_OPTIONS: --max-old-space-size=2048
+      METRICS_MODE: dry
+      PORT: 9464
+      # Configure your Pushgateway endpoint in repo secrets
+      PUSHGATEWAY_URL: ${{ secrets.PUSHGATEWAY_URL }} # e.g. https://push.example.com:9091
+      # Optional basic auth
+      PUSHGATEWAY_USERNAME: ${{ secrets.PUSHGATEWAY_USERNAME }}
+      PUSHGATEWAY_PASSWORD: ${{ secrets.PUSHGATEWAY_PASSWORD }}
+    steps:
+      - uses: actions/checkout @v4/**
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - uses: actions/setup-node @v4/**
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: pnpm i --frozen-lockfile || npm ci
+
+      - name: Start exporter (dry mode)
+        run: |
+          npx ts-node metrics/tsc-prom-exporter.ts &
+          # give it a moment to boot
+          sleep 3
+
+      - name: Scrape and push metrics
+        shell: bash
+        run: |
+          set -euo pipefail
+          scrape=$(curl -fsS "http://localhost:${PORT}/metrics")
+
+          # Route with labels: job + instance + repo + pr + sha
+          # See https://github.com/prometheus/pushgateway for label routing patterns
+          url="${PUSHGATEWAY_URL%/}/metrics/job/summit-tsc/instance/github-ci/repo/${GITHUB_REPOSITORY}/pr/${{ github.event.number }}/sha/${GITHUB_SHA}"
+
+          if [[ -n "${PUSHGATEWAY_USERNAME:-}" ]]; then
+            curl -fsS -u "${PUSHGATEWAY_USERNAME}:${PUSHGATEWAY_PASSWORD}" \
+              --data-binary "@-" "$url" <<< "$scrape"
+          else
+            curl -fsS --data-binary "@-" "$url" <<< "$scrape"
+          fi
+
+      - name: Stop exporter
+        if: always()
+        run: |
+          pkill -f "metrics/tsc-prom-exporter" || true

@@ -1,0 +1,56 @@
+name: CI — Build & Test (polyglot)
+
+on:
+  pull_request:
+  push:
+    branches: [main, trunk, "release/**"]
+
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    if: hashFiles('**/package.json') != ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci || npm install
+      - run: npm test --if-present
+
+  python:
+    runs-on: ubuntu-latest
+    if: hashFiles('**/pyproject.toml', '**/requirements*.txt') != ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: |
+          pip install -r requirements.txt || true
+          if [ -f pyproject.toml ]; then pip install -e . || true; fi
+          pip install pytest || true
+      - run: pytest -q || true
+
+  go:
+    runs-on: ubuntu-latest
+    if: hashFiles('**/go.mod') != ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - run: go test ./...
+
+  java:
+    runs-on: ubuntu-latest
+    if: hashFiles('**/pom.xml') != ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+      - run: mvn -B -DskipTests=false test

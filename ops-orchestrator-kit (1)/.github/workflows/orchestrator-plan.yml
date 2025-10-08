@@ -1,0 +1,72 @@
+name: Orchestrator • Plan & Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main, trunk, 'release/**']
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: plan-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Tools (jq/yq/gh) — ensure present
+        run: |
+          set -euxo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y jq yq
+          gh --version || (type -p curl && sudo apt-get install -y gh || true)
+
+      - name: Prepare ops kit
+        run: |
+          set -euxo pipefail
+          if [ ! -f ./ops/ga_orchestrator.sh ]; then
+            echo "::error::ops kit not present in repository. Add it first."
+            exit 1
+          fi
+          chmod +x ./ops/ga_orchestrator.sh scripts/*.sh || true
+
+      - name: Orchestrator — status/init/plan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euxo pipefail
+          ./ops/ga_orchestrator.sh status || true
+          ./ops/ga_orchestrator.sh init
+          ./ops/ga_orchestrator.sh plan
+
+      - name: Orchestrator — build (best-effort)
+        run: |
+          set -euxo pipefail
+          ./ops/ga_orchestrator.sh build || true
+
+      - name: Orchestrator — release dry-run
+        run: |
+          set -euxo pipefail
+          ./ops/ga_orchestrator.sh release-dry || true
+
+      - name: Upload ops artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-artifacts-${{ github.run_id }}
+          path: |
+            ops-logs/**
+            ops-state.json
+            templates/GA_RELEASE_PLAN.md
+          if-no-files-found: warn

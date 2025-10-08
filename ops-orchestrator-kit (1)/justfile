@@ -1,0 +1,28 @@
+
+# Simple aliases for the GA Orchestrator
+init: 
+\t./ops/ga_orchestrator.sh init
+
+plan:
+\t./ops/ga_orchestrator.sh plan
+
+build:
+\t./ops/ga_orchestrator.sh build
+
+release-dry:
+\t./ops/ga_orchestrator.sh release-dry
+
+merge-prs:
+\tCONFIRM=1 ./ops/ga_orchestrator.sh merge-prs
+
+cleanup-branches:
+\tCONFIRM=1 ./ops/ga_orchestrator.sh cleanup-branches
+
+tag-ga:
+\tCONFIRM=1 ./ops/ga_orchestrator.sh tag-ga
+
+status:
+\t./ops/ga_orchestrator.sh status
+
+resume:
+\t./ops/ga_orchestrator.sh resume

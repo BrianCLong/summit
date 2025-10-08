@@ -1,0 +1,58 @@
+name: Orchestrator • Cleanup merged local branches (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_branch:
+        description: "Base branch (e.g., main)"
+        default: "main"
+        required: true
+      confirm:
+        description: "Delete local merged branches (CONFIRM=1)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tools (jq/yq)
+        run: |
+          set -euxo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y jq yq
+      - name: Prepare ops kit
+        run: |
+          set -euxo pipefail
+          test -f ./ops/ga_orchestrator.sh || (echo "::error::ops kit missing" && exit 1)
+          chmod +x ./ops/ga_orchestrator.sh scripts/*.sh || true
+      - name: Cleanup (dry-run by default)
+        env:
+          BASE_BRANCH: ${{ inputs.base_branch }}
+        run: |
+          set -euxo pipefail
+          ./ops/ga_orchestrator.sh cleanup-branches || true
+      - name: Cleanup (CONFIRM=1)
+        if: inputs.confirm == true
+        env:
+          BASE_BRANCH: ${{ inputs.base_branch }}
+          CONFIRM: "1"
+        run: |
+          set -euxo pipefail
+          ./ops/ga_orchestrator.sh cleanup-branches
+      - name: Upload ops artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-cleanup-artifacts-${{ github.run_id }}
+          path: |
+            ops-logs/**
+            ops-state.json
+          if-no-files-found: warn
