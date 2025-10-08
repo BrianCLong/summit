@@ -1,0 +1,34 @@
+{
+  "name": "Prevent Force Pushes to Release Tags",
+  "target": "branch",
+  "source_type": "Repository",
+  "rules": [
+    {
+      "type": "tag_name_pattern",
+      "parameters": {
+        "name": "Release Tag Pattern",
+        "negate": false,
+        "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+.*$"
+      }
+    },
+    {
+      "type": "prevent_force_push",
+      "parameters": {
+        "name": "Prevent Force Push"
+      }
+    },
+    {
+      "type": "prevent_deletions",
+      "parameters": {
+        "name": "Prevent Deletion"
+      }
+    }
+  ],
+  "conditions": {
+    "ref_name": {
+      "exclude": [],
+      "include": ["~TAG_SOURCE"]
+    }
+  },
+  "enforcement": "active"
+}

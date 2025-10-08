@@ -1,0 +1,23 @@
+name: nightly-verify
+on:
+  schedule: [{ cron: "17 4 * * *" }]  # daily 04:17 UTC
+  workflow_dispatch: {}
+jobs:
+  verify-latest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Install gh CLI
+        run: |
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+      - name: Verify latest GA tag
+        run: |
+          TAG=$(gh release list --limit 1 --json tagName,isLatest --jq '.[] | select(.isLatest==true) | .tagName')
+          echo "Latest GA tag: $TAG"
+          make verify-release-strict TAG="$TAG"
