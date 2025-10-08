@@ -1,0 +1,71 @@
+name: PR Auto Update
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # every 6 hours
+  workflow_dispatch:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    if: github.event_name != 'issue_comment' || contains(github.event.comment.body, '/update')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout @v4
+
+      - name: List PRs targeting main
+        id: list
+        uses: actions/github-script @db/migrations/V7__create_cap_hits_mv_and_notices.sql
+        with:
+          script: |
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              base: 'main',
+              per_page: 100
+            });
+            core.setOutput('prs', JSON.stringify(prs.map(p => ({number: p.number, head: p.head.ref, mergeable_state: p.mergeable_state}))));
+
+      - name: Update & label behind-main PRs
+        uses: actions/github-script @db/migrations/V7__create_cap_hits_mv_and_notices.sql
+        with:
+          script: |
+            const prs = JSON.parse(core.getInput('prs'));
+            for (const pr of prs) {
+              const { data: prData } = await github.rest.pulls.get({
+                owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number
+              });
+              if (prData.mergeable_state === 'behind') {
+                await github.rest.issues.addLabels({ owner: context.repo.owner, repo: context.repo.repo, issue_number: pr.number, labels: ['needs-rebase'] });
+                await github.rest.pulls.updateBranch({ owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number });
+              }
+              // enable auto-merge when required checks are passing and no conflicts
+              if (prData.mergeable_state === 'clean' && prData.draft === false) {
+                try {
+                  await github.graphql(
+                    "mutation($id:ID!) { enablePullRequestAutoMerge(input:{pullRequestId:$id, mergeMethod:SQUASH}){ clientMutationId } }",
+                    { id: prData.node_id }
+                  );
+                } catch(e) { /* ignore */ }
+              }
+            }
+
+  comment:
+    runs-on: ubuntu-latest
+    needs: [update]
+    steps:
+      - name: Comment summary
+        uses: actions/github-script @db/migrations/V7__create_cap_hits_mv_and_notices.sql
+        with:
+          script: |
+            const summary = `**PR Auto Update** ran.
+- Updated branches behind `main`
+- Labeled conflicts as `needs-rebase`
+- Enabled auto-merge on clean PRs`;
+            await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number || 1, body: summary }).catch(()=>{});

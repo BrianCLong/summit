@@ -1,0 +1,48 @@
+name: Nightly Heavy Lane
+
+on:
+  schedule:
+    - cron: '17 4 * * *' # 04:17 UTC nightly
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout @v4/**
+        with: { fetch-depth: 0 }
+      - name: Gitleaks scan
+        uses: gitleaks/gitleaks-action @ops-existing/migrations/v2.cypher
+        with:
+          args: detect --no-git -v
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout @v4/**
+      - name: Syft SBOM
+        uses: anchore/sbom-action @.archive/workflows/maestro-conductor-v03.yml
+        with:
+          path: .
+          output-file: sbom.syft.json
+
+  provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout @v4/**
+      - name: Generate release manifest (dry-run)
+        run: node scripts/gen-release-manifest.mjs --dry
+      - name: Verify manifest (strict)
+        run: node scripts/verify-release.mjs --strict
+
+  canary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Canary placeholder
+        run: echo "Add canary deploy/test here; non-blocking to main."

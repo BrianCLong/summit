@@ -1,8 +1,22 @@
-.PHONY: verify-release verify-release-strict
-verify-release: ## Verify manifest for TAG (warn on SHA mismatch)
-	@[ -n "$(TAG)" ] || (echo "Usage: make verify-release TAG=vYYYY.MM.DD" && exit 1)
-	node scripts/verify-release-manifest.mjs --tag=$(TAG)
+COMPOSE := docker compose -f ops/compose/docker-compose.yml
+SMOKE ?= ./scripts/smoke_orchestrator.sh
 
-verify-release-strict: ## Verify manifest and require HEAD==TAG commit
-	@[ -n "$(TAG)" ] || (echo "Usage: make verify-release-strict TAG=vYYYY.MM.DD" && exit 1)
-	node scripts/verify-release-manifest.mjs --tag=$(TAG) --strict
+.PHONY: up down logs ps rebuild verify
+up:
+$(COMPOSE) up -d
+
+down:
+$(COMPOSE) down -v
+
+logs:
+$(COMPOSE) logs -f --tail=200
+
+ps:
+$(COMPOSE) ps
+
+rebuild:
+$(COMPOSE) build --no-cache
+$(COMPOSE) up -d --force-recreate
+
+verify:
+$(SMOKE)

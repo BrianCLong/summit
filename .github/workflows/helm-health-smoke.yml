@@ -1,0 +1,40 @@
+name: Helm Health Smoke
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  helm-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Cache kubeconform and schemas
+        uses: actions/cache@v4
+        with:
+          path: |
+            tools/kubeconform
+            tools/k8s-schemas
+          key: kubeconform-${{ runner.os }}-${{ runner.arch }}-v0
+
+      - name: Install kubeconform (if missing)
+        if: ${{ hashFiles('tools/kubeconform/**/kubeconform') == '' }}
+        run: tools/kubeconform/fetch.sh 0.6.7
+
+      - name: Fetch schemas (if missing)
+        if: ${{ hashFiles('tools/k8s-schemas/**') == '' }}
+        run: tools/kubeconform/fetch-schemas.sh v1.28.0
+
+      - name: Helm lint
+        run: make helm-lint
+
+      - name: Helm validate
+        run: make helm-validate

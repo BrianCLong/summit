@@ -1,51 +1,92 @@
-name: Batch Merge PRs
+name: Merge Train (Analyze & Comment)
+
 on:
   workflow_dispatch:
-    inputs:
-      integration_branch:
-        description: 'The integration branch to merge PRs into'
-        required: true
-      pr_numbers:
-        description: 'A JSON array of PR numbers to merge'
-        required: true
+  schedule:
+    - cron: '15 */12 * * *' # twice a day
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
-  batch-merge:
+  analyze:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Scan open PRs
+        id: scan
+        uses: actions/github-script@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0 # Needed to access all history
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
 
-      - name: Set up git user
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+              sort: 'updated',
+              direction: 'desc'
+            });
 
-      - name: Create and checkout integration branch
-        run: |
-          git checkout main # Or your default branch
-          git pull origin main
-          git checkout -b ${{ github.event.inputs.integration_branch }}
+            const payload = [];
 
-      - name: Merge PRs
+            for (const pr of prs) {
+              const labels = pr.labels.map((label) => label.name);
+              const checks = await github.rest.checks.listForRef({
+                owner,
+                repo,
+                ref: pr.head.sha,
+                per_page: 100
+              }).catch(() => ({ data: { check_runs: [] } }));
+
+              const failing = (checks.data.check_runs || [])
+                .filter((check) => check.conclusion === 'failure')
+                .map((check) => check.name);
+
+              payload.push({
+                number: pr.number,
+                title: pr.title,
+                labels,
+                failing
+              });
+            }
+
+            core.setOutput('payload', JSON.stringify(payload));
+
+      - name: Leave status comments
+        if: steps.scan.outputs.payload != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const payload = JSON.parse(process.env.PAYLOAD);
+
+            for (const entry of payload) {
+              const body = [
+                '### Merge Train Status',
+                '',
+                `- Failing checks: ${entry.failing.length ? entry.failing.join(', ') : 'None'}`,
+                `- Labels: ${entry.labels.length ? entry.labels.join(', ') : '—'}`,
+                '',
+                '> Tip: Apply `ci:light` to run fast checks only. Use `ci:full` when you need the heavier lane.'
+              ].join('\n');
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: entry.number,
+                body
+              }).catch((error) => {
+                if (error.status !== 403) {
+                  core.warning(`Unable to comment on PR #${entry.number}: ${error.message}`);
+                }
+              });
+            }
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBERS: ${{ github.event.inputs.pr_numbers }}
-        run: |
-          for pr_number in $(echo "${PR_NUMBERS}" | jq -r '.[]'); do
-            echo "Fetching and merging PR #${pr_number}"
-            git fetch origin pull/${pr_number}/head
-            if git merge --no-ff --no-edit FETCH_HEAD; then
-              echo "Successfully merged PR #${pr_number}"
-            else
-              echo "::error::Conflict when merging PR #${pr_number}. Aborting batch merge."
-              git merge --abort
-              exit 1
-            fi
-          done
+          PAYLOAD: ${{ steps.scan.outputs.payload }}
 
-      - name: Push integration branch
-        run: git push origin ${{ github.event.inputs.integration_branch }}
+      - name: Log summary
+        run: echo "Merge train analysis complete."

@@ -1,0 +1,24 @@
+services:
+  orchestrator:
+    image: ghcr.io/${GITHUB_OWNER}/summit-orchestrator:latest
+    ports: [ "8080:8080" ]
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      api:
+        condition: service_healthy
+
+  api:
+    image: ghcr.io/${GITHUB_OWNER}/summit-api:latest
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s

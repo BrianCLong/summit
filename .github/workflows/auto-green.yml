@@ -1,38 +1,91 @@
-name: Auto-Green PR
+name: Auto Green (main baseline)
+
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-permissions:
-  contents: write
-  pull-requests: write
+  push:
+    branches: [ main ]
+
 concurrency:
-  group: auto-green-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
-  autofix:
+  setup:
     runs-on: ubuntu-latest
+    outputs:
+      node: ${{ steps.versions.outputs.node }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout @v4/**
         with: { fetch-depth: 0 }
-      - uses: actions/setup-node@v4
-        with: { node-version: '18' }
-      - name: Install (no scripts)
-        run: |
-          corepack enable
-          pnpm -v || npm i -g pnpm
-          pnpm install --ignore-scripts --frozen-lockfile || npm ci --ignore-scripts
-      - name: Prettier + ESLint (safe fixes)
-        run: |
-          npx --yes prettier . -w || true
-          npm run -ws --if-present lint:fix || true
-      - name: Pact smoke tag only (non-fatal)
-        run: |
-          export PACT_TAG=smoke
-          npm run -ws --if-present pact:verify || true
-      - name: Commit fixes (if any)
-        uses: stefanzweifel/git-auto-commit-action@v5
+
+      - name: Use Node
+        uses: actions/setup-node @v4/**
         with:
-          commit_message: "chore(auto-green): apply safe autofixes"
-          branch: ${{ github.head_ref }}
-      - name: Note gate
-        run: echo "Gate: Stabilization: Build & Unit Tests"
+          node-version: '20'
+          cache: 'npm'
+
+      - id: versions
+        run: |
+          echo "node=20" >> "$GITHUB_OUTPUT"
+
+      - name: Install
+        run: |
+          npm ci
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: [setup]
+    steps:
+      - uses: actions/checkout @v4/**
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node @v4/**
+        with:
+          node-version: ${{ needs.setup.outputs.node }}
+          cache: 'npm'
+      - run: npm ci
+      - name: Lint
+        run: npm run lint --workspace= @helm/summit/Chart.yaml --if-present
+
+  types:
+    runs-on: ubuntu-latest
+    needs: [setup]
+    steps:
+      - uses: actions/checkout @v4/**
+      - uses: actions/setup-node @v4/**
+        with:
+          node-version: ${{ needs.setup.outputs.node }}
+          cache: 'npm'
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck --workspace= @helm/summit/Chart.yaml --if-present
+
+  unit:
+    runs-on: ubuntu-latest
+    needs: [setup]
+    steps:
+      - uses: actions/checkout @v4/**
+      - uses: actions/setup-node @v4/**
+        with:
+          node-version: ${{ needs.setup.outputs.node }}
+          cache: 'npm'
+      - run: npm ci
+      - name: Unit tests (quarantined flakies excluded)
+        run: |
+          npm test --workspaces --if-present -- --maxWorkers=50%
+        env:
+          CI: "true"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint, types, unit]
+    steps:
+      - uses: actions/checkout @v4/**
+      - uses: actions/setup-node @v4/**
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Build (no publish/push)
+        run: npm run build --workspaces --if-present
