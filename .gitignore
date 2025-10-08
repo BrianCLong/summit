@@ -183,3 +183,19 @@ neo4j/data/
 neo4j/import/
 neo4j/logs/
 neo4j/backups/
+
+# vpc (Terraform)
+vpc/.terraform/
+vpc/.terraform.lock.hcl
+vpc/terraform.tfstate
+vpc/terraform.tfstate.backup
+vpc/*.tfvars
+vpc/**/crash.log
+vpc/**/override.tf
+vpc/**/override.tf.json
+
+# webapp (Node)
+webapp/node_modules/
+webapp/.next/
+webapp/dist/
+webapp/.pnpm-store/

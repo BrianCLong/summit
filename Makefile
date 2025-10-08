@@ -100,3 +100,14 @@ copilot-context:
 
 copilot-report:
 	gh workflow run "Weekly Copilot Adoption Report" || true
+
+.PHONY: vpc-validate vpc-plan webapp-build
+
+vpc-validate:
+	cd vpc && terraform init -input=false && terraform validate
+
+vpc-plan:
+	cd vpc && terraform init -input=false && terraform plan -input=false -refresh=false -out=tfplan
+
+webapp-build:
+	cd webapp && (npm ci || pnpm i || yarn install) && (npm run build || true)
