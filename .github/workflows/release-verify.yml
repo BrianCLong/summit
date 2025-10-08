@@ -1,0 +1,43 @@
+# Release Verification Workflow
+#
+# Enforces strict manifest verification for release tags.
+# This workflow runs when tags matching 'v*' are pushed and ensures:
+# - The checkout is exactly at the tagged commit (--strict)
+# - The manifest commit matches the tag commit (--expect-sha)
+#
+# To make this workflow a required status check:
+# 1. Go to Settings → Branches
+# 2. Add/edit branch protection rules for release branches or tag patterns
+# 3. Enable "Require status checks to pass before merging"
+# 4. Select "Release Verify / verify" as a required check
+
+name: Release Verify
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for tag resolution
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Verify manifest at tag (strict)
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          echo "Verifying release manifest for tag: $TAG"
+          echo "Expected commit SHA: $GITHUB_SHA"
+          node scripts/verify-release-manifest.mjs --tag="$TAG" --strict --expect-sha="$GITHUB_SHA"
