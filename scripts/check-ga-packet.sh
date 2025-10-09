@@ -9,6 +9,7 @@ RELEASE_ID="${RELEASE_ID:-}"
 PACKET="${PACKET:-docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md}"
 SHEET="${SHEET:-docs/releases/ga-signoff/GA_SIGNOFF_SHEET.md}"
 QUICK="${QUICK:-docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md}"
+SUMMARY="${SUMMARY:-docs/releases/FINAL_GA_RELEASE_SUMMARY.md}"
 ANNOUNCE="${ANNOUNCE:-docs/releases/${RELEASE_ID:-2025.10.07}_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md}"
 REPORT_DIR="${REPORT_DIR:-.ga-check}"; REPORT="${REPORT_DIR}/report.txt"; mkdir -p "$REPORT_DIR"
 
@@ -33,7 +34,7 @@ for f in \
   "ops/tag-protection-ruleset.json" \
   "ops/grafana/ga-health-dashboard.json" \
   "RUNBOOK.md" \
-  "$PACKET" "$SHEET" "$QUICK"
+  "$PACKET" "$SHEET" "$QUICK" "$SUMMARY"
 do
   [[ -f "$f" ]] && ok "Found $f" || fail "Missing required file: $f"
 done
@@ -47,7 +48,8 @@ for l in \
   "RUNBOOK.md" \
   "docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md" \
   "docs/releases/ga-signoff/GA_SIGNOFF_SHEET.md" \
-  "docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md"
+  "docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md" \
+  "docs/releases/FINAL_GA_RELEASE_SUMMARY.md"
 do
   if grep -qF "$l" "$ANNOUNCE"; then
     ok "Announcement links to $l"
@@ -57,12 +59,23 @@ do
 done
 
 # Packet sanity sections
-info "Validating GA packet content: docs/releases/GA_SIGNOFF_PACKET.md"
-grep -qiE '^##[[:space:]]+Go[[:space:]]*/[[:space:]]*No-?Go Checklist' docs/releases/GA_SIGNOFF_PACKET.md \
+info "Validating GA packet content: $PACKET"
+grep -qiE '^##[[:space:]]+.*Go[[:space:]]*/[[:space:]]*No-?Go Checklist' "$PACKET" \
   && ok "Canonical packet contains Go/No-Go Checklist" || warn "Canonical packet missing Go/No-Go Checklist section"
 
-grep -qiE '^##[[:space:]]+Final Verification Summary' docs/releases/GA_SIGNOFF_PACKET.md \
+grep -qiE '^##[[:space:]]+.*Final Verification Summary' "$PACKET" \
   && ok "Canonical packet contains Final Verification Summary" || warn "Canonical packet missing Final Verification Summary section"
+
+# Summary validation
+info "Validating $SUMMARY"
+grep -qiE '^##[[:space:]]+.*Executive Overview' "$SUMMARY" \
+  && ok "Final GA summary contains Executive Overview" || fail "Final GA summary missing Executive Overview section"
+
+grep -qiE '^##[[:space:]]+.*Deliverables at a Glance' "$SUMMARY" \
+  && ok "Final GA summary contains Deliverables at a Glance" || fail "Final GA summary missing Deliverables at a Glance section"
+
+grep -qiE '^##[[:space:]]+.*Verification Status' "$SUMMARY" \
+  && ok "Final GA summary contains Verification Status" || fail "Final GA summary missing Verification Status section"
 
 ok "GA Packet & Links verification passed for RELEASE_ID=${RELEASE_ID}"
 
@@ -79,7 +92,7 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
       "ops/tag-protection-ruleset.json" \
       "ops/grafana/ga-health-dashboard.json" \
       "RUNBOOK.md" \
-      "$PACKET" "$SHEET" "$QUICK"
+      "$PACKET" "$SHEET" "$QUICK" "$SUMMARY"
     do echo "- ✅ $f"; done
     echo ""
     echo "### Links present in announcement"
@@ -90,7 +103,8 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
       "RUNBOOK.md" \
       "docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md" \
       "docs/releases/ga-signoff/GA_SIGNOFF_SHEET.md" \
-      "docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md"
+      "docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md" \
+      "docs/releases/FINAL_GA_RELEASE_SUMMARY.md"
     do echo "- ✅ $l"; done
     echo ""
     echo "_Report saved at \`${REPORT}\`_"

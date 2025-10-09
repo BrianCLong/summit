@@ -4,8 +4,9 @@
  *
  * Usage:
  *   node scripts/verify-release-manifest.mjs --tag=v2025.10.07
- *   node scripts/verify-release-manifest.mjs --tag=v2025.10.07 --strict
- *   node scripts/verify-release-manifest.mjs --tag=v2025.10.07 --expect-sha=$GITHUB_SHA
+ *   TAG=v2025.10.07 node scripts/verify-release-manifest.mjs
+ *
+ * Exits non-zero on any mismatch or missing file.
  */
 
 import fs from "fs";
@@ -19,9 +20,6 @@ function arg(name) {
 }
 
 const TAG = arg("tag") || process.env.TAG || "v" + new Date().toISOString().slice(0,10).replace(/-/g,".");
-const strict = process.argv.includes('--strict');                 // require HEAD === tag commit
-const expectSha = arg("expect-sha");  // explicitly expected SHA
-
 const distDir = path.join(process.cwd(), "dist");
 const manifestPath = path.join(distDir, `release-manifest-${TAG}.yaml`);
 
