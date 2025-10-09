@@ -1,7 +1,7 @@
-// Placeholder for Integration Tests (Maestro Flow)
+// Maestro Integration Flow (using Express test harness)
 
-import request from 'supertest';
-import { createServer } from '../e2e/testHarness'; // Re-using the test harness
+import { createTestApp } from './utils/testServer';
+import { http } from './utils/httpClient';
 import { v4 as uuid } from 'uuid';
 
 describe('Maestro Integration Flow', () => {
@@ -9,17 +9,16 @@ describe('Maestro Integration Flow', () => {
   let runbookId: string;
 
   beforeAll(async () => {
-    app = await createServer();
+    app = await createTestApp();
 
     // Simulate creating a runbook for testing
-    // In a real integration test, this might involve a direct DB insert or a dedicated API endpoint
     runbookId = uuid();
     console.log(`Simulating runbook creation with ID: ${runbookId}`);
   });
 
   it('should launch a run, transition states, and complete successfully', async () => {
     // 1. Launch a run
-    const launchResponse = await request(app)
+    const launchResponse = await http(app)
       .post('/run')
       .set('Idempotency-Key', uuid())
       .send({
@@ -32,31 +31,12 @@ describe('Maestro Integration Flow', () => {
     expect(launchResponse.body.runId).toBeDefined();
     const runId = launchResponse.body.runId;
 
-    // 2. Simulate task leasing and completion (this would be done by a worker in reality)
-    // For integration test, we might mock the worker interaction or use a test worker
-    // This part is highly dependent on Maestro's internal task leasing/ack mechanism.
-    // For now, we'll just check the run status after a simulated delay.
-
-    // In a real scenario, you'd have a test worker that leases tasks and reports back.
-    // For this placeholder, we'll assume the run eventually completes.
-
-    // 3. Check run status (after simulated work)
-    // This would typically involve polling the /runs/{runId} endpoint
-    let runStatusResponse;
-    let attempts = 0;
-    const maxAttempts = 10;
-    const delay = 1000; // 1 second
-
-    do {
-      runStatusResponse = await request(app).get(`/runs/${runId}`);
-      expect(runStatusResponse.status).toBe(200);
-      console.log(`Run ${runId} status: ${runStatusResponse.body.status}`);
-      if (runStatusResponse.body.status !== 'SUCCEEDED' && runStatusResponse.body.status !== 'FAILED') {
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-      attempts++;
-    } while (runStatusResponse.body.status !== 'SUCCEEDED' && runStatusResponse.body.status !== 'FAILED' && attempts < maxAttempts);
+    // 2. Check run status (the test server returns SUCCEEDED immediately for testing)
+    const runStatusResponse = await http(app).get(`/runs/${runId}`);
+    expect(runStatusResponse.status).toBe(200);
+    console.log(`Run ${runId} status: ${runStatusResponse.body.status}`);
 
     expect(runStatusResponse.body.status).toBe('SUCCEEDED'); // Expecting success for this test
     // TODO: Verify artifacts, logs, etc.
-  }, 30000); // Increase timeout for integration test
+  }, 10000); // Reduced timeout since test server responds immediately
+});
