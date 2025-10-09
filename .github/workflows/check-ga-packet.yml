@@ -1,0 +1,49 @@
+name: Verify GA Packet & Links
+
+on:
+  pull_request:
+    paths:
+      - "docs/releases/**"
+      - "RUNBOOK.md"
+      - "ops/**"
+      - ".github/workflows/**"
+      - "scripts/check-ga-packet.sh"
+  push:
+    branches: [ main ]
+    paths:
+      - "docs/releases/**"
+      - "RUNBOOK.md"
+      - "ops/**"
+      - ".github/workflows/**"
+      - "scripts/check-ga-packet.sh"
+  workflow_dispatch:
+    inputs:
+      release_id:
+        description: "Override RELEASE_ID (e.g., 2025.10.07)"
+        required: false
+        type: string
+
+jobs:
+  ga-packet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure script is executable
+        run: chmod +x scripts/check-ga-packet.sh
+
+      - name: Verify GA Packet & Links
+        env:
+          RELEASE_ID: ${{ inputs.release_id }}
+        run: |
+          ./scripts/check-ga-packet.sh
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-check-report
+          path: .ga-check/
+          if-no-files-found: warn

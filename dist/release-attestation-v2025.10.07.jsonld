@@ -1,0 +1,81 @@
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    {
+      "BuildManifest": "https://purl.org/summit/BuildManifest",
+      "Artifact": "https://purl.org/summit/Artifact",
+      "sha256": "https://schema.org/sha256",
+      "commitSha": "https://schema.org/sha256",
+      "repository": "https://schema.org/url",
+      "releaseVersion": "https://schema.org/version",
+      "buildEnv": "https://schema.org/softwareRequirements",
+      "evidence": "https://schema.org/MediaObject"
+    }
+  ],
+  "type": [
+    "VerifiableCredential",
+    "BuildManifest"
+  ],
+  "issuer": {
+    "id": "did:web:summit.io",
+    "name": "Summit Release Service"
+  },
+  "issuanceDate": "2025-10-08T00:47:37.704Z",
+  "credentialSubject": {
+    "releaseVersion": "v2025.10.07",
+    "repository": "https://github.com/BrianCLong/summit",
+    "commitSha": "634c24f02072bdef4efbebc57643a253dca1cf03",
+    "buildEnv": "summit-prod",
+    "artifacts": [
+      {
+        "type": "Artifact",
+        "name": "evidence_bundle",
+        "path": "dist/evidence-v0.3.2-mc-nightly.json",
+        "sha256": "b0badfaab123075b9f0f53835c5c061090b5af88673f113bf58c0e7fed8e1322"
+      },
+      {
+        "type": "Artifact",
+        "name": "summary_doc",
+        "path": "MAESTRO_CONDUCTOR_GA_SUMMARY.md",
+        "sha256": "c27f41178f8a689e9881c90fdef39c55e30e4350a904a7d2cedaf225ff5c8e13"
+      },
+      {
+        "type": "Artifact",
+        "name": "grafana_dashboard",
+        "path": "ops/monitoring/grafana/dashboards/summit-ts-build.json",
+        "sha256": null
+      },
+      {
+        "type": "Artifact",
+        "name": "prometheus_scrape_config",
+        "path": "ops/monitoring/prometheus/prometheus.yml",
+        "sha256": null
+      }
+    ],
+    "environment": {
+      "node_version": "20.19.5",
+      "pnpm_version": "9.15.9",
+      "typescript_version": "5.9.2",
+      "eslint_version": "9.35.0",
+      "os": "darwin",
+      "arch": "arm64",
+      "ci_system": "local"
+    },
+    "integrity": {
+      "build_reproducibility": "verified",
+      "fastlane_pipeline": "pass",
+      "slo_guardrails": "pass",
+      "friction_monitor": "enabled",
+      "security_audit": "clean",
+      "dependency_lock": "frozen",
+      "evidence_bundle_attested": true
+    }
+  },
+  "proof": {
+    "type": "Ed25519Signature2020",
+    "created": "2025-10-08T00:47:37.705Z",
+    "verificationMethod": "did:web:summit.io#keys-1",
+    "proofPurpose": "assertionMethod",
+    "jws": ""
+  }
+}

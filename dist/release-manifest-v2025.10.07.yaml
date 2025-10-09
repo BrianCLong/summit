@@ -1,0 +1,46 @@
+metadata: 
+  product_name: Maestro Conductor
+  release_version: v2025.10.07
+  release_channel: GA
+  build_env: "summit-prod"
+  build_id: "MC-v2025.10.07"
+  build_date: "2025-10-08"
+  maintainer: Brian Long
+  contact: brianclong@gmail.com
+artifacts: 
+  tag: 
+    name: v2025.10.07
+    repository: "https://github.com/BrianCLong/summit"
+    commit_sha: 634c24f02072bdef4efbebc57643a253dca1cf03
+  evidence_bundle: 
+    path: "dist/evidence-v0.3.2-mc-nightly.json"
+    sha256: b0badfaab123075b9f0f53835c5c061090b5af88673f113bf58c0e7fed8e1322
+  summary_doc: 
+    path: MAESTRO_CONDUCTOR_GA_SUMMARY.md
+    sha256: c27f41178f8a689e9881c90fdef39c55e30e4350a904a7d2cedaf225ff5c8e13
+  grafana_dashboard: 
+    path: "ops/monitoring/grafana/dashboards/summit-ts-build.json"
+    sha256: 9b12f3f74d23ca4769236d5203f239f5d1f1482aae78738c4b8eaf48913afd8e
+  prometheus_scrape_config: 
+    path: ops/monitoring/prometheus/prometheus.yml
+    sha256: 6951104a1f9ee7497a95346877ddd6b1eb037a9831b862758a1ae2058a8f6279
+environment: 
+  node_version: 20.19.5
+  pnpm_version: 9.15.9
+  typescript_version: 5.9.2
+  eslint_version: 9.35.0
+  os: darwin
+  arch: arm64
+  ci_system: local
+integrity: 
+  build_reproducibility: verified
+  fastlane_pipeline: pass
+  slo_guardrails: pass
+  friction_monitor: enabled
+  security_audit: clean
+  dependency_lock: frozen
+  evidence_bundle_attested: true
+signoff: 
+  release_manager: Brian Long
+  reviewed_by: Summit Release Council
+  approval_timestamp: "2025-10-08T01:05:02.667Z"
