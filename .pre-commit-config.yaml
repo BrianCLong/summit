@@ -2,25 +2,39 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
-      - id: check-merge-conflict
+      - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+      - id: check-added-large-files
       - id: detect-private-key
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.7
-    hooks: [{ id: ruff, args: ['--fix'] }, { id: ruff-format }]
-  - repo: https://github.com/psf/black
-    rev: 24.8.0
-    hooks: [{ id: black }]
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
-    hooks: [{ id: mypy, additional_dependencies: ['types-requests'] }]
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.9.0
+
+  # JS/TS formatting (runs fast; respects your project prettier config)
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.3.3
     hooks:
-      - id: eslint
-        additional_dependencies: [eslint, prettier, eslint-config-prettier]
-        files: .(js|jsx|ts|tsx)$
-  - repo: https://github.com/okonet/lint-staged
-    rev: v14.0.1
-    hooks: [{ id: lint-staged }]
+      - id: prettier
+        additional_dependencies: []
+        files: \.(js|jsx|ts|tsx|json|yml|yaml|md)$
+
+  # Python lint/format only if you actually have python subdirs
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^(api|scripts|tools)/.*\.py$
+      - id: ruff-format
+        files: ^(api|scripts|tools)/.*\.py$
+
+default_language_version:
+  python: python3
+
+exclude: >
+  (?x)(
+    ^dist/|
+    ^build/|
+    ^node_modules/|
+    ^.git/|
+    ^.venv/|
+    ^venv/
+  )

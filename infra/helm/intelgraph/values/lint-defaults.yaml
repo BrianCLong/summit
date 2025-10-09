@@ -1,0 +1,5 @@
+database:
+  postgresql:
+    existingSecret: "intelgraph-db"
+neo4j:
+  enabled: false

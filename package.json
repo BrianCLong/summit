@@ -35,6 +35,8 @@
     "test:e2e": "playwright test",
     "test:ci": "pnpm run test:jest && pnpm run test:e2e",
     "test": "pnpm run test:jest",
+    "test:fast": "jest -c jest.fast.config.ts",
+    "test:nightly": "jest -c jest.nightly.config.ts",
     "test:server": "cd server && npm test",
     "test:client": "cd client && npm test",
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
@@ -88,10 +90,14 @@
     "prov:dev": "ts-node packages/prov-ledger/src/server.ts",
     "lac:compile": "ts-node packages/lac/src/compiler.ts",
     "kpw:dev": "node packages/kpw-media/dist/server.js",
+    "pr:orchestrate": "node scripts/pr-orchestrator.js",
     "release:manifest": "node scripts/gen-release-manifest.mjs",
     "release:manifest:tag": "node scripts/gen-release-manifest.mjs --tag=",
     "release:attest": "node scripts/gen-release-attestation.mjs --tag=",
-    "release:verify": "node scripts/verify-release-manifest.mjs"
+    "release:verify": "node scripts/verify-release-manifest.mjs",
+    "hooks:install": "pre-commit install --install-hooks -t pre-commit -t commit-msg",
+    "hooks:run": "pre-commit run --all-files",
+    "hooks:fix": "bash scripts/fix_precommit.sh"
   },
   "keywords": [
     "intelligence-analysis",
@@ -114,6 +120,7 @@
     "@commitlint/config-conventional": "^19.8.1",
     "@eslint/js": "^9.33.0",
     "@playwright/test": "^1.54.2",
+    "@testing-library/jest-dom": "^6.6.3",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "10.0.1",
     "@semantic-release/github": "^11.0.4",
@@ -127,6 +134,7 @@
     "globals": "^15.12.0",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
+    "jest-canvas-mock": "^2.5.2",
     "jest-environment-jsdom": "^30.0.5",
     "jest-watch-typeahead": "^2.2.2",
     "lint-staged": "^16.1.5",
@@ -187,6 +195,8 @@
     ]
   },
   "dependencies": {
+    "archiver": "^6.0.2",
+    "argon2": "^0.41.1",
     "axios": "^1.11.0",
     "cross-env": "^10.0.0",
     "docx": "^9.5.1",

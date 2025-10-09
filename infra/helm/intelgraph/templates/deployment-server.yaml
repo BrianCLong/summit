@@ -62,32 +62,52 @@ spec:
           resources:
             {{- toYaml .Values.resources.server | nindent 12 }}
           env:
+            {{- $safeDb := (include "safe.db" .Values.database | fromYaml) }}
+            {{- $safeNeo4j := (include "safe.neo4j" .Values.database | fromYaml) }}
+            {{- $safeRedis := (include "safe.redis" .Values.database | fromYaml) }}
             - name: NODE_ENV
               value: "production"
             - name: PORT
               value: "{{ .Values.service.server.targetPort }}"
+            {{- if $safeDb.secret }}
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.postgresql.existingSecret }}
-                  key: url
+                  name: {{ $safeDb.secret | quote }}
+                  key: {{ default "url" (index $safeDb.pg "key") }}
+            {{- else }}
+            - name: DATABASE_URL
+              value: {{ default "postgresql://postgres:devpassword@postgresql:5432/intelgraph_dev" (index $safeDb.pg "url") | quote }}
+            {{- end }}
+            {{- if $safeNeo4j.secret }}
             - name: NEO4J_URI
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.neo4j.existingSecret }}
-                  key: uri
-            - name: NEO4J_USERNAME
-              value: {{ .Values.database.neo4j.username }}
+                  name: {{ $safeNeo4j.secret | quote }}
+                  key: {{ default "uri" (index $safeNeo4j.neo4j "uriKey") }}
             - name: NEO4J_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.neo4j.existingSecret }}
-                  key: password
+                  name: {{ $safeNeo4j.secret | quote }}
+                  key: {{ default "password" (index $safeNeo4j.neo4j "passwordKey") }}
+            {{- else }}
+            - name: NEO4J_URI
+              value: {{ default "bolt://neo4j:7687" (index $safeNeo4j.neo4j "uri") | quote }}
+            - name: NEO4J_PASSWORD
+              value: {{ default "neo4j" (index $safeNeo4j.neo4j "password") | quote }}
+            {{- end }}
+            - name: NEO4J_USERNAME
+              value: {{ default "neo4j" (index $safeNeo4j.neo4j "username") | quote }}
+            {{- if $safeRedis.secret }}
             - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.redis.existingSecret }}
-                  key: url
+                  name: {{ $safeRedis.secret | quote }}
+                  key: {{ default "url" (index $safeRedis.redis "key") }}
+            {{- else }}
+            - name: REDIS_URL
+              value: {{ default "redis://redis:6379" (index $safeRedis.redis "url") | quote }}
+            {{- end }}
           volumeMounts:
             - name: tmp
               mountPath: /tmp
