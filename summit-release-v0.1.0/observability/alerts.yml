@@ -1,0 +1,15 @@
+groups:
+- name: core.summit
+  rules:
+  - alert: SummitAPIDown
+    expr: up{job="api"} == 0
+    for: 2m
+    labels: {severity: page}
+    annotations:
+      summary: "API down"
+  - alert: SummitHighErrorRate
+    expr: rate(http_requests_total{job="api",code=~"5.."}[5m]) / rate(http_requests_total{job="api"}[5m]) > 0.05
+    for: 10m
+    labels: {severity: warn}
+    annotations:
+      summary: "5xx > 5% for 10m"

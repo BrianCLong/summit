@@ -1,0 +1,29 @@
+name: ${COMPOSE_PROJECT_NAME:-summit}
+services:
+  prom:
+    image: prom/prometheus:v2.55.1
+    command: ["--config.file=/etc/prometheus/prometheus.yml","--web.enable-lifecycle"]
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["19090:9090"]
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    ports: ["19093:9093"]
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    ports: ["13000:3000"]
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.1.2
+    command: ["-config.file=/etc/loki/config.yml"]
+    volumes:
+      - ./observability/loki.yml:/etc/loki/config.yml:ro
+    ports: ["13100:3100"]
+    restart: unless-stopped

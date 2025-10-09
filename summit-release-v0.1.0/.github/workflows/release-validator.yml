@@ -1,0 +1,119 @@
+name: Release Artifact Validator
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  validate-release-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate required documentation exists
+        run: |
+          echo "Validating required documentation files exist..."
+          
+          REQUIRED_DOCS=(
+            "docs/OPERATOR_READINESS.md"
+            "docs/ANNOUNCEMENT.md" 
+            "docs/OPS_TLDR.md"
+            "README.md"
+            "RELEASE_NOTES.md"
+            "SECURITY.md"
+            "SUPPORT.md"
+            "STATUS.md"
+          )
+          
+          MISSING_DOCS=()
+          for doc in "${REQUIRED_DOCS[@]}"; do
+            if [ ! -f "$doc" ]; then
+              echo "❌ Missing required document: $doc"
+              MISSING_DOCS+=("$doc")
+            else
+              echo "✅ Found required document: $doc"
+            fi
+          done
+          
+          if [ ${#MISSING_DOCS[@]} -gt 0 ]; then
+            echo "💥 Release validation failed: Missing required documentation"
+            exit 1
+          fi
+          
+          echo "✅ All required documentation present for release"
+
+      - name: Validate Makefile targets exist
+        run: |
+          echo "Validating required Makefile targets exist..."
+          
+          REQUIRED_TARGETS=(
+            "up"
+            "app" 
+            "verify"
+            "smoke"
+            "down"
+            "nuke"
+            "dr-drill"
+            "evidence"
+            "sentinel"
+            "config-contract"
+            "snapshot"
+            "labels"
+          )
+          
+          MISSING_TARGETS=()
+          for target in "${REQUIRED_TARGETS[@]}"; do
+            if ! grep -q "^$target:" Makefile; then
+              echo "❌ Missing required Makefile target: $target"
+              MISSING_TARGETS+=("$target")
+            else
+              echo "✅ Found required Makefile target: $target"
+            fi
+          done
+          
+          if [ ${#MISSING_TARGETS[@]} -gt 0 ]; then
+            echo "💥 Release validation failed: Missing required Makefile targets"
+            exit 1
+          fi
+          
+          echo "✅ All required Makefile targets present"
+
+      - name: Validate compose files exist
+        run: |
+          echo "Validating required compose files exist..."
+          
+          REQUIRED_COMPOSE=(
+            "docker-compose.fresh.yml"
+            "docker-compose.app.yml"
+            "docker-compose.observability.yml"
+          )
+          
+          MISSING_COMPOSE=()
+          for compose in "${REQUIRED_COMPOSE[@]}"; do
+            if [ ! -f "$compose" ]; then
+              echo "❌ Missing required compose file: $compose"
+              MISSING_COMPOSE+=("$compose")
+            else
+              echo "✅ Found required compose file: $compose"
+            fi
+          done
+          
+          if [ ${#MISSING_COMPOSE[@]} -gt 0 ]; then
+            echo "💥 Release validation failed: Missing required compose files"
+            exit 1
+          fi
+          
+          echo "✅ All required compose files present"
+
+      - name: Create release with artifacts
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            docs/OPERATOR_READINESS.md
+            docs/ANNOUNCEMENT.md
+            docs/OPS_TLDR.md
+          body_path: RELEASE_NOTES.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

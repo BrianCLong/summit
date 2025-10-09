@@ -1,0 +1,22 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Database Overview",
+    "tags": ["database"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "DB Connection Count",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(pg_stat_activity_count{datname=~\"summit\"})",
+            "legendFormat": "Connections"
+          }
+        ]
+      }
+    ]
+  },
+  "overwrite": true
+}

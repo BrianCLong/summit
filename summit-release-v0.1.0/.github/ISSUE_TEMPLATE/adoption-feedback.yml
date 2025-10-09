@@ -1,0 +1,51 @@
+name: Adoption Feedback
+about: Share your deployment feedback
+title: '[Feedback] '
+labels: feedback
+assignees: ''
+
+body:
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: What environment are you deploying to?
+      placeholder: "prod / staging / single host"
+    validations:
+      required: true
+
+  - type: textarea
+    id: wins
+    attributes:
+      label: What worked well?
+      description: Share what went smoothly during your deployment
+    validations:
+      required: true
+
+  - type: textarea
+    id: gaps
+    attributes:
+      label: What needs polish?
+      description: Areas where you encountered friction or confusion
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is addressing this feedback?
+      options:
+        - low
+        - medium
+        - high
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: Suggestions
+      description: How would you improve this experience?
+    validations:
+      required: false

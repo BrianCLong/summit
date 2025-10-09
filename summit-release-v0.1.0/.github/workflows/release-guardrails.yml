@@ -1,0 +1,122 @@
+name: Release Digest Pin Validator
+
+on:
+  push:
+    branches: [ main, release/v0.1 ]
+  pull_request:
+    branches: [ main, release/v0.1 ]
+
+jobs:
+  validate-digests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate compose files have digest pins
+        run: |
+          echo "Validating that all compose files have digest pins (@sha256:)..."
+          
+          # Find all compose files
+          COMPOSE_FILES=$(find . -name "docker-compose*.yml" -o -name "docker-compose*.yaml")
+          
+          if [ -z "$COMPOSE_FILES" ]; then
+            echo "No compose files found"
+            exit 0
+          fi
+          
+          MISSING_PINS=()
+          for file in $COMPOSE_FILES; do
+            # Check if file contains image definitions
+            if grep -q "image:" "$file"; then
+              # Check if all image lines have digest pins
+              if ! grep "image:" "$file" | grep -q "@sha256:"; then
+                # If there are image lines without digest pins, check if they're all commented out
+                UNPINNED_IMAGES=$(grep "image:" "$file" | grep -v "@sha256:" | grep -v "^#" || true)
+                if [ -n "$UNPINNED_IMAGES" ]; then
+                  echo "❌ $file contains unpinned images:"
+                  echo "$UNPINNED_IMAGES"
+                  MISSING_PINS+=("$file")
+                else
+                  echo "✅ $file - all images properly pinned"
+                fi
+              else
+                echo "✅ $file - all images properly pinned"
+              fi
+            else
+              echo "ℹ️ $file - no image definitions found"
+            fi
+          done
+          
+          if [ ${#MISSING_PINS[@]} -gt 0 ]; then
+            echo "💥 Release validation failed: Found unpinned images in compose files"
+            echo "All production images must be pinned by digest (@sha256:...)"
+            exit 1
+          fi
+          
+          echo "✅ All compose files have properly pinned images"
+
+  validate-release-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate required release documentation exists
+        run: |
+          echo "Validating required release documentation exists..."
+          
+          REQUIRED_DOCS=(
+            "docs/OPERATOR_READINESS.md"
+            "docs/OPS_TLDR.md"
+          )
+          
+          MISSING_DOCS=()
+          for doc in "${REQUIRED_DOCS[@]}"; do
+            if [ ! -f "$doc" ]; then
+              echo "❌ Missing required documentation: $doc"
+              MISSING_DOCS+=("$doc")
+            else
+              echo "✅ Found required documentation: $doc"
+            fi
+          done
+          
+          if [ ${#MISSING_DOCS[@]} -gt 0 ]; then
+            echo "💥 Release validation failed: Missing required documentation"
+            exit 1
+          fi
+          
+          echo "✅ All required release documentation present"
+
+  validate-go-no-go:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Go/No-Go release gate
+        run: |
+          echo "Validating Go/No-Go release gate..."
+          
+          # Check required documentation files exist
+          if [ ! -f docs/OPERATOR_READINESS.md ] || [ ! -f docs/OPS_TLDR.md ]; then
+            echo "❌ Missing required documentation files"
+            exit 1
+          fi
+          echo "✅ Required documentation files present"
+          
+          # Check digest pins in compose files
+          if ! grep -Rq " @sha256:" docker-compose*.yml; then
+            echo "❌ Missing digest pins in compose files"
+            exit 1
+          fi
+          echo "✅ Digest pins present in compose files"
+          
+          # Run verify-release target
+          if ! make verify-release; then
+            echo "❌ Release verification failed"
+            exit 1
+          fi
+          echo "✅ Release verification passed"
+          
+          echo "✅ All Go/No-Go checks passed - release ready"

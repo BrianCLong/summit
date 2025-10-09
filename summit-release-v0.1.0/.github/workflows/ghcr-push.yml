@@ -1,0 +1,64 @@
+name: Push to GHCR
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to push (e.g., v0.1.0)'
+        required: true
+
+jobs:
+  push-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/summit
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_latest_tag}}
+
+      - name: Build and push images
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/server.Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/summit/api:${{ github.ref_name }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/client.Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/summit/web:${{ github.ref_name }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Verify pushed images
+        run: |
+          echo "Images pushed to GHCR:"
+          echo "  ghcr.io/${{ github.repository_owner }}/summit/api:${{ github.ref_name }}"
+          echo "  ghcr.io/${{ github.repository_owner }}/summit/web:${{ github.ref_name }}"

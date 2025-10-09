@@ -1,0 +1,26 @@
+# CODEOWNERS
+
+# Core compose files
+docker-compose.fresh.yml @BrianCLong
+docker-compose.app.yml @BrianCLong
+docker-compose.observability.yml @BrianCLong
+
+# Scripts
+scripts/ @BrianCLong
+
+# Observability configs
+observability/ @BrianCLong
+
+# CI workflows
+.github/workflows/ @BrianCLong
+
+# Documentation
+README.md @BrianCLong
+RELEASE_NOTES.md @BrianCLong
+SECURITY.md @BrianCLong
+SUPPORT.md @BrianCLong
+STATUS.md @BrianCLong
+
+# Configuration
+.env.example @BrianCLong
+Makefile @BrianCLong

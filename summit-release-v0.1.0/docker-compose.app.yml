@@ -1,0 +1,73 @@
+name: summit-app
+
+x-common-security: &security
+  restart: unless-stopped
+  read_only: true
+  security_opt:
+    - no-new-privileges:true
+  cap_drop: [ALL]
+  tmpfs:
+    - /tmp:size=64m,mode=1777
+  ulimits:
+    nofile: 65535
+
+x-health-defaults: &hc
+  interval: 10s
+  timeout: 3s
+  retries: 30
+  start_period: 15s
+
+services:
+  api:
+    # Image pinned to digest (replace with actual digest when available)
+    image: summit/api@sha256:PLACEHOLDER_API_DIGEST
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432
+      REDIS_URL: redis://default:${REDIS_PASSWORD}@redis:6379
+      NEO4J_URL: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-neo4jpass}
+    # Note: depends_on to core services will be handled by shared network
+    healthcheck:
+      test: ["CMD-SHELL","curl -fsS http://localhost:8081/health || exit 1"]
+      <<: *hc
+    ports:
+      - "${API_PORT:-18081}:8081"
+    <<: *security  # Include common security settings
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: "1g"
+        reservations:
+          cpus: "0.25"
+          memory: "256m"
+    profiles: ["app"]
+
+  web:
+    # Image pinned to digest (replace with actual digest when available)
+    image: summit/web@sha256:PLACEHOLDER_WEB_DIGEST
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      API_BASE_URL: http://api:8081
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL","curl -fsS http://localhost:8080/health || exit 1"]
+      <<: *hc
+    ports:
+      - "${WEB_PORT:-18082}:8080"
+    <<: *security  # Include common security settings
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: "512m"
+        reservations:
+          cpus: "0.1"
+          memory: "128m"
+    profiles: ["app"]

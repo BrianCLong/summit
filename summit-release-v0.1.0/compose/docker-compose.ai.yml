@@ -1,0 +1,9 @@
+services:
+  ai:
+    image: python:3.12-slim
+    environment:
+      AI_ENABLE_GPU: ${AI_ENABLE_GPU}
+      AI_MODELS_PATH: ${AI_MODELS_PATH}
+    volumes:
+      - ./models:${AI_MODELS_PATH}
+    command: ["python","-c","print('AI service placeholder; wire to server via gRPC/HTTP as in repo scripts')"]

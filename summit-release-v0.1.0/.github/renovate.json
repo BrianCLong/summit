@@ -1,0 +1,15 @@
+{
+  "extends": ["config:recommended"],
+  "schedule": ["before 6am on monday"],
+  "labels": ["deps"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "matchDatasources": ["docker"],
+      "labels": ["deps", "docker"]
+    }
+  ]
+}

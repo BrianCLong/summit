@@ -1,0 +1,22 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Platform Health",
+    "tags": ["health"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Health Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up",
+            "legendFormat": "Status"
+          }
+        ]
+      }
+    ]
+  },
+  "overwrite": true
+}
