@@ -31,12 +31,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Enable corepack
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: pnpm i --frozen-lockfile || npm ci
+
       - name: Ensure script is executable
         run: chmod +x scripts/check-ga-packet.sh
 
       - name: Verify GA Packet & Links
         env:
           RELEASE_ID: ${{ inputs.release_id }}
+          PACKET: docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+          SHEET: docs/releases/ga-signoff/GA_SIGNOFF_SHEET.md
+          QUICK: docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md
         run: |
           ./scripts/check-ga-packet.sh
 

@@ -1,40 +1,16 @@
-# 🎯 Maestro Conductor — GA Sign‑Off Sheet
+# GA Quick Sign-Off Sheet — v2025.10.07
 
-**Release ID:** `v2025.10.07`
-**Release Date:** 2025‑10‑07 (America/Denver)
-**Repository:** `BrianCLong/summit`
-**Branch:** `release-artifact-verification-system`
+**Repo:** BrianCLong/summit  
+**Evidence:** Manifest, Attestation, Evidence attached to GitHub Release
 
----
+**Go/No-Go:** ☐ GO  ☐ NO-GO  
+**Notes:** __________________________________________________
 
-## Sign‑Offs
+**Signatures**
+- Product Owner: __________________  Date: ________
+- Platform Owner: ________________  Date: ________
+- Security/Compliance: ___________  Date: ________
+- SRE Lead: ______________________  Date: ________
+- Release Eng: ___________________  Date: ________
 
-**Product Owner:** ____________________  Date: __________  Signature: __________
-**Platform Owner:** ___________________  Date: __________  Signature: __________
-**Security/Compliance:** ______________  Date: __________  Signature: __________
-**SRE Lead:** _________________________  Date: __________  Signature: __________
-**Release Engineering:** ______________  Date: __________  Signature: __________
-
----
-
-## Acceptance Criteria Verification
-
-| AC   | Description                                         | Status | Verifier | Date       | Notes |
-| ---- | --------------------------------------------------- | ------ | -------- | ---------- | ----- |
-| AC-1 | Manifest includes paths, SHA256, source commits     |        |          |            |       |
-| AC-2 | Attestation conforms to JSON-LD context             |        |          |            |       |
-| AC-3 | CI workflow attaches artifacts to Release           |        |          |            |       |
-| AC-4 | Evidence bundle contains SLO/compliance snapshots   |        |          |            |       |
-| AC-5 | Docs exist (announcement + runbooks)               |        |          |            |       |
-
----
-
-## Go/No-Go Decision
-
-**Decision:** ☐ GO  ☐ NO-GO
-
-**Reason (if NO-GO):** ________________________________________________
-______________________________________________________________________
-______________________________________________________________________
-
-**Decision Maker:** ____________________  Date: __________  Signature: __________
+_Reference: docs/releases/GA_SIGNOFF_PACKET.md (Appendix A & B)_
