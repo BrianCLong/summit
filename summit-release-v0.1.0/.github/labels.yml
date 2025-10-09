@@ -1,0 +1,9 @@
+- name: adoption
+  color: 0e8a16
+  description: Customer onboarding
+- name: customer-feedback
+  color: fbca04
+  description: Field feedback / requests
+- name: no-feature
+  color: 5319e7
+  description: Maintenance-only change

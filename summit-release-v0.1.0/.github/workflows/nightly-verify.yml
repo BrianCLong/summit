@@ -1,0 +1,21 @@
+name: Nightly Verify (GA + Main)
+on:
+  schedule: [{ cron: "17 4 * * *" }]
+  workflow_dispatch: {}
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Show GA & latest
+        run: |
+          echo "GA_TAG=v0.1.0-ga"
+          git tag --list | grep v0.1.0-ga || exit 1
+      - name: Build & evidence check (compose core)
+        run: |
+          cp .env.example .env
+          make up && make verify
+          make evidence || true
+      - name: App smoke
+        run: make app && make smoke

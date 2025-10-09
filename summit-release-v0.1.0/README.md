@@ -1,4 +1,9 @@
-# Summit v0.1.0 Docker Release ![GA](https://img.shields.io/badge/release-v0.1.0-blue) ![SLO API](https://img.shields.io/badge/SLO_API-99.9%25-green) ![SBOM](https://img.shields.io/badge/SBOM-attached-success) ![Provenance](https://img.shields.io/badge/provenance-signed-success)
+# Summit v0.1.0 Docker Release
+
+[![Latest GA](https://img.shields.io/badge/GA-v0.1.0--ga-blue)](./releases/tag/v0.1.0-ga)
+[![Security Policy](https://img.shields.io/badge/security-policy-important)](./SECURITY.md)
+[![SBOM/Evidence](https://img.shields.io/badge/release-evidence-green)](./releases/tag/v0.1.0-ga)
+![SLO API](https://img.shields.io/badge/SLO_API-99.9%25-green) ![Provenance](https://img.shields.io/badge/provenance-signed-success)
 
 # Summit v0.1.0 Docker Release
 

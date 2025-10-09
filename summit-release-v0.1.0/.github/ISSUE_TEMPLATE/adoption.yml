@@ -1,0 +1,19 @@
+name: Adoption – Install/Day-2/Observability
+description: Track onboarding to SUMMIT GA
+labels: ["adoption", "customer-feedback"]
+body:
+  - type: checkboxes
+    attributes:
+      label: Install
+      options:
+        - label: "Cloned GA tag and .env staged"
+        - label: "make up && make verify ran clean"
+  - type: checkboxes
+    attributes:
+      label: Observability
+      options:
+        - label: "Prometheus/Grafana accessible"
+        - label: "SLO alerts configured"
+  - type: textarea
+    attributes:
+      label: Notes / blockers
