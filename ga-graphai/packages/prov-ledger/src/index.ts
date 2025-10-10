@@ -1,4 +1,41 @@
 import { createHash, createHmac, randomUUID } from 'node:crypto';
+import {
+  CapsuleStorageEngine,
+  CapsuleVersioningAPI,
+  LineageGraphGenerator,
+  type CapsulePayload,
+  type CapsuleMetadata,
+  type DifferentialPrivacyGuarantee,
+  type ComplianceAttestation,
+  type DatasetCapsule,
+  type TransformationDetails,
+  type CapsuleTransformation,
+  type SnapshotOptions,
+  type TrainingSnapshot,
+  type ModelRegistryLink,
+  type LineageGraph,
+  type LineageGraphEdge,
+  type LineageGraphNode
+} from './capsules';
+
+export {
+  CapsuleStorageEngine,
+  CapsuleVersioningAPI,
+  LineageGraphGenerator,
+  type CapsulePayload,
+  type CapsuleMetadata,
+  type DifferentialPrivacyGuarantee,
+  type ComplianceAttestation,
+  type DatasetCapsule,
+  type TransformationDetails,
+  type CapsuleTransformation,
+  type SnapshotOptions,
+  type TrainingSnapshot,
+  type ModelRegistryLink,
+  type LineageGraph,
+  type LineageGraphEdge,
+  type LineageGraphNode
+};
 import type { 
   EvidenceBundle, 
   LedgerEntry, 
