@@ -1,32 +1,34 @@
-// Archiver mock that records operations and emits finish event on finalize
-const archiverMock = jest.fn(() => {
-  const calls = { append: [], file: [], directory: [] };
-  const listeners = {};
-  
-  return {
-    calls, // Expose the recorded calls for assertions
-    pipe: jest.fn(),
-    append: jest.fn((x) => void calls.append.push(x)),
-    file: jest.fn((x) => void calls.file.push(x)),
-    directory: jest.fn((x) => void calls.directory.push(x)),
-    on: jest.fn((evt, cb) => {
-      if (!listeners[evt]) {
-        listeners[evt] = [];
-      }
-      listeners[evt].push(cb);
-      return undefined;
-    }),
-    finalize: jest.fn(async () => {
-      // Trigger all 'finish' event listeners when finalize is called
-      const finishCallbacks = listeners['finish'] || [];
-      for (const callback of finishCallbacks) {
-        callback();
-      }
-    }),
-  };
-});
+import { EventEmitter } from 'events';
 
-// Add the create method that archiver typically exposes
-archiverMock.create = archiverMock;
+type Operation = { type: string; args: any[] };
 
-module.exports = archiverMock;
+class MockArchive extends EventEmitter {
+  operations: Operation[] = [];
+
+  pipe() {
+    return this;
+  }
+
+  append(...args: any[]) {
+    this.operations.push({ type: 'append', args });
+    return this;
+  }
+
+  file(...args: any[]) {
+    this.operations.push({ type: 'file', args });
+    return this;
+  }
+
+  directory(...args: any[]) {
+    this.operations.push({ type: 'directory', args });
+    return this;
+  }
+
+  async finalize() {
+    setImmediate(() => this.emit('finish'));
+  }
+}
+
+export default function createArchiver() {
+  return new MockArchive();
+}

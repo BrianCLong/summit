@@ -16,8 +16,11 @@ module.exports = {
   moduleNameMapper: {
     '^@server/(.*)$': '<rootDir>/server/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
+    '^services/api$': '<rootDir>/tests/integration/__mocks__/services-api.ts',
+    '^graphql-tester$': '<rootDir>/tests/integration/__mocks__/graphql-tester.js',
+    '^evidenceRepo$': '<rootDir>/tests/integration/__mocks__/evidenceRepo.ts',
     '^argon2$': '<rootDir>/__mocks__/argon2.ts',
-    '^archiver$': '<rootDir>/__mocks__/archiver.js',
+    '^archiver$': '<rootDir>/tests/integration/__mocks__/archiver.ts',
   },
   moduleDirectories: ['node_modules', '<rootDir>', '<rootDir>/server/src', '<rootDir>/src'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
