@@ -41,7 +41,7 @@
     "test:smoke:backend": "cd server && npm run test:smoke",
     "test:smoke:frontend": "cd client && npm run test:smoke",
     "test:unit": "npm run test",
-    "test:integration": "cd server && npm run test:integration",
+    "test:integration": "jest -c Developer/summit-jest/jest.integration.config.cjs --runInBand --detectOpenHandles --bail=1 --silent",
     "test:api": "cd services/api && npx jest -c jest.config.cjs",
     "build": "npm run build:client && npm run build:server",
     "build:client": "cd client && npm run build",
