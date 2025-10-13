@@ -25,6 +25,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Register test guard problem matchers
+        run: echo "::add-matcher::.github/matchers/test-guards.json"
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -41,16 +44,25 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=3072
         run: |
           echo '::group::jest integration lane'
-          npm run test:integration | tee integration.log
+          npm run test:integration -- --runInBand --bail=1 --silent --json --outputFile=integration-jest-results.json \
+            | tee integration.log
           echo '::endgroup::'
 
-      - name: Upload integration log
+      - name: Upload integration artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: integration-lane-log
-          path: integration.log
+          name: integration-lane-artifacts
+          path: |
+            integration.log
+            integration-jest-results.json
           retention-days: 7
+
+      - name: Summarize results
+        if: always()
+        shell: bash
+        run: |
+          node -e 'const fs=require("fs");let r={};try{r=JSON.parse(fs.readFileSync("integration-jest-results.json","utf8"))}catch(e){};const p=r.numPassedTests??"?",f=r.numFailedTests??"?",s=r.numPendingTests??"?",t=r.numTotalTests??"?";const handles=(r.testResults||[]).some(tr=>/Jest did not exit/.test((tr.message)||""))?"⚠️ open handles detected":"✅ no open handles";fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,`## Integration Lane Summary\n\n- **Passed:** ${p}\n- **Failed:** ${f}\n- **Skipped:** ${s}\n- **Total:** ${t}\n- **Handles:** ${handles}\n\nArtifacts: \`integration.log\`, \`integration-jest-results.json\` (7d)\n`);'
 
       # If you enabled JUnit in the jest config:
       # - name: Upload JUnit

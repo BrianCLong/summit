@@ -51,7 +51,7 @@
     "deploy:prod": "scripts/deploy.sh prod",
     "backup": "scripts/backup.sh",
     "lint": "eslint . && ruff .",
-    "lint:tests": "eslint --no-error-on-unmatched-pattern --ext .js,.ts,.tsx tests/integration tests/graphql server/src/tests",
+    "lint:tests": "node scripts/guard-tests.js",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
     "typecheck": "tsc -b --pretty false",
