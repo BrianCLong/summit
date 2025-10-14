@@ -16,10 +16,7 @@ const neighborhoodSchema = Joi.object({
     radius: Joi.number().integer().min(1).max(3).default(1),
 });
 const tagSchema = Joi.object({
-    entityId: Joi.string()
-        .trim()
-        .pattern(/^[A-Za-z0-9:_-]{1,48}$/)
-        .required(),
+    entityId: Joi.string().trim().pattern(/^[A-Za-z0-9:_-]{1,48}$/).required(),
     tag: Joi.string().trim().min(1).max(50).required(),
     lastModifiedAt: Joi.date().iso().optional(), // Optional for initial creation, required for updates
 });
@@ -32,7 +29,7 @@ function ensureRole(user, allowedRoles = []) {
     if (allowedRoles.length === 0)
         return true;
     const role = (user.role || '').toUpperCase();
-    if (!allowedRoles.map((r) => r.toUpperCase()).includes(role)) {
+    if (!allowedRoles.map(r => r.toUpperCase()).includes(role)) {
         const err = new Error('Forbidden');
         err.code = 'FORBIDDEN';
         throw err;
@@ -73,17 +70,13 @@ const resolvers = {
                     throw err;
                 }
             }
-            catch (_) {
-                /* Intentionally empty */
-            }
+            catch (_) { /* Intentionally empty */ }
             const cacheKey = `expand:${value.entityId}:${limit}:${role}`;
             let cached = null;
             try {
                 cached = await redis.get(cacheKey);
             }
-            catch (_) {
-                /* Intentionally empty */
-            }
+            catch (_) { /* Intentionally empty */ }
             if (cached) {
                 metrics.graphExpandRequestsTotal.labels('true').inc();
                 return JSON.parse(cached);
@@ -95,24 +88,16 @@ const resolvers = {
             try {
                 haveLock = (await redis.set(lockKey, '1', 'NX', 'EX', 10)) === 'OK';
             }
-            catch (_) {
-                /* Intentionally empty */
-            }
+            catch (_) { /* Intentionally empty */ }
             try {
-                const result = await GraphOpsService.expandNeighbors(value.entityId, limit, {
-                    traceId: tId,
-                });
+                const result = await GraphOpsService.expandNeighbors(value.entityId, limit, { traceId: tId });
                 // Read-through cache, short TTL
-                const ttl = process.env.GRAPH_EXPAND_CACHE === '0'
-                    ? 0
-                    : Number(process.env.GRAPH_EXPAND_TTL_SEC) || 120;
+                const ttl = process.env.GRAPH_EXPAND_CACHE === '0' ? 0 : (Number(process.env.GRAPH_EXPAND_TTL_SEC) || 120);
                 if (ttl > 0) {
                     try {
                         await redis.set(cacheKey, JSON.stringify(result), 'EX', ttl);
                     }
-                    catch (_) {
-                        /* Intentionally empty */
-                    }
+                    catch (_) { /* Intentionally empty */ }
                 }
                 metrics.resolverLatencyMs.labels('expandNeighbors').observe(Date.now() - start);
                 return result;
@@ -144,11 +129,7 @@ const resolvers = {
                 return cached;
             }
             try {
-                const result = await GraphOpsService.expandNeighborhood(value.entityId, value.radius, {
-                    tenantId,
-                    investigationId: value.investigationId,
-                    traceId: tId,
-                });
+                const result = await GraphOpsService.expandNeighborhood(value.entityId, value.radius, { tenantId, investigationId: value.investigationId, traceId: tId });
                 await cache.set(tenantId, value.investigationId, value.entityId, value.radius, result);
                 metrics.resolverLatencyMs.labels('expandNeighborhood').observe(Date.now() - start);
                 return result;
@@ -173,16 +154,11 @@ const resolvers = {
             }
             ensureRole(user, ['ANALYST', 'ADMIN']);
             try {
-                const entity = await TagService.addTag(value.entityId, value.tag, value.lastModifiedAt, {
-                    user,
-                    traceId: tId,
-                });
+                const entity = await TagService.addTag(value.entityId, value.tag, value.lastModifiedAt, { user, traceId: tId });
                 // Cache bust for relevant expand keys for this entity across roles
                 const redis = getRedisClient();
                 const roles = ['VIEWER', 'ANALYST', 'ADMIN'];
-                await Promise.all(roles
-                    .map((r) => redis.keys(`expand:${value.entityId}:*:${r}`))
-                    .map(async (p) => {
+                await Promise.all(roles.map(r => redis.keys(`expand:${value.entityId}:*:${r}`)).map(async (p) => {
                     const keys = await p;
                     if (keys && keys.length) {
                         await redis.del(keys);
@@ -210,16 +186,11 @@ const resolvers = {
             }
             ensureRole(user, ['ANALYST', 'ADMIN']);
             try {
-                const entity = await TagService.deleteTag(value.entityId, value.tag, {
-                    user,
-                    traceId: tId,
-                });
+                const entity = await TagService.deleteTag(value.entityId, value.tag, { user, traceId: tId });
                 // Cache bust for relevant expand keys for this entity across roles
                 const redis = getRedisClient();
                 const roles = ['VIEWER', 'ANALYST', 'ADMIN'];
-                await Promise.all(roles
-                    .map((r) => redis.keys(`expand:${value.entityId}:*:${r}`))
-                    .map(async (p) => {
+                await Promise.all(roles.map(r => redis.keys(`expand:${value.entityId}:*:${r}`)).map(async (p) => {
                     const keys = await p;
                     if (keys && keys.length) {
                         await redis.del(keys);
@@ -270,3 +241,4 @@ const resolvers = {
     },
 };
 module.exports = { graphResolvers: resolvers };
+//# sourceMappingURL=resolvers.graphops.js.map

@@ -1,0 +1,16 @@
+FROM node:20-bookworm AS build
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+RUN pnpm fetch
+COPY . .
+RUN pnpm install --offline --frozen-lockfile
+RUN pnpm --filter server build || pnpm --filter apps/server build || true
+
+FROM gcr.io/distroless/nodejs20-debian12
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build /app/apps/server/dist ./dist
+COPY --from=build /app/apps/server/package.json ./
+CMD ["dist/main.js"]
+

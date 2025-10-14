@@ -1,0 +1,386 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "MC v0.3.6 - Trustless Velocity",
+    "tags": ["mc-platform", "v0.3.6", "trustless", "velocity"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "ZTA Coverage",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99.5}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "options": {
+          "orientation": "auto",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "text": {},
+          "textMode": "auto"
+        },
+        "targets": [
+          {
+            "expr": "mc_zta_coverage_percent",
+            "interval": "",
+            "legendFormat": "ZTA Coverage",
+            "refId": "A"
+          }
+        ],
+        "title": "ZTA Coverage %"
+      },
+      {
+        "id": 2,
+        "title": "ZTA Verifier Performance",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 200}
+              ]
+            },
+            "unit": "ms"
+          }
+        },
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "table",
+            "placement": "right"
+          },
+          "tooltip": {
+            "mode": "single"
+          }
+        },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(mc_zta_verification_duration_seconds_bucket[5m])) by (le)) * 1000",
+            "interval": "",
+            "legendFormat": "P95 Verification Time",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(mc_zta_verification_duration_seconds_bucket[5m])) by (le)) * 1000",
+            "interval": "",
+            "legendFormat": "P50 Verification Time",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Policy Proof Health",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 0.9},
+                {"color": "green", "value": 1}
+              ]
+            },
+            "unit": "short",
+            "min": 0,
+            "max": 1
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_policy_proof_success_ratio",
+            "interval": "",
+            "legendFormat": "Proof Success Ratio",
+            "refId": "A"
+          }
+        ],
+        "title": "Policy Proof Success"
+      },
+      {
+        "id": 4,
+        "title": "Counterexamples Found",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "red", "value": 1}
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "targets": [
+          {
+            "expr": "increase(mc_policy_counterexamples_total[1h])",
+            "interval": "",
+            "legendFormat": "{{property}} counterexamples",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Remediation MTTR",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 5},
+                {"color": "red", "value": 7}
+              ]
+            },
+            "unit": "m"
+          }
+        },
+        "options": {
+          "legend": {
+            "calcs": ["last"],
+            "displayMode": "table",
+            "placement": "right"
+          }
+        },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(mc_remediation_mttr_minutes_bucket[5m])) by (le, incident_class))",
+            "interval": "",
+            "legendFormat": "P95 {{incident_class}}",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(mc_remediation_mttr_minutes_bucket[5m])) by (le, incident_class))",
+            "interval": "",
+            "legendFormat": "P50 {{incident_class}}",
+            "refId": "B"
+          }
+        ],
+        "title": "Remediation MTTR by Class"
+      },
+      {
+        "id": 6,
+        "title": "Remediation Approval Ratios",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 8},
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "short"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "pieType": "pie",
+          "tooltip": {
+            "mode": "single"
+          },
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "values": ["percent"]
+          }
+        },
+        "targets": [
+          {
+            "expr": "sum(increase(mc_remediation_decisions_total{decision=\"approved\"}[24h]))",
+            "interval": "",
+            "legendFormat": "Approved",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(increase(mc_remediation_decisions_total{decision=\"denied\"}[24h]))",
+            "interval": "",
+            "legendFormat": "Denied",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(increase(mc_remediation_decisions_total{decision=\"auto_applied\"}[24h]))",
+            "interval": "",
+            "legendFormat": "Auto Applied",
+            "refId": "C"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Confidential Plane Performance",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 8},
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 5},
+                {"color": "red", "value": 7}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_confidential_performance_overhead_percent",
+            "interval": "",
+            "legendFormat": "TEE Overhead %",
+            "refId": "A"
+          }
+        ],
+        "title": "Confidential Compute Overhead"
+      },
+      {
+        "id": 8,
+        "title": "Residency Enforcement",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 16},
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 99},
+                {"color": "green", "value": 100}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "targets": [
+          {
+            "expr": "mc_residency_enforcement_success_rate * 100",
+            "interval": "",
+            "legendFormat": "Enforcement Rate",
+            "refId": "A"
+          }
+        ],
+        "title": "Residency Enforcement"
+      },
+      {
+        "id": 9,
+        "title": "Enclave Attestations",
+        "type": "timeseries",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 16},
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "reqps"
+          }
+        },
+        "targets": [
+          {
+            "expr": "rate(mc_enclave_attestations_total[5m])",
+            "interval": "",
+            "legendFormat": "{{enclave_id}} attestations/sec",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "KMS Access Logs",
+        "type": "logs",
+        "gridPos": {"h": 4, "w": 12, "x": 12, "y": 16},
+        "targets": [
+          {
+            "expr": "{job=\"kms-audit\"} |= \"unseal_key\"",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": false,
+          "showCommonLabels": false,
+          "wrapLogMessage": false,
+          "prettifyLogMessage": false,
+          "enableLogDetails": true,
+          "dedupStrategy": "none",
+          "sortOrder": "Descending"
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": [
+        {
+          "name": "tenant",
+          "type": "query",
+          "query": "label_values(mc_zta_coverage_percent, tenant_id)",
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "prometheus",
+          "expr": "changes(mc_deployment_version[5m])",
+          "iconColor": "blue"
+        }
+      ]
+    },
+    "refresh": "10s",
+    "schemaVersion": 36,
+    "version": 1,
+    "weekStart": ""
+  }
+}
