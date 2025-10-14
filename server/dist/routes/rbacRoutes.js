@@ -1,5 +1,5 @@
-import express from 'express';
-import { ensureAuthenticated } from '../middleware/auth.js';
+const express = require('express');
+const { ensureAuthenticated } = require('../middleware/auth');
 const router = express.Router();
 router.use(ensureAuthenticated);
 function simulateAccess(roleVector = {}, action) {
@@ -27,4 +27,5 @@ router.post('/simulate', async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
-export default router;
+module.exports = router;
+//# sourceMappingURL=rbacRoutes.js.map

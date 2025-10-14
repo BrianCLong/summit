@@ -1,24 +1,27 @@
-import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
-import fs from 'fs';
-import axios from 'axios';
-import isEqual from 'lodash/isEqual.js';
+import type {
+  ApolloServerPlugin,
+  GraphQLRequestListener,
+} from "@apollo/server";
+import fs from "fs";
+import axios from "axios";
+import { isEqual } from "lodash";
 
 const ELASTIC_URL = process.env.ELASTICSEARCH_URL;
-const LOG_FILE = process.env.AUDIT_LOG_FILE || 'audit-log.jsonl';
-const ANONYMIZE = process.env.AUDIT_LOG_ANONYMIZE === 'true';
+const LOG_FILE = process.env.AUDIT_LOG_FILE || "audit-log.jsonl";
+const ANONYMIZE = process.env.AUDIT_LOG_ANONYMIZE === "true";
 
 const anonymize = (value: unknown): any => {
   if (value === null || value === undefined) return value;
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     if (Array.isArray(value)) {
-      return value.map(() => '[redacted]');
+      return value.map(() => "[redacted]");
     }
     return Object.keys(value as Record<string, unknown>).reduce(
       (acc, key) => ({ ...acc, [key]: anonymize((value as any)[key]) }),
       {},
     );
   }
-  return '[redacted]';
+  return "[redacted]";
 };
 
 const auditLoggerPlugin: ApolloServerPlugin = {
@@ -27,22 +30,29 @@ const auditLoggerPlugin: ApolloServerPlugin = {
     return {
       async willSendResponse(ctx) {
         const operation = ctx.operation;
-        if (!operation || operation.operation !== 'mutation') {
+        if (!operation || operation.operation !== "mutation") {
           return;
         }
 
-        const entity = (operation.selectionSet.selections[0] as any)?.name?.value || 'unknown';
+        const entity =
+          (operation.selectionSet.selections[0] as any)?.name?.value ||
+          "unknown";
         const userId = ctx.contextValue?.user?.id ?? null;
 
         const before = ctx.contextValue?.audit?.before;
         const after =
           ctx.contextValue?.audit?.after ||
-          (ctx.response.body.kind === 'single'
+          (ctx.response.body.kind === "single"
             ? (ctx.response.body.singleResult?.data as any)?.[entity]
             : undefined);
 
         const diff: Record<string, { before: unknown; after: unknown }> = {};
-        if (before && after && typeof before === 'object' && typeof after === 'object') {
+        if (
+          before &&
+          after &&
+          typeof before === "object" &&
+          typeof after === "object"
+        ) {
           const keys = new Set([
             ...Object.keys(before as Record<string, unknown>),
             ...Object.keys(after as Record<string, unknown>),
@@ -73,10 +83,10 @@ const auditLoggerPlugin: ApolloServerPlugin = {
               timeout: 2000,
             });
           } else {
-            throw new Error('No Elasticsearch URL');
+            throw new Error("No Elasticsearch URL");
           }
         } catch (_err) {
-          fs.appendFileSync(LOG_FILE, JSON.stringify(logEntry) + '\n');
+          fs.appendFileSync(LOG_FILE, JSON.stringify(logEntry) + "\n");
         }
       },
     };

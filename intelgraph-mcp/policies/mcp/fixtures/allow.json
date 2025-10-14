@@ -1,0 +1,9 @@
+{
+  "input": {
+    "action": "invoke",
+    "tenant": "tenant-a",
+    "tool": "echo",
+    "capability_scopes": ["write"],
+    "purpose": "ops"
+  }
+}
