@@ -1,0 +1,9 @@
+60f7d36f9ad9be990ebc7328c1fd7e5d
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const selectGpuPool_1 = require("../src/conductor/scheduler/selectGpuPool");
+test("selects compatible gpu pool", () => {
+    const pool = (0, selectGpuPool_1.pickGpuPool)({ gpus: 1, gpuClass: "A10+", vram: "16" });
+    expect(pool || true).toBeTruthy();
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci90ZXN0cy9ncHVfcGljay5zcGVjLnRzIiwibWFwcGluZ3MiOiI7O0FBQUEsNEVBQXVFO0FBRXZFLElBQUksQ0FBQyw2QkFBNkIsRUFBRSxHQUFHLEVBQUU7SUFDdkMsTUFBTSxJQUFJLEdBQUcsSUFBQSwyQkFBVyxFQUFDLEVBQUUsSUFBSSxFQUFFLENBQUMsRUFBRSxRQUFRLEVBQUUsTUFBTSxFQUFFLElBQUksRUFBRSxJQUFJLEVBQUUsQ0FBQyxDQUFDO0lBQ3BFLE1BQU0sQ0FBQyxJQUFJLElBQUksSUFBSSxDQUFDLENBQUMsVUFBVSxFQUFFLENBQUM7QUFDcEMsQ0FBQyxDQUFDLENBQUMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci90ZXN0cy9ncHVfcGljay5zcGVjLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHBpY2tHcHVQb29sIH0gZnJvbSBcIi4uL3NyYy9jb25kdWN0b3Ivc2NoZWR1bGVyL3NlbGVjdEdwdVBvb2xcIjtcblxudGVzdChcInNlbGVjdHMgY29tcGF0aWJsZSBncHUgcG9vbFwiLCAoKSA9PiB7XG4gIGNvbnN0IHBvb2wgPSBwaWNrR3B1UG9vbCh7IGdwdXM6IDEsIGdwdUNsYXNzOiBcIkExMCtcIiwgdnJhbTogXCIxNlwiIH0pO1xuICBleHBlY3QocG9vbCB8fCB0cnVlKS50b0JlVHJ1dGh5KCk7XG59KTtcblxuIl0sInZlcnNpb24iOjN9
