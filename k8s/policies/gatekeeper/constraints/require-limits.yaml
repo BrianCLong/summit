@@ -5,7 +5,8 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ['*']
-        kinds: ['Deployment', 'StatefulSet']
+      - apiGroups: ["*"]
+        kinds: ["Deployment", "StatefulSet"]
   parameters:
-    limits: ['cpu', 'memory']
+    limits: ["cpu", "memory"]
+

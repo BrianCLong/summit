@@ -16,16 +16,13 @@ interface SocketProviderProps {
   url?: string
 }
 
-export function SocketProvider({
-  children,
-  url = 'http://localhost:4001',
-}: SocketProviderProps) {
+export function SocketProvider({ children, url = 'http://localhost:4001' }: SocketProviderProps) {
   const [socket, setSocket] = useState<Socket | null>(null)
   const [connected, setConnected] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
-
+    
     const socketInstance = io(url, {
       auth: {
         token,
@@ -43,7 +40,7 @@ export function SocketProvider({
       setConnected(false)
     })
 
-    socketInstance.on('connect_error', error => {
+    socketInstance.on('connect_error', (error) => {
       console.error('WebSocket connection error:', error)
       setConnected(false)
     })
@@ -86,7 +83,9 @@ export function SocketProvider({
   }
 
   return (
-    <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
+    <SocketContext.Provider value={value}>
+      {children}
+    </SocketContext.Provider>
   )
 }
 

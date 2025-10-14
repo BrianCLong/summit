@@ -1,0 +1,81 @@
+{
+  "title": "Performance & Latency",
+  "schemaVersion": 38,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Latency Percentiles",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum(rate(request_latency_ms_bucket{service=\"$service\", route=~\"$route\"}[5m])) by (le))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(request_latency_ms_bucket{service=\"$service\", route=~\"$route\"}[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(request_latency_ms_bucket{service=\"$service\", route=~\"$route\"}[5m])) by (le))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Worker Queue Delay",
+      "targets": [
+        {
+          "expr": "avg(worker_queue_delay_seconds{service=\"$service\", queue=~\"$queue\"})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Dependency Latency",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(db_query_time_ms_bucket{service=\"$service\"}[5m])) by (le, db_cluster))",
+          "legendFormat": "{{db_cluster}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "type": "query",
+        "query": "label_values(request_latency_ms_bucket, service)",
+        "datasource": "$datasource"
+      },
+      {
+        "name": "route",
+        "type": "query",
+        "query": "label_values(request_latency_ms_bucket{service=\"$service\"}, route)",
+        "datasource": "$datasource"
+      },
+      {
+        "name": "queue",
+        "type": "query",
+        "query": "label_values(worker_queue_depth{service=\"$service\"}, queue)",
+        "datasource": "$datasource"
+      }
+    ]
+  }
+}

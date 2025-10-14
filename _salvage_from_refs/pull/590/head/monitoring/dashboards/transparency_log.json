@@ -1,6 +1,0 @@
-{
-  "title": "Transparency Log",
-  "panels": [
-    { "type": "graph", "title": "log size" }
-  ]
-}

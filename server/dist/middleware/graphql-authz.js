@@ -9,8 +9,6 @@ import logger from '../utils/logger.js';
  * authorization policies defined in Rego files.
  */
 export class GraphQLAuthzPlugin {
-    opaUrl;
-    enabled;
     constructor(opaUrl = 'http://localhost:8181') {
         this.opaUrl = opaUrl;
         this.enabled = process.env.OPA_ENABLED !== 'false';
@@ -28,7 +26,7 @@ export class GraphQLAuthzPlugin {
                 if (requestContext.context.authzDecisions) {
                     logger.info(`Authorization audit. User: ${requestContext.context.user?.id}, Operation: ${requestContext.request.operationName}, Decisions: ${JSON.stringify(requestContext.context.authzDecisions)}, IP: ${requestContext.request.http?.ip}`);
                 }
-            },
+            }
         };
     }
     /**
@@ -56,7 +54,7 @@ export class GraphQLAuthzPlugin {
                 context.authzDecisions.push({
                     field: info.fieldName,
                     decision: decision.allow,
-                    reason: decision.reason,
+                    reason: decision.reason
                 });
                 // Enforce decision
                 if (!decision.allow) {
@@ -91,7 +89,7 @@ export class GraphQLAuthzPlugin {
                 permissions: context.user.permissions || [],
                 missionTags: context.user.missionTags || [],
                 orgId: context.user.orgId,
-                teamId: context.user.teamId,
+                teamId: context.user.teamId
             },
             action: `${operation}.${fieldName}`,
             resource: {
@@ -101,10 +99,10 @@ export class GraphQLAuthzPlugin {
                 missionTags: args.missionTags || [],
                 compartment: {
                     orgId: args.orgId,
-                    teamId: args.teamId,
+                    teamId: args.teamId
                 },
                 validFrom: args.validFrom,
-                validUntil: args.validUntil,
+                validUntil: args.validUntil
             },
             context: {
                 tenantId: this.extractTenantId(context, args),
@@ -112,8 +110,8 @@ export class GraphQLAuthzPlugin {
                 environment: config.env,
                 ip: context.req?.ip,
                 userAgent: context.req?.get('user-agent'),
-                time: new Date().toISOString(),
-            },
+                time: new Date().toISOString()
+            }
         };
     }
     /**
@@ -123,7 +121,7 @@ export class GraphQLAuthzPlugin {
         try {
             const response = await axios.post(`${this.opaUrl}/v1/data/intelgraph/allow`, { input }, {
                 timeout: 5000,
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' }
             });
             const result = response.data.result;
             if (typeof result === 'boolean') {
@@ -132,7 +130,7 @@ export class GraphQLAuthzPlugin {
             if (typeof result === 'object' && result !== null) {
                 return {
                     allow: result.allow === true,
-                    reason: result.reason,
+                    reason: result.reason
                 };
             }
             // Default deny if unexpected response
@@ -156,7 +154,9 @@ export class GraphQLAuthzPlugin {
      * Extract tenant ID from context or args
      */
     extractTenantId(context, args) {
-        return args.tenantId || context.user.tenantId || context.req?.headers['x-tenant-id'];
+        return args.tenantId ||
+            context.user.tenantId ||
+            context.req?.headers['x-tenant-id'];
     }
     /**
      * Sanitize arguments for policy evaluation (remove sensitive data)
@@ -165,7 +165,7 @@ export class GraphQLAuthzPlugin {
         const sanitized = { ...args };
         // Remove sensitive fields
         const sensitiveFields = ['password', 'token', 'secret', 'key'];
-        sensitiveFields.forEach((field) => {
+        sensitiveFields.forEach(field => {
             if (sanitized[field]) {
                 sanitized[field] = '[REDACTED]';
             }
@@ -189,7 +189,7 @@ export function authDirective() {
             // Transform schema to add authorization checks
             // This would integrate with the GraphQL schema transformation
             return schema;
-        },
+        }
     };
 }
 /**
@@ -208,12 +208,12 @@ export function createAuthzMiddleware(opaUrl) {
                 resource,
                 context: {
                     environment: config.env,
-                    ...context,
-                },
+                    ...context
+                }
             };
             const decision = await plugin['queryOPA'](input);
             return decision.allow;
-        },
+        }
     };
 }
 /**
@@ -229,6 +229,7 @@ export const RBAC = {
         if (action === 'read' && RBAC.isAnalyst(user))
             return true;
         return false; // Defer to OPA for complex cases
-    },
+    }
 };
 export default GraphQLAuthzPlugin;
+//# sourceMappingURL=graphql-authz.js.map

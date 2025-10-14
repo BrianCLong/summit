@@ -157,8 +157,8 @@ export function createSpan(name, fn, attributes) {
     });
 }
 class IntelGraphCostTracker {
-    budgets = new Map();
     constructor() {
+        this.budgets = new Map();
         // Initialize default budgets
         this.budgets.set('default', { used: 0, limit: 1000 });
     }
@@ -197,7 +197,9 @@ class IntelGraphCostTracker {
 }
 export const costTracker = new IntelGraphCostTracker();
 class Neo4jSlowQueryKiller {
-    activeQueries = new Map();
+    constructor() {
+        this.activeQueries = new Map();
+    }
     registerQuery(queryId, query, timeout) {
         const startTime = new Date();
         const timeoutHandle = setTimeout(() => {
@@ -323,3 +325,4 @@ if (process.env.NODE_ENV !== 'test') {
     });
 }
 export { SERVICE_NAME, SERVICE_VERSION, DEPLOYMENT_ENVIRONMENT };
+//# sourceMappingURL=telemetry.js.map

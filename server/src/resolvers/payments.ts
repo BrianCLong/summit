@@ -5,13 +5,13 @@ const paymentsResolvers = {
     },
     paymentStatus: (_: any, { orderId }: { orderId: string }) => {
       return { orderId, status: 'PENDING', updatedAt: new Date().toISOString() };
-    },
+    }
   },
   Mutation: {
     createCheckout: (_: any, { orderId }: { orderId: string }) => {
       return { sessionId: `sess_${orderId}` };
-    },
-  },
+    }
+  }
 };
 
 export default paymentsResolvers;

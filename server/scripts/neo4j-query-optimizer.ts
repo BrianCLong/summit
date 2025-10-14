@@ -17,11 +17,11 @@ async function analyzeQuery(query: string, params: any = {}) {
   try {
     // Use EXPLAIN to get the query plan without executing
     const explainResult = await session.run(`EXPLAIN ${query}`, params);
-    const plan = explainResult.records.map((record) => record.toObject());
+    const plan = explainResult.records.map(record => record.toObject());
 
     // Use PROFILE to get execution statistics
     const profileResult = await session.run(`PROFILE ${query}`, params);
-    const profile = profileResult.records.map((record) => record.toObject());
+    const profile = profileResult.records.map(record => record.toObject());
 
     // Extract relevant metrics (e.g., db hits, rows)
     // This part would require parsing the PROFILE output, which is complex
