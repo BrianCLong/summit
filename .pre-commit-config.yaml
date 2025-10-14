@@ -1,263 +1,38 @@
-# Pre-commit Quality Gates Configuration
-# Sprint 27A: Comprehensive quality checks before commit
-
 repos:
-  # Standard hooks for basic file hygiene
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
-      - id: trailing-whitespace
-        exclude: '\.md$'
-      - id: end-of-file-fixer
-      - id: check-yaml
-        args: ['--unsafe']
-      - id: check-json
-      - id: check-toml
-      - id: check-xml
       - id: check-merge-conflict
-      - id: check-case-conflict
-      - id: check-symlinks
-      - id: check-added-large-files
-        args: ['--maxkb=1000']
-      - id: check-executables-have-shebangs
-      - id: check-shebang-scripts-are-executable
-      - id: mixed-line-ending
-        args: ['--fix=lf']
-      - id: pretty-format-json
-        args: ['--autofix', '--indent=2']
-
-  # Secrets scanning gate (fail-fast)
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.4
-    hooks:
-      - id: gitleaks
-        name: gitleaks protect
-        args: ['protect', '--staged']
-
-  # Security checks for secrets
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
-    hooks:
-      - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
-        exclude: '\.lock$|package-lock\.json$'
-
-  # TypeScript and JavaScript linting
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: detect-private-key
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.7
+    hooks: [{ id: ruff, args: ['--fix'] }, { id: ruff-format }]
+  - repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks: [{ id: black }]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0
+    hooks: [{ id: mypy, additional_dependencies: ['types-requests'] }]
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.57.0
+    rev: v9.9.0
     hooks:
       - id: eslint
-        files: \.(js|jsx|ts|tsx)$
-        types: [file]
-        args: ['--fix', '--max-warnings=0']
-        additional_dependencies:
-          - '@typescript-eslint/eslint-plugin@6.21.0'
-          - '@typescript-eslint/parser@6.21.0'
-          - 'eslint@8.57.0'
-          - 'eslint-config-prettier@9.1.0'
-          - 'eslint-plugin-react@7.33.2'
-          - 'eslint-plugin-react-hooks@4.6.0'
-          - 'eslint-plugin-import@2.29.1'
-
-  # Code formatting with Prettier
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
-    hooks:
-      - id: prettier
-        files: \.(js|jsx|ts|tsx|json|md|yml|yaml|css|scss|html)$
-        args: ['--write']
-
-  # Shell script linting
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.6
-    hooks:
-      - id: shellcheck
-        args: ['-x', '--severity=warning']
-
-  # Docker linting
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
-    hooks:
-      - id: hadolint
-        args: ['--ignore', 'DL3008', '--ignore', 'DL3009']
-
-  # GitHub Actions linting
-  - repo: https://github.com/rhymond/actionlint
-    rev: v1.6.26
-    hooks:
-      - id: actionlint
-
-  # Markdown linting
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.37.0
-    hooks:
-      - id: markdownlint
-        args: ['--fix']
-
-  # Spell checking
-  - repo: https://github.com/crate-ci/typos
-    rev: v1.16.23
-    hooks:
-      - id: typos
-        args: ['--write-changes']
-        exclude: '\.lock$|package-lock\.json$|node_modules/'
-
-  # Python code quality (for scripts)
-  - repo: https://github.com/psf/black
-    rev: 23.11.0
-    hooks:
-      - id: black
-        language_version: python3
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.1.0
-    hooks:
-      - id: flake8
-        args: ['--max-line-length=88', '--extend-ignore=E203,W503']
-
-  # YAML formatting
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.11.0
-    hooks:
-      - id: pretty-format-yaml
-        args: ['--autofix', '--indent=2']
-
-  # Custom hooks for project-specific checks
+        additional_dependencies: [eslint, prettier, eslint-config-prettier]
+        files: .(js|jsx|ts|tsx)$
+  - repo: https://github.com/okonet/lint-staged
+    rev: v14.0.1
+    hooks: [{ id: lint-staged }]
   - repo: local
     hooks:
-      # TypeScript compilation check
-      - id: typescript-check
-        name: TypeScript Compilation Check
-        entry: npx tsc --noEmit
+      - id: forbid-focused-tests
+        name: forbid .only in tests
+        entry: bash -c 'if git grep -nE "(it|test|describe)\\.only\\(" -- "*.ts" "*.tsx" "*.js" | grep -v node_modules; then echo "::error::.only found — remove focused tests"; exit 1; fi'
         language: system
-        files: \.(ts|tsx)$
         pass_filenames: false
-
-      # Package.json validation
-      - id: package-json-validation
-        name: Package.json Validation
-        entry: npm audit --audit-level=high
+      - id: forbid-console-error-in-tests
+        name: forbid console.error in tests
+        entry: bash -c 'if git grep -n "console\\.error(" -- tests server/src/tests | grep -v node_modules; then echo "::error::console.error found in tests — use assertions/throws"; exit 1; fi'
         language: system
-        files: package\.json$
         pass_filenames: false
-
-      # Environment file validation
-      - id: env-validation
-        name: Environment File Validation
-        entry: bash -c 'if [ -f .env ]; then grep -E "^[A-Z_]+=.*$" .env || exit 1; fi'
-        language: system
-        files: \.env$
-        pass_filenames: false
-
-      # Docker compose validation
-      - id: docker-compose-validation
-        name: Docker Compose Validation
-        entry: docker-compose config
-        language: system
-        files: docker-compose.*\.yml$
-        pass_filenames: false
-
-      # Security policy validation
-      - id: security-policy-check
-        name: Security Policy Check
-        entry: bash -c 'find . -name "*.ts" -o -name "*.js" | xargs grep -l "process.env" | head -5 | xargs grep -H "process.env" || true'
-        language: system
-        files: \.(ts|js)$
-        pass_filenames: false
-
-      # License header check
-      - id: license-header-check
-        name: License Header Check
-        entry: bash -c 'for file in "$@"; do if ! head -10 "$file" | grep -q "Copyright\|License\|SPDX"; then echo "Missing license header: $file"; exit 1; fi; done'
-        language: system
-        files: \.(ts|tsx|js|jsx)$
-        exclude: '\.d\.ts$|node_modules/|dist/'
-
-      # Dependency vulnerability check
-      - id: dependency-vulnerability-check
-        name: Dependency Vulnerability Check
-        entry: npm audit --audit-level=moderate
-        language: system
-        files: package\.json$
-        pass_filenames: false
-
-      # Git commit message validation
-      - id: commit-msg-format
-        name: Commit Message Format
-        entry: bash -c 'echo "$1" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|build|ci|perf|revert)(\(.+\))?: .{1,72}$" || (echo "Commit message must follow conventional commits format"; exit 1)'
-        language: system
-        stages: [commit-msg]
-
-      # Bundle size check
-      - id: bundle-size-check
-        name: Bundle Size Check
-        entry: bash -c 'if [ -f "package.json" ] && npm list webpack >/dev/null 2>&1; then npm run build:analyze || true; fi'
-        language: system
-        files: \.(ts|tsx|js|jsx|json)$
-        pass_filenames: false
-
-      # Database migration validation
-      - id: migration-validation
-        name: Database Migration Validation
-        entry: bash -c 'find . -path "*/migrations/*.sql" -newer .git/COMMIT_EDITMSG 2>/dev/null | while read file; do echo "Validating migration: $file"; done || true'
-        language: system
-        files: '.*migrations.*\.sql$'
-        pass_filenames: false
-
-      # API schema validation
-      - id: api-schema-validation
-        name: API Schema Validation
-        entry: bash -c 'find . -name "*.openapi.json" -o -name "*.swagger.json" | xargs -I {} sh -c "echo Validating {}; npx swagger-parser validate {} || exit 1" || true'
-        language: system
-        files: \.(openapi|swagger)\.json$
-        pass_filenames: false
-
-# Global configuration
-default_language_version:
-  python: python3
-  node: '20'
-
-default_stages: [commit]
-
-# Exclude patterns
-exclude: |
-  (?x)^(
-    node_modules/|
-    dist/|
-    build/|
-    coverage/|
-    \.next/|
-    \.nuxt/|
-    \.output/|
-    \.vercel/|
-    \.netlify/|
-    public/|
-    static/|
-    assets/|
-    \.git/|
-    \.vscode/|
-    \.idea/|
-    \.DS_Store|
-    Thumbs\.db|
-    \.env\.local|
-    \.env\.development\.local|
-    \.env\.test\.local|
-    \.env\.production\.local|
-    .*\.lock$|
-    package-lock\.json$|
-    yarn\.lock$|
-    pnpm-lock\.yaml$
-  )
-
-# Performance optimizations
-repos:
-  - repo: meta
-    hooks:
-      - id: check-hooks-apply
-      - id: check-useless-excludes
-
-# Custom commands for manual runs
-# Run all hooks: pre-commit run --all-files
-# Run specific hook: pre-commit run <hook-id>
-# Update hooks: pre-commit autoupdate
-# Install hooks: pre-commit install

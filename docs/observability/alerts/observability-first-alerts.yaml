@@ -1,0 +1,47 @@
+
+global:
+  resolve_timeout: 5m
+route:
+  receiver: summit-observability
+  group_by: ['service']
+  routes:
+    - matchers:
+        - service = observability-first
+      receiver: summit-observability
+    - matchers:
+        - severity = info
+      receiver: summit-slack
+    - matchers:
+        - alertname = SyntheticDrill
+      receiver: synthetic-drill
+receivers:
+  - name: summit-observability
+    pagerdutyConfigs:
+      - serviceKey: ${PAGERDUTY_SERVICE_KEY}
+        severity: error
+        sendResolved: true
+        details:
+          playbook: https://confluence.summit/playbooks/observability-first
+          slack_channel: '#observability-alarms'
+  - name: summit-slack
+    slackConfigs:
+      - api_url: ${SLACK_WEBHOOK_URL}
+        channel: '#observability-alarms'
+        title: "{{ template \"slack.title\" . }}"
+        text: "{{ template \"slack.text\" . }}"
+        send_resolved: true
+        footer: Observability First SLO kits
+  - name: synthetic-drill
+    webhookConfigs:
+      - url: https://synthetic-drills.summit/run
+        httpConfig:
+          bearer_token: ${DRILL_AUTOMATION_TOKEN}
+        sendResolved: true
+inhibit_rules:
+  - source_matchers:
+      - severity = critical
+    target_matchers:
+      - severity = warning
+    equal:
+      - service
+      - alertname

@@ -32,7 +32,7 @@ class CopilotPostgresStore {
             run.status,
             JSON.stringify(run.plan || {}),
             JSON.stringify(run.metadata || {}),
-            run.createdAt || new Date().toISOString(),
+            run.createdAt || new Date().toISOString()
         ];
         const result = await this.pg.query(query, values);
         return this.mapRunFromDb(result.rows[0]);
@@ -70,7 +70,7 @@ class CopilotPostgresStore {
             JSON.stringify(run.plan || {}),
             JSON.stringify(run.metadata || {}),
             run.startedAt || null,
-            run.finishedAt || null,
+            run.finishedAt || null
         ];
         const result = await this.pg.query(query, values);
         return result.rows.length > 0 ? this.mapRunFromDb(result.rows[0]) : null;
@@ -102,7 +102,7 @@ class CopilotPostgresStore {
             task.status,
             task.errorMessage || task.error || null,
             task.startedAt || null,
-            task.finishedAt || null,
+            task.finishedAt || null
         ];
         const result = await this.pg.query(query, values);
         return this.mapTaskFromDb(result.rows[0]);
@@ -117,7 +117,7 @@ class CopilotPostgresStore {
       ORDER BY sequence_number ASC
     `;
         const result = await this.pg.query(query, [runId]);
-        return result.rows.map((row) => this.mapTaskFromDb(row));
+        return result.rows.map(row => this.mapTaskFromDb(row));
     }
     /**
      * Update task status with retry logic
@@ -140,7 +140,7 @@ class CopilotPostgresStore {
             JSON.stringify(task.outputData || task.output || {}),
             task.errorMessage || task.error || null,
             task.startedAt || null,
-            task.finishedAt || null,
+            task.finishedAt || null
         ];
         const result = await this.pg.query(query, values);
         return result.rows.length > 0 ? this.mapTaskFromDb(result.rows[0]) : null;
@@ -161,7 +161,7 @@ class CopilotPostgresStore {
             (event.level || 'info').toLowerCase(),
             event.message,
             JSON.stringify(event.payload || {}),
-            event.ts || new Date().toISOString(),
+            event.ts || new Date().toISOString()
         ];
         const result = await this.pg.query(query, values);
         return this.mapEventFromDb(result.rows[0]);
@@ -190,7 +190,7 @@ class CopilotPostgresStore {
         query += ` ORDER BY id ASC LIMIT $${paramIndex}`;
         params.push(limit);
         const result = await this.pg.query(query, params);
-        return result.rows.map((row) => this.mapEventFromDb(row));
+        return result.rows.map(row => this.mapEventFromDb(row));
     }
     /**
      * Find resumable runs (failed or paused)
@@ -207,7 +207,7 @@ class CopilotPostgresStore {
         }
         query += ` ORDER BY created_at DESC`;
         const result = await this.pg.query(query, params);
-        return result.rows.map((row) => this.mapRunFromDb(row));
+        return result.rows.map(row => this.mapRunFromDb(row));
     }
     /**
      * Get run statistics for monitoring
@@ -252,7 +252,7 @@ class CopilotPostgresStore {
             createdAt: row.created_at,
             updatedAt: row.updated_at,
             startedAt: row.started_at,
-            finishedAt: row.finished_at,
+            finishedAt: row.finished_at
         };
     }
     mapTaskFromDb(row) {
@@ -274,7 +274,7 @@ class CopilotPostgresStore {
             error: row.error_message, // backwards compatibility
             createdAt: row.created_at,
             startedAt: row.started_at,
-            finishedAt: row.finished_at,
+            finishedAt: row.finished_at
         };
     }
     mapEventFromDb(row) {
@@ -288,8 +288,9 @@ class CopilotPostgresStore {
             message: row.message,
             payload: typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload,
             ts: row.created_at,
-            createdAt: row.created_at,
+            createdAt: row.created_at
         };
     }
 }
 module.exports = CopilotPostgresStore;
+//# sourceMappingURL=store.postgres.js.map

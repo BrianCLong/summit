@@ -1,0 +1,55 @@
+version: '3.9'
+services:
+  opa:
+    image: openpolicyagent/opa:0.65.0-rootless
+    command: ["run","--server","--log-level=info"]
+    ports: ["8181:8181"]
+
+  mc:
+    build: ../server
+    image: mc-local:latest
+    environment:
+      - NODE_ENV=development
+    ports: ["4000:4000"]
+    volumes:
+      - ../contracts:/app/contracts
+      - ../dist:/app/dist
+    depends_on: [opa]
+
+  cos:
+    build: ../companyos
+    image: cos-local:latest
+    environment:
+      - NODE_ENV=development
+      - OPA_URL=http://opa:8181
+      - MC_POLICY_PACK_URL=http://mc:4000/v1/policy/packs/policy-pack-v0
+      - POLICY_POLL_INTERVAL_MS=10000
+      - MC_URL=http://mc:4000
+      - MC_TOKEN=dev-token
+    depends_on: [mc, opa]
+
+  prom:
+    image: prom/prometheus:v2.55.0
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["9090:9090"]
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports: ["3001:3000"]
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ../observability/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on: [prom]
+
+  synthetic:
+    image: node:20-alpine
+    volumes:
+      - ./synthetic/traffic.js:/app/traffic.js:ro
+    environment:
+      - MC_URL=http://mc:4000/graphql
+      - RATE_MS=200
+    depends_on: [mc]
+    command: ["node","/app/traffic.js"]

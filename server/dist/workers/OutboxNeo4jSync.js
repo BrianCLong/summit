@@ -6,15 +6,11 @@
 import logger from '../config/logger.js';
 const workerLogger = logger.child({ name: 'OutboxNeo4jSync' });
 export class OutboxNeo4jSync {
-    pg;
-    neo4j;
-    config;
-    isRunning = false;
-    intervalId;
     constructor(pg, neo4j, config = {}) {
         this.pg = pg;
         this.neo4j = neo4j;
         this.config = config;
+        this.isRunning = false;
         this.config = {
             batchSize: 100,
             intervalMs: 2000,
@@ -265,3 +261,4 @@ export class OutboxNeo4jSync {
         return deletedCount;
     }
 }
+//# sourceMappingURL=OutboxNeo4jSync.js.map

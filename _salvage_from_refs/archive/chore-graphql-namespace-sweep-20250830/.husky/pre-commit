@@ -1,9 +1,0 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-set -euo pipefail
-
-# Run staged-only linting (fast)
-npx lint-staged -c client/.lintstagedrc.json
-
-# Optional: ultra-fast typecheck of changed files (skips emit)
-# npm -w client run typecheck --silent
