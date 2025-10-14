@@ -1,0 +1,36 @@
+{
+  "title": "PR Health",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Median PR CI Time (mins)",
+      "datasource": "${ds_prometheus}",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum(rate(github_actions_job_duration_seconds_bucket{job=~\".*pr.*\"}[5m])) by (le)) / 60"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Open PRs",
+      "datasource": "${ds_prometheus}",
+      "targets": [
+        {
+          "expr": "sum(github_open_pull_requests)"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "ds_prometheus",
+        "type": "datasource",
+        "query": "prometheus"
+      }
+    ]
+  },
+  "schemaVersion": 38,
+  "version": 1
+}

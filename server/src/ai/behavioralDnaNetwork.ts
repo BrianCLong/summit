@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 export interface BehaviorEvent {
   entityId: string;
@@ -39,7 +39,7 @@ export class BehavioralDnaNetwork extends EventEmitter {
     this.history.set(event.entityId, history);
     this.embeddings.set(event.entityId, this.mean(history));
 
-    this.emit('update', {
+    this.emit("update", {
       entityId: event.entityId,
       embedding: this.embeddings.get(event.entityId),
       anomaly,
@@ -98,7 +98,8 @@ export class BehavioralDnaNetwork extends EventEmitter {
     const meanVec = this.mean(history);
     const distance = this.distance(vector, meanVec);
     const stdDev = this.stdDev(history, meanVec);
-    const isAnomaly = stdDev === 0 ? distance > 0 : distance > this.anomalyThreshold * stdDev;
+    const isAnomaly =
+      stdDev === 0 ? distance > 0 : distance > this.anomalyThreshold * stdDev;
     const score = stdDev === 0 ? distance : distance / stdDev;
     return { entityId, isAnomaly, score };
   }
@@ -106,7 +107,8 @@ export class BehavioralDnaNetwork extends EventEmitter {
   private stdDev(history: number[][], meanVec: number[]): number {
     const distances = history.map((vec) => this.distance(vec, meanVec));
     const avg = distances.reduce((a, b) => a + b, 0) / distances.length;
-    const variance = distances.reduce((a, b) => a + (b - avg) ** 2, 0) / distances.length;
+    const variance =
+      distances.reduce((a, b) => a + (b - avg) ** 2, 0) / distances.length;
     return Math.sqrt(variance);
   }
 

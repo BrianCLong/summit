@@ -1,0 +1,31 @@
+name: Auto Update PRs (safe)
+on:
+  schedule: [{ cron: "11,41 * * * *" }]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List out-of-date PRs
+        id: list
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr list --state open --json number,updateBranch --jq '
+            [.[] | select(.updateBranch == true) | .number] | @tsv' | tr '\t' '\n' > prs.txt || true
+          echo "prs=$(cat prs.txt | tr '\n' ' ')" >> $GITHUB_OUTPUT
+
+      - name: Update branches (safe server-side)
+        if: steps.list.outputs.prs != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for pr in ${{ steps.list.outputs.prs }}; do
+            echo "🔄 Updating PR #$pr"
+            gh pr update "$pr" --update-branch || true
+          done

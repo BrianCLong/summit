@@ -1,0 +1,21 @@
+Feature,Graphika,Proposed MVP-2,Proposed GA
+Intelligence Feeds,Yes,Yes,Yes+
+Narrative Intelligence,Yes,Yes,Yes+
+Analyst & SME Calls,Yes,Yes,Yes+
+Landscape Reports,Yes,Yes,Yes+
+Deep-Dive Reports,Yes,Yes,Yes+
+Network Discovery Maps,Yes,Yes,Yes+
+API Access,Yes (Narrative Analytics),Yes,Yes+
+Team Integration,"Slack (Live), Teams (Coming)","Slack, Teams, Salesforce","Slack, Teams, Salesforce, Dynamics"
+Data Exports,"Yes (Reports, Maps)",Yes,Yes+
+Custom Training,Yes,Yes,Yes+
+User Access (Growth),1 User,1 User,1 User
+User Access (Company),Up to 100 Users,Up to 100 Users,Up to 100 Users
+User Access (Enterprise),Unlimited,Unlimited,Unlimited
+Community Data Downloads,Yes,Yes,Yes+
+Predictive Analytics,Limited,Yes,Yes+
+Real-Time Alerting,No,Yes,Yes+
+Cross-Platform Integration,Partial,Yes,Yes+
+AI Explainability,No,No,Yes
+Collaborative Workspaces,No,No,Yes
+Automated Playbooks,No,No,Yes

@@ -3,8 +3,8 @@ export function breaker(fn, name, opts = {}) {
     const br = new CircuitBreaker(fn, {
         timeout: 3000, // fail fast
         errorThresholdPercentage: 50, // trip after 50% errors in window
-        resetTimeout: 10_000, // half-open after 10s
-        rollingCountTimeout: 10_000,
+        resetTimeout: 10000, // half-open after 10s
+        rollingCountTimeout: 10000,
         rollingCountBuckets: 10,
         ...opts,
     });
@@ -17,3 +17,4 @@ export function breaker(fn, name, opts = {}) {
     });
     return br;
 }
+//# sourceMappingURL=breakers.js.map

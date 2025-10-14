@@ -1,0 +1,102 @@
+version: '3'
+
+env:
+  REGISTRY: ghcr.io/example
+  IMAGE_PREFIX: golden-path
+  GOFLAGS: -mod=readonly
+
+tasks:
+  default:
+    cmds:
+      - task: build
+
+  bootstrap:
+    desc: Install developer tooling defaults
+    cmds:
+      - go env -w GODEBUG=tlsrsakex=0
+      - go env -w GOSUMDB=sum.golang.org
+    silent: true
+
+  build:
+    desc: Build service and job binaries
+    deps: ["build:service", "build:job"]
+
+  build:service:
+    dir: services/hello-service
+    cmds:
+      - CGO_ENABLED=0 go build -ldflags "-s -w -trimpath" -o ../../dist/hello-service
+
+  build:job:
+    dir: jobs/hello-job
+    cmds:
+      - CGO_ENABLED=0 go build -ldflags "-s -w -trimpath" -o ../../dist/hello-job
+
+  test:
+    desc: Run Go unit tests with race detector
+    cmds:
+      - cd services/hello-service && go test ./... -count=1 -race -coverprofile=../../coverage-service.out
+      - cd jobs/hello-job && go test ./... -count=1 -race -coverprofile=../../coverage-job.out
+      - go tool cover -func=coverage-service.out
+      - go tool cover -func=coverage-job.out
+
+  docker:build:
+    desc: Build multi-arch images with buildx
+    cmds:
+      - |
+        docker buildx build \
+          --platform linux/amd64,linux/arm64 \
+          --build-arg GIT_SHA=$(git rev-parse --short HEAD) \
+          --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+          -t $REGISTRY/$IMAGE_PREFIX-hello-service:$(git rev-parse --short HEAD) \
+          services/hello-service
+      - |
+        docker buildx build \
+          --platform linux/amd64,linux/arm64 \
+          --build-arg GIT_SHA=$(git rev-parse --short HEAD) \
+          --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+          -t $REGISTRY/$IMAGE_PREFIX-hello-job:$(git rev-parse --short HEAD) \
+          jobs/hello-job
+
+  scan:
+    desc: Run vulnerability, secret, and license scans via Trivy
+    cmds:
+      - trivy fs --security-checks vuln,config,secret --exit-code 1 --severity HIGH,CRITICAL .
+      - trivy image --security-checks license $REGISTRY/$IMAGE_PREFIX-hello-service:$(git rev-parse --short HEAD)
+      - trivy image --security-checks license $REGISTRY/$IMAGE_PREFIX-hello-job:$(git rev-parse --short HEAD)
+
+  sbom:
+    desc: Generate SPDX SBOMs using Syft
+    cmds:
+      - scripts/generate-sbom.sh $REGISTRY/$IMAGE_PREFIX-hello-service:$(git rev-parse --short HEAD) artifacts/hello-service-sbom.spdx.json
+      - scripts/generate-sbom.sh $REGISTRY/$IMAGE_PREFIX-hello-job:$(git rev-parse --short HEAD) artifacts/hello-job-sbom.spdx.json
+
+  sign:
+    desc: Sign container images with cosign keyless
+    cmds:
+      - scripts/sign-image.sh $REGISTRY/$IMAGE_PREFIX-hello-service:$(git rev-parse --short HEAD) artifacts/hello-service-sbom.spdx.json
+      - scripts/sign-image.sh $REGISTRY/$IMAGE_PREFIX-hello-job:$(git rev-parse --short HEAD) artifacts/hello-job-sbom.spdx.json
+
+  attest:
+    desc: Produce SLSA provenance attestations
+    cmds:
+      - scripts/generate-provenance.sh $REGISTRY/$IMAGE_PREFIX-hello-service:$(git rev-parse --short HEAD)
+      - scripts/generate-provenance.sh $REGISTRY/$IMAGE_PREFIX-hello-job:$(git rev-parse --short HEAD)
+
+  helm:template:
+    desc: Render Helm templates for an environment
+    vars:
+      ENV: dev
+    cmds:
+      - helm template hello-service helm/hello-service -f helm/environments/{{.ENV}}/hello-service.yaml --set image.tag=$(git rev-parse --short HEAD)
+      - helm template hello-job helm/hello-job -f helm/environments/{{.ENV}}/hello-job.yaml --set image.tag=$(git rev-parse --short HEAD)
+
+  helm:diff:
+    desc: Preview Helm changes using helmfile diff conventions
+    cmds:
+      - helm diff upgrade hello-service helm/hello-service -f helm/environments/stage/hello-service.yaml --set image.tag=$(git rev-parse --short HEAD)
+
+  opa:check:
+    desc: Evaluate OPA policy before promotion
+    cmds:
+      - opa eval --format pretty --data scripts/policy/bundle.rego --input scripts/policy/input.json 'data.cicd.allow'
+
