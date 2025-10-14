@@ -31,7 +31,7 @@ describe('CopilotOrchestrationService', () => {
       mockNeo4jDriver,
       mockAIExtractionService,
       mockFederatedSearchService,
-      mockLogger,
+      mockLogger
     );
   });
 
@@ -52,7 +52,7 @@ describe('CopilotOrchestrationService', () => {
     expect(service.queryPlanners.size).toBeGreaterThan(0);
     expect(service.logger.info).toHaveBeenCalledWith(
       expect.stringContaining('Initialized'),
-      expect.any(Object),
+      expect.any(Object)
     );
   });
 
@@ -60,7 +60,7 @@ describe('CopilotOrchestrationService', () => {
     expect(service.domainKnowledge.size).toBeGreaterThan(0);
     expect(service.logger.info).toHaveBeenCalledWith(
       expect.stringContaining('Loaded domain knowledge'),
-      expect.any(Object),
+      expect.any(Object)
     );
   });
 
@@ -117,7 +117,7 @@ describe('CopilotOrchestrationService', () => {
     expect(service.metrics.successfulQueries).toEqual(1);
     expect(service.logger.info).toHaveBeenCalledWith(
       expect.stringContaining('Query orchestration completed'),
-      expect.any(Object),
+      expect.any(Object)
     );
   });
 

@@ -9,8 +9,6 @@ import { insertAnalyticsTrace } from '../../db/timescale.js';
 import GraphXAIExplainer from './graph-explainer.js';
 import logger from '../../utils/logger.js';
 export class DetectorService {
-    static instance;
-    xaiExplainer;
     static getInstance() {
         if (!DetectorService.instance) {
             DetectorService.instance = new DetectorService();
@@ -507,3 +505,4 @@ export class DetectorService {
     }
 }
 export default DetectorService;
+//# sourceMappingURL=detectors.js.map

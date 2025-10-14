@@ -1,11 +1,36 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "npm"
-    directory: "/client"
-    schedule:
-      interval: "weekly"
-
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule: { interval: 'weekly', day: 'monday', time: '07:00' }
+    groups:
+      react-stack:
+        patterns: ['react*', 'react-*-*', 'next*', 'zustand*', 'redux*']
+      tooling:
+        patterns:
+          [
+            'eslint*',
+            'prettier*',
+            'typescript',
+            'ts-*',
+            'vite*',
+            'vitest*',
+            '@types/*',
+          ]
+      ui-graphics:
+        patterns:
+          ['@mui/*', 'three*', 'd3*', 'canvas*', 'mapbox*', 'react-map-gl*']
+      minor-patch:
+        update-types: ['minor', 'patch']
+    open-pull-requests-limit: 15
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule: { interval: 'weekly' }
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule: { interval: 'daily' } # security only
+    allow: [{ dependency-type: 'direct' }]
+    labels: ['security-blocker']
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major'] # security lane only

@@ -8,3 +8,4 @@ export function verifyWeights(path, expectedSha256) {
     }
     return JSON.parse(buf.toString());
 }
+//# sourceMappingURL=WeightsVerifier.js.map

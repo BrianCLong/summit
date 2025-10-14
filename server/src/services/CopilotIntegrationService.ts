@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { isFeatureEnabled } from '../config/mvp1-features';
 import { MVP1RBACService, Permission, ResourceType } from './MVP1RBACService';
-import baseLogger from '../config/logger';
+import pino from 'pino';
 
-const logger = baseLogger.child({ name: 'CopilotIntegrationService' });
+const logger = pino();
 
 interface CopilotEntity {
   type: string;
@@ -65,7 +65,7 @@ export class CopilotIntegrationService {
       investigationId?: string;
       precisionThreshold?: number;
       enableCaching?: boolean;
-    } = {},
+    } = {}
   ): Promise<CopilotNERResponse> {
     // Feature flag check
     if (!isFeatureEnabled('COPILOT_SERVICE')) {
@@ -79,9 +79,9 @@ export class CopilotIntegrationService {
         email: user.email,
         role: user.role as any,
         tenantId: user.tenantId,
-        isActive: true,
+        isActive: true
       },
-      action: Permission.AI_QUERY,
+      action: Permission.AI_QUERY
     });
 
     if (!hasPermission) {
@@ -96,26 +96,30 @@ export class CopilotIntegrationService {
         tenant_id: user.tenantId,
         investigation_id: options.investigationId,
         precision_threshold: options.precisionThreshold || 0.7,
-        enable_caching: options.enableCaching !== false,
+        enable_caching: options.enableCaching !== false
       };
 
       logger.info('Requesting NER extraction from Copilot service', {
         textLength: text.length,
         tenantId: user.tenantId,
-        userId: user.id,
+        userId: user.id
       });
 
-      const response = await axios.post(`${this.copilotBaseUrl}/ner/extract`, requestPayload, {
-        timeout: this.timeout,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': user.id,
-          'X-Tenant-ID': user.tenantId,
-        },
-      });
+      const response = await axios.post(
+        `${this.copilotBaseUrl}/ner/extract`,
+        requestPayload,
+        {
+          timeout: this.timeout,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-ID': user.id,
+            'X-Tenant-ID': user.tenantId
+          }
+        }
+      );
 
       const result = response.data as CopilotNERResponse;
-
+      
       // Log audit event
       await this.rbacService.recordAuditEvent({
         userId: user.id,
@@ -123,29 +127,30 @@ export class CopilotIntegrationService {
         tenantId: user.tenantId,
         action: 'AI_NER_EXTRACT',
         resourceType: ResourceType.SYSTEM,
-        resourceData: {
-          textLength: text.length,
+        resourceData: { 
+          textLength: text.length, 
           entitiesFound: result.entities.length,
           confidence: result.confidence,
-          processingTime: result.processing_time_ms,
+          processingTime: result.processing_time_ms
         },
         success: true,
-        investigationId: options.investigationId,
+        investigationId: options.investigationId
       });
 
       logger.info('NER extraction completed', {
         entitiesFound: result.entities.length,
         confidence: result.confidence,
         processingTime: result.processing_time_ms,
-        cached: result.cached,
+        cached: result.cached
       });
 
       return result;
+
     } catch (error: any) {
       logger.error('Copilot NER extraction failed', {
         error: error.message,
         userId: user.id,
-        tenantId: user.tenantId,
+        tenantId: user.tenantId
       });
 
       // Log failed audit event
@@ -157,7 +162,7 @@ export class CopilotIntegrationService {
         resourceType: ResourceType.SYSTEM,
         success: false,
         errorMessage: error.message,
-        investigationId: options.investigationId,
+        investigationId: options.investigationId
       });
 
       if (error.code === 'ECONNREFUSED') {
@@ -182,7 +187,7 @@ export class CopilotIntegrationService {
     options: {
       maxSuggestions?: number;
       confidenceThreshold?: number;
-    } = {},
+    } = {}
   ): Promise<CopilotLinkResponse> {
     // Feature flag check
     if (!isFeatureEnabled('COPILOT_SERVICE')) {
@@ -196,14 +201,14 @@ export class CopilotIntegrationService {
         email: user.email,
         role: user.role as any,
         tenantId: user.tenantId,
-        isActive: true,
+        isActive: true
       },
       action: Permission.AI_SUGGEST,
       resource: {
         type: ResourceType.INVESTIGATION,
         id: investigationId,
-        tenantId: user.tenantId,
-      },
+        tenantId: user.tenantId
+      }
     });
 
     if (!hasPermission) {
@@ -216,24 +221,28 @@ export class CopilotIntegrationService {
         investigation_id: investigationId,
         tenant_id: user.tenantId,
         max_suggestions: options.maxSuggestions || 10,
-        confidence_threshold: options.confidenceThreshold || 0.7,
+        confidence_threshold: options.confidenceThreshold || 0.7
       };
 
       logger.info('Requesting link suggestions from Copilot service', {
         entityCount: entities.length,
         investigationId,
         tenantId: user.tenantId,
-        userId: user.id,
+        userId: user.id
       });
 
-      const response = await axios.post(`${this.copilotBaseUrl}/links/suggest`, requestPayload, {
-        timeout: this.timeout,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-ID': user.id,
-          'X-Tenant-ID': user.tenantId,
-        },
-      });
+      const response = await axios.post(
+        `${this.copilotBaseUrl}/links/suggest`,
+        requestPayload,
+        {
+          timeout: this.timeout,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-ID': user.id,
+            'X-Tenant-ID': user.tenantId
+          }
+        }
+      );
 
       const result = response.data as CopilotLinkResponse;
 
@@ -248,25 +257,26 @@ export class CopilotIntegrationService {
         resourceData: {
           inputEntities: entities.length,
           suggestionsGenerated: result.suggestions.length,
-          processingTime: result.processing_time_ms,
+          processingTime: result.processing_time_ms
         },
         success: true,
-        investigationId,
+        investigationId
       });
 
       logger.info('Link suggestions completed', {
         suggestionsGenerated: result.suggestions.length,
         processingTime: result.processing_time_ms,
-        graphEntitiesAnalyzed: result.graph_entities_analyzed,
+        graphEntitiesAnalyzed: result.graph_entities_analyzed
       });
 
       return result;
+
     } catch (error: any) {
       logger.error('Copilot link suggestions failed', {
         error: error.message,
         userId: user.id,
         tenantId: user.tenantId,
-        investigationId,
+        investigationId
       });
 
       // Log failed audit event
@@ -279,7 +289,7 @@ export class CopilotIntegrationService {
         resourceId: investigationId,
         success: false,
         errorMessage: error.message,
-        investigationId,
+        investigationId
       });
 
       if (error.code === 'ECONNREFUSED') {
@@ -304,9 +314,9 @@ export class CopilotIntegrationService {
   }> {
     try {
       const startTime = Date.now();
-
+      
       const response = await axios.get(`${this.copilotBaseUrl}/health`, {
-        timeout: 5000, // Short timeout for health checks
+        timeout: 5000 // Short timeout for health checks
       });
 
       const responseTime = Date.now() - startTime;
@@ -316,14 +326,15 @@ export class CopilotIntegrationService {
         available: true,
         response_time_ms: responseTime,
         version: response.data.version,
-        models_loaded: response.data.models_loaded,
+        models_loaded: response.data.models_loaded
       };
+
     } catch (error: any) {
       logger.warn('Copilot service health check failed', { error: error.message });
-
+      
       return {
         status: 'unhealthy',
-        available: false,
+        available: false
       };
     }
   }
@@ -335,7 +346,7 @@ export class CopilotIntegrationService {
     copilotEntities: CopilotEntity[],
     investigationId: string,
     tenantId: string,
-    userId: string,
+    userId: string
   ): Array<{
     type: string;
     label: string;
@@ -346,7 +357,7 @@ export class CopilotIntegrationService {
     investigationId: string;
     tenantId: string;
   }> {
-    return copilotEntities.map((entity) => ({
+    return copilotEntities.map(entity => ({
       type: entity.type,
       label: entity.label,
       description: `Extracted from text (${entity.start_index}-${entity.end_index})`,
@@ -355,12 +366,12 @@ export class CopilotIntegrationService {
         extractedFrom: 'copilot_ner',
         context: entity.context,
         startIndex: entity.start_index,
-        endIndex: entity.end_index,
+        endIndex: entity.end_index
       },
       confidence: entity.confidence,
       source: 'copilot_ai',
       investigationId,
-      tenantId,
+      tenantId
     }));
   }
 
@@ -374,7 +385,7 @@ export class CopilotIntegrationService {
     options: {
       precisionThreshold?: number;
       maxConcurrency?: number;
-    } = {},
+    } = {}
   ): Promise<Array<{ text: string; result: CopilotNERResponse | null; error?: string }>> {
     const maxConcurrency = options.maxConcurrency || 3;
     const results: Array<{ text: string; result: CopilotNERResponse | null; error?: string }> = [];
@@ -382,12 +393,12 @@ export class CopilotIntegrationService {
     // Process in batches to avoid overwhelming the service
     for (let i = 0; i < texts.length; i += maxConcurrency) {
       const batch = texts.slice(i, i + maxConcurrency);
-
+      
       const batchPromises = batch.map(async (text) => {
         try {
           const result = await this.extractEntities(text, user, {
             investigationId,
-            precisionThreshold: options.precisionThreshold,
+            precisionThreshold: options.precisionThreshold
           });
           return { text, result, error: undefined };
         } catch (error: any) {
@@ -400,7 +411,7 @@ export class CopilotIntegrationService {
 
       // Small delay between batches to be respectful
       if (i + maxConcurrency < texts.length) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
 

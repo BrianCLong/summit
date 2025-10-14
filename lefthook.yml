@@ -1,11 +1,23 @@
 pre-commit:
   parallel: true
   commands:
-    lint: { run: pnpm lint-staged }
-    typecheck: { run: pnpm -w typecheck, stage_fixed: true }
+    lint:
+      run: pnpm lint-staged
+    typecheck:
+      run: pnpm -w typecheck
+      stage_fixed: true
 pre-push:
-  parallel: true
+  parallel: false
   commands:
-    actionlint: { run: npx actionlint }
-    hadolint:   { run: npx hadolint Dockerfile || true }
-    gitleaks:   { run: npx gitleaks detect --redact --no-banner }
+    hook-signature:
+      run: scripts/hooks/verify-hook-signature.sh
+    smoke:
+      run: node smoke-test.js --ci
+    parity:
+      run: node scripts/devkit/check-parity.js
+    actionlint:
+      run: npx actionlint
+    hadolint:
+      run: npx hadolint Dockerfile || true
+    gitleaks:
+      run: npx gitleaks detect --redact --no-banner
