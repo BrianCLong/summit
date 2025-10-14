@@ -6,16 +6,14 @@
  */
 import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { z } from 'zod';
-import baseLogger from '../config/logger';
-const logger = baseLogger.child({ name: 'authPolicy' });
+import pino from 'pino';
+const logger = pino({ name: 'authPolicy' });
 // Zod schemas for validation
 const ActionSchema = z.string().min(1);
-const ResourceSchema = z
-    .object({
+const ResourceSchema = z.object({
     type: z.string(),
-    id: z.string(),
-})
-    .passthrough();
+    id: z.string()
+}).passthrough();
 /**
  * Mock policy service - replace with actual OPA integration
  */
@@ -110,8 +108,8 @@ export function withAuthAndPolicy(action, resourceFactory) {
                         userAgent: context.req?.headers?.['user-agent'],
                         ip: context.req?.ip,
                         orgId: context.user.orgId,
-                        teamId: context.user.teamId,
-                    },
+                        teamId: context.user.teamId
+                    }
                 };
                 const policyResult = await policyService.evaluate(policyInput);
                 if (!policyResult.allow) {
@@ -181,7 +179,7 @@ export function investigationResource(investigationId, orgId, teamId) {
         type: 'investigation',
         id: investigationId,
         orgId,
-        teamId,
+        teamId
     };
 }
 /**
@@ -193,7 +191,7 @@ export function entityResource(entityId, investigationId, orgId, teamId) {
         id: entityId,
         investigationId,
         orgId,
-        teamId,
+        teamId
     };
 }
 /**
@@ -205,7 +203,7 @@ export function relationshipResource(relationshipId, investigationId, orgId, tea
         id: relationshipId,
         investigationId,
         orgId,
-        teamId,
+        teamId
     };
 }
 /**
@@ -216,7 +214,7 @@ export function getPolicyStats() {
     return {
         serviceType: 'mock',
         totalEvaluations: 0,
-        deniedRequests: 0,
+        deniedRequests: 0
     };
 }
 /**
@@ -239,4 +237,5 @@ export function getPolicyStats() {
  *     )
  *   }
  * }
- */
+ */ 
+//# sourceMappingURL=withAuthAndPolicy.js.map

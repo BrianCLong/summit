@@ -1,0 +1,34 @@
+name: Compose UI Screens
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  up-and-capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Build and start compose
+        run: |
+          docker compose -f .github/ci/docker-compose.ci.yml build
+          docker compose -f .github/ci/docker-compose.ci.yml up -d
+      - name: Wait for UI
+        run: |
+          for i in {1..30}; do curl -fsS http://localhost:3000 && break || sleep 2; done
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+      - name: Capture screenshots
+        env:
+          UI_URL: http://localhost:3000
+        run: npm run screenshots
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: cookbook-screenshots-compose
+          path: docs/cookbook/screenshots
+      - name: Compose down
+        if: always()
+        run: docker compose -f .github/ci/docker-compose.ci.yml down -v

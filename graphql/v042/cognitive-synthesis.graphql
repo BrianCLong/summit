@@ -1,0 +1,1878 @@
+# MC Platform v0.4.2 Cognitive Synthesis Engine GraphQL Schema
+# Multi-modal intelligence, federated learning, and adaptive cognitive architectures
+
+extend type Query {
+  # === COGNITIVE PROCESSING ===
+
+  # Cognitive processing status
+  cognitiveProcessingStatus(tenant: Tenant!): CognitiveProcessingStatus!
+
+  # Multi-modal intelligence capabilities
+  multiModalCapabilities(tenant: Tenant!): MultiModalCapabilities!
+
+  # Federated learning network status
+  federatedLearningStatus(tenant: Tenant!): FederatedLearningStatus!
+
+  # Cognitive memory system status
+  cognitiveMemoryStatus(tenant: Tenant!): CognitiveMemoryStatus!
+
+  # Adaptive architecture status
+  adaptiveArchitectureStatus(tenant: Tenant!): AdaptiveArchitectureStatus!
+
+  # === COGNITIVE QUERIES ===
+
+  # Multi-modal reasoning
+  performMultiModalReasoning(
+    tenant: Tenant!,
+    inputs: [MultiModalInput!]!,
+    context: CognitiveContext
+  ): MultiModalReasoningResult!
+
+  # Cognitive synthesis
+  performCognitiveSynthesis(
+    tenant: Tenant!,
+    synthesisRequest: CognitiveSynthesisRequest!
+  ): CognitiveSynthesisResult!
+
+  # Memory recall
+  recallCognitiveMemory(
+    tenant: Tenant!,
+    memoryQuery: CognitiveMemoryQuery!
+  ): CognitiveMemoryResult!
+
+  # Federated learning insights
+  getFederatedLearningInsights(
+    tenant: Tenant!,
+    sessionId: String!
+  ): FederatedLearningInsights!
+
+  # Cognitive performance metrics
+  getCognitivePerformanceMetrics(
+    tenant: Tenant!,
+    timeRange: Duration
+  ): CognitivePerformanceMetrics!
+
+  # === COGNITIVE MONITORING ===
+
+  # Cognitive load monitoring
+  getCurrentCognitiveLoad(tenant: Tenant!): CognitiveLoadStatus!
+
+  # Attention distribution
+  getAttentionDistribution(tenant: Tenant!): AttentionDistribution!
+
+  # Cognitive health assessment
+  assessCognitiveHealth(tenant: Tenant!): CognitiveHealthAssessment!
+}
+
+extend type Mutation {
+  # === COGNITIVE CONFIGURATION ===
+
+  # Configure cognitive synthesis engine
+  configureCognitiveSynthesis(
+    tenant: Tenant!,
+    config: CognitiveSynthesisConfig!
+  ): MutationResult!
+
+  # Configure multi-modal processing
+  configureMultiModalProcessing(
+    tenant: Tenant!,
+    config: MultiModalConfig!
+  ): MutationResult!
+
+  # Configure federated learning
+  configureFederatedLearning(
+    tenant: Tenant!,
+    config: FederatedLearningConfig!
+  ): MutationResult!
+
+  # Configure cognitive memory
+  configureCognitiveMemory(
+    tenant: Tenant!,
+    config: CognitiveMemoryConfig!
+  ): MutationResult!
+
+  # Configure adaptive architecture
+  configureAdaptiveArchitecture(
+    tenant: Tenant!,
+    config: AdaptiveArchitectureConfig!
+  ): MutationResult!
+
+  # === COGNITIVE OPERATIONS ===
+
+  # Start multi-modal processing session
+  startMultiModalSession(
+    tenant: Tenant!,
+    sessionConfig: MultiModalSessionConfig!
+  ): MultiModalSession!
+
+  # Start federated learning session
+  startFederatedLearningSession(
+    tenant: Tenant!,
+    participants: [FederatedParticipant!]!,
+    sessionConfig: FederatedLearningSessionConfig!
+  ): FederatedLearningSession!
+
+  # Store cognitive memory
+  storeCognitiveMemory(
+    tenant: Tenant!,
+    memoryData: CognitiveMemoryData!,
+    memoryType: CognitiveMemoryType!
+  ): CognitiveMemoryHandle!
+
+  # Trigger cognitive adaptation
+  triggerCognitiveAdaptation(
+    tenant: Tenant!,
+    adaptationTrigger: AdaptationTrigger!
+  ): AdaptationResult!
+
+  # === COGNITIVE LEARNING ===
+
+  # Submit learning feedback
+  submitLearningFeedback(
+    tenant: Tenant!,
+    sessionId: String!,
+    feedback: LearningFeedback!
+  ): MutationResult!
+
+  # Update cognitive model
+  updateCognitiveModel(
+    tenant: Tenant!,
+    modelId: String!,
+    updateData: ModelUpdateData!
+  ): ModelUpdateResult!
+
+  # Consolidate cognitive memory
+  consolidateCognitiveMemory(
+    tenant: Tenant!,
+    consolidationConfig: MemoryConsolidationConfig
+  ): MemoryConsolidationResult!
+
+  # === COGNITIVE CONTROL ===
+
+  # Adjust cognitive load
+  adjustCognitiveLoad(
+    tenant: Tenant!,
+    loadAdjustment: CognitiveLoadAdjustment!
+  ): MutationResult!
+
+  # Redirect cognitive attention
+  redirectCognitiveAttention(
+    tenant: Tenant!,
+    attentionRedirection: AttentionRedirection!
+  ): MutationResult!
+
+  # Emergency cognitive shutdown
+  emergencyCognitiveShutdown(
+    tenant: Tenant!,
+    shutdownReason: String!,
+    preserveMemory: Boolean! = true
+  ): MutationResult!
+}
+
+extend type Subscription {
+  # Real-time cognitive processing updates
+  cognitiveProcessingUpdates(tenant: Tenant!): CognitiveProcessingUpdate!
+
+  # Multi-modal session updates
+  multiModalSessionUpdates(tenant: Tenant!, sessionId: String!): MultiModalSessionUpdate!
+
+  # Federated learning progress
+  federatedLearningProgress(tenant: Tenant!, sessionId: String!): FederatedLearningProgress!
+
+  # Cognitive load changes
+  cognitiveLoadChanges(tenant: Tenant!): CognitiveLoadChange!
+
+  # Attention shifts
+  attentionShifts(tenant: Tenant!): AttentionShift!
+
+  # Cognitive adaptation events
+  cognitiveAdaptationEvents(tenant: Tenant!): CognitiveAdaptationEvent!
+}
+
+# === CORE TYPES ===
+
+type CognitiveProcessingStatus {
+  enabled: Boolean!
+  version: String!
+  multiModalEnabled: Boolean!
+  federatedLearningEnabled: Boolean!
+  adaptiveArchitectureEnabled: Boolean!
+  cognitiveMemoryEnabled: Boolean!
+  currentSessions: Int!
+  totalProcessedInputs: BigInt!
+  averageProcessingTime: Float!
+  cognitiveLoad: Float!
+  healthStatus: CognitiveHealthStatus!
+  lastUpdated: DateTime!
+}
+
+enum CognitiveHealthStatus {
+  OPTIMAL
+  GOOD
+  DEGRADED
+  CRITICAL
+  OFFLINE
+}
+
+# === MULTI-MODAL PROCESSING ===
+
+type MultiModalCapabilities {
+  visionLanguageIntegration: Boolean!
+  audioLanguageIntegration: Boolean!
+  crossModalReasoning: Boolean!
+  contextualUnderstanding: Boolean!
+  realTimeSynthesis: Boolean!
+  supportedModalities: [ModalityType!]!
+  maxConcurrentModalities: Int!
+  processingLatency: ModalityLatencyMetrics!
+}
+
+enum ModalityType {
+  TEXT
+  IMAGE
+  AUDIO
+  VIDEO
+  STRUCTURED_DATA
+  SENSOR_DATA
+  GRAPH_DATA
+}
+
+type ModalityLatencyMetrics {
+  text: Float!
+  image: Float!
+  audio: Float!
+  video: Float!
+  structuredData: Float!
+  crossModal: Float!
+}
+
+input MultiModalInput {
+  modalityType: ModalityType!
+  data: JSON!
+  metadata: MultiModalMetadata
+  quality: InputQuality
+}
+
+input MultiModalMetadata {
+  source: String
+  timestamp: DateTime
+  confidence: Float
+  encoding: String
+  resolution: String
+  sampleRate: Int
+  channels: Int
+}
+
+enum InputQuality {
+  LOW
+  MEDIUM
+  HIGH
+  ULTRA_HIGH
+}
+
+input CognitiveContext {
+  sessionId: String
+  userId: String
+  taskType: CognitiveTaskType
+  priority: TaskPriority
+  constraints: [CognitiveConstraint!]
+  preferences: CognitivePreferences
+}
+
+enum CognitiveTaskType {
+  REASONING
+  SYNTHESIS
+  ANALYSIS
+  GENERATION
+  TRANSLATION
+  CLASSIFICATION
+  SUMMARIZATION
+  QUESTION_ANSWERING
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+  EMERGENCY
+}
+
+input CognitiveConstraint {
+  type: ConstraintType!
+  value: JSON!
+  strict: Boolean! = false
+}
+
+enum ConstraintType {
+  TIME_LIMIT
+  RESOURCE_LIMIT
+  QUALITY_THRESHOLD
+  PRIVACY_LEVEL
+  ACCURACY_REQUIREMENT
+  RESPONSE_FORMAT
+}
+
+input CognitivePreferences {
+  explanationLevel: ExplanationLevel
+  responseFormat: ResponseFormat
+  languagePreference: String
+  culturalContext: String
+  personalizedOutput: Boolean
+}
+
+enum ExplanationLevel {
+  NONE
+  BRIEF
+  DETAILED
+  COMPREHENSIVE
+  STEP_BY_STEP
+}
+
+enum ResponseFormat {
+  TEXT
+  STRUCTURED
+  VISUAL
+  AUDIO
+  MULTIMODAL
+}
+
+type MultiModalReasoningResult {
+  resultId: String!
+  reasoning: [ReasoningStep!]!
+  confidence: Float!
+  modalities: [ModalityType!]!
+  processingTime: Float!
+  explanation: String
+  evidenceSources: [EvidenceSource!]!
+  qualityMetrics: QualityMetrics!
+}
+
+type ReasoningStep {
+  stepId: String!
+  description: String!
+  inputModalities: [ModalityType!]!
+  outputModality: ModalityType!
+  confidence: Float!
+  processingTime: Float!
+  intermediateResults: JSON
+}
+
+type EvidenceSource {
+  sourceId: String!
+  modalityType: ModalityType!
+  relevanceScore: Float!
+  confidenceContribution: Float!
+  description: String
+}
+
+type QualityMetrics {
+  accuracy: Float!
+  coherence: Float!
+  completeness: Float!
+  relevance: Float!
+  efficiency: Float!
+  overallQuality: Float!
+}
+
+# === FEDERATED LEARNING ===
+
+type FederatedLearningStatus {
+  enabled: Boolean!
+  activeParticipants: Int!
+  totalParticipants: Int!
+  activeSessions: Int!
+  totalSessions: Int!
+  averageAccuracy: Float!
+  privacyPreservationLevel: Float!
+  collaborativeEfficiency: Float!
+  networkHealth: FederatedNetworkHealth!
+  lastSynchronization: DateTime
+}
+
+type FederatedNetworkHealth {
+  overallHealth: Float!
+  participantConnectivity: Float!
+  dataQuality: Float!
+  trainingStability: Float!
+  privacyCompliance: Float!
+  performanceConsistency: Float!
+}
+
+input FederatedParticipant {
+  participantId: String!
+  organizationId: String
+  capabilities: [String!]!
+  privacyLevel: PrivacyLevel!
+  resourceContribution: ResourceContribution!
+  trustScore: Float
+}
+
+enum PrivacyLevel {
+  PUBLIC
+  CONFIDENTIAL
+  SECRET
+  TOP_SECRET
+  SOVEREIGN
+}
+
+input ResourceContribution {
+  computePower: Float!
+  memoryCapacity: Float!
+  storageCapacity: Float!
+  networkBandwidth: Float!
+  availabilityHours: Int!
+}
+
+input FederatedLearningSessionConfig {
+  sessionName: String!
+  modelType: ModelType!
+  trainingObjective: TrainingObjective!
+  privacyMechanism: PrivacyMechanism!
+  aggregationStrategy: AggregationStrategy!
+  maxRounds: Int!
+  convergenceThreshold: Float!
+  participantSelection: ParticipantSelectionStrategy!
+}
+
+enum ModelType {
+  NEURAL_NETWORK
+  TRANSFORMER
+  CONVOLUTIONAL
+  RECURRENT
+  GRAPH_NEURAL_NETWORK
+  ENSEMBLE
+}
+
+enum TrainingObjective {
+  CLASSIFICATION
+  REGRESSION
+  GENERATION
+  REPRESENTATION_LEARNING
+  REINFORCEMENT_LEARNING
+  MULTI_TASK_LEARNING
+}
+
+enum PrivacyMechanism {
+  DIFFERENTIAL_PRIVACY
+  HOMOMORPHIC_ENCRYPTION
+  SECURE_MULTIPARTY_COMPUTATION
+  ZERO_KNOWLEDGE_PROOFS
+  FEDERATED_AVERAGING
+}
+
+enum AggregationStrategy {
+  FEDERATED_AVERAGING
+  WEIGHTED_AGGREGATION
+  SECURE_AGGREGATION
+  ADAPTIVE_AGGREGATION
+  PERSONALIZED_AGGREGATION
+}
+
+enum ParticipantSelectionStrategy {
+  RANDOM
+  PERFORMANCE_BASED
+  RESOURCE_BASED
+  DIVERSITY_BASED
+  TRUST_BASED
+  HYBRID
+}
+
+type FederatedLearningSession {
+  sessionId: String!
+  status: SessionStatus!
+  participants: [FederatedParticipant!]!
+  currentRound: Int!
+  totalRounds: Int!
+  modelAccuracy: Float!
+  privacyBudget: Float!
+  estimatedCompletion: DateTime
+  metrics: FederatedSessionMetrics!
+}
+
+enum SessionStatus {
+  INITIALIZING
+  TRAINING
+  AGGREGATING
+  EVALUATING
+  COMPLETED
+  FAILED
+  PAUSED
+}
+
+type FederatedSessionMetrics {
+  roundsCompleted: Int!
+  averageParticipantAccuracy: Float!
+  globalModelAccuracy: Float!
+  convergenceRate: Float!
+  privacyLoss: Float!
+  communicationCost: Float!
+  computationalCost: Float!
+}
+
+# === COGNITIVE MEMORY SYSTEM ===
+
+type CognitiveMemoryStatus {
+  enabled: Boolean!
+  workingMemoryEnabled: Boolean!
+  episodicMemoryEnabled: Boolean!
+  semanticMemoryEnabled: Boolean!
+  memoryCapacity: MemoryCapacityStatus!
+  memoryUtilization: MemoryUtilizationStatus!
+  consolidationStatus: ConsolidationStatus!
+  retrievalPerformance: RetrievalPerformanceStatus!
+}
+
+type MemoryCapacityStatus {
+  workingMemoryCapacity: Float!
+  episodicMemoryCapacity: Float!
+  semanticMemoryCapacity: Float!
+  totalCapacity: Float!
+  availableCapacity: Float!
+}
+
+type MemoryUtilizationStatus {
+  workingMemoryUtilization: Float!
+  episodicMemoryUtilization: Float!
+  semanticMemoryUtilization: Float!
+  overallUtilization: Float!
+}
+
+type ConsolidationStatus {
+  lastConsolidation: DateTime
+  consolidationEfficiency: Float!
+  pendingConsolidations: Int!
+  consolidationBacklog: Int!
+}
+
+type RetrievalPerformanceStatus {
+  averageRetrievalTime: Float!
+  retrievalAccuracy: Float!
+  cacheHitRate: Float!
+  memoryFragmentation: Float!
+}
+
+enum CognitiveMemoryType {
+  WORKING_MEMORY
+  EPISODIC_MEMORY
+  SEMANTIC_MEMORY
+  PROCEDURAL_MEMORY
+  ASSOCIATIVE_MEMORY
+}
+
+input CognitiveMemoryData {
+  content: JSON!
+  encoding: MemoryEncoding!
+  importance: Float!
+  context: MemoryContext!
+  associations: [MemoryAssociation!]
+  retention: MemoryRetention!
+}
+
+enum MemoryEncoding {
+  RAW
+  COMPRESSED
+  SEMANTIC
+  EPISODIC
+  PROCEDURAL
+  MULTIMODAL
+}
+
+input MemoryContext {
+  temporal: TemporalContext
+  spatial: SpatialContext
+  conceptual: ConceptualContext
+  emotional: EmotionalContext
+}
+
+input TemporalContext {
+  timestamp: DateTime!
+  duration: Duration
+  frequency: String
+  temporalRelations: [String!]
+}
+
+input SpatialContext {
+  location: String
+  coordinates: [Float!]
+  spatialRelations: [String!]
+  scale: SpatialScale
+}
+
+enum SpatialScale {
+  MICROSCOPIC
+  LOCAL
+  REGIONAL
+  GLOBAL
+  COSMIC
+}
+
+input ConceptualContext {
+  domain: String!
+  concepts: [String!]!
+  conceptualRelations: [ConceptualRelation!]
+  abstractionLevel: Int!
+}
+
+input ConceptualRelation {
+  fromConcept: String!
+  toConcept: String!
+  relationType: String!
+  strength: Float!
+}
+
+input EmotionalContext {
+  emotionalValence: Float
+  emotionalArousal: Float
+  emotionalCategories: [String!]
+  emotionalIntensity: Float
+}
+
+input MemoryAssociation {
+  associatedMemoryId: String!
+  associationType: AssociationType!
+  strength: Float!
+  bidirectional: Boolean! = true
+}
+
+enum AssociationType {
+  CAUSAL
+  TEMPORAL
+  SPATIAL
+  CONCEPTUAL
+  SIMILARITY
+  CONTRAST
+  HIERARCHICAL
+}
+
+input MemoryRetention {
+  importance: Float!
+  decayRate: Float!
+  reinforcements: Int!
+  lastAccess: DateTime
+  expirationPolicy: ExpirationPolicy!
+}
+
+enum ExpirationPolicy {
+  NEVER_EXPIRE
+  TIME_BASED
+  ACCESS_BASED
+  IMPORTANCE_BASED
+  HYBRID
+}
+
+type CognitiveMemoryHandle {
+  memoryId: String!
+  memoryType: CognitiveMemoryType!
+  createdAt: DateTime!
+  lastAccessed: DateTime
+  accessCount: Int!
+  importance: Float!
+  status: MemoryStatus!
+}
+
+enum MemoryStatus {
+  ACTIVE
+  CONSOLIDATING
+  CONSOLIDATED
+  ARCHIVED
+  EXPIRED
+  CORRUPTED
+}
+
+input CognitiveMemoryQuery {
+  queryType: MemoryQueryType!
+  searchTerms: [String!]
+  contextFilters: MemoryContextFilters
+  temporalRange: TemporalRange
+  memoryTypes: [CognitiveMemoryType!]
+  minImportance: Float
+  maxResults: Int! = 100
+  includeAssociations: Boolean! = false
+}
+
+enum MemoryQueryType {
+  EXACT_MATCH
+  SEMANTIC_SEARCH
+  ASSOCIATIVE_RECALL
+  EPISODIC_RETRIEVAL
+  TEMPORAL_SEARCH
+  CONTEXT_BASED
+}
+
+input MemoryContextFilters {
+  domains: [String!]
+  concepts: [String!]
+  locations: [String!]
+  emotionalCategories: [String!]
+  minRelevance: Float
+}
+
+input TemporalRange {
+  startTime: DateTime
+  endTime: DateTime
+  relativePeriod: String
+}
+
+type CognitiveMemoryResult {
+  queryId: String!
+  results: [MemoryResult!]!
+  totalResults: Int!
+  retrievalTime: Float!
+  relevanceScores: [Float!]!
+  associativeConnections: [AssociativeConnection!]!
+}
+
+type MemoryResult {
+  memoryHandle: CognitiveMemoryHandle!
+  content: JSON!
+  relevanceScore: Float!
+  contextMatch: Float!
+  temporalRelevance: Float!
+  associations: [MemoryAssociation!]!
+}
+
+type AssociativeConnection {
+  fromMemoryId: String!
+  toMemoryId: String!
+  connectionStrength: Float!
+  connectionPath: [String!]!
+  pathLength: Int!
+}
+
+# === ADAPTIVE ARCHITECTURE ===
+
+type AdaptiveArchitectureStatus {
+  enabled: Boolean!
+  dynamicReconfigurationEnabled: Boolean!
+  performanceOptimizationEnabled: Boolean!
+  resourceAwareAdaptationEnabled: Boolean!
+  taskSpecificOptimizationEnabled: Boolean!
+  currentArchitecture: CognitiveArchitecture!
+  adaptationHistory: [AdaptationEvent!]!
+  performanceMetrics: ArchitecturePerformanceMetrics!
+}
+
+type CognitiveArchitecture {
+  architectureId: String!
+  architectureName: String!
+  version: String!
+  components: [ArchitectureComponent!]!
+  connections: [ComponentConnection!]!
+  configuration: ArchitectureConfiguration!
+  performance: ArchitecturePerformance!
+}
+
+type ArchitectureComponent {
+  componentId: String!
+  componentName: String!
+  componentType: ComponentType!
+  status: ComponentStatus!
+  configuration: JSON!
+  resourceUsage: ResourceUsage!
+  performance: ComponentPerformance!
+}
+
+enum ComponentType {
+  INPUT_PROCESSOR
+  ATTENTION_MODULE
+  WORKING_MEMORY
+  EPISODIC_MEMORY
+  SEMANTIC_MEMORY
+  REASONING_ENGINE
+  SYNTHESIS_MODULE
+  OUTPUT_GENERATOR
+  ADAPTATION_CONTROLLER
+  MONITORING_AGENT
+}
+
+enum ComponentStatus {
+  ACTIVE
+  INACTIVE
+  ADAPTING
+  OPTIMIZING
+  ERROR
+  MAINTENANCE
+}
+
+type ResourceUsage {
+  cpuUtilization: Float!
+  memoryUtilization: Float!
+  networkUtilization: Float!
+  storageUtilization: Float!
+  energyConsumption: Float!
+}
+
+type ComponentPerformance {
+  throughput: Float!
+  latency: Float!
+  accuracy: Float!
+  efficiency: Float!
+  reliability: Float!
+}
+
+type ComponentConnection {
+  connectionId: String!
+  sourceComponentId: String!
+  targetComponentId: String!
+  connectionType: ConnectionType!
+  bandwidth: Float!
+  latency: Float!
+  reliability: Float!
+  configuration: ConnectionConfiguration!
+}
+
+enum ConnectionType {
+  DATA_FLOW
+  CONTROL_FLOW
+  FEEDBACK_LOOP
+  ATTENTION_SIGNAL
+  MEMORY_ACCESS
+  SYNCHRONIZATION
+}
+
+type ConnectionConfiguration {
+  protocol: String!
+  compression: Boolean!
+  encryption: Boolean!
+  errorCorrection: Boolean!
+  qosSettings: QoSSettings!
+}
+
+type QoSSettings {
+  priority: Int!
+  bandwidth: Float!
+  latency: Float!
+  reliability: Float!
+  jitter: Float!
+}
+
+type ArchitectureConfiguration {
+  configurationId: String!
+  optimizationTarget: OptimizationTarget!
+  adaptationPolicy: AdaptationPolicy!
+  resourceConstraints: ResourceConstraints!
+  performanceRequirements: PerformanceRequirements!
+}
+
+enum OptimizationTarget {
+  THROUGHPUT
+  LATENCY
+  ACCURACY
+  EFFICIENCY
+  RELIABILITY
+  BALANCED
+}
+
+type AdaptationPolicy {
+  adaptationTriggers: [AdaptationTrigger!]!
+  adaptationStrategy: AdaptationStrategy!
+  adaptationFrequency: AdaptationFrequency!
+  rollbackPolicy: RollbackPolicy!
+}
+
+input AdaptationTrigger {
+  triggerType: TriggerType!
+  threshold: Float!
+  metric: String!
+  condition: TriggerCondition!
+}
+
+enum TriggerType {
+  PERFORMANCE_DEGRADATION
+  RESOURCE_EXHAUSTION
+  ERROR_RATE_INCREASE
+  WORKLOAD_CHANGE
+  USER_FEEDBACK
+  SCHEDULED
+}
+
+enum TriggerCondition {
+  GREATER_THAN
+  LESS_THAN
+  EQUAL_TO
+  NOT_EQUAL_TO
+  TREND_INCREASING
+  TREND_DECREASING
+}
+
+enum AdaptationStrategy {
+  REACTIVE
+  PROACTIVE
+  PREDICTIVE
+  HYBRID
+}
+
+enum AdaptationFrequency {
+  CONTINUOUS
+  PERIODIC
+  EVENT_DRIVEN
+  MANUAL
+}
+
+type RollbackPolicy {
+  enableRollback: Boolean!
+  rollbackConditions: [RollbackCondition!]!
+  maxRollbackAttempts: Int!
+  rollbackTimeout: Duration!
+}
+
+type RollbackCondition {
+  conditionType: String!
+  threshold: Float!
+  evaluationPeriod: Duration!
+}
+
+type ResourceConstraints {
+  maxCpuUtilization: Float!
+  maxMemoryUtilization: Float!
+  maxNetworkUtilization: Float!
+  maxStorageUtilization: Float!
+  maxEnergyConsumption: Float!
+  budgetConstraints: BudgetConstraints
+}
+
+type BudgetConstraints {
+  maxCostPerHour: Float!
+  maxCostPerDay: Float!
+  maxCostPerMonth: Float!
+  currency: String!
+}
+
+type PerformanceRequirements {
+  minThroughput: Float!
+  maxLatency: Float!
+  minAccuracy: Float!
+  minReliability: Float!
+  maxErrorRate: Float!
+}
+
+type ArchitecturePerformance {
+  overallPerformance: Float!
+  throughput: Float!
+  latency: Float!
+  accuracy: Float!
+  efficiency: Float!
+  reliability: Float!
+  scalability: Float!
+  adaptability: Float!
+}
+
+type ArchitecturePerformanceMetrics {
+  currentPerformance: ArchitecturePerformance!
+  performanceHistory: [PerformanceSnapshot!]!
+  performanceTrends: PerformanceTrends!
+  benchmarkComparisons: [BenchmarkComparison!]!
+}
+
+type PerformanceSnapshot {
+  timestamp: DateTime!
+  performance: ArchitecturePerformance!
+  configuration: String!
+  workloadCharacteristics: WorkloadCharacteristics!
+}
+
+type WorkloadCharacteristics {
+  requestRate: Float!
+  dataVolume: Float!
+  complexity: Float!
+  modalityDistribution: [ModalityDistribution!]!
+}
+
+type ModalityDistribution {
+  modality: ModalityType!
+  percentage: Float!
+}
+
+type PerformanceTrends {
+  throughputTrend: Float!
+  latencyTrend: Float!
+  accuracyTrend: Float!
+  efficiencyTrend: Float!
+  reliabilityTrend: Float!
+}
+
+type BenchmarkComparison {
+  benchmarkName: String!
+  ourPerformance: Float!
+  benchmarkPerformance: Float!
+  relativePerformance: Float!
+  performanceGap: Float!
+}
+
+type AdaptationEvent {
+  eventId: String!
+  timestamp: DateTime!
+  eventType: AdaptationEventType!
+  trigger: AdaptationTrigger!
+  adaptationApplied: AdaptationDescription!
+  performanceImpact: PerformanceImpact!
+  success: Boolean!
+  rollbackRequired: Boolean!
+}
+
+enum AdaptationEventType {
+  ARCHITECTURE_CHANGE
+  COMPONENT_OPTIMIZATION
+  CONNECTION_MODIFICATION
+  RESOURCE_REALLOCATION
+  CONFIGURATION_UPDATE
+  ROLLBACK
+}
+
+type AdaptationDescription {
+  adaptationType: String!
+  description: String!
+  componentsAffected: [String!]!
+  configurationChanges: JSON!
+  expectedImpact: String!
+}
+
+type PerformanceImpact {
+  throughputChange: Float!
+  latencyChange: Float!
+  accuracyChange: Float!
+  efficiencyChange: Float!
+  reliabilityChange: Float!
+  overallImpact: Float!
+}
+
+# === COGNITIVE SYNTHESIS ===
+
+input CognitiveSynthesisRequest {
+  synthesisType: SynthesisType!
+  inputs: [SynthesisInput!]!
+  objectives: [SynthesisObjective!]!
+  constraints: [SynthesisConstraint!]
+  preferences: SynthesisPreferences
+  quality: SynthesisQuality!
+}
+
+enum SynthesisType {
+  MULTI_MODAL_FUSION
+  CROSS_DOMAIN_INTEGRATION
+  TEMPORAL_SYNTHESIS
+  HIERARCHICAL_SYNTHESIS
+  ASSOCIATIVE_SYNTHESIS
+  CREATIVE_SYNTHESIS
+}
+
+input SynthesisInput {
+  inputId: String!
+  inputType: SynthesisInputType!
+  data: JSON!
+  weight: Float! = 1.0
+  relevance: Float! = 1.0
+  quality: Float! = 1.0
+}
+
+enum SynthesisInputType {
+  STRUCTURED_DATA
+  UNSTRUCTURED_TEXT
+  VISUAL_DATA
+  AUDIO_DATA
+  SENSOR_DATA
+  MEMORY_RECALL
+  EXTERNAL_KNOWLEDGE
+}
+
+input SynthesisObjective {
+  objectiveType: ObjectiveType!
+  priority: Float!
+  description: String!
+  successCriteria: [SuccessCriterion!]!
+}
+
+enum ObjectiveType {
+  ACCURACY_MAXIMIZATION
+  COHERENCE_OPTIMIZATION
+  CREATIVITY_ENHANCEMENT
+  EFFICIENCY_IMPROVEMENT
+  COMPREHENSIVENESS
+  NOVELTY_DISCOVERY
+}
+
+input SuccessCriterion {
+  metric: String!
+  threshold: Float!
+  weight: Float!
+}
+
+input SynthesisConstraint {
+  constraintType: SynthesisConstraintType!
+  value: JSON!
+  strictness: ConstraintStrictness!
+}
+
+enum SynthesisConstraintType {
+  TIME_CONSTRAINT
+  RESOURCE_CONSTRAINT
+  QUALITY_CONSTRAINT
+  FORMAT_CONSTRAINT
+  CONTENT_CONSTRAINT
+  ETHICAL_CONSTRAINT
+}
+
+enum ConstraintStrictness {
+  SOFT
+  MEDIUM
+  HARD
+  ABSOLUTE
+}
+
+input SynthesisPreferences {
+  outputFormat: SynthesisOutputFormat!
+  explanationDepth: ExplanationDepth!
+  creativityLevel: CreativityLevel!
+  riskTolerance: RiskTolerance!
+  diversityPreference: DiversityPreference!
+}
+
+enum SynthesisOutputFormat {
+  TEXTUAL
+  VISUAL
+  STRUCTURED
+  MULTIMODAL
+  INTERACTIVE
+}
+
+enum ExplanationDepth {
+  MINIMAL
+  SUMMARY
+  DETAILED
+  COMPREHENSIVE
+  FULL_TRACE
+}
+
+enum CreativityLevel {
+  CONSERVATIVE
+  MODERATE
+  CREATIVE
+  HIGHLY_CREATIVE
+  RADICAL
+}
+
+enum RiskTolerance {
+  RISK_AVERSE
+  CAUTIOUS
+  BALANCED
+  RISK_TOLERANT
+  RISK_SEEKING
+}
+
+enum DiversityPreference {
+  FOCUSED
+  MODERATE_DIVERSITY
+  HIGH_DIVERSITY
+  MAXIMUM_DIVERSITY
+}
+
+enum SynthesisQuality {
+  DRAFT
+  STANDARD
+  HIGH_QUALITY
+  PREMIUM
+  RESEARCH_GRADE
+}
+
+type CognitiveSynthesisResult {
+  resultId: String!
+  synthesisType: SynthesisType!
+  synthesizedOutput: SynthesizedOutput!
+  qualityAssessment: QualityAssessment!
+  explanationTrace: ExplanationTrace!
+  performanceMetrics: SynthesisPerformanceMetrics!
+  confidence: Float!
+  alternatives: [AlternativeSynthesis!]!
+}
+
+type SynthesizedOutput {
+  primaryOutput: JSON!
+  outputFormat: SynthesisOutputFormat!
+  modalities: [ModalityType!]!
+  structure: OutputStructure!
+  metadata: SynthesisMetadata!
+}
+
+type OutputStructure {
+  hierarchy: [StructureLevel!]!
+  connections: [StructureConnection!]!
+  annotations: [StructureAnnotation!]!
+}
+
+type StructureLevel {
+  levelId: String!
+  levelName: String!
+  depth: Int!
+  content: JSON!
+  importance: Float!
+}
+
+type StructureConnection {
+  sourceId: String!
+  targetId: String!
+  connectionType: String!
+  strength: Float!
+  description: String!
+}
+
+type StructureAnnotation {
+  targetId: String!
+  annotationType: String!
+  content: String!
+  confidence: Float!
+}
+
+type SynthesisMetadata {
+  creationTime: DateTime!
+  processingTime: Float!
+  resourcesUsed: ResourceUsage!
+  inputSources: [String!]!
+  synthesisPath: [String!]!
+  qualityMetrics: QualityMetrics!
+}
+
+type QualityAssessment {
+  overallQuality: Float!
+  accuracy: Float!
+  coherence: Float!
+  completeness: Float!
+  creativity: Float!
+  relevance: Float!
+  novelty: Float!
+  feasibility: Float!
+  ethicalCompliance: Float!
+}
+
+type ExplanationTrace {
+  synthesisSteps: [SynthesisStep!]!
+  decisionPoints: [DecisionPoint!]!
+  evidenceUsed: [EvidenceItem!]!
+  alternativesConsidered: [AlternativeConsidered!]!
+  rationaleBehindChoices: [ChoiceRationale!]!
+}
+
+type SynthesisStep {
+  stepId: String!
+  stepName: String!
+  description: String!
+  inputsUsed: [String!]!
+  outputGenerated: JSON!
+  reasoning: String!
+  confidence: Float!
+  processingTime: Float!
+}
+
+type DecisionPoint {
+  decisionId: String!
+  description: String!
+  options: [DecisionOption!]!
+  chosenOption: String!
+  reasoning: String!
+  confidence: Float!
+  impact: Float!
+}
+
+type DecisionOption {
+  optionId: String!
+  description: String!
+  pros: [String!]!
+  cons: [String!]!
+  expectedOutcome: String!
+  riskLevel: Float!
+}
+
+type EvidenceItem {
+  evidenceId: String!
+  source: String!
+  evidenceType: EvidenceType!
+  content: JSON!
+  reliability: Float!
+  relevance: Float!
+  weight: Float!
+}
+
+enum EvidenceType {
+  FACTUAL_DATA
+  STATISTICAL_EVIDENCE
+  EXPERT_OPINION
+  HISTORICAL_PRECEDENT
+  EXPERIMENTAL_RESULT
+  OBSERVATIONAL_DATA
+}
+
+type AlternativeConsidered {
+  alternativeId: String!
+  description: String!
+  approach: String!
+  expectedQuality: Float!
+  estimatedTime: Float!
+  resourceRequirements: Float!
+  reasonNotChosen: String!
+}
+
+type ChoiceRationale {
+  choiceId: String!
+  description: String!
+  factors: [RationaleFactor!]!
+  tradeoffs: [Tradeoff!]!
+  confidence: Float!
+  riskAssessment: String!
+}
+
+type RationaleFactor {
+  factor: String!
+  importance: Float!
+  impact: Float!
+  certainty: Float!
+  description: String!
+}
+
+type Tradeoff {
+  tradeoffType: String!
+  benefit: String!
+  cost: String!
+  netValue: Float!
+  description: String!
+}
+
+type SynthesisPerformanceMetrics {
+  totalProcessingTime: Float!
+  cpuUtilization: Float!
+  memoryUtilization: Float!
+  networkUtilization: Float!
+  throughput: Float!
+  efficiency: Float!
+  scalability: Float!
+  resourceEfficiency: Float!
+}
+
+type AlternativeSynthesis {
+  alternativeId: String!
+  synthesisApproach: String!
+  output: JSON!
+  quality: Float!
+  confidence: Float!
+  processingTime: Float!
+  resourceUsage: Float!
+  differentiatingFactors: [String!]!
+}
+
+# === PERFORMANCE AND MONITORING ===
+
+type CognitivePerformanceMetrics {
+  overallPerformance: Float!
+  multiModalPerformance: MultiModalPerformanceMetrics!
+  federatedLearningPerformance: FederatedLearningPerformanceMetrics!
+  memoryPerformance: MemoryPerformanceMetrics!
+  adaptiveArchitecturePerformance: AdaptiveArchitecturePerformanceMetrics!
+  synthesisPerformance: SynthesisPerformanceMetrics!
+  timeRange: Duration!
+  lastUpdated: DateTime!
+}
+
+type MultiModalPerformanceMetrics {
+  averageProcessingTime: Float!
+  accuracyByModality: [ModalityAccuracy!]!
+  crossModalAccuracy: Float!
+  throughput: Float!
+  resourceEfficiency: Float!
+}
+
+type ModalityAccuracy {
+  modality: ModalityType!
+  accuracy: Float!
+  confidence: Float!
+  sampleSize: Int!
+}
+
+type FederatedLearningPerformanceMetrics {
+  averageRoundTime: Float!
+  convergenceRate: Float!
+  participantRetention: Float!
+  modelAccuracyImprovement: Float!
+  privacyPreservationScore: Float!
+  communicationEfficiency: Float!
+}
+
+type MemoryPerformanceMetrics {
+  averageRetrievalTime: Float!
+  retrievalAccuracy: Float!
+  memoryUtilization: Float!
+  consolidationEfficiency: Float!
+  forgettingRate: Float!
+  associativeRecallAccuracy: Float!
+}
+
+type CognitiveLoadStatus {
+  currentLoad: Float!
+  maxCapacity: Float!
+  utilizationPercentage: Float!
+  loadDistribution: LoadDistribution!
+  bottlenecks: [CognitiveBottleneck!]!
+  projectedLoad: [LoadProjection!]!
+}
+
+type LoadDistribution {
+  processingLoad: Float!
+  memoryLoad: Float!
+  attentionLoad: Float!
+  learningLoad: Float!
+  adaptationLoad: Float!
+}
+
+type CognitiveBottleneck {
+  componentId: String!
+  componentName: String!
+  bottleneckType: BottleneckType!
+  severity: Float!
+  impact: String!
+  suggestedResolution: String!
+}
+
+enum BottleneckType {
+  PROCESSING_CAPACITY
+  MEMORY_BANDWIDTH
+  ATTENTION_LIMITATION
+  LEARNING_RATE
+  ADAPTATION_SPEED
+  NETWORK_LATENCY
+}
+
+type LoadProjection {
+  timeHorizon: Duration!
+  projectedLoad: Float!
+  confidence: Float!
+  factors: [LoadFactor!]!
+}
+
+type LoadFactor {
+  factor: String!
+  contribution: Float!
+  trend: String!
+  certainty: Float!
+}
+
+type AttentionDistribution {
+  currentFocus: [AttentionFocus!]!
+  attentionHistory: [AttentionSnapshot!]!
+  attentionEfficiency: Float!
+  focusStability: Float!
+  attentionSwitchingCost: Float!
+}
+
+type AttentionFocus {
+  focusId: String!
+  target: String!
+  intensity: Float!
+  duration: Duration!
+  importance: Float!
+  modalityType: ModalityType!
+}
+
+type AttentionSnapshot {
+  timestamp: DateTime!
+  focuses: [AttentionFocus!]!
+  overallAttention: Float!
+  attentionDistributionEntropy: Float!
+}
+
+input AttentionRedirection {
+  targetFocus: String!
+  intensity: Float!
+  duration: Duration
+  priority: TaskPriority!
+  reason: String!
+}
+
+type CognitiveHealthAssessment {
+  overallHealth: Float!
+  componentHealth: [ComponentHealthStatus!]!
+  systemIntegrity: Float!
+  performanceDegradation: Float!
+  errorRates: [ErrorRateMetric!]!
+  recommendations: [HealthRecommendation!]!
+  lastAssessment: DateTime!
+}
+
+type ComponentHealthStatus {
+  componentId: String!
+  componentName: String!
+  healthScore: Float!
+  status: ComponentStatus!
+  issues: [ComponentIssue!]!
+  uptime: Float!
+  performanceIndex: Float!
+}
+
+type ComponentIssue {
+  issueId: String!
+  issueType: IssueType!
+  severity: IssueSeverity!
+  description: String!
+  impact: String!
+  suggestedFix: String!
+  detectedAt: DateTime!
+}
+
+enum IssueType {
+  PERFORMANCE_DEGRADATION
+  MEMORY_LEAK
+  CONNECTION_FAILURE
+  CONFIGURATION_ERROR
+  RESOURCE_EXHAUSTION
+  ALGORITHM_FAILURE
+}
+
+enum IssueSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+  EMERGENCY
+}
+
+type ErrorRateMetric {
+  errorType: String!
+  errorRate: Float!
+  errorCount: Int!
+  timeWindow: Duration!
+  trend: String!
+}
+
+type HealthRecommendation {
+  recommendationId: String!
+  priority: TaskPriority!
+  category: RecommendationCategory!
+  title: String!
+  description: String!
+  expectedImpact: String!
+  implementationEffort: ImplementationEffort!
+  timeframe: Duration!
+}
+
+enum RecommendationCategory {
+  PERFORMANCE_OPTIMIZATION
+  RESOURCE_ALLOCATION
+  CONFIGURATION_TUNING
+  CAPACITY_PLANNING
+  ERROR_RESOLUTION
+  PREVENTIVE_MAINTENANCE
+}
+
+enum ImplementationEffort {
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
+}
+
+# === REAL-TIME UPDATES ===
+
+type CognitiveProcessingUpdate {
+  updateType: CognitiveUpdateType!
+  timestamp: DateTime!
+  sessionId: String
+  componentId: String
+  data: JSON!
+  severity: UpdateSeverity!
+}
+
+enum CognitiveUpdateType {
+  STATUS_CHANGE
+  PERFORMANCE_UPDATE
+  ERROR_OCCURRED
+  ADAPTATION_TRIGGERED
+  MEMORY_UPDATED
+  LEARNING_COMPLETED
+}
+
+enum UpdateSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+type MultiModalSessionUpdate {
+  sessionId: String!
+  updateType: SessionUpdateType!
+  timestamp: DateTime!
+  progress: Float!
+  currentStage: String!
+  results: JSON
+  errors: [String!]
+}
+
+enum SessionUpdateType {
+  STARTED
+  PROGRESS_UPDATE
+  STAGE_COMPLETED
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+type FederatedLearningProgress {
+  sessionId: String!
+  currentRound: Int!
+  totalRounds: Int!
+  participantStatus: [ParticipantStatus!]!
+  globalAccuracy: Float!
+  estimatedCompletion: DateTime
+  progressPercentage: Float!
+}
+
+type ParticipantStatus {
+  participantId: String!
+  status: ParticipantState!
+  contribution: Float!
+  lastUpdate: DateTime!
+}
+
+enum ParticipantState {
+  TRAINING
+  UPLOADING
+  WAITING
+  COMPLETED
+  FAILED
+  DISCONNECTED
+}
+
+type CognitiveLoadChange {
+  previousLoad: Float!
+  currentLoad: Float!
+  change: Float!
+  changeType: LoadChangeType!
+  cause: String!
+  timestamp: DateTime!
+}
+
+enum LoadChangeType {
+  INCREASE
+  DECREASE
+  SPIKE
+  DROP
+  FLUCTUATION
+}
+
+type AttentionShift {
+  fromFocus: String!
+  toFocus: String!
+  shiftReason: ShiftReason!
+  shiftCost: Float!
+  newIntensity: Float!
+  timestamp: DateTime!
+}
+
+enum ShiftReason {
+  PRIORITY_CHANGE
+  TASK_COMPLETION
+  INTERRUPTION
+  ADAPTIVE_OPTIMIZATION
+  USER_REQUEST
+  SYSTEM_REQUIREMENT
+}
+
+type CognitiveAdaptationEvent {
+  eventId: String!
+  adaptationType: AdaptationEventType!
+  trigger: AdaptationTrigger!
+  componentsAffected: [String!]!
+  expectedImpact: String!
+  status: AdaptationStatus!
+  timestamp: DateTime!
+}
+
+enum AdaptationStatus {
+  INITIATED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  ROLLED_BACK
+}
+
+# === CONFIGURATION TYPES ===
+
+input CognitiveSynthesisConfig {
+  enabled: Boolean! = true
+  maxConcurrentSessions: Int! = 10
+  defaultQuality: SynthesisQuality! = STANDARD
+  timeoutSeconds: Int! = 300
+  resourceLimits: ResourceLimits!
+  qualityThresholds: QualityThresholds!
+}
+
+input ResourceLimits {
+  maxCpuCores: Int!
+  maxMemoryGb: Float!
+  maxStorageGb: Float!
+  maxNetworkMbps: Float!
+}
+
+input QualityThresholds {
+  minAccuracy: Float! = 0.8
+  minCoherence: Float! = 0.7
+  minCompleteness: Float! = 0.75
+  minRelevance: Float! = 0.8
+}
+
+input MultiModalConfig {
+  enabledModalities: [ModalityType!]!
+  maxConcurrentModalities: Int! = 5
+  processingTimeouts: ModalityTimeouts!
+  qualitySettings: ModalityQualitySettings!
+  crossModalSettings: CrossModalSettings!
+}
+
+input ModalityTimeouts {
+  textProcessing: Int! = 30
+  imageProcessing: Int! = 60
+  audioProcessing: Int! = 120
+  videoProcessing: Int! = 300
+}
+
+input ModalityQualitySettings {
+  textQuality: InputQuality! = HIGH
+  imageQuality: InputQuality! = HIGH
+  audioQuality: InputQuality! = MEDIUM
+  videoQuality: InputQuality! = MEDIUM
+}
+
+input CrossModalSettings {
+  enableCrossModalReasoning: Boolean! = true
+  crossModalTimeout: Int! = 180
+  maxCrossModalComplexity: Float! = 0.8
+}
+
+input FederatedLearningConfig {
+  enabled: Boolean! = true
+  maxParticipants: Int! = 100
+  minParticipants: Int! = 2
+  defaultPrivacyLevel: PrivacyLevel! = CONFIDENTIAL
+  aggregationStrategy: AggregationStrategy! = FEDERATED_AVERAGING
+  communicationSettings: CommunicationSettings!
+}
+
+input CommunicationSettings {
+  maxRoundTime: Int! = 600
+  compressionEnabled: Boolean! = true
+  encryptionEnabled: Boolean! = true
+  heartbeatInterval: Int! = 30
+}
+
+input CognitiveMemoryConfig {
+  enabledMemoryTypes: [CognitiveMemoryType!]!
+  capacityLimits: MemoryCapacityLimits!
+  consolidationSettings: ConsolidationSettings!
+  retentionPolicies: RetentionPolicies!
+}
+
+input MemoryCapacityLimits {
+  workingMemoryMb: Float! = 1000
+  episodicMemoryMb: Float! = 10000
+  semanticMemoryMb: Float! = 50000
+  maxTotalMemoryMb: Float! = 100000
+}
+
+input ConsolidationSettings {
+  autoConsolidation: Boolean! = true
+  consolidationInterval: Int! = 3600
+  consolidationThreshold: Float! = 0.8
+}
+
+input RetentionPolicies {
+  defaultRetentionDays: Int! = 365
+  importanceThreshold: Float! = 0.5
+  accessThreshold: Int! = 10
+}
+
+input AdaptiveArchitectureConfig {
+  enabled: Boolean! = true
+  adaptationStrategy: AdaptationStrategy! = HYBRID
+  adaptationFrequency: AdaptationFrequency! = PERIODIC
+  performanceThresholds: PerformanceThresholds!
+  adaptationLimits: AdaptationLimits!
+}
+
+input PerformanceThresholds {
+  minThroughput: Float! = 100
+  maxLatency: Float! = 1000
+  minAccuracy: Float! = 0.9
+  minEfficiency: Float! = 0.7
+}
+
+input AdaptationLimits {
+  maxAdaptationsPerHour: Int! = 10
+  maxComponentChanges: Int! = 5
+  rollbackTimeoutMinutes: Int! = 15
+}
+
+input MultiModalSessionConfig {
+  sessionName: String!
+  inputModalities: [ModalityType!]!
+  outputModalities: [ModalityType!]!
+  quality: SynthesisQuality! = STANDARD
+  timeoutSeconds: Int! = 300
+  enableRealTimeUpdates: Boolean! = true
+}
+
+input CognitiveLoadAdjustment {
+  targetLoad: Float!
+  adjustmentStrategy: LoadAdjustmentStrategy!
+  timeframe: Duration!
+  priority: TaskPriority! = MEDIUM
+}
+
+enum LoadAdjustmentStrategy {
+  GRADUAL
+  IMMEDIATE
+  OPTIMIZED
+  CONSERVATIVE
+}
+
+input MemoryConsolidationConfig {
+  consolidationType: ConsolidationType!
+  targetMemoryTypes: [CognitiveMemoryType!]!
+  consolidationDepth: ConsolidationDepth!
+  preserveAssociations: Boolean! = true
+}
+
+enum ConsolidationType {
+  FULL_CONSOLIDATION
+  SELECTIVE_CONSOLIDATION
+  IMPORTANCE_BASED
+  ACCESS_BASED
+}
+
+enum ConsolidationDepth {
+  SURFACE
+  MODERATE
+  DEEP
+  COMPREHENSIVE
+}
+
+# Reuse existing types from v0.4.0 and v0.4.1
+scalar Tenant
+scalar DateTime
+scalar Duration
+scalar BigInt
+scalar JSON
+
+type MutationResult {
+  ok: Boolean!
+  audit: String
+}
+
+input LearningFeedback {
+  feedbackType: String!
+  rating: Float!
+  comments: String
+  suggestions: [String!]
+}
+
+input ModelUpdateData {
+  updateType: String!
+  data: JSON!
+  version: String!
+}

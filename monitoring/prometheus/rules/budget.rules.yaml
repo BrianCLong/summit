@@ -1,0 +1,228 @@
+# MC Platform v0.3.4 - Budget Guard Monitoring Rules
+# Prometheus rules for budget enforcement and auto-tuning
+
+groups:
+  - name: budget_guard
+    interval: 30s
+    rules:
+      # Budget utilization recording rules
+      - record: budget:daily_utilization:rate5m
+        expr: avg_over_time(budget_daily_utilization_percent[5m])
+        labels:
+          component: "budget_guard"
+
+      - record: budget:monthly_utilization:rate5m
+        expr: avg_over_time(budget_monthly_utilization_percent[5m])
+        labels:
+          component: "budget_guard"
+
+      - record: budget:enforcement_latency:p95
+        expr: histogram_quantile(0.95, rate(budget_enforcement_duration_seconds_bucket[5m]))
+        labels:
+          component: "budget_guard"
+
+      # Budget threshold alerts
+      - alert: BudgetWarning80Percent
+        expr: budget:daily_utilization:rate5m >= 80 or budget:monthly_utilization:rate5m >= 80
+        for: 2m
+        labels:
+          severity: warning
+          component: "budget_guard"
+          team: "finance"
+        annotations:
+          summary: "Budget utilization high for {{ $labels.tenant }}"
+          description: "Tenant {{ $labels.tenant }} has consumed {{ $value }}% of budget"
+          runbook_url: "https://docs.mc-platform.com/runbooks/budget-management"
+
+      - alert: BudgetCritical90Percent
+        expr: budget:daily_utilization:rate5m >= 90 or budget:monthly_utilization:rate5m >= 90
+        for: 1m
+        labels:
+          severity: critical
+          component: "budget_guard"
+          team: "finance"
+          pager_duty: "true"
+        annotations:
+          summary: "Budget nearly exhausted for {{ $labels.tenant }}"
+          description: "CRITICAL: Tenant {{ $labels.tenant }} has consumed {{ $value }}% of budget"
+          runbook_url: "https://docs.mc-platform.com/runbooks/budget-emergency"
+
+      - alert: BudgetExhausted
+        expr: budget_daily_remaining <= 0 or budget_monthly_remaining <= 0
+        for: 0s
+        labels:
+          severity: critical
+          component: "budget_guard"
+          team: "finance"
+          pager_duty: "true"
+        annotations:
+          summary: "Budget exhausted for {{ $labels.tenant }}"
+          description: "Tenant {{ $labels.tenant }} has no remaining budget - services blocked"
+          runbook_url: "https://docs.mc-platform.com/runbooks/budget-exhausted"
+
+      # Enforcement performance alerts
+      - alert: BudgetEnforcementLatencyHigh
+        expr: budget:enforcement_latency:p95 > 120
+        for: 5m
+        labels:
+          severity: warning
+          component: "budget_guard"
+          team: "platform"
+        annotations:
+          summary: "Budget enforcement latency exceeds target"
+          description: "P95 enforcement latency is {{ $value }}s (target: ≤120s)"
+          runbook_url: "https://docs.mc-platform.com/runbooks/performance-tuning"
+
+      - alert: BudgetEnforcementFailure
+        expr: increase(budget_enforcement_failures_total[5m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          component: "budget_guard"
+          team: "platform"
+          pager_duty: "true"
+        annotations:
+          summary: "Budget enforcement failures detected"
+          description: "{{ $value }} budget enforcement failures in last 5 minutes"
+          runbook_url: "https://docs.mc-platform.com/runbooks/budget-enforcement-incident"
+
+  - name: budget_ml_monitoring
+    interval: 60s
+    rules:
+      # ML prediction accuracy tracking
+      - record: budget:ml_prediction_accuracy:rate1h
+        expr: avg_over_time(budget_ml_prediction_accuracy_percent[1h])
+        labels:
+          component: "budget_guard"
+
+      - record: budget:anomaly_detection_rate:rate1h
+        expr: rate(budget_anomaly_detections_total[1h])
+        labels:
+          component: "budget_guard"
+
+      # Auto-tuning effectiveness
+      - record: budget:auto_tune_success:rate1h
+        expr: rate(budget_auto_tune_successes_total[1h]) / rate(budget_auto_tune_attempts_total[1h])
+        labels:
+          component: "budget_guard"
+
+      # ML model performance alerts
+      - alert: BudgetMLPredictionAccuracyLow
+        expr: budget:ml_prediction_accuracy:rate1h < 85
+        for: 10m
+        labels:
+          severity: warning
+          component: "budget_guard"
+          team: "ml"
+        annotations:
+          summary: "Budget ML prediction accuracy degraded"
+          description: "ML prediction accuracy is {{ $value }}% (target: ≥85%)"
+          runbook_url: "https://docs.mc-platform.com/runbooks/ml-model-retraining"
+
+      - alert: BudgetAnomalyDetectionSpike
+        expr: budget:anomaly_detection_rate:rate1h > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: "budget_guard"
+          team: "security"
+        annotations:
+          summary: "High rate of budget anomalies detected"
+          description: "Anomaly detection rate is {{ $value }}/hour (threshold: 0.1/hour)"
+          runbook_url: "https://docs.mc-platform.com/runbooks/anomaly-investigation"
+
+      - alert: BudgetAutoTuneFailureRate
+        expr: budget:auto_tune_success:rate1h < 0.9
+        for: 15m
+        labels:
+          severity: warning
+          component: "budget_guard"
+          team: "platform"
+        annotations:
+          summary: "Budget auto-tuning success rate low"
+          description: "Auto-tune success rate is {{ $value }} (target: ≥0.9)"
+          runbook_url: "https://docs.mc-platform.com/runbooks/auto-tune-debugging"
+
+  - name: budget_fairness
+    interval: 30s
+    rules:
+      # Cross-tenant budget fairness monitoring
+      - record: budget:tenant_usage_ratio:rate5m
+        expr: |
+          (
+            budget_daily_spent by (tenant) /
+            budget_daily_limit by (tenant)
+          ) / scalar(
+            avg(budget_daily_spent / budget_daily_limit)
+          )
+        labels:
+          component: "budget_guard"
+
+      - record: budget:cost_per_query:rate5m
+        expr: rate(budget_total_spent[5m]) / rate(budget_query_count_total[5m])
+        labels:
+          component: "budget_guard"
+
+      # Budget efficiency alerts
+      - alert: BudgetTenantFairnessImbalance
+        expr: budget:tenant_usage_ratio:rate5m > 2.0 or budget:tenant_usage_ratio:rate5m < 0.5
+        for: 10m
+        labels:
+          severity: warning
+          component: "budget_guard"
+          team: "finance"
+        annotations:
+          summary: "Budget usage imbalance detected for {{ $labels.tenant }}"
+          description: "Tenant usage ratio is {{ $value }} (fair range: 0.5-2.0)"
+          runbook_url: "https://docs.mc-platform.com/runbooks/budget-fairness"
+
+      - alert: BudgetCostPerQueryHigh
+        expr: budget:cost_per_query:rate5m > 2.0
+        for: 5m
+        labels:
+          severity: warning
+          component: "budget_guard"
+          team: "optimization"
+        annotations:
+          summary: "High cost per query for {{ $labels.tenant }}"
+          description: "Cost per query is ${{ $value }} (target: ≤$2.00)"
+          runbook_url: "https://docs.mc-platform.com/runbooks/query-optimization"
+
+  - name: budget_backpressure
+    interval: 15s
+    rules:
+      # Backpressure and throttling metrics
+      - record: budget:throttle_rate:rate1m
+        expr: rate(budget_throttled_requests_total[1m])
+        labels:
+          component: "budget_guard"
+
+      - record: budget:queue_depth:avg
+        expr: avg_over_time(budget_queue_depth[1m])
+        labels:
+          component: "budget_guard"
+
+      # Backpressure alerts
+      - alert: BudgetThrottleRateHigh
+        expr: budget:throttle_rate:rate1m > 10
+        for: 2m
+        labels:
+          severity: warning
+          component: "budget_guard"
+          team: "platform"
+        annotations:
+          summary: "High request throttling rate for {{ $labels.tenant }}"
+          description: "Throttling {{ $value }} requests/minute (threshold: 10/min)"
+          runbook_url: "https://docs.mc-platform.com/runbooks/throttling-analysis"
+
+      - alert: BudgetQueueDepthHigh
+        expr: budget:queue_depth:avg > 500
+        for: 1m
+        labels:
+          severity: critical
+          component: "budget_guard"
+          team: "platform"
+        annotations:
+          summary: "Budget enforcement queue depth high"
+          description: "Average queue depth is {{ $value }} (max: 1000)"
+          runbook_url: "https://docs.mc-platform.com/runbooks/queue-management"

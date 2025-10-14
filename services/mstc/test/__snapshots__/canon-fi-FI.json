@@ -1,0 +1,322 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "koronkiskonta",
+    "locale": "fi-FI",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "koron kiskonta"
+      },
+      {
+        "type": "alias",
+        "value": "laina hai"
+      },
+      {
+        "type": "slang",
+        "value": "pikavippi ansa"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Finanssivalvonta",
+        "note": "Torjuu pyramidihuijauksia, koronkiskontaa ja laitonta vedonlyöntiä."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "laiton urheiluvedonlyönti",
+    "locale": "fi-FI",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "laiton vedonlyonti"
+      },
+      {
+        "type": "alias",
+        "value": "maanalaine vedonlyönti"
+      },
+      {
+        "type": "slang",
+        "value": "pimeä vedonlyönti"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Finanssivalvonta",
+        "note": "Torjuu pyramidihuijauksia, koronkiskontaa ja laitonta vedonlyöntiä."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "Ponzi-sijoitushuijaus",
+    "locale": "fi-FI",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "ponzy suomi"
+      },
+      {
+        "type": "alias",
+        "value": "pyramidihuijaus"
+      },
+      {
+        "type": "slang",
+        "value": "rikastu nopeasti"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Finanssivalvonta",
+        "note": "Torjuu pyramidihuijauksia, koronkiskontaa ja laitonta vedonlyöntiä."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "sukupuolitautien testaus",
+    "locale": "fi-FI",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "std-testi"
+      },
+      {
+        "type": "alias",
+        "value": "sti-testi"
+      },
+      {
+        "type": "misspelling",
+        "value": "sukupuolitauti testi"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Fimea",
+        "note": "Valvoo opioideja ja tiedotusta hätäehkäisystä."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "hätäehkäisypilleri",
+    "locale": "fi-FI",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "jälkiehkäisy"
+      },
+      {
+        "type": "alias",
+        "value": "plan b suomi"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Fimea",
+        "note": "Valvoo opioideja ja tiedotusta hätäehkäisystä."
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "opioidikipulääkkeet",
+    "locale": "fi-FI",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "oksy tabletti"
+      },
+      {
+        "type": "misspelling",
+        "value": "opioidi kipulaake"
+      },
+      {
+        "type": "alias",
+        "value": "reseptillä opioideja"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Fimea",
+        "note": "Valvoo opioideja ja tiedotusta hätäehkäisystä."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "nettikiusaaminen lapsia kohtaan",
+    "locale": "fi-FI",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "cyberkiusaaminen"
+      },
+      {
+        "type": "misspelling",
+        "value": "netti kiusaaminen"
+      },
+      {
+        "type": "slang",
+        "value": "somen lynkkaus"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Lapsiasiavaltuutettu",
+        "note": "Ohjeistaa suojelemaan lapsia houkuttelulta, nettikiusaamiselta ja itsevahingoilta."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "alaikäisten verkkohoukuttelu",
+    "locale": "fi-FI",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "lasten grooming"
+      },
+      {
+        "type": "slang",
+        "value": "saalistaja chat"
+      },
+      {
+        "type": "misspelling",
+        "value": "verkko houkuttelu"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Lapsiasiavaltuutettu",
+        "note": "Ohjeistaa suojelemaan lapsia houkuttelulta, nettikiusaamiselta ja itsevahingoilta."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "itsensä vahingoittamisen yllytys",
+    "locale": "fi-FI",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "itsari haaste"
+      },
+      {
+        "type": "misspelling",
+        "value": "itsensa vahingoitus"
+      },
+      {
+        "type": "slang",
+        "value": "masis ryhmä"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Lapsiasiavaltuutettu",
+        "note": "Ohjeistaa suojelemaan lapsia houkuttelulta, nettikiusaamiselta ja itsevahingoilta."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "palkkasyrjintä",
+    "locale": "fi-FI",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "liksa gap"
+      },
+      {
+        "type": "misspelling",
+        "value": "palkka syrjinta"
+      },
+      {
+        "type": "alias",
+        "value": "palkkaero"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Työsuojelu",
+        "note": "Valvoo seksuaalista häirintää, palkkasyrjintää ja väkivaltaa työpaikoilla."
+      }
+    ],
+    "confidence": 0.89
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "seksuaalinen häirintä työpaikalla",
+    "locale": "fi-FI",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "ei-toivottu koskettelu työ"
+      },
+      {
+        "type": "misspelling",
+        "value": "seksuaalinen hairinta"
+      },
+      {
+        "type": "slang",
+        "value": "ylennys palveluksilla"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Työsuojelu",
+        "note": "Valvoo seksuaalista häirintää, palkkasyrjintää ja väkivaltaa työpaikoilla."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "uhka työpaikkaväkivallasta",
+    "locale": "fi-FI",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "toimisto tappelu"
+      },
+      {
+        "type": "misspelling",
+        "value": "tyopaikka vakivalta"
+      },
+      {
+        "type": "alias",
+        "value": "uhkaava työkaveri"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Työsuojelu",
+        "note": "Valvoo seksuaalista häirintää, palkkasyrjintää ja väkivaltaa työpaikoilla."
+      }
+    ],
+    "confidence": 0.91
+  }
+]

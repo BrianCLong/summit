@@ -84,7 +84,7 @@
   condition: >
     spawned_process and
     intelgraph_container and
-    proc.name in (sudo, su, doas)
+    proc.name in (sudo, su, doas) 
   output: >
     Privilege escalation attempt in IntelGraph container
     (user=%user.name command=%proc.cmdline
