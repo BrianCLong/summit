@@ -1,0 +1,6 @@
+route:
+  receiver: "log"
+
+receivers:
+  - name: "log"
+    # Replace later with email/slack/webhook configs
