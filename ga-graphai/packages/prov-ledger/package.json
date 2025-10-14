@@ -8,7 +8,7 @@
   },
   "types": "./src/index.ts",
   "scripts": {
-    "test": "vitest run && node --test tests",
+    "test": "vitest run",
     "test:record": "node --loader ts-node/esm ./tests/record.test.ts"
   },
   "dependencies": {

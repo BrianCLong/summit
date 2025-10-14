@@ -47,3 +47,4 @@ export function nl2cypher(prompt) {
     }
     throw new Error('Unsupported query');
 }
+//# sourceMappingURL=index.js.map

@@ -1,5 +1,4 @@
-# Build Stage
-FROM node:18-alpine AS build
+FROM node:18-alpine
 
 # Install system dependencies for native modules like canvas
 RUN apk add --no-cache \
@@ -17,36 +16,15 @@ RUN apk add --no-cache \
     freetype-dev
 
 WORKDIR /app
-RUN npm install -g pnpm
-COPY server/package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-
+COPY package*.json ./
+RUN npm ci --only=production
 COPY . .
-RUN npm run build
-
-# Production Stage
-FROM node:18-alpine
-
-# Install only production system dependencies for native modules
-RUN apk add --no-cache \
-    cairo-dev \
-    jpeg-dev \
-    pango-dev \
-    musl-dev \
-    giflib-dev \
-    pixman-dev \
-    pangomm-dev \
-    libjpeg-turbo-dev \
-    freetype-dev
-
-WORKDIR /app
-COPY --from=build /app/server/package.json --from=build /app/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --only=production
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/src/graphql/schema ./src/graphql/schema # Copy GraphQL schema if needed at runtime
+# Skip TypeScript build for demo - use direct source execution
+# RUN npm run build
 
 ENV NODE_ENV=production
 ENV PORT=4000
 EXPOSE 4000
+# Run directly from source for demonstration
+CMD ["npx", "tsx", "src/index.ts"]
 
-CMD ["node", "dist/index.js"]
