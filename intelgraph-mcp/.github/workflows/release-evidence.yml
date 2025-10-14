@@ -1,0 +1,64 @@
+name: release-evidence
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    env:
+      FC_MOCK: '1'
+      REPLAY_ENGINE_URL: http://localhost:8081
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0.16.0
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.4.0
+
+      - name: Install deps
+        run: make install
+
+      - name: Build packages
+        run: make build
+
+      - name: Generate SBOM
+        run: syft dir:. -o spdx-json=sbom.spdx.json
+
+      - name: Sign SBOM
+        env:
+          COSIGN_KEY_B64: ${{ secrets.COSIGN_KEY_B64 }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          if [ -n "$COSIGN_KEY_B64" ]; then
+            echo "$COSIGN_KEY_B64" | base64 -d > cosign.key
+            cosign sign-blob --key cosign.key sbom.spdx.json --output-signature sbom.spdx.sig
+            rm -f cosign.key
+          else
+            cosign sign-blob --yes sbom.spdx.json --output-signature sbom.spdx.sig
+          fi
+
+      - name: Prepare release evidence
+        run: |
+          mkdir -p release-evidence
+          cp sbom.spdx.json release-evidence/
+          if [ -f sbom.spdx.sig ]; then cp sbom.spdx.sig release-evidence/; fi
+          cp benchmarks/shootout/results.json release-evidence/
+          echo "$(date -u)" > release-evidence/generated_at.txt
+
+      - name: Upload release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: intelgraph-mcp-evidence
+          path: release-evidence
