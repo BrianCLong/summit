@@ -1,0 +1,16 @@
+name: Feature Request
+description: Propose a feature
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+  - type: input
+    id: metrics
+    attributes:
+      label: Success metrics / KPIs

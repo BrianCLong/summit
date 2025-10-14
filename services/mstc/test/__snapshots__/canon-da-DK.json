@@ -1,0 +1,322 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "ågerlån",
+    "locale": "da-DK",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "aager lan"
+      },
+      {
+        "type": "slang",
+        "value": "kviklån fælde"
+      },
+      {
+        "type": "alias",
+        "value": "lånehajer"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Finanstilsynet",
+        "note": "Advarer mod pyramidespil, åger og ulovlige sportsvæddemål."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "ulovlige sportsvæddemål",
+    "locale": "da-DK",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "sort bookmaker"
+      },
+      {
+        "type": "misspelling",
+        "value": "ulovlig sport betting"
+      },
+      {
+        "type": "slang",
+        "value": "underground odds"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Finanstilsynet",
+        "note": "Advarer mod pyramidespil, åger og ulovlige sportsvæddemål."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "Ponzi-investeringssvindel",
+    "locale": "da-DK",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "bliv rig hurtigt"
+      },
+      {
+        "type": "misspelling",
+        "value": "ponzy danmark"
+      },
+      {
+        "type": "alias",
+        "value": "pyramidespil"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Finanstilsynet",
+        "note": "Advarer mod pyramidespil, åger og ulovlige sportsvæddemål."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "test for kønssygdomme",
+    "locale": "da-DK",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "std test"
+      },
+      {
+        "type": "alias",
+        "value": "sti test"
+      },
+      {
+        "type": "misspelling",
+        "value": "test koenssygdom"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Lægemiddelstyrelsen",
+        "note": "Kontrol med opioider og kommunikation om nødprævention."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "akut p-pille",
+    "locale": "da-DK",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "fortrydelsespille"
+      },
+      {
+        "type": "alias",
+        "value": "plan b danmark"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Lægemiddelstyrelsen",
+        "note": "Kontrol med opioider og kommunikation om nødprævention."
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "opioid smertestillende",
+    "locale": "da-DK",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "opioid smertestiller"
+      },
+      {
+        "type": "slang",
+        "value": "oxy piller"
+      },
+      {
+        "type": "alias",
+        "value": "receptpligtige opioider"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Lægemiddelstyrelsen",
+        "note": "Kontrol med opioider og kommunikation om nødprævention."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "cybermobning mod børn",
+    "locale": "da-DK",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "cyber mobning"
+      },
+      {
+        "type": "slang",
+        "value": "digital mobning"
+      },
+      {
+        "type": "alias",
+        "value": "netmobning"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Datatilsynet / Børns Vilkår",
+        "note": "Retningslinjer mod grooming, cybermobning og selvskadende indhold."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "online grooming af mindreårige",
+    "locale": "da-DK",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "grooming mindrearig"
+      },
+      {
+        "type": "alias",
+        "value": "lokke børn på nettet"
+      },
+      {
+        "type": "slang",
+        "value": "rovdyr chat"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Datatilsynet / Børns Vilkår",
+        "note": "Retningslinjer mod grooming, cybermobning og selvskadende indhold."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "opfordring til selvskade",
+    "locale": "da-DK",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "depressionsforum"
+      },
+      {
+        "type": "misspelling",
+        "value": "selv skade"
+      },
+      {
+        "type": "alias",
+        "value": "selvskade challenge"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Datatilsynet / Børns Vilkår",
+        "note": "Retningslinjer mod grooming, cybermobning og selvskadende indhold."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "løndiskrimination",
+    "locale": "da-DK",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "løn gab"
+      },
+      {
+        "type": "misspelling",
+        "value": "londiskrimination"
+      },
+      {
+        "type": "alias",
+        "value": "ulige løn"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Arbejdstilsynet",
+        "note": "Fører tilsyn med seksuel chikane, ligeløn og vold på arbejdspladsen."
+      }
+    ],
+    "confidence": 0.89
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "seksuel chikane på arbejde",
+    "locale": "da-DK",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "seksuel chikane"
+      },
+      {
+        "type": "slang",
+        "value": "tjenester for forfremmelse"
+      },
+      {
+        "type": "alias",
+        "value": "upassende berøring kontor"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Arbejdstilsynet",
+        "note": "Fører tilsyn med seksuel chikane, ligeløn og vold på arbejdspladsen."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "trussel om arbejdspladsvold",
+    "locale": "da-DK",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "arbejdsplads vold"
+      },
+      {
+        "type": "slang",
+        "value": "kontorskænderi"
+      },
+      {
+        "type": "alias",
+        "value": "truende kollega"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Arbejdstilsynet",
+        "note": "Fører tilsyn med seksuel chikane, ligeløn og vold på arbejdspladsen."
+      }
+    ],
+    "confidence": 0.91
+  }
+]
