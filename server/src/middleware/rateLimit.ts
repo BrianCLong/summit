@@ -1,9 +1,9 @@
 import { rateLimit } from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import Redis from 'ioredis';
-import baseLogger from '../config/logger';
+import pino from 'pino';
 
-const logger = baseLogger.child({ name: 'rateLimit' });
+const logger = pino();
 
 // Initialize Redis client for rate limiting
 const redisClient = new Redis({

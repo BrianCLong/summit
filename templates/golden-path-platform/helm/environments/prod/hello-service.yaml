@@ -1,0 +1,11 @@
+image:
+  tag: prod
+replicaCount: 4
+canary:
+  steps:
+    - setWeight: 10
+    - pause: { duration: 5m }
+    - setWeight: 50
+    - pause: { duration: 10m }
+serviceAccount:
+  roleArn: arn:aws:iam::123456789012:role/golden-path-prod-service

@@ -13,7 +13,7 @@ spec:
         - name: neo4j
           image: neo4j:5.15
           env:
-            - { name: NEO4J_AUTH, value: 'neo4j/testpassword' }
+            - { name: NEO4J_AUTH, value: "neo4j/testpassword" }
           ports:
             - { containerPort: 7687 }
             - { containerPort: 7474 }
@@ -27,3 +27,4 @@ spec:
   ports:
     - { name: bolt, port: 7687, targetPort: 7687 }
     - { name: http, port: 7474, targetPort: 7474 }
+

@@ -62,15 +62,38 @@
     }
   },
 
-  "forwardPorts": [3000, 4000, 5432, 6379, 7474, 8080, 9090, 3001],
+  "forwardPorts": [
+    3000, 3001, 4000, 4010, 4100, 4317, 4318, 5432, 6379, 7474, 8080, 8181,
+    9090, 9464, 16686
+  ],
   "portsAttributes": {
     "3000": {
       "label": "Web App",
       "onAutoForward": "notify"
     },
+    "3001": {
+      "label": "Storybook",
+      "onAutoForward": "notify"
+    },
     "4000": {
       "label": "API Gateway",
       "onAutoForward": "notify"
+    },
+    "4010": {
+      "label": "Mock Services",
+      "onAutoForward": "silent"
+    },
+    "4100": {
+      "label": "Worker Health",
+      "onAutoForward": "silent"
+    },
+    "4317": {
+      "label": "OTLP gRPC",
+      "onAutoForward": "silent"
+    },
+    "4318": {
+      "label": "OTLP HTTP",
+      "onAutoForward": "silent"
     },
     "5432": {
       "label": "PostgreSQL",
@@ -88,18 +111,25 @@
       "label": "Grafana",
       "onAutoForward": "notify"
     },
+    "8181": {
+      "label": "OPA",
+      "onAutoForward": "silent"
+    },
     "9090": {
       "label": "Prometheus",
       "onAutoForward": "silent"
     },
-    "3001": {
-      "label": "Storybook",
+    "9464": {
+      "label": "OTEL Metrics",
+      "onAutoForward": "silent"
+    },
+    "16686": {
+      "label": "Jaeger",
       "onAutoForward": "notify"
     }
   },
 
   "postCreateCommand": "bash .devcontainer/setup.sh",
-  "postStartCommand": "npm run dev:services",
 
   "remoteUser": "node",
   "containerUser": "node",

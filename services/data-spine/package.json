@@ -1,0 +1,19 @@
+{
+  "name": "@summit/data-spine",
+  "version": "0.1.0",
+  "description": "Data spine schema registry, residency enforcement, and lineage sink",
+  "main": "src/index.js",
+  "bin": {
+    "data-spine": "bin/data-spine.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "schema-registry",
+    "lineage",
+    "residency"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT"
+}

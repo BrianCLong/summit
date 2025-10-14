@@ -1,0 +1,7 @@
+global: { scrape_interval: 15s }
+scrape_configs:
+  - job_name: 'companyos'
+    static_configs: [{ targets: ['cos:3000'] }]
+  - job_name: 'mc'
+    metrics_path: /metrics
+    static_configs: [{ targets: ['mc:4000'] }]
