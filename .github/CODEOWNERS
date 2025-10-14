@@ -1,14 +1,71 @@
-# Lines starting with '#' are comments.
-# Each line is a file pattern followed by one or more owners.
+# CODEOWNERS - Code ownership and review requirements
+#
+# This file defines ownership for high-contention files and critical paths.
+# Owners are automatically requested for review when PRs modify these files.
+#
+# Updated: 2025-10-14 (merge train optimization)
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-# These owners will be suggested for any code changes in the .github/workflows directory
-/.github/workflows/ @intelgraph-devops-team
+# =============================================================================
+# Critical Infrastructure (require DevOps team approval)
+# =============================================================================
 
-# These owners will be suggested for any code changes in the client directory
-/client/ @intelgraph-frontend-team
+# CI/CD Workflows - high contention, breaking changes affect all PRs
+/.github/workflows/                          @intelgraph-devops-team @BrianCLong
+/.github/workflows/_reusable-ci-fast.yml     @intelgraph-devops-team @BrianCLong
+/.github/workflows/lane-integration.yml      @intelgraph-devops-team @BrianCLong
+/.github/workflows/ci-comprehensive.yml      @intelgraph-devops-team @BrianCLong
 
-# These owners will be suggested for any code changes in the server directory
-/server/ @intelgraph-backend-team
+# Root configuration files - require careful review to avoid breakage
+/package.json                                @intelgraph-devops-team @BrianCLong
+/package-lock.json                           @intelgraph-devops-team
+/pnpm-lock.yaml                              @intelgraph-devops-team
+/tsconfig.json                               @intelgraph-devops-team
+/.eslintrc*                                  @intelgraph-devops-team
+/.prettierrc*                                @intelgraph-devops-team
 
-# You can also specify individuals
-# /docs/ @your-username
+# =============================================================================
+# Application Code (team-specific)
+# =============================================================================
+
+# Frontend
+/client/                                     @intelgraph-frontend-team
+
+# Backend
+/server/                                     @intelgraph-backend-team
+
+# =============================================================================
+# Hot Files (TODO: Update from conflict-hotspot-report.sh)
+# =============================================================================
+# Run `scripts/conflict-hotspot-report.sh` weekly to identify new hotspots
+# Add entries here for files changed >50 times in 90 days
+
+# Example patterns:
+# /apps/web/src/components/common/          @intelgraph-frontend-team
+# /apps/api/src/routes/                     @intelgraph-backend-team
+
+# =============================================================================
+# Documentation & Process
+# =============================================================================
+
+/README.md                                   @BrianCLong
+/docs/                                       @BrianCLong
+/CONTRIBUTING.md                             @BrianCLong
+/docs/merge-train-runbook.md                 @intelgraph-devops-team @BrianCLong
+
+# =============================================================================
+# Scripts & Automation (merge train maintenance)
+# =============================================================================
+
+/scripts/                                    @intelgraph-devops-team @BrianCLong
+/scripts/merge-train.sh                      @intelgraph-devops-team @BrianCLong
+/scripts/triage-conflicting-prs.sh           @intelgraph-devops-team @BrianCLong
+/scripts/conflict-hotspot-report.sh          @intelgraph-devops-team @BrianCLong
+
+# =============================================================================
+# Security-sensitive files (require security review)
+# =============================================================================
+
+/.github/workflows/*deploy*.yml              @intelgraph-devops-team @BrianCLong
+/.github/workflows/*release*.yml             @intelgraph-devops-team @BrianCLong
+/ops/                                        @intelgraph-devops-team
