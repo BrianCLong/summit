@@ -26,9 +26,7 @@ async function addTag(entityId, tag, clientLastModifiedAt, { user, traceId } = {
         const currentLastModifiedAt = fetchRes.records[0].get('lastModifiedAt');
         const currentTags = fetchRes.records[0].get('tags') || [];
         // LWW check
-        if (currentLastModifiedAt &&
-            clientLastModifiedAt &&
-            new Date(clientLastModifiedAt).getTime() < new Date(currentLastModifiedAt).getTime()) {
+        if (currentLastModifiedAt && clientLastModifiedAt && new Date(clientLastModifiedAt).getTime() < new Date(currentLastModifiedAt).getTime()) {
             realtimeConflictsTotal.inc();
             const err = new Error('Conflict: Entity has been modified more recently. Please refresh and try again.');
             err.code = 'LWW_CONFLICT';
@@ -60,13 +58,7 @@ async function addTag(entityId, tag, clientLastModifiedAt, { user, traceId } = {
           UNIQUE (entity_id, tag, tenant_id)
         )`);
             await pg.query('INSERT INTO entity_tags(entity_id, tag, tenant_id) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING', [entityId, tag, tenantId]);
-            await pg.query('INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING', [
-                user?.id || null,
-                'TAG_ENTITY',
-                'Entity',
-                entityId,
-                { tag, traceId, tenantId, newLastModifiedAt },
-            ]);
+            await pg.query('INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING', [user?.id || null, 'TAG_ENTITY', 'Entity', entityId, { tag, traceId, tenantId, newLastModifiedAt }]);
         }
         catch (e) {
             logger.warn('TagService PG mirror failed', { err: e.message });
@@ -75,14 +67,9 @@ async function addTag(entityId, tag, clientLastModifiedAt, { user, traceId } = {
         try {
             const io = getIO();
             if (io)
-                io.of('/realtime').emit('graph:updated', {
-                    entityId,
-                    change: { type: 'tag_added', tag, lastModifiedAt: newLastModifiedAt },
-                });
+                io.of('/realtime').emit('graph:updated', { entityId, change: { type: 'tag_added', tag, lastModifiedAt: newLastModifiedAt } });
         }
-        catch (_) {
-            /* Intentionally empty */
-        }
+        catch (_) { /* Intentionally empty */ }
         return entity;
     }
     finally {
@@ -121,14 +108,9 @@ async function deleteTag(entityId, tag, { user, traceId } = {}) {
         try {
             const io = getIO();
             if (io)
-                io.of('/realtime').emit('graph:updated', {
-                    entityId,
-                    change: { type: 'tag_removed', tag },
-                });
+                io.of('/realtime').emit('graph:updated', { entityId, change: { type: 'tag_removed', tag } });
         }
-        catch (_) {
-            /* Intentionally empty */
-        }
+        catch (_) { /* Intentionally empty */ }
         return entity;
     }
     finally {
@@ -136,3 +118,4 @@ async function deleteTag(entityId, tag, { user, traceId } = {}) {
     }
 }
 module.exports = { addTag, deleteTag };
+//# sourceMappingURL=TagService.js.map
