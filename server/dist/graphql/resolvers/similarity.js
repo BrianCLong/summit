@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import logger from '../../config/logger';
+import pino from 'pino';
 import { GraphQLError } from 'graphql';
 import { createHash } from 'crypto';
 import { getPostgresPool } from '../../config/database.js';
@@ -7,9 +7,9 @@ import { withAuthAndPolicy } from '../../middleware/withAuthAndPolicy.js';
 import client from 'prom-client';
 import { register } from '../../monitoring/metrics.js';
 import EmbeddingService from '../../services/EmbeddingService.js';
-const log = logger.child({ name: 'similarity' });
+const log = pino({ name: 'similarity' });
 let pool = null;
-const CACHE_TTL_MS = 60_000;
+const CACHE_TTL_MS = 60000;
 const cache = new Map();
 const similarityMs = new client.Histogram({
     name: 'similarity_ms',
@@ -40,14 +40,12 @@ function getPool() {
     }
     return pool;
 }
-const Args = z
-    .object({
+const Args = z.object({
     entityId: z.string().optional(),
     text: z.string().optional(),
     topK: z.number().int().min(1).max(100).default(20),
-    tenantId: z.string(),
-})
-    .refine((a) => a.entityId || a.text, { message: 'entityId or text required' });
+    tenantId: z.string()
+}).refine((a) => a.entityId || a.text, { message: 'entityId or text required' });
 const embeddingService = new EmbeddingService();
 async function embeddingForText(text) {
     try {
@@ -60,10 +58,7 @@ async function embeddingForText(text) {
 }
 export const similarityResolvers = {
     Query: {
-        similarEntities: withAuthAndPolicy('read:entities', (args, ctx) => ({
-            type: 'tenant',
-            id: ctx.user.tenant,
-        }))(async (_, args, ctx) => {
+        similarEntities: withAuthAndPolicy('read:entities', (args, ctx) => ({ type: 'tenant', id: ctx.user.tenant }))(async (_, args, ctx) => {
             const start = Date.now();
             const { entityId, text, topK } = Args.parse({ ...args, tenantId: ctx.user.tenant });
             let embedding;
@@ -98,6 +93,7 @@ export const similarityResolvers = {
             log.info({ count: rows.rowCount }, 'similarEntities');
             similarityMs.observe(Date.now() - start);
             return data;
-        }),
-    },
+        })
+    }
 };
+//# sourceMappingURL=similarity.js.map

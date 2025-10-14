@@ -10,8 +10,8 @@ function MockApp() {
 function createMockStore() {
   return configureStore({
     reducer: {
-      graph: graphSlice,
-    },
+      graph: graphSlice
+    }
   });
 }
 
@@ -20,7 +20,7 @@ test('renders IntelGraph platform', () => {
   render(
     <Provider store={store}>
       <MockApp />
-    </Provider>,
+    </Provider>
   );
   expect(screen.getByText(/IntelGraph Platform/i)).toBeInTheDocument();
 });

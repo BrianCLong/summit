@@ -21,9 +21,9 @@ export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100, message 
             res.status(429).json({
                 error: message,
                 retryAfter: Math.ceil(windowMs / 1000),
-                timestamp: new Date().toISOString(),
+                timestamp: new Date().toISOString()
             });
-        },
+        }
     });
 };
 /**
@@ -65,7 +65,7 @@ export const requestSizeLimiter = (maxSize = '10mb') => {
             return res.status(413).json({
                 error: 'Request entity too large',
                 maxSize: maxSize,
-                received: contentLength,
+                received: contentLength
             });
         }
         next();
@@ -85,7 +85,7 @@ export const ipWhitelist = (allowedIPs = []) => {
             logger.warn(`Unauthorized IP access attempt. IP: ${clientIP}, Path: ${req.path}, User Agent: ${req.get('User-Agent')}`);
             return res.status(403).json({
                 error: 'Access denied',
-                message: 'IP not authorized',
+                message: 'IP not authorized'
             });
         }
         next();
@@ -101,14 +101,14 @@ export const apiKeyAuth = (req, res, next) => {
         trackError('security', 'MissingAPIKey');
         return res.status(401).json({
             error: 'API key required',
-            message: 'Include X-API-Key header or api_key query parameter',
+            message: 'Include X-API-Key header or api_key query parameter'
         });
     }
     if (!validKeys.includes(apiKey)) {
         trackError('security', 'InvalidAPIKey');
         logger.warn(`Invalid API key used. IP: ${req.ip}, Path: ${req.path}, Key Prefix: ${apiKey.substring(0, 8)}...`);
         return res.status(401).json({
-            error: 'Invalid API key',
+            error: 'Invalid API key'
         });
     }
     req.apiKey = apiKey;
@@ -129,14 +129,14 @@ export const validateRequest = (req, res, next) => {
     const requestStr = JSON.stringify({
         url: req.url,
         query: req.query,
-        body: req.body,
+        body: req.body
     });
     for (const pattern of suspiciousPatterns) {
         if (pattern.test(requestStr)) {
             trackError('security', 'SuspiciousRequest');
             logger.warn(`Suspicious request pattern detected. IP: ${req.ip}, Path: ${req.path}, Pattern: ${pattern.toString()}, User Agent: ${req.get('User-Agent')}`);
             return res.status(400).json({
-                error: 'Invalid request format',
+                error: 'Invalid request format'
             });
         }
     }
@@ -151,7 +151,7 @@ export const securityHeaders = helmet({
             defaultSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             scriptSrc: ["'self'"],
-            imgSrc: ["'self'", 'data:', 'https:'],
+            imgSrc: ["'self'", "data:", "https:"],
             connectSrc: ["'self'"],
             fontSrc: ["'self'"],
             objectSrc: ["'none'"],
@@ -163,8 +163,8 @@ export const securityHeaders = helmet({
     hsts: {
         maxAge: 31536000,
         includeSubDomains: true,
-        preload: true,
-    },
+        preload: true
+    }
 });
 /**
  * CORS configuration for specific origins
@@ -174,7 +174,7 @@ export const corsConfig = {
         const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
             'http://localhost:3000',
             'http://localhost:5173',
-            'https://intelgraph.app',
+            'https://intelgraph.app'
         ];
         // Allow requests with no origin (mobile apps, etc.)
         if (!origin)
@@ -190,7 +190,7 @@ export const corsConfig = {
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Requested-With']
 };
 /**
  * Request logging middleware
@@ -214,6 +214,7 @@ export const errorHandler = (err, req, res, next) => {
     const isDev = process.env.NODE_ENV === 'development';
     res.status(err.status || 500).json({
         error: isDev ? err.message : 'Internal server error',
-        ...(isDev && { stack: err.stack }),
+        ...(isDev && { stack: err.stack })
     });
 };
+//# sourceMappingURL=security.js.map

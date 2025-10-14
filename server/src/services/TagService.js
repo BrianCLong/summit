@@ -29,15 +29,9 @@ async function addTag(entityId, tag, clientLastModifiedAt, { user, traceId } = {
     const currentTags = fetchRes.records[0].get('tags') || [];
 
     // LWW check
-    if (
-      currentLastModifiedAt &&
-      clientLastModifiedAt &&
-      new Date(clientLastModifiedAt).getTime() < new Date(currentLastModifiedAt).getTime()
-    ) {
+    if (currentLastModifiedAt && clientLastModifiedAt && new Date(clientLastModifiedAt).getTime() < new Date(currentLastModifiedAt).getTime()) {
       realtimeConflictsTotal.inc();
-      const err = new Error(
-        'Conflict: Entity has been modified more recently. Please refresh and try again.',
-      );
+      const err = new Error('Conflict: Entity has been modified more recently. Please refresh and try again.');
       err.code = 'LWW_CONFLICT';
       throw err;
     }
@@ -56,7 +50,7 @@ async function addTag(entityId, tag, clientLastModifiedAt, { user, traceId } = {
       err.code = 'NOT_FOUND';
       throw err;
     }
-
+    
     const entity = res.records[0].get('entity');
     const newLastModifiedAt = new Date().toISOString();
 
@@ -69,21 +63,15 @@ async function addTag(entityId, tag, clientLastModifiedAt, { user, traceId } = {
           tenant_id TEXT NOT NULL,
           created_at TIMESTAMPTZ DEFAULT now(),
           UNIQUE (entity_id, tag, tenant_id)
-        )`,
+        )`
       );
       await pg.query(
         'INSERT INTO entity_tags(entity_id, tag, tenant_id) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING',
-        [entityId, tag, tenantId],
+        [entityId, tag, tenantId]
       );
       await pg.query(
         'INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING',
-        [
-          user?.id || null,
-          'TAG_ENTITY',
-          'Entity',
-          entityId,
-          { tag, traceId, tenantId, newLastModifiedAt },
-        ],
+        [user?.id || null, 'TAG_ENTITY', 'Entity', entityId, { tag, traceId, tenantId, newLastModifiedAt }]
       );
     } catch (e) {
       logger.warn('TagService PG mirror failed', { err: e.message });
@@ -92,14 +80,8 @@ async function addTag(entityId, tag, clientLastModifiedAt, { user, traceId } = {
     // Emit optional graph update
     try {
       const io = getIO();
-      if (io)
-        io.of('/realtime').emit('graph:updated', {
-          entityId,
-          change: { type: 'tag_added', tag, lastModifiedAt: newLastModifiedAt },
-        });
-    } catch (_) {
-      /* Intentionally empty */
-    }
+      if (io) io.of('/realtime').emit('graph:updated', { entityId, change: { type: 'tag_added', tag, lastModifiedAt: newLastModifiedAt } });
+    } catch (_) { /* Intentionally empty */ }
 
     return entity;
   } finally {
@@ -131,13 +113,10 @@ async function deleteTag(entityId, tag, { user, traceId } = {}) {
     const entity = res.records[0].get('entity');
 
     try {
-      await pg.query(
-        'DELETE FROM entity_tags WHERE entity_id = $1 AND tag = $2 AND tenant_id = $3',
-        [entityId, tag, tenantId],
-      );
+      await pg.query('DELETE FROM entity_tags WHERE entity_id = $1 AND tag = $2 AND tenant_id = $3', [entityId, tag, tenantId]);
       await pg.query(
         'INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5)',
-        [user?.id || null, 'DELETE_TAG', 'Entity', entityId, { tag, traceId, tenantId }],
+        [user?.id || null, 'DELETE_TAG', 'Entity', entityId, { tag, traceId, tenantId }]
       );
     } catch (e) {
       logger.warn('TagService PG mirror failed on delete', { err: e.message });
@@ -145,14 +124,8 @@ async function deleteTag(entityId, tag, { user, traceId } = {}) {
 
     try {
       const io = getIO();
-      if (io)
-        io.of('/realtime').emit('graph:updated', {
-          entityId,
-          change: { type: 'tag_removed', tag },
-        });
-    } catch (_) {
-      /* Intentionally empty */
-    }
+      if (io) io.of('/realtime').emit('graph:updated', { entityId, change: { type: 'tag_removed', tag } });
+    } catch (_) { /* Intentionally empty */ }
 
     return entity;
   } finally {

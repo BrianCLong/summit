@@ -1,0 +1,6 @@
+packages:
+  - "services/*"
+  - "packages/*"
+  - "tools/*"
+  - "benchmarks/*"
+  - "shootout-ui"
