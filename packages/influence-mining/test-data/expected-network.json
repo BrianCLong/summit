@@ -1,0 +1,1028 @@
+{
+  "graph": {
+    "nodes": [
+      {
+        "id": "alice",
+        "type": "actor",
+        "label": "alice"
+      },
+      {
+        "id": "bob",
+        "type": "actor",
+        "label": "bob"
+      },
+      {
+        "id": "carol",
+        "type": "actor",
+        "label": "carol"
+      },
+      {
+        "id": "newsdesk",
+        "type": "actor",
+        "label": "newsdesk"
+      },
+      {
+        "id": "dave",
+        "type": "actor",
+        "label": "dave"
+      },
+      {
+        "id": "erin",
+        "type": "actor",
+        "label": "erin"
+      },
+      {
+        "id": "frank",
+        "type": "actor",
+        "label": "frank"
+      },
+      {
+        "id": "grace",
+        "type": "actor",
+        "label": "grace"
+      },
+      {
+        "id": "henry",
+        "type": "actor",
+        "label": "henry"
+      },
+      {
+        "id": "ivy",
+        "type": "actor",
+        "label": "ivy"
+      },
+      {
+        "id": "judy",
+        "type": "actor",
+        "label": "judy"
+      },
+      {
+        "id": "bot1",
+        "type": "actor",
+        "label": "bot1"
+      },
+      {
+        "id": "propagandahub",
+        "type": "actor",
+        "label": "propagandahub"
+      },
+      {
+        "id": "bot2",
+        "type": "actor",
+        "label": "bot2"
+      },
+      {
+        "id": "bot3",
+        "type": "actor",
+        "label": "bot3"
+      }
+    ],
+    "edges": [
+      {
+        "from": "bot1",
+        "to": "propagandahub",
+        "weight": 16,
+        "types": [
+          "mention",
+          "share"
+        ]
+      },
+      {
+        "from": "bot2",
+        "to": "propagandahub",
+        "weight": 16,
+        "types": [
+          "mention",
+          "share"
+        ]
+      },
+      {
+        "from": "bot3",
+        "to": "propagandahub",
+        "weight": 14,
+        "types": [
+          "mention",
+          "share"
+        ]
+      },
+      {
+        "from": "bob",
+        "to": "alice",
+        "weight": 12,
+        "types": [
+          "reply",
+          "mention"
+        ]
+      },
+      {
+        "from": "alice",
+        "to": "bob",
+        "weight": 10,
+        "types": [
+          "mention"
+        ]
+      },
+      {
+        "from": "alice",
+        "to": "carol",
+        "weight": 10,
+        "types": [
+          "mention"
+        ]
+      },
+      {
+        "from": "carol",
+        "to": "alice",
+        "weight": 8,
+        "types": [
+          "mention",
+          "share"
+        ]
+      },
+      {
+        "from": "carol",
+        "to": "newsdesk",
+        "weight": 8,
+        "types": [
+          "mention",
+          "share"
+        ]
+      },
+      {
+        "from": "bob",
+        "to": "carol",
+        "weight": 6,
+        "types": [
+          "mention"
+        ]
+      },
+      {
+        "from": "erin",
+        "to": "dave",
+        "weight": 6,
+        "types": [
+          "reply",
+          "mention"
+        ]
+      },
+      {
+        "from": "grace",
+        "to": "newsdesk",
+        "weight": 6,
+        "types": [
+          "share"
+        ]
+      },
+      {
+        "from": "henry",
+        "to": "newsdesk",
+        "weight": 6,
+        "types": [
+          "share"
+        ]
+      },
+      {
+        "from": "ivy",
+        "to": "newsdesk",
+        "weight": 6,
+        "types": [
+          "share"
+        ]
+      },
+      {
+        "from": "judy",
+        "to": "alice",
+        "weight": 5,
+        "types": [
+          "mention"
+        ]
+      },
+      {
+        "from": "alice",
+        "to": "newsdesk",
+        "weight": 5,
+        "types": [
+          "share"
+        ]
+      },
+      {
+        "from": "dave",
+        "to": "erin",
+        "weight": 4,
+        "types": [
+          "mention"
+        ]
+      },
+      {
+        "from": "erin",
+        "to": "alice",
+        "weight": 3,
+        "types": [
+          "mention"
+        ]
+      },
+      {
+        "from": "frank",
+        "to": "dave",
+        "weight": 3,
+        "types": [
+          "mention"
+        ]
+      },
+      {
+        "from": "dave",
+        "to": "newsdesk",
+        "weight": 3,
+        "types": [
+          "share"
+        ]
+      },
+      {
+        "from": "frank",
+        "to": "newsdesk",
+        "weight": 3,
+        "types": [
+          "share"
+        ]
+      }
+    ],
+    "adjacency": {
+      "alice": {
+        "bob": 10,
+        "carol": 10,
+        "newsdesk": 5
+      },
+      "bot1": {
+        "propagandahub": 16
+      },
+      "bot2": {
+        "propagandahub": 16
+      },
+      "bot3": {
+        "propagandahub": 14
+      },
+      "bob": {
+        "alice": 12,
+        "carol": 6
+      },
+      "grace": {
+        "newsdesk": 6
+      },
+      "henry": {
+        "newsdesk": 6
+      },
+      "ivy": {
+        "newsdesk": 6
+      },
+      "judy": {
+        "alice": 5
+      },
+      "carol": {
+        "alice": 8,
+        "newsdesk": 8
+      },
+      "dave": {
+        "erin": 4,
+        "newsdesk": 3
+      },
+      "erin": {
+        "alice": 3,
+        "dave": 6
+      },
+      "frank": {
+        "dave": 3,
+        "newsdesk": 3
+      }
+    }
+  },
+  "entities": [
+    {
+      "id": "alice",
+      "type": "actor",
+      "label": "alice"
+    },
+    {
+      "id": "bob",
+      "type": "actor",
+      "label": "bob"
+    },
+    {
+      "id": "carol",
+      "type": "actor",
+      "label": "carol"
+    },
+    {
+      "id": "newsdesk",
+      "type": "actor",
+      "label": "newsdesk"
+    },
+    {
+      "id": "dave",
+      "type": "actor",
+      "label": "dave"
+    },
+    {
+      "id": "erin",
+      "type": "actor",
+      "label": "erin"
+    },
+    {
+      "id": "frank",
+      "type": "actor",
+      "label": "frank"
+    },
+    {
+      "id": "grace",
+      "type": "actor",
+      "label": "grace"
+    },
+    {
+      "id": "henry",
+      "type": "actor",
+      "label": "henry"
+    },
+    {
+      "id": "ivy",
+      "type": "actor",
+      "label": "ivy"
+    },
+    {
+      "id": "judy",
+      "type": "actor",
+      "label": "judy"
+    },
+    {
+      "id": "bot1",
+      "type": "actor",
+      "label": "bot1"
+    },
+    {
+      "id": "propagandahub",
+      "type": "actor",
+      "label": "propagandahub"
+    },
+    {
+      "id": "bot2",
+      "type": "actor",
+      "label": "bot2"
+    },
+    {
+      "id": "bot3",
+      "type": "actor",
+      "label": "bot3"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "alice",
+      "to": "bob",
+      "type": "mention",
+      "weight": 10,
+      "metadata": {
+        "occurrences": 10,
+        "sources": [
+          "post:alice-001",
+          "post:alice-002",
+          "post:alice-003",
+          "post:alice-004",
+          "post:alice-005",
+          "post:alice-006",
+          "post:alice-007",
+          "post:alice-008",
+          "post:alice-009",
+          "post:alice-010"
+        ]
+      }
+    },
+    {
+      "from": "alice",
+      "to": "carol",
+      "type": "mention",
+      "weight": 10,
+      "metadata": {
+        "occurrences": 10,
+        "sources": [
+          "post:alice-001",
+          "post:alice-002",
+          "post:alice-003",
+          "post:alice-004",
+          "post:alice-005",
+          "post:alice-006",
+          "post:alice-007",
+          "post:alice-008",
+          "post:alice-009",
+          "post:alice-010"
+        ]
+      }
+    },
+    {
+      "from": "bot1",
+      "to": "propagandahub",
+      "type": "mention",
+      "weight": 8,
+      "metadata": {
+        "occurrences": 8,
+        "sources": [
+          "post:bot1-078",
+          "post:bot1-079",
+          "post:bot1-080",
+          "post:bot1-081",
+          "post:bot1-082",
+          "post:bot1-083",
+          "post:bot1-084",
+          "post:bot1-085"
+        ]
+      }
+    },
+    {
+      "from": "bot1",
+      "to": "propagandahub",
+      "type": "share",
+      "weight": 8,
+      "metadata": {
+        "occurrences": 8,
+        "sources": [
+          "post:bot1-078",
+          "post:bot1-079",
+          "post:bot1-080",
+          "post:bot1-081",
+          "post:bot1-082",
+          "post:bot1-083",
+          "post:bot1-084",
+          "post:bot1-085"
+        ]
+      }
+    },
+    {
+      "from": "bot2",
+      "to": "propagandahub",
+      "type": "mention",
+      "weight": 8,
+      "metadata": {
+        "occurrences": 8,
+        "sources": [
+          "post:bot2-086",
+          "post:bot2-087",
+          "post:bot2-088",
+          "post:bot2-089",
+          "post:bot2-090",
+          "post:bot2-091",
+          "post:bot2-092",
+          "post:bot2-093"
+        ]
+      }
+    },
+    {
+      "from": "bot2",
+      "to": "propagandahub",
+      "type": "share",
+      "weight": 8,
+      "metadata": {
+        "occurrences": 8,
+        "sources": [
+          "post:bot2-086",
+          "post:bot2-087",
+          "post:bot2-088",
+          "post:bot2-089",
+          "post:bot2-090",
+          "post:bot2-091",
+          "post:bot2-092",
+          "post:bot2-093"
+        ]
+      }
+    },
+    {
+      "from": "bot3",
+      "to": "propagandahub",
+      "type": "mention",
+      "weight": 7,
+      "metadata": {
+        "occurrences": 7,
+        "sources": [
+          "post:bot3-094",
+          "post:bot3-095",
+          "post:bot3-096",
+          "post:bot3-097",
+          "post:bot3-098",
+          "post:bot3-099",
+          "post:bot3-100"
+        ]
+      }
+    },
+    {
+      "from": "bot3",
+      "to": "propagandahub",
+      "type": "share",
+      "weight": 7,
+      "metadata": {
+        "occurrences": 7,
+        "sources": [
+          "post:bot3-094",
+          "post:bot3-095",
+          "post:bot3-096",
+          "post:bot3-097",
+          "post:bot3-098",
+          "post:bot3-099",
+          "post:bot3-100"
+        ]
+      }
+    },
+    {
+      "from": "bob",
+      "to": "alice",
+      "type": "reply",
+      "weight": 6,
+      "metadata": {
+        "occurrences": 6,
+        "sources": [
+          "post:bob-016",
+          "post:bob-017",
+          "post:bob-018",
+          "post:bob-019",
+          "post:bob-020",
+          "post:bob-021"
+        ]
+      }
+    },
+    {
+      "from": "bob",
+      "to": "alice",
+      "type": "mention",
+      "weight": 6,
+      "metadata": {
+        "occurrences": 6,
+        "sources": [
+          "post:bob-022",
+          "post:bob-023",
+          "post:bob-024",
+          "post:bob-025",
+          "post:bob-026",
+          "post:bob-027"
+        ]
+      }
+    },
+    {
+      "from": "bob",
+      "to": "carol",
+      "type": "mention",
+      "weight": 6,
+      "metadata": {
+        "occurrences": 6,
+        "sources": [
+          "post:bob-022",
+          "post:bob-023",
+          "post:bob-024",
+          "post:bob-025",
+          "post:bob-026",
+          "post:bob-027"
+        ]
+      }
+    },
+    {
+      "from": "grace",
+      "to": "newsdesk",
+      "type": "share",
+      "weight": 6,
+      "metadata": {
+        "occurrences": 6,
+        "sources": [
+          "post:grace-055",
+          "post:grace-056",
+          "post:grace-057",
+          "post:grace-058",
+          "post:grace-059",
+          "post:grace-060"
+        ]
+      }
+    },
+    {
+      "from": "henry",
+      "to": "newsdesk",
+      "type": "share",
+      "weight": 6,
+      "metadata": {
+        "occurrences": 6,
+        "sources": [
+          "post:henry-061",
+          "post:henry-062",
+          "post:henry-063",
+          "post:henry-064",
+          "post:henry-065",
+          "post:henry-066"
+        ]
+      }
+    },
+    {
+      "from": "ivy",
+      "to": "newsdesk",
+      "type": "share",
+      "weight": 6,
+      "metadata": {
+        "occurrences": 6,
+        "sources": [
+          "post:ivy-067",
+          "post:ivy-068",
+          "post:ivy-069",
+          "post:ivy-070",
+          "post:ivy-071",
+          "post:ivy-072"
+        ]
+      }
+    },
+    {
+      "from": "alice",
+      "to": "newsdesk",
+      "type": "share",
+      "weight": 5,
+      "metadata": {
+        "occurrences": 5,
+        "sources": [
+          "post:alice-011",
+          "post:alice-012",
+          "post:alice-013",
+          "post:alice-014",
+          "post:alice-015"
+        ]
+      }
+    },
+    {
+      "from": "judy",
+      "to": "alice",
+      "type": "mention",
+      "weight": 5,
+      "metadata": {
+        "occurrences": 5,
+        "sources": [
+          "post:judy-073",
+          "post:judy-074",
+          "post:judy-075",
+          "post:judy-076",
+          "post:judy-077"
+        ]
+      }
+    },
+    {
+      "from": "carol",
+      "to": "alice",
+      "type": "mention",
+      "weight": 4,
+      "metadata": {
+        "occurrences": 4,
+        "sources": [
+          "post:carol-028",
+          "post:carol-029",
+          "post:carol-030",
+          "post:carol-031"
+        ]
+      }
+    },
+    {
+      "from": "carol",
+      "to": "alice",
+      "type": "share",
+      "weight": 4,
+      "metadata": {
+        "occurrences": 4,
+        "sources": [
+          "post:carol-028",
+          "post:carol-029",
+          "post:carol-030",
+          "post:carol-031"
+        ]
+      }
+    },
+    {
+      "from": "carol",
+      "to": "newsdesk",
+      "type": "mention",
+      "weight": 4,
+      "metadata": {
+        "occurrences": 4,
+        "sources": [
+          "post:carol-032",
+          "post:carol-033",
+          "post:carol-034",
+          "post:carol-035"
+        ]
+      }
+    },
+    {
+      "from": "carol",
+      "to": "newsdesk",
+      "type": "share",
+      "weight": 4,
+      "metadata": {
+        "occurrences": 4,
+        "sources": [
+          "post:carol-032",
+          "post:carol-033",
+          "post:carol-034",
+          "post:carol-035"
+        ]
+      }
+    },
+    {
+      "from": "dave",
+      "to": "erin",
+      "type": "mention",
+      "weight": 4,
+      "metadata": {
+        "occurrences": 4,
+        "sources": [
+          "post:dave-036",
+          "post:dave-037",
+          "post:dave-038",
+          "post:dave-039"
+        ]
+      }
+    },
+    {
+      "from": "dave",
+      "to": "newsdesk",
+      "type": "share",
+      "weight": 3,
+      "metadata": {
+        "occurrences": 3,
+        "sources": [
+          "post:dave-040",
+          "post:dave-041",
+          "post:dave-042"
+        ]
+      }
+    },
+    {
+      "from": "erin",
+      "to": "alice",
+      "type": "mention",
+      "weight": 3,
+      "metadata": {
+        "occurrences": 3,
+        "sources": [
+          "post:erin-046",
+          "post:erin-047",
+          "post:erin-048"
+        ]
+      }
+    },
+    {
+      "from": "erin",
+      "to": "dave",
+      "type": "reply",
+      "weight": 3,
+      "metadata": {
+        "occurrences": 3,
+        "sources": [
+          "post:erin-043",
+          "post:erin-044",
+          "post:erin-045"
+        ]
+      }
+    },
+    {
+      "from": "erin",
+      "to": "dave",
+      "type": "mention",
+      "weight": 3,
+      "metadata": {
+        "occurrences": 3,
+        "sources": [
+          "post:erin-046",
+          "post:erin-047",
+          "post:erin-048"
+        ]
+      }
+    },
+    {
+      "from": "frank",
+      "to": "dave",
+      "type": "mention",
+      "weight": 3,
+      "metadata": {
+        "occurrences": 3,
+        "sources": [
+          "post:frank-049",
+          "post:frank-050",
+          "post:frank-051"
+        ]
+      }
+    },
+    {
+      "from": "frank",
+      "to": "newsdesk",
+      "type": "share",
+      "weight": 3,
+      "metadata": {
+        "occurrences": 3,
+        "sources": [
+          "post:frank-052",
+          "post:frank-053",
+          "post:frank-054"
+        ]
+      }
+    }
+  ],
+  "motifs": {
+    "botNetworks": [
+      {
+        "label": "Coordinated share burst targeting propagandahub",
+        "members": [
+          "bot1",
+          "bot2",
+          "bot3"
+        ],
+        "activityScore": 46,
+        "evidence": [
+          "share"
+        ]
+      },
+      {
+        "label": "Coordinated share burst targeting newsdesk",
+        "members": [
+          "carol",
+          "grace",
+          "henry",
+          "ivy",
+          "alice",
+          "dave",
+          "frank"
+        ],
+        "activityScore": 37,
+        "evidence": [
+          "share"
+        ]
+      }
+    ],
+    "amplifierClusters": [
+      {
+        "nodes": [
+          "bot1",
+          "bot2",
+          "carol",
+          "bot3",
+          "alice",
+          "bob",
+          "grace",
+          "henry",
+          "ivy",
+          "dave",
+          "erin",
+          "frank"
+        ],
+        "amplificationScore": 149
+      }
+    ],
+    "coordinatedBehaviors": []
+  },
+  "rankings": [
+    {
+      "entity": {
+        "id": "alice",
+        "type": "actor",
+        "label": "alice"
+      },
+      "score": 58.6,
+      "inboundWeight": 28,
+      "outboundWeight": 25
+    },
+    {
+      "entity": {
+        "id": "propagandahub",
+        "type": "actor",
+        "label": "propagandahub"
+      },
+      "score": 55.199999999999996,
+      "inboundWeight": 46,
+      "outboundWeight": 0
+    },
+    {
+      "entity": {
+        "id": "newsdesk",
+        "type": "actor",
+        "label": "newsdesk"
+      },
+      "score": 44.4,
+      "inboundWeight": 37,
+      "outboundWeight": 0
+    },
+    {
+      "entity": {
+        "id": "carol",
+        "type": "actor",
+        "label": "carol"
+      },
+      "score": 35.2,
+      "inboundWeight": 16,
+      "outboundWeight": 16
+    },
+    {
+      "entity": {
+        "id": "bob",
+        "type": "actor",
+        "label": "bob"
+      },
+      "score": 30,
+      "inboundWeight": 10,
+      "outboundWeight": 18
+    },
+    {
+      "entity": {
+        "id": "dave",
+        "type": "actor",
+        "label": "dave"
+      },
+      "score": 17.799999999999997,
+      "inboundWeight": 9,
+      "outboundWeight": 7
+    },
+    {
+      "entity": {
+        "id": "bot1",
+        "type": "actor",
+        "label": "bot1"
+      },
+      "score": 16,
+      "inboundWeight": 0,
+      "outboundWeight": 16
+    },
+    {
+      "entity": {
+        "id": "bot2",
+        "type": "actor",
+        "label": "bot2"
+      },
+      "score": 16,
+      "inboundWeight": 0,
+      "outboundWeight": 16
+    },
+    {
+      "entity": {
+        "id": "bot3",
+        "type": "actor",
+        "label": "bot3"
+      },
+      "score": 14,
+      "inboundWeight": 0,
+      "outboundWeight": 14
+    },
+    {
+      "entity": {
+        "id": "erin",
+        "type": "actor",
+        "label": "erin"
+      },
+      "score": 13.8,
+      "inboundWeight": 4,
+      "outboundWeight": 9
+    },
+    {
+      "entity": {
+        "id": "frank",
+        "type": "actor",
+        "label": "frank"
+      },
+      "score": 6,
+      "inboundWeight": 0,
+      "outboundWeight": 6
+    },
+    {
+      "entity": {
+        "id": "grace",
+        "type": "actor",
+        "label": "grace"
+      },
+      "score": 6,
+      "inboundWeight": 0,
+      "outboundWeight": 6
+    },
+    {
+      "entity": {
+        "id": "henry",
+        "type": "actor",
+        "label": "henry"
+      },
+      "score": 6,
+      "inboundWeight": 0,
+      "outboundWeight": 6
+    },
+    {
+      "entity": {
+        "id": "ivy",
+        "type": "actor",
+        "label": "ivy"
+      },
+      "score": 6,
+      "inboundWeight": 0,
+      "outboundWeight": 6
+    },
+    {
+      "entity": {
+        "id": "judy",
+        "type": "actor",
+        "label": "judy"
+      },
+      "score": 5,
+      "inboundWeight": 0,
+      "outboundWeight": 5
+    }
+  ]
+}

@@ -88,7 +88,8 @@
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
     "prov:dev": "ts-node packages/prov-ledger/src/server.ts",
     "lac:compile": "ts-node packages/lac/src/compiler.ts",
-    "kpw:dev": "node packages/kpw-media/dist/server.js"
+    "kpw:dev": "node packages/kpw-media/dist/server.js",
+    "extract": "npm run --workspace=packages/influence-mining extract --"
   },
   "keywords": [
     "intelligence-analysis",
