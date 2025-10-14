@@ -1,8 +1,0 @@
-{
-  "pipeline": {
-    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", "build/**" ] },
-    "test":  { "dependsOn": ["build"], "outputs": [] },
-    "lint":  { "outputs": [] },
-    "typecheck": { "outputs": ["tsbuildinfo/**"] }
-  }
-}

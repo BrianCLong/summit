@@ -1,6 +1,4 @@
 class LRUCache {
-    cache;
-    capacity;
     constructor(capacity) {
         this.cache = new Map();
         this.capacity = capacity;
@@ -33,3 +31,4 @@ class LRUCache {
     }
 }
 export default LRUCache;
+//# sourceMappingURL=lruCache.js.map

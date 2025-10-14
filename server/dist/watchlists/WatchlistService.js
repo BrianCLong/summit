@@ -1,5 +1,7 @@
 export class WatchlistService {
-    lists = {};
+    constructor() {
+        this.lists = {};
+    }
     create(data) {
         const id = Date.now().toString();
         this.lists[id] = { ...data, id, members: [] };
@@ -18,3 +20,4 @@ export class WatchlistService {
         return Object.values(this.lists);
     }
 }
+//# sourceMappingURL=WatchlistService.js.map

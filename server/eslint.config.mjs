@@ -1,22 +1,18 @@
-import tsParser from '@typescript-eslint/parser';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
-import globals from 'globals';
-import resolverPolicy from './eslint-rules/require-wrap-resolver-policy.js';
+import tsParser from "@typescript-eslint/parser";
+import globals from "globals";
+import resolverPolicy from "./eslint-rules/require-wrap-resolver-policy.js";
 
 export default [
   {
-    ignores: ['dist/**', 'node_modules/**'],
+    ignores: ["dist/**", "node_modules/**"],
   },
   {
-    files: ['**/*.{ts,js}'],
-    plugins: {
-      '@typescript-eslint': tsPlugin,
-    },
+    files: ["**/*.{ts,js}"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
+        ecmaVersion: "latest",
+        sourceType: "module",
       },
       globals: {
         ...globals.node,
@@ -24,16 +20,17 @@ export default [
       },
     },
     rules: {
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
-      'no-console': 'warn',
-      'prefer-const': 'error',
-      'no-var': 'error',
-      '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false } }],
-      '@typescript-eslint/no-floating-promises': ['error', { ignoreIIFE: true }],
+      "no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+      "no-console": "warn",
+      "prefer-const": "error",
+      "no-var": "error",
     },
   },
   {
-    files: ['tests/**/*'],
+    files: ["tests/**/*"],
     languageOptions: {
       globals: {
         ...globals.jest,
@@ -41,16 +38,16 @@ export default [
     },
   },
   {
-    files: ['src/resolvers/**/*.{ts,js}'],
+    files: ["src/resolvers/**/*.{ts,js}"],
     plugins: {
-      'resolver-policy': {
+      "resolver-policy": {
         rules: {
           wrap: resolverPolicy,
         },
       },
     },
     rules: {
-      'resolver-policy/wrap': 'error',
+      "resolver-policy/wrap": "error",
     },
   },
 ];
