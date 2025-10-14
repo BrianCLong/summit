@@ -1,1 +1,0 @@
-directive @sensitive on FIELD_DEFINITION
