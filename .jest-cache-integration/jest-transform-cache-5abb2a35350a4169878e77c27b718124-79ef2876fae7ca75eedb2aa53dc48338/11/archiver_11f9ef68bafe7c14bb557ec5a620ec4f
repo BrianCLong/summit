@@ -1,0 +1,31 @@
+bd7f7af65d74e1ca11d3b035bcd1f637
+// Archiver mock that records operations and emits finish event on finalize
+const archiverMock = jest.fn(() => {
+    const calls = { append: [], file: [], directory: [] };
+    const listeners = {};
+    return {
+        calls, // Expose the recorded calls for assertions
+        pipe: jest.fn(),
+        append: jest.fn((x) => void calls.append.push(x)),
+        file: jest.fn((x) => void calls.file.push(x)),
+        directory: jest.fn((x) => void calls.directory.push(x)),
+        on: jest.fn((evt, cb) => {
+            if (!listeners[evt]) {
+                listeners[evt] = [];
+            }
+            listeners[evt].push(cb);
+            return undefined;
+        }),
+        finalize: jest.fn(async () => {
+            // Trigger all 'finish' event listeners when finalize is called
+            const finishCallbacks = listeners['finish'] || [];
+            for (const callback of finishCallbacks) {
+                callback();
+            }
+        }),
+    };
+});
+// Add the create method that archiver typically exposes
+archiverMock.create = archiverMock;
+module.exports = archiverMock;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3Rlc3RzL2ludGVncmF0aW9uL19fbW9ja3NfXy9hcmNoaXZlci50cyIsIm1hcHBpbmdzIjoiQUFBQSwyRUFBMkU7QUFDM0UsTUFBTSxZQUFZLEdBQUcsSUFBSSxDQUFDLEVBQUUsQ0FBQyxHQUFHLEVBQUU7SUFDaEMsTUFBTSxLQUFLLEdBQUcsRUFBRSxNQUFNLEVBQUUsRUFBRSxFQUFFLElBQUksRUFBRSxFQUFFLEVBQUUsU0FBUyxFQUFFLEVBQUUsRUFBRSxDQUFDO0lBQ3RELE1BQU0sU0FBUyxHQUFHLEVBQUUsQ0FBQztJQUVyQixPQUFPO1FBQ0wsS0FBSyxFQUFFLDJDQUEyQztRQUNsRCxJQUFJLEVBQUUsSUFBSSxDQUFDLEVBQUUsRUFBRTtRQUNmLE1BQU0sRUFBRSxJQUFJLENBQUMsRUFBRSxDQUFDLENBQUMsQ0FBQyxFQUFFLEVBQUUsQ0FBQyxLQUFLLEtBQUssQ0FBQyxNQUFNLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDO1FBQ2pELElBQUksRUFBRSxJQUFJLENBQUMsRUFBRSxDQUFDLENBQUMsQ0FBQyxFQUFFLEVBQUUsQ0FBQyxLQUFLLEtBQUssQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDO1FBQzdDLFNBQVMsRUFBRSxJQUFJLENBQUMsRUFBRSxDQUFDLENBQUMsQ0FBQyxFQUFFLEVBQUUsQ0FBQyxLQUFLLEtBQUssQ0FBQyxTQUFTLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDO1FBQ3ZELEVBQUUsRUFBRSxJQUFJLENBQUMsRUFBRSxDQUFDLENBQUMsR0FBRyxFQUFFLEVBQUUsRUFBRSxFQUFFO1lBQ3RCLElBQUksQ0FBQyxTQUFTLENBQUMsR0FBRyxDQUFDLEVBQUUsQ0FBQztnQkFDcEIsU0FBUyxDQUFDLEdBQUcsQ0FBQyxHQUFHLEVBQUUsQ0FBQztZQUN0QixDQUFDO1lBQ0QsU0FBUyxDQUFDLEdBQUcsQ0FBQyxDQUFDLElBQUksQ0FBQyxFQUFFLENBQUMsQ0FBQztZQUN4QixPQUFPLFNBQVMsQ0FBQztRQUNuQixDQUFDLENBQUM7UUFDRixRQUFRLEVBQUUsSUFBSSxDQUFDLEVBQUUsQ0FBQyxLQUFLLElBQUksRUFBRTtZQUMzQiwrREFBK0Q7WUFDL0QsTUFBTSxlQUFlLEdBQUcsU0FBUyxDQUFDLFFBQVEsQ0FBQyxJQUFJLEVBQUUsQ0FBQztZQUNsRCxLQUFLLE1BQU0sUUFBUSxJQUFJLGVBQWUsRUFBRSxDQUFDO2dCQUN2QyxRQUFRLEVBQUUsQ0FBQztZQUNiLENBQUM7UUFDSCxDQUFDLENBQUM7S0FDSCxDQUFDO0FBQ0osQ0FBQyxDQUFDLENBQUM7QUFFSCx3REFBd0Q7QUFDeEQsWUFBWSxDQUFDLE1BQU0sR0FBRyxZQUFZLENBQUM7QUFFbkMsTUFBTSxDQUFDLE9BQU8sR0FBRyxZQUFZLENBQUMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3Rlc3RzL2ludGVncmF0aW9uL19fbW9ja3NfXy9hcmNoaXZlci50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvLyBBcmNoaXZlciBtb2NrIHRoYXQgcmVjb3JkcyBvcGVyYXRpb25zIGFuZCBlbWl0cyBmaW5pc2ggZXZlbnQgb24gZmluYWxpemVcbmNvbnN0IGFyY2hpdmVyTW9jayA9IGplc3QuZm4oKCkgPT4ge1xuICBjb25zdCBjYWxscyA9IHsgYXBwZW5kOiBbXSwgZmlsZTogW10sIGRpcmVjdG9yeTogW10gfTtcbiAgY29uc3QgbGlzdGVuZXJzID0ge307XG4gIFxuICByZXR1cm4ge1xuICAgIGNhbGxzLCAvLyBFeHBvc2UgdGhlIHJlY29yZGVkIGNhbGxzIGZvciBhc3NlcnRpb25zXG4gICAgcGlwZTogamVzdC5mbigpLFxuICAgIGFwcGVuZDogamVzdC5mbigoeCkgPT4gdm9pZCBjYWxscy5hcHBlbmQucHVzaCh4KSksXG4gICAgZmlsZTogamVzdC5mbigoeCkgPT4gdm9pZCBjYWxscy5maWxlLnB1c2goeCkpLFxuICAgIGRpcmVjdG9yeTogamVzdC5mbigoeCkgPT4gdm9pZCBjYWxscy5kaXJlY3RvcnkucHVzaCh4KSksXG4gICAgb246IGplc3QuZm4oKGV2dCwgY2IpID0+IHtcbiAgICAgIGlmICghbGlzdGVuZXJzW2V2dF0pIHtcbiAgICAgICAgbGlzdGVuZXJzW2V2dF0gPSBbXTtcbiAgICAgIH1cbiAgICAgIGxpc3RlbmVyc1tldnRdLnB1c2goY2IpO1xuICAgICAgcmV0dXJuIHVuZGVmaW5lZDtcbiAgICB9KSxcbiAgICBmaW5hbGl6ZTogamVzdC5mbihhc3luYyAoKSA9PiB7XG4gICAgICAvLyBUcmlnZ2VyIGFsbCAnZmluaXNoJyBldmVudCBsaXN0ZW5lcnMgd2hlbiBmaW5hbGl6ZSBpcyBjYWxsZWRcbiAgICAgIGNvbnN0IGZpbmlzaENhbGxiYWNrcyA9IGxpc3RlbmVyc1snZmluaXNoJ10gfHwgW107XG4gICAgICBmb3IgKGNvbnN0IGNhbGxiYWNrIG9mIGZpbmlzaENhbGxiYWNrcykge1xuICAgICAgICBjYWxsYmFjaygpO1xuICAgICAgfVxuICAgIH0pLFxuICB9O1xufSk7XG5cbi8vIEFkZCB0aGUgY3JlYXRlIG1ldGhvZCB0aGF0IGFyY2hpdmVyIHR5cGljYWxseSBleHBvc2VzXG5hcmNoaXZlck1vY2suY3JlYXRlID0gYXJjaGl2ZXJNb2NrO1xuXG5tb2R1bGUuZXhwb3J0cyA9IGFyY2hpdmVyTW9jazsiXSwidmVyc2lvbiI6M30=

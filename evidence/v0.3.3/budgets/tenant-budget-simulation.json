@@ -1,0 +1,29 @@
+{
+  "timestamp": "2025-09-26T10:30:29.808848Z",
+  "tenants": {
+    "TENANT_001": {
+      "utilization": 65.2,
+      "status": "healthy"
+    },
+    "TENANT_002": {
+      "utilization": 78.9,
+      "status": "warning"
+    },
+    "TENANT_003": {
+      "utilization": 82.1,
+      "status": "warning"
+    },
+    "TENANT_004": {
+      "utilization": 45.3,
+      "status": "healthy"
+    },
+    "TENANT_005": {
+      "utilization": 91.4,
+      "status": "critical"
+    }
+  },
+  "aggregate": {
+    "avg_utilization": 72.6,
+    "critical_count": 1
+  }
+}

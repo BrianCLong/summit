@@ -17,7 +17,7 @@ async function loadEntitiesByIds(ids) {
        WHERE e.id IN $ids
        OPTIONAL MATCH (e)-[:BELONGS_TO]->(i:Investigation)
        RETURN e, i`,
-      { ids },
+      { ids }
     );
     return res.records.map((r) => {
       const e = r.get('e').properties;
@@ -62,7 +62,7 @@ const aiResolvers = {
         const nbRes = await session.run(
           `MATCH (e:Entity {id: $entityId})-[]-(n:Entity)
            RETURN collect(distinct n.id) AS nbs`,
-          { entityId },
+          { entityId }
         );
         if (nbRes.records.length === 0) return [];
         const nbs = nbRes.records[0].get('nbs');
@@ -80,7 +80,7 @@ const aiResolvers = {
            ORDER BY commonNeighbors DESC
            LIMIT $limit
            RETURN cand.id AS toId, commonNeighbors`,
-          { entityId, nbs, limit: Math.max(1, Math.min(100, limit)) },
+          { entityId, nbs, limit: Math.max(1, Math.min(100, limit)) }
         );
 
         const recs = candRes.records.map((r) => ({
@@ -91,29 +91,23 @@ const aiResolvers = {
         }));
 
         // Cache the heuristic result briefly
-        try {
-          await redis.set(cacheKey, JSON.stringify(recs), 'EX', 60);
-        } catch (_) {}
+        try { await redis.set(cacheKey, JSON.stringify(recs), 'EX', 60); } catch (_) {}
 
         // Publish immediately for subscribers
-        try {
-          await pubsub.publish(`AI_SUGG_${entityId}`, { aiSuggestions: recs });
-        } catch (_) {}
+        try { await pubsub.publish(`AI_SUGG_${entityId}`, { aiSuggestions: recs }); } catch (_) {}
 
         // Kick off GNN link prediction in background (best-effort)
         try {
-          const candidateEdges = recs.map((r) => [r.from, r.to]);
-          gnnService
-            .predictLinks({
-              investigationId: null,
-              graphData: null, // service can pull graph via its own source if configured; kept null to enqueue
-              nodeFeatures: {},
-              candidateEdges,
-              modelName: 'default_link_predictor',
-              taskMode: 'predict',
-              options: { focusEntityId: entityId },
-            })
-            .catch(() => {});
+          const candidateEdges = recs.map(r => [r.from, r.to]);
+          gnnService.predictLinks({
+            investigationId: null,
+            graphData: null, // service can pull graph via its own source if configured; kept null to enqueue
+            nodeFeatures: {},
+            candidateEdges,
+            modelName: 'default_link_predictor',
+            taskMode: 'predict',
+            options: { focusEntityId: entityId }
+          }).catch(() => {});
         } catch (_) {}
 
         return recs;
@@ -157,7 +151,7 @@ const aiResolvers = {
            RETURN e.id AS entityId,
                   CASE WHEN z IS NULL THEN 0.0 ELSE toFloat(z) END AS anomalyScore,
                   deg AS degree`,
-          { investigationId, limit: Math.max(1, Math.min(100, limit)) },
+          { investigationId, limit: Math.max(1, Math.min(100, limit)) }
         );
 
         return res.records.map((r) => ({
@@ -224,10 +218,7 @@ const aiResolvers = {
         // 1) Full-text in Neo4j with scores
         const clauses = [];
         const params = { q, limit: Math.max(1, Math.min(100, limit)) };
-        if (filters.type) {
-          clauses.push('node.type = $type');
-          params.type = filters.type;
-        }
+        if (filters.type) { clauses.push('node.type = $type'); params.type = filters.type; }
         if (filters.investigationId) {
           clauses.push('exists( (node)-[:BELONGS_TO]->(:Investigation {id: $investigationId}) )');
           params.investigationId = filters.investigationId;
@@ -239,11 +230,9 @@ const aiResolvers = {
            RETURN node.id AS id, score
            ORDER BY score DESC
            LIMIT $limit`,
-          params,
+          params
         );
-        const fulltextScores = new Map(
-          ftRes.records.map((r) => [r.get('id'), Number(r.get('score'))]),
-        );
+        const fulltextScores = new Map(ftRes.records.map(r => [r.get('id'), Number(r.get('score'))]));
 
         // 2) Vector similarity from Postgres (if installed)
         let vectorScores = new Map();
@@ -260,11 +249,9 @@ const aiResolvers = {
             ORDER BY e.embedding <#> (SELECT qv FROM query)
             LIMIT $2`;
           const { rows } = await pg.query(sql, [q, limit]);
-          vectorScores = new Map(rows.map((r) => [r.entity_id, Number(r.sim)]));
+          vectorScores = new Map(rows.map(r => [r.entity_id, Number(r.sim)]));
         } catch (err) {
-          logger.warn('pgvector hybrid search unavailable, falling back to full-text', {
-            err: err.message,
-          });
+          logger.warn('pgvector hybrid search unavailable, falling back to full-text', { err: err.message });
         }
 
         // 3) Merge scores (normalize roughly) and order
@@ -272,17 +259,17 @@ const aiResolvers = {
         // Normalize scores to [0,1] naively by dividing by max
         const ftMax = Math.max(1e-6, ...fulltextScores.values());
         const vsMax = Math.max(1e-6, ...vectorScores.values());
-        const combined = Array.from(ids).map((id) => {
+        const combined = Array.from(ids).map(id => {
           const ft = (fulltextScores.get(id) || 0) / ftMax;
           const vs = (vectorScores.get(id) || 0) / vsMax;
           const score = 0.6 * ft + 0.4 * vs;
           return { id, score };
         });
-        combined.sort((a, b) => b.score - a.score);
-        const topIds = combined.slice(0, limit).map((x) => x.id);
+        combined.sort((a,b) => b.score - a.score);
+        const topIds = combined.slice(0, limit).map(x => x.id);
         const entities = await loadEntitiesByIds(topIds);
         const order = new Map(topIds.map((id, idx) => [id, idx]));
-        entities.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+        entities.sort((a,b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
         return entities;
       } catch (e) {
         logger.error('searchEntitiesHybrid failed', { q, err: e.message });
@@ -309,7 +296,7 @@ const aiResolvers = {
              createdBy: $createdBy,
              enclave: 'UNCLASSIFIED'
            })-[:ANNOTATES]->(e)`,
-          { entityId, reason: reason || 'Anomaly detected', createdBy: user.id },
+          { entityId, reason: reason || 'Anomaly detected', createdBy: user.id }
         );
       } catch (e) {
         logger.error('recordAnomaly failed', { entityId, err: e.message });
@@ -354,7 +341,7 @@ const aiResolvers = {
   Subscription: {
     aiSuggestions: {
       subscribe: (_, { entityId }) => pubsub.asyncIterator([`AI_SUGG_${entityId}`]),
-      resolve: (event) => event.payload,
+      resolve: (event) => event.payload
     },
   },
 };
@@ -366,4 +353,4 @@ module.exports.publishAISuggestions = async function publishAISuggestions(entity
   try {
     await pubsub.publish(`AI_SUGG_${entityId}`, { aiSuggestions: recs || [] });
   } catch (_) {}
-};
+}

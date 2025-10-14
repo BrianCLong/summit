@@ -35,3 +35,4 @@ export const dbUrls = {
     postgres: cfg.DATABASE_URL,
     neo4j: cfg.NEO4J_URI,
 };
+//# sourceMappingURL=config.js.map

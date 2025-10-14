@@ -11,7 +11,7 @@ export interface Entity {
   tags?: string[]
 }
 
-export type EntityType =
+export type EntityType = 
   | 'PERSON'
   | 'ORGANIZATION'
   | 'LOCATION'
@@ -71,12 +71,7 @@ export interface Investigation {
   metadata: Record<string, any>
 }
 
-export type InvestigationStatus =
-  | 'draft'
-  | 'active'
-  | 'on_hold'
-  | 'completed'
-  | 'archived'
+export type InvestigationStatus = 'draft' | 'active' | 'on_hold' | 'completed' | 'archived'
 export type Priority = 'low' | 'medium' | 'high' | 'critical'
 
 export interface Alert {
@@ -95,11 +90,7 @@ export interface Alert {
 }
 
 export type AlertSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical'
-export type AlertStatus =
-  | 'open'
-  | 'investigating'
-  | 'resolved'
-  | 'false_positive'
+export type AlertStatus = 'open' | 'investigating' | 'resolved' | 'false_positive'
 
 export interface Case {
   id: string
