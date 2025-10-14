@@ -12,12 +12,7 @@ router.post('/tag', async (req, res) => {
         if (!text || typeof text !== 'string')
             return res.status(400).json({ error: 'text required' });
         const result = await svc.analyzeText(text, {});
-        await writeAudit({
-            userId: req.user?.id,
-            action: 'TAG_TEXT',
-            resourceType: 'NLP',
-            details: { len: text.length },
-        });
+        await writeAudit({ userId: req.user?.id, action: 'TAG_TEXT', resourceType: 'NLP', details: { len: text.length } });
         res.json({ tags: result.tokens || [] });
     }
     catch (e) {
@@ -25,3 +20,4 @@ router.post('/tag', async (req, res) => {
     }
 });
 module.exports = router;
+//# sourceMappingURL=nlp.js.map

@@ -1,0 +1,27 @@
+name: Data Spine Governance Checks
+
+on:
+  pull_request:
+    paths:
+      - 'services/data-spine/**'
+  push:
+    branches: [main]
+    paths:
+      - 'services/data-spine/**'
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run unit tests
+        run: node --test services/data-spine/test
+      - name: Validate schemas and residency policies
+        run: node services/data-spine/bin/data-spine.js validate --all --output services/data-spine/reports/ci-residency-audit.json
+      - name: Check compatibility for customer profile
+        run: node services/data-spine/bin/data-spine.js compat customer-profile
+      - name: Check compatibility for transaction events
+        run: node services/data-spine/bin/data-spine.js compat transaction-events
