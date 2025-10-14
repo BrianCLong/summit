@@ -1,0 +1,11 @@
+{
+  "suite": "health-probe-stub",
+  "generated_at": "2025-10-04T16:52:32.071237+00:00",
+  "command": "python tools/evals/run_eval.py --golden sprint/benchmark/health_probe_golden.jsonl --results sprint/benchmark/health_probe_stub.jsonl",
+  "metrics": {
+    "total": 1,
+    "pass": 1,
+    "rate": 1.0
+  },
+  "notes": "Baseline captured from health probe stub evaluator run."
+}
