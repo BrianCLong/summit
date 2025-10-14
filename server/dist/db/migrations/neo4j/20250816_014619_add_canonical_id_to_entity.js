@@ -30,5 +30,6 @@ module.exports = {
       REMOVE e.canonicalId
     `);
         console.log('✅ Removed canonicalId from Entity nodes.');
-    },
+    }
 };
+//# sourceMappingURL=20250816_014619_add_canonical_id_to_entity.js.map
