@@ -1,0 +1,6 @@
+f87611461a6b92e66aa13dd7f728dfd0
+"use strict";
+
+require("@testing-library/jest-dom");
+require("jest-canvas-mock");
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJyZXF1aXJlIl0sInNvdXJjZXMiOlsic2V0dXAtdGVzdHMudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0ICdAdGVzdGluZy1saWJyYXJ5L2plc3QtZG9tJztcbmltcG9ydCAnamVzdC1jYW52YXMtbW9jayc7Il0sIm1hcHBpbmdzIjoiOztBQUFBQSxPQUFBO0FBQ0FBLE9BQUEiLCJpZ25vcmVMaXN0IjpbXX0=

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>/docs/site/2.3.4/adrs/adr-0001-adopt-docforge.html</loc>
+  </url>
+  <url>
+    <loc>/docs/site/2.3.4/index.html</loc>
+  </url>
+  <url>
+    <loc>/docs/site/2.3.4/modules/pcbo__engine_go.html</loc>
+  </url>
+  <url>
+    <loc>/docs/site/2.3.4/modules/src__analytics_js.html</loc>
+  </url>
+  <url>
+    <loc>/docs/site/2.3.4/modules/tools__report_py.html</loc>
+  </url>
+  <url>
+    <loc>/docs/site/index.html</loc>
+  </url>
+</urlset>

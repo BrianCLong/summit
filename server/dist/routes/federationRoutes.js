@@ -15,26 +15,26 @@ const registerInstanceSchema = {
         required: true,
         pattern: '^[a-zA-Z0-9_-]+$',
         minLength: 3,
-        maxLength: 50,
+        maxLength: 50
     },
     name: {
         type: 'string',
         required: true,
         minLength: 3,
-        maxLength: 100,
+        maxLength: 100
     },
     endpoint: {
         type: 'string',
         required: true,
-        format: 'uri',
+        format: 'uri'
     },
     apiKey: {
         type: 'string',
         required: true,
-        minLength: 10,
+        minLength: 10
     },
     publicKey: {
-        type: 'string',
+        type: 'string'
     },
     capabilities: {
         type: 'array',
@@ -48,33 +48,33 @@ const registerInstanceSchema = {
                 'multimodal_search',
                 'nlp_processing',
                 'threat_intelligence',
-                'social_analysis',
-            ],
-        },
+                'social_analysis'
+            ]
+        }
     },
     accessLevel: {
         type: 'string',
         enum: ['public', 'restricted', 'private'],
-        default: 'public',
+        default: 'public'
     },
     maxConcurrentQueries: {
         type: 'number',
         minimum: 1,
         maximum: 20,
-        default: 5,
+        default: 5
     },
     timeout: {
         type: 'number',
         minimum: 5000,
         maximum: 120000,
-        default: 30000,
-    },
+        default: 30000
+    }
 };
 const updateInstanceSchema = {
     name: {
         type: 'string',
         minLength: 3,
-        maxLength: 100,
+        maxLength: 100
     },
     capabilities: {
         type: 'array',
@@ -88,24 +88,24 @@ const updateInstanceSchema = {
                 'multimodal_search',
                 'nlp_processing',
                 'threat_intelligence',
-                'social_analysis',
-            ],
-        },
+                'social_analysis'
+            ]
+        }
     },
     accessLevel: {
         type: 'string',
-        enum: ['public', 'restricted', 'private'],
+        enum: ['public', 'restricted', 'private']
     },
     maxConcurrentQueries: {
         type: 'number',
         minimum: 1,
-        maximum: 20,
+        maximum: 20
     },
     timeout: {
         type: 'number',
         minimum: 5000,
-        maximum: 120000,
-    },
+        maximum: 120000
+    }
 };
 const federatedSearchSchema = {
     query: {
@@ -115,43 +115,43 @@ const federatedSearchSchema = {
             graphql: {
                 type: 'string',
                 required: true,
-                minLength: 10,
+                minLength: 10
             },
             variables: {
-                type: 'object',
-            },
-        },
+                type: 'object'
+            }
+        }
     },
     instances: {
         type: 'array',
         items: {
-            type: 'string',
-        },
+            type: 'string'
+        }
     },
     maxResults: {
         type: 'number',
         minimum: 1,
         maximum: 1000,
-        default: 100,
+        default: 100
     },
     timeout: {
         type: 'number',
         minimum: 1000,
         maximum: 120000,
-        default: 30000,
+        default: 30000
     },
     aggregateResults: {
         type: 'boolean',
-        default: true,
+        default: true
     },
     respectACL: {
         type: 'boolean',
-        default: true,
+        default: true
     },
     cacheResults: {
         type: 'boolean',
-        default: true,
-    },
+        default: true
+    }
 };
 // Initialize controller
 let federationController;
@@ -459,10 +459,11 @@ router.get('/health', (req, res) => {
         version: '1.0.0',
         connectedInstances: stats?.connectedInstances || 0,
         healthyInstances: stats?.healthyInstances || 0,
-        cacheSize: stats?.cacheSize || 0,
+        cacheSize: stats?.cacheSize || 0
     });
 });
 module.exports = {
     router,
-    initializeRoutes,
+    initializeRoutes
 };
+//# sourceMappingURL=federationRoutes.js.map
