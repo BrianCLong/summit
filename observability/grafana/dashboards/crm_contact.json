@@ -1,0 +1,53 @@
+{
+  "uid": "crm-contact-360",
+  "title": "CompanyOS — Contact 360",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": ["companyos","crm","contact"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Indexed Contacts",
+      "gridPos": {"x":0,"y":0,"w":6,"h":4},
+      "targets": [{"expr":"sum(companyos_crm_contacts_total)"}]
+    },
+    {
+      "type": "stat",
+      "title": "Active Accounts",
+      "gridPos": {"x":6,"y":0,"w":6,"h":4},
+      "targets": [{"expr":"sum(companyos_crm_accounts_total)"}]
+    },
+    {
+      "type": "stat",
+      "title": "Last Sync Age (min)",
+      "gridPos": {"x":12,"y":0,"w":6,"h":4},
+      "targets": [{"expr":"(time() - max(companyos_crm_last_sync_ts)) / 60"}]
+    },
+    {
+      "type": "graph",
+      "title": "Push Ingest Rate (Gmail + Graph)",
+      "gridPos": {"x":0,"y":4,"w":12,"h":8},
+      "targets": [
+        {"expr":"rate(companyos_push_gmail_events_total[5m])", "legendFormat":"gmail rps"},
+        {"expr":"rate(companyos_push_graph_events_total[5m])", "legendFormat":"graph rps"}
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "NLP/ASR Processing Latency (p95)",
+      "gridPos": {"x":12,"y":4,"w":12,"h":8},
+      "targets": [
+        {"expr":"histogram_quantile(0.95, sum by (le) (rate(companyos_nlp_latency_seconds_bucket[5m])))"}
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Deal Nudges (last 24h)",
+      "gridPos": {"x":0,"y":12,"w":24,"h":8},
+      "targets": [{"expr":"companyos_deal_nudges{severity!=""}"}],
+      "transformations": [{"id":"organize","options":{"excludeByName":{"instance":true,"job":true}}}]
+    }
+  ],
+  "templating": { "list": [] }
+}

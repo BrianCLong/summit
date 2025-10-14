@@ -14,7 +14,8 @@ test('renders placeholder when nothing selected', () => {
   render(
     <Provider store={store}>
       <AIInsightsPanel open={true} onClose={() => {}} />
-    </Provider>,
+    </Provider>
   );
   expect(screen.getByText(/Select a node or edge/i)).toBeInTheDocument();
 });
+

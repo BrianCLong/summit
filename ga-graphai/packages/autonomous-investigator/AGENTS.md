@@ -1,0 +1,3 @@
+- Python autonomous investigator service.
+- Run `pytest` in this directory after changes.
+- Prefer type annotations and dataclasses where appropriate.
