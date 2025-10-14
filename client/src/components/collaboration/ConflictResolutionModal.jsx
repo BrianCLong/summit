@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -10,9 +10,15 @@ import {
   FormControlLabel,
   Radio,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
-export default function ConflictResolutionModal({ open, local, server, onResolve, onCancel }) {
+export default function ConflictResolutionModal({
+  open,
+  local,
+  server,
+  onResolve,
+  onCancel,
+}) {
   const [selection, setSelection] = useState({});
   const fields = Object.keys(local);
   const handleChange = (field, value) => {
@@ -21,7 +27,7 @@ export default function ConflictResolutionModal({ open, local, server, onResolve
   const handleSubmit = () => {
     const resolved = {};
     fields.forEach((f) => {
-      resolved[f] = selection[f] === 'server' ? server[f] : local[f];
+      resolved[f] = selection[f] === "server" ? server[f] : local[f];
     });
     onResolve(resolved);
   };
@@ -38,22 +44,40 @@ export default function ConflictResolutionModal({ open, local, server, onResolve
           </Grid>
         </Grid>
         {fields.map((field) => (
-          <Grid container spacing={2} alignItems="center" key={field} sx={{ mb: 1 }}>
+          <Grid
+            container
+            spacing={2}
+            alignItems="center"
+            key={field}
+            sx={{ mb: 1 }}
+          >
             <Grid item xs={5}>
-              <Typography variant="body2">{String(local[field] ?? '')}</Typography>
+              <Typography variant="body2">
+                {String(local[field] ?? "")}
+              </Typography>
             </Grid>
             <Grid item xs={2}>
               <RadioGroup
                 row
-                value={selection[field] || 'local'}
+                value={selection[field] || "local"}
                 onChange={(e) => handleChange(field, e.target.value)}
               >
-                <FormControlLabel value="local" control={<Radio size="small" />} label="" />
-                <FormControlLabel value="server" control={<Radio size="small" />} label="" />
+                <FormControlLabel
+                  value="local"
+                  control={<Radio size="small" />}
+                  label=""
+                />
+                <FormControlLabel
+                  value="server"
+                  control={<Radio size="small" />}
+                  label=""
+                />
               </RadioGroup>
             </Grid>
             <Grid item xs={5}>
-              <Typography variant="body2">{String(server[field] ?? '')}</Typography>
+              <Typography variant="body2">
+                {String(server[field] ?? "")}
+              </Typography>
             </Grid>
           </Grid>
         ))}

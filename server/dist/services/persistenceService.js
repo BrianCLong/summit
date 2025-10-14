@@ -1,11 +1,11 @@
 import { cacheService } from './cacheService';
 class PersistenceService {
-    // In-memory storage for demonstration
-    // In production, this would be backed by PostgreSQL/Neo4j
-    investigations = new Map();
-    entities = new Map();
-    relationships = new Map();
     constructor() {
+        // In-memory storage for demonstration
+        // In production, this would be backed by PostgreSQL/Neo4j
+        this.investigations = new Map();
+        this.entities = new Map();
+        this.relationships = new Map();
         this.initializeMockData();
     }
     initializeMockData() {
@@ -209,3 +209,4 @@ class PersistenceService {
 }
 // Global persistence service instance
 export const persistenceService = new PersistenceService();
+//# sourceMappingURL=persistenceService.js.map

@@ -1,0 +1,160 @@
+From 6372f0074419b662128bf5115855ca2dd53e5d4d Mon Sep 17 00:00:00 2001
+From: GitHub Actions <github-actions@github.com>
+Date: Mon, 6 Oct 2025 12:06:59 -0600
+Subject: [PATCH 27/38] ci: add workflow_dispatch and fix helm-health-smoke.yml
+
+---
+ .github/workflows/ci-core.yml           |  1 +
+ .github/workflows/helm-health-smoke.yml | 15 ++++++++++++---
+ Makefile                                | 21 ++++++++++++++++-----
+ docs/RECONCILIATION_REPORT.md           |  7 +++++++
+ 4 files changed, 36 insertions(+), 8 deletions(-)
+
+diff --git a/.github/workflows/ci-core.yml b/.github/workflows/ci-core.yml
+index cc976c2f8..2794cba42 100644
+--- a/.github/workflows/ci-core.yml
++++ b/.github/workflows/ci-core.yml
+@@ -3,6 +3,7 @@ on:
+   pull_request:
+   push:
+     branches: [main]
++  workflow_dispatch:
+ permissions:
+   contents: read
+   actions: read
+diff --git a/.github/workflows/helm-health-smoke.yml b/.github/workflows/helm-health-smoke.yml
+index bd84c9391..be32dacde 100644
+--- a/.github/workflows/helm-health-smoke.yml
++++ b/.github/workflows/helm-health-smoke.yml
+@@ -3,7 +3,7 @@ name: Helm Health Smoke
+ on:
+   pull_request:
+   push:
+-    branches: [ main ]
++    branches: [main]
+ 
+ jobs:
+   helm-smoke:
+@@ -21,6 +21,12 @@ jobs:
+         run: |
+           helm lint infra/helm/intelgraph --set dev.dummySecrets=true
+ 
++      - name: Install kubeconform
++        run: |
++          curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.6.5/kubeconform-linux-amd64.tar.gz \
++            | tar -xz -C /tmp kubeconform
++          sudo install -m 0755 /tmp/kubeconform /usr/local/bin/kubeconform
++
+       - name: Template chart (no cluster needed)
+         working-directory: infra/helm/intelgraph
+         run: |
+@@ -37,14 +43,17 @@ jobs:
+             --set dev.dummySecrets=true \
+             > /tmp/smoke.yaml
+ 
+-      - name: Assert: service exposes http and prometheus scrape
++      - name: Validate manifests with kubeconform
++        run: kubeconform -strict -summary /tmp/smoke.yaml
++
++      - name: Assert service exposes http and prometheus scrape
+         run: |
+           grep -q 'kind: Service' /tmp/smoke.yaml
+           grep -q 'name: smoke-intelgraph-server' /tmp/smoke.yaml
+           grep -q 'port: 4000' /tmp/smoke.yaml
+           grep -q 'prometheus.io/scrape: "true"' /tmp/smoke.yaml
+ 
+-      - name: Assert: deployment has /health probes
++      - name: Assert deployment has /health probes
+         run: |
+           grep -q 'readinessProbe:' /tmp/smoke.yaml
+           grep -q 'livenessProbe:' /tmp/smoke.yaml
+diff --git a/Makefile b/Makefile
+index 1b73b311b..f4197ce9a 100644
+--- a/Makefile
++++ b/Makefile
+@@ -170,9 +170,20 @@ helm-smoke: ## Render chart locally and assert service/probe/metrics wiring
+ 	@rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" /tmp/smoke.yaml
+ 
+ helm-validate: ## Render chart and validate manifests with kubeconform
+-	@command -v kubeconform >/dev/null || { echo "kubeconform is required (e.g. brew install kubeconform)" >&2; exit 1; }
+ 	@set -euo pipefail
+-	@helm template smoke infra/helm/intelgraph --namespace smoke \
++	@KUBECONFORM_BIN=$$(command -v kubeconform || { \
++		tmp_dir=$$(mktemp -d); \
++		os=$$(uname | tr '[:upper:]' '[:lower:]'); \
++		arch=$$(uname -m); \
++		if [ "$$arch" = "x86_64" ]; then arch=amd64; \
++		elif [ "$$arch" = "arm64" ] || [ "$$arch" = "aarch64" ]; then arch=arm64; \
++		else echo "Unsupported architecture: $$arch" >&2; exit 1; fi; \
++		archive="kubeconform-$${os}-$$arch.tar.gz"; \
++		curl -sSL "https://github.com/yannh/kubeconform/releases/download/v0.6.5/$$archive" \
++		  | tar -xz -C "$$tmp_dir" kubeconform; \
++		echo "$$tmp_dir/kubeconform"; \
++	}); \
++	 helm template smoke infra/helm/intelgraph --namespace smoke \
+ 	  --set server.enabled=true \
+ 	  --set server.service.enabled=true \
+ 	  --set server.service.port=4000 \
+@@ -182,9 +193,9 @@ helm-validate: ## Render chart and validate manifests with kubeconform
+ 	  --set server.metrics.enabled=true \
+ 	  --set server.metrics.prometheusScrape=true \
+ 	  --set dev.dummySecrets=true \
+-	  > /tmp/smoke.yaml
+-	@rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" /tmp/smoke.yaml
+-	@kubeconform -strict -summary /tmp/smoke.yaml
++	  > /tmp/smoke.yaml; \
++	 rg -n "kind: Service|/health|prometheus.io/scrape|port: 4000" /tmp/smoke.yaml; \
++	 "$$KUBECONFORM_BIN" -strict -summary /tmp/smoke.yaml
+ 
+ # Green-Lock Acceptance Pack Targets
+ acceptance: verify recover auto-merge monitor ## Run complete acceptance workflow
+diff --git a/docs/RECONCILIATION_REPORT.md b/docs/RECONCILIATION_REPORT.md
+index 7dc8d0020..0537af5f0 100644
+--- a/docs/RECONCILIATION_REPORT.md
++++ b/docs/RECONCILIATION_REPORT.md
+@@ -1,28 +1,34 @@
+ # Reconciliation Report — October 2025 (HALLOWEEN)
+ 
+ ## Scope
++
+ - Repo alignment for naming consistency (`summit` repository path, IntelGraph product branding)
+ - README quick-start and documentation pointers refreshed for October 2025 release
+ - Makefile hardened with fail-fast deploy targets and health-gated smoke automation
+ - Security guardrails and release documentation linked from project entry points
+ 
+ ## Fixes in This Pass
++
+ - Updated README clone instructions and GitHub URLs to reference the `summit` repository
+ - Linked the 2025.10.HALLOWEEN release notes and documentation index from the README
+ - Introduced deploy targets (`make bootstrap`, `make up`, `make smoke`, etc.) with health checks and golden-flow validation
+ - Added `scripts/golden-smoke.sh` to exercise the golden path after environment bring-up
+ - Ensured monitoring stack participation in core `make up` flow for Grafana/Prometheus visibility
+ - Created `.github/workflows/helm-health-smoke.yml` to assert Helm-rendered probes/ports and added a first-class server service manifest
++- Relocated archived Helm manifests to `templates-disabled/` so `helm lint` can run without sanitizing steps
+ 
+ ## Verification
++
+ - `make bootstrap && make up && make smoke` — Pending rerun on workstation with Docker available (blocked in current sandbox)
+ - `scripts/golden-smoke.sh` — Pending (included in `make smoke` once services are up)
+ - `trivy fs --scanners vuln,secret,misconfig .` — Recommended as part of CI (`trivy.yml` enforces HIGH/CRITICAL fail)
+ - `gitleaks detect --no-git` — Recommended pre-flight check (enforced via `gitleaks.yml`)
+ - `cosign verify-attestation` against 2025.10.HALLOWEEN release artifacts — See release notes for command template
+ - `helm template smoke infra/helm/intelgraph` (via `helm-health-smoke.yml`) — Validates `/health` probes and metrics port exposure
++- `kubeconform -strict -summary /tmp/smoke.yaml` — Schema-validates rendered manifests when paired with local smoke output
+ 
+ ## Follow-Ups
++
+ - Extend golden smoke coverage for AI/Kafka optional services once compose overlays are finalized
+ - Automate SBOM + provenance regeneration in nightly workflows to capture dependency deltas
+ - Expand README troubleshooting with environment-specific resource limits observed during smoke runs
+@@ -31,6 +37,7 @@
+ 
+ - `make helm-lint`
+ - `make helm-smoke` (uses `dev.dummySecrets=true` for template-only secrets)
++- `make helm-validate` (auto-fetches kubeconform if missing and runs `kubeconform -strict -summary` on the rendered bundle)
+ - `helm template smoke infra/helm/intelgraph --namespace smoke`
+ - Inspect output via `less /tmp/smoke.yaml` or `rg -n "Service|/health|prometheus" /tmp/smoke.yaml`
+ 
+-- 
+2.51.0
+

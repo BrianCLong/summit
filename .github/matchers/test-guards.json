@@ -1,0 +1,34 @@
+{
+  "problemMatcher": [
+    {
+      "owner": "test-guards",
+      "severity": "error",
+      "pattern": [
+        {
+          "regexp": "^(.*)$",
+          "message": 1
+        }
+      ]
+    },
+    {
+      "owner": "console-error-guard",
+      "severity": "error",
+      "pattern": [
+        {
+          "regexp": "^(.*)$",
+          "message": 1
+        }
+      ]
+    },
+    {
+      "owner": "jest-open-handles",
+      "severity": "warning",
+      "pattern": [
+        {
+          "regexp": "^(.*)$",
+          "message": 1
+        }
+      ]
+    }
+  ]
+}

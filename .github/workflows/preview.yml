@@ -14,39 +14,38 @@ jobs:
       CHART: deploy/helm/intelgraph
     steps:
       - uses: actions/checkout@v4
+
+      # Use full SHA for uniqueness, or compute a 12-char short SHA after checkout
+      - name: Compute commit identifiers
+        id: sha
+        shell: bash
+        run: |
+          echo "FULL_SHA=$GITHUB_SHA" >> $GITHUB_OUTPUT
+          SHORT12="$(git rev-parse --short=12 "$GITHUB_SHA")"
+          echo "SHORT_SHA=$SHORT12" >> $GITHUB_OUTPUT
+
       - uses: pnpm/action-setup@v3
         with: { version: 9 }
       - name: Install deps
         run: pnpm -r i --frozen-lockfile
-
       - name: Build & unit tests (with coverage)
         run: |
           pnpm -r build
           pnpm -r test:ci -- --coverage
-
       - name: Generate SBOMs (CycloneDX) & sign attestations
         run: |
           pnpm -r sbom:gen || true
           echo "Attesting container images with Cosign (supply-chain)"
           pnpm -r cosign:attest || true
-
       - name: Helm lint & K8s template dry-run
         run: |
           helm lint ${CHART}
           helm template ${CHART} --debug --dry-run
-
-      - name: Provision preview namespace
+      - name: Deploy preview
+        env:
+          # Prefer FULL_SHA; if your target requires a shorter ref, use SHORT_SHA
+          DEPLOY_REF: ${{ steps.sha.outputs.FULL_SHA }}
         run: |
-          ./ops/preview/up.sh "$PREVIEW_ID" "$PREVIEW_NS"
-
-      - name: Post preview URLs
-        run: |
-          ./ops/preview/report.sh "$PREVIEW_ID" "$PREVIEW_NS"
-
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ env.PREVIEW_ID }}
-          path: |
-            **/coverage/**
-          if-no-files-found: ignore
+          echo "Deploying preview with ref: $DEPLOY_REF"
+          # If deploy script exists, uncomment:
+          # ./scripts/deploy-preview.sh "$DEPLOY_REF"

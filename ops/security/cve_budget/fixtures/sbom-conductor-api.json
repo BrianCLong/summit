@@ -1,0 +1,12 @@
+{
+  "bomFormat": "SPDX",
+  "specVersion": "2.3",
+  "name": "conductor-api",
+  "versionInfo": "2025.09.01",
+  "packages": [
+    {"name": "conductor-api", "versionInfo": "2025.09.01"},
+    {"name": "express", "versionInfo": "4.18.3"},
+    {"name": "lodash", "versionInfo": "4.17.20"},
+    {"name": "pg", "versionInfo": "8.11.1"}
+  ]
+}
