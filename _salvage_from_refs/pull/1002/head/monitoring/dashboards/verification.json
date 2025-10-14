@@ -1,6 +1,0 @@
-{
-  "title": "Publisher Verification",
-  "panels": [
-    { "type": "stat", "metric": "verification_pass_rate" }
-  ]
-}
