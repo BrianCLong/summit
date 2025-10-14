@@ -10,3 +10,4 @@ export function isSuspicious(input) {
     const s = input.slice(0, 4000);
     return INJECTION_SIGNS.some((rx) => rx.test(s));
 }
+//# sourceMappingURL=guard.js.map

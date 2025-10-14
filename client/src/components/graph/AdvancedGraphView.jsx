@@ -369,11 +369,23 @@ export default function AdvancedGraphView({ elements = { nodes: [], edges: [] },
       <AIInsightsPanel open={insightsOpen} onClose={() => setInsightsOpen(false)} />
       <EdgeInspectorDialog open={edgeInspectorOpen} onClose={() => setEdgeInspectorOpen(false)} edge={edgeDetail} />
       {/* TTP Correlation Overlay */}
-      <TTPCorrelationOverlay cy={cyRef.current} nodes={elements.nodes} edges={elements.edges} open={ttpOverlayOpen} />
+      <TTPCorrelationOverlay
+        cy={cyRef.current}
+        nodes={elements.nodes}
+        edges={elements.edges}
+        open={ttpOverlayOpen}
+      />
       {/* TTP Triage Panel */}
-      <TTPTriagePanel open={triagePanelOpen} onClose={() => setTriagePanelOpen(false)} selectedEntity={elements.nodes.find(n => n.id === selectedNode)} />
-      {/* Subgraph Explorer */}
-      <SubgraphExplorerDialog open={subgraphOpen} onClose={() => setSubgraphOpen(false)} elements={subgraphElements} />
+      <TTPTriagePanel
+        open={triagePanelOpen}
+        onClose={() => setTriagePanelOpen(false)}
+        selectedEntity={elements.nodes.find((n) => n.id === selectedNode)}
+      />
+      <SubgraphExplorerDialog
+        open={subgraphOpen}
+        onClose={() => setSubgraphOpen(false)}
+        elements={subgraphElements}
+      />
     </Box>
   );
 }

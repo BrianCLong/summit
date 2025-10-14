@@ -1,0 +1,18 @@
+{
+  "keys": [
+    {
+      "kty": "oct",
+      "use": "sig",
+      "kid": "mc-v035-demo-202509",
+      "alg": "HS256",
+      "k": "0HgocX1kx2ytPZ8fJ4JAPsQCXw_Il6S60oERYlDN1BQ"
+    }
+  ],
+  "metadata": {
+    "issuer": "mc-platform-v035",
+    "created": "2025-09-26T23:29:12.251624Z",
+    "rotation_policy": "90_days",
+    "key_count": 1,
+    "note": "Demo JWKS - use Ed25519 in production"
+  }
+}

@@ -1,0 +1,70 @@
+name: mock-ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-mock:
+    runs-on: ubuntu-latest
+    env:
+      FC_MOCK: '1'
+      REPLAY_ENGINE_URL: http://localhost:8081
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install k6
+        run: sudo apt-get update && sudo apt-get install -y k6
+
+      - name: Install dependencies
+        run: make install
+
+      - name: Run tests (mock)
+        run: make test
+
+      - name: Lint & typecheck
+        run: |
+          make lint
+          make typecheck
+
+      - name: Conformance smoke
+        run: make conformance
+
+      - name: Replay + runtime (smoke)
+        run: |
+          nohup make dev-replay >/tmp/replay.log 2>&1 &
+          nohup make dev-runtime >/tmp/runtime.log 2>&1 &
+          sleep 10
+          curl -s -X POST http://localhost:8080/jsonrpc \
+            -H 'content-type: application/json' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"echo","params":{"toolClass":"echo","args":{"demo":true}}}'
+
+      - name: Bench SSE (mock)
+        env:
+          ENDPOINT: http://localhost:8080
+          TOKEN: demo
+        run: make bench || true
+
+      - name: Collect OTEL trace sample (mock)
+        run: |
+          jq -n '{trace":"mock"}' > traces/mock-trace.json
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: intelgraph-mcp-mock-artifacts
+          path: |
+            coverage
+            benchmarks/shootout/results.json
+            traces/mock-trace.json
+            /tmp/runtime.log
+            /tmp/replay.log
+        if-no-files-found: warn
