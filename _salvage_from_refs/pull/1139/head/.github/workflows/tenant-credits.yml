@@ -1,9 +1,0 @@
-name: tenant-credits
-on:
-  schedule: [{ cron: '0 0 * * *' }]
-jobs:
-  compute:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: node scripts/compute_credits.js  # queries Prom; opens issues for tenants breaching SLO

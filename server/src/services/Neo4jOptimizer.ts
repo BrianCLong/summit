@@ -1,14 +1,14 @@
 /**
  * Neo4j Query Optimizer
- *
+ * 
  * Provides optimized query templates and performance monitoring
  * for common graph operations.
  */
 
 import { Driver, Session } from 'neo4j-driver';
-import baseLogger from '../config/logger';
+import pino from 'pino';
 
-const logger = baseLogger.child({ name: 'Neo4jOptimizer' });
+const logger = pino({ name: 'Neo4jOptimizer' });
 
 interface QueryProfile {
   cypher: string;
@@ -40,7 +40,7 @@ export class Neo4jOptimizer {
    */
   getOptimizedEntityQuery(includeEmbedding: boolean = false): string {
     const embeddingClause = includeEmbedding ? ', e.embedding' : '';
-
+    
     return `
       MATCH (e:Entity {tenantId: $tenantId})
       WHERE e.type = $type
@@ -103,37 +103,37 @@ export class Neo4jOptimizer {
   async executeWithProfiling<T>(
     cypher: string,
     parameters: Record<string, any>,
-    session: Session,
+    session: Session
   ): Promise<{ results: T[]; profile: QueryProfile }> {
     const startTime = Date.now();
-
+    
     try {
       // Execute with PROFILE for performance analysis
       const profiledCypher = `PROFILE ${cypher}`;
       const result = await session.run(profiledCypher, parameters);
-
+      
       const executionTime = Date.now() - startTime;
       const profile = this.extractProfile(result, cypher, parameters, executionTime);
-
+      
       // Log slow queries
       if (executionTime > this.slowQueryThreshold) {
         logger.warn('Slow query detected', {
           executionTime,
           cypher: cypher.substring(0, 100),
-          dbHits: profile.dbHits,
+          dbHits: profile.dbHits
         });
       }
 
       this.queryProfiles.push(profile);
-
+      
       // Keep only last 1000 profiles for memory management
       if (this.queryProfiles.length > 1000) {
         this.queryProfiles = this.queryProfiles.slice(-1000);
       }
 
       return {
-        results: result.records.map((record) => record.toObject()) as T[],
-        profile,
+        results: result.records.map(record => record.toObject()) as T[],
+        profile
       };
     } catch (error) {
       logger.error({ error, cypher, parameters }, 'Query execution failed');
@@ -150,28 +150,28 @@ export class Neo4jOptimizer {
         averageExecutionTime: 0,
         indexUsageRate: 0,
         slowQueries: [],
-        totalQueries: 0,
+        totalQueries: 0
       };
     }
 
     const totalExecutionTime = this.queryProfiles.reduce(
-      (sum, profile) => sum + profile.executionTime,
-      0,
+      (sum, profile) => sum + profile.executionTime, 
+      0
     );
-
+    
     const queriesWithIndexes = this.queryProfiles.filter(
-      (profile) => profile.usedIndexes.length > 0,
+      profile => profile.usedIndexes.length > 0
     );
-
+    
     const slowQueries = this.queryProfiles.filter(
-      (profile) => profile.executionTime > this.slowQueryThreshold,
+      profile => profile.executionTime > this.slowQueryThreshold
     );
 
     return {
       averageExecutionTime: totalExecutionTime / this.queryProfiles.length,
       indexUsageRate: queriesWithIndexes.length / this.queryProfiles.length,
       slowQueries: slowQueries.slice(-10), // Last 10 slow queries
-      totalQueries: this.queryProfiles.length,
+      totalQueries: this.queryProfiles.length
     };
   }
 
@@ -183,16 +183,16 @@ export class Neo4jOptimizer {
       // Entity indexes
       'CREATE INDEX entity_tenant_type_idx IF NOT EXISTS FOR (e:Entity) ON (e.tenantId, e.type)',
       'CREATE INDEX entity_created_idx IF NOT EXISTS FOR (e:Entity) ON (e.createdAt)',
-
-      // Relationship indexes
+      
+      // Relationship indexes  
       'CREATE INDEX rel_tenant_type_idx IF NOT EXISTS FOR ()-[r:RELATIONSHIP]->() ON (r.tenantId, r.type)',
-
+      
       // Vector index for embeddings
       `CREATE INDEX entity_embedding_idx IF NOT EXISTS FOR (e:Entity) ON (e.embedding)
        OPTIONS {indexConfig: {
          \`vector.dimensions\`: 1536,
          \`vector.similarity_function\`: 'cosine'
-       }}`,
+       }}`
     ];
 
     for (const command of indexCommands) {
@@ -200,9 +200,9 @@ export class Neo4jOptimizer {
         await session.run(command);
         logger.info('Created index', { command: command.substring(0, 50) });
       } catch (error) {
-        logger.warn('Index creation failed or already exists', {
+        logger.warn('Index creation failed or already exists', { 
           command: command.substring(0, 50),
-          error: (error as Error).message,
+          error: (error as Error).message 
         });
       }
     }
@@ -237,11 +237,11 @@ export class Neo4jOptimizer {
     result: any,
     cypher: string,
     parameters: Record<string, any>,
-    executionTime: number,
+    executionTime: number
   ): QueryProfile {
     const summary = result.summary;
     const plan = summary.plan || summary.profile;
-
+    
     let dbHits = 0;
     let operatorType = 'Unknown';
     let usedIndexes: string[] = [];
@@ -259,7 +259,7 @@ export class Neo4jOptimizer {
       executionTime,
       dbHits,
       operatorType,
-      usedIndexes,
+      usedIndexes
     };
   }
 
@@ -275,17 +275,17 @@ export class Neo4jOptimizer {
 
   private extractIndexUsage(plan: any): string[] {
     const indexes: string[] = [];
-
+    
     if (plan.operatorType && plan.operatorType.includes('Index')) {
       indexes.push(plan.operatorType);
     }
-
+    
     if (plan.children) {
       for (const child of plan.children) {
         indexes.push(...this.extractIndexUsage(child));
       }
     }
-
+    
     return [...new Set(indexes)]; // Remove duplicates
   }
 

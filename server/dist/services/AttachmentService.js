@@ -4,7 +4,6 @@ import { createHash } from 'crypto';
 import * as path from 'path';
 import { createProvenanceRecord } from '../../../packages/shared/provenance';
 export class AttachmentService {
-    baseDir;
     constructor(baseDir = path.join(process.cwd(), 'attachments')) {
         this.baseDir = baseDir;
     }
@@ -52,3 +51,4 @@ export function redactPII(text) {
         .replace(PHONE_RE, '[REDACTED]')
         .replace(SSN_RE, '[REDACTED]');
 }
+//# sourceMappingURL=AttachmentService.js.map

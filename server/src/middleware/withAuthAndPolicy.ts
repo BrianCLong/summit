@@ -1,15 +1,15 @@
 /**
  * withAuthAndPolicy Higher-Order Resolver
- *
+ * 
  * Provides consistent authentication and authorization enforcement
  * across all GraphQL resolvers using OPA/ABAC policies.
  */
 
 import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { z } from 'zod';
-import baseLogger from '../config/logger';
+import pino from 'pino';
 
-const logger = baseLogger.child({ name: 'authPolicy' });
+const logger: pino.Logger = pino({ name: 'authPolicy' });
 
 // Types for authentication and authorization
 interface User {
@@ -58,12 +58,10 @@ interface PolicyService {
 
 // Zod schemas for validation
 const ActionSchema = z.string().min(1);
-const ResourceSchema = z
-  .object({
-    type: z.string(),
-    id: z.string(),
-  })
-  .passthrough();
+const ResourceSchema = z.object({
+  type: z.string(),
+  id: z.string()
+}).passthrough();
 
 /**
  * Mock policy service - replace with actual OPA integration
@@ -92,9 +90,7 @@ class MockPolicyService implements PolicyService {
       const userTags = user.missionTags || [];
       const hasTag = resource.missionTags.some((tag: string) => userTags.includes(tag));
       if (!hasTag) {
-        logger.warn(
-          `Mission tag mismatch: user tags ${userTags} attempted to access ${resource.missionTags}`,
-        );
+        logger.warn(`Mission tag mismatch: user tags ${userTags} attempted to access ${resource.missionTags}`);
         return { allow: false, reason: 'mission_tag_mismatch' };
       }
     }
@@ -155,23 +151,21 @@ type ResourceFactory<TArgs = any> = (args: TArgs, context: Context) => Resource 
  */
 export function withAuthAndPolicy<TArgs = any, TResult = any>(
   action: string,
-  resourceFactory: ResourceFactory<TArgs>,
+  resourceFactory: ResourceFactory<TArgs>
 ) {
-  return function (
-    resolver: (parent: any, args: TArgs, context: Context, info: any) => Promise<TResult> | TResult,
+  return function(
+    resolver: (parent: any, args: TArgs, context: Context, info: any) => Promise<TResult> | TResult
   ) {
     return async (parent: any, args: TArgs, context: Context, info: any): Promise<TResult> => {
       const startTime = Date.now();
-
+      
       try {
         // Validate inputs
         const validAction = ActionSchema.parse(action);
-
+        
         // Check authentication
         if (!context.user) {
-          logger.warn(
-            `Unauthenticated access attempt. Action: ${validAction}, Operation: ${info.fieldName}, Path: ${info.path}`,
-          );
+          logger.warn(`Unauthenticated access attempt. Action: ${validAction}, Operation: ${info.fieldName}, Path: ${info.path}`);
           throw new AuthenticationError('Authentication required');
         }
 
@@ -190,51 +184,44 @@ export function withAuthAndPolicy<TArgs = any, TResult = any>(
             userAgent: context.req?.headers?.['user-agent'],
             ip: context.req?.ip,
             orgId: context.user.orgId,
-            teamId: context.user.teamId,
-          },
+            teamId: context.user.teamId
+          }
         };
 
         const policyResult = await policyService.evaluate(policyInput);
 
         if (!policyResult.allow) {
           if (policyResult.reason?.includes('compartment')) {
-            logger.error(
-              `Compartment leak attempt. User ID: ${context.user.id}, Action: ${validAction}, Resource: ${JSON.stringify(validResource)}, Reason: ${policyResult.reason}, Operation: ${info.fieldName}`,
-            );
+            logger.error(`Compartment leak attempt. User ID: ${context.user.id}, Action: ${validAction}, Resource: ${JSON.stringify(validResource)}, Reason: ${policyResult.reason}, Operation: ${info.fieldName}`);
           } else {
-            logger.warn(
-              `Authorization denied. User ID: ${context.user.id}, Action: ${validAction}, Resource: ${JSON.stringify(validResource)}, Reason: ${policyResult.reason}, Operation: ${info.fieldName}`,
-            );
+            logger.warn(`Authorization denied. User ID: ${context.user.id}, Action: ${validAction}, Resource: ${JSON.stringify(validResource)}, Reason: ${policyResult.reason}, Operation: ${info.fieldName}`);
           }
 
-          throw new ForbiddenError(policyResult.reason || 'Access denied by security policy');
+          throw new ForbiddenError(
+            policyResult.reason || 'Access denied by security policy'
+          );
         }
 
         // Log successful authorization
-        logger.info(
-          `Authorization granted. User ID: ${context.user.id}, Action: ${validAction}, Resource Type: ${validResource.type}, Resource ID: ${validResource.id}, Operation: ${info.fieldName}`,
-        );
+        logger.info(`Authorization granted. User ID: ${context.user.id}, Action: ${validAction}, Resource Type: ${validResource.type}, Resource ID: ${validResource.id}, Operation: ${info.fieldName}`);
 
         // Execute the resolver
         const result = await resolver(parent, args, context, info);
 
         const duration = Date.now() - startTime;
-        logger.debug(
-          `Resolver execution completed. User ID: ${context.user.id}, Action: ${validAction}, Operation: ${info.fieldName}, Duration: ${duration}`,
-        );
+        logger.debug(`Resolver execution completed. User ID: ${context.user.id}, Action: ${validAction}, Operation: ${info.fieldName}, Duration: ${duration}`);
 
         return result;
+
       } catch (error) {
         const duration = Date.now() - startTime;
-
+        
         if (error instanceof AuthenticationError || error instanceof ForbiddenError) {
           // Re-throw auth errors as-is
           throw error;
         }
 
-        logger.error(
-          `Resolver execution failed. User ID: ${context.user?.id}, Action: ${action}, Operation: ${info.fieldName}, Duration: ${duration}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        );
+        logger.error(`Resolver execution failed. User ID: ${context.user?.id}, Action: ${action}, Operation: ${info.fieldName}, Duration: ${duration}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
 
         throw error;
       }
@@ -245,14 +232,18 @@ export function withAuthAndPolicy<TArgs = any, TResult = any>(
 /**
  * Convenience wrapper for read operations
  */
-export function withReadAuth<TArgs = any, TResult = any>(resourceFactory: ResourceFactory<TArgs>) {
+export function withReadAuth<TArgs = any, TResult = any>(
+  resourceFactory: ResourceFactory<TArgs>
+) {
   return withAuthAndPolicy<TArgs, TResult>('read', resourceFactory);
 }
 
 /**
  * Convenience wrapper for write operations
  */
-export function withWriteAuth<TArgs = any, TResult = any>(resourceFactory: ResourceFactory<TArgs>) {
+export function withWriteAuth<TArgs = any, TResult = any>(
+  resourceFactory: ResourceFactory<TArgs>
+) {
   return withAuthAndPolicy<TArgs, TResult>('write', resourceFactory);
 }
 
@@ -260,7 +251,7 @@ export function withWriteAuth<TArgs = any, TResult = any>(resourceFactory: Resou
  * Convenience wrapper for create operations
  */
 export function withCreateAuth<TArgs = any, TResult = any>(
-  resourceFactory: ResourceFactory<TArgs>,
+  resourceFactory: ResourceFactory<TArgs>
 ) {
   return withAuthAndPolicy<TArgs, TResult>('create', resourceFactory);
 }
@@ -269,7 +260,7 @@ export function withCreateAuth<TArgs = any, TResult = any>(
  * Convenience wrapper for update operations
  */
 export function withUpdateAuth<TArgs = any, TResult = any>(
-  resourceFactory: ResourceFactory<TArgs>,
+  resourceFactory: ResourceFactory<TArgs>
 ) {
   return withAuthAndPolicy<TArgs, TResult>('update', resourceFactory);
 }
@@ -278,7 +269,7 @@ export function withUpdateAuth<TArgs = any, TResult = any>(
  * Convenience wrapper for delete operations
  */
 export function withDeleteAuth<TArgs = any, TResult = any>(
-  resourceFactory: ResourceFactory<TArgs>,
+  resourceFactory: ResourceFactory<TArgs>
 ) {
   return withAuthAndPolicy<TArgs, TResult>('delete', resourceFactory);
 }
@@ -286,52 +277,38 @@ export function withDeleteAuth<TArgs = any, TResult = any>(
 /**
  * Common resource factory for investigation-scoped resources
  */
-export function investigationResource(
-  investigationId: string,
-  orgId?: string,
-  teamId?: string,
-): Resource {
+export function investigationResource(investigationId: string, orgId?: string, teamId?: string): Resource {
   return {
     type: 'investigation',
     id: investigationId,
     orgId,
-    teamId,
+    teamId
   };
 }
 
 /**
  * Common resource factory for entity resources
  */
-export function entityResource(
-  entityId: string,
-  investigationId?: string,
-  orgId?: string,
-  teamId?: string,
-): Resource {
+export function entityResource(entityId: string, investigationId?: string, orgId?: string, teamId?: string): Resource {
   return {
     type: 'entity',
     id: entityId,
     investigationId,
     orgId,
-    teamId,
+    teamId
   };
 }
 
 /**
  * Common resource factory for relationship resources
  */
-export function relationshipResource(
-  relationshipId: string,
-  investigationId?: string,
-  orgId?: string,
-  teamId?: string,
-): Resource {
+export function relationshipResource(relationshipId: string, investigationId?: string, orgId?: string, teamId?: string): Resource {
   return {
     type: 'relationship',
     id: relationshipId,
     investigationId,
     orgId,
-    teamId,
+    teamId
   };
 }
 
@@ -347,13 +324,13 @@ export function getPolicyStats(): {
   return {
     serviceType: 'mock',
     totalEvaluations: 0,
-    deniedRequests: 0,
+    deniedRequests: 0
   };
 }
 
 /**
  * Example usage in resolvers:
- *
+ * 
  * const resolvers = {
  *   Query: {
  *     investigation: withReadAuth((args) => ({ type: 'investigation', id: args.id }))(
@@ -362,7 +339,7 @@ export function getPolicyStats(): {
  *       }
  *     )
  *   },
- *
+ *   
  *   Mutation: {
  *     createEntity: withCreateAuth((args) => ({ type: 'entity', id: 'new' }))(
  *       async (_, { input }, context) => {

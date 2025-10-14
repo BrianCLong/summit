@@ -1,0 +1,31 @@
+# IntelGraph Local Dev Kit environment template
+# Copy to .envrc and adjust secrets locally. Never commit real credentials.
+
+dotenv_if_exists .env
+
+dotenv_if_exists server/.env
+
+export POSTGRES_HOST=${POSTGRES_HOST:-"localhost"}
+export POSTGRES_PORT=${POSTGRES_PORT:-"5432"}
+export POSTGRES_USER=${POSTGRES_USER:-"intelgraph"}
+export POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-"password"}
+export POSTGRES_DB=${POSTGRES_DB:-"intelgraph_dev"}
+
+export REDIS_HOST=${REDIS_HOST:-"localhost"}
+export REDIS_PORT=${REDIS_PORT:-"6379"}
+
+export NEO4J_URI=${NEO4J_URI:-"bolt://localhost:7687"}
+export NEO4J_USER=${NEO4J_USER:-"neo4j"}
+export NEO4J_PASSWORD=${NEO4J_PASSWORD:-"dev_password"}
+
+export OPA_URL=${OPA_URL:-"http://localhost:8181"}
+export OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-"http://localhost:4317"}
+export MOCK_SERVICE_URL=${MOCK_SERVICE_URL:-"http://localhost:4010"}
+
+export WORKER_PORT=${WORKER_PORT:-"4100"}
+export INTELGRAPH_API_URL=${INTELGRAPH_API_URL:-"http://localhost:4000"}
+export INTELGRAPH_UI_URL=${INTELGRAPH_UI_URL:-"http://localhost:3000"}
+
+# Configure trusted git hooks signature verification
+export LEFTHOOK_SIGNATURE_FILE=${LEFTHOOK_SIGNATURE_FILE:-".lefthook-signature"}
+
