@@ -2,88 +2,85 @@
 // Provides graph operations (Cypher queries, algorithms) via MCP protocol
 import WebSocket from 'ws';
 export class GraphOpsServer {
-    config;
-    server;
-    neo4jDriver; // Neo4j driver instance
-    rateLimitCache = new Map();
-    // Available tools
-    tools = [
-        {
-            name: 'graph.query',
-            description: 'Execute parameterized Cypher queries against the tenant graph',
-            schema: {
-                type: 'object',
-                properties: {
-                    cypher: {
-                        type: 'string',
-                        description: 'Cypher query to execute',
-                    },
-                    params: {
-                        type: 'object',
-                        description: 'Parameters for the query',
-                    },
-                    tenantId: {
-                        type: 'string',
-                        description: 'Tenant ID for multi-tenant isolation',
-                    },
-                },
-                required: ['cypher'],
-            },
-            scopes: ['graph:read'],
-        },
-        {
-            name: 'graph.write',
-            description: 'Execute write operations (CREATE, UPDATE, DELETE)',
-            schema: {
-                type: 'object',
-                properties: {
-                    cypher: { type: 'string' },
-                    params: { type: 'object' },
-                    tenantId: { type: 'string' },
-                },
-                required: ['cypher'],
-            },
-            scopes: ['graph:write'],
-        },
-        {
-            name: 'graph.alg',
-            description: 'Execute graph algorithms (PageRank, Community Detection, etc.)',
-            schema: {
-                type: 'object',
-                properties: {
-                    name: {
-                        type: 'string',
-                        enum: ['pagerank', 'community', 'shortestPath', 'betweenness', 'closeness'],
-                    },
-                    args: {
-                        type: 'object',
-                        description: 'Algorithm-specific arguments',
-                    },
-                    tenantId: { type: 'string' },
-                },
-                required: ['name'],
-            },
-            scopes: ['graph:compute'],
-        },
-        {
-            name: 'graph.schema',
-            description: 'Get or modify graph schema information',
-            schema: {
-                type: 'object',
-                properties: {
-                    operation: {
-                        type: 'string',
-                        enum: ['get', 'constraints', 'indexes'],
-                    },
-                    tenantId: { type: 'string' },
-                },
-                required: ['operation'],
-            },
-            scopes: ['graph:read'],
-        },
-    ];
     constructor(config) {
         this.config = config;
+        this.rateLimitCache = new Map();
+        // Available tools
+        this.tools = [
+            {
+                name: 'graph.query',
+                description: 'Execute parameterized Cypher queries against the tenant graph',
+                schema: {
+                    type: 'object',
+                    properties: {
+                        cypher: {
+                            type: 'string',
+                            description: 'Cypher query to execute',
+                        },
+                        params: {
+                            type: 'object',
+                            description: 'Parameters for the query',
+                        },
+                        tenantId: {
+                            type: 'string',
+                            description: 'Tenant ID for multi-tenant isolation',
+                        },
+                    },
+                    required: ['cypher'],
+                },
+                scopes: ['graph:read'],
+            },
+            {
+                name: 'graph.write',
+                description: 'Execute write operations (CREATE, UPDATE, DELETE)',
+                schema: {
+                    type: 'object',
+                    properties: {
+                        cypher: { type: 'string' },
+                        params: { type: 'object' },
+                        tenantId: { type: 'string' },
+                    },
+                    required: ['cypher'],
+                },
+                scopes: ['graph:write'],
+            },
+            {
+                name: 'graph.alg',
+                description: 'Execute graph algorithms (PageRank, Community Detection, etc.)',
+                schema: {
+                    type: 'object',
+                    properties: {
+                        name: {
+                            type: 'string',
+                            enum: ['pagerank', 'community', 'shortestPath', 'betweenness', 'closeness'],
+                        },
+                        args: {
+                            type: 'object',
+                            description: 'Algorithm-specific arguments',
+                        },
+                        tenantId: { type: 'string' },
+                    },
+                    required: ['name'],
+                },
+                scopes: ['graph:compute'],
+            },
+            {
+                name: 'graph.schema',
+                description: 'Get or modify graph schema information',
+                schema: {
+                    type: 'object',
+                    properties: {
+                        operation: {
+                            type: 'string',
+                            enum: ['get', 'constraints', 'indexes'],
+                        },
+                        tenantId: { type: 'string' },
+                    },
+                    required: ['operation'],
+                },
+                scopes: ['graph:read'],
+            },
+        ];
         this.server = new WebSocket.Server({ port: config.port });
         this.setupNeo4jDriver();
         this.setupWebSocketHandlers();
@@ -394,3 +391,4 @@ export class GraphOpsServer {
 }
 // Export for use in main server
 export default GraphOpsServer;
+//# sourceMappingURL=graphops-server.js.map

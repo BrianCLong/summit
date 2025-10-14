@@ -4,6 +4,9 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "prov-verify": "dist/cli/verify.js"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "jest"

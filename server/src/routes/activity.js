@@ -15,20 +15,8 @@ router.get('/', async (req, res) => {
     const pool = getPostgresPool();
     const where = ['user_id = $1'];
     const params = [req.user.id];
-    if (action) {
-      where.push('action ILIKE $' + (params.length + 1));
-      params.push(`%${action}%`);
-    }
-    if (resource) {
-      where.push(
-        '(resource_type ILIKE $' +
-          (params.length + 1) +
-          ' OR resource_id ILIKE $' +
-          (params.length + 2) +
-          ')',
-      );
-      params.push(`%${resource}%`, `%${resource}%`);
-    }
+    if (action) { where.push('action ILIKE $' + (params.length + 1)); params.push(`%${action}%`); }
+    if (resource) { where.push('(resource_type ILIKE $' + (params.length + 1) + ' OR resource_id ILIKE $' + (params.length + 2) + ')'); params.push(`%${resource}%`, `%${resource}%`); }
     const whereSql = where.join(' AND ');
     const listSql = `SELECT id, user_id, action, resource_type, resource_id, details, ip_address, user_agent, created_at
                      FROM audit_logs WHERE ${whereSql} ORDER BY created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
@@ -51,20 +39,8 @@ router.get('/all', requirePermission('activity:read_all'), async (req, res) => {
     const pool = getPostgresPool();
     const where = [];
     const params = [];
-    if (action) {
-      where.push('action ILIKE $' + (params.length + 1));
-      params.push(`%${action}%`);
-    }
-    if (resource) {
-      where.push(
-        '(resource_type ILIKE $' +
-          (params.length + 1) +
-          ' OR resource_id ILIKE $' +
-          (params.length + 2) +
-          ')',
-      );
-      params.push(`%${resource}%`, `%${resource}%`);
-    }
+    if (action) { where.push('action ILIKE $' + (params.length + 1)); params.push(`%${action}%`); }
+    if (resource) { where.push('(resource_type ILIKE $' + (params.length + 1) + ' OR resource_id ILIKE $' + (params.length + 2) + ')'); params.push(`%${resource}%`, `%${resource}%`); }
     const whereSql = where.length ? 'WHERE ' + where.join(' AND ') : '';
     const listSql = `SELECT id, user_id, action, resource_type, resource_id, details, ip_address, user_agent, created_at
                      FROM audit_logs ${whereSql} ORDER BY created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;

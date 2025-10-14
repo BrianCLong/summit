@@ -1,0 +1,3 @@
+query GetCaseById($id: ID!) {
+  caseById(id: $id) { id title createdAt status }
+}
