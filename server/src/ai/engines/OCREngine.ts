@@ -2,11 +2,11 @@ import { spawn } from 'child_process';
 import { createReadStream, createWriteStream } from 'fs';
 import { promisify } from 'util';
 import path from 'path';
-import baseLogger from '../../config/logger';
+import pino from 'pino';
 import sharp from 'sharp';
 import { ExtractionEngineConfig } from '../ExtractionEngine.js';
 
-const logger = baseLogger.child({ name: 'OCREngine' });
+const logger = pino({ name: 'OCREngine' });
 
 export interface OCRResult {
   text: string;
@@ -20,13 +20,6 @@ export interface OCRResult {
   };
   language: string;
   engine: string;
-  metadata?: {
-    readingOrder?: number;
-    isHeading?: boolean;
-    isTableCell?: boolean;
-    structureType?: 'heading' | 'table' | 'paragraph';
-    [key: string]: any;
-  };
 }
 
 export interface OCROptions {
@@ -52,10 +45,10 @@ export class OCREngine {
     try {
       // Verify Tesseract installation
       await this.verifyTesseractInstallation();
-
+      
       // Verify Python dependencies for PaddleOCR
       await this.verifyPaddleOCRInstallation();
-
+      
       this.isInitialized = true;
       logger.info('OCR Engine initialized successfully');
     } catch (error) {
@@ -77,7 +70,7 @@ export class OCREngine {
       enhanceImage = true,
       confidenceThreshold = 0.6,
       preserveWhitespace = false,
-      enableStructureAnalysis = true,
+      enableStructureAnalysis = true
     } = options;
 
     logger.info(`Starting OCR extraction for: ${imagePath}`);
@@ -93,7 +86,7 @@ export class OCREngine {
       // Run multiple OCR engines and combine results
       const [tesseractResults, paddleResults] = await Promise.allSettled([
         this.runTesseractOCR(processedImagePath, language, confidenceThreshold),
-        this.runPaddleOCR(processedImagePath, language, confidenceThreshold),
+        this.runPaddleOCR(processedImagePath, language, confidenceThreshold)
       ]);
 
       const allResults: OCRResult[] = [];
@@ -122,6 +115,7 @@ export class OCREngine {
 
       logger.info(`OCR extraction completed: ${mergedResults.length} text regions found`);
       return mergedResults;
+
     } catch (error) {
       logger.error('OCR extraction failed:', error);
       throw error;
@@ -134,21 +128,17 @@ export class OCREngine {
   private async runTesseractOCR(
     imagePath: string,
     language: string,
-    confidenceThreshold: number,
+    confidenceThreshold: number
   ): Promise<OCRResult[]> {
     return new Promise((resolve, reject) => {
       const args = [
         imagePath,
         'stdout',
-        '-l',
-        language,
-        '--psm',
-        '6', // Uniform block of text
-        '--oem',
-        '3', // Default OCR Engine Mode
-        '-c',
-        'preserve_interword_spaces=1',
-        'tsv',
+        '-l', language,
+        '--psm', '6', // Uniform block of text
+        '--oem', '3', // Default OCR Engine Mode
+        '-c', 'preserve_interword_spaces=1',
+        'tsv'
       ];
 
       const tesseract = spawn('tesseract', args);
@@ -189,19 +179,16 @@ export class OCREngine {
   private async runPaddleOCR(
     imagePath: string,
     language: string,
-    confidenceThreshold: number,
+    confidenceThreshold: number
   ): Promise<OCRResult[]> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'paddle_ocr.py');
-
+      
       const args = [
         pythonScript,
-        '--image',
-        imagePath,
-        '--lang',
-        this.mapLanguageForPaddle(language),
-        '--confidence',
-        confidenceThreshold.toString(),
+        '--image', imagePath,
+        '--lang', this.mapLanguageForPaddle(language),
+        '--confidence', confidenceThreshold.toString()
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -243,15 +230,14 @@ export class OCREngine {
   private async enhanceImageForOCR(imagePath: string): Promise<string> {
     const enhancedPath = path.join(
       this.config.tempPath,
-      `enhanced_${Date.now()}_${path.basename(imagePath)}`,
+      `enhanced_${Date.now()}_${path.basename(imagePath)}`
     );
 
     try {
       await sharp(imagePath)
-        .resize(null, 2000, {
-          // Upscale to minimum 2000px height
+        .resize(null, 2000, { // Upscale to minimum 2000px height
           withoutEnlargement: false,
-          kernel: sharp.kernel.lanczos3,
+          kernel: sharp.kernel.lanczos3
         })
         .sharpen()
         .normalize()
@@ -273,10 +259,9 @@ export class OCREngine {
     const lines = tsvOutput.trim().split('\n');
     const results: OCRResult[] = [];
 
-    for (let i = 1; i < lines.length; i++) {
-      // Skip header
+    for (let i = 1; i < lines.length; i++) { // Skip header
       const columns = lines[i].split('\t');
-
+      
       if (columns.length >= 12) {
         const confidence = parseFloat(columns[10]);
         const text = columns[11];
@@ -290,10 +275,10 @@ export class OCREngine {
               y: parseInt(columns[7]),
               width: parseInt(columns[8]),
               height: parseInt(columns[9]),
-              confidence: confidence / 100,
+              confidence: confidence / 100
             },
             language: 'detected',
-            engine: 'tesseract',
+            engine: 'tesseract'
           });
         }
       }
@@ -310,12 +295,12 @@ export class OCREngine {
 
     for (const result of paddleResults) {
       const [bbox, [text, confidence]] = result;
-
+      
       if (confidence >= confidenceThreshold && text.trim()) {
         // PaddleOCR returns 4 corner points, convert to bounding box
         const xs = bbox.map((point: number[]) => point[0]);
         const ys = bbox.map((point: number[]) => point[1]);
-
+        
         const x = Math.min(...xs);
         const y = Math.min(...ys);
         const width = Math.max(...xs) - x;
@@ -329,10 +314,10 @@ export class OCREngine {
             y: Math.round(y),
             width: Math.round(width),
             height: Math.round(height),
-            confidence,
+            confidence
           },
           language: 'detected',
-          engine: 'paddleocr',
+          engine: 'paddleocr'
         });
       }
     }
@@ -348,25 +333,24 @@ export class OCREngine {
 
     // Group results by spatial overlap
     const groups: OCRResult[][] = [];
-
+    
     for (const result of allResults) {
       let merged = false;
-
+      
       for (const group of groups) {
         const representative = group[0];
         const overlap = this.calculateBoundingBoxOverlap(
           result.boundingBox,
-          representative.boundingBox,
+          representative.boundingBox
         );
-
-        if (overlap > 0.5) {
-          // 50% overlap threshold
+        
+        if (overlap > 0.5) { // 50% overlap threshold
           group.push(result);
           merged = true;
           break;
         }
       }
-
+      
       if (!merged) {
         groups.push([result]);
       }
@@ -374,30 +358,32 @@ export class OCREngine {
 
     // For each group, select the best result
     const mergedResults: OCRResult[] = [];
-
+    
     for (const group of groups) {
       if (group.length === 1) {
         mergedResults.push(group[0]);
       } else {
         // Choose result with highest confidence
-        const bestResult = group.reduce((best, current) =>
-          current.confidence > best.confidence ? current : best,
+        const bestResult = group.reduce((best, current) => 
+          current.confidence > best.confidence ? current : best
         );
-
+        
         // If multiple engines agree, increase confidence
         if (group.length > 1) {
-          const textSimilarity = this.calculateTextSimilarity(group.map((r) => r.text));
-
+          const textSimilarity = this.calculateTextSimilarity(
+            group.map(r => r.text)
+          );
+          
           if (textSimilarity > 0.8) {
             bestResult.confidence = Math.min(0.95, bestResult.confidence * 1.2);
           }
         }
-
+        
         mergedResults.push(bestResult);
       }
     }
 
-    return mergedResults.filter((r) => r.confidence >= confidenceThreshold);
+    return mergedResults.filter(r => r.confidence >= confidenceThreshold);
   }
 
   /**
@@ -424,11 +410,11 @@ export class OCREngine {
    */
   private calculateTextSimilarity(texts: string[]): number {
     if (texts.length < 2) return 1.0;
-
-    const normalized = texts.map((t) => t.toLowerCase().trim());
+    
+    const normalized = texts.map(t => t.toLowerCase().trim());
     let totalSimilarity = 0;
     let comparisons = 0;
-
+    
     for (let i = 0; i < normalized.length; i++) {
       for (let j = i + 1; j < normalized.length; j++) {
         const similarity = this.levenshteinSimilarity(normalized[i], normalized[j]);
@@ -436,7 +422,7 @@ export class OCREngine {
         comparisons++;
       }
     }
-
+    
     return comparisons > 0 ? totalSimilarity / comparisons : 0;
   }
 
@@ -446,7 +432,7 @@ export class OCREngine {
   private levenshteinSimilarity(str1: string, str2: string): number {
     const maxLength = Math.max(str1.length, str2.length);
     if (maxLength === 0) return 1.0;
-
+    
     const distance = this.levenshteinDistance(str1, str2);
     return (maxLength - distance) / maxLength;
   }
@@ -456,15 +442,15 @@ export class OCREngine {
    */
   private levenshteinDistance(str1: string, str2: string): number {
     const matrix = [];
-
+    
     for (let i = 0; i <= str2.length; i++) {
       matrix[i] = [i];
     }
-
+    
     for (let j = 0; j <= str1.length; j++) {
       matrix[0][j] = j;
     }
-
+    
     for (let i = 1; i <= str2.length; i++) {
       for (let j = 1; j <= str1.length; j++) {
         if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
@@ -473,12 +459,12 @@ export class OCREngine {
           matrix[i][j] = Math.min(
             matrix[i - 1][j - 1] + 1,
             matrix[i][j - 1] + 1,
-            matrix[i - 1][j] + 1,
+            matrix[i - 1][j] + 1
           );
         }
       }
     }
-
+    
     return matrix[str2.length][str1.length];
   }
 
@@ -489,8 +475,7 @@ export class OCREngine {
     // Sort by reading order (top to bottom, left to right)
     results.sort((a, b) => {
       const yDiff = a.boundingBox.y - b.boundingBox.y;
-      if (Math.abs(yDiff) < 20) {
-        // Same line
+      if (Math.abs(yDiff) < 20) { // Same line
         return a.boundingBox.x - b.boundingBox.x;
       }
       return yDiff;
@@ -499,20 +484,20 @@ export class OCREngine {
     // Add structure metadata
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
-
+      
       // Detect if this is likely a heading (larger text, isolated)
       const isHeading = this.detectHeading(result, results);
-
+      
       // Detect if this is part of a table
       const isTableCell = this.detectTableCell(result, results);
-
+      
       // Add reading order
       result.metadata = {
         ...result.metadata,
         readingOrder: i,
         isHeading,
         isTableCell,
-        structureType: isHeading ? 'heading' : isTableCell ? 'table' : 'paragraph',
+        structureType: isHeading ? 'heading' : (isTableCell ? 'table' : 'paragraph')
       };
     }
   }
@@ -522,14 +507,13 @@ export class OCREngine {
    */
   private detectHeading(result: OCRResult, allResults: OCRResult[]): boolean {
     const height = result.boundingBox.height;
-    const avgHeight =
-      allResults.reduce((sum, r) => sum + r.boundingBox.height, 0) / allResults.length;
-
+    const avgHeight = allResults.reduce((sum, r) => sum + r.boundingBox.height, 0) / allResults.length;
+    
     // Heading heuristics
     const isLargerText = height > avgHeight * 1.3;
     const isShortText = result.text.length < 50;
     const isIsolated = !this.hasNearbyText(result, allResults, 30);
-
+    
     return isLargerText && isShortText && isIsolated;
   }
 
@@ -539,16 +523,16 @@ export class OCREngine {
   private detectTableCell(result: OCRResult, allResults: OCRResult[]): boolean {
     // Look for aligned text elements (same x or y coordinates)
     const threshold = 10; // pixels
-
-    const alignedElements = allResults.filter((other) => {
+    
+    const alignedElements = allResults.filter(other => {
       if (other === result) return false;
-
+      
       const sameRow = Math.abs(result.boundingBox.y - other.boundingBox.y) < threshold;
       const sameColumn = Math.abs(result.boundingBox.x - other.boundingBox.x) < threshold;
-
+      
       return sameRow || sameColumn;
     });
-
+    
     return alignedElements.length >= 2; // At least 2 other aligned elements
   }
 
@@ -556,14 +540,14 @@ export class OCREngine {
    * Check if text has nearby text elements
    */
   private hasNearbyText(result: OCRResult, allResults: OCRResult[], threshold: number): boolean {
-    return allResults.some((other) => {
+    return allResults.some(other => {
       if (other === result) return false;
-
+      
       const distance = Math.sqrt(
         Math.pow(result.boundingBox.x - other.boundingBox.x, 2) +
-          Math.pow(result.boundingBox.y - other.boundingBox.y, 2),
+        Math.pow(result.boundingBox.y - other.boundingBox.y, 2)
       );
-
+      
       return distance < threshold;
     });
   }
@@ -573,18 +557,18 @@ export class OCREngine {
    */
   private mapLanguageForPaddle(tesseractLang: string): string {
     const languageMap: Record<string, string> = {
-      eng: 'en',
-      chi_sim: 'ch',
-      chi_tra: 'chinese_cht',
-      jpn: 'japan',
-      kor: 'korean',
-      fra: 'french',
-      deu: 'german',
-      spa: 'spanish',
-      rus: 'russian',
-      ara: 'arabic',
+      'eng': 'en',
+      'chi_sim': 'ch',
+      'chi_tra': 'chinese_cht',
+      'jpn': 'japan',
+      'kor': 'korean',
+      'fra': 'french',
+      'deu': 'german',
+      'spa': 'spanish',
+      'rus': 'russian',
+      'ara': 'arabic'
     };
-
+    
     return languageMap[tesseractLang] || 'en';
   }
 
@@ -594,7 +578,7 @@ export class OCREngine {
   private async verifyTesseractInstallation(): Promise<void> {
     return new Promise((resolve, reject) => {
       const tesseract = spawn('tesseract', ['--version']);
-
+      
       tesseract.on('close', (code) => {
         if (code === 0) {
           resolve();
@@ -602,7 +586,7 @@ export class OCREngine {
           reject(new Error('Tesseract not found. Please install Tesseract OCR.'));
         }
       });
-
+      
       tesseract.on('error', () => {
         reject(new Error('Tesseract not found. Please install Tesseract OCR.'));
       });
@@ -615,7 +599,7 @@ export class OCREngine {
   private async verifyPaddleOCRInstallation(): Promise<void> {
     return new Promise((resolve, reject) => {
       const python = spawn(this.config.pythonPath, ['-c', 'import paddleocr; print("OK")']);
-
+      
       python.on('close', (code) => {
         if (code === 0) {
           resolve();
@@ -623,7 +607,7 @@ export class OCREngine {
           reject(new Error('PaddleOCR not installed. Please install PaddleOCR Python package.'));
         }
       });
-
+      
       python.on('error', () => {
         reject(new Error('Python not found or PaddleOCR not installed.'));
       });

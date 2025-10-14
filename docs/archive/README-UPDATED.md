@@ -15,13 +15,11 @@ All critical MVP-0 features implemented with enterprise-grade security, observab
 ## 🚀 Quick Start
 
 ### Prerequisites
-
 - Node.js 18+
 - Docker & Docker Compose
 - Git
 
 ### Development Setup
-
 ```bash
 # 1. Clone and setup
 git clone https://github.com/brianlong/intelgraph.git
@@ -42,7 +40,6 @@ make smoke
 ```
 
 ### Production Deployment
-
 ```bash
 # Build and deploy
 docker compose -f docker-compose.prod.yml up -d
@@ -57,35 +54,30 @@ curl http://localhost:9090/metrics
 ## 🏆 MVP-0 Completed Features
 
 ### 🔒 Phase 0: Development Environment
-
 - ✅ **Docker Compose**: Multi-service orchestration with health checks
 - ✅ **Development Scripts**: `make up`, `make down`, `make seed`, `make smoke`
 - ✅ **Environment Configuration**: Proper .env handling and validation
 - ✅ **Service Health Checks**: Automated dependency management
 
 ### 💾 Phase 1: Data Persistence & Copilot Durability
-
 - ✅ **Postgres Integration**: Copilot runs, tasks, and events persistence
 - ✅ **Enhanced Orchestrator**: Resume capability with Redis Streams
 - ✅ **Data Access Layer**: Clean separation between storage and business logic
 - ✅ **Event Sourcing**: Complete audit trail for AI operations
 
 ### 📊 Phase 2: Data Ingestion Pipeline
-
 - ✅ **CSV Import Service**: Streaming imports with field mapping and deduplication
 - ✅ **STIX/TAXII Connector**: STIX 2.1 support with cursor-based pagination
 - ✅ **GraphQL Import APIs**: Standardized import operations
 - ✅ **Progress Tracking**: Real-time import status and error handling
 
 ### 🛡️ Phase 3: Security Hardening
-
 - ✅ **OPA Policy Engine**: Comprehensive RBAC and tenant isolation
 - ✅ **Persisted GraphQL Queries**: Hash-based query whitelisting
 - ✅ **Authentication Middleware**: JWT with proper validation
 - ✅ **Security Policies**: 150+ test cases covering all access patterns
 
 ### 📈 Phase 4: Observability & Performance
-
 - ✅ **OpenTelemetry Tracing**: Distributed tracing with Jaeger integration
 - ✅ **Prometheus Metrics**: 20+ custom metrics for all components
 - ✅ **Grafana Dashboard**: Production-ready monitoring dashboard
@@ -95,21 +87,18 @@ curl http://localhost:9090/metrics
 ## 🎨 User Experience Features
 
 ### 🧭 Golden Path Wizard
-
 - ✅ **5-Step Onboarding**: Create investigation → Add entities → Import data → Run Copilot → View results
 - ✅ **Demo Mode**: Pre-filled sample data for quick evaluation
 - ✅ **Progress Tracking**: Visual progress indicators and help system
 - ✅ **Skip Options**: For experienced users
 
 ### 🤖 Enhanced Copilot Panel
-
 - ✅ **Real-time Events**: Live streaming of AI analysis progress
 - ✅ **Task Visualization**: Progress bars and status indicators
 - ✅ **Pause/Resume**: Control over long-running analyses
 - ✅ **Event History**: Scrollable history with filtering
 
 ### ⚡ Graph Performance Mode
-
 - ✅ **Level-of-Detail Rendering**: Zoom-based quality adjustment
 - ✅ **Community Clustering**: Automatic grouping for large graphs
 - ✅ **Viewport Culling**: Render only visible nodes
@@ -118,7 +107,6 @@ curl http://localhost:9090/metrics
 ## 🏗️ Architecture Overview
 
 ### Core Technology Stack
-
 - **Frontend**: React 18, Material-UI, Cytoscape.js, Socket.IO
 - **Backend**: Node.js, Apollo GraphQL, Express, Socket.IO
 - **Databases**: Neo4j (graph), PostgreSQL (persistence), Redis (cache/streams)
@@ -126,7 +114,6 @@ curl http://localhost:9090/metrics
 - **Monitoring**: OpenTelemetry, Prometheus, Grafana, Jaeger
 
 ### Production Infrastructure
-
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   React Client  │◄──►│  GraphQL API    │◄──►│    Neo4j DB     │
@@ -150,17 +137,15 @@ curl http://localhost:9090/metrics
 ## 🚦 Testing & Quality Assurance
 
 ### Smoke Testing Suite
-
 ```bash
 # Simplified smoke test (works without services)
 node scripts/smoke-test-simple.js
 
-# Comprehensive smoke test (requires running services)
+# Comprehensive smoke test (requires running services)  
 node scripts/smoke-test.js
 ```
 
 **Comprehensive Test Coverage:**
-
 - ✅ Infrastructure health checks (Neo4j, Postgres, Redis)
 - ✅ API health and GraphQL introspection
 - ✅ Golden path workflow validation
@@ -170,7 +155,6 @@ node scripts/smoke-test.js
 - ✅ End-to-end cleanup verification
 
 ### OPA Policy Testing
-
 ```bash
 # Run 150+ security policy tests
 opa test server/policies/
@@ -179,7 +163,6 @@ opa test server/policies/
 ## 📊 Production Monitoring
 
 ### Metrics Available
-
 - **API Performance**: Request rates, response times, error rates
 - **Database Health**: Query performance, connection pools, cache hit rates
 - **Graph Operations**: Node/edge counts, expansion requests, clustering
@@ -187,11 +170,9 @@ opa test server/policies/
 - **Infrastructure**: Memory, CPU, disk usage, network
 
 ### Grafana Dashboard
-
 Production-ready dashboard with 13 panels covering:
-
 - System overview and API performance
-- Database and cache performance
+- Database and cache performance  
 - Graph operations and AI processing
 - Error tracking and pipeline SLIs
 
@@ -200,7 +181,7 @@ Production-ready dashboard with 13 panels covering:
 ```bash
 # Environment management
 make up              # Start all services
-make down            # Stop all services
+make down            # Stop all services  
 make logs            # View service logs
 make smoke           # Run smoke tests
 
@@ -219,14 +200,12 @@ make restore         # Restore from backup
 ## 🎯 Next Steps for Production
 
 ### Critical Production Features (4 High Priority Issues)
-
 1. **OpenTelemetry Integration**: Complete OTLP exporter setup
-2. **Security Scanning**: Add Gitleaks and Trivy to CI pipeline
+2. **Security Scanning**: Add Gitleaks and Trivy to CI pipeline  
 3. **Backup Procedures**: Automated backup and disaster recovery
 4. **Performance Testing**: Load testing and optimization
 
 ### GitHub Issues Ready
-
 ```bash
 # Preview production-ready issues
 python scripts/preview-github-issues.py
@@ -236,7 +215,6 @@ python scripts/create-github-issues.py
 ```
 
 ### Deployment Checklist
-
 - [ ] Set up OTLP endpoint (Jaeger/DataDog/New Relic)
 - [ ] Configure backup scheduling
 - [ ] Set up monitoring alerts
@@ -249,7 +227,6 @@ python scripts/create-github-issues.py
 ## 🛡️ Security Features
 
 ### Production Security Hardening
-
 - ✅ **Multi-tenant Isolation**: OPA policies with 150+ test cases
 - ✅ **Query Whitelisting**: Hash-based persisted GraphQL queries
 - ✅ **JWT Authentication**: With refresh token rotation
@@ -258,7 +235,6 @@ python scripts/create-github-issues.py
 - ✅ **Audit Logging**: Complete operation trail
 
 ### Compliance Ready
-
 - RBAC with granular permissions
 - Data lineage and provenance tracking
 - Secure multi-tenancy
@@ -268,13 +244,11 @@ python scripts/create-github-issues.py
 ## 📞 Support & Contributing
 
 ### Getting Help
-
 - **Documentation**: Complete guides in `docs/` directory
 - **Issues**: [GitHub Issues](https://github.com/brianlong/intelgraph/issues)
 - **Smoke Tests**: Built-in validation and troubleshooting
 
 ### Development Workflow
-
 1. Run `make smoke` to verify environment
 2. Use `scripts/smoke-test-simple.js` for quick validation
 3. Follow conventional commits (`feat:`, `fix:`, `docs:`)
@@ -283,7 +257,6 @@ python scripts/create-github-issues.py
 ## 📈 Performance & Scale
 
 ### Optimizations Implemented
-
 - **Graph Rendering**: LOD with viewport culling for 10k+ nodes
 - **Database**: Proper indexes and query optimization
 - **Caching**: Redis integration for hot data
@@ -291,7 +264,6 @@ python scripts/create-github-issues.py
 - **Memory**: Garbage collection tuning and leak prevention
 
 ### Tested Scale
-
 - ✅ 10,000+ graph nodes with smooth interaction
 - ✅ Real-time updates for 100+ concurrent users
 - ✅ Import processing for large CSV/STIX files
@@ -302,9 +274,8 @@ python scripts/create-github-issues.py
 ## 🎉 Production Ready
 
 This IntelGraph platform is **production-ready** with enterprise-grade:
-
 - **Security**: Multi-tenant isolation, RBAC, query whitelisting
-- **Observability**: Comprehensive metrics, tracing, and dashboards
+- **Observability**: Comprehensive metrics, tracing, and dashboards  
 - **Performance**: Optimized for large-scale graph operations
 - **Reliability**: Robust error handling, retries, and graceful degradation
 - **Testing**: Comprehensive smoke testing and validation

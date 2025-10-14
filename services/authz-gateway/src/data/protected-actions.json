@@ -1,0 +1,7 @@
+[
+  "dataset:write",
+  "dataset:delete",
+  "admin:rotate-keys",
+  "policy:publish",
+  "dataset:share-external"
+]

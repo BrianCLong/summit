@@ -1,3 +1,0 @@
-image: ga-assist:latest
-service:
-  port: 8000

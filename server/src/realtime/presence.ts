@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io';
-import baseLogger from '../config/logger';
+import pino from 'pino';
 
-const logger = baseLogger.child({ name: 'presence' });
+const logger = pino();
 
 interface Presence {
   userId: string;

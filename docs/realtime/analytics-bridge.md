@@ -35,18 +35,10 @@ This component streams partial analytics results and AI insights from Redis Stre
 ```js
 const socket = io('/graph-analytics', { auth: { token } });
 socket.emit('join_job', { jobId });
-socket.on('progress', (ev) => {
-  /* update UI */
-});
-socket.on('result', (ev) => {
-  /* append partial */
-});
-socket.on('error', (ev) => {
-  /* show error */
-});
-socket.on('complete', (ev) => {
-  /* finalize */
-});
+socket.on('progress', (ev) => { /* update UI */ });
+socket.on('result', (ev) => { /* append partial */ });
+socket.on('error', (ev) => { /* show error */ });
+socket.on('complete', (ev) => { /* finalize */ });
 ```
 
 ## Tests
@@ -65,3 +57,4 @@ socket.on('complete', (ev) => {
 
 - First packet latency target: ≤ 500ms; the bridge uses short blocking reads to minimize delay.
 - The general AI insights flow (`ai:insight` to `ai:entity:{id}`) is handled by `server/src/workers/aiWorker.js` on the `/realtime` namespace.
+
