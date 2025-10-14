@@ -1,4 +1,0 @@
-image:
-  repository: ghcr.io/<org>/intelgraph-server
-  tag: latest
-  digest: "" # when set, image will be pulled by digest

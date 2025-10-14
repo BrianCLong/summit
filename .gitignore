@@ -85,6 +85,7 @@ poetry.lock
 **/.gradle/
 
 # Archive files
+archive_legacy/
 *.zip
 *.tar
 *.gz
@@ -107,7 +108,6 @@ cognitive_insights_engine/poetry.lock
 
 # JavaScript/TypeScript package manager lockfiles are ignored to prevent
 # accidental binary diffs from blocking PR workflows
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
@@ -182,3 +182,29 @@ neo4j/data/
 neo4j/import/
 neo4j/logs/
 neo4j/backups/
+
+# vpc (Terraform)
+vpc/.terraform/
+vpc/.terraform.lock.hcl
+vpc/terraform.tfstate
+vpc/terraform.tfstate.backup
+vpc/*.tfvars
+vpc/**/crash.log
+vpc/**/override.tf
+vpc/**/override.tf.json
+
+# webapp (Node)
+webapp/node_modules/
+webapp/.next/
+webapp/dist/
+webapp/.pnpm-store/ops/compose/.env
+!webapp/package-lock.json
+
+# Test caches and artifacts
+.jest-cache-*/
+conductor-ui/.jest-cache-ui/
+.orchestrator/
+apps/**/dist/
+**/dist/
+server/test-results/
+server/junit.xml
