@@ -1,0 +1,107 @@
+# UNIT 83M [CITADEL][BULWARK][WHITE] SPRINT — Q1'26 • S4 (Feb 12–Feb 25)
+
+## 🎯 Objectives
+- Deploy IAM decoys & response automation.
+- Run DLP exfiltration simulation with tripwire triggers.
+- Automate audit closure logic based on conditions.
+- Review all IAM roles for least privilege enforcement.
+- Launch embedded data classification engine.
+- Automate DPIA stub generation on asset onboarding.
+
+---
+
+## ✅ Backlog
+
+| ID | Title | Owner | Definition of Done |
+|----|-------|--------|---------------------|
+| IAM‑25 | Deploy IAM Decoy Roles | CITADEL | Decoy roles trigger alert + auto-disable + notify |
+| DLP‑26 | DLP Tripwire Simulation | BULWARK | Simulated exfil triggers block, alert, and log to IntelGraph |
+| AUD‑27 | Audit Auto-Closure Logic | WHITE | If closure criteria met (e.g., signoff + logs), mark resolved |
+| LPR‑28 | IAM Least Privilege Review Tool | CITADEL | Script outputs access delta from minimal scope |
+| DC‑29 | Data Classifier Engine | WHITE | Tool tags data (PII, contract, financial, logs) on ingestion |
+| DPIA‑30 | DPIA Generator on Asset Onboarding | WHITE | New asset triggers DPIA stub with risk context and policy links |
+
+---
+
+## 🧩 Artifacts
+
+### 1. IAM Decoy Role (Terraform Sketch)
+```hcl
+resource "aws_iam_role" "decoy_role" {
+  name = "decoy-monitor-only"
+  assume_role_policy = "..."
+  tags = {
+    trap = "iam-decoy"
+  }
+}
+```
+
+### 2. DLP Simulation Runbook (Steps)
+- Simulate bulk export of sensitive records
+- Exceed export threshold → trigger block
+- Alert routed to SecOps → IntelGraph node created
+- Auto-disable token or session
+
+### 3. Audit Auto-Closure Rego
+```rego
+package audit.status
+
+closed {
+  input.logs_complete
+  input.signed_by != null
+  input.status != "open"
+}
+```
+
+### 4. Least Privilege Report Generator (Python)
+```python
+for role in roles:
+  granted = set(role.permissions)
+  used = query_usage(role.id)
+  delta = granted - used
+  if delta:
+    print(f"Role {role.name} over-provisioned: {delta}")
+```
+
+### 5. Data Classifier Engine (Tags on Ingest)
+```json
+{
+  "file": "contract_nda.pdf",
+  "classifiers": ["legal_basis:contract", "sensitivity:high", "dlp_required"]
+}
+```
+
+### 6. DPIA Generator (Stub Output)
+```yaml
+dpia_id: dpia_auto_2026_002
+asset: s3://data-partner-raw
+risk_level: high
+controls:
+  - policy_label: dlp_required
+  - export_control: redaction + watermark
+linked_policies: ["opa/data_export.rego"]
+```
+
+---
+
+## 📅 Sprint Exit Criteria (S4)
+- ✅ IAM decoys deployed + alert on access
+- ✅ DLP sim triggers alert, logs, containment
+- ✅ Audits auto-close when inputs met
+- ✅ IAM roles flagged for overprovisioning
+- ✅ New data auto-tagged on ingest
+- ✅ New assets auto-generate DPIA stubs
+
+---
+
+## 📎 References
+- `iam/tripwires/decoy_roles.tf`
+- `runbooks/dlp_sim.md`
+- `audit/rego/status.rego`
+- `tools/least_privilege_audit.py`
+- `pipelines/ingest/classifier.json`
+- `dpia/bundle_generator_v1.0.py`
+
+---
+
+# End of Sprint Plan — UNIT 83M Q1'26 S4

@@ -30,7 +30,7 @@ import {
   AccordionDetails,
   Paper,
   Switch,
-  FormControlLabel,
+  FormControlLabel
 } from '@mui/material';
 import {
   History,
@@ -58,19 +58,19 @@ import {
   Warning,
   Info,
   Backup,
-  CloudDownload,
+  CloudDownload
 } from '@mui/icons-material';
 import { formatDistanceToNow, format } from 'date-fns';
 
-function GraphVersionHistory({
-  graphId,
-  currentVersion,
-  onVersionSelect,
+function GraphVersionHistory({ 
+  graphId, 
+  currentVersion, 
+  onVersionSelect, 
   onVersionRestore,
   onVersionCompare,
   onCreateSnapshot,
   onDeleteVersion,
-  onVersionTag,
+  onVersionTag
 }) {
   const [versions, setVersions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -106,16 +106,16 @@ function GraphVersionHistory({
           stats: {
             nodes: 45,
             edges: 67,
-            changes: 112,
+            changes: 112
           },
           changes: [
             { type: 'add', entity: 'Person', count: 15 },
             { type: 'add', entity: 'Organization', count: 8 },
             { type: 'add', entity: 'Location', count: 12 },
-            { type: 'add', entity: 'Connection', count: 67 },
+            { type: 'add', entity: 'Connection', count: 67 }
           ],
           size: '2.4 MB',
-          commitHash: 'a1b2c3d4',
+          commitHash: 'a1b2c3d4'
         },
         {
           id: 'v1.1.0',
@@ -131,17 +131,17 @@ function GraphVersionHistory({
           stats: {
             nodes: 67,
             edges: 89,
-            changes: 44,
+            changes: 44
           },
           changes: [
             { type: 'add', entity: 'Bank Account', count: 12 },
             { type: 'add', entity: 'Transaction', count: 22 },
             { type: 'edit', entity: 'Person', count: 5 },
-            { type: 'add', entity: 'Connection', count: 22 },
+            { type: 'add', entity: 'Connection', count: 22 }
           ],
           size: '3.1 MB',
           commitHash: 'e5f6g7h8',
-          parentVersion: 'v1.0.0',
+          parentVersion: 'v1.0.0'
         },
         {
           id: 'v1.2.0',
@@ -157,16 +157,16 @@ function GraphVersionHistory({
           stats: {
             nodes: 89,
             edges: 134,
-            changes: 67,
+            changes: 67
           },
           changes: [
             { type: 'add', entity: 'Location Cluster', count: 8 },
             { type: 'edit', entity: 'Location', count: 14 },
-            { type: 'add', entity: 'Geographic Link', count: 45 },
+            { type: 'add', entity: 'Geographic Link', count: 45 }
           ],
           size: '4.7 MB',
           commitHash: 'i9j0k1l2',
-          parentVersion: 'v1.1.0',
+          parentVersion: 'v1.1.0'
         },
         {
           id: 'v1.3.0',
@@ -182,17 +182,17 @@ function GraphVersionHistory({
           stats: {
             nodes: 112,
             edges: 178,
-            changes: 44,
+            changes: 44
           },
           changes: [
             { type: 'add', entity: 'Communication', count: 23 },
             { type: 'edit', entity: 'Person', count: 12 },
-            { type: 'add', entity: 'Sentiment Link', count: 44 },
+            { type: 'add', entity: 'Sentiment Link', count: 44 }
           ],
           size: '6.2 MB',
           commitHash: 'm3n4o5p6',
-          parentVersion: 'v1.2.0',
-        },
+          parentVersion: 'v1.2.0'
+        }
       ]);
       setLoading(false);
     }, 1000);
@@ -222,7 +222,7 @@ function GraphVersionHistory({
     if (onCreateSnapshot) {
       onCreateSnapshot({
         name: newVersionName,
-        description: newVersionDescription,
+        description: newVersionDescription
       });
       setCreateDialog(false);
       setNewVersionName('');
@@ -243,34 +243,26 @@ function GraphVersionHistory({
     event.preventDefault();
     setContextMenu({
       mouseX: event.clientX - 2,
-      mouseY: event.clientY - 4,
+      mouseY: event.clientY - 4
     });
     setSelectedVersion(version);
   };
 
   const getChangeTypeIcon = (type) => {
     switch (type) {
-      case 'add':
-        return <Add color="success" />;
-      case 'remove':
-        return <Remove color="error" />;
-      case 'edit':
-        return <Edit color="warning" />;
-      default:
-        return <Changes />;
+      case 'add': return <Add color="success" />;
+      case 'remove': return <Remove color="error" />;
+      case 'edit': return <Edit color="warning" />;
+      default: return <Changes />;
     }
   };
 
   const getChangeTypeColor = (type) => {
     switch (type) {
-      case 'add':
-        return 'success';
-      case 'remove':
-        return 'error';
-      case 'edit':
-        return 'warning';
-      default:
-        return 'default';
+      case 'add': return 'success';
+      case 'remove': return 'error';
+      case 'edit': return 'warning';
+      default: return 'default';
     }
   };
 
@@ -282,14 +274,19 @@ function GraphVersionHistory({
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
               {version.name}
             </Typography>
-            {version.isCurrent && <Chip label="Current" color="primary" size="small" />}
+            {version.isCurrent && (
+              <Chip label="Current" color="primary" size="small" />
+            )}
             {version.isStarred && <Star color="warning" fontSize="small" />}
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="caption" color="text.secondary">
               {version.commitHash}
             </Typography>
-            <IconButton size="small" onClick={(e) => handleContextMenu(e, version)}>
+            <IconButton
+              size="small"
+              onClick={(e) => handleContextMenu(e, version)}
+            >
               <MoreVert />
             </IconButton>
           </Box>
@@ -344,7 +341,9 @@ function GraphVersionHistory({
               <List dense>
                 {version.changes.map((change, index) => (
                   <ListItem key={index}>
-                    <ListItemAvatar>{getChangeTypeIcon(change.type)}</ListItemAvatar>
+                    <ListItemAvatar>
+                      {getChangeTypeIcon(change.type)}
+                    </ListItemAvatar>
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -391,9 +390,9 @@ function GraphVersionHistory({
             startIcon={<Compare />}
             onClick={() => {
               if (selectedVersions.includes(version)) {
-                setSelectedVersions((prev) => prev.filter((v) => v.id !== version.id));
+                setSelectedVersions(prev => prev.filter(v => v.id !== version.id));
               } else if (selectedVersions.length < 2) {
-                setSelectedVersions((prev) => [...prev, version]);
+                setSelectedVersions(prev => [...prev, version]);
               }
             }}
             color={selectedVersions.includes(version) ? 'primary' : 'inherit'}
@@ -405,14 +404,10 @@ function GraphVersionHistory({
     );
 
     return (
-      <Card
-        sx={{
-          mb: 2,
-          border: version.isCurrent ? 2 : 1,
-          borderColor: version.isCurrent ? 'primary.main' : 'divider',
-        }}
-      >
-        <CardContent>{ItemContent}</CardContent>
+      <Card sx={{ mb: 2, border: version.isCurrent ? 2 : 1, borderColor: version.isCurrent ? 'primary.main' : 'divider' }}>
+        <CardContent>
+          {ItemContent}
+        </CardContent>
       </Card>
     );
   };
@@ -427,11 +422,18 @@ function GraphVersionHistory({
         <Box sx={{ display: 'flex', gap: 1 }}>
           <FormControlLabel
             control={
-              <Switch checked={showDetails} onChange={(e) => setShowDetails(e.target.checked)} />
+              <Switch
+                checked={showDetails}
+                onChange={(e) => setShowDetails(e.target.checked)}
+              />
             }
             label="Show details"
           />
-          <Button variant="outlined" startIcon={<Save />} onClick={() => setCreateDialog(true)}>
+          <Button
+            variant="outlined"
+            startIcon={<Save />}
+            onClick={() => setCreateDialog(true)}
+          >
             Create Snapshot
           </Button>
           {selectedVersions.length === 2 && (
@@ -474,19 +476,19 @@ function GraphVersionHistory({
         onClose={() => setContextMenu(null)}
         anchorReference="anchorPosition"
         anchorPosition={
-          contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
+          contextMenu !== null
+            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+            : undefined
         }
       >
         <MenuItem onClick={() => setTagDialog(true)}>
           <Label sx={{ mr: 1 }} />
           Add Tag
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setSelectedVersion((prev) => ({ ...prev, isStarred: !prev.isStarred }));
-            setContextMenu(null);
-          }}
-        >
+        <MenuItem onClick={() => {
+          setSelectedVersion(prev => ({ ...prev, isStarred: !prev.isStarred }));
+          setContextMenu(null);
+        }}>
           {selectedVersion?.isStarred ? <StarBorder sx={{ mr: 1 }} /> : <Star sx={{ mr: 1 }} />}
           {selectedVersion?.isStarred ? 'Unstar' : 'Star'}
         </MenuItem>
@@ -515,8 +517,7 @@ function GraphVersionHistory({
                 Comparing: {selectedVersions[0].name} vs {selectedVersions[1].name}
               </Typography>
               <Alert severity="info">
-                This will open a side-by-side comparison view showing the differences between these
-                two versions.
+                This will open a side-by-side comparison view showing the differences between these two versions.
               </Alert>
             </Box>
           )}
@@ -553,8 +554,8 @@ function GraphVersionHistory({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCreateDialog(false)}>Cancel</Button>
-          <Button
-            variant="contained"
+          <Button 
+            variant="contained" 
             onClick={handleCreateSnapshot}
             disabled={!newVersionName.trim()}
           >
@@ -578,7 +579,11 @@ function GraphVersionHistory({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setTagDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleAddTag} disabled={!newTag.trim()}>
+          <Button 
+            variant="contained" 
+            onClick={handleAddTag}
+            disabled={!newTag.trim()}
+          >
             Add Tag
           </Button>
         </DialogActions>
