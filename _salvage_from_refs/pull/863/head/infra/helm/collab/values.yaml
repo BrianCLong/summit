@@ -1,3 +1,0 @@
-image: collab:latest
-service:
-  port: 4010

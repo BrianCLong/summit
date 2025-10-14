@@ -21,7 +21,7 @@ class MigrationManager {
   async initialize() {
     const pool = getPostgresPool();
     const client = await pool.connect();
-
+    
     try {
       // Create migrations table in Postgres for tracking
       await client.query(`
@@ -33,7 +33,7 @@ class MigrationManager {
           execution_time_ms INTEGER
         )
       `);
-
+      
       logger.info('Migration system initialized');
     } finally {
       client.release();
@@ -46,11 +46,13 @@ class MigrationManager {
   async getAppliedMigrations() {
     const pool = getPostgresPool();
     const client = await pool.connect();
-
+    
     try {
-      const result = await client.query('SELECT version FROM neo4j_migrations ORDER BY version');
-
-      this.appliedMigrations = new Set(result.rows.map((r) => r.version));
+      const result = await client.query(
+        'SELECT version FROM neo4j_migrations ORDER BY version'
+      );
+      
+      this.appliedMigrations = new Set(result.rows.map(r => r.version));
       return this.appliedMigrations;
     } finally {
       client.release();
@@ -64,8 +66,8 @@ class MigrationManager {
     try {
       const files = await fs.readdir(this.migrationsPath);
       return files
-        .filter((f) => f.endsWith('.js'))
-        .map((f) => f.replace('.js', ''))
+        .filter(f => f.endsWith('.js'))
+        .map(f => f.replace('.js', ''))
         .sort();
     } catch (error) {
       logger.warn('No migration directory found, creating...');
@@ -80,10 +82,10 @@ class MigrationManager {
   async migrate() {
     await this.initialize();
     await this.getAppliedMigrations();
-
+    
     const availableMigrations = await this.getAvailableMigrations();
     const pendingMigrations = availableMigrations.filter(
-      (version) => !this.appliedMigrations.has(version),
+      version => !this.appliedMigrations.has(version)
     );
 
     if (pendingMigrations.length === 0) {
@@ -106,14 +108,14 @@ class MigrationManager {
   async runMigration(version) {
     const startTime = Date.now();
     const migrationPath = path.join(this.migrationsPath, `${version}.js`);
-
+    
     try {
       logger.info(`Running migration ${version}...`);
-
+      
       // Load migration module
       delete require.cache[require.resolve(migrationPath)];
       const migration = require(migrationPath);
-
+      
       // Validate migration structure
       if (!migration.description || !migration.up) {
         throw new Error(`Invalid migration ${version}: missing description or up function`);
@@ -122,7 +124,7 @@ class MigrationManager {
       // Run the migration
       const driver = getNeo4jDriver();
       const session = driver.session();
-
+      
       try {
         await migration.up(session);
         await session.close();
@@ -135,18 +137,19 @@ class MigrationManager {
       const executionTime = Date.now() - startTime;
       const pool = getPostgresPool();
       const client = await pool.connect();
-
+      
       try {
         await client.query(
           `INSERT INTO neo4j_migrations (version, description, execution_time_ms) 
            VALUES ($1, $2, $3)`,
-          [version, migration.description, executionTime],
+          [version, migration.description, executionTime]
         );
       } finally {
         client.release();
       }
 
       logger.info(`✅ Migration ${version} completed in ${executionTime}ms`);
+      
     } catch (error) {
       logger.error(`❌ Migration ${version} failed:`, error.message);
       throw error;
@@ -194,7 +197,7 @@ module.exports = {
 
     await fs.mkdir(this.migrationsPath, { recursive: true });
     await fs.writeFile(filepath, template);
-
+    
     logger.info(`Created migration: ${filename}`);
     return version;
   }
@@ -205,11 +208,11 @@ module.exports = {
   async status() {
     await this.getAppliedMigrations();
     const availableMigrations = await this.getAvailableMigrations();
-
-    const status = availableMigrations.map((version) => ({
+    
+    const status = availableMigrations.map(version => ({
       version,
       applied: this.appliedMigrations.has(version),
-      status: this.appliedMigrations.has(version) ? '✅ Applied' : '⏳ Pending',
+      status: this.appliedMigrations.has(version) ? '✅ Applied' : '⏳ Pending'
     }));
 
     return status;
@@ -221,5 +224,5 @@ const migrationManager = new MigrationManager();
 
 module.exports = {
   MigrationManager,
-  migrationManager,
+  migrationManager
 };

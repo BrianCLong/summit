@@ -1,8 +1,0 @@
-type PsiSession { id: ID!, pubKey: String!, nonce: String!, ttlMs: Int!, createdAt: String! }
-
-type DpJoinResult { value: Float!, meta: JSON! }
-
-extend type Mutation {
-  psiStartSession(ttlMs: Int): PsiSession!
-  dpJoinAggregate(sessionId: ID!, tokenRef: String!, template: String!, epsilon: Float!, delta: Float!, kMin: Int!): DpJoinResult!
-}

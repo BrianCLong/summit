@@ -1,0 +1,16 @@
+75b869823ddc96072bc71a461d700553
+"use strict";
+// Simple utility functions for testing
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.subtract = subtract;
+exports.divide = divide;
+function subtract(a, b) {
+    return a - b;
+}
+function divide(a, b) {
+    if (b === 0) {
+        throw new Error('Division by zero');
+    }
+    return a / b;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci9zcmMvdGVzdHMvdXRpbHMyL21hdGhVdGlsczIudHMiLCJtYXBwaW5ncyI6IjtBQUFBLHVDQUF1Qzs7QUFFdkMsNEJBRUM7QUFFRCx3QkFLQztBQVRELFNBQWdCLFFBQVEsQ0FBQyxDQUFTLEVBQUUsQ0FBUztJQUMzQyxPQUFPLENBQUMsR0FBRyxDQUFDLENBQUM7QUFDZixDQUFDO0FBRUQsU0FBZ0IsTUFBTSxDQUFDLENBQVMsRUFBRSxDQUFTO0lBQ3pDLElBQUksQ0FBQyxLQUFLLENBQUMsRUFBRSxDQUFDO1FBQ1osTUFBTSxJQUFJLEtBQUssQ0FBQyxrQkFBa0IsQ0FBQyxDQUFDO0lBQ3RDLENBQUM7SUFDRCxPQUFPLENBQUMsR0FBRyxDQUFDLENBQUM7QUFDZixDQUFDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9Vc2Vycy9icmlhbmxvbmcvRGV2ZWxvcGVyL3N1bW1pdC9zZXJ2ZXIvc3JjL3Rlc3RzL3V0aWxzMi9tYXRoVXRpbHMyLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8vIFNpbXBsZSB1dGlsaXR5IGZ1bmN0aW9ucyBmb3IgdGVzdGluZ1xuXG5leHBvcnQgZnVuY3Rpb24gc3VidHJhY3QoYTogbnVtYmVyLCBiOiBudW1iZXIpOiBudW1iZXIge1xuICByZXR1cm4gYSAtIGI7XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBkaXZpZGUoYTogbnVtYmVyLCBiOiBudW1iZXIpOiBudW1iZXIge1xuICBpZiAoYiA9PT0gMCkge1xuICAgIHRocm93IG5ldyBFcnJvcignRGl2aXNpb24gYnkgemVybycpO1xuICB9XG4gIHJldHVybiBhIC8gYjtcbn0iXSwidmVyc2lvbiI6M30=

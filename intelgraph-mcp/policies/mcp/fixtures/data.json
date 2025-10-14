@@ -1,0 +1,19 @@
+{
+  "manifests": {
+    "tenant-a": {
+      "tools": {
+        "echo": true,
+        "ping": true
+      }
+    }
+  },
+  "purposes": {
+    "read": ["ops", "analytics"],
+    "write": ["ops"]
+  },
+  "egress_exceptions": {
+    "tenant-a": {
+      "https://api.github.com": true
+    }
+  }
+}

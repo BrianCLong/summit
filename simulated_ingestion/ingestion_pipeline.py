@@ -31,7 +31,11 @@ class MockGraphDBClient:
         node_id = node_data.get('properties', {}).get('id') or node_data.get('id')
         if node_id:
             self.nodes.append(node_data)
-            self.graph_representation.add_node(node_id)
+            attributes = {
+                "type": node_data.get('type'),
+                **node_data.get('properties', {}),
+            }
+            self.graph_representation.add_node(node_id, attributes=attributes)
             print(f"Mock DB: Created node {node_data.get('type')}: {node_data.get('properties', {}).get('name')}")
         else:
             print(f"Mock DB: Warning - Node data missing ID: {node_data}")
@@ -42,7 +46,12 @@ class MockGraphDBClient:
         target_id = rel_data.get('target_id')
         if source_id and target_id:
             self.relationships.append(rel_data)
-            self.graph_representation.add_edge(source_id, target_id)
+            edge_attributes = {
+                key: value
+                for key, value in rel_data.items()
+                if key not in {'source_id', 'target_id'}
+            }
+            self.graph_representation.add_edge(source_id, target_id, attributes=edge_attributes)
             print(f"Mock DB: Created relationship {rel_data.get('type')}")
         else:
             print(f"Mock DB: Warning - Relationship data missing source/target ID: {rel_data}")
