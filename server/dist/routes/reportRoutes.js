@@ -8,3 +8,4 @@ router.post('/generate', async (req, res) => {
     await controller.generate(req, res);
 });
 module.exports = router;
+//# sourceMappingURL=reportRoutes.js.map
