@@ -7,9 +7,6 @@ import crypto from 'crypto';
 import { insertAnalyticsTrace } from '../../db/timescale.js';
 import logger from '../../utils/logger.js';
 export class GraphXAIExplainer {
-    static instance;
-    explanationCache = new Map();
-    modelCards = new Map();
     static getInstance() {
         if (!GraphXAIExplainer.instance) {
             GraphXAIExplainer.instance = new GraphXAIExplainer();
@@ -17,6 +14,8 @@ export class GraphXAIExplainer {
         return GraphXAIExplainer.instance;
     }
     constructor() {
+        this.explanationCache = new Map();
+        this.modelCards = new Map();
         this.initializeModelCards();
     }
     // Committee requirement: Model cards for explainability
@@ -353,3 +352,4 @@ export class GraphXAIExplainer {
     }
 }
 export default GraphXAIExplainer;
+//# sourceMappingURL=graph-explainer.js.map
