@@ -33,7 +33,7 @@ import {
   FormControlLabel,
   Button,
   Chip,
-  LinearProgress,
+  LinearProgress
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -66,7 +66,7 @@ import {
   Map,
   Chat,
   Bookmark,
-  CloudDownload,
+  CloudDownload
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -82,7 +82,7 @@ function ResponsiveLayout({ children }) {
   const dispatch = useDispatch();
   const { isMobile, isTablet, isDesktop } = useResponsive();
   const { announce, announcements, prefersReducedMotion } = useAccessibility();
-
+  
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopOpen, setDesktopOpen] = useState(true);
   const [miniDrawer, setMiniDrawer] = useState(false);
@@ -91,35 +91,17 @@ function ResponsiveLayout({ children }) {
   const [accessibilityPanelOpen, setAccessibilityPanelOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [notifications] = useState([
-    {
-      id: 1,
-      title: 'New analysis complete',
-      message: 'Graph centrality analysis finished',
-      type: 'info',
-      unread: true,
-    },
-    {
-      id: 2,
-      title: 'Anomaly detected',
-      message: 'Unusual pattern found in network',
-      type: 'warning',
-      unread: true,
-    },
-    {
-      id: 3,
-      title: 'Investigation updated',
-      message: 'Case #INV-001 has new evidence',
-      type: 'success',
-      unread: false,
-    },
+    { id: 1, title: 'New analysis complete', message: 'Graph centrality analysis finished', type: 'info', unread: true },
+    { id: 2, title: 'Anomaly detected', message: 'Unusual pattern found in network', type: 'warning', unread: true },
+    { id: 3, title: 'Investigation updated', message: 'Case #INV-001 has new evidence', type: 'success', unread: false }
   ]);
 
   const mainRef = useRef(null);
   const skipLinkRef = useRef(null);
 
   // Redux state
-  const { user } = useSelector((state) => state.auth || {});
-  const { darkMode } = useSelector((state) => state.ui || {});
+  const { user } = useSelector(state => state.auth || {});
+  const { darkMode } = useSelector(state => state.ui || {});
 
   useEffect(() => {
     const handleScroll = () => {
@@ -144,72 +126,72 @@ function ResponsiveLayout({ children }) {
 
   // Navigation items with accessibility labels
   const navigationItems = [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      icon: <Dashboard />,
+    { 
+      id: 'dashboard', 
+      label: 'Dashboard', 
+      icon: <Dashboard />, 
       path: '/dashboard',
-      ariaLabel: 'Go to main dashboard',
+      ariaLabel: 'Go to main dashboard'
     },
-    {
-      id: 'investigations',
-      label: 'Investigations',
-      icon: <Search />,
+    { 
+      id: 'investigations', 
+      label: 'Investigations', 
+      icon: <Search />, 
       path: '/investigations',
-      ariaLabel: 'View and manage investigations',
+      ariaLabel: 'View and manage investigations'
     },
-    {
-      id: 'graph',
-      label: 'Graph Explorer',
-      icon: <AccountTree />,
+    { 
+      id: 'graph', 
+      label: 'Graph Explorer', 
+      icon: <AccountTree />, 
       path: '/graph',
-      ariaLabel: 'Explore network graphs',
+      ariaLabel: 'Explore network graphs'
     },
-    {
-      id: 'analytics',
-      label: 'Analytics',
-      icon: <Analytics />,
+    { 
+      id: 'analytics', 
+      label: 'Analytics', 
+      icon: <Analytics />, 
       path: '/analytics',
-      ariaLabel: 'View analytics and reports',
+      ariaLabel: 'View analytics and reports'
     },
-    {
-      id: 'ai-insights',
-      label: 'AI Insights',
-      icon: <Psychology />,
+    { 
+      id: 'ai-insights', 
+      label: 'AI Insights', 
+      icon: <Psychology />, 
       path: '/ai-insights',
-      ariaLabel: 'Access AI-powered insights',
-    },
+      ariaLabel: 'Access AI-powered insights'
+    }
   ];
 
   const toolsItems = [
-    {
-      id: 'timeline',
-      label: 'Timeline',
-      icon: <Timeline />,
+    { 
+      id: 'timeline', 
+      label: 'Timeline', 
+      icon: <Timeline />, 
       path: '/timeline',
-      ariaLabel: 'View timeline analysis',
+      ariaLabel: 'View timeline analysis'
     },
-    {
-      id: 'geospatial',
-      label: 'Geospatial',
-      icon: <Map />,
+    { 
+      id: 'geospatial', 
+      label: 'Geospatial', 
+      icon: <Map />, 
       path: '/geospatial',
-      ariaLabel: 'Access geospatial tools',
+      ariaLabel: 'Access geospatial tools'
     },
-    {
-      id: 'collaboration',
-      label: 'Collaboration',
-      icon: <Chat />,
+    { 
+      id: 'collaboration', 
+      label: 'Collaboration', 
+      icon: <Chat />, 
       path: '/collaboration',
-      ariaLabel: 'Collaborate with team members',
+      ariaLabel: 'Collaborate with team members'
     },
-    {
-      id: 'documents',
-      label: 'Documents',
-      icon: <Description />,
+    { 
+      id: 'documents', 
+      label: 'Documents', 
+      icon: <Description />, 
       path: '/documents',
-      ariaLabel: 'Manage documents and files',
-    },
+      ariaLabel: 'Manage documents and files'
+    }
   ];
 
   const handleDrawerToggle = () => {
@@ -241,12 +223,11 @@ function ResponsiveLayout({ children }) {
 
   const DrawerContent = ({ variant = 'permanent' }) => (
     <Box
-      sx={{
-        width:
-          variant === 'temporary' ? DRAWER_WIDTH : miniDrawer ? MINI_DRAWER_WIDTH : DRAWER_WIDTH,
+      sx={{ 
+        width: variant === 'temporary' ? DRAWER_WIDTH : (miniDrawer ? MINI_DRAWER_WIDTH : DRAWER_WIDTH),
         height: '100%',
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'column'
       }}
       role="navigation"
       aria-label="Main navigation"
@@ -258,14 +239,14 @@ function ResponsiveLayout({ children }) {
           display: 'flex',
           alignItems: 'center',
           gap: 2,
-          minHeight: 64,
+          minHeight: 64
         }}
       >
         <Avatar
           sx={{
             bgcolor: 'primary.main',
             width: 40,
-            height: 40,
+            height: 40
           }}
         >
           IG
@@ -302,21 +283,23 @@ function ResponsiveLayout({ children }) {
                     bgcolor: 'primary.main',
                     color: 'primary.contrastText',
                     '&:hover': {
-                      bgcolor: 'primary.dark',
-                    },
-                  },
+                      bgcolor: 'primary.dark'
+                    }
+                  }
                 }}
                 aria-label={item.ariaLabel}
               >
                 <ListItemIcon
                   sx={{
                     color: location.pathname === item.path ? 'inherit' : 'text.secondary',
-                    minWidth: miniDrawer && variant !== 'temporary' ? 'auto' : 56,
+                    minWidth: miniDrawer && variant !== 'temporary' ? 'auto' : 56
                   }}
                 >
                   {item.icon}
                 </ListItemIcon>
-                {(!miniDrawer || variant === 'temporary') && <ListItemText primary={item.label} />}
+                {(!miniDrawer || variant === 'temporary') && (
+                  <ListItemText primary={item.label} />
+                )}
               </ListItemButton>
             </ListItem>
           ))}
@@ -340,19 +323,21 @@ function ResponsiveLayout({ children }) {
                 onClick={() => handleNavigate(item.path, item.label)}
                 sx={{
                   mx: 1,
-                  borderRadius: 1,
+                  borderRadius: 1
                 }}
                 aria-label={item.ariaLabel}
               >
                 <ListItemIcon
                   sx={{
                     color: 'text.secondary',
-                    minWidth: miniDrawer && variant !== 'temporary' ? 'auto' : 56,
+                    minWidth: miniDrawer && variant !== 'temporary' ? 'auto' : 56
                   }}
                 >
                   {item.icon}
                 </ListItemIcon>
-                {(!miniDrawer || variant === 'temporary') && <ListItemText primary={item.label} />}
+                {(!miniDrawer || variant === 'temporary') && (
+                  <ListItemText primary={item.label} />
+                )}
               </ListItemButton>
             </ListItem>
           ))}
@@ -371,10 +356,12 @@ function ResponsiveLayout({ children }) {
             <ListItemIcon sx={{ color: 'text.secondary' }}>
               <Accessibility />
             </ListItemIcon>
-            {(!miniDrawer || variant === 'temporary') && <ListItemText primary="Accessibility" />}
+            {(!miniDrawer || variant === 'temporary') && (
+              <ListItemText primary="Accessibility" />
+            )}
           </ListItemButton>
         </ListItem>
-
+        
         <ListItem disablePadding>
           <ListItemButton
             onClick={() => handleNavigate('/settings', 'Settings')}
@@ -384,7 +371,9 @@ function ResponsiveLayout({ children }) {
             <ListItemIcon sx={{ color: 'text.secondary' }}>
               <Settings />
             </ListItemIcon>
-            {(!miniDrawer || variant === 'temporary') && <ListItemText primary="Settings" />}
+            {(!miniDrawer || variant === 'temporary') && (
+              <ListItemText primary="Settings" />
+            )}
           </ListItemButton>
         </ListItem>
       </List>
@@ -410,8 +399,8 @@ function ResponsiveLayout({ children }) {
           borderRadius: 1,
           textDecoration: 'none',
           '&:focus': {
-            top: 6,
-          },
+            top: 6
+          }
         }}
         onFocus={() => announce('Skip to main content link focused')}
       >
@@ -423,14 +412,12 @@ function ResponsiveLayout({ children }) {
         position="fixed"
         sx={{
           width: {
-            sm: isMobile
-              ? '100%'
-              : `calc(100% - ${desktopOpen ? DRAWER_WIDTH : MINI_DRAWER_WIDTH}px)`,
+            sm: isMobile ? '100%' : `calc(100% - ${desktopOpen ? DRAWER_WIDTH : MINI_DRAWER_WIDTH}px)`
           },
           ml: {
-            sm: isMobile ? 0 : desktopOpen ? DRAWER_WIDTH : MINI_DRAWER_WIDTH,
+            sm: isMobile ? 0 : (desktopOpen ? DRAWER_WIDTH : MINI_DRAWER_WIDTH)
           },
-          zIndex: theme.zIndex.drawer + 1,
+          zIndex: theme.zIndex.drawer + 1
         }}
         elevation={1}
       >
@@ -469,10 +456,7 @@ function ResponsiveLayout({ children }) {
                     onClick={(e) => setNotificationsAnchor(e.currentTarget)}
                     aria-label="View notifications"
                   >
-                    <Badge
-                      badgeContent={notifications.filter((n) => n.unread).length}
-                      color="error"
-                    >
+                    <Badge badgeContent={notifications.filter(n => n.unread).length} color="error">
                       <Notifications />
                     </Badge>
                   </IconButton>
@@ -487,7 +471,9 @@ function ResponsiveLayout({ children }) {
                 onClick={(e) => setUserMenuAnchor(e.currentTarget)}
                 aria-label="Open user menu"
               >
-                <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
+                <Avatar
+                  sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}
+                >
                   {user?.firstName?.[0] || 'U'}
                 </Avatar>
               </IconButton>
@@ -508,10 +494,10 @@ function ResponsiveLayout({ children }) {
               boxSizing: 'border-box',
               transition: theme.transitions.create('width', {
                 easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen,
+                duration: theme.transitions.duration.enteringScreen
               }),
-              overflowX: 'hidden',
-            },
+              overflowX: 'hidden'
+            }
           }}
           open={desktopOpen}
         >
@@ -526,13 +512,13 @@ function ResponsiveLayout({ children }) {
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile
+            keepMounted: true // Better open performance on mobile
           }}
           sx={{
             '& .MuiDrawer-paper': {
               width: DRAWER_WIDTH,
-              boxSizing: 'border-box',
-            },
+              boxSizing: 'border-box'
+            }
           }}
         >
           <DrawerContent variant="temporary" />
@@ -549,7 +535,7 @@ function ResponsiveLayout({ children }) {
           overflow: 'auto',
           height: '100vh',
           pt: 8, // Account for AppBar
-          backgroundColor: 'background.default',
+          backgroundColor: 'background.default'
         }}
         tabIndex={-1} // Make focusable for skip link
       >
@@ -568,7 +554,7 @@ function ResponsiveLayout({ children }) {
               position: 'fixed',
               bottom: 16,
               right: 16,
-              zIndex: theme.zIndex.speedDial,
+              zIndex: theme.zIndex.speedDial
             }}
           >
             <KeyboardArrowUp />
@@ -585,26 +571,16 @@ function ResponsiveLayout({ children }) {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         <MenuItem onClick={() => handleNavigate('/profile', 'Profile')}>
-          <ListItemIcon>
-            <Person fontSize="small" />
-          </ListItemIcon>
+          <ListItemIcon><Person fontSize="small" /></ListItemIcon>
           <ListItemText>Profile</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleNavigate('/settings', 'Settings')}>
-          <ListItemIcon>
-            <Settings fontSize="small" />
-          </ListItemIcon>
+          <ListItemIcon><Settings fontSize="small" /></ListItemIcon>
           <ListItemText>Settings</ListItemText>
         </MenuItem>
         <Divider />
-        <MenuItem
-          onClick={() => {
-            /* Logout logic */
-          }}
-        >
-          <ListItemIcon>
-            <ExitToApp fontSize="small" />
-          </ListItemIcon>
+        <MenuItem onClick={() => {/* Logout logic */}}>
+          <ListItemIcon><ExitToApp fontSize="small" /></ListItemIcon>
           <ListItemText>Sign Out</ListItemText>
         </MenuItem>
       </Menu>
@@ -617,7 +593,7 @@ function ResponsiveLayout({ children }) {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         PaperProps={{
-          sx: { width: 320, maxHeight: 400 },
+          sx: { width: 320, maxHeight: 400 }
         }}
       >
         <Box sx={{ p: 2 }}>
@@ -631,7 +607,9 @@ function ResponsiveLayout({ children }) {
                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
                   {notification.title}
                 </Typography>
-                {notification.unread && <Chip label="New" size="small" color="primary" />}
+                {notification.unread && (
+                  <Chip label="New" size="small" color="primary" />
+                )}
               </Box>
               <Typography variant="body2" color="text.secondary">
                 {notification.message}
@@ -652,7 +630,7 @@ function ResponsiveLayout({ children }) {
           <Typography variant="h6" gutterBottom>
             Accessibility Settings
           </Typography>
-
+          
           <FormControlLabel
             control={<Switch checked={darkMode} onChange={toggleDarkMode} />}
             label="Dark Mode"
@@ -711,11 +689,13 @@ function ResponsiveLayout({ children }) {
           left: -10000,
           width: 1,
           height: 1,
-          overflow: 'hidden',
+          overflow: 'hidden'
         }}
       >
         {announcements.map((announcement) => (
-          <div key={announcement.id}>{announcement.message}</div>
+          <div key={announcement.id}>
+            {announcement.message}
+          </div>
         ))}
       </Box>
     </Box>

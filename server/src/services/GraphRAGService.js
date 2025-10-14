@@ -14,13 +14,13 @@ class GraphRAGService {
     this.llmService = llmService;
     this.redis = redisClient;
     this.logger = logger;
-
+    
     this.metrics = {
       totalQueries: 0,
       averageResponseTime: 0,
       cacheHitRate: 0,
       relevanceScores: [],
-      contextSizes: [],
+      contextSizes: []
     };
 
     // Configuration
@@ -31,7 +31,7 @@ class GraphRAGService {
       embeddingDimension: 384,
       cacheTTL: 3600, // 1 hour
       llmModel: 'gpt-3.5-turbo',
-      embeddingModel: 'text-embedding-3-small',
+      embeddingModel: 'text-embedding-3-small'
     };
   }
 
@@ -39,7 +39,12 @@ class GraphRAGService {
    * Main GraphRAG query method
    */
   async query(params) {
-    const { query, investigationId, context = {}, options = {} } = params;
+    const {
+      query,
+      investigationId,
+      context = {},
+      options = {}
+    } = params;
 
     const queryId = uuidv4();
     const startTime = Date.now();
@@ -49,7 +54,7 @@ class GraphRAGService {
         logger.info('GraphRAG query initiated', {
           queryId,
           investigationId,
-          queryLength: query.length,
+          queryLength: query.length
         });
 
         // Step 1: Generate query embedding
@@ -57,9 +62,9 @@ class GraphRAGService {
 
         // Step 2: Retrieve relevant graph context
         const graphContext = await this.retrieveGraphContext(
-          queryEmbedding,
-          investigationId,
-          options,
+          queryEmbedding, 
+          investigationId, 
+          options
         );
 
         // Step 3: Rank and filter retrieved content
@@ -82,7 +87,7 @@ class GraphRAGService {
           investigationId,
           responseTime,
           contextSize: rankedContext.length,
-          relevanceScore: finalResponse.relevanceScore,
+          relevanceScore: finalResponse.relevanceScore
         });
 
         return {
@@ -92,26 +97,27 @@ class GraphRAGService {
           metadata: {
             contextSize: rankedContext.length,
             relevanceScore: finalResponse.relevanceScore,
-            sources: rankedContext.map((c) => ({
+            sources: rankedContext.map(c => ({
               type: c.type,
               id: c.id,
-              score: c.score,
+              score: c.score
             })),
-            responseTime,
-          },
+            responseTime
+          }
         };
+
       } catch (error) {
         trackError('graphrag_service', 'QueryError');
         logger.error('GraphRAG query failed', {
           queryId,
           investigationId,
-          error: error.message,
+          error: error.message
         });
 
         return {
           success: false,
           queryId,
-          error: error.message,
+          error: error.message
         };
       }
     });
@@ -122,7 +128,7 @@ class GraphRAGService {
    */
   async generateQueryEmbedding(query) {
     const cacheKey = `query_embed:${Buffer.from(query).toString('base64').slice(0, 32)}`;
-
+    
     if (this.redis) {
       const cached = await this.redis.get(cacheKey);
       if (cached) {
@@ -135,7 +141,7 @@ class GraphRAGService {
       // Use ML service or OpenAI API for embeddings
       const embedding = await this.embedService.generateEmbedding({
         text: query,
-        model: this.config.embeddingModel,
+        model: this.config.embeddingModel
       });
 
       if (this.redis) {
@@ -159,34 +165,26 @@ class GraphRAGService {
     try {
       // 1. Vector similarity search on entity embeddings
       const vectorResults = await this.vectorSimilaritySearch(
-        session,
-        queryEmbedding,
-        investigationId,
-        options,
+        session, queryEmbedding, investigationId, options
       );
       context.push(...vectorResults);
 
       // 2. Graph traversal from relevant entities
-      for (const item of vectorResults.slice(0, 5)) {
-        // Top 5 entities
+      for (const item of vectorResults.slice(0, 5)) { // Top 5 entities
         const graphContext = await this.expandGraphContext(
-          session,
-          item.id,
-          investigationId,
-          options,
+          session, item.id, investigationId, options
         );
         context.push(...graphContext);
       }
 
       // 3. Keyword/fulltext search fallback
       const keywordResults = await this.keywordSearch(
-        session,
-        this.extractKeywords(options.query || ''),
-        investigationId,
+        session, this.extractKeywords(options.query || ''), investigationId
       );
       context.push(...keywordResults);
 
       return context;
+
     } finally {
       await session.close();
     }
@@ -215,10 +213,10 @@ class GraphRAGService {
         investigationId,
         queryEmbedding,
         minScore: this.config.minRelevanceScore,
-        limit: options.maxResults || 20,
+        limit: options.maxResults || 20
       });
 
-      return result.records.map((record) => ({
+      return result.records.map(record => ({
         type: 'entity',
         id: record.get('id'),
         label: record.get('label'),
@@ -226,11 +224,12 @@ class GraphRAGService {
         description: record.get('description'),
         properties: record.get('properties'),
         score: record.get('similarity'),
-        content: this.formatEntityContent(record),
+        content: this.formatEntityContent(record)
       }));
+
     } catch (error) {
       logger.warn('Vector similarity search failed, falling back to keyword search', {
-        error: error.message,
+        error: error.message
       });
       return [];
     }
@@ -241,7 +240,7 @@ class GraphRAGService {
    */
   async expandGraphContext(session, entityId, investigationId, options) {
     const depth = Math.min(options.depth || 2, this.config.maxRetrievalDepth);
-
+    
     const query = `
       MATCH (start:Entity {id: $entityId})-[:BELONGS_TO]->(i:Investigation {id: $investigationId})
       CALL {
@@ -261,10 +260,10 @@ class GraphRAGService {
     const result = await session.run(query, {
       entityId,
       investigationId,
-      limit: options.expansionLimit || 15,
+      limit: options.expansionLimit || 15
     });
 
-    return result.records.map((record) => ({
+    return result.records.map(record => ({
       type: 'related_entity',
       id: record.get('id'),
       label: record.get('label'),
@@ -273,7 +272,7 @@ class GraphRAGService {
       properties: record.get('properties'),
       distance: record.get('distance'),
       score: 1 / (1 + record.get('distance')), // Distance-based score
-      content: this.formatEntityContent(record),
+      content: this.formatEntityContent(record)
     }));
   }
 
@@ -297,10 +296,10 @@ class GraphRAGService {
     const searchTerm = keywords.join(' OR ');
     const result = await session.run(query, {
       searchTerm,
-      investigationId,
+      investigationId
     });
 
-    return result.records.map((record) => ({
+    return result.records.map(record => ({
       type: 'keyword_match',
       id: record.get('id'),
       label: record.get('label'),
@@ -308,7 +307,7 @@ class GraphRAGService {
       description: record.get('description'),
       properties: record.get('properties'),
       score: record.get('score'),
-      content: this.formatEntityContent(record),
+      content: this.formatEntityContent(record)
     }));
   }
 
@@ -317,9 +316,8 @@ class GraphRAGService {
    */
   async rankContext(context, query) {
     // Remove duplicates
-    const uniqueContext = context.filter(
-      (item, index, self) =>
-        index === self.findIndex((t) => t.id === item.id && t.type === item.type),
+    const uniqueContext = context.filter((item, index, self) => 
+      index === self.findIndex(t => t.id === item.id && t.type === item.type)
     );
 
     // Sort by score descending
@@ -334,7 +332,7 @@ class GraphRAGService {
     for (const item of rankedContext) {
       const itemTokens = this.estimateTokens(item.content);
       if (totalTokens + itemTokens > this.config.maxContextSize) break;
-
+      
       totalTokens += itemTokens;
       finalContext.push(item);
     }
@@ -346,15 +344,13 @@ class GraphRAGService {
    * Build context prompt for LLM
    */
   async buildContextPrompt(context, query, userContext) {
-    const contextString = context
-      .map((item) => {
-        return `[${item.type.toUpperCase()}] ${item.label || item.id}:
+    const contextString = context.map(item => {
+      return `[${item.type.toUpperCase()}] ${item.label || item.id}:
 ${item.description || 'No description available'}
 ${item.content}
 Relevance: ${(item.score || 0).toFixed(3)}
 ---`;
-      })
-      .join('\n\n');
+    }).join('\n\n');
 
     const prompt = `You are an intelligence analyst with access to a knowledge graph. Answer the user's question based on the provided context from the graph database.
 
@@ -388,8 +384,7 @@ RESPONSE:`;
         prompt,
         model: options.model || this.config.llmModel,
         maxTokens: options.maxTokens || 1000,
-        temperature: options.temperature || 0.3,
-        providerTag: 'rag.graph',
+        temperature: options.temperature || 0.3
       });
 
       return response;
@@ -409,7 +404,7 @@ RESPONSE:`;
     return {
       content: response,
       relevanceScore,
-      contextUtilization: this.calculateContextUtilization(response, context),
+      contextUtilization: this.calculateContextUtilization(response, context)
     };
   }
 
@@ -421,19 +416,16 @@ RESPONSE:`;
     const propString = Object.entries(properties)
       .map(([key, value]) => `${key}: ${value}`)
       .join(', ');
-
+    
     return `${record.get('description') || ''} ${propString ? `Properties: ${propString}` : ''}`.trim();
   }
 
   extractKeywords(query) {
     // Simple keyword extraction - could be enhanced with NLP
-    return query
-      .toLowerCase()
+    return query.toLowerCase()
       .split(/\s+/)
-      .filter((word) => word.length > 3)
-      .filter(
-        (word) => !['this', 'that', 'with', 'from', 'what', 'when', 'where', 'why'].includes(word),
-      );
+      .filter(word => word.length > 3)
+      .filter(word => !['this', 'that', 'with', 'from', 'what', 'when', 'where', 'why'].includes(word));
   }
 
   estimateTokens(text) {
@@ -444,27 +436,30 @@ RESPONSE:`;
   calculateRelevanceScore(response, context) {
     // Simple relevance scoring - could be enhanced
     const responseWords = response.toLowerCase().split(/\s+/);
-    const contextWords = context.flatMap((c) =>
-      (c.content + ' ' + c.label).toLowerCase().split(/\s+/),
+    const contextWords = context.flatMap(c => 
+      (c.content + ' ' + c.label).toLowerCase().split(/\s+/)
     );
-
-    const matches = responseWords.filter((word) => contextWords.includes(word));
+    
+    const matches = responseWords.filter(word => contextWords.includes(word));
     return Math.min(matches.length / responseWords.length, 1);
   }
 
   calculateContextUtilization(response, context) {
     return {
       totalItems: context.length,
-      referencedItems: context.filter((c) => response.includes(c.id) || response.includes(c.label))
-        .length,
+      referencedItems: context.filter(c => 
+        response.includes(c.id) || response.includes(c.label)
+      ).length
     };
   }
 
   updateMetrics(responseTime, context, response) {
     this.metrics.totalQueries++;
-
+    
     const currentAvg = this.metrics.averageResponseTime;
-    this.metrics.averageResponseTime = currentAvg ? (currentAvg + responseTime) / 2 : responseTime;
+    this.metrics.averageResponseTime = currentAvg
+      ? (currentAvg + responseTime) / 2
+      : responseTime;
 
     this.metrics.relevanceScores.push(response.relevanceScore);
     this.metrics.contextSizes.push(context.length);
@@ -482,16 +477,13 @@ RESPONSE:`;
    * Health check and metrics
    */
   getHealth() {
-    const avgRelevance =
-      this.metrics.relevanceScores.length > 0
-        ? this.metrics.relevanceScores.reduce((a, b) => a + b, 0) /
-          this.metrics.relevanceScores.length
-        : 0;
+    const avgRelevance = this.metrics.relevanceScores.length > 0
+      ? this.metrics.relevanceScores.reduce((a, b) => a + b, 0) / this.metrics.relevanceScores.length
+      : 0;
 
-    const avgContextSize =
-      this.metrics.contextSizes.length > 0
-        ? this.metrics.contextSizes.reduce((a, b) => a + b, 0) / this.metrics.contextSizes.length
-        : 0;
+    const avgContextSize = this.metrics.contextSizes.length > 0
+      ? this.metrics.contextSizes.reduce((a, b) => a + b, 0) / this.metrics.contextSizes.length
+      : 0;
 
     return {
       status: 'healthy',
@@ -500,9 +492,9 @@ RESPONSE:`;
         averageResponseTime: Math.round(this.metrics.averageResponseTime),
         cacheHitRate: Math.round(this.metrics.cacheHitRate * 100) / 100,
         averageRelevance: Math.round(avgRelevance * 1000) / 1000,
-        averageContextSize: Math.round(avgContextSize),
+        averageContextSize: Math.round(avgContextSize)
       },
-      config: this.config,
+      config: this.config
     };
   }
 }

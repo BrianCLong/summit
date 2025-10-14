@@ -1,6 +1,6 @@
-import baseLogger from '../config/logger';
+import pino from 'pino';
 
-const logger = baseLogger.child({ name: 'aiAnalysisService' });
+const logger: pino.Logger = pino();
 
 interface EntityExtractionResult {
   entities: Array<{
@@ -33,73 +33,70 @@ export class AIAnalysisService {
     PERSON: [
       /\b([A-Z][a-z]+ [A-Z][a-z]+)\b/g, // John Doe pattern
       /\b(Mr\.?|Mrs\.?|Dr\.?|Prof\.?) ([A-Z][a-z]+)\b/g, // Title + Name
-      /\b([A-Z][a-z]+), ([A-Z][a-z]+)\b/g, // LastName, FirstName
+      /\b([A-Z][a-z]+), ([A-Z][a-z]+)\b/g // LastName, FirstName
     ],
     ORGANIZATION: [
       /\b([A-Z][a-z]+ Inc\.?|Corp\.?|LLC|Ltd\.?)\b/g,
       /\b([A-Z][A-Za-z\s]+ Company)\b/g,
       /\b([A-Z][A-Za-z\s]+ Corporation)\b/g,
-      /\b(Microsoft|Apple|Google|Amazon|Meta|Tesla|OpenAI)\b/g,
+      /\b(Microsoft|Apple|Google|Amazon|Meta|Tesla|OpenAI)\b/g
     ],
     LOCATION: [
       /\b([A-Z][a-z]+ City)\b/g,
       /\b(New York|Los Angeles|Chicago|Houston|Phoenix|Philadelphia|San Antonio|San Diego|Dallas|San Jose|Austin|Jacksonville|Fort Worth|Columbus|Charlotte|San Francisco|Indianapolis|Seattle|Denver|Washington|Boston|El Paso|Nashville|Detroit|Oklahoma City|Portland|Las Vegas|Memphis|Louisville|Baltimore|Milwaukee|Albuquerque|Tucson|Fresno|Sacramento|Mesa|Kansas City|Atlanta|Long Beach|Colorado Springs|Raleigh|Miami|Virginia Beach|Omaha|Oakland|Minneapolis|Tulsa|Arlington|Tampa|New Orleans)\b/g,
-      /\b([A-Z][a-z]+, [A-Z]{2})\b/g, // City, State
+      /\b([A-Z][a-z]+, [A-Z]{2})\b/g // City, State
     ],
     EVENT: [
       /\b(meeting|conference|summit|workshop|seminar|presentation|training|interview)\b/gi,
       /\b([A-Z][a-z]+ Meeting)\b/g,
-      /\b([0-9]{4} [A-Z][a-z]+ Conference)\b/g,
+      /\b([0-9]{4} [A-Z][a-z]+ Conference)\b/g
     ],
     DATE: [
       /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/g,
       /\b(\d{4}-\d{2}-\d{2})\b/g,
-      /\b(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}\b/g,
+      /\b(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}\b/g
     ],
-    EMAIL: [/\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/g],
+    EMAIL: [
+      /\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/g
+    ],
     PHONE: [
       /\b(\(\d{3}\)\s?\d{3}-\d{4})\b/g,
       /\b(\d{3}-\d{3}-\d{4})\b/g,
-      /\b(\+\d{1,3}\s?\d{3}\s?\d{3}\s?\d{4})\b/g,
-    ],
+      /\b(\+\d{1,3}\s?\d{3}\s?\d{3}\s?\d{4})\b/g
+    ]
   };
 
   private relationshipPatterns = [
     {
       pattern: /(\w+(?:\s+\w+)*)\s+(works\s+(?:at|for)|employed\s+(?:by|at))\s+(\w+(?:\s+\w+)*)/gi,
-      type: 'EMPLOYED_BY',
+      type: 'EMPLOYED_BY'
     },
     {
-      pattern:
-        /(\w+(?:\s+\w+)*)\s+(is\s+(?:the\s+)?(?:CEO|CTO|CFO|President|Manager|Director))\s+(?:of\s+)?(\w+(?:\s+\w+)*)/gi,
-      type: 'LEADS',
+      pattern: /(\w+(?:\s+\w+)*)\s+(is\s+(?:the\s+)?(?:CEO|CTO|CFO|President|Manager|Director))\s+(?:of\s+)?(\w+(?:\s+\w+)*)/gi,
+      type: 'LEADS'
     },
     {
       pattern: /(\w+(?:\s+\w+)*)\s+(met\s+with|meeting\s+with|talked\s+to)\s+(\w+(?:\s+\w+)*)/gi,
-      type: 'MET_WITH',
+      type: 'MET_WITH'
     },
     {
       pattern: /(\w+(?:\s+\w+)*)\s+(located\s+in|based\s+in|from)\s+(\w+(?:\s+\w+)*)/gi,
-      type: 'LOCATED_IN',
+      type: 'LOCATED_IN'
     },
     {
       pattern: /(\w+(?:\s+\w+)*)\s+(owns|founded|created)\s+(\w+(?:\s+\w+)*)/gi,
-      type: 'OWNS',
+      type: 'OWNS'
     },
     {
-      pattern:
-        /(\w+(?:\s+\w+)*)\s+and\s+(\w+(?:\s+\w+)*)\s+(are\s+)?(?:partners|collaborated|working\s+together)/gi,
-      type: 'COLLABORATES_WITH',
-    },
+      pattern: /(\w+(?:\s+\w+)*)\s+and\s+(\w+(?:\s+\w+)*)\s+(are\s+)?(?:partners|collaborated|working\s+together)/gi,
+      type: 'COLLABORATES_WITH'
+    }
   ];
 
   /**
    * Extract entities from text using pattern matching and NLP
    */
-  public async extractEntities(
-    text: string,
-    options: TextAnalysisOptions = {},
-  ): Promise<EntityExtractionResult> {
+  public async extractEntities(text: string, options: TextAnalysisOptions = {}): Promise<EntityExtractionResult> {
     try {
       const entities: EntityExtractionResult['entities'] = [];
       const relationships: EntityExtractionResult['relationships'] = [];
@@ -111,14 +108,14 @@ export class AIAnalysisService {
           while ((match = pattern.exec(text)) !== null) {
             const entityText = match[1] || match[0];
             const confidence = this.calculateEntityConfidence(entityText, entityType);
-
+            
             if (confidence >= (options.confidenceThreshold || 0.7)) {
               entities.push({
                 text: entityText.trim(),
                 label: entityType,
                 confidence,
                 start: match.index,
-                end: match.index + match[0].length,
+                end: match.index + match[0].length
               });
             }
           }
@@ -132,13 +129,13 @@ export class AIAnalysisService {
           while ((match = relationPattern.pattern.exec(text)) !== null) {
             const source = match[1]?.trim();
             const target = match[3]?.trim();
-
+            
             if (source && target) {
               relationships.push({
                 source,
                 target,
                 type: relationPattern.type,
-                confidence: 0.8,
+                confidence: 0.8
               });
             }
           }
@@ -149,14 +146,13 @@ export class AIAnalysisService {
       const uniqueEntities = this.deduplicateEntities(entities);
       const uniqueRelationships = this.deduplicateRelationships(relationships);
 
-      logger.info(
-        `AI Analysis completed. Entities Found: ${uniqueEntities.length}, Relationships Found: ${uniqueRelationships.length}, Text Length: ${text.length}`,
-      );
+      logger.info(`AI Analysis completed. Entities Found: ${uniqueEntities.length}, Relationships Found: ${uniqueRelationships.length}, Text Length: ${text.length}`);
 
       return {
         entities: uniqueEntities.sort((a, b) => b.confidence - a.confidence),
-        relationships: uniqueRelationships.sort((a, b) => b.confidence - a.confidence),
+        relationships: uniqueRelationships.sort((a, b) => b.confidence - a.confidence)
       };
+
     } catch (error) {
       logger.error(`AI Analysis failed. Error: ${(error as Error).message}`);
       return { entities: [], relationships: [] };
@@ -166,18 +162,13 @@ export class AIAnalysisService {
   /**
    * Analyze entity relationships in a given text
    */
-  public async analyzeRelationships(
-    entities: string[],
-    text: string,
-  ): Promise<
-    Array<{
-      source: string;
-      target: string;
-      type: string;
-      confidence: number;
-      context: string;
-    }>
-  > {
+  public async analyzeRelationships(entities: string[], text: string): Promise<Array<{
+    source: string;
+    target: string;
+    type: string;
+    confidence: number;
+    context: string;
+  }>> {
     const relationships = [];
 
     // Check for co-occurrence relationships
@@ -185,7 +176,7 @@ export class AIAnalysisService {
       for (let j = i + 1; j < entities.length; j++) {
         const entity1 = entities[i];
         const entity2 = entities[j];
-
+        
         const cooccurrenceContext = this.findCooccurrenceContext(entity1, entity2, text);
         if (cooccurrenceContext) {
           relationships.push({
@@ -193,7 +184,7 @@ export class AIAnalysisService {
             target: entity2,
             type: 'RELATED_TO',
             confidence: 0.6,
-            context: cooccurrenceContext,
+            context: cooccurrenceContext
           });
         }
       }
@@ -206,14 +197,14 @@ export class AIAnalysisService {
       while ((match = regex.exec(text)) !== null) {
         const source = match[1]?.trim();
         const target = match[3]?.trim();
-
+        
         if (source && target && entities.includes(source) && entities.includes(target)) {
           relationships.push({
             source,
             target,
             type: relationPattern.type,
             confidence: 0.85,
-            context: match[0],
+            context: match[0]
           });
         }
       }
@@ -225,11 +216,7 @@ export class AIAnalysisService {
   /**
    * Generate entity insights and suggestions
    */
-  public async generateEntityInsights(
-    entityId: string,
-    entityType: string,
-    properties: any,
-  ): Promise<{
+  public async generateEntityInsights(entityId: string, entityType: string, properties: any): Promise<{
     insights: string[];
     suggestedRelationships: Array<{ type: string; reason: string; confidence: number }>;
     riskFactors: Array<{ factor: string; severity: string; description: string }>;
@@ -246,7 +233,7 @@ export class AIAnalysisService {
           riskFactors.push({
             factor: 'Government Affiliation',
             severity: 'medium',
-            description: 'Subject may be bound by government regulations',
+            description: 'Subject may be bound by government regulations'
           });
         }
         if (properties.role?.toLowerCase().includes('ceo')) {
@@ -254,7 +241,7 @@ export class AIAnalysisService {
           suggestedRelationships.push({
             type: 'LEADS',
             reason: 'CEO role suggests organizational leadership',
-            confidence: 0.9,
+            confidence: 0.9
           });
         }
         break;
@@ -265,7 +252,7 @@ export class AIAnalysisService {
           riskFactors.push({
             factor: 'Financial Regulations',
             severity: 'high',
-            description: 'Subject to banking and financial compliance requirements',
+            description: 'Subject to banking and financial compliance requirements'
           });
         }
         break;
@@ -276,7 +263,7 @@ export class AIAnalysisService {
           suggestedRelationships.push({
             type: 'ATTENDED_BY',
             reason: 'High-importance events typically have executive attendance',
-            confidence: 0.8,
+            confidence: 0.8
           });
         }
         break;
@@ -294,27 +281,9 @@ export class AIAnalysisService {
     keywords: string[];
   }> {
     // Simple sentiment analysis using keyword matching
-    const positiveWords = [
-      'good',
-      'great',
-      'excellent',
-      'success',
-      'win',
-      'achieve',
-      'positive',
-      'benefit',
-    ];
-    const negativeWords = [
-      'bad',
-      'terrible',
-      'fail',
-      'loss',
-      'negative',
-      'problem',
-      'issue',
-      'concern',
-    ];
-
+    const positiveWords = ['good', 'great', 'excellent', 'success', 'win', 'achieve', 'positive', 'benefit'];
+    const negativeWords = ['bad', 'terrible', 'fail', 'loss', 'negative', 'problem', 'issue', 'concern'];
+    
     const words = text.toLowerCase().split(/\W+/);
     let positiveScore = 0;
     let negativeScore = 0;
@@ -335,10 +304,10 @@ export class AIAnalysisService {
 
     if (positiveScore > negativeScore) {
       sentiment = 'positive';
-      confidence = Math.min(0.9, 0.5 + ((positiveScore - negativeScore) / words.length) * 2);
+      confidence = Math.min(0.9, 0.5 + (positiveScore - negativeScore) / words.length * 2);
     } else if (negativeScore > positiveScore) {
       sentiment = 'negative';
-      confidence = Math.min(0.9, 0.5 + ((negativeScore - positiveScore) / words.length) * 2);
+      confidence = Math.min(0.9, 0.5 + (negativeScore - positiveScore) / words.length * 2);
     }
 
     return { sentiment, confidence, keywords: foundKeywords };
@@ -374,11 +343,9 @@ export class AIAnalysisService {
   /**
    * Remove duplicate entities
    */
-  private deduplicateEntities(
-    entities: EntityExtractionResult['entities'],
-  ): EntityExtractionResult['entities'] {
+  private deduplicateEntities(entities: EntityExtractionResult['entities']): EntityExtractionResult['entities'] {
     const seen = new Set<string>();
-    return entities.filter((entity) => {
+    return entities.filter(entity => {
       const key = `${entity.text.toLowerCase()}-${entity.label}`;
       if (seen.has(key)) return false;
       seen.add(key);
@@ -389,11 +356,9 @@ export class AIAnalysisService {
   /**
    * Remove duplicate relationships
    */
-  private deduplicateRelationships(
-    relationships: EntityExtractionResult['relationships'],
-  ): EntityExtractionResult['relationships'] {
+  private deduplicateRelationships(relationships: EntityExtractionResult['relationships']): EntityExtractionResult['relationships'] {
     const seen = new Set<string>();
-    return relationships.filter((rel) => {
+    return relationships.filter(rel => {
       const key = `${rel.source.toLowerCase()}-${rel.type}-${rel.target.toLowerCase()}`;
       if (seen.has(key)) return false;
       seen.add(key);
@@ -406,12 +371,10 @@ export class AIAnalysisService {
    */
   private findCooccurrenceContext(entity1: string, entity2: string, text: string): string | null {
     const sentences = text.split(/[.!?]+/);
-
+    
     for (const sentence of sentences) {
-      if (
-        sentence.toLowerCase().includes(entity1.toLowerCase()) &&
-        sentence.toLowerCase().includes(entity2.toLowerCase())
-      ) {
+      if (sentence.toLowerCase().includes(entity1.toLowerCase()) && 
+          sentence.toLowerCase().includes(entity2.toLowerCase())) {
         return sentence.trim();
       }
     }
@@ -420,7 +383,7 @@ export class AIAnalysisService {
     const words = text.split(/\s+/);
     const entity1Indices = [];
     const entity2Indices = [];
-
+    
     for (let i = 0; i < words.length; i++) {
       if (words[i].toLowerCase().includes(entity1.toLowerCase())) {
         entity1Indices.push(i);

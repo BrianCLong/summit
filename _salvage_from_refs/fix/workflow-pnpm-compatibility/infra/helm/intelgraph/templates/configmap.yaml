@@ -1,8 +1,0 @@
-# Empty configmap for now. Content to be provided by user if needed.
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "intelgraph.fullname" . }}-config
-  labels:
-    {{- include "intelgraph.labels" . | nindent 4 }}
-data: {}

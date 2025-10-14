@@ -1,13 +1,11 @@
 import { spawn } from 'child_process';
 import path from 'path';
-import baseLogger from '../../config/logger';
-const logger = baseLogger.child({ name: 'EmbeddingService' });
+import pino from 'pino';
+const logger = pino({ name: 'EmbeddingService' });
 export class EmbeddingService {
-    config;
-    db;
-    isInitialized = false;
-    availableModels = new Map();
     constructor(config, db) {
+        this.isInitialized = false;
+        this.availableModels = new Map();
         this.config = config;
         this.db = db;
     }
@@ -39,7 +37,7 @@ export class EmbeddingService {
         if (!this.isInitialized) {
             await this.initialize();
         }
-        const { model = 'sentence-transformers/all-MiniLM-L6-v2', normalize = true, poolingStrategy = 'mean', } = options;
+        const { model = 'sentence-transformers/all-MiniLM-L6-v2', normalize = true, poolingStrategy = 'mean' } = options;
         try {
             logger.debug(`Generating text embedding for: ${text.substring(0, 100)}...`);
             const embedding = await this.runTextEmbedding(text, model, normalize, poolingStrategy);
@@ -152,7 +150,7 @@ export class EmbeddingService {
                 JSON.stringify(vector),
                 JSON.stringify(metadata),
                 modality,
-                source,
+                source
             ]);
             logger.debug(`Stored embedding: ${id} (${modality})`);
         }
@@ -196,11 +194,11 @@ export class EmbeddingService {
             query += ` ORDER BY similarity DESC LIMIT $${++paramCount}`;
             params.push(topK);
             const result = await this.db.query(query, params);
-            const similarities = result.rows.map((row) => ({
+            const similarities = result.rows.map(row => ({
                 id: row.id,
                 similarity: row.similarity,
                 metadata: row.metadata,
-                vector: JSON.parse(row.vector),
+                vector: JSON.parse(row.vector)
             }));
             logger.debug(`Found ${similarities.length} similar embeddings`);
             return similarities;
@@ -263,7 +261,7 @@ export class EmbeddingService {
             // Run clustering algorithm
             const clusters = await this.runClustering(embeddings, numClusters, algorithm);
             // Filter out small clusters
-            const validClusters = clusters.filter((cluster) => cluster.members.length >= minClusterSize);
+            const validClusters = clusters.filter(cluster => cluster.members.length >= minClusterSize);
             logger.info(`Clustering completed: ${validClusters.length} clusters found`);
             return validClusters;
         }
@@ -278,7 +276,12 @@ export class EmbeddingService {
     async runTextEmbedding(text, model, normalize, poolingStrategy) {
         return new Promise((resolve, reject) => {
             const pythonScript = path.join(this.config.modelsPath, 'text_embedding.py');
-            const args = [pythonScript, '--text', text, '--model', model, '--pooling', poolingStrategy];
+            const args = [
+                pythonScript,
+                '--text', text,
+                '--model', model,
+                '--pooling', poolingStrategy
+            ];
             if (normalize) {
                 args.push('--normalize');
             }
@@ -319,7 +322,11 @@ export class EmbeddingService {
     async runImageEmbedding(imagePath, model, normalize) {
         return new Promise((resolve, reject) => {
             const pythonScript = path.join(this.config.modelsPath, 'image_embedding.py');
-            const args = [pythonScript, '--image', imagePath, '--model', model];
+            const args = [
+                pythonScript,
+                '--image', imagePath,
+                '--model', model
+            ];
             if (normalize) {
                 args.push('--normalize');
             }
@@ -360,7 +367,11 @@ export class EmbeddingService {
     async runAudioEmbedding(audioPath, model, normalize) {
         return new Promise((resolve, reject) => {
             const pythonScript = path.join(this.config.modelsPath, 'audio_embedding.py');
-            const args = [pythonScript, '--audio', audioPath, '--model', model];
+            const args = [
+                pythonScript,
+                '--audio', audioPath,
+                '--model', model
+            ];
             if (normalize) {
                 args.push('--normalize');
             }
@@ -407,7 +418,7 @@ export class EmbeddingService {
         }
         // Normalize weights
         const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-        const normalizedWeights = weights.map((w) => w / totalWeight);
+        const normalizedWeights = weights.map(w => w / totalWeight);
         // Get dimension from first embedding
         const dimension = embeddings[0].length;
         // Verify all embeddings have same dimension
@@ -445,13 +456,13 @@ export class EmbeddingService {
       WHERE id = ANY($1)
     `;
         const result = await this.db.query(query, [ids]);
-        return result.rows.map((row) => ({
+        return result.rows.map(row => ({
             id: row.id,
             vector: JSON.parse(row.vector),
             metadata: row.metadata,
             modality: row.modality,
             source: row.source,
-            createdAt: row.created_at,
+            createdAt: row.created_at
         }));
     }
     /**
@@ -461,20 +472,17 @@ export class EmbeddingService {
         return new Promise((resolve, reject) => {
             const pythonScript = path.join(this.config.modelsPath, 'clustering.py');
             const embeddingData = {
-                embeddings: embeddings.map((e) => ({
+                embeddings: embeddings.map(e => ({
                     id: e.id,
                     vector: e.vector,
-                    metadata: e.metadata,
-                })),
+                    metadata: e.metadata
+                }))
             };
             const args = [
                 pythonScript,
-                '--data',
-                JSON.stringify(embeddingData),
-                '--num-clusters',
-                numClusters.toString(),
-                '--algorithm',
-                algorithm,
+                '--data', JSON.stringify(embeddingData),
+                '--num-clusters', numClusters.toString(),
+                '--algorithm', algorithm
             ];
             const python = spawn(this.config.pythonPath, args);
             let output = '';
@@ -532,7 +540,7 @@ export class EmbeddingService {
         return new Promise((resolve, reject) => {
             const python = spawn(this.config.pythonPath, [
                 '-c',
-                'import sentence_transformers, transformers, torch, sklearn; print("Dependencies OK")',
+                'import sentence_transformers, transformers, torch, sklearn; print("Dependencies OK")'
             ]);
             python.on('close', (code) => {
                 if (code === 0) {
@@ -556,10 +564,16 @@ export class EmbeddingService {
             const textModels = [
                 'sentence-transformers/all-MiniLM-L6-v2',
                 'sentence-transformers/all-mpnet-base-v2',
-                'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',
+                'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
             ];
-            const imageModels = ['openai/clip-vit-base-patch32', 'openai/clip-vit-large-patch14'];
-            const audioModels = ['facebook/wav2vec2-base', 'facebook/wav2vec2-large'];
+            const imageModels = [
+                'openai/clip-vit-base-patch32',
+                'openai/clip-vit-large-patch14'
+            ];
+            const audioModels = [
+                'facebook/wav2vec2-base',
+                'facebook/wav2vec2-large'
+            ];
             this.availableModels.set('text', textModels);
             this.availableModels.set('image', imageModels);
             this.availableModels.set('audio', audioModels);
@@ -593,3 +607,4 @@ export class EmbeddingService {
     }
 }
 export default EmbeddingService;
+//# sourceMappingURL=EmbeddingService.js.map
