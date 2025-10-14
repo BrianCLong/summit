@@ -1,0 +1,93 @@
+version: 1
+build:
+  builder_id: gh://summit/scpe-demo
+  build_type: train-model
+  run_id: demo-001
+  timestamp: 2025-02-16T12:30:00Z
+sbom:
+  path: sbom.json
+  format: cyclonedx-json
+  digest:
+    algorithm: sha256
+    value: 6e4c9bc67ee676d12c23747c7594ef70a4530ce8372288015377a34faecb7204
+artifacts:
+  - name: training-dataset
+    type: dataset
+    path: dataset.csv
+    digest:
+      algorithm: sha256
+      value: b952e6b37073063a016be0702bca6be1d8db52811e056af2663ba0ecec567170
+    signature:
+      type: ed25519
+      encoding: base64
+      value: KZSjaFme9gKcj7aLzk+CaggKpEkse+2YIkJS4uPLMVLSI4q5pVvJ4GmDpj2EZ5USylRqkSN2FnRlZyrPA1etAA==
+      public_key:
+        format: pem
+        path: keys/scpe-signing.pub
+    provenance:
+      builder_id: gs://datasets/builder
+      source_uri: https://git.example.com/datasets@main
+      slsa_level: 3
+      materials:
+        - uri: https://git.example.com/datasets
+          digest: b952e6b37073063a016be0702bca6be1d8db52811e056af2663ba0ecec567170
+  - name: trainer-wheel
+    type: python-wheel
+    path: trainer.whl
+    digest:
+      algorithm: sha256
+      value: 8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154
+    signature:
+      type: ed25519
+      encoding: base64
+      value: y4IRJi7DoClzRysUA7xN2fpjwAwkZ8l7+wBWU4gjah+x6HEnbKsLfJM4wb+gvVhdbVCrJsXIxkpPuLIrda/SAQ==
+      public_key:
+        format: pem
+        path: keys/scpe-signing.pub
+    provenance:
+      builder_id: gh://summit/build-bot
+      source_uri: https://git.example.com/pipelines@v1.0.0
+      slsa_level: 3
+      materials:
+        - uri: https://git.example.com/pipelines
+          digest: 8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154
+  - name: inference-container
+    type: container-image
+    path: inference-container.tar
+    digest:
+      algorithm: sha256
+      value: 2b5dd9d9cb267c834e782a54283399be0b8b50f4b743728ccfbb2406d2c35734
+    signature:
+      type: ed25519
+      encoding: base64
+      value: +LLVV934tZsEr2V9FQv98LsI2yxz5ObsJhBe2gf9UmA4U7joXo75zAhCyvKELOCZ96PFbT9c/2aobhVelMcZDQ==
+      public_key:
+        format: pem
+        path: keys/scpe-signing.pub
+    provenance:
+      builder_id: gh://summit/container-fleet
+      source_uri: registry.example.com/inference@sha256:demo
+      slsa_level: 4
+      materials:
+        - uri: https://git.example.com/containers
+          digest: 2b5dd9d9cb267c834e782a54283399be0b8b50f4b743728ccfbb2406d2c35734
+  - name: training-manifest
+    type: training-manifest
+    path: training-manifest.json
+    digest:
+      algorithm: sha256
+      value: 09ad0cf7723f40026f59baa3cb12a513416fda8ac18433601fccd3150dd4f249
+    signature:
+      type: ed25519
+      encoding: base64
+      value: dKYCoYV4jqAhFFYw8aMeBDFbxDOsrDbEG3iD6e5eIEddnROX9CThEUne6uKVE66FyiBuCXj5+3sTBCoyQ7XkDw==
+      public_key:
+        format: pem
+        path: keys/scpe-signing.pub
+    provenance:
+      builder_id: gh://summit/build-bot
+      source_uri: https://git.example.com/pipelines@v1.0.0
+      slsa_level: 3
+      materials:
+        - uri: https://git.example.com/pipelines
+          digest: 8898f453b76ef0eef18cd7d2419041f162b218733b3c9f49d17f19d6ead33154
