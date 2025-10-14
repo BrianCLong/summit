@@ -27,3 +27,6 @@ Metrics/Dashboards
 Runbooks
 - See server/runbooks/agents for operational steps and escalation paths.
 
+Master Prompts
+- [Link Analysis Canvas Orchestrator](./link-analysis-canvas-master-prompt.md) — coordinates the tri-pane workspace, telemetry, and policy guardrails for investigative workflows.
+
