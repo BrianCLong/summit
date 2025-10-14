@@ -1,11 +1,9 @@
 import axios from 'axios';
-import logger from '../utils/logger';
+import { logger } from '../logging';
 import { CacheService } from './CacheService';
 export class AdvancedMLService {
-    mlServiceUrl;
-    cacheService;
-    defaultTimeout = 30000; // 30 seconds
     constructor() {
+        this.defaultTimeout = 30000; // 30 seconds
         this.mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:8000';
         this.cacheService = new CacheService();
         logger.info('Advanced ML Service initialized', { url: this.mlServiceUrl });
@@ -16,7 +14,7 @@ export class AdvancedMLService {
     async healthCheck() {
         try {
             const response = await axios.get(`${this.mlServiceUrl}/health`, {
-                timeout: 5000,
+                timeout: 5000
             });
             return response.status === 200;
         }
@@ -31,7 +29,7 @@ export class AdvancedMLService {
     async getSystemInfo() {
         try {
             const response = await axios.get(`${this.mlServiceUrl}/system/info`, {
-                timeout: this.defaultTimeout,
+                timeout: this.defaultTimeout
             });
             return response.data;
         }
@@ -48,7 +46,7 @@ export class AdvancedMLService {
             logger.info('Creating ML model', { config });
             const response = await axios.post(`${this.mlServiceUrl}/models`, config, {
                 timeout: this.defaultTimeout,
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' }
             });
             const modelId = response.data.model_id;
             logger.info('ML model created successfully', { modelId, type: config.model_type });
@@ -65,7 +63,7 @@ export class AdvancedMLService {
     async listModels() {
         try {
             const response = await axios.get(`${this.mlServiceUrl}/models`, {
-                timeout: this.defaultTimeout,
+                timeout: this.defaultTimeout
             });
             return response.data.models;
         }
@@ -80,7 +78,7 @@ export class AdvancedMLService {
     async getModel(modelId) {
         try {
             const response = await axios.get(`${this.mlServiceUrl}/models/${modelId}`, {
-                timeout: this.defaultTimeout,
+                timeout: this.defaultTimeout
             });
             return response.data;
         }
@@ -95,7 +93,7 @@ export class AdvancedMLService {
     async deleteModel(modelId) {
         try {
             await axios.delete(`${this.mlServiceUrl}/models/${modelId}`, {
-                timeout: this.defaultTimeout,
+                timeout: this.defaultTimeout
             });
             logger.info('ML model deleted successfully', { modelId });
         }
@@ -112,7 +110,7 @@ export class AdvancedMLService {
             logger.info('Starting ML model training', { modelId: request.model_id });
             const response = await axios.post(`${this.mlServiceUrl}/models/${request.model_id}/train`, request, {
                 timeout: 60000, // 1 minute for training initiation
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' }
             });
             logger.info('ML model training started', { modelId: request.model_id });
             return response.data.message;
@@ -120,7 +118,7 @@ export class AdvancedMLService {
         catch (error) {
             logger.error('Failed to start ML model training', {
                 error: error.message,
-                modelId: request.model_id,
+                modelId: request.model_id
             });
             throw new Error(`Failed to start training: ${error.message}`);
         }
@@ -140,11 +138,11 @@ export class AdvancedMLService {
             logger.debug('Running ML inference', {
                 modelId: request.model_id,
                 nodeCount: request.node_features.length,
-                edgeCount: request.edge_index[0]?.length || 0,
+                edgeCount: request.edge_index[0]?.length || 0
             });
             const response = await axios.post(`${this.mlServiceUrl}/models/${request.model_id}/predict`, request, {
                 timeout: this.defaultTimeout,
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' }
             });
             const result = response.data;
             // Cache result for 5 minutes
@@ -152,14 +150,14 @@ export class AdvancedMLService {
             logger.info('ML inference completed', {
                 modelId: request.model_id,
                 inferenceTime: result.inference_time_ms,
-                predictions: result.predictions.length,
+                predictions: result.predictions.length
             });
             return result;
         }
         catch (error) {
             logger.error('ML inference failed', {
                 error: error.message,
-                modelId: request.model_id,
+                modelId: request.model_id
             });
             throw new Error(`Inference failed: ${error.message}`);
         }
@@ -172,14 +170,14 @@ export class AdvancedMLService {
             logger.info('Starting ML model optimization', {
                 modelId,
                 optimizationType,
-                targetPrecision,
+                targetPrecision
             });
             const response = await axios.post(`${this.mlServiceUrl}/models/${modelId}/optimize`, {
                 optimization_type: optimizationType,
-                target_precision: targetPrecision,
+                target_precision: targetPrecision
             }, {
                 timeout: 120000, // 2 minutes for optimization
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' }
             });
             logger.info('ML model optimization completed', { modelId, optimizationType });
             return response.data.message;
@@ -188,7 +186,7 @@ export class AdvancedMLService {
             logger.error('ML model optimization failed', {
                 error: error.message,
                 modelId,
-                optimizationType,
+                optimizationType
             });
             throw new Error(`Optimization failed: ${error.message}`);
         }
@@ -200,24 +198,24 @@ export class AdvancedMLService {
         try {
             logger.info('Starting quantum optimization', {
                 problemType: request.problem_type,
-                numQubits: request.num_qubits,
+                numQubits: request.num_qubits
             });
             const response = await axios.post(`${this.mlServiceUrl}/quantum/optimize`, request, {
                 timeout: 180000, // 3 minutes for quantum optimization
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' }
             });
             const result = response.data;
             logger.info('Quantum optimization completed', {
                 problemType: request.problem_type,
                 finalCost: result.final_cost,
-                optimalParams: result.optimal_parameters.length,
+                optimalParams: result.optimal_parameters.length
             });
             return result;
         }
         catch (error) {
             logger.error('Quantum optimization failed', {
                 error: error.message,
-                problemType: request.problem_type,
+                problemType: request.problem_type
             });
             throw new Error(`Quantum optimization failed: ${error.message}`);
         }
@@ -229,17 +227,17 @@ export class AdvancedMLService {
         try {
             logger.debug('Applying quantum feature mapping', {
                 sampleCount: features.length,
-                featureCount: features[0]?.length || 0,
+                featureCount: features[0]?.length || 0
             });
             const response = await axios.post(`${this.mlServiceUrl}/quantum/feature_map`, { features }, {
                 timeout: this.defaultTimeout,
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' }
             });
             const result = response.data;
             logger.info('Quantum feature mapping completed', {
                 originalShape: result.original_shape,
                 quantumShape: result.quantum_shape,
-                qubitsUsed: result.num_qubits_used,
+                qubitsUsed: result.num_qubits_used
             });
             return result;
         }
@@ -254,7 +252,7 @@ export class AdvancedMLService {
     async getMetrics() {
         try {
             const response = await axios.get(`${this.mlServiceUrl}/metrics`, {
-                timeout: this.defaultTimeout,
+                timeout: this.defaultTimeout
             });
             return response.data;
         }
@@ -269,7 +267,7 @@ export class AdvancedMLService {
     async getModelMetrics() {
         try {
             const response = await axios.get(`${this.mlServiceUrl}/metrics/models`, {
-                timeout: this.defaultTimeout,
+                timeout: this.defaultTimeout
             });
             return response.data;
         }
@@ -291,14 +289,14 @@ export class AdvancedMLService {
                 num_classes: analysisType === 'anomaly_detection' ? 2 : 10,
                 architecture: 'gcn',
                 use_quantization: true,
-                quantization_bits: 8,
+                quantization_bits: 8
             };
             const modelId = await this.createModel(modelConfig);
             // Run inference
             const result = await this.predict({
                 model_id: modelId,
                 node_features: nodeFeatures,
-                edge_index: edgeIndex,
+                edge_index: edgeIndex
             });
             // Clean up model (in production, you might want to cache models)
             await this.deleteModel(modelId);
@@ -310,8 +308,8 @@ export class AdvancedMLService {
                 model_info: {
                     type: modelConfig.model_type,
                     architecture: modelConfig.architecture,
-                    quantized: modelConfig.use_quantization,
-                },
+                    quantized: modelConfig.use_quantization
+                }
             };
         }
         catch (error) {
@@ -328,13 +326,13 @@ export class AdvancedMLService {
             const costFunction = {
                 type: optimizationType,
                 graph_size: graphData.nodes?.length || 0,
-                edge_count: graphData.edges?.length || 0,
+                edge_count: graphData.edges?.length || 0
             };
             const result = await this.quantumOptimize({
                 problem_type: optimizationType,
                 cost_function: costFunction,
                 num_qubits: numQubits,
-                num_iterations: 100,
+                num_iterations: 100
             });
             return {
                 optimization_type: optimizationType,
@@ -343,8 +341,8 @@ export class AdvancedMLService {
                 quantum_advantage: result.num_qubits > 4, // Heuristic
                 graph_info: {
                     nodes: graphData.nodes?.length || 0,
-                    edges: graphData.edges?.length || 0,
-                },
+                    edges: graphData.edges?.length || 0
+                }
             };
         }
         catch (error) {
@@ -354,3 +352,4 @@ export class AdvancedMLService {
     }
 }
 export const advancedMLService = new AdvancedMLService();
+//# sourceMappingURL=AdvancedMLService.js.map

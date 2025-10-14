@@ -1,0 +1,326 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "loan sharking",
+    "locale": "en-GB",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "illegal money lending"
+      },
+      {
+        "type": "misspelling",
+        "value": "loan-sharking"
+      },
+      {
+        "type": "slang",
+        "value": "payday sting"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FCA",
+        "note": "Financial promotions rules cover Ponzi-style claims and predatory lending."
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "unlicensed sports betting",
+    "locale": "en-GB",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "mates rates betting"
+      },
+      {
+        "type": "misspelling",
+        "value": "sport betting illegal"
+      },
+      {
+        "type": "alias",
+        "value": "underground bookie"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FCA",
+        "note": "Financial promotions rules cover Ponzi-style claims and predatory lending."
+      }
+    ],
+    "confidence": 0.89
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "Ponzi-style investment",
+    "locale": "en-GB",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "get rich quick club"
+      },
+      {
+        "type": "misspelling",
+        "value": "ponzie scheme"
+      },
+      {
+        "type": "alias",
+        "value": "pyramid selling"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FCA",
+        "note": "Financial promotions rules cover Ponzi-style claims and predatory lending."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "sexual health screening",
+    "locale": "en-GB",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "std clinic test"
+      },
+      {
+        "type": "alias",
+        "value": "sti check"
+      },
+      {
+        "type": "misspelling",
+        "value": "sti sceening"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MHRA",
+        "note": "Misuse of Drugs Act scheduling and reproductive health advertising codes."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "morning-after tablet",
+    "locale": "en-GB",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "emergency contraception"
+      },
+      {
+        "type": "misspelling",
+        "value": "morning after pil"
+      },
+      {
+        "type": "alias",
+        "value": "plan b tablet"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MHRA",
+        "note": "Misuse of Drugs Act scheduling and reproductive health advertising codes."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "opioid analgesics",
+    "locale": "en-GB",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "controlled opioids"
+      },
+      {
+        "type": "misspelling",
+        "value": "opiate painkillers"
+      },
+      {
+        "type": "slang",
+        "value": "oxy tabs"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MHRA",
+        "note": "Misuse of Drugs Act scheduling and reproductive health advertising codes."
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "cyber bullying towards children",
+    "locale": "en-GB",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "cyberbullyng"
+      },
+      {
+        "type": "slang",
+        "value": "digital slagging"
+      },
+      {
+        "type": "alias",
+        "value": "online bullying pupils"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "UK Safer Internet / CEOP",
+        "note": "Online Safety Act duties around grooming, bullying, and self-harm content for minors."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "online grooming of minors",
+    "locale": "en-GB",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "age-gap chat"
+      },
+      {
+        "type": "alias",
+        "value": "child grooming uk"
+      },
+      {
+        "type": "misspelling",
+        "value": "grooming minors online"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "UK Safer Internet / CEOP",
+        "note": "Online Safety Act duties around grooming, bullying, and self-harm content for minors."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "self-harm promotion",
+    "locale": "en-GB",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "kms chat"
+      },
+      {
+        "type": "misspelling",
+        "value": "self harm advise"
+      },
+      {
+        "type": "alias",
+        "value": "suicide pact forum"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "UK Safer Internet / CEOP",
+        "note": "Online Safety Act duties around grooming, bullying, and self-harm content for minors."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "pay equality breach",
+    "locale": "en-GB",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "equal pay breach"
+      },
+      {
+        "type": "alias",
+        "value": "gender pay gap claim"
+      },
+      {
+        "type": "slang",
+        "value": "salary bias case"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "EHRC / HSE",
+        "note": "Guidance on sexual harassment, pay equity, and violence prevention in workplaces."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "sexual harassment at work",
+    "locale": "en-GB",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "inappropriate touching at office"
+      },
+      {
+        "type": "alias",
+        "value": "quid pro quo uk"
+      },
+      {
+        "type": "misspelling",
+        "value": "sexual harrassment"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "EHRC / HSE",
+        "note": "Guidance on sexual harassment, pay equity, and violence prevention in workplaces."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "threat of workplace violence",
+    "locale": "en-GB",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "office fight threat"
+      },
+      {
+        "type": "alias",
+        "value": "threatening coworker"
+      },
+      {
+        "type": "misspelling",
+        "value": "workplace threat"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "EHRC / HSE",
+        "note": "Guidance on sexual harassment, pay equity, and violence prevention in workplaces."
+      }
+    ],
+    "confidence": 0.92
+  }
+]

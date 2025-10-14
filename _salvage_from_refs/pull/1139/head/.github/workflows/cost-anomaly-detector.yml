@@ -1,9 +1,0 @@
-name: cost-anomaly-detector
-on:
-  schedule: [{ cron: '0 0 * * 1' }]
-jobs:
-  detect:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: python scripts/cost-anomaly-detector.py

@@ -2,7 +2,7 @@ import {
   runThreatCorrelation,
   runWargameOptimizer,
   runSentimentVolatility,
-  runStegoAnalyzer,
+  runStegoAnalyzer
 } from '../../services/strategicIntelligenceServices';
 
 export const strategicIntelligenceResolvers = {

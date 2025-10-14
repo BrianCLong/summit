@@ -1,0 +1,416 @@
+# ────────────────────────────────────────────────────────────────────────────────
+# MC v0.3.9 — Resolvers + Typed Client Pack
+# Node/Apollo resolvers with OPA authorization, audit emission, persisted-only
+# enforcement; plus a TypeScript client SDK that uses persisted IDs by default.
+# ────────────────────────────────────────────────────────────────────────────────
+---
+kind: file
+name: server/package.json
+content: |
+  {
+    "name": "mc-admin-server",
+    "version": "0.3.9",
+    "type": "module",
+    "scripts": {
+      "start": "node dist/index.js",
+      "dev": "tsx src/index.ts",
+      "build": "tsc -p tsconfig.json",
+      "lint": "eslint ."
+    },
+    "dependencies": {
+      "@apollo/server": "^4.10.0",
+      "body-parser": "^1.20.2",
+      "cors": "^2.8.5",
+      "express": "^4.19.2",
+      "graphql": "^16.9.0",
+      "node-fetch": "^3.3.2",
+      "pino": "^9.3.2"
+    },
+    "devDependencies": {
+      "@types/express": "^4.17.21",
+      "@types/node": "^22.5.4",
+      "eslint": "^9.9.0",
+      "tsx": "^4.16.2",
+      "typescript": "^5.5.4"
+    }
+  }
+---
+kind: file
+name: server/tsconfig.json
+content: |
+  {
+    "compilerOptions": {
+      "target": "ES2022",
+      "module": "ES2022",
+      "moduleResolution": "Bundler",
+      "outDir": "dist",
+      "rootDir": "src",
+      "esModuleInterop": true,
+      "strict": true,
+      "skipLibCheck": true
+    },
+    "include": ["src"]
+  }
+---
+kind: file
+name: server/src/index.ts
+content: |
+  import express from 'express';
+  import { ApolloServer } from '@apollo/server';
+  import { expressMiddleware } from '@apollo/server/express4';
+  import cors from 'cors';
+  import bodyParser from 'body-parser';
+  import { readFileSync } from 'node:fs';
+  import { createResolvers } from './resolvers.js';
+  import { makeAuthz } from './opa.js';
+  import { persistedOnlyMiddleware } from './persisted.js';
+  import pino from 'pino';
+
+  const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+  const typeDefs = readFileSync('graphql/schema/mc-admin.graphql', 'utf8');
+
+  const app = express();
+  app.use(cors());
+  app.use(bodyParser.json({ limit: '1mb' }));
+
+  // Enforce persisted-only + audit/provenance headers at the gateway edge
+  app.use('/graphql', persistedOnlyMiddleware(logger));
+
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers: createResolvers(logger),
+    includeStacktraceInErrorResponses: false
+  });
+  await server.start();
+
+  // Context: extract actor/tenant/purpose/region from OIDC / headers
+  app.use('/graphql', expressMiddleware(server, {
+    context: async ({ req }) => {
+      const actor = {
+        id: req.header('x-actor-id') || 'unknown',
+        role: req.header('x-actor-role') || 'tenant-admin',
+        tenant: (req.header('x-actor-tenant') as any) || 'TENANT_001',
+        region: req.header('x-actor-region') || 'US'
+      };
+      const context = {
+        purpose: req.header('x-purpose') || 'ops',
+        region: req.header('x-region') || 'US'
+      };
+      const authz = makeAuthz();
+      return { actor, context, authz, logger };
+    }
+  }));
+
+  const port = Number(process.env.PORT || 4000);
+  app.listen(port, () => logger.info({ port }, 'MC admin GraphQL listening'));
+---
+kind: file
+name: server/src/resolvers.ts
+content: |
+  import type { GraphQLResolveInfo } from 'graphql';
+  import { emitAudit } from './audit.js';
+
+  type Ctx = {
+    actor: { id: string; role: string; tenant: string; region: string };
+    context: { purpose: string; region: string };
+    authz: ReturnType<typeof import('./opa.js').makeAuthz>;
+    logger: any;
+  };
+
+  function opInput(info: GraphQLResolveInfo, variables: any, ctx: Ctx) {
+    return {
+      operation: {
+        isMutation: info.parentType.name === 'Mutation',
+        name: info.fieldName,
+        variables
+      },
+      actor: ctx.actor,
+      tenant: variables?.tenant || 'ALL',
+      context: ctx.context
+    };
+  }
+
+  export function createResolvers(logger: any) {
+    return {
+      Query: {
+        health: () => ({ ok: true, message: 'alive' }),
+        getFeatureFlags: (_: any, { tenant }: any) => ({
+          attestJWS: true, attestPQ: false, adaptiveCanary: true, budgetV2: true, bftEco: true, zkProofs: true, cse: true
+        }),
+        getCanaryWeights: (_: any, { tenant }: any) => ({ p95: 0.5, error: 0.3, cost: 0.15, p99: 0.05 }),
+        getSloThresholds: (_: any, { tenant }: any) => ({ composite: 0.85, jwsFail: 0.001, budgetNoise: 0.05, graphqlP95: 350, aaLag: 120 })
+      },
+      Mutation: {
+        async setFeatureFlags(_: any, vars: any, ctx: Ctx, info: GraphQLResolveInfo) {
+          const input = opInput(info, vars, ctx);
+          const decision = await ctx.authz(input);
+          if (!decision.allow || decision.deny?.length) throw new Error(`policy_denied:${decision.deny?.[0]||'unknown'}`);
+          const audit = await emitAudit(ctx, input);
+          return { ok: true, audit };
+        },
+        async setCanaryWeights(_: any, vars: any, ctx: Ctx, info: GraphQLResolveInfo) {
+          const input = opInput(info, vars, ctx);
+          const decision = await ctx.authz(input);
+          if (!decision.allow || decision.deny?.length) throw new Error(`policy_denied:${decision.deny?.[0]||'unknown'}`);
+          const audit = await emitAudit(ctx, input);
+          return { ok: true, audit };
+        },
+        async setSloThresholds(_: any, vars: any, ctx: Ctx, info: GraphQLResolveInfo) {
+          const input = opInput(info, vars, ctx);
+          const decision = await ctx.authz(input);
+          if (!decision.allow || decision.deny?.length) throw new Error(`policy_denied:${decision.deny?.[0]||'unknown'}`);
+          const audit = await emitAudit(ctx, input);
+          return { ok: true, audit };
+        },
+        async proposeRemediation(_: any, vars: any, ctx: Ctx, info: GraphQLResolveInfo) {
+          const input = opInput(info, vars, ctx);
+          const decision = await ctx.authz(input);
+          if (!decision.allow || decision.deny?.length) throw new Error(`policy_denied:${decision.deny?.[0]||'unknown'}`);
+          const audit = await emitAudit(ctx, input);
+          return { ok: true, audit };
+        },
+        async canaryPromote(_: any, vars: any, ctx: Ctx, info: GraphQLResolveInfo) {
+          const input = opInput(info, vars, ctx);
+          const decision = await ctx.authz(input);
+          if (!decision.allow || decision.deny?.length) throw new Error(`policy_denied:${decision.deny?.[0]||'unknown'}`);
+          const audit = await emitAudit(ctx, input);
+          return { ok: true, audit };
+        },
+        async canaryHold(_: any, vars: any, ctx: Ctx, info: GraphQLResolveInfo) {
+          const input = opInput(info, vars, ctx);
+          const decision = await ctx.authz(input);
+          if (!decision.allow || decision.deny?.length) throw new Error(`policy_denied:${decision.deny?.[0]||'unknown'}`);
+          const audit = await emitAudit(ctx, input);
+          return { ok: true, audit };
+        },
+        async evidencePack(_: any, vars: any, ctx: Ctx, info: GraphQLResolveInfo) {
+          const input = opInput(info, vars, ctx);
+          const decision = await ctx.authz(input);
+          if (!decision.allow || decision.deny?.length) throw new Error(`policy_denied:${decision.deny?.[0]||'unknown'}`);
+          const audit = await emitAudit(ctx, input);
+          return { ok: true, evidenceId: audit.evidenceId, hash: 'sha256:deadbeef', sizeBytes: 4096, audit };
+        },
+        async evidenceVerify(_: any, vars: any, ctx: Ctx, info: GraphQLResolveInfo) {
+          const input = opInput(info, vars, ctx);
+          const decision = await ctx.authz(input);
+          if (!decision.allow || decision.deny?.length) throw new Error(`policy_denied:${decision.deny?.[0]||'unknown'}`);
+          const audit = await emitAudit(ctx, input);
+          return { ok: true, audit };
+        },
+        async regulatorExport(_: any, vars: any, ctx: Ctx, info: GraphQLResolveInfo) {
+          const input = opInput(info, vars, ctx);
+          const decision = await ctx.authz(input);
+          if (!decision.allow || decision.deny?.length) throw new Error(`policy_denied:${decision.deny?.[0]||'unknown'}`);
+          const audit = await emitAudit(ctx, input);
+          return { ok: true, url: `/artifacts/${audit.evidenceId}.zip`, sizeBytes: 123456, audit };
+        },
+        async podrRun(_: any, vars: any, ctx: Ctx, info: GraphQLResolveInfo) {
+          const input = opInput(info, vars, ctx);
+          const decision = await ctx.authz(input);
+          if (!decision.allow || decision.deny?.length) throw new Error(`policy_denied:${decision.deny?.[0]||'unknown'}`);
+          const audit = await emitAudit(ctx, input);
+          return { ok: true, audit };
+        }
+      }
+    };
+  }
+---
+kind: file
+name: server/src/opa.ts
+content: |
+  import fetch from 'node-fetch';
+
+  const OPA_URL = process.env.OPA_URL || 'http://opa:8181/v1/data/mc/admin/decision';
+
+  export function makeAuthz() {
+    return async function authorize(input: any) {
+      // Call OPA; if unreachable, fail-closed
+      try {
+        const r = await fetch(OPA_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ input }) });
+        if (!r.ok) throw new Error(`opa_http_${r.status}`);
+        const { result } = await r.json();
+        return result || { allow: false, deny: ["opa_no_result"] };
+      } catch (e: any) {
+        return { allow: false, deny: ["opa_unreachable"] };
+      }
+    };
+  }
+---
+kind: file
+name: server/src/audit.ts
+content: |
+  import crypto from 'node:crypto';
+
+  export async function emitAudit(ctx: any, input: any) {
+    const evidenceId = crypto.randomUUID();
+    const ts = new Date().toISOString();
+    const evt = { evidenceId, ts, actor: ctx.actor.id, input };
+    // In production: write to SIEM sink + evidence store
+    ctx.logger.info({ audit: evt }, 'audit_emit');
+    return { evidenceId, ts, actor: ctx.actor.id };
+  }
+---
+kind: file
+name: server/src/persisted.ts
+content: |
+  import type { Request, Response, NextFunction } from 'express';
+  import { readFileSync } from 'node:fs';
+
+  const manifestPath = process.env.PERSISTED_MANIFEST || 'graphql/persisted/persisted-manifest.json';
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+
+  export function persistedOnlyMiddleware(logger: any) {
+    return (req: Request, res: Response, next: NextFunction) => {
+      // Enforce headers for provenance & persisted-only contract
+      if (req.method === 'POST' && req.path === '/graphql') {
+        if (req.headers['x-persisted-only'] !== 'true' || req.headers['x-provenance-capture'] !== 'true') {
+          return res.status(412).json({ error: 'persisted_only_required' });
+        }
+        const body: any = req.body || {};
+        const opName = body.operationName as string;
+        const ext = body.extensions?.persistedQuery;
+        if (!opName || !ext?.sha256Hash) return res.status(412).json({ error: 'persisted_query_required' });
+        const expected = manifest.operations[opName];
+        if (!expected || expected !== ext.sha256Hash) {
+          logger.warn({ opName, got: ext?.sha256Hash, expected }, 'persisted_mismatch');
+          return res.status(412).json({ error: 'persisted_query_mismatch' });
+        }
+      }
+      next();
+    };
+  }
+---
+kind: file
+name: server/Dockerfile
+content: |
+  FROM node:20-alpine AS base
+  WORKDIR /app
+  COPY server/package.json server/tsconfig.json ./
+  RUN npm i --omit=dev
+  COPY server/src ./src
+  COPY graphql ./graphql
+  RUN npx tsc -p tsconfig.json
+  
+  FROM node:20-alpine
+  WORKDIR /app
+  COPY --from=base /app/dist ./dist
+  COPY --from=base /app/graphql ./graphql
+  COPY server/package.json ./
+  ENV NODE_ENV=production PORT=4000
+  EXPOSE 4000
+  CMD ["node","dist/index.js"]
+---
+kind: file
+name: client/package.json
+content: |
+  {
+    "name": "mc-admin-client",
+    "version": "0.3.9",
+    "type": "module",
+    "main": "dist/index.js",
+    "scripts": {
+      "build": "tsc -p tsconfig.json"
+    },
+    "dependencies": {
+      "node-fetch": "^3.3.2"
+    },
+    "devDependencies": {
+      "@types/node": "^22.5.4",
+      "typescript": "^5.5.4"
+    }
+  }
+---
+kind: file
+name: client/tsconfig.json
+content: |
+  { "compilerOptions": { "target": "ES2022", "module": "ES2022", "outDir": "dist", "moduleResolution": "Bundler", "strict": true, "esModuleInterop": true }, "include": ["src"] }
+---
+kind: file
+name: client/src/manifest.ts
+content: |
+  // Resolved manifest (replace hashes from CI artifact out/persisted-manifest.resolved.json)
+  export const PERSISTED: Record<string,string> = {
+    setFeatureFlags: "<sha256>",
+    setCanaryWeights: "<sha256>",
+    setSloThresholds: "<sha256>",
+    proposeRemediation: "<sha256>",
+    canaryPromote: "<sha256>",
+    canaryHold: "<sha256>",
+    evidencePack: "<sha256>",
+    evidenceVerify: "<sha256>",
+    regulatorExport: "<sha256>",
+    podrRun: "<sha256>"
+  };
+---
+kind: file
+name: client/src/index.ts
+content: |
+  import fetch from 'node-fetch';
+  import { PERSISTED } from './manifest.js';
+
+  type Headers = Record<string,string>;
+  const baseHeaders: Headers = {
+    'content-type': 'application/json',
+    'x-persisted-only': 'true',
+    'x-provenance-capture': 'true'
+  };
+
+  export class McAdminClient {
+    constructor(private url: string, private authHeaders: Headers = {}) {}
+
+    private async call<T>(op: string, variables: any): Promise<T> {
+      const sha = PERSISTED[op];
+      if (!sha) throw new Error(`persisted_id_missing:${op}`);
+      const body = {
+        operationName: op,
+        variables,
+        extensions: { persistedQuery: { version: 1, sha256Hash: sha } }
+      };
+      const res = await fetch(this.url, { method: 'POST', headers: { ...baseHeaders, ...this.authHeaders }, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      const payload: any = await res.json();
+      if (payload.errors?.length) throw new Error(payload.errors[0].message);
+      return payload.data?.[op];
+    }
+
+    setFeatureFlags(vars: { tenant: string; flags: any }) { return this.call('setFeatureFlags', vars); }
+    setCanaryWeights(vars: { tenant: string; weights: any }) { return this.call('setCanaryWeights', vars); }
+    setSloThresholds(vars: { tenant: string; thresholds: any }) { return this.call('setSloThresholds', vars); }
+    proposeRemediation(vars: { tenant: string; type: string; hitl: boolean }) { return this.call('proposeRemediation', vars); }
+    canaryPromote(vars: { tenant: string }) { return this.call('canaryPromote', vars); }
+    canaryHold(vars: { tenant: string }) { return this.call('canaryHold', vars); }
+    evidencePack(vars: { version: string }) { return this.call('evidencePack', vars); }
+    evidenceVerify() { return this.call('evidenceVerify', {}); }
+    regulatorExport(vars: { tenant: string; profile: string }) { return this.call('regulatorExport', vars); }
+    podrRun(vars: { tenant: string }) { return this.call('podrRun', vars); }
+  }
+---
+kind: file
+name: README-RESOLVERS-CLIENT.md
+content: |
+  # MC v0.3.9 — Resolvers + Typed Client
+  
+  ## Server
+  - Env: `OPA_URL`, `PORT`, `PERSISTED_MANIFEST`.
+  - Start: `npm -C server run dev` (or build + docker).
+  - Enforces **persisted-only** at `/graphql` and requires provenance header.
+  - Every mutation → OPA `mc/admin/decision` → emits audit (SIEM in prod).
+  
+  ## Client
+  - Update `client/src/manifest.ts` with hashes from `out/persisted-manifest.resolved.json` (CI artifact).
+  - Usage:
+    ```ts
+    import { McAdminClient } from 'mc-admin-client';
+    const mc = new McAdminClient('https://api.example.com/graphql', {
+      'x-actor-id': 'ops-123', 'x-actor-role': 'platform-admin', 'x-actor-tenant': 'ALL'
+    });
+    await mc.setSloThresholds({ tenant: 'ALL', thresholds: { composite: 0.87, jwsFail: 0.001, budgetNoise: 0.05, graphqlP95: 350, aaLag: 120 } });
+    ```
+  
+  ## Wiring to UI
+  - Point UI `API_BASE` to the server gateway that routes to this GraphQL endpoint.
+  - UI buttons correspond directly to persisted operations in `graphql/persisted/*`.
+  
+  ## Notes
+  - Replace stubbed return values with service calls (evidence packer, exporter, remediator, etc.).
+  - Fail-closed OPA: if OPA is unreachable, mutations are denied by design.
