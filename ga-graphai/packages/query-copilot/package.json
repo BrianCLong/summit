@@ -1,0 +1,21 @@
+{
+  "name": "@ga-graphai/query-copilot",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ga-graphai/prov-ledger": "file:../prov-ledger",
+    "common-types": "file:../common-types"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "vitest": "^1.6.0",
+    "typescript": "^5.4.5"
+  }
+}

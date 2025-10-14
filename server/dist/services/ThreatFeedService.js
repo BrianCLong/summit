@@ -1,4 +1,4 @@
-const axios = require('axios');
+const axios = require("axios");
 /**
  * Service to fetch and apply live threat intelligence feeds
  */
@@ -6,7 +6,9 @@ class ThreatFeedService {
     constructor(logger, feedUrl) {
         this.logger = logger;
         this.feedUrl =
-            feedUrl || process.env.THREAT_FEED_URL || 'https://jsonplaceholder.typicode.com/todos';
+            feedUrl ||
+                process.env.THREAT_FEED_URL ||
+                "https://jsonplaceholder.typicode.com/todos";
     }
     async fetchLatestFeeds() {
         try {
@@ -35,3 +37,4 @@ class ThreatFeedService {
     }
 }
 module.exports = ThreatFeedService;
+//# sourceMappingURL=ThreatFeedService.js.map

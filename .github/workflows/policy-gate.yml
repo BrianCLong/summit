@@ -1,0 +1,38 @@
+name: Policy Gate
+
+on:
+  push: { branches: [ main, feature/dev-aws-green ] }
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  trufflehog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: trufflesecurity/trufflehog@v3
+        with: { path: ".", base: "origin/main", head: "${{ github.sha }}" }
+
+  license-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pilosus/action-pip-license-checker@v2
+        with: { requirements: "requirements.txt", fail: "strong" }
+      - uses: pilosus/action-licensefinder@v2
+        with: { decisions-file: "doc/license-decisions.yml" }
+
+  npm-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: 'pnpm' }
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level=high || true
+
