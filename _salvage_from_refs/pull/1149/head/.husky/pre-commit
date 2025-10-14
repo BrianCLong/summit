@@ -1,2 +1,0 @@
-pnpm turbo run lint --filter=...[HEAD^]
-pnpm turbo run test --filter=...[HEAD^] -- --passWithNoTests
