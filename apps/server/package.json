@@ -1,0 +1,27 @@
+{
+  "name": "apps-server",
+  "private": true,
+  "version": "1.0.0",
+  "description": "IntelGraph GraphQL Server",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "apollo-server": "^3.13.0",
+    "graphql": "^16.9.0",
+    "express": "^4.19.2",
+    "body-parser": "^1.20.2",
+    "axios": "^1.7.2",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.13",
+    "@types/uuid": "^9.0.8",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}
