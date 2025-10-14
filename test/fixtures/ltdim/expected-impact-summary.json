@@ -1,0 +1,60 @@
+{
+  "blockedChanges": 1,
+  "allowedChanges": 3,
+  "manualReviewChanges": 0,
+  "obligations": [
+    "Implement automated detection to support 24h breach notifications",
+    "Notify compliance team of retention change",
+    "Route data flows to EU sovereign storage providers",
+    "Schedule quarterly model governance audits",
+    "Stand up AI transparency reporting pipeline",
+    "Update retention timer configuration to 90 days"
+  ],
+  "sloImpact": [
+    {
+      "metric": "auditCycleTime",
+      "totalDelta": -10,
+      "unit": "%",
+      "direction": "improved",
+      "drivers": [
+        "Automated evidence collection via transparency tooling"
+      ]
+    },
+    {
+      "metric": "dataResidencyCutover",
+      "totalDelta": 4,
+      "unit": "hours",
+      "direction": "degraded",
+      "drivers": [
+        "Migration to EU sovereign regions"
+      ]
+    },
+    {
+      "metric": "onCallLoad",
+      "totalDelta": 2,
+      "unit": "FTE",
+      "direction": "degraded",
+      "drivers": [
+        "Need expanded on-call coverage for faster notification"
+      ]
+    },
+    {
+      "metric": "storageCost",
+      "totalDelta": 15,
+      "unit": "%",
+      "direction": "degraded",
+      "drivers": [
+        "Longer retention window"
+      ]
+    },
+    {
+      "metric": "transferLatency",
+      "totalDelta": 12,
+      "unit": "%",
+      "direction": "degraded",
+      "drivers": [
+        "Geo-fencing and compliance routing"
+      ]
+    }
+  ]
+}

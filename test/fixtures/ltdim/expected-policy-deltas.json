@@ -1,0 +1,106 @@
+[
+  {
+    "policyId": "ai.governance.transparency",
+    "ruleId": "ai-transparency-governance",
+    "clauseId": "Clause 6",
+    "changeType": "added",
+    "clauseHeading": "AI Transparency",
+    "clauseExcerpt": "AI Transparency\nWe will provide AI decision transparency packs, maintain audit trails for automated processing, and make audit results available on a quarterly cadence.",
+    "action": "add",
+    "status": "allowed",
+    "summary": "Enable AI transparency controls and audit logging.",
+    "beforeState": null,
+    "afterState": null,
+    "obligations": [
+      "Stand up AI transparency reporting pipeline",
+      "Schedule quarterly model governance audits"
+    ],
+    "sloImpact": [
+      {
+        "metric": "auditCycleTime",
+        "delta": -10,
+        "unit": "%",
+        "reason": "Automated evidence collection via transparency tooling"
+      }
+    ]
+  },
+  {
+    "policyId": "data.retention.window",
+    "ruleId": "retention-window-extension",
+    "clauseId": "Clause 4",
+    "changeType": "modified",
+    "clauseHeading": "Data Retention",
+    "clauseExcerpt": "Data Retention\nWe retain personal data for 90 days to support customer investigations while still meeting legal obligations.",
+    "action": "update",
+    "status": "allowed",
+    "summary": "Extend retention window to 90 days.",
+    "beforeState": "retention.days = 30",
+    "afterState": "retention.days = 90",
+    "obligations": [
+      "Update retention timer configuration to 90 days",
+      "Notify compliance team of retention change"
+    ],
+    "sloImpact": [
+      {
+        "metric": "storageCost",
+        "delta": 15,
+        "unit": "%",
+        "reason": "Longer retention window"
+      }
+    ]
+  },
+  {
+    "policyId": "geo.transfer.restrictions",
+    "ruleId": "cross-border-eu-only",
+    "clauseId": "Clause 3",
+    "changeType": "modified",
+    "clauseHeading": "Cross-Border Transfers",
+    "clauseExcerpt": "Cross-Border Transfers\nCross-border transfers of personal data outside the EU or EEA are prohibited except where mandated by an EU supervisory authority. Processing must remain within EU sovereign regions with geo-fenced routing and logging.",
+    "action": "update",
+    "status": "blocked",
+    "summary": "Enforce EU-only residency for personal data transfers.",
+    "beforeState": "geoPolicy.allowNonEuTransfers = true",
+    "afterState": "geoPolicy.allowNonEuTransfers = false",
+    "obligations": [
+      "Route data flows to EU sovereign storage providers"
+    ],
+    "sloImpact": [
+      {
+        "metric": "dataResidencyCutover",
+        "delta": 4,
+        "unit": "hours",
+        "reason": "Migration to EU sovereign regions"
+      },
+      {
+        "metric": "transferLatency",
+        "delta": 12,
+        "unit": "%",
+        "reason": "Geo-fencing and compliance routing"
+      }
+    ]
+  },
+  {
+    "policyId": "incident.response.notification",
+    "ruleId": "incident-accelerated-notification",
+    "clauseId": "Clause 5",
+    "changeType": "modified",
+    "clauseHeading": "Incident Reporting",
+    "clauseExcerpt": "Incident Reporting\nWe notify the customer of any personal data incident without undue delay and no later than twenty-four (24) hours after confirmation.",
+    "action": "update",
+    "status": "allowed",
+    "summary": "Accelerate breach notification SLA to 24 hours.",
+    "beforeState": "incident.slaHours = 72",
+    "afterState": "incident.slaHours = 24",
+    "obligations": [
+      "Implement automated detection to support 24h breach notifications"
+    ],
+    "sloImpact": [
+      {
+        "metric": "onCallLoad",
+        "delta": 2,
+        "unit": "FTE",
+        "reason": "Need expanded on-call coverage for faster notification"
+      }
+    ]
+  }
+]
