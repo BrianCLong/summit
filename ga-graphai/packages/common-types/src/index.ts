@@ -329,6 +329,63 @@ export interface WorkOrderSubmission {
   metadata?: Record<string, unknown>;
 }
 
+export type SelfEditStatus =
+  | 'proposed'
+  | 'queued'
+  | 'approved'
+  | 'rejected'
+  | 'applied'
+  | 'expired';
+
+export interface SelfEditVerifierScore {
+  verifier: string;
+  score: number;
+  passed: boolean;
+  rationale?: string;
+  measuredAt: string;
+}
+
+export interface SelfEditApproval {
+  reviewer: string;
+  decision: 'approved' | 'rejected';
+  decidedAt: string;
+  notes?: string;
+}
+
+export interface SelfEditProposal {
+  instruction: string;
+  expectedOutput: string;
+  rationale?: string;
+  modelId: string;
+  baseCheckpoint: string;
+  domain?: string;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+  ttlMs?: number;
+}
+
+export interface SelfEditRecord extends SelfEditProposal {
+  id: string;
+  status: SelfEditStatus;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt?: string;
+  verifierScores: SelfEditVerifierScore[];
+  approval?: SelfEditApproval;
+  appliedCheckpoint?: string;
+}
+
+export interface SelfEditScorecard {
+  totalChecks: number;
+  passedChecks: number;
+  failedChecks: number;
+  averageScore: number | null;
+  failingVerifiers: readonly string[];
+  passedVerifiers: readonly string[];
+  ready: boolean;
+  status: SelfEditStatus;
+}
+
 export type WorkOrderStatus = 'completed' | 'partial' | 'rejected';
 
 export interface WorkOrderResult {
@@ -1116,6 +1173,21 @@ export interface WorkflowEstimates {
   criticalPath: string[];
 }
 
+export interface TimelineStatusCounts {
+  total: number;
+  completed: number;
+  succeeded: number;
+  skipped: number;
+  failed: number;
+  running: number;
+  queued: number;
+}
+
+export interface TimelineDelta {
+  nodeId: string;
+  status: NodeRunStatus;
+}
+
 export interface ObserverTimelineFrame {
   index: number;
   timestamp: string;
@@ -1123,6 +1195,9 @@ export interface ObserverTimelineFrame {
   costUSD?: number;
   latencyMs?: number;
   criticalPath?: string[];
+  statusCounts: TimelineStatusCounts;
+  progressPercent: number;
+  delta?: TimelineDelta;
 }
 
 export interface ObserverTimeline {
@@ -1575,6 +1650,134 @@ export interface WorkbookReceipt {
   artifacts: EvidenceLink[];
   startedAt: string;
   completedAt: string;
+}
+
+// ============================================================================
+// AUDIT INVESTIGATION PLATFORM TYPES
+// ============================================================================
+
+export type AuditSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';
+
+export type AuditInvestigatorRole = 'viewer' | 'analyst' | 'admin' | (string & {});
+
+export interface AuditInvestigationContext {
+  tenantId: string;
+  userId: string;
+  sessionId: string;
+  roles: AuditInvestigatorRole[];
+}
+
+export interface AuditLogEvent {
+  id: string;
+  timestamp: string;
+  actor: string;
+  action: string;
+  resource: string;
+  system: string;
+  category?: string;
+  severity?: AuditSeverity;
+  metadata?: Record<string, unknown>;
+  correlationIds?: string[];
+}
+
+export interface AuditQueryFilter {
+  text?: string;
+  actors?: string[];
+  actions?: string[];
+  resources?: string[];
+  systems?: string[];
+  categories?: string[];
+  severities?: AuditSeverity[];
+  correlationIds?: string[];
+  from?: string;
+  to?: string;
+}
+
+export interface AuditTimelinePoint {
+  timestamp: string;
+  actor: string;
+  action: string;
+  resource: string;
+  system: string;
+  label: string;
+  visual: string;
+}
+
+export interface AuditCorrelation {
+  key: string;
+  systems: string[];
+  events: AuditLogEvent[];
+}
+
+export interface AuditAnomaly {
+  reason: string;
+  score: number;
+  events: AuditLogEvent[];
+  actor?: string;
+  system?: string;
+}
+
+export interface AuditQueryOptions {
+  limit?: number;
+  includeTimeline?: boolean;
+  includeAnomalies?: boolean;
+  includeCorrelations?: boolean;
+  exportFormat?: 'json' | 'csv';
+  optimize?: boolean;
+  naturalLanguage?: string;
+  useCache?: boolean;
+}
+
+export interface AuditQueryResult {
+  queryId: string;
+  executedAt: string;
+  durationMs: number;
+  filter: AuditQueryFilter;
+  events: AuditLogEvent[];
+  timeline: AuditTimelinePoint[];
+  anomalies: AuditAnomaly[];
+  correlations: AuditCorrelation[];
+  optimizedPlan?: string;
+  cached: boolean;
+  exportPayload?: string;
+  exportFormat?: 'json' | 'csv';
+  naturalLanguage?: string;
+}
+
+export interface AuditRoleCapabilities {
+  query: boolean;
+  export: boolean;
+  viewAnomalies: boolean;
+}
+
+export interface AuditPlatformOptions {
+  cacheTtlMs?: number;
+  maxCacheEntries?: number;
+  anomalyMultiplier?: number;
+  anomalyMinEvents?: number;
+  roleMatrix?: Partial<Record<AuditInvestigatorRole, AuditRoleCapabilities>>;
+  now?: () => Date;
+}
+
+export interface AuditInvestigationTrailEntry {
+  id: string;
+  investigator: AuditInvestigationContext;
+  query: {
+    filter: AuditQueryFilter;
+    options: AuditQueryOptions;
+  };
+  executedAt: string;
+  resultSummary: {
+    events: number;
+    anomalies: number;
+    correlations: number;
+  };
+  notes?: string;
+}
+
+export interface AuditLogDataSource {
+  system: string;
+  load: (filter: AuditQueryFilter) => Promise<AuditLogEvent[]> | AuditLogEvent[];
 }
 
 export interface ValidationResult {
