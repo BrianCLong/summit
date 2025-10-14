@@ -1,15 +1,14 @@
-import express from 'express';
-import { ensureAuthenticated } from '../middleware/auth.js';
+const express = require('express');
+const { ensureAuthenticated } = require('../middleware/auth');
 
 const router = express.Router();
 router.use(ensureAuthenticated);
 
 function simulateAccess(roleVector = {}, action) {
-  const requiredRole =
-    {
-      'delete-user': 'Admin',
-      'view-report': 'Analyst',
-    }[action] || 'Analyst';
+  const requiredRole = {
+    'delete-user': 'Admin',
+    'view-report': 'Analyst',
+  }[action] || 'Analyst';
   const score = roleVector[requiredRole] || 0;
   return {
     granted: score >= 0.5,
@@ -30,4 +29,4 @@ router.post('/simulate', async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

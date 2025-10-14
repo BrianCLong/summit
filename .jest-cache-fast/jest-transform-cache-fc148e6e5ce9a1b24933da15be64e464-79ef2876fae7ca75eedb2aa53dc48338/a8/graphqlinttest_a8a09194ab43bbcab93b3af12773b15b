@@ -1,0 +1,20 @@
+48db6ec14b6a242c118cf03759f27280
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+// Moved from server/tests/graphql.test.ts to integration suite
+__exportStar(require("../graphql.test.ts"), exports);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci90ZXN0cy9pbnRlZ3JhdGlvbi9ncmFwaHFsLmludC50ZXN0LnRzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSwrREFBK0Q7QUFDL0QscURBQW1DIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9Vc2Vycy9icmlhbmxvbmcvRGV2ZWxvcGVyL3N1bW1pdC9zZXJ2ZXIvdGVzdHMvaW50ZWdyYXRpb24vZ3JhcGhxbC5pbnQudGVzdC50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvLyBNb3ZlZCBmcm9tIHNlcnZlci90ZXN0cy9ncmFwaHFsLnRlc3QudHMgdG8gaW50ZWdyYXRpb24gc3VpdGVcbmV4cG9ydCAqIGZyb20gJy4uL2dyYXBocWwudGVzdC50cyc7XG4iXSwidmVyc2lvbiI6M30=

@@ -1,12 +1,7 @@
 const gql = require('graphql-tag');
 
 const typeDefs = gql`
-  extend type Entity {
-    id: ID!
-    label: String!
-    type: String!
-    tags: [String!]!
-  }
+  extend type Entity { id: ID!, label: String!, type: String!, tags: [String!]! }
 
   enum GraphExportFormat {
     GRAPHML
@@ -65,3 +60,4 @@ const typeDefs = gql`
 `;
 
 module.exports = { graphTypeDefs: typeDefs };
+

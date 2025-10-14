@@ -6,12 +6,12 @@ const copilotResolvers = {
       const { copilotOrchestrator } = dataSources;
       return copilotOrchestrator.getRunInfo(id);
     },
-
+    
     copilotEvents: async (_, { runId, afterId, limit }, { dataSources }) => {
       const { copilotOrchestrator } = dataSources;
       const run = await copilotOrchestrator.store.getRun(runId);
       if (!run) throw new Error('Run not found');
-
+      
       return copilotOrchestrator.store.listEvents(runId, { afterId, limit });
     },
 
@@ -24,17 +24,13 @@ const copilotResolvers = {
     copilotStats: async (_, { timeRange = '24 hours' }, { dataSources }) => {
       const { copilotOrchestrator } = dataSources;
       return copilotOrchestrator.getStats(timeRange);
-    },
+    }
   },
 
   Mutation: {
-    startCopilotRun: async (
-      _,
-      { goalId, goalText, investigationId, resume = false },
-      { dataSources, user },
-    ) => {
+    startCopilotRun: async (_, { goalId, goalText, investigationId, resume = false }, { dataSources, user }) => {
       const { copilotOrchestrator } = dataSources;
-
+      
       // If goalId provided, get goal text
       let goal = goalText;
       if (goalId && !goal) {
@@ -50,7 +46,7 @@ const copilotResolvers = {
       return copilotOrchestrator.startRun(goalId, goal, {
         resume,
         investigationId,
-        userId: user?.id,
+        userId: user?.id
       });
     },
 
@@ -63,9 +59,9 @@ const copilotResolvers = {
       const { copilotOrchestrator } = dataSources;
       const run = await copilotOrchestrator.store.getRun(runId);
       if (!run) throw new Error('Run not found');
-
+      
       return copilotOrchestrator.resumeRun(run);
-    },
+    }
   },
 
   // Subscriptions for real-time updates
@@ -79,8 +75,8 @@ const copilotResolvers = {
 
         return pubsub.asyncIterator(`COPILOT_EVENT_${runId}`);
       },
-      resolve: (event) => event.payload,
-    },
+      resolve: (event) => event.payload
+    }
   },
 
   // Field resolvers for nested data
@@ -98,8 +94,8 @@ const copilotResolvers = {
     isActive: (run, _, { dataSources }) => {
       const { copilotOrchestrator } = dataSources;
       return copilotOrchestrator.activeRuns.has(run.id);
-    },
-  },
+    }
+  }
 };
 
 module.exports = { copilotResolvers };
