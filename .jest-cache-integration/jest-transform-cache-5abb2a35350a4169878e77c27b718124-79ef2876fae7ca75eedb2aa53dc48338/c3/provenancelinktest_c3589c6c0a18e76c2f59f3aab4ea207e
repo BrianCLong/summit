@@ -1,0 +1,57 @@
+a14ee0a2485e910404a6af554537d403
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const globals_1 = require("@jest/globals");
+// Mock the repositories to handle missing dependencies
+globals_1.jest.mock('../../server/src/db/repositories/trustRiskRepo.ts', () => ({
+    getTrustScore: globals_1.jest.fn(async () => ({ tenant_id: 't0', subject_id: 's1', score: 0.8, reasons: ['baseline'], updated_at: new Date().toISOString() })),
+    upsertTrustScore: globals_1.jest.fn(async () => 'ts_t0_s1'),
+}));
+globals_1.jest.mock('../../server/src/db/repositories/evidenceRepo.ts', () => ({
+    getLatestEvidence: globals_1.jest.fn(async () => []),
+    listEvidence: globals_1.jest.fn(async () => []),
+}));
+describe('linkTrustScoreEvidence resolver', () => {
+    it('updates trust score with evidence id and returns updated TrustScore', async () => {
+        const { provenanceResolvers } = await Promise.resolve().then(() => __importStar(require('../../server/src/graphql/resolvers/provenance')));
+        const result = await provenanceResolvers.Mutation.linkTrustScoreEvidence({}, { tenantId: 't0', subjectId: 's1', evidenceId: 'ev_1' });
+        expect(result.subjectId).toBe('s1');
+        expect(result.score).toBeDefined();
+        expect(Array.isArray(result.reasons)).toBe(true);
+        expect(typeof result.updatedAt).toBe('string');
+    });
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3Rlc3RzL2dyYXBocWwvcHJvdmVuYW5jZS5saW5rLnRlc3QudHMiLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSwyQ0FBcUM7QUFFckMsdURBQXVEO0FBQ3ZELGNBQUksQ0FBQyxJQUFJLENBQUMsbURBQW1ELEVBQUUsR0FBRyxFQUFFLENBQUMsQ0FBQztJQUNwRSxhQUFhLEVBQUUsY0FBSSxDQUFDLEVBQUUsQ0FBQyxLQUFLLElBQUksRUFBRSxDQUFDLENBQUMsRUFBRSxTQUFTLEVBQUUsSUFBSSxFQUFFLFVBQVUsRUFBRSxJQUFJLEVBQUUsS0FBSyxFQUFFLEdBQUcsRUFBRSxPQUFPLEVBQUUsQ0FBQyxVQUFVLENBQUMsRUFBRSxVQUFVLEVBQUUsSUFBSSxJQUFJLEVBQUUsQ0FBQyxXQUFXLEVBQUUsRUFBRSxDQUFDLENBQUM7SUFDcEosZ0JBQWdCLEVBQUUsY0FBSSxDQUFDLEVBQUUsQ0FBQyxLQUFLLElBQUksRUFBRSxDQUFDLFVBQVUsQ0FBQztDQUNsRCxDQUFDLENBQUMsQ0FBQztBQUVKLGNBQUksQ0FBQyxJQUFJLENBQUMsa0RBQWtELEVBQUUsR0FBRyxFQUFFLENBQUMsQ0FBQztJQUNuRSxpQkFBaUIsRUFBRSxjQUFJLENBQUMsRUFBRSxDQUFDLEtBQUssSUFBSSxFQUFFLENBQUMsRUFBRSxDQUFDO0lBQzFDLFlBQVksRUFBRSxjQUFJLENBQUMsRUFBRSxDQUFDLEtBQUssSUFBSSxFQUFFLENBQUMsRUFBRSxDQUFDO0NBQ3RDLENBQUMsQ0FBQyxDQUFDO0FBRUosUUFBUSxDQUFDLGlDQUFpQyxFQUFFLEdBQUcsRUFBRTtJQUMvQyxFQUFFLENBQUMscUVBQXFFLEVBQUUsS0FBSyxJQUFJLEVBQUU7UUFDbkYsTUFBTSxFQUFFLG1CQUFtQixFQUFFLEdBQUcsd0RBQWEsK0NBQStDLEdBQUMsQ0FBQztRQUM5RixNQUFNLE1BQU0sR0FBRyxNQUFNLG1CQUFtQixDQUFDLFFBQVEsQ0FBQyxzQkFBc0IsQ0FBQyxFQUFFLEVBQUUsRUFBRSxRQUFRLEVBQUUsSUFBSSxFQUFFLFNBQVMsRUFBRSxJQUFJLEVBQUUsVUFBVSxFQUFFLE1BQU0sRUFBRSxDQUFDLENBQUM7UUFDdEksTUFBTSxDQUFDLE1BQU0sQ0FBQyxTQUFTLENBQUMsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLENBQUM7UUFDcEMsTUFBTSxDQUFDLE1BQU0sQ0FBQyxLQUFLLENBQUMsQ0FBQyxXQUFXLEVBQUUsQ0FBQztRQUNuQyxNQUFNLENBQUMsS0FBSyxDQUFDLE9BQU8sQ0FBQyxNQUFNLENBQUMsT0FBTyxDQUFDLENBQUMsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLENBQUM7UUFDakQsTUFBTSxDQUFDLE9BQU8sTUFBTSxDQUFDLFNBQVMsQ0FBQyxDQUFDLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQztJQUNqRCxDQUFDLENBQUMsQ0FBQztBQUNMLENBQUMsQ0FBQyxDQUFDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9Vc2Vycy9icmlhbmxvbmcvRGV2ZWxvcGVyL3N1bW1pdC90ZXN0cy9ncmFwaHFsL3Byb3ZlbmFuY2UubGluay50ZXN0LnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGplc3QgfSBmcm9tICdAamVzdC9nbG9iYWxzJztcblxuLy8gTW9jayB0aGUgcmVwb3NpdG9yaWVzIHRvIGhhbmRsZSBtaXNzaW5nIGRlcGVuZGVuY2llc1xuamVzdC5tb2NrKCcuLi8uLi9zZXJ2ZXIvc3JjL2RiL3JlcG9zaXRvcmllcy90cnVzdFJpc2tSZXBvLnRzJywgKCkgPT4gKHtcbiAgZ2V0VHJ1c3RTY29yZTogamVzdC5mbihhc3luYyAoKSA9PiAoeyB0ZW5hbnRfaWQ6ICd0MCcsIHN1YmplY3RfaWQ6ICdzMScsIHNjb3JlOiAwLjgsIHJlYXNvbnM6IFsnYmFzZWxpbmUnXSwgdXBkYXRlZF9hdDogbmV3IERhdGUoKS50b0lTT1N0cmluZygpIH0pKSxcbiAgdXBzZXJ0VHJ1c3RTY29yZTogamVzdC5mbihhc3luYyAoKSA9PiAndHNfdDBfczEnKSxcbn0pKTtcblxuamVzdC5tb2NrKCcuLi8uLi9zZXJ2ZXIvc3JjL2RiL3JlcG9zaXRvcmllcy9ldmlkZW5jZVJlcG8udHMnLCAoKSA9PiAoe1xuICBnZXRMYXRlc3RFdmlkZW5jZTogamVzdC5mbihhc3luYyAoKSA9PiBbXSksXG4gIGxpc3RFdmlkZW5jZTogamVzdC5mbihhc3luYyAoKSA9PiBbXSksXG59KSk7XG5cbmRlc2NyaWJlKCdsaW5rVHJ1c3RTY29yZUV2aWRlbmNlIHJlc29sdmVyJywgKCkgPT4ge1xuICBpdCgndXBkYXRlcyB0cnVzdCBzY29yZSB3aXRoIGV2aWRlbmNlIGlkIGFuZCByZXR1cm5zIHVwZGF0ZWQgVHJ1c3RTY29yZScsIGFzeW5jICgpID0+IHtcbiAgICBjb25zdCB7IHByb3ZlbmFuY2VSZXNvbHZlcnMgfSA9IGF3YWl0IGltcG9ydCgnLi4vLi4vc2VydmVyL3NyYy9ncmFwaHFsL3Jlc29sdmVycy9wcm92ZW5hbmNlJyk7XG4gICAgY29uc3QgcmVzdWx0ID0gYXdhaXQgcHJvdmVuYW5jZVJlc29sdmVycy5NdXRhdGlvbi5saW5rVHJ1c3RTY29yZUV2aWRlbmNlKHt9LCB7IHRlbmFudElkOiAndDAnLCBzdWJqZWN0SWQ6ICdzMScsIGV2aWRlbmNlSWQ6ICdldl8xJyB9KTtcbiAgICBleHBlY3QocmVzdWx0LnN1YmplY3RJZCkudG9CZSgnczEnKTtcbiAgICBleHBlY3QocmVzdWx0LnNjb3JlKS50b0JlRGVmaW5lZCgpO1xuICAgIGV4cGVjdChBcnJheS5pc0FycmF5KHJlc3VsdC5yZWFzb25zKSkudG9CZSh0cnVlKTtcbiAgICBleHBlY3QodHlwZW9mIHJlc3VsdC51cGRhdGVkQXQpLnRvQmUoJ3N0cmluZycpO1xuICB9KTtcbn0pOyJdLCJ2ZXJzaW9uIjozfQ==

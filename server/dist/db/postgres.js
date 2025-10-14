@@ -1,8 +1,8 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
-import baseLogger from '../config/logger';
+import pino from 'pino';
 dotenv.config();
-const logger = baseLogger.child({ name: 'postgres' });
+const logger = pino();
 const POSTGRES_HOST = process.env.POSTGRES_HOST || 'postgres';
 const POSTGRES_USER = process.env.POSTGRES_USER || 'intelgraph';
 const POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD || 'devpassword';
@@ -22,13 +22,10 @@ export function getPostgresPool() {
             });
             logger.info('PostgreSQL pool initialized.');
             // Test the connection
-            pool
-                .connect()
-                .then((client) => {
+            pool.connect().then(client => {
                 client.release();
                 logger.info('PostgreSQL connection verified.');
-            })
-                .catch((err) => {
+            }).catch(err => {
                 logger.warn(`PostgreSQL connection failed - using mock responses. Error: ${err.message}`);
                 pool = createMockPostgresPool();
             });
@@ -48,10 +45,10 @@ function createMockPostgresPool() {
         },
         connect: async () => ({
             query: async (text, params) => ({ rows: [], rowCount: 0, fields: [] }),
-            release: () => { },
+            release: () => { }
         }),
         end: async () => { },
-        on: () => { },
+        on: () => { }
     };
 }
 export async function closePostgresPool() {
@@ -61,3 +58,4 @@ export async function closePostgresPool() {
         pool = null; // Clear the pool instance
     }
 }
+//# sourceMappingURL=postgres.js.map

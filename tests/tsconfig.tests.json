@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "skipLibCheck": true,
+    "types": ["jest", "@testing-library/jest-dom"],
+    "moduleResolution": "node",
+    "isolatedModules": true
+  },
+  "include": ["../tests/**/*", "../server/src/**/*"],
+  "exclude": ["../node_modules", "../conductor-ui/**", "../playwright/**", "../e2e/**"]
+}

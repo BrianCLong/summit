@@ -3,11 +3,9 @@ import path from 'path';
 import crypto from 'crypto';
 import yaml from 'js-yaml';
 export class ExperimentManager {
-    configPath;
-    experiments = [];
-    logPath;
     constructor(configPath = path.join(process.cwd(), 'config', 'experiments.yaml'), logFile = path.join(process.cwd(), 'experiment-exposures.log')) {
         this.configPath = configPath;
+        this.experiments = [];
         this.logPath = logFile;
         this.loadConfig();
     }
@@ -41,3 +39,4 @@ export class ExperimentManager {
         fs.appendFileSync(this.logPath, `${JSON.stringify(entry)}\n`);
     }
 }
+//# sourceMappingURL=index.js.map

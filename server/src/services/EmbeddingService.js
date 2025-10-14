@@ -16,7 +16,7 @@ class EmbeddingService {
       batchSize: parseInt(process.env.EMBEDDING_BATCH_SIZE) || 10,
       timeout: parseInt(process.env.EMBEDDING_TIMEOUT) || 30000,
       maxRetries: parseInt(process.env.EMBEDDING_MAX_RETRIES) || 3,
-      ...config,
+      ...config
     };
 
     this.logger = logger;
@@ -24,7 +24,7 @@ class EmbeddingService {
       totalEmbeddings: 0,
       averageLatency: 0,
       errorCount: 0,
-      batchCount: 0,
+      batchCount: 0
     };
   }
 
@@ -33,7 +33,7 @@ class EmbeddingService {
    */
   async generateEmbedding(params) {
     const { text, model = this.config.model } = params;
-
+    
     if (!text || typeof text !== 'string') {
       throw new Error('Valid text string is required');
     }
@@ -42,7 +42,7 @@ class EmbeddingService {
 
     try {
       let embedding;
-
+      
       switch (this.config.provider) {
         case 'openai':
           embedding = await this.generateOpenAIEmbedding(text, model);
@@ -65,21 +65,22 @@ class EmbeddingService {
         model,
         textLength: text.length,
         dimension: embedding.length,
-        latency,
+        latency
       });
 
       return embedding;
+
     } catch (error) {
       this.metrics.errorCount++;
       applicationErrors.labels('embedding_service', 'GenerationError', 'error').inc();
-
+      
       logger.error('Embedding generation failed', {
         provider: this.config.provider,
         model,
         textLength: text.length,
-        error: error.message,
+        error: error.message
       });
-
+      
       throw error;
     }
   }
@@ -97,26 +98,27 @@ class EmbeddingService {
 
     for (let i = 0; i < batches.length; i++) {
       const batch = batches[i];
-
+      
       try {
         const batchEmbeddings = await this.generateBatchEmbeddings(batch, model);
         allEmbeddings.push(...batchEmbeddings);
-
+        
         this.metrics.batchCount++;
-
+        
         logger.debug('Batch embeddings generated', {
           batchIndex: i + 1,
           totalBatches: batches.length,
           batchSize: batch.length,
-          provider: this.config.provider,
+          provider: this.config.provider
         });
+
       } catch (error) {
         logger.error('Batch embedding generation failed', {
           batchIndex: i + 1,
           batchSize: batch.length,
-          error: error.message,
+          error: error.message
         });
-
+        
         // Continue with individual processing for failed batch
         for (const text of batch) {
           try {
@@ -125,7 +127,7 @@ class EmbeddingService {
           } catch (individualError) {
             logger.warn('Individual embedding failed, using zero vector', {
               textLength: text.length,
-              error: individualError.message,
+              error: individualError.message
             });
             // Use zero vector as fallback
             allEmbeddings.push(new Array(this.config.dimension).fill(0));
@@ -148,15 +150,15 @@ class EmbeddingService {
     const response = await fetch('https://api.openai.com/v1/embeddings', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${this.config.apiKey}`,
-        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.config.apiKey}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         input: text,
         model: model,
-        encoding_format: 'float',
+        encoding_format: 'float'
       }),
-      signal: AbortSignal.timeout(this.config.timeout),
+      signal: AbortSignal.timeout(this.config.timeout)
     });
 
     if (!response.ok) {
@@ -165,7 +167,7 @@ class EmbeddingService {
     }
 
     const data = await response.json();
-
+    
     if (!data.data || data.data.length === 0) {
       throw new Error('No embedding data returned from OpenAI');
     }
@@ -190,15 +192,15 @@ class EmbeddingService {
     const response = await fetch('https://api.openai.com/v1/embeddings', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${this.config.apiKey}`,
-        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.config.apiKey}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         input: texts,
         model: model,
-        encoding_format: 'float',
+        encoding_format: 'float'
       }),
-      signal: AbortSignal.timeout(this.config.timeout),
+      signal: AbortSignal.timeout(this.config.timeout)
     });
 
     if (!response.ok) {
@@ -207,12 +209,12 @@ class EmbeddingService {
     }
 
     const data = await response.json();
-
+    
     if (!data.data || data.data.length !== texts.length) {
       throw new Error('Batch embedding response length mismatch');
     }
 
-    return data.data.map((item) => item.embedding);
+    return data.data.map(item => item.embedding);
   }
 
   /**
@@ -237,7 +239,7 @@ class EmbeddingService {
   async calculateSimilarity(text1, text2, model) {
     const [embedding1, embedding2] = await Promise.all([
       this.generateEmbedding({ text: text1, model }),
-      this.generateEmbedding({ text: text2, model }),
+      this.generateEmbedding({ text: text2, model })
     ]);
 
     return this.cosineSimilarity(embedding1, embedding2);
@@ -266,7 +268,11 @@ class EmbeddingService {
    * Find most similar texts from a corpus
    */
   async findSimilar(queryText, corpusTexts, options = {}) {
-    const { topK = 5, threshold = 0.0, model = this.config.model } = options;
+    const { 
+      topK = 5, 
+      threshold = 0.0,
+      model = this.config.model 
+    } = options;
 
     const queryEmbedding = await this.generateEmbedding({ text: queryText, model });
     const corpusEmbeddings = await this.generateEmbeddings(corpusTexts, model);
@@ -274,11 +280,11 @@ class EmbeddingService {
     const similarities = corpusEmbeddings.map((embedding, index) => ({
       index,
       text: corpusTexts[index],
-      similarity: this.cosineSimilarity(queryEmbedding, embedding),
+      similarity: this.cosineSimilarity(queryEmbedding, embedding)
     }));
 
     return similarities
-      .filter((item) => item.similarity >= threshold)
+      .filter(item => item.similarity >= threshold)
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, topK);
   }
@@ -296,9 +302,11 @@ class EmbeddingService {
 
   updateMetrics(latency) {
     this.metrics.totalEmbeddings++;
-
+    
     const currentAvg = this.metrics.averageLatency;
-    this.metrics.averageLatency = currentAvg ? (currentAvg + latency) / 2 : latency;
+    this.metrics.averageLatency = currentAvg
+      ? (currentAvg + latency) / 2
+      : latency;
   }
 
   /**
@@ -315,15 +323,10 @@ class EmbeddingService {
         averageLatency: Math.round(this.metrics.averageLatency),
         errorCount: this.metrics.errorCount,
         batchCount: this.metrics.batchCount,
-        successRate:
-          this.metrics.totalEmbeddings > 0
-            ? (
-                ((this.metrics.totalEmbeddings - this.metrics.errorCount) /
-                  this.metrics.totalEmbeddings) *
-                100
-              ).toFixed(1) + '%'
-            : '100%',
-      },
+        successRate: this.metrics.totalEmbeddings > 0 
+          ? ((this.metrics.totalEmbeddings - this.metrics.errorCount) / this.metrics.totalEmbeddings * 100).toFixed(1) + '%'
+          : '100%'
+      }
     };
   }
 
@@ -332,18 +335,18 @@ class EmbeddingService {
    */
   async test() {
     try {
-      const testText = 'This is a test sentence for embedding generation.';
+      const testText = "This is a test sentence for embedding generation.";
       const embedding = await this.generateEmbedding({ text: testText });
-
+      
       return {
         success: true,
         dimension: embedding.length,
-        sampleValues: embedding.slice(0, 5),
+        sampleValues: embedding.slice(0, 5)
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: error.message
       };
     }
   }
