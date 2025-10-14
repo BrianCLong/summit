@@ -1,0 +1,9 @@
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "name": "Analytics Plugin",
+  "version": "1.0.0",
+  "main": "index.js",
+  "extensionPoints": ["ANALYTICS_ALGORITHM"],
+  "hooks": [],
+  "sandboxed": true
+}

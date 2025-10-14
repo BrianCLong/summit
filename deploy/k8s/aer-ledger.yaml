@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: aer-ledger }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: aer-ledger } }
+  template:
+    metadata: { labels: { app: aer-ledger } }
+    spec:
+      containers:
+        - name: aer
+          image: ghcr.io/org/aer-ledger:latest
+          env:
+            - name: AER_PRIVATE_KEY_PEM
+              valueFrom: { secretKeyRef: { name: aer-secrets, key: priv } }
+            - name: AER_PUBLIC_KEY_PEM
+              valueFrom: { secretKeyRef: { name: aer-secrets, key: pub } }
+          ports: [{ containerPort: 7201 }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: aer-ledger }
+spec: { selector: { app: aer-ledger }, ports: [{ port: 7201, targetPort: 7201 }] }

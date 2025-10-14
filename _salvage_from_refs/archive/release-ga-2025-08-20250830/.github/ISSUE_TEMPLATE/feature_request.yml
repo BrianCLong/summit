@@ -1,9 +1,0 @@
-name: Feature request
-labels: [feature]
-body:
-  - type: textarea
-    id: problem
-    attributes: { label: Problem, description: What problem are you solving? }
-  - type: textarea
-    id: proposal
-    attributes: { label: Proposal, description: How should we solve it? }

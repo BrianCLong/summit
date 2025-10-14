@@ -9,6 +9,8 @@ services:
       - ..:/workspace:cached
       - /var/run/docker.sock:/var/run/docker.sock
       - node_modules:/workspace/node_modules
+      - server_node_modules:/workspace/server/node_modules
+      - client_node_modules:/workspace/client/node_modules
       - ~/.gitconfig:/home/node/.gitconfig:ro
       - ~/.ssh:/home/node/.ssh:ro
     command: sleep infinity
@@ -17,36 +19,243 @@ services:
     environment:
       - NODE_ENV=development
       - POSTGRES_HOST=postgres
+      - POSTGRES_PASSWORD=dev_password
+      - POSTGRES_DB=intelgraph_dev
       - REDIS_HOST=redis
       - NEO4J_HOST=neo4j
+      - OPA_URL=http://opa:8181
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     depends_on:
-      - postgres
-      - redis
-      - neo4j
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      opa:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
+      seed-fixtures:
+        condition: service_completed_successfully
+      api:
+        condition: service_started
+      ui:
+        condition: service_started
+      worker:
+        condition: service_started
+      mock-services:
+        condition: service_started
+
+  api:
+    image: node:20-bullseye
+    user: node
+    working_dir: /workspace/server
+    command: ["bash", "-lc", "if [ ! -d node_modules ]; then npm install; fi; npm run dev"]
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: intelgraph
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: intelgraph_dev
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      OPA_URL: http://opa:8181
+      MOCK_SERVICE_URL: http://mock-services:4010
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_SERVICE_NAME: intelgraph-api
+    volumes:
+      - ..:/workspace:cached
+      - node_modules:/workspace/node_modules
+      - server_node_modules:/workspace/server/node_modules
+    ports:
+      - "4000:4000"
+    networks:
+      - intelgraph-dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      opa:
+        condition: service_healthy
+      seed-fixtures:
+        condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "node", "/workspace/scripts/health-check.js", "http://localhost:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  ui:
+    image: node:20-bullseye
+    user: node
+    working_dir: /workspace/client
+    command: ["bash", "-lc", "if [ ! -d node_modules ]; then npm install; fi; npm run dev -- --host 0.0.0.0 --port 3000"]
+    environment:
+      VITE_PORT: 3000
+      VITE_HOST: 0.0.0.0
+      VITE_API_URL: http://api:4000
+    volumes:
+      - ..:/workspace:cached
+      - node_modules:/workspace/node_modules
+      - client_node_modules:/workspace/client/node_modules
+    ports:
+      - "3000:3000"
+    networks:
+      - intelgraph-dev
+    depends_on:
+      api:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  worker:
+    image: node:20-bullseye
+    user: node
+    working_dir: /workspace/server
+    command: ["bash", "-lc", "if [ ! -d node_modules ]; then npm install; fi; npm run dev:worker"]
+    environment:
+      NODE_ENV: development
+      WORKER_PORT: 4100
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: intelgraph
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: intelgraph_dev
+      REDIS_URL: redis://redis:6379
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_SERVICE_NAME: intelgraph-worker
+    volumes:
+      - ..:/workspace:cached
+      - node_modules:/workspace/node_modules
+      - server_node_modules:/workspace/server/node_modules
+    ports:
+      - "4100:4100"
+    networks:
+      - intelgraph-dev
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      seed-fixtures:
+        condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:4100/health >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  mock-services:
+    image: node:20-bullseye
+    user: node
+    working_dir: /workspace
+    command: ["node", "scripts/devkit/mock-services.js"]
+    environment:
+      MOCK_SERVICE_PORT: 4010
+    volumes:
+      - ..:/workspace:cached
+    ports:
+      - "4010:4010"
+    networks:
+      - intelgraph-dev
+    healthcheck:
+      test: ["CMD", "node", "scripts/health-check.js", "http://localhost:4010/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+
+  migrations:
+    image: node:20-bullseye
+    user: node
+    working_dir: /workspace/server
+    command: ["bash", "-lc", "if [ ! -d node_modules ]; then npm install; fi; npm run migrate"]
+    environment:
+      NODE_ENV: development
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: intelgraph
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: intelgraph_dev
+      POSTGRES_URL: postgres://intelgraph:dev_password@postgres:5432/intelgraph_dev
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: dev_password
+    volumes:
+      - ..:/workspace:cached
+      - node_modules:/workspace/node_modules
+      - server_node_modules:/workspace/server/node_modules
+    networks:
+      - intelgraph-dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+
+  seed-fixtures:
+    image: node:20-bullseye
+    user: node
+    working_dir: /workspace
+    command: ["bash", "-lc", "if [ ! -d node_modules ]; then npm install; fi; node scripts/devkit/seed-fixtures.js"]
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: intelgraph
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: intelgraph_dev
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: dev_password
+      OPA_URL: http://opa:8181
+    volumes:
+      - ..:/workspace:cached
+      - node_modules:/workspace/node_modules
+      - server_node_modules:/workspace/server/node_modules
+    networks:
+      - intelgraph-dev
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+      opa:
+        condition: service_healthy
+    restart: "no"
 
   postgres:
-    image: postgres:15-alpine
-    restart: unless-stopped
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: intelgraph
       POSTGRES_PASSWORD: dev_password
       POSTGRES_DB: intelgraph_dev
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ../scripts/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ../server/db/migrations/postgres:/docker-entrypoint-initdb.d:ro
     ports:
       - "5432:5432"
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U intelgraph"]
+      test: ["CMD-SHELL", "pg_isready -U intelgraph -d intelgraph_dev"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 6
 
   redis:
     image: redis:7-alpine
-    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
@@ -57,18 +266,17 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 6
 
   neo4j:
     image: neo4j:5.8
-    restart: unless-stopped
     environment:
       NEO4J_AUTH: neo4j/dev_password
       NEO4J_PLUGINS: '["apoc", "graph-data-science"]'
       NEO4J_apoc_export_file_enabled: true
       NEO4J_apoc_import_file_enabled: true
       NEO4J_apoc_import_file_use__neo4j__config: true
-      NEO4J_ACCEPT_LICENSE_AGREEMENT: yes
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -85,9 +293,52 @@ services:
       timeout: 10s
       retries: 5
 
+  opa:
+    image: openpolicyagent/opa:0.65.0-rootless
+    command:
+      - run
+      - --server
+      - --watch
+      - /policy
+    volumes:
+      - ../policy/opa:/policy:ro
+    ports:
+      - "8181:8181"
+    networks:
+      - intelgraph-dev
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8181/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.58
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "14250:14250"
+      - "14268:14268"
+    networks:
+      - intelgraph-dev
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.110.0
+    command: ["--config=/etc/otel-collector.yaml"]
+    volumes:
+      - ../ops/devkit/otel-collector.yaml:/etc/otel-collector.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "9464:9464"
+    networks:
+      - intelgraph-dev
+    depends_on:
+      - jaeger
+
   prometheus:
     image: prom/prometheus:latest
-    restart: unless-stopped
     ports:
       - "9090:9090"
     volumes:
@@ -106,12 +357,11 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    restart: unless-stopped
     ports:
       - "8080:3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: dev_password
-      GF_USERS_ALLOW_SIGN_UP: false
+      GF_USERS_ALLOW_SIGN_UP: "false"
       GF_INSTALL_PLUGINS: grafana-piechart-panel,grafana-worldmap-panel
     volumes:
       - grafana_data:/var/lib/grafana
@@ -121,9 +371,12 @@ services:
       - intelgraph-dev
     depends_on:
       - prometheus
+      - otel-collector
 
 volumes:
   node_modules:
+  server_node_modules:
+  client_node_modules:
   postgres_data:
   redis_data:
   neo4j_data:

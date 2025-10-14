@@ -1,7 +1,0 @@
-dist/
-build/
-coverage/
-node_modules/
-public/
-**/*.snap
-.github/workflows/compliance-automation.yml
