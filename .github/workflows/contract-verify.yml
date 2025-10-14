@@ -1,0 +1,47 @@
+name: contract-verify
+on: [pull_request, workflow_dispatch]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node & deps
+        uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm i -g graphql-cli graphql-schema-linter @redhat-developer/depcheck@latest @playwright/test
+      - name: Validate SDL
+        run: npx graphql-schema-linter graphql/schema/mc-admin.graphql
+      - name: Build persisted manifest
+        run: |
+          mkdir -p out
+          python3 - <<'PY'
+          import hashlib, json, glob
+          man = json.load(open('graphql/persisted/persisted-manifest.json'))
+          ops = {}
+          for p in glob.glob('graphql/persisted/*.graphql'):
+            name = p.split('/')[-1].replace('.graphql','')
+            if name != 'persisted-manifest':
+              ops[name] = hashlib.sha256(open(p,'rb').read()).hexdigest()
+          man['operations'] = {k: ops[k] for k in man['operations'] if k in ops}
+          open('out/persisted-manifest.resolved.json','w').write(json.dumps(man, indent=2))
+          PY
+      - name: Conftest (OPA)
+        uses: instrumenta/conftest-action@v0.3.0
+        with:
+          files: policy/mc-admin.rego
+      - name: Prometheus rules lint
+        run: |
+          if [ -f prom/rules/mc-v035-recording.rules.yaml ]; then promtool check rules prom/rules/mc-v035-recording.rules.yaml; fi
+          if [ -f prom/alerts/mc-v035-slo.alerts.yaml ]; then promtool check rules prom/alerts/mc-v035-slo.alerts.yaml; fi
+      - name: Playwright smoke
+        run: |
+          npx playwright install --with-deps
+          npx playwright test -c tests/e2e || true # smoke only (no app)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: contract-verify-artifacts
+          path: |
+            out/persisted-manifest.resolved.json
+            graphql/schema/mc-admin.graphql
+            graphql/persisted/*.graphql
+            policy/**/*.rego

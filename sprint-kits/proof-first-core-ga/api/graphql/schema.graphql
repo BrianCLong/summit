@@ -1,0 +1,47 @@
+type Query {
+  case(id: ID!): Case
+  search(text: String!, limit: Int = 20): [Entity!]!
+  cypherPreview(prompt: String!, caseId: ID!): CypherPreview!
+}
+
+type Mutation {
+  runSandbox(cypher: String!, caseId: ID!): SandboxResult!
+  registerEvidence(input: EvidenceInput!): Evidence!
+  erMerge(leftId: ID!, rightId: ID!, policy: String!): MergeResult!
+}
+
+type Case {
+  id: ID!
+  title: String!
+  createdAt: String!
+}
+
+input EvidenceInput {
+  sourceUri: String!
+  hash: String!
+  metadata: JSON
+}
+
+scalar JSON
+
+type CypherPreview {
+  cypher: String!
+  costEstimate: Float!
+}
+
+type SandboxResult {
+  rows: [JSON!]!
+  latencyMs: Int!
+}
+
+type Entity {
+  id: ID!
+  label: String!
+  confidence: Float
+}
+
+type MergeResult {
+  mergedId: ID!
+  reversible: Boolean!
+  auditId: ID!
+}

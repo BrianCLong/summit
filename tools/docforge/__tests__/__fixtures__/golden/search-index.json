@@ -1,0 +1,117 @@
+{
+  "version": "2.3.4",
+  "generatedAt": "1970-01-01T00:00:00.000Z",
+  "items": [
+    {
+      "id": "adr:adr-0001-adopt-docforge",
+      "type": "adr",
+      "title": "ADR 0001: Adopt DocForge",
+      "url": "/2.3.4/adrs/adr-0001-adopt-docforge.html",
+      "summary": "- Status: Accepted"
+    },
+    {
+      "id": "module:pcbo__engine_go",
+      "type": "module",
+      "title": "pcbo/engine.go",
+      "url": "/2.3.4/modules/pcbo__engine_go.html",
+      "language": "Go",
+      "summary": "Planner orchestrates policy evaluation and scoring logic."
+    },
+    {
+      "id": "module:src__analytics_js",
+      "type": "module",
+      "title": "src/analytics.js",
+      "url": "/2.3.4/modules/src__analytics_js.html",
+      "language": "JavaScript",
+      "summary": "Calculate the moving average for a numeric series."
+    },
+    {
+      "id": "module:tools__report_py",
+      "type": "module",
+      "title": "tools/report.py",
+      "url": "/2.3.4/modules/tools__report_py.html",
+      "language": "Python",
+      "summary": "Reporting helpers for DocForge sample fixtures."
+    },
+    {
+      "id": "symbol:pcbo__engine_go:execute",
+      "type": "function",
+      "title": "Execute (pcbo/engine.go)",
+      "url": "/2.3.4/modules/pcbo__engine_go.html#execute",
+      "language": "Go",
+      "summary": "Execute evaluates incoming payloads and returns a summary string."
+    },
+    {
+      "id": "symbol:pcbo__engine_go:helperversion",
+      "type": "function",
+      "title": "helperVersion (pcbo/engine.go)",
+      "url": "/2.3.4/modules/pcbo__engine_go.html#helperversion",
+      "language": "Go",
+      "summary": "helperVersion exposes the current engine version for diagnostics."
+    },
+    {
+      "id": "symbol:pcbo__engine_go:planner",
+      "type": "type",
+      "title": "Planner (pcbo/engine.go)",
+      "url": "/2.3.4/modules/pcbo__engine_go.html#planner",
+      "language": "Go",
+      "summary": "Planner orchestrates policy evaluation and scoring logic."
+    },
+    {
+      "id": "symbol:src__analytics_js:buildhistogram",
+      "type": "function",
+      "title": "buildHistogram (src/analytics.js)",
+      "url": "/2.3.4/modules/src__analytics_js.html#buildhistogram",
+      "language": "JavaScript",
+      "summary": "Build a histogram for discrete buckets using an arrow function."
+    },
+    {
+      "id": "symbol:src__analytics_js:movingaverage",
+      "type": "function",
+      "title": "movingAverage (src/analytics.js)",
+      "url": "/2.3.4/modules/src__analytics_js.html#movingaverage",
+      "language": "JavaScript",
+      "summary": "Calculate the moving average for a numeric series."
+    },
+    {
+      "id": "symbol:tools__report_py:add-row",
+      "type": "function",
+      "title": "add_row (tools/report.py)",
+      "url": "/2.3.4/modules/tools__report_py.html#add-row",
+      "language": "Python",
+      "summary": "Append a label/value pair to the table rows."
+    },
+    {
+      "id": "symbol:tools__report_py:format-percentage",
+      "type": "function",
+      "title": "format_percentage (tools/report.py)",
+      "url": "/2.3.4/modules/tools__report_py.html#format-percentage",
+      "language": "Python",
+      "summary": "Format a floating point value as a human readable percentage."
+    },
+    {
+      "id": "symbol:tools__report_py:module",
+      "type": "module",
+      "title": "Module (tools/report.py)",
+      "url": "/2.3.4/modules/tools__report_py.html#module",
+      "language": "Python",
+      "summary": "Reporting helpers for DocForge sample fixtures."
+    },
+    {
+      "id": "symbol:tools__report_py:render",
+      "type": "function",
+      "title": "render (tools/report.py)",
+      "url": "/2.3.4/modules/tools__report_py.html#render",
+      "language": "Python",
+      "summary": "Render the accumulated rows as a GitHub flavored markdown table."
+    },
+    {
+      "id": "symbol:tools__report_py:reportbuilder",
+      "type": "class",
+      "title": "ReportBuilder (tools/report.py)",
+      "url": "/2.3.4/modules/tools__report_py.html#reportbuilder",
+      "language": "Python",
+      "summary": "Accumulates rows and renders a markdown table."
+    }
+  ]
+}

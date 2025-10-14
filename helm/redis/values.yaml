@@ -18,10 +18,11 @@ resources:
 persistence:
   enabled: true
   size: 5Gi
-  storageClass: ''
+  storageClass: ""
 
 env: []
 
 redis:
-  appendonly: 'yes'
-  save: '300 1 60 10000 5 5000000'
+  appendonly: "yes"
+  save: "300 1 60 10000 5 5000000"
+

@@ -6,11 +6,9 @@ info:
   contact:
     name: Maestro Team
     email: maestro@intelgraph.io
-
 servers:
   - url: /api/maestro/v1
     description: Maestro API Gateway
-
 paths:
   /runs:
     get:
@@ -45,7 +43,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Run'
-
   /runs/{runId}:
     get:
       operationId: getRunById
@@ -68,7 +65,6 @@ paths:
                 $ref: '#/components/schemas/Run'
         '404':
           description: Run not found
-
   /runs/deprecated-endpoint:
     get:
       operationId: getDeprecatedRuns
@@ -91,7 +87,6 @@ paths:
       # Example of Sunset header (would be set by the server, not in OpenAPI spec)
       # headers:
       #   Sunset: "Fri, 31 Dec 2025 23:59:59 GMT"
-
   /pipelines:
     get:
       operationId: listPipelines
@@ -107,7 +102,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Pipeline'
-
   /budgets/tenant:
     get:
       operationId: getTenantBudget
@@ -128,7 +122,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Budget'
-
   /alertcenter/events:
     get:
       operationId: listAlertEvents
@@ -144,7 +137,27 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AlertEvent'
-
+  /handoff/fastlane:
+    post:
+      operationId: submitFastlaneHandoff
+      summary: Submit a fastlane handoff request for expedited processing
+      tags:
+        - Handoff
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FastlaneHandoffRequest'
+      responses:
+        '200':
+          description: Handoff request accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FastlaneHandoffResponse'
+        '429':
+          description: Rate limit exceeded or fastlane capacity full
 components:
   schemas:
     Run:
@@ -179,7 +192,6 @@ components:
         - id
         - pipeline
         - status
-
     CreateRunRequest:
       type: object
       properties:
@@ -193,7 +205,6 @@ components:
       required:
         - pipelineId
         - estimatedCost
-
     Pipeline:
       type: object
       properties:
@@ -212,7 +223,6 @@ components:
       required:
         - id
         - name
-
     Budget:
       type: object
       properties:
@@ -232,7 +242,6 @@ components:
       required:
         - tenant
         - monthlyUsd
-
     BudgetPolicy:
       type: object
       properties:
@@ -251,7 +260,50 @@ components:
       required:
         - type
         - limit
-
+    FastlaneHandoffRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: Unique request ID for tracking
+        priority:
+          type: string
+          enum: ['urgent', 'high', 'normal']
+          description: Priority level for fastlane processing
+        agentId:
+          type: string
+          description: ID of the agent making the handoff request
+        signalStrength:
+          type: number
+          format: float
+          description: Signal strength indicating urgency (0.0-1.0)
+        payload:
+          type: object
+          description: Request payload data
+          additionalProperties: true
+      required:
+        - requestId
+        - agentId
+        - signalStrength
+    FastlaneHandoffResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: Unique request ID echoed back
+        accepted:
+          type: boolean
+          description: Whether the fastlane request was accepted
+        estimatedLatencyMs:
+          type: number
+          format: int64
+          description: Estimated processing latency in milliseconds
+        queuePosition:
+          type: integer
+          description: Position in the fastlane queue
+      required:
+        - requestId
+        - accepted
     AlertEvent:
       type: object
       properties:
@@ -260,7 +312,7 @@ components:
           description: Unique ID of the alert event
         type:
           type: string
-          description: Type of alert (e.g., billing, supply-chain, slo)
+          description: Type of alert (e.g., billing, supply-chain, slo, friction)
         severity:
           type: string
           description: Severity of the alert (e.g., critical, warning, info)
@@ -274,6 +326,21 @@ components:
           type: number
           format: int64
           description: Timestamp of the alert event in milliseconds (epoch)
+        frictionMetrics:
+          type: object
+          description: Friction-specific metrics when type is 'friction'
+          properties:
+            latencyMs:
+              type: number
+              format: int64
+              description: Measured latency in milliseconds
+            retryCount:
+              type: integer
+              description: Number of retries attempted
+            errorRate:
+              type: number
+              format: float
+              description: Error rate as a percentage (0.0-1.0)
         meta:
           type: object
           description: Additional metadata related to the alert
