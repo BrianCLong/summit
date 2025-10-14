@@ -91,7 +91,37 @@ class EntityCorrelationEngine {
   }
 
   entitiesAreSimilar(e1, e2) {
-    return this.getDisambiguationScore(e1, e2) > 0.8;
+    const score = this.getDisambiguationScore(e1, e2);
+    if (score >= 0.8) {
+      return true;
+    }
+
+    const n1 = this.normalize(e1);
+    const n2 = this.normalize(e2);
+
+    if (n1.label && n2.label && n1.label.toLowerCase() === n2.label.toLowerCase()) {
+      return true;
+    }
+
+    const stringScore = this.calculateStringSimilarity(n1.label || "", n2.label || "");
+    if (stringScore >= 0.9) {
+      return true;
+    }
+
+    const sharedAttrs = Object.keys({ ...n1.attributes, ...n2.attributes }).filter(
+      (key) => n1.attributes[key] && n2.attributes[key],
+    );
+
+    if (sharedAttrs.length > 0) {
+      const attrMatches = sharedAttrs.filter(
+        (key) => n1.attributes[key] === n2.attributes[key],
+      );
+      if (attrMatches.length / sharedAttrs.length >= 0.8) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   groupSimilarEntities(entities = []) {
@@ -139,7 +169,8 @@ class EntityCorrelationEngine {
     const avgConfidence =
       entities.reduce((sum, e) => sum + (e.confidence ?? 0.5), 0) /
       entities.length;
-    merged.confidence = Math.min(0.99, avgConfidence);
+    const consensusBoost = Math.min(0.15, 0.05 * (entities.length - 1));
+    merged.confidence = Math.min(0.99, avgConfidence + consensusBoost);
     return merged;
   }
 
