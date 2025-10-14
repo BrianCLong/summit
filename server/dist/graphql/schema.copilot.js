@@ -1,40 +1,22 @@
 const gql = require('graphql-tag');
 const copilotTypeDefs = gql `
-  enum CopilotRunStatus {
-    pending
-    running
-    succeeded
-    failed
-    paused
-  }
-  enum CopilotTaskStatus {
-    pending
-    running
-    succeeded
-    failed
-    skipped
-  }
-  enum CopilotEventLevel {
-    info
-    warning
-    error
-    debug
-    progress
-  }
+  enum CopilotRunStatus { pending running succeeded failed paused }
+  enum CopilotTaskStatus { pending running succeeded failed skipped }
+  enum CopilotEventLevel { info warning error debug progress }
 
   type CopilotTask {
     id: ID!
     runId: ID!
     sequenceNumber: Int!
-    taskType: String! # e.g. "NEO4J_QUERY", "ENRICH_ENTITY", "SUMMARIZE"
-    kind: String! # backwards compatibility alias for taskType
-    inputParams: JSON! # JSON input parameters
-    input: String! # backwards compatibility - JSON stringified
-    outputData: JSON # JSON result data
-    output: String # backwards compatibility - JSON stringified
+    taskType: String!     # e.g. "NEO4J_QUERY", "ENRICH_ENTITY", "SUMMARIZE"
+    kind: String!         # backwards compatibility alias for taskType
+    inputParams: JSON!    # JSON input parameters
+    input: String!        # backwards compatibility - JSON stringified
+    outputData: JSON      # JSON result data
+    output: String        # backwards compatibility - JSON stringified
     status: CopilotTaskStatus!
     errorMessage: String
-    error: String # backwards compatibility alias
+    error: String         # backwards compatibility alias
     createdAt: String!
     startedAt: String
     finishedAt: String
@@ -51,7 +33,7 @@ const copilotTypeDefs = gql `
     id: ID!
     goalId: ID
     goalText: String!
-    goal: String! # backwards compatibility alias
+    goal: String!         # backwards compatibility alias
     investigationId: ID
     status: CopilotRunStatus!
     plan: CopilotPlan
@@ -92,13 +74,21 @@ const copilotTypeDefs = gql `
   extend type Query {
     # Get a specific run with full details
     copilotRun(id: ID!): CopilotRun
-
+    
     # Get multiple runs with filtering
-    copilotRuns(investigationId: ID, status: CopilotRunStatus, limit: Int = 20): [CopilotRun!]!
-
+    copilotRuns(
+      investigationId: ID
+      status: CopilotRunStatus
+      limit: Int = 20
+    ): [CopilotRun!]!
+    
     # Get events for a run with pagination
-    copilotEvents(runId: ID!, afterId: ID, limit: Int = 50): [CopilotEvent!]!
-
+    copilotEvents(
+      runId: ID!
+      afterId: ID
+      limit: Int = 50
+    ): [CopilotEvent!]!
+    
     # Get statistics for monitoring
     copilotStats(timeRange: String = "24 hours"): [CopilotStats!]!
   }
@@ -111,7 +101,7 @@ const copilotTypeDefs = gql `
       investigationId: ID
       resume: Boolean = false
     ): CopilotRun!
-
+    
     # Control run execution
     pauseCopilotRun(runId: ID!): CopilotRun!
     resumeCopilotRun(runId: ID!): CopilotRun!
@@ -126,3 +116,4 @@ const copilotTypeDefs = gql `
   scalar JSON
 `;
 module.exports = { copilotTypeDefs };
+//# sourceMappingURL=schema.copilot.js.map

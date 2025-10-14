@@ -1,0 +1,9 @@
+{
+  "id": "Unique subject identifier used for all downstream lookups",
+  "email": "Primary user email address",
+  "tenantId": "Owning tenant identifier",
+  "residency": "Region residency asserted by IdP (ISO country code)",
+  "clearance": "Data classification clearance level",
+  "loa": "Level of assurance for the most recent primary auth",
+  "groups": "Raw IdP group memberships mapped to entitlements"
+}

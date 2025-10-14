@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mc-platform
+spec:
+  template:
+    metadata:
+      annotations:
+        mc-platform.io/sovereign-safeguards: "enabled"
+        mc-platform.io/version: "v0.4.1"
+        config.kubernetes.io/depends-on: "mc-platform-v041/sovereign-safeguards-service,mc-platform-v041/verification-service"
+    spec:
+      containers:
+        - name: mc-platform
+          env:
+            # v0.4.1 Sovereign Safeguards Configuration
+            - name: MC_PLATFORM_VERSION
+              value: "v0.4.1"
+            - name: SOVEREIGN_SAFEGUARDS_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: sovereign-safeguards-config
+                  key: SOVEREIGN_SAFEGUARDS_ENABLED
+            - name: INDEPENDENT_VERIFICATION_REQUIRED
+              valueFrom:
+                configMapKeyRef:
+                  name: sovereign-safeguards-config
+                  key: INDEPENDENT_VERIFICATION_REQUIRED
+            - name: MINIMUM_VERIFICATION_SOURCES
+              valueFrom:
+                configMapKeyRef:
+                  name: sovereign-safeguards-config
+                  key: MINIMUM_VERIFICATION_SOURCES
+            - name: CONTAINMENT_READINESS_REQUIRED
+              valueFrom:
+                configMapKeyRef:
+                  name: sovereign-safeguards-config
+                  key: CONTAINMENT_READINESS_REQUIRED
+            - name: LAWFUL_INTEROPERABILITY_REQUIRED
+              valueFrom:
+                configMapKeyRef:
+                  name: sovereign-safeguards-config
+                  key: LAWFUL_INTEROPERABILITY_REQUIRED
+            - name: REVERSIBLE_AUTONOMY_REQUIRED
+              valueFrom:
+                configMapKeyRef:
+                  name: sovereign-safeguards-config
+                  key: REVERSIBLE_AUTONOMY_REQUIRED
+            - name: ENHANCED_AUDITING_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: sovereign-safeguards-config
+                  key: ENHANCED_AUDITING_ENABLED
+            - name: MAX_REVERSAL_TIME_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  name: sovereign-safeguards-config
+                  key: MAX_REVERSAL_TIME_SECONDS
+            - name: SNAPSHOT_FREQUENCY_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  name: sovereign-safeguards-config
+                  key: SNAPSHOT_FREQUENCY_SECONDS
+            # Service endpoints
+            - name: SOVEREIGN_SAFEGUARDS_SERVICE_URL
+              value: "http://sovereign-safeguards-service.mc-platform-v041.svc.cluster.local:8080"
+            - name: VERIFICATION_SERVICE_URL
+              value: "http://verification-service.mc-platform-v041.svc.cluster.local:8081"
+            # GraphQL v0.4.1 resolvers
+            - name: GRAPHQL_V041_RESOLVERS_ENABLED
+              value: "true"
+            - name: SOVEREIGN_RESOLVERS_ENABLED
+              value: "true"
+          # Additional health checks for sovereign safeguards
+          livenessProbe:
+            httpGet:
+              path: /health?check=sovereign-safeguards
+              port: http
+            initialDelaySeconds: 45
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /ready?check=sovereign-safeguards
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
