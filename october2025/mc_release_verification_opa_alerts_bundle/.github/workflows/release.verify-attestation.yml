@@ -1,0 +1,39 @@
+name: release.verify-attestation
+on:
+  workflow_dispatch:
+    inputs:
+      image_ref:
+        description: 'OCI image reference (e.g. ghcr.io/org/app:tag). Leave empty to verify file-based attestation instead.'
+        required: false
+        default: ''
+      artifact_path:
+        description: 'Path to built artifact to verify (e.g. dist/app.tar.gz). Used when image_ref is empty.'
+        required: false
+        default: 'sbom.json'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.5.0
+
+      - name: Verify OCI image attestation (if image_ref provided)
+        if: ${{ inputs.image_ref != '' }}
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+        run: |
+          cosign verify-attestation             --type slsaprovenance             --certificate-oidc-issuer https://token.actions.githubusercontent.com             --certificate-identity-regexp 'https://github.com/.+/.+/.github/workflows/.+@.+'
+            ${{ inputs.image_ref }}
+
+      - name: Verify file-based attestation presence (fallback)
+        if: ${{ inputs.image_ref == '' }}
+        run: |
+          test -s "${{ inputs.artifact_path }}" || (echo "Artifact not found for verification: ${{ inputs.artifact_path }}" && exit 1)
+          echo "NOTE: File-based attestation verification requires your chosen attestation storage/retrieval. Consider verifying a release asset or OCI-ref instead."

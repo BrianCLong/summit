@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events';
 import { cacheService } from './cacheService';
 export class InvestigationWorkflowService extends EventEmitter {
-    investigations = new Map();
-    templates = new Map();
     constructor() {
         super();
+        this.investigations = new Map();
+        this.templates = new Map();
         console.log('[WORKFLOW] Investigation workflow service initialized');
         this.initializeTemplates();
     }
@@ -345,3 +345,4 @@ export class InvestigationWorkflowService extends EventEmitter {
 }
 // Global investigation workflow service instance
 export const investigationWorkflowService = new InvestigationWorkflowService();
+//# sourceMappingURL=investigationWorkflowService.js.map

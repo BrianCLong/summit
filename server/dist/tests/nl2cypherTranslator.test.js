@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { nl2cypher } from '../nl2cypher/index';
 describe('nl2cypher corpus', () => {
     it('produces expected cypher and AST for corpus', () => {
-        const corpusPath = join(__dirname, '../../../contracts/nl2cypher/prompts.jsv');
+        const corpusPath = join(__dirname, '../../../contracts/nl2cypher/prompts.tsv');
         const lines = readFileSync(corpusPath, 'utf-8').trim().split('\n');
         let success = 0;
         for (const line of lines) {
@@ -19,3 +19,4 @@ describe('nl2cypher corpus', () => {
         expect(success / lines.length).toBeGreaterThanOrEqual(0.95);
     });
 });
+//# sourceMappingURL=nl2cypherTranslator.test.js.map

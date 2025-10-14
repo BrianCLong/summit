@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "hello-job.fullname" . }}
+  labels:
+    {{- include "hello-job.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.schedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "hello-job.selectorLabels" . | nindent 12 }}
+        spec:
+          serviceAccountName: {{ include "hello-job.serviceAccountName" . }}
+          securityContext:
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          restartPolicy: Never
+          containers:
+            - name: job
+              image: {{ include "hello-job.image" . }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              env:
+                {{- toYaml .Values.env | nindent 16 }}
+              resources:
+                {{- toYaml .Values.resources | nindent 16 }}
+              securityContext:
+                {{- toYaml .Values.securityContext | nindent 16 }}

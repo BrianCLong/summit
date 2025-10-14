@@ -143,5 +143,6 @@ module.exports = {
     getPostgresPool,
     getRedisClient,
     closeConnections,
-    isMockMode: true,
+    isMockMode: true
 };
+//# sourceMappingURL=database-mock.js.map

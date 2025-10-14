@@ -1,9 +1,9 @@
-const { NlpManager } = require('node-nlp');
-const natural = require('natural');
-const logger = require('../utils/logger');
+const { NlpManager } = require("node-nlp");
+const natural = require("natural");
+const logger = require("../utils/logger");
 class ContextAnalysisService {
     constructor() {
-        this.nlpManager = new NlpManager({ languages: ['en'], forceNER: true });
+        this.nlpManager = new NlpManager({ languages: ["en"], forceNER: true });
         this.tokenizer = new natural.WordTokenizer();
         this.stemmer = natural.PorterStemmer;
         this.tfidf = new natural.TfIdf();
@@ -17,18 +17,18 @@ class ContextAnalysisService {
     async initializeEntityPatterns() {
         try {
             // Add entity patterns for common intelligence entities
-            this.nlpManager.addNamedEntityText('person', 'John Doe', ['en'], ['John Doe']);
-            this.nlpManager.addNamedEntityText('organization', 'CIA', ['en'], ['CIA', 'Central Intelligence Agency']);
-            this.nlpManager.addNamedEntityText('location', 'Washington DC', ['en'], ['Washington DC', 'DC']);
-            this.nlpManager.addNamedEntityText('phone', 'phone', ['en'], ['+1-555-123-4567', '555-123-4567']);
-            this.nlpManager.addNamedEntityText('email', 'email', ['en'], ['john@example.com']);
-            this.nlpManager.addNamedEntityText('date', 'date', ['en'], ['2025-01-01', 'January 1st']);
+            this.nlpManager.addNamedEntityText("person", "John Doe", ["en"], ["John Doe"]);
+            this.nlpManager.addNamedEntityText("organization", "CIA", ["en"], ["CIA", "Central Intelligence Agency"]);
+            this.nlpManager.addNamedEntityText("location", "Washington DC", ["en"], ["Washington DC", "DC"]);
+            this.nlpManager.addNamedEntityText("phone", "phone", ["en"], ["+1-555-123-4567", "555-123-4567"]);
+            this.nlpManager.addNamedEntityText("email", "email", ["en"], ["john@example.com"]);
+            this.nlpManager.addNamedEntityText("date", "date", ["en"], ["2025-01-01", "January 1st"]);
             // Train the NLP manager
             await this.nlpManager.train();
-            this.logger.info('NLP Manager initialized and trained');
+            this.logger.info("NLP Manager initialized and trained");
         }
         catch (error) {
-            this.logger.error('Error initializing NLP patterns:', error);
+            this.logger.error("Error initializing NLP patterns:", error);
         }
     }
     /**
@@ -36,7 +36,7 @@ class ContextAnalysisService {
      */
     async extractEntities(text) {
         try {
-            const result = await this.nlpManager.process('en', text);
+            const result = await this.nlpManager.process("en", text);
             // Enhanced entity extraction with custom patterns
             const entities = result.entities || [];
             const customEntities = this.extractCustomEntities(text);
@@ -51,7 +51,7 @@ class ContextAnalysisService {
             };
         }
         catch (error) {
-            this.logger.error('Error extracting entities:', error);
+            this.logger.error("Error extracting entities:", error);
             throw error;
         }
     }
@@ -63,39 +63,39 @@ class ContextAnalysisService {
         const patterns = {
             ip_address: {
                 regex: /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g,
-                type: 'ip_address',
+                type: "ip_address",
             },
             phone_number: {
                 regex: /(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})/g,
-                type: 'phone_number',
+                type: "phone_number",
             },
             email: {
                 regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-                type: 'email',
+                type: "email",
             },
             url: {
                 regex: /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+. ~#?&//=]*)/g,
-                type: 'url',
+                type: "url",
             },
             ssn: {
                 regex: /\b\d{3}-\d{2}-\d{4}\b/g,
-                type: 'ssn',
+                type: "ssn",
             },
             credit_card: {
                 regex: /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g,
-                type: 'credit_card',
+                type: "credit_card",
             },
             coordinates: {
                 regex: /[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)/g,
-                type: 'coordinates',
+                type: "coordinates",
             },
             date: {
                 regex: /\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b|\b\d{4}[/-]\d{1,2}[/-]\d{1,2}\b/g,
-                type: 'date',
+                type: "date",
             },
             time: {
                 regex: /\b\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AaPp][Mm])?\b/g,
-                type: 'time',
+                type: "time",
             },
         };
         Object.keys(patterns).forEach((patternName) => {
@@ -155,7 +155,7 @@ class ContextAnalysisService {
                 topics.push({
                     documentIndex: index,
                     topTerms: terms,
-                    document: doc.substring(0, 100) + (doc.length > 100 ? '...' : ''),
+                    document: doc.substring(0, 100) + (doc.length > 100 ? "..." : ""),
                 });
             });
             return {
@@ -164,7 +164,7 @@ class ContextAnalysisService {
             };
         }
         catch (error) {
-            this.logger.error('Error analyzing topics:', error);
+            this.logger.error("Error analyzing topics:", error);
             throw error;
         }
     }
@@ -175,36 +175,36 @@ class ContextAnalysisService {
         try {
             const tokens = this.tokenizer.tokenize(text.toLowerCase());
             const stopWords = new Set([
-                'the',
-                'a',
-                'an',
-                'and',
-                'or',
-                'but',
-                'in',
-                'on',
-                'at',
-                'to',
-                'for',
-                'of',
-                'with',
-                'by',
-                'is',
-                'are',
-                'was',
-                'were',
-                'be',
-                'been',
-                'have',
-                'has',
-                'had',
-                'do',
-                'does',
-                'did',
-                'will',
-                'would',
-                'could',
-                'should',
+                "the",
+                "a",
+                "an",
+                "and",
+                "or",
+                "but",
+                "in",
+                "on",
+                "at",
+                "to",
+                "for",
+                "of",
+                "with",
+                "by",
+                "is",
+                "are",
+                "was",
+                "were",
+                "be",
+                "been",
+                "have",
+                "has",
+                "had",
+                "do",
+                "does",
+                "did",
+                "will",
+                "would",
+                "could",
+                "should",
             ]);
             // Filter out stop words and short words
             const meaningfulTokens = tokens.filter((token) => !stopWords.has(token) && token.length > 2);
@@ -243,7 +243,7 @@ class ContextAnalysisService {
             };
         }
         catch (error) {
-            this.logger.error('Error extracting key phrases:', error);
+            this.logger.error("Error extracting key phrases:", error);
             throw error;
         }
     }
@@ -284,7 +284,7 @@ class ContextAnalysisService {
             };
         }
         catch (error) {
-            this.logger.error('Error analyzing similarity:', error);
+            this.logger.error("Error analyzing similarity:", error);
             throw error;
         }
     }
@@ -309,7 +309,7 @@ class ContextAnalysisService {
                 Promise.resolve(this.extractKeyPhrases(text)),
             ]);
             // Language detection
-            const language = 'en'; // Placeholder for language detection
+            const language = "en"; // Placeholder for language detection
             // Text statistics
             const stats = this.calculateTextStatistics(text);
             return {
@@ -325,7 +325,7 @@ class ContextAnalysisService {
             };
         }
         catch (error) {
-            this.logger.error('Error performing comprehensive analysis:', error);
+            this.logger.error("Error performing comprehensive analysis:", error);
             throw error;
         }
     }
@@ -341,7 +341,7 @@ class ContextAnalysisService {
             wordCount: words.length,
             sentenceCount: sentences.length,
             averageWordsPerSentence: words.length / sentences.length || 0,
-            averageCharactersPerWord: text.replace(/\s/g, '').length / words.length || 0,
+            averageCharactersPerWord: text.replace(/\s/g, "").length / words.length || 0,
             uniqueWords: new Set(words.map((w) => w.toLowerCase())).size,
             lexicalDiversity: new Set(words.map((w) => w.toLowerCase())).size / words.length || 0,
         };
@@ -361,7 +361,11 @@ class ContextAnalysisService {
             score: Math.min(10, complexityScore / 2), // Normalize to 0-10 scale
             averageWordLength: avgWordLength,
             averageSentenceLength: avgSentenceLength,
-            level: complexityScore < 8 ? 'Simple' : complexityScore < 15 ? 'Moderate' : 'Complex',
+            level: complexityScore < 8
+                ? "Simple"
+                : complexityScore < 15
+                    ? "Moderate"
+                    : "Complex",
         };
     }
     /**
@@ -374,24 +378,25 @@ class ContextAnalysisService {
         if (sentences.length === 0 || words.length === 0)
             return 0;
         const avgSentenceLength = words.length / sentences.length;
-        const avgSyllables = words.reduce((sum, word) => sum + this.countSyllables(word), 0) / words.length;
+        const avgSyllables = words.reduce((sum, word) => sum + this.countSyllables(word), 0) /
+            words.length;
         // Simplified Flesch Reading Ease
         const score = 206.835 - 1.015 * avgSentenceLength - 84.6 * avgSyllables;
         return {
             score: Math.max(0, Math.min(100, score)),
             level: score >= 90
-                ? 'Very Easy'
+                ? "Very Easy"
                 : score >= 80
-                    ? 'Easy'
+                    ? "Easy"
                     : score >= 70
-                        ? 'Fairly Easy'
+                        ? "Fairly Easy"
                         : score >= 60
-                            ? 'Standard'
+                            ? "Standard"
                             : score >= 50
-                                ? 'Fairly Difficult'
+                                ? "Fairly Difficult"
                                 : score >= 30
-                                    ? 'Difficult'
-                                    : 'Very Difficult',
+                                    ? "Difficult"
+                                    : "Very Difficult",
         };
     }
     /**
@@ -401,8 +406,8 @@ class ContextAnalysisService {
         word = word.toLowerCase();
         if (word.length <= 3)
             return 1;
-        word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
-        word = word.replace(/^y/, '');
+        word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, "");
+        word = word.replace(/^y/, "");
         const matches = word.match(/[aeiouy]{1,2}/g);
         return matches ? matches.length : 1;
     }
@@ -413,12 +418,56 @@ class ContextAnalysisService {
         const keyPhrases = this.extractKeyPhrases(text, 5);
         // Intelligence-specific topic categories
         const topicCategories = {
-            security: ['security', 'threat', 'risk', 'vulnerability', 'attack', 'breach', 'defense'],
-            military: ['military', 'army', 'navy', 'air force', 'troops', 'deployment', 'operation'],
-            political: ['government', 'policy', 'election', 'political', 'parliament', 'congress'],
-            economic: ['economy', 'trade', 'market', 'financial', 'investment', 'economic'],
-            social: ['social', 'community', 'people', 'society', 'cultural', 'demographic'],
-            technology: ['technology', 'cyber', 'digital', 'computer', 'internet', 'software'],
+            security: [
+                "security",
+                "threat",
+                "risk",
+                "vulnerability",
+                "attack",
+                "breach",
+                "defense",
+            ],
+            military: [
+                "military",
+                "army",
+                "navy",
+                "air force",
+                "troops",
+                "deployment",
+                "operation",
+            ],
+            political: [
+                "government",
+                "policy",
+                "election",
+                "political",
+                "parliament",
+                "congress",
+            ],
+            economic: [
+                "economy",
+                "trade",
+                "market",
+                "financial",
+                "investment",
+                "economic",
+            ],
+            social: [
+                "social",
+                "community",
+                "people",
+                "society",
+                "cultural",
+                "demographic",
+            ],
+            technology: [
+                "technology",
+                "cyber",
+                "digital",
+                "computer",
+                "internet",
+                "software",
+            ],
         };
         const detectedTopics = {};
         const textLower = text.toLowerCase();
@@ -437,3 +486,4 @@ class ContextAnalysisService {
     }
 }
 module.exports = ContextAnalysisService;
+//# sourceMappingURL=ContextAnalysisService.js.map
