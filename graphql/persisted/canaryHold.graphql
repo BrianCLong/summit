@@ -1,0 +1,1 @@
+mutation canaryHold($tenant: Tenant!) { canaryHold(tenant: $tenant) { ok audit { evidenceId ts actor } } }
