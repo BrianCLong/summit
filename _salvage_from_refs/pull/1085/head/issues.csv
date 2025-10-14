@@ -1,6 +1,0 @@
-title,labels,milestone,project,body_file
-"[orchestrator-core] Implement durable run/task/event store (Postgres)","area/orchestrator-core,type/feat,priority/P0-blocker,autonomy/A2","Phase 0","<project-id>","issue_bodies/orchestrator_core_durable_store.md"
-"[policy] Wire OPA gate + reason-for-access for WRITE/DEPLOY actions","area/policy,type/security,priority/P0-blocker,risk/write,risk/deploy","Phase 0","<project-id>","issue_bodies/policy_opa_gate.md"
-"[orchestrator-core] Implement Kill Switch and Autonomy Profiles","area/orchestrator-core,type/feat,priority/P0-blocker,autonomy/A0,autonomy/A1,autonomy/A2,autonomy/A3,autonomy/A4,autonomy/A5","Phase 0","<project-id>","issue_bodies/orchestrator_kill_switch_profiles.md"
-"[router] Provider routing with budgets + fallbacks","area/router,type/feat,priority/P1,provider/premium-llm,provider/code-llm,provider/local","Phase 1","<project-id>","issue_bodies/router_provider_routing.md"
-"[workers] Code-LLM unit test generation (diff-only contract)","area/workers,type/feat,priority/P1,provider/code-llm","Phase 1","<project-id>","issue_bodies/worker_test_generation.md"
