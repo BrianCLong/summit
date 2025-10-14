@@ -1,0 +1,189 @@
+name: golden-path-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io/example
+  IMAGE_PREFIX: golden-path
+  GO_VERSION: 1.22.4
+
+jobs:
+  build-test:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129b4052e0f3944c0e437ac31d59
+      - name: Set up Go
+        uses: actions/setup-go@c0137caad775660c0844396c52da96e560aba63d
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Cache Go modules
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Install dependencies
+        run: go mod tidy
+        working-directory: templates/golden-path-platform/services/hello-service
+      - name: Install job dependencies
+        run: go mod tidy
+        working-directory: templates/golden-path-platform/jobs/hello-job
+      - name: Run tests
+        run: make test
+        working-directory: templates/golden-path-platform
+      - name: Static analysis
+        uses: golangci/golangci-lint-action@f33eece31ed917dd3cd02519e429115c0bbf1179
+        with:
+          working-directory: templates/golden-path-platform/services/hello-service
+          args: --timeout=5m
+      - name: Static analysis (job)
+        uses: golangci/golangci-lint-action@f33eece31ed917dd3cd02519e429115c0bbf1179
+        with:
+          working-directory: templates/golden-path-platform/jobs/hello-job
+          args: --timeout=5m
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@bf2dc8e55639c1e091e9b45970152e4313705814
+        with:
+          args: --no-banner
+
+  supply-chain:
+    runs-on: ubuntu-22.04
+    needs: build-test
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      security-events: write
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+      SERVICE_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-hello-service:${{ github.sha }}
+      JOB_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-hello-job:${{ github.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129b4052e0f3944c0e437ac31d59
+      - name: Set metadata
+        id: meta
+        run: echo "date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@e77e8065d9f7ec6abdd9838668cd7b43924dd64d
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@1583c0f09d26c58c59d25b0eef29792b7ce99d9a
+      - name: Login to registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@5b7b28b1cc417bbd34cd8c225a957c9ce9adf7f2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push hello-service
+        uses: docker/build-push-action@cb8fc7586f9ad9441b20c33e0f6e8b1b58d8b4c6
+        with:
+          context: templates/golden-path-platform/services/hello-service
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.SERVICE_IMAGE }}
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+            BUILD_DATE=${{ steps.meta.outputs.date }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build and push hello-job
+        uses: docker/build-push-action@cb8fc7586f9ad9441b20c33e0f6e8b1b58d8b4c6
+        with:
+          context: templates/golden-path-platform/jobs/hello-job
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.JOB_IMAGE }}
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+            BUILD_DATE=${{ steps.meta.outputs.date }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Vulnerability scan (filesystem)
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          scan-type: fs
+          format: sarif
+          output: trivy-fs.sarif
+          exit-code: '1'
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          scanners: vuln,config,secret
+      - name: Upload Trivy results
+        if: always()
+        uses: github/codeql-action/upload-sarif@6a87ebe42bbd3423c818b3d15ce9803ba45bd522
+        with:
+          sarif_file: trivy-fs.sarif
+      - name: Vulnerability scan (images)
+        if: github.event_name != 'pull_request'
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          image-ref: ${{ env.SERVICE_IMAGE }}
+          format: table
+          exit-code: '1'
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+      - name: License scan (job image)
+        if: github.event_name != 'pull_request'
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          image-ref: ${{ env.JOB_IMAGE }}
+          format: table
+          exit-code: '0'
+          scanners: license
+      - name: Prepare artifact directory
+        run: mkdir -p artifacts
+      - name: Generate SBOM (service)
+        uses: anchore/sbom-action@c73dd3f93ab542b7902df62a6ee5ad763179fa7b
+        with:
+          image: ${{ env.SERVICE_IMAGE }}
+          output-file: artifacts/hello-service-sbom.spdx.json
+      - name: Generate SBOM (job)
+        uses: anchore/sbom-action@c73dd3f93ab542b7902df62a6ee5ad763179fa7b
+        with:
+          image: ${{ env.JOB_IMAGE }}
+          output-file: artifacts/hello-job-sbom.spdx.json
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@2848b2cda0e5190984587ec6bb1f36730ca78d50
+        with:
+          name: sboms
+          path: artifacts/*.spdx.json
+      - name: Install cosign
+        uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62
+      - name: Sign images
+        if: github.event_name != 'pull_request'
+        env:
+          COSIGN_YES: "1"
+        run: |
+          cosign sign --keyless ${{ env.SERVICE_IMAGE }}
+          cosign sign --keyless ${{ env.JOB_IMAGE }}
+      - name: Attach SBOM
+        if: github.event_name != 'pull_request'
+        env:
+          COSIGN_YES: "1"
+        run: |
+          cosign attach sbom --sbom artifacts/hello-service-sbom.spdx.json ${{ env.SERVICE_IMAGE }}
+          cosign attach sbom --sbom artifacts/hello-job-sbom.spdx.json ${{ env.JOB_IMAGE }}
+      - name: Generate provenance
+        if: github.event_name != 'pull_request'
+        uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@4876e96b8268fd8b7b8d8574718d06c0d0426d40
+        with:
+          base64-subjects: ${{ env.SERVICE_IMAGE }},${{ env.JOB_IMAGE }}
+          upload-assets: true
+      - name: Upload artifacts
+        uses: actions/upload-artifact@2848b2cda0e5190984587ec6bb1f36730ca78d50
+        with:
+          name: supply-chain-artifacts
+          path: |
+            artifacts/*.json
+            provenance
+

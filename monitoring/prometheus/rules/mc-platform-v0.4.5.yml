@@ -1,0 +1,270 @@
+groups:
+  - name: mc-platform-v0.4.5-recording-rules
+    interval: 30s
+    rules:
+      # Decision Latency SLI
+      - record: mc:decision:latency_p95_5m
+        expr: histogram_quantile(0.95, rate(mc_decision_latency_ms_bucket[5m]))
+        labels:
+          service: mc-platform
+          version: v0.4.5
+
+      - record: mc:decision:latency_p99_5m
+        expr: histogram_quantile(0.99, rate(mc_decision_latency_ms_bucket[5m]))
+        labels:
+          service: mc-platform
+          version: v0.4.5
+
+      # Error Rate SLI
+      - record: mc:decision:error_rate_5m
+        expr: rate(mc_decision_errors_total[5m]) / rate(mc_decision_total[5m])
+        labels:
+          service: mc-platform
+          version: v0.4.5
+
+      # Exploration Rate Metrics
+      - record: mc:exploration:rate_current
+        expr: mc_exploration_rate
+        labels:
+          service: mc-platform
+          version: v0.4.5
+
+      - record: mc:exploration:rate_baseline
+        expr: mc_exploration_rate_baseline
+        labels:
+          service: mc-platform
+          version: v0.4.5
+
+      # Weight Pin Metrics
+      - record: mc:weights:pinned_status
+        expr: mc_weights_pinned
+        labels:
+          service: mc-platform
+          version: v0.4.5
+
+      - record: mc:weights:pin_duration_minutes
+        expr: (time() - mc_pin_start_timestamp) / 60
+        labels:
+          service: mc-platform
+          version: v0.4.5
+
+      # Incident Reweighter Metrics
+      - record: mc:reweighter:active_count
+        expr: sum(mc_incident_reweighter_active)
+        labels:
+          service: mc-platform
+          version: v0.4.5
+
+      - record: mc:reweighter:incidents_rate_5m
+        expr: rate(mc_reweighter_incidents_processed_total[5m])
+        labels:
+          service: mc-platform
+          version: v0.4.5
+
+      - record: mc:reweighter:restore_success_rate_5m
+        expr: rate(mc_reweighter_restore_success_total[5m])
+        labels:
+          service: mc-platform
+          version: v0.4.5
+
+      - record: mc:reweighter:restore_failure_rate_5m
+        expr: rate(mc_reweighter_restore_failed_total[5m])
+        labels:
+          service: mc-platform
+          version: v0.4.5
+
+      # SLO Compliance Metrics
+      - record: mc:slo:availability_30d
+        expr: (
+          rate(mc_decision_success_total[30d]) /
+          rate(mc_decision_total[30d])
+        )
+        labels:
+          service: mc-platform
+          version: v0.4.5
+          slo: availability
+
+      - record: mc:slo:latency_compliance_30d
+        expr: (
+          histogram_quantile(0.95, rate(mc_decision_latency_ms_bucket[30d])) <= 250
+        )
+        labels:
+          service: mc-platform
+          version: v0.4.5
+          slo: latency
+
+      - record: mc:slo:reweighter_correctness_30d
+        expr: (
+          (rate(mc_reweighter_correct_reduction_total[30d]) +
+           rate(mc_reweighter_correct_pin_duration_total[30d])) /
+          (rate(mc_reweighter_incidents_total[30d]) * 2)
+        )
+        labels:
+          service: mc-platform
+          version: v0.4.5
+          slo: reweighter_correctness
+
+  - name: mc-platform-v0.4.5-alerts
+    rules:
+      # Critical Alerts
+      - alert: MCReweighterToggleStuck
+        expr: mc_incident_reweighter_active == 1 and on() (time() - mc_last_incident_timestamp) > 600
+        for: 5m
+        labels:
+          severity: critical
+          service: mc-platform
+          version: v0.4.5
+          component: incident-auto-reweighter
+          runbook: https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/incident-auto-reweighter.md
+        annotations:
+          summary: "IncidentAutoReweighter stuck in active state"
+          description: "Reweighter has been active for >10 minutes without recent incident. Manual intervention required."
+          impact: "System may be in degraded exploration mode unnecessarily"
+          action: "Check incident status and manually restore if needed"
+
+      - alert: MCPinTTLExpiredButPinned
+        expr: mc_weights_pinned == 1 and on() (time() - mc_pin_start_timestamp) > 7800
+        for: 2m
+        labels:
+          severity: warning
+          service: mc-platform
+          version: v0.4.5
+          component: incident-auto-reweighter
+          runbook: https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/incident-auto-reweighter.md
+        annotations:
+          summary: "Weight pinning exceeded 2h10m TTL"
+          description: "Weights have been pinned beyond the expected 2-hour duration."
+          impact: "System may be stuck in incident mode"
+          action: "Investigate pin duration and manually restore if needed"
+
+      - alert: MCExplorationNotReduced
+        expr: mc_incident_reweighter_active == 1 and mc_exploration_rate > 0.6 * mc_exploration_rate_baseline
+        for: 2m
+        labels:
+          severity: critical
+          service: mc-platform
+          version: v0.4.5
+          component: incident-auto-reweighter
+          runbook: https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/incident-auto-reweighter.md
+        annotations:
+          summary: "Exploration rate not reduced during active incident"
+          description: "Incident is active but exploration rate is >60% of baseline. Expected ~50% reduction."
+          impact: "Incident response not functioning correctly"
+          action: "Check reweighter status and manually apply reweight if needed"
+
+      - alert: MCRestoreFailed
+        expr: increase(mc_reweighter_restore_success_total[5m]) == 0 and on() (time() - mc_incident_clear_timestamp) > 300
+        for: 1m
+        labels:
+          severity: critical
+          service: mc-platform
+          version: v0.4.5
+          component: incident-auto-reweighter
+          runbook: https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/incident-auto-reweighter.md
+        annotations:
+          summary: "Failed to restore settings after incident clearance"
+          description: "No successful restore within 5 minutes of incident clearance."
+          impact: "System may remain in degraded state"
+          action: "Manually restore settings and investigate restore mechanism"
+
+      - alert: MCDecisionLatencyHigh
+        expr: mc:decision:latency_p95_5m > 250
+        for: 10m
+        labels:
+          severity: warning
+          service: mc-platform
+          version: v0.4.5
+          component: decision-engine
+          slo: latency
+        annotations:
+          summary: "Decision latency p95 exceeds 250ms SLO"
+          description: "95th percentile decision latency is {{ $value }}ms, exceeding 250ms SLO target."
+          impact: "Performance degradation affecting user experience"
+          action: "Investigate decision path performance bottlenecks"
+
+      - alert: MCErrorRateHigh
+        expr: mc:decision:error_rate_5m > 0.005
+        for: 5m
+        labels:
+          severity: critical
+          service: mc-platform
+          version: v0.4.5
+          component: decision-engine
+          slo: availability
+        annotations:
+          summary: "Error rate exceeds 0.5% SLO"
+          description: "Decision error rate is {{ $value | humanizePercentage }}, exceeding 0.5% SLO target."
+          impact: "Service reliability degraded"
+          action: "Investigate error patterns and consider triggering incident response"
+
+      # Warning Alerts
+      - alert: MCReweighterHighFailureRate
+        expr: mc:reweighter:restore_failure_rate_5m / (mc:reweighter:restore_failure_rate_5m + mc:reweighter:restore_success_rate_5m) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: mc-platform
+          version: v0.4.5
+          component: incident-auto-reweighter
+        annotations:
+          summary: "High reweighter restore failure rate"
+          description: "Restore failure rate is >10% over 5 minutes."
+          impact: "Reduced reliability of incident response"
+          action: "Review logs for restore failures and address underlying issues"
+
+      - alert: MCQAMServiceDown
+        expr: up{job=~"mc-platform.*"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: mc-platform
+          version: v0.4.5
+          component: qam-service
+        annotations:
+          summary: "MC Platform QAM service is down"
+          description: "QAM service instance {{ $labels.instance }} is not responding."
+          impact: "Core MC Platform functionality unavailable"
+          action: "Check service health and restart if necessary"
+
+      # SLO Breach Alerts
+      - alert: MCSLOAvailabilityBreach
+        expr: mc:slo:availability_30d < 0.999
+        for: 15m
+        labels:
+          severity: warning
+          service: mc-platform
+          version: v0.4.5
+          slo: availability
+        annotations:
+          summary: "MC Platform availability SLO breach"
+          description: "30-day availability is {{ $value | humanizePercentage }}, below 99.9% target."
+          impact: "SLO violation - may affect customer agreements"
+          action: "Review incident patterns and implement reliability improvements"
+
+      - alert: MCSLOLatencyBreach
+        expr: mc:slo:latency_compliance_30d == 0
+        for: 15m
+        labels:
+          severity: warning
+          service: mc-platform
+          version: v0.4.5
+          slo: latency
+        annotations:
+          summary: "MC Platform latency SLO breach"
+          description: "30-day p95 latency exceeds 250ms target."
+          impact: "Performance SLO violation"
+          action: "Analyze performance trends and optimize decision path"
+
+      - alert: MCSLOReweighterCorrectnessBreach
+        expr: mc:slo:reweighter_correctness_30d < 0.95
+        for: 15m
+        labels:
+          severity: warning
+          service: mc-platform
+          version: v0.4.5
+          slo: reweighter_correctness
+        annotations:
+          summary: "MC Platform reweighter correctness SLO breach"
+          description: "30-day reweighter correctness is {{ $value | humanizePercentage }}, below 95% target."
+          impact: "Incident response reliability degraded"
+          action: "Review reweighter configuration and incident handling patterns"

@@ -1,0 +1,89 @@
+ec10800c4923b35837a309f3f2aa0168
+import express from 'express';
+import request from 'supertest';
+import router from '../servers-api.js';
+// Mock the repo to avoid DB
+jest.unstable_mockModule('../MCPServersRepo.js', () => ({
+    mcpServersRepo: {
+        create: jest.fn(async (input) => ({
+            id: 's1',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            auth_token: input.authToken ?? null,
+            scopes: input.scopes ?? [],
+            tags: input.tags ?? [],
+            name: input.name,
+            url: input.url,
+        })),
+        list: jest.fn(async () => [
+            {
+                id: 's1',
+                name: 'local-graphops',
+                url: 'ws://localhost:9010',
+                auth_token: null,
+                scopes: ['graph:read'],
+                tags: ['local'],
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            },
+        ]),
+        get: jest.fn(async (id) => id === 's1'
+            ? {
+                id: 's1',
+                name: 'local-graphops',
+                url: 'ws://localhost:9010',
+                auth_token: null,
+                scopes: ['graph:read'],
+                tags: ['local'],
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            }
+            : null),
+        update: jest.fn(async (id, input) => id === 's1'
+            ? {
+                id: 's1',
+                name: input.name ?? 'local-graphops',
+                url: input.url ?? 'ws://localhost:9010',
+                auth_token: input.authToken ?? null,
+                scopes: input.scopes ?? ['graph:read'],
+                tags: input.tags ?? ['local'],
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            }
+            : null),
+        delete: jest.fn(async (id) => id === 's1'),
+    },
+}));
+describe('MCP Servers API', () => {
+    const app = express();
+    app.use('/api/maestro/v1/mcp', router);
+    it('creates an MCP server', async () => {
+        const res = await request(app)
+            .post('/api/maestro/v1/mcp/servers')
+            .send({ name: 'local-graphops', url: 'ws://localhost:9001', scopes: ['graph:read'] })
+            .expect(201);
+        expect(res.body).toHaveProperty('id');
+        expect(res.body).toHaveProperty('name', 'local-graphops');
+        expect(res.body).not.toHaveProperty('auth_token');
+    });
+    it('lists servers', async () => {
+        const res = await request(app).get('/api/maestro/v1/mcp/servers').expect(200);
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body[0]).toHaveProperty('name');
+    });
+    it('gets a server by id', async () => {
+        const res = await request(app).get('/api/maestro/v1/mcp/servers/s1').expect(200);
+        expect(res.body).toHaveProperty('id', 's1');
+    });
+    it('updates a server', async () => {
+        const res = await request(app)
+            .put('/api/maestro/v1/mcp/servers/s1')
+            .send({ name: 'updated' })
+            .expect(200);
+        expect(res.body).toHaveProperty('name', 'updated');
+    });
+    it('deletes a server', async () => {
+        await request(app).delete('/api/maestro/v1/mcp/servers/s1').expect(204);
+    });
+});
+//# sourceMappingURL=servers-api.test.js.map

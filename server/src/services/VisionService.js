@@ -1,14 +1,15 @@
-const logger = require('../utils/logger');
+const logger = require("../utils/logger");
 
 class VisionService {
   async analyzeImageObjects(input) {
     // Placeholder: returns pseudo-detected objects based on input hash/length
-    const text = typeof input === 'string' ? input : JSON.stringify(input || {});
+    const text =
+      typeof input === "string" ? input : JSON.stringify(input || {});
     const h = this.hash(text);
     const objects = [
-      { label: 'person', confidence: ((h % 50) + 50) / 100 },
-      { label: 'car', confidence: ((Math.floor(h / 3) % 40) + 40) / 100 },
-      { label: 'face', confidence: ((Math.floor(h / 7) % 30) + 30) / 100 },
+      { label: "person", confidence: ((h % 50) + 50) / 100 },
+      { label: "car", confidence: ((Math.floor(h / 3) % 40) + 40) / 100 },
+      { label: "face", confidence: ((Math.floor(h / 7) % 30) + 30) / 100 },
     ].filter((o) => o.confidence > 0.6);
     // Generate pseudo bounding boxes (normalized 0..1)
     const n = Math.max(1, Math.min(3, objects.length));
@@ -22,7 +23,7 @@ class VisionService {
         y: Number(y.toFixed(3)),
         w: Number(ww.toFixed(3)),
         h: Number(hh.toFixed(3)),
-        label: objects[i]?.label || 'object',
+        label: objects[i]?.label || "object",
         confidence: objects[i]?.confidence || 0.7,
       };
     });
@@ -31,8 +32,17 @@ class VisionService {
 
   async analyzeMicroexpressions(input) {
     // Placeholder: returns emotion scores
-    const emotions = ['neutral', 'happy', 'sad', 'anger', 'surprise', 'fear', 'disgust'];
-    const text = typeof input === 'string' ? input : JSON.stringify(input || {});
+    const emotions = [
+      "neutral",
+      "happy",
+      "sad",
+      "anger",
+      "surprise",
+      "fear",
+      "disgust",
+    ];
+    const text =
+      typeof input === "string" ? input : JSON.stringify(input || {});
     const h = this.hash(text);
     const scores = {};
     let sum = 0;

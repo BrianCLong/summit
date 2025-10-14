@@ -1,3 +1,0 @@
-image: gateway:latest
-service:
-  port: 4000
