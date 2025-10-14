@@ -10,7 +10,7 @@ router.use(ensureAuthenticated);
 
 router.get('/providers', (req, res) => {
   const p = svc.providers();
-  res.json({ providers: Object.keys(p).map((k) => ({ id: k, info: p[k].info })) });
+  res.json({ providers: Object.keys(p).map(k => ({ id: k, info: p[k].info })) });
 });
 
 router.post('/query', async (req, res) => {
@@ -27,15 +27,10 @@ router.post('/query', async (req, res) => {
           params JSONB,
           user_id UUID,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`,
+        )`
       );
-      await pool.query(
-        'INSERT INTO external_queries (provider, params, user_id) VALUES ($1,$2,$3)',
-        [provider, params || {}, req.user?.id || null],
-      );
-    } catch (e) {
-      /* ignore */
-    }
+      await pool.query('INSERT INTO external_queries (provider, params, user_id) VALUES ($1,$2,$3)', [provider, params || {}, req.user?.id || null]);
+    } catch (e) { /* ignore */ }
     res.json({ success: true, ...out });
   } catch (e) {
     res.status(400).json({ success: false, error: e.message });
@@ -43,3 +38,4 @@ router.post('/query', async (req, res) => {
 });
 
 module.exports = router;
+

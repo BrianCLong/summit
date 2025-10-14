@@ -111,7 +111,7 @@ export const handlers = [
     // AI Analysis query
     if (queryString.includes('aiAnalysis')) {
       const text = variables?.text || 'sample text'
-
+      
       return res(
         ctx.json({
           data: {
@@ -128,11 +128,7 @@ export const handlers = [
                 { name: '192.168.1.100', type: 'IP_ADDRESS', confidence: 0.98 },
               ],
               anomaliesDetected: [
-                {
-                  type: 'unusual_time_access',
-                  description: 'Access outside normal hours',
-                  severity: 'medium',
-                },
+                { type: 'unusual_time_access', description: 'Access outside normal hours', severity: 'medium' },
               ],
               processingTime: 1200,
             },
@@ -156,7 +152,7 @@ export const handlers = [
         tags: [],
         metadata: {},
       }
-
+      
       return res(
         ctx.json({
           data: {
@@ -213,7 +209,7 @@ export const handlers = [
   // Auth endpoints
   rest.post('/auth/login', (req, res, ctx) => {
     const { email, password } = req.body as { email: string; password: string }
-
+    
     // Simple mock auth
     if (email && password) {
       return res(
@@ -224,8 +220,11 @@ export const handlers = [
         })
       )
     }
-
-    return res(ctx.status(401), ctx.json({ error: 'Invalid credentials' }))
+    
+    return res(
+      ctx.status(401),
+      ctx.json({ error: 'Invalid credentials' })
+    )
   }),
 
   rest.post('/auth/logout', (req, res, ctx) => {

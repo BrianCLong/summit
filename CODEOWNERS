@@ -1,8 +1,6 @@
-# Ensure critical paths get the right reviewers
-.github/workflows/ @BrianCLong @org/devops
-ops/**               @org/devops
-charts/**            @org/platform
-infra/**             @org/platform
-services/**          @org/owners
-packages/**          @org/owners
-**/migrations/**     @org/data-team
+# Core ownership mapping
+/apps/ai-core/          @brianclong
+/apps/orchestrator/     @brianclong
+/ops/helm/              @brianclong
+/policies/              @brianclong
+/docs/                  @brianclong

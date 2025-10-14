@@ -49,3 +49,4 @@ export async function legacyMetricsText() {
         return '# no legacy registry';
     return legacy.metrics();
 }
+//# sourceMappingURL=expose.js.map
