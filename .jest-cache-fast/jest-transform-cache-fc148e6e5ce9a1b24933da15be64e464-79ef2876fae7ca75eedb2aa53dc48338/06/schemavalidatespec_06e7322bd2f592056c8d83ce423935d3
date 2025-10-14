@@ -1,0 +1,13 @@
+975e115b7a3df8c69e730959f429ad28
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const schema_validate_js_1 = __importDefault(require("../src/tasks/schema.validate.js"));
+test('valid schema passes', async () => {
+    const schema = { type: 'object', properties: { a: { type: 'number' } }, required: ['a'] };
+    const out = await schema_validate_js_1.default.execute({}, { payload: { schema, data: { a: 1 } } });
+    expect(out.payload.valid).toBe(true);
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3BhY2thZ2VzL3Rhc2tzLWNvcmUvdGVzdC9zY2hlbWEudmFsaWRhdGUuc3BlYy50cyIsIm1hcHBpbmdzIjoiOzs7OztBQUFBLHlGQUFtRDtBQUVuRCxJQUFJLENBQUMscUJBQXFCLEVBQUUsS0FBSyxJQUFJLEVBQUU7SUFDckMsTUFBTSxNQUFNLEdBQUcsRUFBRSxJQUFJLEVBQUUsUUFBUSxFQUFFLFVBQVUsRUFBRSxFQUFFLENBQUMsRUFBRSxFQUFFLElBQUksRUFBRSxRQUFRLEVBQUUsRUFBRSxFQUFFLFFBQVEsRUFBRSxDQUFDLEdBQUcsQ0FBQyxFQUFFLENBQUM7SUFDMUYsTUFBTSxHQUFHLEdBQUcsTUFBTSw0QkFBSSxDQUFDLE9BQU8sQ0FBQyxFQUFTLEVBQUUsRUFBRSxPQUFPLEVBQUUsRUFBRSxNQUFNLEVBQUUsSUFBSSxFQUFFLEVBQUUsQ0FBQyxFQUFFLENBQUMsRUFBRSxFQUFFLEVBQUUsQ0FBQyxDQUFDO0lBQ25GLE1BQU0sQ0FBQyxHQUFHLENBQUMsT0FBTyxDQUFDLEtBQUssQ0FBQyxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsQ0FBQztBQUN2QyxDQUFDLENBQUMsQ0FBQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvVXNlcnMvYnJpYW5sb25nL0RldmVsb3Blci9zdW1taXQvcGFja2FnZXMvdGFza3MtY29yZS90ZXN0L3NjaGVtYS52YWxpZGF0ZS5zcGVjLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB0YXNrIGZyb20gJy4uL3NyYy90YXNrcy9zY2hlbWEudmFsaWRhdGUuanMnO1xuXG50ZXN0KCd2YWxpZCBzY2hlbWEgcGFzc2VzJywgYXN5bmMgKCkgPT4ge1xuICBjb25zdCBzY2hlbWEgPSB7IHR5cGU6ICdvYmplY3QnLCBwcm9wZXJ0aWVzOiB7IGE6IHsgdHlwZTogJ251bWJlcicgfSB9LCByZXF1aXJlZDogWydhJ10gfTtcbiAgY29uc3Qgb3V0ID0gYXdhaXQgdGFzay5leGVjdXRlKHt9IGFzIGFueSwgeyBwYXlsb2FkOiB7IHNjaGVtYSwgZGF0YTogeyBhOiAxIH0gfSB9KTtcbiAgZXhwZWN0KG91dC5wYXlsb2FkLnZhbGlkKS50b0JlKHRydWUpO1xufSk7XG4iXSwidmVyc2lvbiI6M30=

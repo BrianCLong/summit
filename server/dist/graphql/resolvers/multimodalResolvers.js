@@ -1,7 +1,7 @@
 import { withAuthAndPolicy } from '../../middleware/withAuthAndPolicy.js';
 import { PubSub } from 'graphql-subscriptions';
-import baseLogger from '../../config/logger';
-const logger = baseLogger.child({ name: 'MultimodalResolvers' });
+import pino from 'pino';
+const logger = pino({ name: 'MultimodalResolvers' });
 const pubsub = new PubSub();
 export const multimodalResolvers = {
     Query: {
@@ -9,71 +9,53 @@ export const multimodalResolvers = {
         mediaSource: withAuthAndPolicy('read', (args) => ({ type: 'media_source', id: args.id }))(async (_, { id }, context) => {
             return await context.multimodalDataService.getMediaSource(id);
         }),
-        mediaSources: withAuthAndPolicy('read', (args) => ({
-            type: 'investigation',
-            id: args.investigationId,
-        }))(async (_, { investigationId, mediaType, status, limit, offset }, context) => {
+        mediaSources: withAuthAndPolicy('read', (args) => ({ type: 'investigation', id: args.investigationId }))(async (_, { investigationId, mediaType, status, limit, offset }, context) => {
             return await context.multimodalDataService.getMediaSources(investigationId, {
                 mediaType,
                 status,
                 limit,
-                offset,
+                offset
             });
         }),
         // Multimodal Entity queries
-        multimodalEntity: withAuthAndPolicy('read', (args) => ({
-            type: 'multimodal_entity',
-            id: args.id,
-        }))(async (_, { id }, context) => {
+        multimodalEntity: withAuthAndPolicy('read', (args) => ({ type: 'multimodal_entity', id: args.id }))(async (_, { id }, context) => {
             return await context.multimodalDataService.getMultimodalEntity(id);
         }),
-        multimodalEntities: withAuthAndPolicy('read', (args) => ({
-            type: 'investigation',
-            id: args.investigationId,
-        }))(async (_, { investigationId, mediaType, entityType, verified, confidenceLevel, limit, offset }, context) => {
+        multimodalEntities: withAuthAndPolicy('read', (args) => ({ type: 'investigation', id: args.investigationId }))(async (_, { investigationId, mediaType, entityType, verified, confidenceLevel, limit, offset }, context) => {
             return await context.multimodalDataService.getMultimodalEntities(investigationId, {
                 mediaType,
                 entityType,
                 verified,
                 confidenceLevel,
                 limit,
-                offset,
+                offset
             });
         }),
         // Semantic Search
-        semanticSearch: withAuthAndPolicy('read', (args) => ({
-            type: 'investigation',
-            id: args.input.investigationId,
-        }))(async (_, { input }, context) => {
+        semanticSearch: withAuthAndPolicy('read', (args) => ({ type: 'investigation', id: args.input.investigationId }))(async (_, { input }, context) => {
             return await context.multimodalDataService.semanticSearch(input.investigationId, {
                 text: input.query,
                 entityId: input.entityId,
                 topK: input.topK,
                 threshold: input.threshold,
                 mediaTypes: input.mediaTypes,
-                includeText: input.includeText,
+                includeText: input.includeText
             });
         }),
-        similarEntities: withAuthAndPolicy('read', (args) => ({
-            type: 'multimodal_entity',
-            id: args.entityId,
-        }))(async (_, { entityId, topK, threshold }, context) => {
+        similarEntities: withAuthAndPolicy('read', (args) => ({ type: 'multimodal_entity', id: args.entityId }))(async (_, { entityId, topK, threshold }, context) => {
             return await context.multimodalDataService.findSimilarEntities(entityId, topK, threshold);
         }),
         // Extraction Job queries
         extractionJob: withAuthAndPolicy('read', (args) => ({ type: 'extraction_job', id: args.id }))(async (_, { id }, context) => {
             return await context.extractionJobService.getExtractionJob(id);
         }),
-        extractionJobs: withAuthAndPolicy('read', (args) => ({
-            type: 'investigation',
-            id: args.investigationId,
-        }))(async (_, { investigationId, status, limit, offset }, context) => {
+        extractionJobs: withAuthAndPolicy('read', (args) => ({ type: 'investigation', id: args.investigationId }))(async (_, { investigationId, status, limit, offset }, context) => {
             return await context.extractionJobService.getExtractionJobs(investigationId, {
                 status,
                 limit,
-                offset,
+                offset
             });
-        }),
+        })
     },
     Mutation: {
         // Media Source management
@@ -94,7 +76,7 @@ export const multimodalResolvers = {
                         filesize: 0,
                         checksum: `uri:${input.uri}`,
                         mediaType: input.mediaType,
-                        metadata: input.metadata || {},
+                        metadata: input.metadata || {}
                     };
                 }
                 else {
@@ -109,17 +91,11 @@ export const multimodalResolvers = {
                 throw error;
             }
         }),
-        updateMediaSource: withAuthAndPolicy('update', (args) => ({
-            type: 'media_source',
-            id: args.id,
-        }))(async (_, { id, input }, context) => {
+        updateMediaSource: withAuthAndPolicy('update', (args) => ({ type: 'media_source', id: args.id }))(async (_, { id, input }, context) => {
             // Implementation for updating media source metadata
             throw new Error('updateMediaSource not yet implemented');
         }),
-        deleteMediaSource: withAuthAndPolicy('delete', (args) => ({
-            type: 'media_source',
-            id: args.id,
-        }))(async (_, { id }, context) => {
+        deleteMediaSource: withAuthAndPolicy('delete', (args) => ({ type: 'media_source', id: args.id }))(async (_, { id }, context) => {
             const mediaSource = await context.multimodalDataService.getMediaSource(id);
             if (!mediaSource) {
                 throw new Error(`Media source ${id} not found`);
@@ -136,46 +112,34 @@ export const multimodalResolvers = {
             return true;
         }),
         // Multimodal Entity management
-        createMultimodalEntity: withAuthAndPolicy('create', (args) => ({
-            type: 'multimodal_entity',
-            id: 'new',
-        }))(async (_, { input }, context) => {
+        createMultimodalEntity: withAuthAndPolicy('create', (args) => ({ type: 'multimodal_entity', id: 'new' }))(async (_, { input }, context) => {
             const entity = await context.multimodalDataService.createMultimodalEntity(input, context.user.id);
             // Publish real-time update
             pubsub.publish(`MULTIMODAL_ENTITY_ADDED_${input.investigationId}`, {
-                multimodalEntityAdded: entity,
+                multimodalEntityAdded: entity
             });
             logger.info(`Created multimodal entity: ${entity.id}, type: ${entity.entityType}`);
             return entity;
         }),
-        updateMultimodalEntity: withAuthAndPolicy('update', (args) => ({
-            type: 'multimodal_entity',
-            id: args.id,
-        }))(async (_, { id, input }, context) => {
+        updateMultimodalEntity: withAuthAndPolicy('update', (args) => ({ type: 'multimodal_entity', id: args.id }))(async (_, { id, input }, context) => {
             const entity = await context.multimodalDataService.updateMultimodalEntity(id, input);
             // Publish real-time update
             pubsub.publish(`MULTIMODAL_ENTITY_UPDATED_${entity.investigationId}`, {
-                multimodalEntityUpdated: entity,
+                multimodalEntityUpdated: entity
             });
             logger.info(`Updated multimodal entity: ${id}`);
             return entity;
         }),
-        verifyMultimodalEntity: withAuthAndPolicy('update', (args) => ({
-            type: 'multimodal_entity',
-            id: args.id,
-        }))(async (_, { id, verification }, context) => {
+        verifyMultimodalEntity: withAuthAndPolicy('update', (args) => ({ type: 'multimodal_entity', id: args.id }))(async (_, { id, verification }, context) => {
             const entity = await context.multimodalDataService.verifyMultimodalEntity(id, verification, context.user.id);
             // Publish real-time update
             pubsub.publish(`MULTIMODAL_ENTITY_VERIFIED_${entity.investigationId}`, {
-                multimodalEntityVerified: entity,
+                multimodalEntityVerified: entity
             });
             logger.info(`Verified multimodal entity: ${id}, verified: ${verification.verified}`);
             return entity;
         }),
-        deleteMultimodalEntity: withAuthAndPolicy('delete', (args) => ({
-            type: 'multimodal_entity',
-            id: args.id,
-        }))(async (_, { id }, context) => {
+        deleteMultimodalEntity: withAuthAndPolicy('delete', (args) => ({ type: 'multimodal_entity', id: args.id }))(async (_, { id }, context) => {
             const deleted = await context.multimodalDataService.deleteMultimodalEntity(id);
             if (deleted) {
                 logger.info(`Deleted multimodal entity: ${id}`);
@@ -183,47 +147,35 @@ export const multimodalResolvers = {
             return deleted;
         }),
         // Extraction Job management
-        startExtractionJob: withAuthAndPolicy('create', (args) => ({
-            type: 'extraction_job',
-            id: 'new',
-        }))(async (_, { input }, context) => {
+        startExtractionJob: withAuthAndPolicy('create', (args) => ({ type: 'extraction_job', id: 'new' }))(async (_, { input }, context) => {
             const job = await context.extractionJobService.startExtractionJob(input, context.user.id);
             // Publish real-time update
             pubsub.publish(`EXTRACTION_JOB_UPDATED_${job.id}`, {
-                extractionJobUpdated: job,
+                extractionJobUpdated: job
             });
             logger.info(`Started extraction job: ${job.id}, methods: ${input.extractionMethods.join(', ')}`);
             return job;
         }),
-        cancelExtractionJob: withAuthAndPolicy('update', (args) => ({
-            type: 'extraction_job',
-            id: args.id,
-        }))(async (_, { id }, context) => {
+        cancelExtractionJob: withAuthAndPolicy('update', (args) => ({ type: 'extraction_job', id: args.id }))(async (_, { id }, context) => {
             const job = await context.extractionJobService.cancelExtractionJob(id);
             // Publish real-time update
             pubsub.publish(`EXTRACTION_JOB_UPDATED_${id}`, {
-                extractionJobUpdated: job,
+                extractionJobUpdated: job
             });
             logger.info(`Cancelled extraction job: ${id}`);
             return job;
         }),
-        retryExtractionJob: withAuthAndPolicy('update', (args) => ({
-            type: 'extraction_job',
-            id: args.id,
-        }))(async (_, { id }, context) => {
+        retryExtractionJob: withAuthAndPolicy('update', (args) => ({ type: 'extraction_job', id: args.id }))(async (_, { id }, context) => {
             const job = await context.extractionJobService.retryExtractionJob(id);
             // Publish real-time update
             pubsub.publish(`EXTRACTION_JOB_UPDATED_${id}`, {
-                extractionJobUpdated: job,
+                extractionJobUpdated: job
             });
             logger.info(`Retried extraction job: ${id}`);
             return job;
         }),
         // Batch Operations
-        batchVerifyEntities: withAuthAndPolicy('update', (args) => ({
-            type: 'investigation',
-            id: 'batch',
-        }))(async (_, { entityIds, verification }, context) => {
+        batchVerifyEntities: withAuthAndPolicy('update', (args) => ({ type: 'investigation', id: 'batch' }))(async (_, { entityIds, verification }, context) => {
             const verifiedEntities = [];
             for (const entityId of entityIds) {
                 try {
@@ -231,7 +183,7 @@ export const multimodalResolvers = {
                     verifiedEntities.push(entity);
                     // Publish individual updates
                     pubsub.publish(`MULTIMODAL_ENTITY_VERIFIED_${entity.investigationId}`, {
-                        multimodalEntityVerified: entity,
+                        multimodalEntityVerified: entity
                     });
                 }
                 catch (error) {
@@ -241,10 +193,7 @@ export const multimodalResolvers = {
             logger.info(`Batch verified ${verifiedEntities.length}/${entityIds.length} entities`);
             return verifiedEntities;
         }),
-        batchDeleteEntities: withAuthAndPolicy('delete', (args) => ({
-            type: 'investigation',
-            id: 'batch',
-        }))(async (_, { entityIds }, context) => {
+        batchDeleteEntities: withAuthAndPolicy('delete', (args) => ({ type: 'investigation', id: 'batch' }))(async (_, { entityIds }, context) => {
             let deletedCount = 0;
             for (const entityId of entityIds) {
                 try {
@@ -258,40 +207,31 @@ export const multimodalResolvers = {
             }
             logger.info(`Batch deleted ${deletedCount}/${entityIds.length} entities`);
             return deletedCount === entityIds.length;
-        }),
+        })
     },
     Subscription: {
         // Real-time Job Updates
         extractionJobUpdated: {
             subscribe: withAuthAndPolicy('read', (args) => ({ type: 'extraction_job', id: args.jobId }))((_, { jobId }) => pubsub.asyncIterator(`EXTRACTION_JOB_UPDATED_${jobId}`)),
-            resolve: (event) => event.payload,
+            resolve: (event) => event.payload
         },
         extractionJobCompleted: {
             subscribe: withAuthAndPolicy('read', (args) => ({ type: 'extraction_job', id: args.jobId }))((_, { jobId }) => pubsub.asyncIterator(`EXTRACTION_JOB_COMPLETED_${jobId}`)),
-            resolve: (event) => event.payload,
+            resolve: (event) => event.payload
         },
         // Real-time Entity Updates
         multimodalEntityAdded: {
-            subscribe: withAuthAndPolicy('read', (args) => ({
-                type: 'investigation',
-                id: args.investigationId,
-            }))((_, { investigationId }) => pubsub.asyncIterator(`MULTIMODAL_ENTITY_ADDED_${investigationId}`)),
-            resolve: (event) => event.payload,
+            subscribe: withAuthAndPolicy('read', (args) => ({ type: 'investigation', id: args.investigationId }))((_, { investigationId }) => pubsub.asyncIterator(`MULTIMODAL_ENTITY_ADDED_${investigationId}`)),
+            resolve: (event) => event.payload
         },
         multimodalEntityVerified: {
-            subscribe: withAuthAndPolicy('read', (args) => ({
-                type: 'investigation',
-                id: args.investigationId,
-            }))((_, { investigationId }) => pubsub.asyncIterator(`MULTIMODAL_ENTITY_VERIFIED_${investigationId}`)),
-            resolve: (event) => event.payload,
+            subscribe: withAuthAndPolicy('read', (args) => ({ type: 'investigation', id: args.investigationId }))((_, { investigationId }) => pubsub.asyncIterator(`MULTIMODAL_ENTITY_VERIFIED_${investigationId}`)),
+            resolve: (event) => event.payload
         },
         multimodalEntityUpdated: {
-            subscribe: withAuthAndPolicy('read', (args) => ({
-                type: 'investigation',
-                id: args.investigationId,
-            }))((_, { investigationId }) => pubsub.asyncIterator(`MULTIMODAL_ENTITY_UPDATED_${investigationId}`)),
-            resolve: (event) => event.payload,
-        },
+            subscribe: withAuthAndPolicy('read', (args) => ({ type: 'investigation', id: args.investigationId }))((_, { investigationId }) => pubsub.asyncIterator(`MULTIMODAL_ENTITY_UPDATED_${investigationId}`)),
+            resolve: (event) => event.payload
+        }
     },
     // Type resolvers for complex fields
     MediaSource: {
@@ -302,7 +242,7 @@ export const multimodalResolvers = {
             // This would fetch entities related to this media source
             // Implementation depends on your query requirements
             return [];
-        }),
+        })
     },
     MultimodalEntity: {
         // Resolve media source
@@ -321,16 +261,14 @@ export const multimodalResolvers = {
         },
         // Resolve bounding box
         boundingBox: (parent) => {
-            if (parent.bboxX !== null &&
-                parent.bboxY !== null &&
-                parent.bboxWidth !== null &&
-                parent.bboxHeight !== null) {
+            if (parent.bboxX !== null && parent.bboxY !== null &&
+                parent.bboxWidth !== null && parent.bboxHeight !== null) {
                 return {
                     x: parent.bboxX,
                     y: parent.bboxY,
                     width: parent.bboxWidth,
                     height: parent.bboxHeight,
-                    confidence: parent.bboxConfidence,
+                    confidence: parent.bboxConfidence
                 };
             }
             return null;
@@ -341,18 +279,15 @@ export const multimodalResolvers = {
                 return {
                     startTime: parent.temporalStart,
                     endTime: parent.temporalEnd,
-                    confidence: parent.temporalConfidence,
+                    confidence: parent.temporalConfidence
                 };
             }
             return null;
         },
         // Get related entities (cross-modal matches, etc.)
-        relatedEntities: withAuthAndPolicy('read', () => ({
-            type: 'multimodal_entity',
-            id: 'related',
-        }))(async (parent, _, context) => {
+        relatedEntities: withAuthAndPolicy('read', () => ({ type: 'multimodal_entity', id: 'related' }))(async (parent, _, context) => {
             return await context.multimodalDataService.findSimilarEntities(parent.id, 5, 0.7);
-        }),
+        })
     },
     ExtractionJob: {
         // Resolve media source
@@ -363,7 +298,7 @@ export const multimodalResolvers = {
         results: withAuthAndPolicy('read', () => ({ type: 'extraction_job', id: 'results' }))(async (parent, _, context) => {
             return await context.multimodalDataService.getMultimodalEntities(parent.investigationId, {
                 // Filter by entities created by this job (would need job tracking in entities)
-                limit: 1000,
+                limit: 1000
             });
         }),
         // Parse metrics JSON
@@ -376,9 +311,10 @@ export const multimodalResolvers = {
             catch {
                 return {};
             }
-        },
+        }
     },
     // Scalar resolvers
-    Upload: require('graphql-upload-ts').GraphQLUpload,
+    Upload: require('graphql-upload-ts').GraphQLUpload
 };
 export default multimodalResolvers;
+//# sourceMappingURL=multimodalResolvers.js.map

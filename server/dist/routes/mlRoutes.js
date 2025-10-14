@@ -11,3 +11,4 @@ router.post('/suggest-links', async (req, res) => {
     await controller.suggestLinks(req, res);
 });
 module.exports = router;
+//# sourceMappingURL=mlRoutes.js.map

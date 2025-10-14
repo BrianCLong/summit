@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  Divider,
-  CircularProgress,
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Divider, CircularProgress } from '@mui/material';
 import { useLazyQuery } from '@apollo/client';
 import { RELATIONSHIP_BY_ID } from '../../graphql/relationship.gql';
 
@@ -42,9 +32,7 @@ export default function EdgeInspectorDialog({ open, onClose, edge }) {
       }
     }
     fetchMeta();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [open, edge]);
 
   const [runQuery] = useLazyQuery(RELATIONSHIP_BY_ID, { fetchPolicy: 'network-only' });
@@ -59,50 +47,31 @@ export default function EdgeInspectorDialog({ open, onClose, edge }) {
         {loading && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <CircularProgress size={16} />
-            <Typography variant="body2" color="text.secondary">
-              Loading…
-            </Typography>
+            <Typography variant="body2" color="text.secondary">Loading…</Typography>
           </Box>
         )}
         {error && (
-          <Typography variant="body2" color="error" sx={{ mb: 1 }}>
-            Failed to fetch metadata: {error}
-          </Typography>
+          <Typography variant="body2" color="error" sx={{ mb: 1 }}>Failed to fetch metadata: {error}</Typography>
         )}
         <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', rowGap: 1, columnGap: 2 }}>
-          <Typography variant="body2" color="text.secondary">
-            ID
-          </Typography>
+          <Typography variant="body2" color="text.secondary">ID</Typography>
           <Typography variant="body2">{id}</Typography>
 
-          <Typography variant="body2" color="text.secondary">
-            Type
-          </Typography>
+          <Typography variant="body2" color="text.secondary">Type</Typography>
           <Typography variant="body2">{type || '—'}</Typography>
 
-          <Typography variant="body2" color="text.secondary">
-            Label
-          </Typography>
+          <Typography variant="body2" color="text.secondary">Label</Typography>
           <Typography variant="body2">{label || '—'}</Typography>
 
-          <Typography variant="body2" color="text.secondary">
-            Source
-          </Typography>
+          <Typography variant="body2" color="text.secondary">Source</Typography>
           <Typography variant="body2">{source?.label || source?.id}</Typography>
 
-          <Typography variant="body2" color="text.secondary">
-            Target
-          </Typography>
+          <Typography variant="body2" color="text.secondary">Target</Typography>
           <Typography variant="body2">{target?.label || target?.id}</Typography>
         </Box>
         <Divider sx={{ my: 2 }} />
-        <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-          Properties
-        </Typography>
-        <Box
-          component="pre"
-          sx={{ p: 1, bgcolor: 'grey.100', borderRadius: 1, overflow: 'auto', maxHeight: 220 }}
-        >
+        <Typography variant="subtitle2" sx={{ mb: 0.5 }}>Properties</Typography>
+        <Box component="pre" sx={{ p: 1, bgcolor: 'grey.100', borderRadius: 1, overflow: 'auto', maxHeight: 220 }}>
           {JSON.stringify(properties || {}, null, 2)}
         </Box>
       </DialogContent>

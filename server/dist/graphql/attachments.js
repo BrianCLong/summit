@@ -32,3 +32,4 @@ export const attachmentResolvers = {
         },
     },
 };
+//# sourceMappingURL=attachments.js.map

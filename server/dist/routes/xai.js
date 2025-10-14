@@ -377,3 +377,4 @@ router.get('/health', async (req, res) => {
     }
 });
 export default router;
+//# sourceMappingURL=xai.js.map
