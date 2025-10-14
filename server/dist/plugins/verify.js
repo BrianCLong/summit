@@ -21,3 +21,4 @@ export async function verifyCosign(ref, opts) {
         return false;
     }
 }
+//# sourceMappingURL=verify.js.map

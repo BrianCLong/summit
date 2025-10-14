@@ -1,0 +1,423 @@
+# MC Platform v0.4.1 Sovereign Safeguards Monitoring Rules
+# Prometheus alerting and recording rules for sovereign safeguards
+
+groups:
+  - name: mc_platform_v041_sovereign_safeguards
+    interval: 30s
+    rules:
+      # === SOVEREIGN SAFEGUARDS METRICS ===
+
+      # Record sovereign safeguards compliance score
+      - record: mc_platform:sovereign_compliance_score
+        expr: |
+          (
+            mc_platform_independent_verification_score *
+            mc_platform_containment_readiness_score *
+            mc_platform_lawful_interoperability_score *
+            mc_platform_reversible_autonomy_score
+          ) / 4
+        labels:
+          version: "v0.4.1"
+          component: "sovereign_safeguards"
+
+      # Record independent verification success rate
+      - record: mc_platform:independent_verification_success_rate_5m
+        expr: |
+          (
+            rate(mc_platform_independent_verification_success_total[5m]) /
+            rate(mc_platform_independent_verification_attempts_total[5m])
+          ) * 100
+        labels:
+          version: "v0.4.1"
+          component: "independent_verification"
+
+      # Record containment readiness test success rate
+      - record: mc_platform:containment_test_success_rate_5m
+        expr: |
+          (
+            rate(mc_platform_containment_test_success_total[5m]) /
+            rate(mc_platform_containment_test_attempts_total[5m])
+          ) * 100
+        labels:
+          version: "v0.4.1"
+          component: "containment_readiness"
+
+      # === SOVEREIGN SAFEGUARDS ALERTS ===
+
+      # Critical: Sovereign compliance score below threshold
+      - alert: SovereignComplianceScoreLow
+        expr: mc_platform:sovereign_compliance_score < 0.95
+        for: 2m
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: sovereign_safeguards
+        annotations:
+          summary: "Sovereign safeguards compliance score below critical threshold"
+          description: "Compliance score is {{ $value | humanize }}, below the required 0.95 threshold for tenant {{ $labels.tenant }}"
+          runbook_url: "https://docs.mc-platform.com/runbooks/sovereign-compliance-low"
+
+      # Critical: Independent verification failing
+      - alert: IndependentVerificationFailing
+        expr: mc_platform:independent_verification_success_rate_5m < 80
+        for: 5m
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: independent_verification
+        annotations:
+          summary: "Independent verification success rate below threshold"
+          description: "Verification success rate is {{ $value | humanize }}%, below required 80% for tenant {{ $labels.tenant }}"
+
+      # Critical: Insufficient verification sources
+      - alert: InsufficientVerificationSources
+        expr: mc_platform_verification_sources_active < 2
+        for: 1m
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: independent_verification
+        annotations:
+          summary: "Insufficient independent verification sources active"
+          description: "Only {{ $value }} verification sources active, minimum 2 required for tenant {{ $labels.tenant }}"
+
+      # === CONTAINMENT READINESS ALERTS ===
+
+      # Critical: Emergency stop not ready
+      - alert: EmergencyStopNotReady
+        expr: mc_platform_emergency_stop_ready == 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: containment_readiness
+        annotations:
+          summary: "Emergency stop mechanism not ready"
+          description: "Emergency stop is not operational for tenant {{ $labels.tenant }}"
+
+      # Critical: Rollback capability not ready
+      - alert: RollbackCapabilityNotReady
+        expr: mc_platform_rollback_ready == 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: containment_readiness
+        annotations:
+          summary: "Rollback capability not ready"
+          description: "Rollback mechanism is not operational for tenant {{ $labels.tenant }}"
+
+      # Warning: Containment response time high
+      - alert: ContainmentResponseTimeHigh
+        expr: mc_platform_containment_response_time_ms > 100
+        for: 2m
+        labels:
+          severity: warning
+          version: v0.4.1
+          component: containment_readiness
+        annotations:
+          summary: "Containment response time exceeds threshold"
+          description: "Response time is {{ $value }}ms, above maximum 100ms for tenant {{ $labels.tenant }}"
+
+      # Critical: Containment test failure
+      - alert: ContainmentTestFailure
+        expr: increase(mc_platform_containment_test_failures_total[5m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: containment_readiness
+        annotations:
+          summary: "Containment readiness test failed"
+          description: "Containment test failure detected for {{ $labels.test_type }} in tenant {{ $labels.tenant }}"
+
+      # === LAWFUL INTEROPERABILITY ALERTS ===
+
+      # Critical: Jurisdiction compliance violation
+      - alert: JurisdictionComplianceViolation
+        expr: mc_platform_jurisdiction_compliant == 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: lawful_interoperability
+        annotations:
+          summary: "Jurisdiction compliance violation detected"
+          description: "Non-compliance detected for jurisdiction {{ $labels.jurisdiction }} in tenant {{ $labels.tenant }}"
+
+      # Critical: Data sovereignty requirement not met
+      - alert: DataSovereigntyViolation
+        expr: mc_platform_data_sovereignty_compliant == 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: lawful_interoperability
+        annotations:
+          summary: "Data sovereignty requirement violation"
+          description: "Data sovereignty requirements not met for tenant {{ $labels.tenant }}"
+
+      # Warning: Cross-border approval expiring
+      - alert: CrossBorderApprovalExpiring
+        expr: (mc_platform_cross_border_approval_expiry_timestamp - time()) < 86400 * 7
+        for: 1m
+        labels:
+          severity: warning
+          version: v0.4.1
+          component: lawful_interoperability
+        annotations:
+          summary: "Cross-border approval expiring within 7 days"
+          description: "Approval {{ $labels.approval_id }} expires on {{ $labels.expiry_date }} for tenant {{ $labels.tenant }}"
+
+      # Critical: Regulatory reporting inactive
+      - alert: RegulatoryReportingInactive
+        expr: mc_platform_regulatory_reporting_active == 0
+        for: 10m
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: lawful_interoperability
+        annotations:
+          summary: "Regulatory reporting not active"
+          description: "Regulatory reporting has been inactive for 10+ minutes for tenant {{ $labels.tenant }}"
+
+      # === REVERSIBLE AUTONOMY ALERTS ===
+
+      # Critical: Autonomy not reversible
+      - alert: AutonomyNotReversible
+        expr: mc_platform_autonomy_reversible == 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: reversible_autonomy
+        annotations:
+          summary: "Autonomous operations not reversible"
+          description: "Autonomy reversibility not guaranteed for tenant {{ $labels.tenant }}"
+
+      # Critical: Human control not available
+      - alert: HumanControlNotAvailable
+        expr: mc_platform_human_control_available == 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: reversible_autonomy
+        annotations:
+          summary: "Human control not available for autonomous operations"
+          description: "Human control mechanisms not available for tenant {{ $labels.tenant }}"
+
+      # Warning: Autonomy scope boundary violation
+      - alert: AutonomyScopeBoundaryViolation
+        expr: increase(mc_platform_autonomy_boundary_violations_total[5m]) > 0
+        for: 0s
+        labels:
+          severity: warning
+          version: v0.4.1
+          component: reversible_autonomy
+        annotations:
+          summary: "Autonomy scope boundary violation detected"
+          description: "Boundary violation detected in autonomy scope for tenant {{ $labels.tenant }}"
+
+      # Critical: Autonomy reversal time exceeded
+      - alert: AutonomyReversalTimeExceeded
+        expr: mc_platform_autonomy_reversal_time_seconds > 60
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: reversible_autonomy
+        annotations:
+          summary: "Autonomy reversal time exceeds maximum"
+          description: "Reversal time is {{ $value }}s, above maximum 60s for tenant {{ $labels.tenant }}"
+
+      # Warning: Autonomy snapshot frequency too low
+      - alert: AutonomySnapshotFrequencyLow
+        expr: mc_platform_autonomy_snapshot_frequency_seconds > 300
+        for: 5m
+        labels:
+          severity: warning
+          version: v0.4.1
+          component: reversible_autonomy
+        annotations:
+          summary: "Autonomy snapshot frequency below recommended"
+          description: "Snapshot frequency is {{ $value }}s, above recommended 300s for tenant {{ $labels.tenant }}"
+
+      # === CROSS-BORDER OPERATIONS ALERTS ===
+
+      # Critical: Unauthorized cross-border operation
+      - alert: UnauthorizedCrossBorderOperation
+        expr: increase(mc_platform_unauthorized_cross_border_operations_total[1m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: cross_border_operations
+        annotations:
+          summary: "Unauthorized cross-border operation detected"
+          description: "Unauthorized operation from {{ $labels.source_jurisdiction }} to {{ $labels.target_jurisdiction }} for tenant {{ $labels.tenant }}"
+
+      # Warning: Cross-border operation approval pending
+      - alert: CrossBorderApprovalPending
+        expr: mc_platform_cross_border_approvals_pending > 5
+        for: 10m
+        labels:
+          severity: warning
+          version: v0.4.1
+          component: cross_border_operations
+        annotations:
+          summary: "Multiple cross-border approvals pending"
+          description: "{{ $value }} approvals pending for more than 10 minutes for tenant {{ $labels.tenant }}"
+
+      # === TRANSCENDENT SAFEGUARDS ALERTS ===
+
+      # Critical: Transcendent operation without ethics approval
+      - alert: TranscendentOperationWithoutEthicsApproval
+        expr: |
+          mc_platform_transcendent_operation_active == 1
+          and mc_platform_ethics_board_approval == 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: transcendent_safeguards
+        annotations:
+          summary: "Transcendent operation running without ethics board approval"
+          description: "Transcendent operation active without required ethics approval for tenant {{ $labels.tenant }}"
+
+      # Critical: Transcendent operation without safety committee review
+      - alert: TranscendentOperationWithoutSafetyReview
+        expr: |
+          mc_platform_transcendent_operation_level in ("SUPERINTELLIGENT", "UNBOUNDED")
+          and mc_platform_safety_committee_review == 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: transcendent_safeguards
+        annotations:
+          summary: "High-level transcendent operation without safety committee review"
+          description: "{{ $labels.transcendent_level }} operation without safety review for tenant {{ $labels.tenant }}"
+
+      # Warning: Transcendent operation enhanced monitoring disabled
+      - alert: TranscendentEnhancedMonitoringDisabled
+        expr: |
+          mc_platform_transcendent_operation_active == 1
+          and mc_platform_enhanced_monitoring_enabled == 0
+        for: 1m
+        labels:
+          severity: warning
+          version: v0.4.1
+          component: transcendent_safeguards
+        annotations:
+          summary: "Enhanced monitoring disabled for transcendent operation"
+          description: "Transcendent operation running without enhanced monitoring for tenant {{ $labels.tenant }}"
+
+      # === EMERGENCY PROCEDURES ALERTS ===
+
+      # Critical: Emergency sovereign containment activated
+      - alert: EmergencySovereignContainmentActivated
+        expr: increase(mc_platform_emergency_sovereign_containment_total[1m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: emergency_procedures
+        annotations:
+          summary: "Emergency sovereign containment has been activated"
+          description: "Emergency containment of type {{ $labels.containment_type }} activated for tenant {{ $labels.tenant }}"
+
+      # Critical: Human override activated
+      - alert: HumanOverrideActivated
+        expr: increase(mc_platform_human_override_sovereign_autonomy_total[1m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: emergency_procedures
+        annotations:
+          summary: "Human override of sovereign autonomy activated"
+          description: "Human override activated at {{ $labels.emergency_level }} level for tenant {{ $labels.tenant }}"
+
+      # === AUDIT AND COMPLIANCE ALERTS ===
+
+      # Warning: Sovereign audit trail gap detected
+      - alert: SovereignAuditTrailGap
+        expr: (time() - mc_platform_sovereign_audit_last_entry_timestamp) > 3600
+        for: 5m
+        labels:
+          severity: warning
+          version: v0.4.1
+          component: audit_compliance
+        annotations:
+          summary: "Gap in sovereign audit trail detected"
+          description: "No audit entries for {{ $value | humanizeDuration }} for tenant {{ $labels.tenant }}"
+
+      # Critical: Audit integrity violation
+      - alert: AuditIntegrityViolation
+        expr: mc_platform_audit_integrity_violations_total > 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: audit_compliance
+        annotations:
+          summary: "Audit trail integrity violation detected"
+          description: "Audit integrity violation detected for tenant {{ $labels.tenant }}"
+
+      # Warning: Compliance score degrading
+      - alert: ComplianceScoreDegrading
+        expr: |
+          (
+            mc_platform:sovereign_compliance_score -
+            mc_platform:sovereign_compliance_score offset 1h
+          ) < -0.05
+        for: 5m
+        labels:
+          severity: warning
+          version: v0.4.1
+          component: audit_compliance
+        annotations:
+          summary: "Sovereign compliance score degrading"
+          description: "Compliance score decreased by {{ $value | humanize }} in the last hour for tenant {{ $labels.tenant }}"
+
+      # === PERFORMANCE AND RELIABILITY ALERTS ===
+
+      # Warning: Sovereign safeguards response time high
+      - alert: SovereignSafeguardsResponseTimeHigh
+        expr: |
+          histogram_quantile(0.95,
+            rate(mc_platform_sovereign_safeguards_duration_seconds_bucket[5m])
+          ) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          version: v0.4.1
+          component: performance
+        annotations:
+          summary: "Sovereign safeguards response time high"
+          description: "P95 response time is {{ $value }}s, above 1s threshold for tenant {{ $labels.tenant }}"
+
+      # Critical: Verification service unavailable
+      - alert: VerificationServiceUnavailable
+        expr: up{job="verification-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: verification_service
+        annotations:
+          summary: "Independent verification service unavailable"
+          description: "Verification service is down for instance {{ $labels.instance }}"
+
+      # Critical: Sovereign safeguards service unavailable
+      - alert: SovereignSafeguardsServiceUnavailable
+        expr: up{job="sovereign-safeguards-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          version: v0.4.1
+          component: sovereign_safeguards_service
+        annotations:
+          summary: "Sovereign safeguards service unavailable"
+          description: "Sovereign safeguards service is down for instance {{ $labels.instance }}"
