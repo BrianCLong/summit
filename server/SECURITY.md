@@ -142,6 +142,62 @@ Regular secret rotation is recommended:
 - Rotate as required by your identity provider
 - Update configuration during maintenance windows
 
+## Cryptographic Signing & Verification Pipeline
+
+IntelGraph now ships with a production-ready cryptographic pipeline that provides multi-algorithm signing, certificate validation, timestamping, and audit logging. The pipeline powers provenance ledger exports and is available to any service that needs deterministic integrity checks across distributed systems.
+
+### Supported algorithms
+
+| Identifier | Description |
+| --- | --- |
+| `RSA_SHA256` | RSA-PSS/RSA-SHA256 using PKCS#1/PKCS#8 PEM material |
+| `ECDSA_P256_SHA256` | ECDSA on P-256 with IEEE-P1363 signatures |
+| `ECDSA_P384_SHA384` | ECDSA on P-384 with IEEE-P1363 signatures |
+| `EdDSA_ED25519` | Ed25519 signing/verification |
+
+### Key provisioning (`CRYPTO_SIGNING_KEYS`)
+
+Keys are provisioned through the `CRYPTO_SIGNING_KEYS` environment variable. The value must be a JSON array of key definitions:
+
+```json
+[
+  {
+    "id": "ledger-root",
+    "algorithm": "EdDSA_ED25519",
+    "privateKeyPem": "-----BEGIN PRIVATE KEY-----...",
+    "publicKeyPem": "-----BEGIN PUBLIC KEY-----...",
+    "certificateChain": ["-----BEGIN CERTIFICATE-----..."],
+    "version": 1,
+    "active": true
+  }
+]
+```
+
+- `id` is the stable key identifier used by services (for example the provenance ledger uses `LEDGER_SIGNING_KEY_ID`).
+- `version` is optional; if omitted, version `1` is assumed. Rotation automatically increments the version counter.
+- `certificateChain` is an array ordered leaf → intermediates → root. Chains are validated against trust anchors.
+- Keys marked `active: true` become the signing default. Previous versions remain available for verification allowing smooth rotation.
+
+### Trust anchors (`CRYPTO_TRUST_ANCHORS`)
+
+Set `CRYPTO_TRUST_ANCHORS` to a `:::` delimited list of PEM encoded root certificates. These anchors are loaded on boot and used to verify provided certificate chains. This is critical for verifying delegated signing authorities or intermediate issuing services.
+
+### Timestamping (`CRYPTO_TIMESTAMP_ENDPOINT`)
+
+If defined, the default pipeline will obtain RFC 3161-compatible timestamp tokens for every signature when requested. The timestamping service must accept `application/octet-stream` POST bodies and respond with a JSON payload containing a `token` property. During verification, the same endpoint (or a custom verify endpoint) is contacted to validate tokens.
+
+### Ledger integration (`LEDGER_SIGNING_KEY_ID`)
+
+The provenance ledger now consumes the crypto pipeline automatically. Set `LEDGER_SIGNING_KEY_ID` to the key identifier provisioned in `CRYPTO_SIGNING_KEYS` to enable deterministic signing/verification of Merkle roots. When the pipeline is not configured the legacy cosign/HMAC path remains available as a fallback.
+
+### Hardware Security Modules
+
+The pipeline uses a software-backed HSM implementation by default. For deployments that require PKCS#11 or cloud HSMs, supply a custom `HardwareSecurityModule` implementation when constructing the pipeline or override `createDefaultCryptoPipeline` to return an instance wired to your HSM provider. The helper in `server/src/federal/pkcs11-guard.ts` provides hardened PKCS#11 utilities that can be reused.
+
+### Audit logging
+
+All signing, verification, and rotation operations emit structured audit events (stored in `audit_logs`) capturing success/failure, key metadata, and timestamping status. Ensure `AUDIT_SIGNING_SECRET` is configured to cryptographically seal audit payloads.
+
 ## Role-Based Access Control (RBAC)
 
 ### Roles and Permissions
