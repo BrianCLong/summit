@@ -25,9 +25,9 @@ spec:
         component: backend
         version: v1
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '4000'
-        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4000"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: intelgraph-service-account
       securityContext:
@@ -57,36 +57,36 @@ spec:
               protocol: TCP
           env:
             - name: NODE_ENV
-              value: 'production'
+              value: "production"
             - name: PORT
-              value: '4000'
+              value: "4000"
             # Database connections
             - name: NEO4J_URI
-              value: 'bolt://intelgraph-neo4j:7687'
+              value: "bolt://intelgraph-neo4j:7687"
             - name: NEO4J_USERNAME
-              value: 'neo4j'
+              value: "neo4j"
             - name: NEO4J_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: intelgraph-secrets
                   key: neo4j_password
             - name: POSTGRES_HOST
-              value: 'intelgraph-postgres'
+              value: "intelgraph-postgres"
             - name: POSTGRES_PORT
-              value: '5432'
+              value: "5432"
             - name: POSTGRES_DB
-              value: 'intelgraph_prod'
+              value: "intelgraph_prod"
             - name: POSTGRES_USER
-              value: 'intelgraph'
+              value: "intelgraph"
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: intelgraph-secrets
                   key: postgres_password
             - name: REDIS_HOST
-              value: 'intelgraph-redis'
+              value: "intelgraph-redis"
             - name: REDIS_PORT
-              value: '6379'
+              value: "6379"
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -111,7 +111,7 @@ spec:
                   key: openai_api_key
             # Monitoring
             - name: PROMETHEUS_ENABLED
-              value: 'true'
+              value: "true"
             - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:
@@ -120,11 +120,11 @@ spec:
                   optional: true
           resources:
             requests:
-              memory: '512Mi'
-              cpu: '250m'
+              memory: "512Mi"
+              cpu: "250m"
             limits:
-              memory: '2Gi'
-              cpu: '1000m'
+              memory: "2Gi"
+              cpu: "1000m"
           livenessProbe:
             httpGet:
               path: /health
@@ -180,16 +180,16 @@ spec:
                   matchExpressions:
                     - key: app
                       operator: In
-                      values: ['intelgraph']
+                      values: ["intelgraph"]
                 topologyKey: kubernetes.io/hostname
       tolerations:
-        - key: 'node.kubernetes.io/not-ready'
-          operator: 'Exists'
-          effect: 'NoExecute'
+        - key: "node.kubernetes.io/not-ready"
+          operator: "Exists"
+          effect: "NoExecute"
           tolerationSeconds: 300
-        - key: 'node.kubernetes.io/unreachable'
-          operator: 'Exists'
-          effect: 'NoExecute'
+        - key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoExecute"
           tolerationSeconds: 300
 
 ---
@@ -202,9 +202,9 @@ metadata:
     app: intelgraph
     component: backend
   annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '4000'
-    prometheus.io/path: '/metrics'
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "4000"
+    prometheus.io/path: "/metrics"
 spec:
   type: ClusterIP
   ports:
@@ -223,15 +223,15 @@ metadata:
   name: intelgraph-ingress
   namespace: intelgraph-production
   annotations:
-    kubernetes.io/ingress.class: 'nginx'
-    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
-    nginx.ingress.kubernetes.io/proxy-body-size: '50m'
-    nginx.ingress.kubernetes.io/proxy-read-timeout: '300'
-    nginx.ingress.kubernetes.io/proxy-send-timeout: '300'
-    nginx.ingress.kubernetes.io/rate-limit: '100'
-    nginx.ingress.kubernetes.io/rate-limit-window: '1m'
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
 spec:
   tls:
     - hosts:

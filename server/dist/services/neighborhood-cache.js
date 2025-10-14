@@ -1,27 +1,25 @@
-import { neighborhoodCacheHitRatio, neighborhoodCacheLatencyMs } from '../monitoring/metrics.js';
-import { getNeo4jDriver } from '../config/database.js';
-import { expandNeighborhood } from './GraphOpsService.js';
+import { neighborhoodCacheHitRatio, neighborhoodCacheLatencyMs, } from "../monitoring/metrics.js";
+import { getNeo4jDriver } from "../config/database.js";
+import { expandNeighborhood } from "./GraphOpsService.js";
 export class NeighborhoodCache {
-    redis;
-    hits = 0;
-    total = 0;
-    ttl;
     constructor(redis, ttl = 300) {
         this.redis = redis;
+        this.hits = 0;
+        this.total = 0;
         this.ttl = ttl;
         this.startBackgroundSync();
     }
     startBackgroundSync() {
-        import('node-cron')
+        import("node-cron")
             .then((cron) => {
-            cron.schedule('0 * * * *', async () => {
+            cron.schedule("0 * * * *", async () => {
                 const driver = getNeo4jDriver();
                 const session = driver.session();
                 try {
-                    const ctxRes = await session.run('MATCH (n:Entity) RETURN DISTINCT n.tenantId AS tenantId, n.investigationId AS investigationId');
+                    const ctxRes = await session.run("MATCH (n:Entity) RETURN DISTINCT n.tenantId AS tenantId, n.investigationId AS investigationId");
                     for (const record of ctxRes.records) {
-                        const tenantId = record.get('tenantId');
-                        const investigationId = record.get('investigationId');
+                        const tenantId = record.get("tenantId");
+                        const investigationId = record.get("investigationId");
                         if (!tenantId || !investigationId)
                             continue;
                         const topRes = await session.run(`MATCH (e:Entity {tenantId: $tenantId, investigationId: $investigationId})-[r]-(m:Entity {tenantId: $tenantId, investigationId: $investigationId})
@@ -29,7 +27,7 @@ export class NeighborhoodCache {
                  ORDER BY score DESC
                  LIMIT 10`, { tenantId, investigationId });
                         for (const rec of topRes.records) {
-                            const entityId = rec.get('id');
+                            const entityId = rec.get("id");
                             const graph = await expandNeighborhood(entityId, 2, {
                                 tenantId,
                                 investigationId,
@@ -39,7 +37,7 @@ export class NeighborhoodCache {
                     }
                 }
                 catch (err) {
-                    console.error('Neighborhood cache prewarm failed', err);
+                    console.error("Neighborhood cache prewarm failed", err);
                 }
                 finally {
                     await session.close();
@@ -47,7 +45,7 @@ export class NeighborhoodCache {
             });
         })
             .catch((err) => {
-            console.error('node-cron not available, skipping neighborhood prewarm', err);
+            console.error("node-cron not available, skipping neighborhood prewarm", err);
         });
     }
     key(tenantId, investigationId, entityId, radius) {
@@ -72,7 +70,7 @@ export class NeighborhoodCache {
     }
     async set(tenantId, investigationId, entityId, radius, data) {
         const key = this.key(tenantId, investigationId, entityId, radius);
-        await this.redis.set(key, JSON.stringify(data), 'EX', this.ttl);
+        await this.redis.set(key, JSON.stringify(data), "EX", this.ttl);
         const ids = new Set([entityId, ...data.nodes.map((n) => n.id)]);
         for (const id of ids) {
             await this.redis.sadd(this.tagKey(tenantId, investigationId, id), key);
@@ -90,3 +88,4 @@ export class NeighborhoodCache {
     }
 }
 export default NeighborhoodCache;
+//# sourceMappingURL=neighborhood-cache.js.map
