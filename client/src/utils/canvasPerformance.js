@@ -9,12 +9,12 @@ export class CanvasPerformanceMonitor {
     this.targetFps = options.targetFps || 55;
     this.maxNodes = options.maxNodes || 3000;
     this.maxEdges = options.maxEdges || 6000;
-
+    
     this.frameCount = 0;
     this.lastTime = performance.now();
     this.fps = 0;
     this.isRunning = false;
-
+    
     this.callbacks = new Set();
     this.rafId = null;
   }
@@ -38,19 +38,18 @@ export class CanvasPerformanceMonitor {
 
   tick() {
     if (!this.isRunning) return;
-
+    
     this.frameCount++;
     const now = performance.now();
     const delta = now - this.lastTime;
-
-    if (delta >= 1000) {
-      // Update every second
-      this.fps = Math.round((this.frameCount * 1000) / delta);
+    
+    if (delta >= 1000) { // Update every second
+      this.fps = Math.round(this.frameCount * 1000 / delta);
       this.frameCount = 0;
       this.lastTime = now;
-
+      
       // Notify callbacks
-      this.callbacks.forEach((callback) => {
+      this.callbacks.forEach(callback => {
         try {
           callback(this.getMetrics());
         } catch (error) {
@@ -58,7 +57,7 @@ export class CanvasPerformanceMonitor {
         }
       });
     }
-
+    
     this.rafId = requestAnimationFrame(() => this.tick());
   }
 
@@ -67,7 +66,7 @@ export class CanvasPerformanceMonitor {
       fps: this.fps,
       memoryUsage: this.getMemoryUsage(),
       isPerformant: this.fps >= this.targetFps,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     };
   }
 
@@ -89,9 +88,9 @@ export class LODManager {
       OVERVIEW: { maxNodes: 100, maxEdges: 200, minConfidence: 0.8 },
       DETAILED: { maxNodes: 1000, maxEdges: 2000, minConfidence: 0.6 },
       FOCUSED: { maxNodes: 3000, maxEdges: 6000, minConfidence: 0.5 },
-      MAXIMUM: { maxNodes: 3000, maxEdges: 6000, minConfidence: 0.3 },
+      MAXIMUM: { maxNodes: 3000, maxEdges: 6000, minConfidence: 0.3 }
     };
-
+    
     this.currentLevel = 'FOCUSED';
     this.adaptiveMode = true;
   }
@@ -99,7 +98,7 @@ export class LODManager {
   // Automatically adjust LOD based on performance
   adaptToPerformance(fps, nodeCount, edgeCount) {
     if (!this.adaptiveMode) return this.currentLevel;
-
+    
     // Performance is good, try upgrading
     if (fps >= 60) {
       if (this.currentLevel === 'OVERVIEW' && nodeCount < 500) {
@@ -110,7 +109,7 @@ export class LODManager {
         this.currentLevel = 'MAXIMUM';
       }
     }
-
+    
     // Performance is poor, downgrade
     if (fps < 45) {
       if (this.currentLevel === 'MAXIMUM') {
@@ -121,7 +120,7 @@ export class LODManager {
         this.currentLevel = 'OVERVIEW';
       }
     }
-
+    
     return this.currentLevel;
   }
 
@@ -132,10 +131,10 @@ export class LODManager {
   // Filter data based on current LOD level
   filterGraphData(nodes, edges, level = this.currentLevel) {
     const config = this.getLevelConfig(level);
-
+    
     // Sort by confidence and creation time
     const sortedNodes = nodes
-      .filter((node) => node.confidence >= config.minConfidence)
+      .filter(node => node.confidence >= config.minConfidence)
       .sort((a, b) => {
         // Primary sort: confidence (desc)
         if (b.confidence !== a.confidence) {
@@ -147,15 +146,14 @@ export class LODManager {
       .slice(0, config.maxNodes);
 
     // Get node IDs for edge filtering
-    const nodeIds = new Set(sortedNodes.map((n) => n.id));
-
+    const nodeIds = new Set(sortedNodes.map(n => n.id));
+    
     // Filter edges to only include those between visible nodes
     const filteredEdges = edges
-      .filter(
-        (edge) =>
-          nodeIds.has(edge.sourceEntityId) &&
-          nodeIds.has(edge.targetEntityId) &&
-          edge.confidence >= config.minConfidence,
+      .filter(edge => 
+        nodeIds.has(edge.sourceEntityId) && 
+        nodeIds.has(edge.targetEntityId) &&
+        edge.confidence >= config.minConfidence
       )
       .sort((a, b) => b.confidence - a.confidence)
       .slice(0, config.maxEdges);
@@ -166,7 +164,7 @@ export class LODManager {
       totalNodes: nodes.length,
       totalEdges: edges.length,
       level,
-      hasMore: nodes.length > sortedNodes.length || edges.length > filteredEdges.length,
+      hasMore: nodes.length > sortedNodes.length || edges.length > filteredEdges.length
     };
   }
 
@@ -187,7 +185,7 @@ export class LODManager {
 export class CytoscapeOptimizer {
   static getOptimizedConfig(nodeCount, edgeCount) {
     const isLargeGraph = nodeCount > 1000 || edgeCount > 2000;
-
+    
     return {
       // Rendering optimizations
       textureOnViewport: isLargeGraph,
@@ -195,7 +193,7 @@ export class CytoscapeOptimizer {
       hideLabelsOnViewport: isLargeGraph && nodeCount > 2000,
       pixelRatio: 1, // Force pixel ratio for consistency
       motionBlur: false, // Disable motion blur for performance
-
+      
       // Styling optimizations
       style: [
         {
@@ -203,22 +201,22 @@ export class CytoscapeOptimizer {
           style: {
             'overlay-opacity': 0, // Disable overlays for performance
             'selection-box-opacity': 0.2, // Minimal selection styling
-          },
+          }
         },
         {
           selector: 'edge',
           style: {
             'overlay-opacity': 0,
             'selection-box-opacity': 0.2,
-          },
-        },
-      ],
+          }
+        }
+      ]
     };
   }
 
   static getOptimizedLayoutConfig(nodeCount, layoutName = 'fcose') {
     const isLargeGraph = nodeCount > 1000;
-
+    
     const configs = {
       fcose: {
         name: 'fcose',
@@ -251,9 +249,9 @@ export class CytoscapeOptimizer {
         tile: isLargeGraph,
         tilingPaddingVertical: 5,
         tilingPaddingHorizontal: 5,
-      },
+      }
     };
-
+    
     return configs[layoutName] || configs.fcose;
   }
 }
@@ -268,7 +266,7 @@ export class PerformanceTester {
     this.tests.set(testName, {
       startTime: performance.now(),
       endTime: null,
-      duration: null,
+      duration: null
     });
   }
 
@@ -293,27 +291,27 @@ export class PerformanceTester {
   // Test graph rendering performance
   async testRenderingPerformance(cyInstance, iterations = 10) {
     const results = [];
-
+    
     for (let i = 0; i < iterations; i++) {
       this.startTest(`render_${i}`);
-
+      
       // Force re-render
       cyInstance.resize();
       cyInstance.center();
-
+      
       // Wait for next frame
-      await new Promise((resolve) => requestAnimationFrame(resolve));
-
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      
       const duration = this.endTest(`render_${i}`);
       results.push(duration);
     }
-
+    
     return {
       iterations,
       results,
       average: results.reduce((a, b) => a + b, 0) / results.length,
       min: Math.min(...results),
-      max: Math.max(...results),
+      max: Math.max(...results)
     };
   }
 }
@@ -323,5 +321,5 @@ export default {
   CanvasPerformanceMonitor,
   LODManager,
   CytoscapeOptimizer,
-  PerformanceTester,
+  PerformanceTester
 };

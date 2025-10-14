@@ -1,0 +1,150 @@
+[
+  {
+    "locale": "en-US",
+    "tag": "finance.credit.loan_shark",
+    "vertical": "finance",
+    "phrases": [
+      "illegal lending",
+      "loan shark lending",
+      "loanshark",
+      "payday trap",
+      "predatory loan"
+    ],
+    "confidence": 0.93
+  },
+  {
+    "locale": "en-US",
+    "tag": "finance.gambling.sports_betting",
+    "vertical": "finance",
+    "phrases": [
+      "illegal sports betting",
+      "proxy betting",
+      "sportz betting",
+      "underground sportsbook"
+    ],
+    "confidence": 0.9
+  },
+  {
+    "locale": "en-US",
+    "tag": "finance.scams.ponzi",
+    "vertical": "finance",
+    "phrases": [
+      "get rich quick pool",
+      "Ponzi investment scheme",
+      "ponzzi scheme",
+      "pyramid scheme"
+    ],
+    "confidence": 0.95
+  },
+  {
+    "locale": "en-US",
+    "tag": "health.diseases.sti",
+    "vertical": "health",
+    "phrases": [
+      "clinic std check",
+      "sexually transmitted infection screening",
+      "std chek",
+      "std panel",
+      "sti test"
+    ],
+    "confidence": 0.92
+  },
+  {
+    "locale": "en-US",
+    "tag": "health.meds.contraceptives",
+    "vertical": "health",
+    "phrases": [
+      "day after dose",
+      "emergency contraceptive pill",
+      "morning after pill",
+      "plan b pill",
+      "planb"
+    ],
+    "confidence": 0.94
+  },
+  {
+    "locale": "en-US",
+    "tag": "health.meds.opioids",
+    "vertical": "health",
+    "phrases": [
+      "hillbilly heroin",
+      "opiod pain killers",
+      "opioid painkillers",
+      "oxy",
+      "prescription opioids"
+    ],
+    "confidence": 0.97
+  },
+  {
+    "locale": "en-US",
+    "tag": "minors.abuse.cyberbullying",
+    "vertical": "minors",
+    "phrases": [
+      "cyber bully kids",
+      "cyberbulling",
+      "cyberbullying minors",
+      "digital harassment"
+    ],
+    "confidence": 0.91
+  },
+  {
+    "locale": "en-US",
+    "tag": "minors.exploitation.grooming",
+    "vertical": "minors",
+    "phrases": [
+      "age play chat",
+      "child grooming",
+      "groomming kids",
+      "online grooming minors"
+    ],
+    "confidence": 0.96
+  },
+  {
+    "locale": "en-US",
+    "tag": "minors.suicide.self_harm",
+    "vertical": "minors",
+    "phrases": [
+      "kms tips",
+      "self harm challenge",
+      "selfharm",
+      "self-harm encouragement"
+    ],
+    "confidence": 0.95
+  },
+  {
+    "locale": "en-US",
+    "tag": "workplace.discrimination.equal_pay",
+    "vertical": "workplace",
+    "phrases": [
+      "equal pay violation",
+      "equalpay",
+      "pay discrimination",
+      "wage gap complaint"
+    ],
+    "confidence": 0.89
+  },
+  {
+    "locale": "en-US",
+    "tag": "workplace.harassment.sexual",
+    "vertical": "workplace",
+    "phrases": [
+      "hostile work environment",
+      "quid pro quo harassment",
+      "sexual harasment",
+      "workplace sexual harassment"
+    ],
+    "confidence": 0.96
+  },
+  {
+    "locale": "en-US",
+    "tag": "workplace.violence.threats",
+    "vertical": "workplace",
+    "phrases": [
+      "office attack warning",
+      "threat at work",
+      "work place threat",
+      "workplace violence threat"
+    ],
+    "confidence": 0.94
+  }
+]

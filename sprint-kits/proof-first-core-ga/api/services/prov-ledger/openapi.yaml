@@ -1,0 +1,60 @@
+openapi: 3.0.3
+info:
+  title: Prov-Ledger API
+  version: 0.1.0
+paths:
+  /evidence/register:
+    post:
+      summary: Register evidence with immutable lineage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sourceUri, hash, metadata]
+              properties:
+                sourceUri:
+                  type: string
+                hash:
+                  type: string
+                  description: sha256
+                metadata:
+                  type: object
+      responses:
+        '201':
+          description: Created
+  /claim/parse:
+    post:
+      summary: Parse claim and attach to case
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [caseId, claim]
+              properties:
+                caseId:
+                  type: string
+                claim:
+                  type: string
+      responses:
+        '200':
+          description: OK
+  /export/manifest:
+    get:
+      summary: Export verifiable manifest
+      parameters:
+        - in: query
+          name: caseId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Manifest
+          content:
+            application/json:
+              schema:
+                type: object
