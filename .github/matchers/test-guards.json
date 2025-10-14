@@ -2,30 +2,30 @@
   "problemMatcher": [
     {
       "owner": "test-guards",
+      "severity": "error",
       "pattern": [
         {
-          "regexp": ".*Focused test detected: \\.only is forbidden.*",
-          "severity": "error",
+          "regexp": "^(.*)$",
           "message": 1
         }
       ]
     },
     {
       "owner": "console-error-guard",
+      "severity": "error",
       "pattern": [
         {
-          "regexp": ".*console\\.error called in tests is forbidden.*",
-          "severity": "error",
+          "regexp": "^(.*)$",
           "message": 1
         }
       ]
     },
     {
       "owner": "jest-open-handles",
+      "severity": "warning",
       "pattern": [
         {
-          "regexp": ".*Jest did not exit one second after the test run has completed.*",
-          "severity": "warning",
+          "regexp": "^(.*)$",
           "message": 1
         }
       ]
