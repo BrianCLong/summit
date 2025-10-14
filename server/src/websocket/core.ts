@@ -3,6 +3,7 @@ import { Redis } from 'ioredis';
 import jwt from 'jsonwebtoken';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import { getPostgresPool } from '../db/postgres.js';
+import { ManagedConnection, WebSocketConnectionPool } from './connectionManager.js';
 
 interface WebSocketClaims {
   tenantId: string;
@@ -18,6 +19,8 @@ interface WebSocketConnection extends WebSocketClaims {
   subscriptions: Set<string>;
   lastHeartbeat: number;
   backpressure: number;
+  meshRoute?: string;
+  manager?: ManagedConnection;
 }
 
 interface WebSocketMessage {
@@ -33,6 +36,7 @@ export class WebSocketCore {
   private app: uWS.App;
   private redis: Redis;
   private connections = new Map<string, WebSocketConnection>();
+  private readonly connectionPool: WebSocketConnectionPool;
   private readonly JWT_SECRET: string;
   private readonly HEARTBEAT_INTERVAL = 30000; // 30 seconds
   private readonly MAX_BACKPRESSURE = 64 * 1024; // 64KB
@@ -45,7 +49,18 @@ export class WebSocketCore {
       port: parseInt(process.env.REDIS_PORT || '6379'),
       password: process.env.REDIS_PASSWORD,
     });
-    
+
+    this.connectionPool = new WebSocketConnectionPool({
+      maxQueueSize: parseInt(process.env.WS_MAX_QUEUE_SIZE || '500', 10),
+      replayBatchSize: parseInt(process.env.WS_REPLAY_BATCH_SIZE || '50', 10),
+      queueFlushInterval: parseInt(process.env.WS_QUEUE_FLUSH_INTERVAL_MS || '1500', 10),
+      rateLimitPerSecond: parseInt(process.env.WS_RATE_LIMIT_PER_SECOND || '40', 10),
+      backpressureThreshold: this.MAX_BACKPRESSURE,
+      heartbeatTimeout: this.HEARTBEAT_INTERVAL * 2,
+      initialRetryDelay: parseInt(process.env.WS_RETRY_DELAY_MS || '1000', 10),
+      maxRetryDelay: parseInt(process.env.WS_RETRY_MAX_DELAY_MS || '60000', 10),
+    });
+
     this.setupRedisSubscriptions();
     this.startHeartbeatCheck();
     this.createApp();
@@ -134,6 +149,24 @@ export class WebSocketCore {
     }
   }
 
+  private getServiceMeshRoute(req: uWS.HttpRequest): string | undefined {
+    const headers = [
+      'x-service-mesh-route',
+      'x-envoy-original-dst-host',
+      'x-istio-original-dst-host',
+      'x-forwarded-host',
+    ];
+
+    for (const header of headers) {
+      const value = req.getHeader(header);
+      if (value) {
+        return `${header}:${value}`;
+      }
+    }
+
+    return undefined;
+  }
+
   private createApp() {
     this.app = uWS.App({
       // SSL configuration if needed
@@ -170,7 +203,12 @@ export class WebSocketCore {
             return;
           }
 
-          console.log(`WebSocket upgrade: ${claims.userId}@${claims.tenantId}`);
+          const meshRoute = this.getServiceMeshRoute(req);
+
+          console.log(
+            `WebSocket upgrade: ${claims.userId}@${claims.tenantId}` +
+              (meshRoute ? ` via ${meshRoute}` : ''),
+          );
 
           res.upgrade(
             {
@@ -178,6 +216,7 @@ export class WebSocketCore {
               subscriptions: new Set<string>(),
               lastHeartbeat: Date.now(),
               backpressure: 0,
+              meshRoute,
             },
             req.getHeader('sec-websocket-key'),
             req.getHeader('sec-websocket-protocol'),
@@ -209,17 +248,20 @@ export class WebSocketCore {
           
           // Update heartbeat timestamp
           connection.lastHeartbeat = Date.now();
+          connection.manager?.updateHeartbeat();
 
           // OPA policy check
           const allowed = await this.opaAllow(connection, msg);
           if (!allowed) {
-            const errorMsg = JSON.stringify({
+            const errorPayload = {
               type: 'error',
               error: 'Policy violation',
               message: 'Action not allowed by policy',
               timestamp: Date.now(),
-            });
-            ws.send(errorMsg, opCode);
+            };
+            if (!connection.manager?.sendJson(errorPayload)) {
+              ws.send(JSON.stringify(errorPayload), opCode);
+            }
             return;
           }
 
@@ -234,13 +276,15 @@ export class WebSocketCore {
           });
         } catch (error) {
           console.error('WebSocket message error:', error);
-          const errorMsg = JSON.stringify({
+          const errorPayload = {
             type: 'error',
             error: 'Message processing failed',
             message: error instanceof Error ? error.message : 'Unknown error',
             timestamp: Date.now(),
-          });
-          ws.send(errorMsg, opCode);
+          };
+          if (!connection.manager?.sendJson(errorPayload)) {
+            ws.send(JSON.stringify(errorPayload), opCode);
+          }
         } finally {
           span?.end();
         }
@@ -249,34 +293,56 @@ export class WebSocketCore {
       /* WebSocket open handler */
       open: (ws: any) => {
         const connection = ws as WebSocketConnection;
-        this.connections.set(connection.userId + '@' + connection.tenantId, connection);
-        
-        console.log(`WebSocket opened: ${connection.userId}@${connection.tenantId}`);
-        
-        // Send welcome message
-        const welcomeMsg = JSON.stringify({
+        const connectionId = connection.userId + '@' + connection.tenantId;
+        const manager = this.connectionPool.registerConnection(connectionId, ws, {
+          id: connectionId,
+          tenantId: connection.tenantId,
+          userId: connection.userId,
+          route: connection.meshRoute,
+        });
+        connection.manager = manager;
+        this.connections.set(connectionId, connection);
+
+        console.log(
+          `WebSocket opened: ${connection.userId}@${connection.tenantId}` +
+            (connection.meshRoute ? ` via ${connection.meshRoute}` : ''),
+        );
+
+        const welcomeMessage = {
           type: 'welcome',
           message: 'Connected to Maestro WebSocket',
           tenantId: connection.tenantId,
           userId: connection.userId,
           timestamp: Date.now(),
-        });
-        ws.send(welcomeMsg);
+          route: connection.meshRoute,
+        };
+
+        if (!manager.sendJson(welcomeMessage)) {
+          ws.send(JSON.stringify(welcomeMessage));
+        }
       },
 
       /* WebSocket close handler */
       close: (ws: any, code, message) => {
         const connection = ws as WebSocketConnection;
         const connectionId = connection.userId + '@' + connection.tenantId;
-        
+
         // Clean up subscriptions
         for (const topic of connection.subscriptions) {
           this.redis.srem(`${this.TOPIC_PREFIX}${topic}:subscribers`, connectionId);
         }
-        
+
         this.connections.delete(connectionId);
-        
-        console.log(`WebSocket closed: ${connectionId}, code: ${code}`);
+
+        if (code === 1000) {
+          this.connectionPool.removeConnection(connectionId, 'graceful_close');
+        } else {
+          connection.manager?.markReconnecting(`close_${code}`);
+        }
+
+        console.log(
+          `WebSocket closed: ${connectionId}, code: ${code}, reason: ${message || 'n/a'}`,
+        );
       },
 
       /* Settings */
@@ -300,12 +366,15 @@ export class WebSocketCore {
             connection.subscriptions.add(tenantTopic);
             await this.redis.sadd(`${this.TOPIC_PREFIX}${tenantTopic}:subscribers`, connectionId);
           }
-          
-          connection.ws.send(JSON.stringify({
+
+          const subscribedPayload = {
             type: 'subscribed',
             topics: msg.topics,
             timestamp: Date.now(),
-          }));
+          };
+          if (!connection.manager?.sendJson(subscribedPayload)) {
+            connection.ws.send(JSON.stringify(subscribedPayload));
+          }
         }
         break;
 
@@ -316,12 +385,15 @@ export class WebSocketCore {
             connection.subscriptions.delete(tenantTopic);
             await this.redis.srem(`${this.TOPIC_PREFIX}${tenantTopic}:subscribers`, connectionId);
           }
-          
-          connection.ws.send(JSON.stringify({
+
+          const unsubscribedPayload = {
             type: 'unsubscribed',
             topics: msg.topics,
             timestamp: Date.now(),
-          }));
+          };
+          if (!connection.manager?.sendJson(unsubscribedPayload)) {
+            connection.ws.send(JSON.stringify(unsubscribedPayload));
+          }
         }
         break;
 
@@ -351,10 +423,13 @@ export class WebSocketCore {
 
       case 'heartbeat':
         connection.lastHeartbeat = Date.now();
-        connection.ws.send(JSON.stringify({
+        const heartbeatAck = {
           type: 'heartbeat_ack',
           timestamp: Date.now(),
-        }));
+        };
+        if (!connection.manager?.sendJson(heartbeatAck)) {
+          connection.ws.send(JSON.stringify(heartbeatAck));
+        }
         break;
     }
   }
@@ -377,14 +452,10 @@ export class WebSocketCore {
       for (const connectionId of subscribers) {
         const connection = this.connections.get(connectionId);
         if (connection && connection.subscriptions.has(topic)) {
-          // Check backpressure
-          const backpressure = connection.ws.getBufferedAmount();
-          if (backpressure > this.MAX_BACKPRESSURE) {
-            console.warn(`Backpressure limit exceeded for ${connectionId}`);
-            continue;
+          const sent = connection.manager?.sendRaw(message);
+          if (!sent && !connection.manager) {
+            connection.ws.send(message);
           }
-          
-          connection.ws.send(message);
         }
       }
     });
@@ -392,20 +463,10 @@ export class WebSocketCore {
 
   private startHeartbeatCheck() {
     setInterval(() => {
-      const now = Date.now();
-      const staleConnections: string[] = [];
-      
-      for (const [connectionId, connection] of this.connections) {
-        if (now - connection.lastHeartbeat > this.HEARTBEAT_INTERVAL * 2) {
-          console.log(`Closing stale connection: ${connectionId}`);
-          staleConnections.push(connectionId);
-          connection.ws.close();
-        }
-      }
-      
-      // Clean up stale connections
-      for (const connectionId of staleConnections) {
+      const closed = this.connectionPool.closeIdleConnections(this.HEARTBEAT_INTERVAL * 2);
+      for (const connectionId of closed) {
         this.connections.delete(connectionId);
+        console.log(`Closing stale connection: ${connectionId}`);
       }
     }, this.HEARTBEAT_INTERVAL);
   }
@@ -433,6 +494,10 @@ export class WebSocketCore {
     });
   }
 
+  public notifyServerRestart(reason = 'maintenance'): void {
+    this.connectionPool.handleServerRestart(reason);
+  }
+
   public async publishToTopic(tenantId: string, topic: string, payload: any) {
     const tenantTopic = `${tenantId}.${topic}`;
     const message = {
@@ -450,12 +515,15 @@ export class WebSocketCore {
   }
 
   public getConnectionStats() {
+    const poolStats = this.connectionPool.getStats();
     return {
-      totalConnections: this.connections.size,
-      connectionsByTenant: Array.from(this.connections.values()).reduce((acc, conn) => {
+      totalConnections: poolStats.totalConnections,
+      connectionsByTenant: poolStats.connections.reduce((acc, conn) => {
         acc[conn.tenantId] = (acc[conn.tenantId] || 0) + 1;
         return acc;
       }, {} as Record<string, number>),
+      states: poolStats.byState,
+      details: poolStats.connections,
     };
   }
 }
