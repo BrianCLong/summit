@@ -1,426 +1,314 @@
-version: "3.9"
+services:
+  # Frontend Development Server
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:4000/graphql
+      - VITE_WS_URL=http://localhost:4000
+      - CHOKIDAR_USEPOLLING=true
+    stdin_open: true
+    tty: true
+    networks:
+      - intelgraph-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
 
-# IntelGraph Platform Development Environment
-# Based on conductor summary requirements for Sprint 0 baseline
+  # Database Migrations
+  migrations:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=devpassword
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=intelgraph
+      - POSTGRES_PASSWORD=devpassword
+      - POSTGRES_DB=intelgraph_dev
+      - POSTGRES_URL=postgres://intelgraph:devpassword@postgres:5432/intelgraph_dev
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    command: ["node", "scripts/db_migrate.cjs"]
+    networks:
+      - intelgraph-dev
+
+  # Backend Development Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+      no_cache: true
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    ports:
+      - "4000:4000"
+      - "9229:9229" # Debug port
+    environment:
+      - NODE_ENV=development
+      - DEBUG=intelgraph:*
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=devpassword
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=intelgraph
+      - POSTGRES_PASSWORD=devpassword
+      - POSTGRES_DB=intelgraph_dev
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=devpassword
+      - JWT_SECRET=dev_jwt_secret_12345
+      - JWT_REFRESH_SECRET=dev_refresh_secret_67890
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY:-}
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      - ML_URL=http://intelgraph-ml:8081
+      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
+      - CORS_ORIGIN=http://localhost:3000
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    networks:
+      - intelgraph-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
+  # Graph Database
+  neo4j:
+    image: neo4j:5-community
+    environment:
+      - NEO4J_AUTH=neo4j/devpassword
+      - NEO4J_server_memory_pagecache_size=128M
+      - NEO4J_server_memory_heap_max__size=256M
+    volumes:
+      - neo4j_dev_data:/data
+      - neo4j_dev_logs:/logs
+      - ./backups/neo4j:/backups
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    networks:
+      - intelgraph-dev
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: intelgraph_dev
+      POSTGRES_USER: intelgraph
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./server/db/migrations/postgres:/docker-entrypoint-initdb.d
+      - ./backups/postgres:/backups
+    networks:
+      - intelgraph-dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass devpassword --appendonly yes
+    volumes:
+      - redis_dev_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - intelgraph-dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "devpassword", "--raw", "INFO"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  # AI/ML Microservice
+  intelgraph-ml:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    environment:
+      - UVICORN_HOST=0.0.0.0
+      - UVICORN_PORT=8081
+      - REDIS_URL=redis://:devpassword@redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=devpassword
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY:-}
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY:-}
+      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
+      - ML_WEBHOOK_BASE_URL=http://server:4000
+      - USE_SPACY=${USE_SPACY:-false}
+      - PYTHONPATH=/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    networks:
+      - intelgraph-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  # ML Worker (Celery)
+  intelgraph-ml-worker:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    command:
+      [
+        "celery",
+        "-A",
+        "app.celery_app",
+        "worker",
+        "--loglevel=INFO",
+        "--concurrency=2",
+      ]
+    environment:
+      - REDIS_URL=redis://:devpassword@redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=devpassword
+      - ML_WEBHOOK_SECRET=${ML_WEBHOOK_SECRET:-dev_ml_webhook_secret}
+      - ML_WEBHOOK_BASE_URL=http://server:4000
+      - USE_SPACY=${USE_SPACY:-false}
+      - PYTHONPATH=/app
+    depends_on:
+      intelgraph-ml:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    networks:
+      - intelgraph-dev
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  # Database Administration
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - intelgraph-dev
+
+volumes:
+  neo4j_dev_data:
+  neo4j_dev_logs:
+  postgres_dev_data:
+  redis_dev_data:
 
 networks:
   intelgraph-dev:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-
-volumes:
-  postgres-data:
-  neo4j-data:
-  redis-data:
-  minio-data:
-  vault-data:
-
-services:
-  # === CORE INFRASTRUCTURE ===
-  postgres:
-    image: postgres:15-alpine
-    container_name: intelgraph-postgres-dev
-    environment:
-      POSTGRES_DB: intelgraph
-      POSTGRES_USER: intelgraph
-      POSTGRES_PASSWORD: intelgraph-dev-secret
-      POSTGRES_HOST_AUTH_METHOD: trust
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./init-db:/docker-entrypoint-initdb.d
-    networks:
-      - intelgraph-dev
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U intelgraph -d intelgraph"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  neo4j:
-    image: neo4j:5.15-community
-    container_name: intelgraph-neo4j-dev
-    environment:
-      NEO4J_AUTH: neo4j/intelgraph-dev-secret
-      NEO4J_server_memory_heap_initial__size: 512m
-      NEO4J_server_memory_heap_max__size: 1G
-      NEO4J_server_memory_pagecache_size: 512m
-      NEO4J_PLUGINS: '["apoc", "graph-data-science"]'
-      NEO4J_apoc_export_file_enabled: 'true'
-      NEO4J_apoc_import_file_enabled: 'true'
-      NEO4J_apoc_import_file_use__neo4j__config: 'true'
-    ports:
-      - "7474:7474"  # HTTP
-      - "7687:7687"  # Bolt
-    volumes:
-      - neo4j-data:/data
-      - neo4j-data:/var/lib/neo4j/import
-    networks:
-      - intelgraph-dev
-    healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p intelgraph-dev-secret 'RETURN 1'"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
-  redis:
-    image: redis:7-alpine
-    container_name: intelgraph-redis-dev
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    networks:
-      - intelgraph-dev
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # === S3-COMPATIBLE STORAGE ===
-  minio:
-    image: minio/minio:latest
-    container_name: intelgraph-minio-dev
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - minio-data:/data
-    networks:
-      - intelgraph-dev
-    command: server /data --console-address ":9001"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # === MESSAGE BROKER ===
-  kafka:
-    image: confluentinc/cp-kafka:7.4.0
-    container_name: intelgraph-kafka-dev
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-    ports:
-      - "9092:9092"
-    networks:
-      - intelgraph-dev
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.4.0
-    container_name: intelgraph-zookeeper-dev
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
-    networks:
-      - intelgraph-dev
-
-  # === SECRETS MANAGEMENT ===
-  vault:
-    image: vault:1.14
-    container_name: intelgraph-vault-dev
-    environment:
-      VAULT_DEV_ROOT_TOKEN_ID: intelgraph-dev-root-token
-      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
-    ports:
-      - "8200:8200"
-    cap_add:
-      - IPC_LOCK
-    volumes:
-      - vault-data:/vault/data
-    networks:
-      - intelgraph-dev
-    healthcheck:
-      test: ["CMD-SHELL", "vault status"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # === POLICY ENGINE ===
-  opa:
-    image: openpolicyagent/opa:latest-envoy
-    container_name: intelgraph-opa-dev
-    ports:
-      - "8181:8181"
-    networks:
-      - intelgraph-dev
-    command:
-      - "run"
-      - "--server"
-      - "--log-level=debug"
-      - "--log-format=json"
-      - "/policies"
-    volumes:
-      - ./policies:/policies:ro
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8181/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # === OBSERVABILITY STACK ===
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
-    container_name: intelgraph-otel-dev
-    ports:
-      - "4317:4317"  # OTLP gRPC
-      - "4318:4318"  # OTLP HTTP
-      - "8888:8888"  # Prometheus metrics
-    volumes:
-      - ./otel-config.yaml:/etc/otel-collector-config.yaml:ro
-    command: ["--config=/etc/otel-collector-config.yaml"]
-    networks:
-      - intelgraph-dev
-    depends_on:
-      - jaeger
-
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    container_name: intelgraph-jaeger-dev
-    ports:
-      - "14250:14250"  # gRPC
-      - "14268:14268"  # HTTP
-      - "16686:16686"  # UI
-    environment:
-      COLLECTOR_OTLP_ENABLED: 'true'
-    networks:
-      - intelgraph-dev
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: intelgraph-prometheus-dev
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    networks:
-      - intelgraph-dev
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: intelgraph-grafana-dev
-    ports:
-      - "3001:3000"  # Changed to avoid conflict with web client
-    environment:
-      GF_SECURITY_ADMIN_PASSWORD: admin
-    volumes:
-      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro
-    networks:
-      - intelgraph-dev
-    depends_on:
-      - prometheus
-
-  # === APPLICATION SERVICES ===
-  api-server:
-    build:
-      context: ../../
-      dockerfile: server/Dockerfile
-      target: development
-    container_name: intelgraph-api-dev
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://intelgraph:intelgraph-dev-secret@postgres:5432/intelgraph
-      NEO4J_URI: bolt://neo4j:7687
-      NEO4J_USERNAME: neo4j
-      NEO4J_PASSWORD: intelgraph-dev-secret
-      REDIS_URL: redis://redis:6379
-      KAFKA_BROKERS: kafka:29092
-      VAULT_ADDR: http://vault:8200
-      VAULT_TOKEN: intelgraph-dev-root-token
-      OPA_URL: http://opa:8181
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
-      AWS_ENDPOINT_URL: http://minio:9000
-      AWS_ACCESS_KEY_ID: minioadmin
-      AWS_SECRET_ACCESS_KEY: minioadmin
-      S3_BUCKET: topicality-demo
-      OIDC_ISSUER: https://auth.topicality.co/
-      OIDC_CLIENT_ID: api-topicality
-      LOG_LEVEL: debug
-      PORT: 4000
-    ports:
-      - "4000:4000"
-    volumes:
-      - ../../server:/app
-      - /app/node_modules
-    networks:
-      - intelgraph-dev
-    depends_on:
-      - postgres
-      - neo4j
-      - redis
-      - kafka
-      - vault
-      - opa
-      - otel-collector
-
-  apollo-gateway:
-    build:
-      context: ../../
-      dockerfile: gateway/Dockerfile
-      target: development
-    container_name: intelgraph-gateway-dev
-    environment:
-      NODE_ENV: development
-      APOLLO_SCHEMA_REPORTING: 'false'
-      GRAPH_REF: intelgraph-dev@current
-      SUBGRAPH_URL_CORE: http://api-server:4000/graphql
-      OPA_URL: http://opa:8181
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
-      OIDC_ISSUER: https://auth.topicality.co/
-      OIDC_CLIENT_ID: api-topicality
-      PORT: 4001
-    ports:
-      - "4001:4001"
-    networks:
-      - intelgraph-dev
-    depends_on:
-      - api-server
-      - opa
-      - otel-collector
-
-  web:
-    build:
-      context: ../../
-      dockerfile: client/Dockerfile
-      target: development
-    container_name: intelgraph-web-dev
-    environment:
-      NODE_ENV: development
-      VITE_API_URL: http://localhost:4001/graphql
-      VITE_OIDC_ISSUER: https://auth.topicality.co/
-      VITE_OIDC_CLIENT_ID: web-topicality
-      PORT: 3000
-    ports:
-      - "3000:3000"
-    volumes:
-      - ../../client:/app
-      - /app/node_modules
-    networks:
-      - intelgraph-dev
-    depends_on:
-      - apollo-gateway
-
-  # === DATA INGESTION WORKERS ===
-  ingest-worker:
-    build:
-      context: ../../
-      dockerfile: workers/ingest/Dockerfile
-      target: development
-    container_name: intelgraph-ingest-dev
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://intelgraph:intelgraph-dev-secret@postgres:5432/intelgraph
-      NEO4J_URI: bolt://neo4j:7687
-      NEO4J_USERNAME: neo4j
-      NEO4J_PASSWORD: intelgraph-dev-secret
-      KAFKA_BROKERS: kafka:29092
-      AWS_ENDPOINT_URL: http://minio:9000
-      AWS_ACCESS_KEY_ID: minioadmin
-      AWS_SECRET_ACCESS_KEY: minioadmin
-      S3_BUCKET: topicality-demo
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
-      LOG_LEVEL: debug
-    networks:
-      - intelgraph-dev
-    depends_on:
-      - postgres
-      - neo4j
-      - kafka
-      - minio
-      - otel-collector
-
-  # === PROVENANCE LEDGER ===
-  prov-ledger:
-    build: ../../prov-ledger
-    container_name: intelgraph-provenance-dev
-    ports: ["4010:4010"]
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgresql://intelgraph:intelgraph-dev-secret@postgres:5432/intelgraph
-      - COSIGN_PUBLIC_KEY=/keys/cosign-public.key
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
-    depends_on:
-      - postgres
-      - otel-collector
-    networks:
-      - intelgraph-dev
-    volumes:
-      - ./keys:/keys:ro
-
-  # === SETUP & INITIALIZATION ===
-  setup:
-    image: curlimages/curl:latest
-    container_name: intelgraph-setup-dev
-    networks:
-      - intelgraph-dev
-    depends_on:
-      - minio
-      - vault
-    command: |
-      sh -c '
-        echo "🚀 Setting up IntelGraph development environment..."
-        sleep 15
-
-        # Create S3 buckets in MinIO
-        echo "📦 Creating S3 buckets..."
-        curl -X PUT "http://minio:9000/topicality-demo" || echo "Bucket may already exist"
-
-        # Configure Vault KV secrets
-        echo "🔐 Configuring Vault secrets..."
-        export VAULT_ADDR=http://vault:8200
-        export VAULT_TOKEN=intelgraph-dev-root-token
-
-        # Enable KV secrets engine
-        curl -X POST -H "X-Vault-Token: $VAULT_TOKEN" \
-          "$VAULT_ADDR/v1/sys/mounts/kv" \
-          -d "{\"type\":\"kv\",\"options\":{\"version\":\"2\"}}"
-
-        # Store demo secrets
-        curl -X POST -H "X-Vault-Token: $VAULT_TOKEN" \
-          "$VAULT_ADDR/v1/kv/data/ghcr/topicality-ci-token" \
-          -d "{\"data\":{\"token\":\"demo-token\"}}"
-
-        curl -X POST -H "X-Vault-Token: $VAULT_TOKEN" \
-          "$VAULT_ADDR/v1/kv/data/cosign/topicality-ci-key" \
-          -d "{\"data\":{\"private_key\":\"demo-private-key\"}}"
-
-        curl -X POST -H "X-Vault-Token: $VAULT_TOKEN" \
-          "$VAULT_ADDR/v1/kv/data/topicality/api-key" \
-          -d "{\"data\":{\"api_key\":\"demo-api-key-for-insights-feed\"}}"
-
-        echo "✅ Development environment setup complete!"
-        echo "🌐 IntelGraph Platform Access Points:"
-        echo "  - Web Client: http://localhost:3000"
-        echo "  - GraphQL Gateway: http://localhost:4001/graphql"
-        echo "  - Core API Server: http://localhost:4000"
-        echo "  - Neo4j Browser: http://localhost:7474 (neo4j/intelgraph-dev-secret)"
-        echo "  - Grafana Dashboards: http://localhost:3001 (admin/admin)"
-        echo "  - Jaeger Tracing: http://localhost:16686"
-        echo "  - Prometheus Metrics: http://localhost:9090"
-        echo "  - MinIO Console: http://localhost:9001 (minioadmin/minioadmin)"
-        echo "  - Vault UI: http://localhost:8200 (token: intelgraph-dev-root-token)"
-        echo "  - OPA Policy Engine: http://localhost:8181"
-        echo ""
-        echo "🎯 Ready for Sprint 0 E2E slice: batch_ingest_graph_query_ui"
-      '
-
-networks:
-  default:
-    name: intelgraph-dev

@@ -1,0 +1,70 @@
+[ORACLE MODE – Fusion & Forecast]
+
+---
+
+## EXECUTIVE SUMMARY
+- **Sprint Window Proposal:** Dec 16 – Dec 27, 2025 (2-week cadence)
+- **Focus:** Real-Time Observability + Adversarial Resilience — live query capture, ExplainX Red Team ops, and audit fencing.
+- **Workstream Theme:** Trace Everything, Test Defensively, Trust What Holds.
+- **Target Output:** Live query ingest, ExplainX RT attack logs, alertable audit diffs.
+
+---
+
+## FINDINGS & RATIONALE
+- ExplainX UI and causal map have launched; passive insight is strong, but **live flow** and **offensive testing** are now essential.
+- Prompt abuse, query manipulation, and edge-jump fuzzing must be modeled.
+- Analysts need both telemetry and red cell perspective to assert trust in the output.
+
+---
+
+## RECOMMENDATIONS
+
+### PRIORITY OBJECTIVES (Sprint: Dec 16–27)
+1. **Real-Time Query Capture (RTQC)**
+   - Capture NL queries + Cypher + graph result as atomic chain.  
+   - Push to live ExplainX Trace panel with latency + decision tags.
+2. **ExplainX Red Team Test Harness**
+   - Inject adversarial prompts, malformed joins, time-boxed edge fuzzing.  
+   - Score explainability failure and alert threshold crossings.
+3. **Audit Fence Layer**
+   - Compare intent (prompt) vs result; enforce stability boundaries.  
+   - Emit alerts on hallucinated joins or lineage-free exports.
+4. **Analyst Threat Review Panel**
+   - Allow analyst to triage Red Team triggered alerts.  
+   - Attach feedback to training diff set.
+
+### SUGGESTED FOLLOW-UPS (Next Sprint)
+- Stability classifier integration
+- Trace path hash lock & alert correlation engine
+
+---
+
+## PROOF-CARRYING INTELLIGENCE
+- **Sources:** RTQC logs, red team prompt packs, audit diff anomalies.
+- **Assumptions:** Query latency SLOs < 1.5s; audit latency < 3s.
+- **Uncertainty:** Red team prompt variety needs expansion.
+- **Verification:**
+  - Real-time capture test  
+  - Red team replay diff  
+  - Audit alert correlation
+
+---
+
+## CADENCE PLAN (Q4 '25)
+
+| Layer         | Cadence         | Responsible Artifact                             |
+|---------------|------------------|--------------------------------------------------|
+| Daily         | Query Telemetry  | RTQC stream, latency logs, alert hits           |
+| Weekly        | Red Cell Report  | Prompt Pack Stats, ExplainX Fails               |
+| Biweekly (83M)| Audit Sync       | Join Drift, Hallucination Tagger Stats          |
+| Monthly       | Resilience Brief | Stability Failures, Analyst Interventions       |
+| Quarterly     | Kill-Chain Drill | Prompt-to-join-to-export anomaly maps           |
+
+**Next Steps:**
+- Enable RTQC Live Stream (Dec 17)  
+- Begin Red Team Cycle-2 (Dec 18)  
+- Launch Analyst Threat Panel alpha (Dec 23)
+
+---
+
+**[UNIT 83M – ORACLE MODE]** – SIGINT FUSION: OBSERVE, ATTACK, DEFEND.
