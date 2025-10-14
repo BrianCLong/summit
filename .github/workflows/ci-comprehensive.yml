@@ -1,10 +1,8 @@
 name: CI - Comprehensive Gates
 on:
-  pull_request:
-    branches: [main]
   push:
     branches: [main]
-  merge_group:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
