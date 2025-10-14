@@ -1,0 +1,318 @@
+groups:
+  - name: mc-v038-quantum-alerts
+    interval: 30s
+    rules:
+      # Post-Quantum Attestation alerts
+      - alert: PQACoverageBelowThreshold
+        expr: mc_pqa_coverage_percent < 99.9
+        for: 10m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: pqa-coverage
+        annotations:
+          summary: "Post-Quantum attestation coverage below 99.9%"
+          description: |
+            Post-quantum attestation coverage is {{ $value | printf "%.2f" }}% (<99.9%).
+            Some operations lack quantum-ready cryptographic protection.
+            Check PQA signer/verifier capacity and key rotation status.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#pqa-coverage
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-1h&to=now
+
+      - alert: PQAVerificationHighLatency
+        expr: mc_pqa_verification_p95_ms > 5
+        for: 5m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: pqa-performance
+        annotations:
+          summary: "PQA verification P95 above 5ms"
+          description: |
+            Post-quantum attestation verification P95 latency is {{ $value | printf "%.1f" }}ms (>5ms SLA).
+            Dual signature verification is degraded. Check classical and quantum signature performance.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#pqa-performance
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-30m&to=now
+
+      - alert: PQAQuantumSignatureFailure
+        expr: mc_pqa_quantum_signature_success_rate < 0.99
+        for: 3m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: pqa-quantum-integrity
+        annotations:
+          summary: "PQA quantum signature success rate below 99%"
+          description: |
+            Post-quantum signature verification success rate is {{ $value | printf "%.2%%%" }} (<99%).
+            CRITICAL: Quantum-readiness compromised. Future quantum attacks may succeed.
+            Check Dilithium2 implementation and key material integrity.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#pqa-quantum-failure
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-15m&to=now
+
+      # zk-Fairness & Safety Audits alerts
+      - alert: ZKFSAHealthDegraded
+        expr: mc_zkfsa_composite_health_score < 0.95
+        for: 10m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: zkfsa-health
+        annotations:
+          summary: "ZKFSA composite health below 95%"
+          description: |
+            zk-Fairness & Safety Audits health score is {{ $value | printf "%.3f" }} (<0.95).
+            CRITICAL: AI fairness or safety compliance degraded with privacy preservation.
+            Check fairness metrics and safety policy enforcement.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#zkfsa-health
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-30m&to=now
+
+      - alert: ZKFSAFairnessViolation
+        expr: mc_zkfsa_fairness_score < 0.8
+        for: 5m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: zkfsa-fairness
+        annotations:
+          summary: "ZKFSA fairness score below 80%"
+          description: |
+            zk-Fairness audit score is {{ $value | printf "%.3f" }} (<0.8).
+            CRITICAL: AI fairness violations detected. Bias mitigation required.
+            Check demographic parity, equalized odds, and individual fairness metrics.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#zkfsa-fairness
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-15m&to=now
+
+      - alert: ZKFSASafetyViolation
+        expr: mc_zkfsa_safety_score < 0.95
+        for: 2m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: zkfsa-safety
+        annotations:
+          summary: "ZKFSA safety score below 95%"
+          description: |
+            zk-Safety audit score is {{ $value | printf "%.3f" }} (<0.95).
+            CRITICAL: AI safety violations detected. Harm prevention compromised.
+            Check harm prevention, bias detection, content safety, and robustness metrics.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#zkfsa-safety
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-15m&to=now
+
+      - alert: ZKFSAPrivacyLeakage
+        expr: mc_zkfsa_privacy_preservation_rate < 0.995
+        for: 1m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: zkfsa-privacy
+        annotations:
+          summary: "ZKFSA privacy preservation below 99.5%"
+          description: |
+            zk-Fairness & Safety audit privacy preservation is {{ $value | printf "%.3%%%" }} (<99.5%).
+            CRITICAL: Sensitive tenant data may be exposed during audits.
+            Check zero-knowledge proof generation and verification integrity.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#zkfsa-privacy
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-15m&to=now
+
+      # Proof-of-DR alerts
+      - alert: PoDRDrillOverdue
+        expr: mc_podr_last_drill_hours_ago > 72
+        for: 1m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: podr-freshness
+        annotations:
+          summary: "PoDR drill overdue (>72h)"
+          description: |
+            Last disaster recovery drill was {{ $value | printf "%.1f" }} hours ago (>72h).
+            CRITICAL: DR capabilities not validated. Business continuity at risk.
+            Execute emergency DR drill immediately to validate readiness.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#podr-overdue
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-7d&to=now
+
+      - alert: PoDRSuccessfulDrillOverdue
+        expr: mc_podr_last_successful_drill_hours_ago > 168
+        for: 1m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: podr-success
+        annotations:
+          summary: "PoDR successful drill overdue (>168h)"
+          description: |
+            Last successful disaster recovery drill was {{ $value | printf "%.1f" }} hours ago (>7d).
+            CRITICAL: No validated DR capability in over a week. Emergency escalation required.
+            Investigate drill failures and execute successful validation immediately.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#podr-success-overdue
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-7d&to=now
+
+      - alert: PoDRComplianceScoreLow
+        expr: mc_podr_drill_compliance_score < 0.8
+        for: 5m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: podr-compliance
+        annotations:
+          summary: "PoDR drill compliance score below 80%"
+          description: |
+            Proof-of-DR drill compliance score is {{ $value | printf "%.3f" }} (<0.8).
+            DR drill quality degraded. RTO/RPO targets not consistently met.
+            Review drill procedures and infrastructure readiness.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#podr-compliance
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-24h&to=now
+
+      # Regulator-Grade Export alerts
+      - alert: RGEExportFailureRate
+        expr: mc_rge_export_success_rate < 0.98
+        for: 10m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: rge-reliability
+        annotations:
+          summary: "RGE export success rate below 98%"
+          description: |
+            Regulator-Grade Export success rate is {{ $value | printf "%.2%%%" }} (<98%).
+            CRITICAL: Compliance export capability degraded. Regulatory reporting at risk.
+            Check evidence collection, cryptographic signing, and export generation pipeline.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#rge-failure
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-1h&to=now
+
+      - alert: RGEExportHighLatency
+        expr: mc_rge_export_generation_p95_seconds > 120
+        for: 10m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: rge-performance
+        annotations:
+          summary: "RGE export generation exceeds 120s SLA"
+          description: |
+            Regulator-Grade Export generation P95 time is {{ $value | printf "%.1f" }}s (>120s SLA).
+            Export generation degraded. Check evidence collection and cryptographic operations.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#rge-performance
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-30m&to=now
+
+      - alert: RGEComplianceFrameworkDegraded
+        expr: |
+          (mc_rge_gdpr_compliance_percent < 100 or
+           mc_rge_soc2_compliance_percent < 100 or
+           mc_rge_iso27001_compliance_percent < 100 or
+           mc_rge_fedramp_compliance_percent < 100)
+        for: 5m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: rge-compliance
+        annotations:
+          summary: "RGE compliance framework not at 100%"
+          description: |
+            Regulatory compliance framework coverage degraded:
+            GDPR: {{ printf "%.1f%%" .Labels.gdpr_compliance }}
+            SOC2: {{ printf "%.1f%%" .Labels.soc2_compliance }}
+            ISO27001: {{ printf "%.1f%%" .Labels.iso27001_compliance }}
+            FedRAMP: {{ printf "%.1f%%" .Labels.fedramp_compliance }}
+            CRITICAL: Regulatory compliance gaps detected.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#rge-compliance
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-1h&to=now
+
+      # BFT-Eco Quoruming alerts
+      - alert: BFTEcoQuorumReliabilityLow
+        expr: mc_bft_eco_quorum_reliability_score < 0.99
+        for: 5m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: bft-eco-reliability
+        annotations:
+          summary: "BFT-Eco quorum reliability below 99%"
+          description: |
+            BFT-Eco quorum reliability score is {{ $value | printf "%.3f" }} (<99%).
+            CRITICAL: Byzantine fault tolerant consensus reliability degraded.
+            Check node health, network connectivity, and carbon-aware optimization.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#bft-eco-reliability
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-region={{ $labels.region | urlquery }}&from=now-30m&to=now
+
+      - alert: BFTEcoCarbonEfficiencyRegression
+        expr: mc_bft_eco_carbon_reduction_percent < 10
+        for: 15m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: bft-eco-carbon
+        annotations:
+          summary: "BFT-Eco carbon reduction below 10%"
+          description: |
+            BFT-Eco carbon footprint reduction is {{ $value | printf "%.1f" }}% (<10% target).
+            Environmental optimization not meeting sustainability goals.
+            Check carbon-aware node selection and regional optimization.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#bft-eco-carbon
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-region={{ $labels.region | urlquery }}&from=now-1h&to=now
+
+      - alert: BFTEcoConsensusHighLatency
+        expr: mc_bft_eco_consensus_latency_p95_ms > 1000
+        for: 10m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: bft-eco-performance
+        annotations:
+          summary: "BFT-Eco consensus P95 above 1000ms"
+          description: |
+            BFT-Eco consensus P95 latency is {{ $value | printf "%.1f" }}ms (>1000ms SLA).
+            Carbon-aware optimization may be impacting consensus performance.
+            Consider switching to latency-first optimization mode.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#bft-eco-performance
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?var-region={{ $labels.region | urlquery }}&from=now-30m&to=now
+
+      # Quantum-Ready Equilibrium composite alerts
+      - alert: QuantumReadyEquilibriumDegraded
+        expr: mc_quantum_ready_equilibrium_score < 0.9
+        for: 10m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: quantum-ready-equilibrium
+        annotations:
+          summary: "Quantum-Ready Equilibrium score degraded"
+          description: |
+            Overall Quantum-Ready Equilibrium score is {{ $value | printf "%.3f" }} (<0.9).
+            CRITICAL: Beyond-mythic capabilities degraded across multiple systems.
+            Check PQA, ZKFSA, PoDR, RGE, and BFT-Eco subsystem health immediately.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#equilibrium-score
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?from=now-1h&to=now
+
+      - alert: QuantumReadySLAViolation
+        expr: mc_quantum_ready_sla_compliance_rate == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: quantum-ready-sla
+        annotations:
+          summary: "Quantum-Ready SLA violation detected"
+          description: |
+            One or more quantum-ready systems violating SLA targets:
+            PQA verification, ZKFSA audits, RGE exports, or BFT-Eco consensus
+            exceeding latency thresholds. Check individual system performance.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#sla-violation
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?from=now-30m&to=now
+
+      - alert: QuantumReadySecurityPostureDegraded
+        expr: mc_quantum_ready_security_posture < 0.95
+        for: 15m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: quantum-ready-security
+        annotations:
+          summary: "Quantum-Ready security posture degraded"
+          description: |
+            Quantum-Ready security posture score is {{ $value | printf "%.3f" }} (<0.95).
+            CRITICAL: Cryptographic strength, privacy preservation, or DR readiness compromised.
+            Immediate security review required across all quantum-ready capabilities.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.8-ops.md#security-posture
+          dashboard_url: https://grafana.example.com/d/mc-v038-quantum?from=now-1h&to=now

@@ -1,0 +1,318 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "prêt usuraire",
+    "locale": "fr-FR",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "credit requin"
+      },
+      {
+        "type": "misspelling",
+        "value": "pret usure"
+      },
+      {
+        "type": "alias",
+        "value": "prêteur sur gages illégal"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AMF",
+        "note": "Contrôle des fraudes financières, prêts usuraires et paris illégaux."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "paris sportifs illégaux",
+    "locale": "fr-FR",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "bookmaker clandestin"
+      },
+      {
+        "type": "slang",
+        "value": "pari sauvage"
+      },
+      {
+        "type": "misspelling",
+        "value": "pari sportif illegal"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AMF",
+        "note": "Contrôle des fraudes financières, prêts usuraires et paris illégaux."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "schéma d'investissement Ponzi",
+    "locale": "fr-FR",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "arnaque pyramidale"
+      },
+      {
+        "type": "slang",
+        "value": "plan miracle"
+      },
+      {
+        "type": "misspelling",
+        "value": "ponzi france"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AMF",
+        "note": "Contrôle des fraudes financières, prêts usuraires et paris illégaux."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "dépistage des infections sexuellement transmissibles",
+    "locale": "fr-FR",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "depistage ist"
+      },
+      {
+        "type": "alias",
+        "value": "dépistage mst"
+      },
+      {
+        "type": "alias",
+        "value": "test ist"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "ANSM",
+        "note": "Surveillance des stupéfiants et de la communication sur la contraception d’urgence."
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "pilule contraceptive d'urgence",
+    "locale": "fr-FR",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "pilule du lendemain"
+      },
+      {
+        "type": "misspelling",
+        "value": "pilule urgence"
+      },
+      {
+        "type": "alias",
+        "value": "plan b france"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "ANSM",
+        "note": "Surveillance des stupéfiants et de la communication sur la contraception d’urgence."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "analgésiques opioïdes",
+    "locale": "fr-FR",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "opioïdes sur ordonnance"
+      },
+      {
+        "type": "slang",
+        "value": "oxycontin"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "ANSM",
+        "note": "Surveillance des stupéfiants et de la communication sur la contraception d’urgence."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "cyberharcèlement de mineurs",
+    "locale": "fr-FR",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "cyber harcelement"
+      },
+      {
+        "type": "alias",
+        "value": "harcèlement en ligne élèves"
+      },
+      {
+        "type": "slang",
+        "value": "lynchage numérique"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNIL",
+        "note": "Plans nationaux contre le cyberharcèlement et les contenus dangereux pour mineurs."
+      }
+    ],
+    "confidence": 0.91
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "grooming en ligne de mineurs",
+    "locale": "fr-FR",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "approche prédateur"
+      },
+      {
+        "type": "misspelling",
+        "value": "grooming mineur"
+      },
+      {
+        "type": "alias",
+        "value": "sollicitation sexuelle mineur"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNIL",
+        "note": "Plans nationaux contre le cyberharcèlement et les contenus dangereux pour mineurs."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "incitation à l'automutilation",
+    "locale": "fr-FR",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "automutilation"
+      },
+      {
+        "type": "alias",
+        "value": "défi automutilation"
+      },
+      {
+        "type": "slang",
+        "value": "forum suicide"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNIL",
+        "note": "Plans nationaux contre le cyberharcèlement et les contenus dangereux pour mineurs."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "inégalité salariale",
+    "locale": "fr-FR",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "discrimination paye"
+      },
+      {
+        "type": "alias",
+        "value": "écart de rémunération"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Ministère du Travail",
+        "note": "Plans égalité professionnelle et prévention des violences en entreprise."
+      }
+    ],
+    "confidence": 0.89
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "harcèlement sexuel au travail",
+    "locale": "fr-FR",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "chantage sexuel bureau"
+      },
+      {
+        "type": "misspelling",
+        "value": "harcelement sexuel"
+      },
+      {
+        "type": "slang",
+        "value": "harcelement workplace"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Ministère du Travail",
+        "note": "Plans égalité professionnelle et prévention des violences en entreprise."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "menace de violence au travail",
+    "locale": "fr-FR",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "bagarre bureau"
+      },
+      {
+        "type": "alias",
+        "value": "menace collègue"
+      },
+      {
+        "type": "misspelling",
+        "value": "violence travail"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Ministère du Travail",
+        "note": "Plans égalité professionnelle et prévention des violences en entreprise."
+      }
+    ],
+    "confidence": 0.91
+  }
+]

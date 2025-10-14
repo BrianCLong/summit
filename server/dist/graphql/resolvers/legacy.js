@@ -1,11 +1,11 @@
 import AuthService from '../../services/AuthService.js';
 import { PubSub } from 'graphql-subscriptions';
-import { randomUUID as uuidv4 } from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../utils/logger.js';
 import crypto from 'crypto';
-import relationshipResolvers from './relationship.js';
+import relationshipResolvers from './resolvers/relationship.js';
 const pubsub = new PubSub();
 const authService = new AuthService();
 const goals = []; // replace with DB later
@@ -67,14 +67,14 @@ export const legacyResolvers = {
                     tags: JSON.stringify(input.tags || []),
                     metadata: JSON.stringify(input.metadata || {}),
                     createdBy: user.id,
-                    now,
+                    now
                 });
                 const investigation = result.records[0].get('i').properties;
                 logger.info(`Investigation created: ${id} by user ${user.id}`);
                 return {
                     ...investigation,
                     createdBy: user,
-                    assignedTo: [],
+                    assignedTo: []
                 };
             }
             finally {
@@ -113,7 +113,7 @@ export const legacyResolvers = {
                     source: input.source || 'user_input',
                     investigationId: input.investigationId,
                     createdBy: user.id,
-                    now,
+                    now
                 });
                 const entity = result.records[0].get('e').properties;
                 // Audit log
@@ -123,7 +123,7 @@ export const legacyResolvers = {
                 // Publish subscription
                 pubsub.publish('ENTITY_CREATED', {
                     entityCreated: entity,
-                    investigationId: input.investigationId,
+                    investigationId: input.investigationId
                 });
                 logger.info(`Entity created: ${id} by user ${user.id}`);
                 return entity;
@@ -140,7 +140,7 @@ export const legacyResolvers = {
             const phonePattern = /\b(?:\+?1[-.\ s]?)\(?[2-9][0-8][0-9]\)?[-.\ s]?[2-9][0-9]{2}[-.\ s]?[0-9]{4}\b/g;
             const entities = [];
             const emails = text.match(emailPattern) || [];
-            emails.forEach((email) => {
+            emails.forEach(email => {
                 entities.push({
                     id: uuidv4(),
                     uuid: uuidv4(),
@@ -153,11 +153,11 @@ export const legacyResolvers = {
                     verified: false,
                     createdBy: user,
                     createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
                 });
             });
             const phones = text.match(phonePattern) || [];
-            phones.forEach((phone) => {
+            phones.forEach(phone => {
                 entities.push({
                     id: uuidv4(),
                     uuid: uuidv4(),
@@ -170,7 +170,7 @@ export const legacyResolvers = {
                     verified: false,
                     createdBy: user,
                     createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
                 });
             });
             return entities;
@@ -206,3 +206,4 @@ export const legacyResolvers = {
         },
     },
 };
+//# sourceMappingURL=legacy.js.map

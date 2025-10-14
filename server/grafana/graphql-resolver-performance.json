@@ -396,7 +396,11 @@
   ],
   "schemaVersion": 27,
   "style": "dark",
-  "tags": ["graphql", "performance", "intelgraph"],
+  "tags": [
+    "graphql",
+    "performance",
+    "intelgraph"
+  ],
   "templating": {
     "list": []
   },

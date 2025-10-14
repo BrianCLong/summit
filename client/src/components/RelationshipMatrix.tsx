@@ -1,6 +1,6 @@
-import React from 'react';
-import { Box, Tooltip, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { Box, Tooltip, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 interface RelationshipCount {
   fromType: string;
@@ -15,7 +15,9 @@ interface RelationshipMatrixProps {
 const RelationshipMatrix: React.FC<RelationshipMatrixProps> = ({ data }) => {
   const navigate = useNavigate();
 
-  const types = Array.from(new Set(data.flatMap((d) => [d.fromType, d.toType]))).sort();
+  const types = Array.from(
+    new Set(data.flatMap((d) => [d.fromType, d.toType])),
+  ).sort();
   const maxCount = Math.max(...data.map((d) => d.count), 1);
 
   const getCount = (from: string, to: string) => {
@@ -29,7 +31,7 @@ const RelationshipMatrix: React.FC<RelationshipMatrixProps> = ({ data }) => {
   return (
     <Box
       sx={{
-        display: 'grid',
+        display: "grid",
         gridTemplateColumns: `100px repeat(${types.length}, 1fr)`,
         gridAutoRows: 40,
         gap: 1,
@@ -40,9 +42,9 @@ const RelationshipMatrix: React.FC<RelationshipMatrixProps> = ({ data }) => {
         <Box
           key={`col-${type}`}
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             fontWeight: 500,
           }}
         >
@@ -53,9 +55,9 @@ const RelationshipMatrix: React.FC<RelationshipMatrixProps> = ({ data }) => {
         <React.Fragment key={row}>
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
               pr: 1,
               fontWeight: 500,
             }}
@@ -75,11 +77,11 @@ const RelationshipMatrix: React.FC<RelationshipMatrixProps> = ({ data }) => {
                   onClick={() => handleCellClick(row, col)}
                   sx={{
                     backgroundColor,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: intensity > 0.6 ? 'common.white' : 'text.primary',
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: intensity > 0.6 ? "common.white" : "text.primary",
                     borderRadius: 1,
                   }}
                 >
