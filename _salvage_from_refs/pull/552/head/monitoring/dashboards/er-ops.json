@@ -1,7 +1,0 @@
-{
-  "title": "Entity Resolution Ops",
-  "panels": [
-    { "type": "graph", "title": "Merge Count", "datasource": "prometheus" },
-    { "type": "graph", "title": "Revert Count", "datasource": "prometheus" }
-  ]
-}

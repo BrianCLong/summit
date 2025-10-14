@@ -1,9 +1,0 @@
-name: PM 5.0 ChatOps
-on: issue_comment
-jobs:
-  forecast:
-    if: contains(github.event.comment.body, '/forecast')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout @v4/**
-      - run: node tools/pm/scenario.ts
