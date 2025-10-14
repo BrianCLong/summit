@@ -1,8 +1,8 @@
 import { Driver } from 'neo4j-driver';
-import baseLogger from '../config/logger';
+import pino from 'pino';
 import { writeAudit } from '../utils/audit'; // Assuming audit utility exists
 
-const logger = baseLogger.child({ name: 'DataRetentionService' });
+const logger = pino();
 
 interface RetentionPolicy {
   label: string; // Node or Relationship label
@@ -19,30 +19,19 @@ export class DataRetentionService {
     this.neo4j = neo4jDriver;
     // Define default retention policies
     this.policies = [
-      {
-        label: 'Entity',
-        ttlDays: Number(process.env.ENTITY_TTL_DAYS || 365),
-        auditAction: 'ENTITY_DELETED_TTL',
-      },
-      {
-        label: 'Relationship',
-        ttlDays: Number(process.env.RELATIONSHIP_TTL_DAYS || 365),
-        auditAction: 'RELATIONSHIP_DELETED_TTL',
-      },
+      { label: 'Entity', ttlDays: Number(process.env.ENTITY_TTL_DAYS || 365), auditAction: 'ENTITY_DELETED_TTL' },
+      { label: 'Relationship', ttlDays: Number(process.env.RELATIONSHIP_TTL_DAYS || 365), auditAction: 'RELATIONSHIP_DELETED_TTL' },
       // Add more policies as needed for other labels
     ];
   }
 
-  public startCleanupJob(intervalMs: number = 24 * 60 * 60 * 1000) {
-    // Default to every 24 hours
+  public startCleanupJob(intervalMs: number = 24 * 60 * 60 * 1000) { // Default to every 24 hours
     if (this.cleanupInterval) {
       logger.warn('Data retention cleanup job already running. Stopping existing job.');
       this.stopCleanupJob();
     }
 
-    logger.info(
-      `Starting data retention cleanup job every ${intervalMs / (1000 * 60 * 60)} hours.`,
-    );
+    logger.info(`Starting data retention cleanup job every ${intervalMs / (1000 * 60 * 60)} hours.`);
     this.cleanupInterval = setInterval(() => this.runCleanup(), intervalMs);
   }
 
@@ -73,9 +62,7 @@ export class DataRetentionService {
         const deletedCount = result.records[0].get('deletedCount');
 
         if (deletedCount > 0) {
-          logger.info(
-            `Deleted ${deletedCount} ${policy.label} nodes/relationships older than ${policy.ttlDays} days.`,
-          );
+          logger.info(`Deleted ${deletedCount} ${policy.label} nodes/relationships older than ${policy.ttlDays} days.`);
           // Audit log the deletion
           await writeAudit({
             userId: 'system', // System user for automated actions

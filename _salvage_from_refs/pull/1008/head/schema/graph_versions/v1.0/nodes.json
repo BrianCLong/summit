@@ -1,9 +1,0 @@
-{
-  "Person": {
-    "fields": {
-      "id": {"type": "string", "mandatory": true},
-      "name": {"type": "string", "mandatory": true}
-    },
-    "indexes": ["id"]
-  }
-}
