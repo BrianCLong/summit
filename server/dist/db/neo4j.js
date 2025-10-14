@@ -1,273 +1,102 @@
-import neo4j from 'neo4j-driver';
-import { trace } from '@opentelemetry/api';
-import { Counter, Histogram, Gauge } from 'prom-client';
-const tracer = trace.getTracer('maestro-neo4j', '24.3.0');
-// Neo4j region-aware metrics
-const neo4jConnectionsActive = new Counter({
-    name: 'neo4j_connections_active_total',
-    help: 'Total active Neo4j connections',
-    labelNames: ['region', 'driver_type', 'tenant_id']
-});
-const neo4jQueryDuration = new Histogram({
-    name: 'neo4j_query_duration_seconds',
-    help: 'Neo4j query duration',
-    labelNames: ['region', 'driver_type', 'operation', 'tenant_id'],
-    buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
-});
-const neo4jReplicationLag = new Gauge({
-    name: 'neo4j_replication_lag_seconds',
-    help: 'Neo4j replication lag in seconds',
-    labelNames: ['region', 'primary_region']
-});
-// Write driver (primary region)
-const writeDriver = neo4j.driver(process.env.NEO4J_URI || process.env.NEO4J_WRITE_URI || 'bolt://localhost:7687', neo4j.auth.basic(process.env.NEO4J_USER || 'neo4j', process.env.NEO4J_PASSWORD || 'password'), {
-    encrypted: process.env.NODE_ENV === 'production' ? 'ENCRYPTION_ON' : 'ENCRYPTION_OFF',
-    maxConnectionPoolSize: 30,
-    maxTransactionRetryTime: 30000,
-    connectionAcquisitionTimeout: 60000,
-    userAgent: `maestro-write-${process.env.CURRENT_REGION || 'unknown'}`
-});
-// Read driver (can be replica or primary)
-const readDriver = neo4j.driver(process.env.NEO4J_READ_URI || process.env.NEO4J_URI || 'bolt://localhost:7687', neo4j.auth.basic(process.env.NEO4J_USER || 'neo4j', process.env.NEO4J_PASSWORD || 'password'), {
-    encrypted: process.env.NODE_ENV === 'production' ? 'ENCRYPTION_ON' : 'ENCRYPTION_OFF',
-    maxConnectionPoolSize: 50, // More read connections
-    maxTransactionRetryTime: 30000,
-    connectionAcquisitionTimeout: 60000,
-    userAgent: `maestro-read-${process.env.CURRENT_REGION || 'unknown'}`
-});
-// Legacy driver for backward compatibility
-const driver = writeDriver;
-export const neo = {
-    run: async (query, params = {}, options) => {
-        return tracer.startActiveSpan('neo4j.query', async (span) => {
-            span.setAttributes({
-                'db.system': 'neo4j',
-                'db.statement': query,
-                'db.operation': query.split(' ')[0].toLowerCase(),
-                'tenant_id': options?.tenantId || 'unknown'
-            });
-            const session = driver.session({
-                defaultAccessMode: neo4j.session.WRITE
-            });
-            // Enhanced tenant scoping for Neo4j queries
-            const scopedQuery = validateAndScopeNeo4jQuery(query, params, options?.tenantId);
-            try {
-                const result = await session.run(scopedQuery.query, scopedQuery.params);
-                span.setAttributes({
-                    'db.rows_affected': result.records.length,
-                    'db.tenant_scoped': scopedQuery.wasScoped
-                });
-                return result;
-            }
-            catch (error) {
-                span.recordException(error);
-                span.setStatus({ code: 2, message: error.message });
-                throw error;
-            }
-            finally {
-                await session.close();
-                span.end();
-            }
-        });
-    },
-    // Convenience method for idempotent writes (MERGE operations)
-    merge: async (query, params = {}, options) => {
-        return tracer.startActiveSpan('neo4j.merge', async (span) => {
-            span.setAttributes({
-                'db.system': 'neo4j',
-                'db.statement': query,
-                'db.operation': 'merge',
-                'tenant_id': options?.tenantId || 'unknown'
-            });
-            const session = driver.session({
-                defaultAccessMode: neo4j.session.WRITE
-            });
-            const scopedQuery = validateAndScopeNeo4jQuery(query, params, options?.tenantId);
-            try {
-                const result = await session.run(scopedQuery.query, scopedQuery.params);
-                span.setAttributes({
-                    'db.rows_affected': result.records.length,
-                    'db.tenant_scoped': scopedQuery.wasScoped
-                });
-                return result;
-            }
-            catch (error) {
-                span.recordException(error);
-                span.setStatus({ code: 2, message: error.message });
-                throw error;
-            }
-            finally {
-                await session.close();
-                span.end();
-            }
-        });
-    },
-    // Tenant-scoped transaction support
-    withTenant: async (tenantId, callback) => {
-        return tracer.startActiveSpan('neo4j.with_tenant', async (span) => {
-            span.setAttributes({
-                'tenant_id': tenantId,
-                'db.system': 'neo4j'
-            });
-            const scopedNeo = {
-                run: (query, params = {}) => neo.run(query, params, { tenantId }),
-                merge: (query, params = {}) => neo.merge(query, params, { tenantId })
-            };
-            try {
-                return await callback(scopedNeo);
-            }
-            catch (error) {
-                span.recordException(error);
-                span.setStatus({ code: 2, message: error.message });
-                throw error;
-            }
-            finally {
-                span.end();
-            }
-        });
-    },
-    // Health check
-    healthCheck: async () => {
-        const session = driver.session();
+import * as neo4j from "neo4j-driver";
+import dotenv from "dotenv";
+import pino from "pino";
+import { neo4jConnectivityUp, neo4jQueryErrorsTotal, neo4jQueryLatencyMs, neo4jQueryTotal, } from "../metrics/neo4jMetrics.js";
+dotenv.config();
+const logger = pino();
+const NEO4J_URI = process.env.NEO4J_URI || "bolt://neo4j:7687";
+const NEO4J_USER = process.env.NEO4J_USER || "neo4j";
+const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || "devpassword";
+let driver;
+let isMockMode = false;
+export function getNeo4jDriver() {
+    if (!driver) {
         try {
-            await session.run('CALL db.ping()');
-            return true;
+            driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD));
+            logger.info("Neo4j driver initialized.");
+            const originalSession = driver.session.bind(driver);
+            driver.session = (options) => {
+                const session = originalSession(options);
+                return instrumentSession(session);
+            };
+            driver
+                .verifyConnectivity()
+                .then(() => neo4jConnectivityUp.set(1))
+                .catch(() => {
+                logger.warn("Neo4j connection failed - switching to mock mode");
+                neo4jConnectivityUp.set(0);
+                isMockMode = true;
+            });
+            setInterval(async () => {
+                try {
+                    await driver.verifyConnectivity();
+                    neo4jConnectivityUp.set(1);
+                }
+                catch {
+                    neo4jConnectivityUp.set(0);
+                }
+            }, 15000);
         }
         catch (error) {
-            try {
-                // Fallback health check for older Neo4j versions
-                await session.run('RETURN 1');
-                return true;
-            }
-            catch (fallbackError) {
-                console.error('Neo4j health check failed:', error);
-                return false;
-            }
+            logger.warn(`Neo4j connection failed - using development mode with mock responses. Error: ${error.message}`);
+            driver = createMockNeo4jDriver();
+            isMockMode = true;
         }
-        finally {
-            await session.close();
-        }
-    },
-    close: async () => {
-        await driver.close();
     }
-};
-// Neo4j tenant scoping validation and enforcement
-function validateAndScopeNeo4jQuery(query, params, tenantId) {
-    const lowerQuery = query.toLowerCase().trim();
-    // Node labels that require tenant scoping
-    const tenantScopedLabels = ['Signal', 'User', 'Session', 'ApiKey'];
-    // Check if query affects tenant-scoped nodes
-    const affectedLabel = tenantScopedLabels.find(label => lowerQuery.includes(label.toLowerCase()));
-    if (!affectedLabel) {
-        // Query doesn't affect tenant-scoped nodes
-        return { query, params, wasScoped: false };
-    }
-    // For tenant-scoped nodes, tenantId is required
-    if (!tenantId) {
-        throw new Error(`Tenant ID required for queries on ${affectedLabel} nodes`);
-    }
-    // Check if query already has tenant scoping
-    if (lowerQuery.includes('tenant_id') && (lowerQuery.includes('$tenantid') || params.tenantId)) {
-        // Assume query is already properly scoped
-        return { query, params: { ...params, tenantId }, wasScoped: true };
-    }
-    // Auto-scope the query based on Cypher patterns
-    if (lowerQuery.includes('match')) {
-        return scopeMatchQuery(query, params, tenantId, affectedLabel);
-    }
-    else if (lowerQuery.includes('merge')) {
-        return scopeMergeQuery(query, params, tenantId, affectedLabel);
-    }
-    else if (lowerQuery.includes('create')) {
-        return scopeCreateQuery(query, params, tenantId, affectedLabel);
-    }
-    // Fallback for unrecognized query patterns
-    console.warn(`Unable to auto-scope Neo4j query for label ${affectedLabel}: ${query}`);
-    return { query, params, wasScoped: false };
-}
-function scopeMatchQuery(query, params, tenantId, label) {
-    // Add tenant_id filter to MATCH clauses
-    const regex = new RegExp(`\\(([^)]*):${label}([^)]*)\\)`, 'gi');
-    let scopedQuery = query.replace(regex, (match, varName, props) => {
-        // Add tenant_id property constraint
-        if (props && props.includes('{')) {
-            // Already has properties, add tenant_id
-            const propsWithTenant = props.replace('{', '{tenant_id: $tenantId, ');
-            return `(${varName}:${label}${propsWithTenant})`;
-        }
-        else {
-            // No properties, add tenant_id constraint
-            return `(${varName}:${label} {tenant_id: $tenantId})`;
-        }
-    });
-    return {
-        query: scopedQuery,
-        params: { ...params, tenantId },
-        wasScoped: true
-    };
-}
-function scopeMergeQuery(query, params, tenantId, label) {
-    // For MERGE queries, ensure tenant_id is set in the properties
-    const regex = new RegExp(`\\(([^)]*):${label}([^)]*)\\)`, 'gi');
-    let scopedQuery = query.replace(regex, (match, varName, props) => {
-        if (props && props.includes('{')) {
-            // Already has properties, ensure tenant_id is included
-            if (!props.includes('tenant_id')) {
-                const propsWithTenant = props.replace('{', '{tenant_id: $tenantId, ');
-                return `(${varName}:${label}${propsWithTenant})`;
-            }
-        }
-        else {
-            // No properties, add tenant_id
-            return `(${varName}:${label} {tenant_id: $tenantId})`;
-        }
-        return match;
-    });
-    return {
-        query: scopedQuery,
-        params: { ...params, tenantId },
-        wasScoped: true
-    };
-}
-function scopeCreateQuery(query, params, tenantId, label) {
-    // For CREATE queries, ensure tenant_id is set
-    const regex = new RegExp(`\\(([^)]*):${label}([^)]*)\\)`, 'gi');
-    let scopedQuery = query.replace(regex, (match, varName, props) => {
-        if (props && props.includes('{')) {
-            // Already has properties, ensure tenant_id is included
-            if (!props.includes('tenant_id')) {
-                const propsWithTenant = props.replace('{', '{tenant_id: $tenantId, ');
-                return `(${varName}:${label}${propsWithTenant})`;
-            }
-        }
-        else {
-            // No properties, add tenant_id
-            return `(${varName}:${label} {tenant_id: $tenantId})`;
-        }
-        return match;
-    });
-    return {
-        query: scopedQuery,
-        params: { ...params, tenantId },
-        wasScoped: true
-    };
-}
-// Export driver function for compatibility
-export function getNeo4jDriver() {
     return driver;
 }
-// Export service class for compatibility
-export class Neo4jService {
-    constructor() { }
-    getDriver() {
-        return driver;
-    }
-    async run(query, params = {}) {
-        return neo.run(query, params);
-    }
-}
-// Export mock mode check function
 export function isNeo4jMockMode() {
-    return process.env.NEO4J_MOCK_MODE === 'true';
+    return isMockMode;
 }
+function createMockNeo4jDriver() {
+    return {
+        session: () => instrumentSession({
+            run: async (cypher, params) => {
+                logger.debug(`Mock Neo4j query: Cypher: ${cypher}, Params: ${JSON.stringify(params)}`);
+                return {
+                    records: [],
+                    summary: { counters: { nodesCreated: 0, relationshipsCreated: 0 } },
+                };
+            },
+            close: async () => { },
+            readTransaction: async (fn) => fn({
+                run: async () => ({ records: [] }),
+            }),
+            writeTransaction: async (fn) => fn({
+                run: async () => ({ records: [] }),
+            }),
+        }),
+        close: async () => { },
+        verifyConnectivity: async () => ({}),
+    };
+}
+export async function closeNeo4jDriver() {
+    if (driver) {
+        await driver.close();
+        logger.info("Neo4j driver closed.");
+        driver = null; // Clear the driver instance
+    }
+}
+function instrumentSession(session) {
+    const originalRun = session.run.bind(session);
+    session.run = async (cypher, params, labels = {}) => {
+        const { operation = "unknown", label = "general" } = labels;
+        const start = Date.now();
+        neo4jQueryTotal.inc({ operation, label });
+        try {
+            const result = await originalRun(cypher, params);
+            const latency = Date.now() - start;
+            neo4jQueryLatencyMs.observe({ operation, label }, latency);
+            if (latency > 300) {
+                logger.warn(`Slow Neo4j query (${latency}ms): ${cypher}`);
+            }
+            return result;
+        }
+        catch (error) {
+            neo4jQueryErrorsTotal.inc({ operation, label });
+            throw error;
+        }
+    };
+    return session;
+}
+//# sourceMappingURL=neo4j.js.map

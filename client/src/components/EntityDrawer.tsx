@@ -1,8 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Button, Chip, Drawer, IconButton, Stack, TextField, Typography } from '@mui/material';
-import { gql, useMutation, useQuery, useSubscription } from '@apollo/client';
-import EditIcon from '@mui/icons-material/Edit';
-import CloseIcon from '@mui/icons-material/Close';
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  Chip,
+  Drawer,
+  IconButton,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
+import EditIcon from "@mui/icons-material/Edit";
+import CloseIcon from "@mui/icons-material/Close";
 
 const GET_ENTITY = gql`
   query GetEntity($id: ID!) {
@@ -18,7 +27,11 @@ const GET_ENTITY = gql`
 `;
 
 const UPDATE_ENTITY = gql`
-  mutation UpdateEntity($id: ID!, $input: UpdateEntityInput!, $lastSeen: DateTime!) {
+  mutation UpdateEntity(
+    $id: ID!
+    $input: UpdateEntityInput!
+    $lastSeen: DateTime!
+  ) {
     updateEntity(id: $id, input: $input, lastSeenTimestamp: $lastSeen) {
       id
       type
@@ -75,19 +88,26 @@ function DiffRow({
       </Typography>
       <Typography
         variant="caption"
-        color={changed ? 'error.main' : 'text.secondary'}
-        sx={{ textDecoration: changed ? 'line-through' : 'none' }}
+        color={changed ? "error.main" : "text.secondary"}
+        sx={{ textDecoration: changed ? "line-through" : "none" }}
       >
-        {oldValue || '<empty>'}
+        {oldValue || "<empty>"}
       </Typography>
-      <Typography variant="caption" color={changed ? 'success.main' : 'text.secondary'}>
-        {newValue || '<empty>'}
+      <Typography
+        variant="caption"
+        color={changed ? "success.main" : "text.secondary"}
+      >
+        {newValue || "<empty>"}
       </Typography>
     </Box>
   );
 }
 
-export default function EntityDrawer({ entityId, open, onClose }: EntityDrawerProps) {
+export default function EntityDrawer({
+  entityId,
+  open,
+  onClose,
+}: EntityDrawerProps) {
   const { data } = useQuery(GET_ENTITY, {
     variables: { id: entityId },
     skip: !entityId,
@@ -98,16 +118,16 @@ export default function EntityDrawer({ entityId, open, onClose }: EntityDrawerPr
   const [entity, setEntity] = useState<Entity | null>(null);
   const [prevEntity, setPrevEntity] = useState<Entity | null>(null);
   const [editMode, setEditMode] = useState(false);
-  const [formValues, setFormValues] = useState({ label: '', description: '' });
+  const [formValues, setFormValues] = useState({ label: "", description: "" });
   const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState('');
+  const [newTag, setNewTag] = useState("");
 
   useEffect(() => {
     if (data?.entity) {
       setEntity(data.entity);
       setFormValues({
         label: data.entity.label,
-        description: data.entity.description || '',
+        description: data.entity.description || "",
       });
       setTags(data.entity.properties?.tags || []);
     }
@@ -120,7 +140,7 @@ export default function EntityDrawer({ entityId, open, onClose }: EntityDrawerPr
       setEntity(updated);
       setFormValues({
         label: updated.label,
-        description: updated.description || '',
+        description: updated.description || "",
       });
       setTags(updated.properties?.tags || []);
     }
@@ -146,7 +166,7 @@ export default function EntityDrawer({ entityId, open, onClose }: EntityDrawerPr
     const t = newTag.trim();
     if (t && !tags.includes(t)) {
       setTags([...tags, t]);
-      setNewTag('');
+      setNewTag("");
     }
   };
 
@@ -157,16 +177,20 @@ export default function EntityDrawer({ entityId, open, onClose }: EntityDrawerPr
   const diffSection = prevEntity && (
     <Box mt={2}>
       <Typography variant="subtitle2">Last Update Diff</Typography>
-      <DiffRow label="Label" oldValue={prevEntity.label} newValue={entity?.label} />
+      <DiffRow
+        label="Label"
+        oldValue={prevEntity.label}
+        newValue={entity?.label}
+      />
       <DiffRow
         label="Description"
-        oldValue={prevEntity.description || ''}
-        newValue={entity?.description || ''}
+        oldValue={prevEntity.description || ""}
+        newValue={entity?.description || ""}
       />
       <DiffRow
         label="Tags"
-        oldValue={(prevEntity.properties?.tags || []).join(', ')}
-        newValue={tags.join(', ')}
+        oldValue={(prevEntity.properties?.tags || []).join(", ")}
+        newValue={tags.join(", ")}
       />
     </Box>
   );
@@ -176,12 +200,21 @@ export default function EntityDrawer({ entityId, open, onClose }: EntityDrawerPr
       anchor="right"
       open={open}
       onClose={onClose}
-      sx={{ '& .MuiDrawer-paper': { width: 400, p: 2 } }}
+      sx={{ "& .MuiDrawer-paper": { width: 400, p: 2 } }}
     >
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
         <Typography variant="h6">Entity Details</Typography>
         <Box>
-          <IconButton onClick={() => setEditMode((m) => !m)} size="small" sx={{ mr: 1 }}>
+          <IconButton
+            onClick={() => setEditMode((m) => !m)}
+            size="small"
+            sx={{ mr: 1 }}
+          >
             <EditIcon />
           </IconButton>
           <IconButton onClick={onClose} size="small">
@@ -193,7 +226,9 @@ export default function EntityDrawer({ entityId, open, onClose }: EntityDrawerPr
         <TextField
           label="Label"
           value={formValues.label}
-          onChange={(e) => setFormValues({ ...formValues, label: e.target.value })}
+          onChange={(e) =>
+            setFormValues({ ...formValues, label: e.target.value })
+          }
           onBlur={handleBlur}
           disabled={!editMode}
           fullWidth
@@ -203,7 +238,9 @@ export default function EntityDrawer({ entityId, open, onClose }: EntityDrawerPr
           value={formValues.description}
           multiline
           minRows={3}
-          onChange={(e) => setFormValues({ ...formValues, description: e.target.value })}
+          onChange={(e) =>
+            setFormValues({ ...formValues, description: e.target.value })
+          }
           onBlur={handleBlur}
           disabled={!editMode}
           fullWidth
@@ -212,7 +249,12 @@ export default function EntityDrawer({ entityId, open, onClose }: EntityDrawerPr
           <Typography variant="subtitle2" gutterBottom>
             Metadata Tags
           </Typography>
-          <Stack direction="row" spacing={1} flexWrap="wrap" onBlur={handleBlur}>
+          <Stack
+            direction="row"
+            spacing={1}
+            flexWrap="wrap"
+            onBlur={handleBlur}
+          >
             {tags.map((tag) => (
               <Chip
                 key={tag}
@@ -227,7 +269,7 @@ export default function EntityDrawer({ entityId, open, onClose }: EntityDrawerPr
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     e.preventDefault();
                     handleTagAdd();
                   }
@@ -237,7 +279,11 @@ export default function EntityDrawer({ entityId, open, onClose }: EntityDrawerPr
           </Stack>
         </Box>
         {editMode && (
-          <Button variant="contained" onClick={handleSave} sx={{ alignSelf: 'flex-start' }}>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            sx={{ alignSelf: "flex-start" }}
+          >
             Save
           </Button>
         )}

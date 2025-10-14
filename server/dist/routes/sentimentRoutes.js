@@ -15,3 +15,4 @@ router.post('/analyze', async (req, res) => {
     }
 });
 module.exports = router;
+//# sourceMappingURL=sentimentRoutes.js.map
