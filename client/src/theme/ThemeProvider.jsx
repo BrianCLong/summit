@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import {
-  createTheme,
+import { 
+  createTheme, 
   ThemeProvider as MuiThemeProvider,
   useMediaQuery,
-  CssBaseline,
+  CssBaseline 
 } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { getIntelGraphTheme } from './intelgraphTheme'; // Import the new theme function
@@ -20,10 +20,9 @@ export const useTheme = () => {
 
 // Enhanced theme configurations
 // Enhanced theme configurations
-const getThemeConfig = (mode) => {
-  // Removed colorScheme parameter
+const getThemeConfig = (mode) => { // Removed colorScheme parameter
   const isDark = mode === 'dark';
-
+  
   const baseTheme = getIntelGraphTheme(mode); // Use the new theme function
 
   // Merge custom components and mixins from the original getThemeConfig
@@ -37,7 +36,7 @@ const getThemeConfig = (mode) => {
         high: '#f44336',
         medium: '#ff9800',
         low: '#4caf50',
-        unknown: '#9e9e9e',
+        unknown: '#9e9e9e'
       },
       entity: {
         person: '#4caf50',
@@ -46,8 +45,8 @@ const getThemeConfig = (mode) => {
         document: '#9c27b0',
         event: '#f44336',
         asset: '#795548',
-        communication: '#607d8b',
-      },
+        communication: '#607d8b'
+      }
     },
     typography: {
       ...baseTheme.typography,
@@ -60,7 +59,7 @@ const getThemeConfig = (mode) => {
         'Roboto',
         '"Helvetica Neue"',
         'Arial',
-        'sans-serif',
+        'sans-serif'
       ].join(','),
       h1: {
         ...baseTheme.typography.h1,
@@ -81,12 +80,12 @@ const getThemeConfig = (mode) => {
       h5: {
         fontSize: '1.125rem',
         fontWeight: 600,
-        lineHeight: 1.5,
+        lineHeight: 1.5
       },
       h6: {
         fontSize: '1rem',
         fontWeight: 600,
-        lineHeight: 1.5,
+        lineHeight: 1.5
       },
       body1: {
         ...baseTheme.typography.body1,
@@ -99,7 +98,7 @@ const getThemeConfig = (mode) => {
       caption: {
         ...baseTheme.typography.caption,
         fontSize: '0.6875rem',
-      },
+      }
     },
     components: {
       ...baseTheme.components, // Preserve existing components overrides
@@ -109,65 +108,65 @@ const getThemeConfig = (mode) => {
             scrollbarColor: isDark ? '#6b6b6b #2b2b2b' : '#d4d4d4 #f1f1f1',
             '&::-webkit-scrollbar, & *::-webkit-scrollbar': {
               width: 8,
-              height: 8,
+              height: 8
             },
             '&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb': {
               borderRadius: 8,
               backgroundColor: isDark ? '#6b6b6b' : '#d4d4d4',
               minHeight: 24,
               '&:hover': {
-                backgroundColor: isDark ? '#8b8b8b' : '#b4b4b4',
-              },
+                backgroundColor: isDark ? '#8b8b8b' : '#b4b4b4'
+              }
             },
             '&::-webkit-scrollbar-track, & *::-webkit-scrollbar-track': {
               borderRadius: 8,
-              backgroundColor: isDark ? '#2b2b2b' : '#f1f1f1',
-            },
+              backgroundColor: isDark ? '#2b2b2b' : '#f1f1f1'
+            }
           },
           '*': {
             '&:focus-visible': {
               outline: `2px solid ${baseTheme.palette.primary.main}`,
-              outlineOffset: 2,
-            },
-          },
-        },
+              outlineOffset: 2
+            }
+          }
+        }
       },
       MuiAppBar: {
         styleOverrides: {
           root: {
             backgroundColor: isDark ? '#1e1e1e' : '#ffffff',
             color: isDark ? '#ffffff' : '#212121',
-            boxShadow: isDark
-              ? '0px 2px 4px -1px rgba(0,0,0,0.4)'
-              : '0px 2px 4px -1px rgba(0,0,0,0.2)',
-          },
-        },
+            boxShadow: isDark 
+              ? '0px 2px 4px -1px rgba(0,0,0,0.4)' 
+              : '0px 2px 4px -1px rgba(0,0,0,0.2)'
+          }
+        }
       },
       MuiDrawer: {
         styleOverrides: {
           paper: {
             backgroundColor: isDark ? '#1e1e1e' : '#ffffff',
-            borderRight: `1px solid ${isDark ? '#333333' : '#e0e0e0'}`,
-          },
-        },
+            borderRight: `1px solid ${isDark ? '#333333' : '#e0e0e0'}`
+          }
+        }
       },
       MuiCard: {
         styleOverrides: {
           root: {
             backgroundColor: isDark ? '#1e1e1e' : '#ffffff',
             borderRadius: 12,
-            boxShadow: isDark
+            boxShadow: isDark 
               ? '0px 4px 20px rgba(0, 0, 0, 0.3)'
               : '0px 4px 20px rgba(0, 0, 0, 0.1)',
             transition: 'box-shadow 0.3s ease-in-out, transform 0.2s ease-in-out',
             '&:hover': {
-              boxShadow: isDark
+              boxShadow: isDark 
                 ? '0px 8px 30px rgba(0, 0, 0, 0.4)'
                 : '0px 8px 30px rgba(0, 0, 0, 0.15)',
-              transform: 'translateY(-2px)',
-            },
-          },
-        },
+              transform: 'translateY(-2px)'
+            }
+          }
+        }
       },
       MuiButton: {
         styleOverrides: {
@@ -178,17 +177,17 @@ const getThemeConfig = (mode) => {
             transition: 'all 0.2s ease-in-out',
             '&:focus-visible': {
               outline: `2px solid ${baseTheme.palette.primary.main}`,
-              outlineOffset: 2,
-            },
+              outlineOffset: 2
+            }
           },
           contained: {
             boxShadow: 'none',
             '&:hover': {
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
-              transform: 'translateY(-1px)',
-            },
-          },
-        },
+              transform: 'translateY(-1px)'
+            }
+          }
+        }
       },
       MuiIconButton: {
         styleOverrides: {
@@ -196,15 +195,17 @@ const getThemeConfig = (mode) => {
             borderRadius: 8,
             transition: 'all 0.2s ease-in-out',
             '&:hover': {
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
-              transform: 'scale(1.05)',
+              backgroundColor: isDark 
+                ? 'rgba(255, 255, 255, 0.08)' 
+                : 'rgba(0, 0, 0, 0.04)',
+              transform: 'scale(1.05)'
             },
             '&:focus-visible': {
               outline: `2px solid ${baseTheme.palette.primary.main}`,
-              outlineOffset: 2,
-            },
-          },
-        },
+              outlineOffset: 2
+            }
+          }
+        }
       },
       MuiTextField: {
         styleOverrides: {
@@ -213,15 +214,15 @@ const getThemeConfig = (mode) => {
               borderRadius: 8,
               transition: 'all 0.2s ease-in-out',
               '&:hover': {
-                transform: 'translateY(-1px)',
+                transform: 'translateY(-1px)'
               },
               '&.Mui-focused': {
                 transform: 'translateY(-1px)',
-                boxShadow: `0px 4px 12px rgba(${baseTheme.palette.primary.main}, 0.2)`,
-              },
-            },
-          },
-        },
+                boxShadow: `0px 4px 12px rgba(${baseTheme.palette.primary.main}, 0.2)`
+              }
+            }
+          }
+        }
       },
       MuiChip: {
         styleOverrides: {
@@ -230,10 +231,10 @@ const getThemeConfig = (mode) => {
             fontWeight: 500,
             transition: 'all 0.2s ease-in-out',
             '&:hover': {
-              transform: 'scale(1.05)',
-            },
-          },
-        },
+              transform: 'scale(1.05)'
+            }
+          }
+        }
       },
       MuiTooltip: {
         styleOverrides: {
@@ -242,9 +243,9 @@ const getThemeConfig = (mode) => {
             color: '#ffffff',
             fontSize: '0.75rem',
             borderRadius: 6,
-            padding: '8px 12px',
-          },
-        },
+            padding: '8px 12px'
+          }
+        }
       },
       MuiListItem: {
         styleOverrides: {
@@ -252,17 +253,23 @@ const getThemeConfig = (mode) => {
             borderRadius: 8,
             margin: '2px 0',
             '&.Mui-selected': {
-              backgroundColor: isDark ? 'rgba(144, 202, 249, 0.08)' : 'rgba(25, 118, 210, 0.08)',
+              backgroundColor: isDark 
+                ? 'rgba(144, 202, 249, 0.08)'
+                : 'rgba(25, 118, 210, 0.08)',
               '&:hover': {
-                backgroundColor: isDark ? 'rgba(144, 202, 249, 0.12)' : 'rgba(25, 118, 210, 0.12)',
-              },
+                backgroundColor: isDark 
+                  ? 'rgba(144, 202, 249, 0.12)'
+                  : 'rgba(25, 118, 210, 0.12)'
+              }
             },
             '&:hover': {
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.04)',
-              transform: 'translateX(4px)',
-            },
-          },
-        },
+              backgroundColor: isDark 
+                ? 'rgba(255, 255, 255, 0.04)'
+                : 'rgba(0, 0, 0, 0.04)',
+              transform: 'translateX(4px)'
+            }
+          }
+        }
       },
       MuiAccordion: {
         styleOverrides: {
@@ -270,44 +277,42 @@ const getThemeConfig = (mode) => {
             borderRadius: 8,
             marginBottom: 8,
             '&:before': {
-              display: 'none',
+              display: 'none'
             },
             '&.Mui-expanded': {
-              margin: '8px 0',
-            },
-          },
-        },
-      },
+              margin: '8px 0'
+            }
+          }
+        }
+      }
     },
     // Custom mixins for responsive design
     mixins: {
       toolbar: {
         minHeight: 64,
         '@media (max-width:599px)': {
-          minHeight: 56,
-        },
+          minHeight: 56
+        }
       },
       // Responsive breakpoints helpers
       responsive: {
         mobile: '@media (max-width: 599px)',
         tablet: '@media (max-width: 899px)',
         desktop: '@media (min-width: 900px)',
-        wide: '@media (min-width: 1200px)',
-      },
-    },
+        wide: '@media (min-width: 1200px)'
+      }
+    }
   };
 };
 
 export function ThemeProvider({ children }) {
   const dispatch = useDispatch();
-  const { darkMode, colorScheme } = useSelector(
-    (state) => state.ui || { darkMode: false, colorScheme: 'default' },
-  );
-
+  const { darkMode, colorScheme } = useSelector(state => state.ui || { darkMode: false, colorScheme: 'default' });
+  
   // System preference detection
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const [systemMode, setSystemMode] = useState(prefersDarkMode ? 'dark' : 'light');
-
+  
   // High contrast mode detection
   const prefersHighContrast = useMediaQuery('(prefers-contrast: high)');
   const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
@@ -318,28 +323,28 @@ export function ThemeProvider({ children }) {
 
   // Auto mode uses system preference
   const effectiveMode = darkMode === 'auto' ? systemMode : darkMode ? 'dark' : 'light';
-
+  
   const theme = React.useMemo(() => {
     const baseTheme = getThemeConfig(effectiveMode, colorScheme);
-
+    
     // Apply accessibility enhancements
     if (prefersHighContrast) {
       baseTheme.palette.text.primary = effectiveMode === 'dark' ? '#ffffff' : '#000000';
       baseTheme.palette.text.secondary = effectiveMode === 'dark' ? '#e0e0e0' : '#424242';
     }
-
+    
     if (prefersReducedMotion) {
       // Disable animations for users who prefer reduced motion
       baseTheme.transitions = {
         ...baseTheme.transitions,
-        create: () => 'none',
+        create: () => 'none'
       };
-
+      
       // Override component transition styles
-      Object.keys(baseTheme.components).forEach((component) => {
+      Object.keys(baseTheme.components).forEach(component => {
         if (baseTheme.components[component].styleOverrides) {
           const overrides = baseTheme.components[component].styleOverrides;
-          Object.keys(overrides).forEach((rule) => {
+          Object.keys(overrides).forEach(rule => {
             if (overrides[rule].transition) {
               overrides[rule].transition = 'none';
             }
@@ -350,7 +355,7 @@ export function ThemeProvider({ children }) {
         }
       });
     }
-
+    
     return baseTheme;
   }, [effectiveMode, colorScheme, prefersHighContrast, prefersReducedMotion]);
 
@@ -368,7 +373,7 @@ export function ThemeProvider({ children }) {
     setColorScheme: (scheme) => {
       // Implement color scheme change through Redux
       // dispatch(setColorScheme(scheme));
-    },
+    }
   };
 
   return (
@@ -394,7 +399,7 @@ export const useResponsive = () => {
     isTablet,
     isDesktop,
     isWide,
-    breakpoints: theme.breakpoints,
+    breakpoints: theme.breakpoints
   };
 };
 
@@ -408,14 +413,14 @@ export const useAccessibility = () => {
       id: Date.now(),
       message,
       priority,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
-
-    setAnnouncements((prev) => [...prev, announcement]);
-
+    
+    setAnnouncements(prev => [...prev, announcement]);
+    
     // Remove announcement after it's been announced
     setTimeout(() => {
-      setAnnouncements((prev) => prev.filter((a) => a.id !== announcement.id));
+      setAnnouncements(prev => prev.filter(a => a.id !== announcement.id));
     }, 1000);
   };
 
@@ -423,7 +428,7 @@ export const useAccessibility = () => {
     prefersHighContrast,
     prefersReducedMotion,
     announce,
-    announcements,
+    announcements
   };
 };
 

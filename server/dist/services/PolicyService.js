@@ -1,10 +1,6 @@
 import { evaluate } from './AccessControl.js';
 import { writeAudit } from '../utils/audit.js';
 export class PolicyError extends Error {
-    code;
-    reason;
-    requiredClearances;
-    appealPath;
     constructor(opts) {
         super(opts.reason);
         this.code = opts.code;
@@ -44,3 +40,4 @@ export function withPolicy(resolver, spec) {
         return resolver(parent, args, context, info);
     });
 }
+//# sourceMappingURL=PolicyService.js.map
