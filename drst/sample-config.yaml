@@ -1,0 +1,27 @@
+seed: 42
+jurisdictions:
+  - name: eu-central
+    transactionCount: 2
+    tags:
+      residency: eu
+    routes:
+      - endpoint: api.eu.example.com
+        allowedRegions:
+          - eu-central-1
+        requiredEdgeHops:
+          - api.eu.example.com
+  - name: us-west
+    transactionCount: 1
+    routes:
+      - endpoint: https://api.us.example.com
+        allowedRegions:
+          - us-west-2
+storageScans:
+  - bucket: eu-customer-uploads
+    path: ./artifacts/eu
+    allowedRegions:
+      - eu-central-1
+  - bucket: us-customer-uploads
+    path: ./artifacts/us
+    allowedRegions:
+      - us-west-2
