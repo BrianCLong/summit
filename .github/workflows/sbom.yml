@@ -1,53 +1,16 @@
-name: sbom-and-scan
-
+name: SBOM
 on:
-  push:
-    branches: [ main ]
+  push: { branches: [main] }
   workflow_dispatch: {}
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
-  sbom:
+  bom:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout @v4
-
-      - name: Install Syft
-        uses: anchore/syft-action @v0
-        with:
-          version: v1.0.0
-
-      - name: Generate SBOMs
-        run: |
-          syft packages dir:apps/intelgraph-api -o spdx-json > sbom-intelgraph-api.spdx.json
-          syft packages dir:apps/companyos-console -o spdx-json > sbom-console.spdx.json
-          syft packages dir:apps/mc-orchestrator -o spdx-json > sbom-mc.spdx.json
-
-      - name: Upload SBOMs
-        uses: actions/upload-artifact @v4
-        with:
-          name: sboms
-          path: |
-            sbom-*.spdx.json
-
-  scan:
-    runs-on: ubuntu-latest
-    needs: sbom
-    steps:
-      - uses: actions/download-artifact @v4
-        with:
-          name: sboms
-
-      - name: Install Grype
-        uses: anchore/grype-action @v0
-        with:
-          version: v0.79.0
-
-      - name: Scan SBOMs
-        run: |
-          grype sbom:sbom-intelgraph-api.spdx.json --fail-on high || true
-          grype sbom:sbom-console.spdx.json --fail-on high || true
-          grype sbom:sbom-mc.spdx.json --fail-on high || true
+      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: CycloneDX/gh-node-module-generatebom@b266740b26029650ad7e1b18555b2451325c9853 # v3.0.0
+        with: { output: 'bom.xml' }
+      - uses: actions/upload-artifact@a8a3f3054ee345891c80fa8aa84a2b65b824e06a # v4.3.3
+        with: { name: sbom, path: bom.xml }

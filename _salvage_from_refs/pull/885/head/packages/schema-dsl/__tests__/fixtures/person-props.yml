@@ -1,8 +1,0 @@
-props:
-  - name: givenName
-    type: string
-    required: true
-    tags: [PII]
-  - name: dob
-    type: date
-    required: false

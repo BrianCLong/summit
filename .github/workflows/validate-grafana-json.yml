@@ -1,0 +1,57 @@
+name: validate-grafana-json
+on:
+  pull_request:
+    paths:
+      - 'observability/grafana/dashboards/**/*.json'
+  push:
+    branches: [main]
+    paths:
+      - 'observability/grafana/dashboards/**/*.json'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Grafana Dashboard JSON
+        run: |
+          echo "🔍 Validating Grafana dashboard JSON files..."
+          find observability/grafana/dashboards -name "*.json" -type f | while read -r file; do
+            echo "Checking: $file"
+            if jq -e . "$file" >/dev/null; then
+              echo "✅ $file is valid JSON"
+            else
+              echo "❌ $file has invalid JSON syntax"
+              exit 1
+            fi
+          done
+          echo "🎉 All Grafana dashboard JSON files are valid!"
+
+      - name: Validate MC v0.3.5 Dashboard Structure
+        run: |
+          echo "🔍 Validating MC v0.3.5 dashboard structure..."
+          DASH_FILE="observability/grafana/dashboards/mc-v035-tiles.json"
+          if [[ -f "$DASH_FILE" ]]; then
+            # Check for required panels
+            PANEL_COUNT=$(jq '.panels | length' "$DASH_FILE")
+            if [[ $PANEL_COUNT -ge 6 ]]; then
+              echo "✅ Dashboard has $PANEL_COUNT panels (≥6 required)"
+            else
+              echo "❌ Dashboard has only $PANEL_COUNT panels (<6 required)"
+              exit 1
+            fi
+
+            # Check for required metrics
+            if jq -r '.panels[].targets[]?.expr' "$DASH_FILE" | grep -q "mc_canary_composite_score"; then
+              echo "✅ Composite score metric found"
+            else
+              echo "❌ Missing mc_canary_composite_score metric"
+              exit 1
+            fi
+
+            echo "🎉 MC v0.3.5 dashboard structure validated!"
+          else
+            echo "⚠️ MC v0.3.5 dashboard not found, skipping structure validation"
+          fi
