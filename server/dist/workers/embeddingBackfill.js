@@ -19,3 +19,4 @@ export async function backfillEmbeddings(tenantId) {
     }
     await session.close();
 }
+//# sourceMappingURL=embeddingBackfill.js.map

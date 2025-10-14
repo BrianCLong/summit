@@ -55,3 +55,4 @@ async function expandNeighborhood(entityId, radius = 1, { tenantId, investigatio
     }
 }
 module.exports = { expandNeighbors, expandNeighborhood };
+//# sourceMappingURL=GraphOpsService.js.map

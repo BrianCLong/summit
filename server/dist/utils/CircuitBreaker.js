@@ -1,5 +1,5 @@
-import baseLogger from '../config/logger';
-const logger = baseLogger.child({ name: 'CircuitBreaker' });
+import pino from 'pino';
+const logger = pino();
 var CircuitBreakerState;
 (function (CircuitBreakerState) {
     CircuitBreakerState["CLOSED"] = "CLOSED";
@@ -7,13 +7,11 @@ var CircuitBreakerState;
     CircuitBreakerState["HALF_OPEN"] = "HALF_OPEN";
 })(CircuitBreakerState || (CircuitBreakerState = {}));
 export class CircuitBreaker {
-    state = CircuitBreakerState.CLOSED;
-    failureCount = 0;
-    successCount = 0;
-    lastFailureTime = 0;
-    options;
-    metrics;
     constructor(options) {
+        this.state = CircuitBreakerState.CLOSED;
+        this.failureCount = 0;
+        this.successCount = 0;
+        this.lastFailureTime = 0;
         this.options = {
             failureThreshold: 5,
             successThreshold: 3,
@@ -37,9 +35,7 @@ export class CircuitBreaker {
         return {
             ...this.metrics,
             p95Latency: this.calculateP95Latency(),
-            errorRate: this.metrics.totalRequests > 0
-                ? this.metrics.failedRequests / this.metrics.totalRequests
-                : 0,
+            errorRate: this.metrics.totalRequests > 0 ? this.metrics.failedRequests / this.metrics.totalRequests : 0,
             state: this.state,
         };
     }
@@ -134,3 +130,4 @@ export class CircuitBreaker {
         }
     }
 }
+//# sourceMappingURL=CircuitBreaker.js.map

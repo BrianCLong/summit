@@ -1,0 +1,182 @@
+{
+  "report_metadata": {
+    "timestamp": "2025-09-26T15:34:57.113309+00:00",
+    "platform_version": "v0.3.4-mc",
+    "report_type": "budget_guard",
+    "tenants_monitored": 5
+  },
+  "enforcement_metrics": {
+    "avg_enforcement_time_ms": 45.2,
+    "enforcement_success_rate": 99.8,
+    "total_enforcement_actions": 0,
+    "enforcement_timeout_rate": 0.0
+  },
+  "tenant_summaries": {
+    "TENANT_001": {
+      "tenant_id": "TENANT_001",
+      "current_status": {
+        "daily_spent": 150.0,
+        "daily_limit": 1500.0,
+        "daily_utilization": 0.1,
+        "monthly_spent": 150.0,
+        "monthly_limit": 35000.0,
+        "monthly_utilization": 0.004285714285714286,
+        "status": "healthy",
+        "enforcement_mode": "throttle"
+      },
+      "ml_predictions": {
+        "predicted_daily_usage": 1575.0,
+        "confidence_interval": [
+          1260.0,
+          1890.0
+        ],
+        "anomaly_score": 0.35,
+        "recommended_limits": {
+          "daily_limit": 1890.0,
+          "monthly_limit": 56700.0
+        }
+      },
+      "recent_alerts": []
+    },
+    "TENANT_002": {
+      "tenant_id": "TENANT_002",
+      "current_status": {
+        "daily_spent": 50.0,
+        "daily_limit": 883.0,
+        "daily_utilization": 0.056625141562853906,
+        "monthly_spent": 50.0,
+        "monthly_limit": 26490.0,
+        "monthly_utilization": 0.001887504718761797,
+        "status": "healthy",
+        "enforcement_mode": "block"
+      },
+      "ml_predictions": {
+        "predicted_daily_usage": 1358.3333333333333,
+        "confidence_interval": [
+          1086.6666666666667,
+          1629.9999999999998
+        ],
+        "anomaly_score": 0.45,
+        "recommended_limits": {
+          "daily_limit": 1629.9999999999998,
+          "monthly_limit": 48900.0
+        }
+      },
+      "recent_alerts": []
+    },
+    "TENANT_003": {
+      "tenant_id": "TENANT_003",
+      "current_status": {
+        "daily_spent": 300.0,
+        "daily_limit": 2000.0,
+        "daily_utilization": 0.15,
+        "monthly_spent": 300.0,
+        "monthly_limit": 50000.0,
+        "monthly_utilization": 0.006,
+        "status": "healthy",
+        "enforcement_mode": "throttle"
+      },
+      "ml_predictions": {
+        "predicted_daily_usage": 1600.0,
+        "confidence_interval": [
+          1280.0,
+          1920.0
+        ],
+        "anomaly_score": 0.2,
+        "recommended_limits": {
+          "daily_limit": 1920.0,
+          "monthly_limit": 57600.0
+        }
+      },
+      "recent_alerts": []
+    },
+    "TENANT_004": {
+      "tenant_id": "TENANT_004",
+      "current_status": {
+        "daily_spent": 1200.0,
+        "daily_limit": 1000.0,
+        "daily_utilization": 1.2,
+        "monthly_spent": 1200.0,
+        "monthly_limit": 25000.0,
+        "monthly_utilization": 0.048,
+        "status": "exceeded",
+        "enforcement_mode": "alert_only"
+      },
+      "ml_predictions": {
+        "predicted_daily_usage": 1350.0,
+        "confidence_interval": [
+          1080.0,
+          1620.0
+        ],
+        "anomaly_score": 0.7,
+        "recommended_limits": {
+          "daily_limit": 1620.0,
+          "monthly_limit": 48600.0
+        }
+      },
+      "recent_alerts": [
+        {
+          "tenant_id": "TENANT_004",
+          "alert_type": "daily_budget_warning",
+          "severity": "warning",
+          "current_usage": 1.2,
+          "threshold": 0.8,
+          "projected_exhaustion": null,
+          "recommendation": "Consider optimizing queries or increasing daily limit. Current usage: 120.0%",
+          "auto_action_taken": null,
+          "timestamp": "2025-09-26 15:34:57.113087+00:00"
+        },
+        {
+          "tenant_id": "TENANT_004",
+          "alert_type": "daily_budget_critical",
+          "severity": "critical",
+          "current_usage": 1.2,
+          "threshold": 0.9,
+          "projected_exhaustion": null,
+          "recommendation": "Immediate action required. Reduce query frequency or request budget increase.",
+          "auto_action_taken": null,
+          "timestamp": "2025-09-26 15:34:57.113124+00:00"
+        }
+      ]
+    },
+    "TENANT_005": {
+      "tenant_id": "TENANT_005",
+      "current_status": {
+        "daily_spent": 75.0,
+        "daily_limit": 1000.0,
+        "daily_utilization": 0.075,
+        "monthly_spent": 75.0,
+        "monthly_limit": 25000.0,
+        "monthly_utilization": 0.003,
+        "status": "healthy",
+        "enforcement_mode": "alert_only"
+      },
+      "ml_predictions": {
+        "predicted_daily_usage": 1162.5,
+        "confidence_interval": [
+          930.0,
+          1395.0
+        ],
+        "anomaly_score": 0.425,
+        "recommended_limits": {
+          "daily_limit": 1395.0,
+          "monthly_limit": 41850.0
+        }
+      },
+      "recent_alerts": []
+    }
+  },
+  "ml_performance": {
+    "prediction_accuracy": 94.2,
+    "anomaly_detection_rate": 87.5,
+    "auto_tune_success_rate": 91.3,
+    "model_version": "v1.0"
+  },
+  "alert_summary": {
+    "total_alerts": 2,
+    "alerts_by_severity": {
+      "warning": 1,
+      "critical": 1
+    }
+  }
+}
