@@ -9,6 +9,7 @@ description = "IntelGraph Python core: models, storage, connectors, analytics"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "IntelGraph" }]
+
 dependencies = [
   "neo4j>=5.20",
   "streamlit>=1.36",
@@ -34,12 +35,17 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "pytest>=8.0.0",
+  "pytest-cov>=4.1",
   "pyvis>=0.3.2",
   "networkx>=3.3",
   "dask[distributed]>=2024.5.0",
   "httpx>=0.27.0",
   "sentence-transformers>=2.2.0",
   "openai>=1.0.0",
+]
+test = [
+  "pytest>=8.0.0",
+  "pytest-cov>=4.1",
 ]
 
 [tool.pytest.ini_options]
