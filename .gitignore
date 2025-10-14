@@ -199,3 +199,12 @@ webapp/.next/
 webapp/dist/
 webapp/.pnpm-store/ops/compose/.env
 !webapp/package-lock.json
+
+# Test caches and artifacts
+.jest-cache-*/
+conductor-ui/.jest-cache-ui/
+.orchestrator/
+apps/**/dist/
+**/dist/
+server/test-results/
+server/junit.xml

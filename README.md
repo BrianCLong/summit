@@ -1,5 +1,15 @@
 [![Copilot Playbook](https://img.shields.io/badge/Copilot-Playbook-blue)](docs/Copilot-Playbook.md)
 
+# CI Status
+<p>
+  <a href="https://github.com/BrianCLong/summit/actions/workflows/lane-fast.yml">
+    <img alt="Fast Lane" src="https://github.com/BrianCLong/summit/actions/workflows/lane-fast.yml/badge.svg">
+  </a>
+  <a href="https://github.com/BrianCLong/summit/actions/workflows/lane-integration.yml">
+    <img alt="Integration Lane" src="https://github.com/BrianCLong/summit/actions/workflows/lane-integration.yml/badge.svg">
+  </a>
+</p>
+
 # IntelGraph Platform
 
 ---
