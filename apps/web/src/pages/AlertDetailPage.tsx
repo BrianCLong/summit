@@ -4,7 +4,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 
 export default function AlertDetailPage() {
   const { id } = useParams()
-
+  
   return (
     <div className="p-6">
       <h1 className="text-2xl font-semibold mb-6">Alert Details: {id}</h1>

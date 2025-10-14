@@ -15,21 +15,18 @@ const driver = neo4j.driver(NEO4J_URI, neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWO
 
 async function runMigrations() {
   console.log('Waiting for database to start...');
-  await new Promise((resolve) => setTimeout(resolve, 10000));
+  await new Promise(resolve => setTimeout(resolve, 10000));
   const session = driver.session();
   try {
-    const migrationsDir = path.join(
-      path.dirname(fileURLToPath(import.meta.url)),
-      'server/src/db/migrations',
-    );
+    const migrationsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'server/src/db/migrations');
     const files = await fs.readdir(migrationsDir);
-    const cypherFiles = files.filter((file) => file.endsWith('.cypher')).sort();
+    const cypherFiles = files.filter(file => file.endsWith('.cypher')).sort();
 
     for (const file of cypherFiles) {
       const filePath = path.join(migrationsDir, file);
       console.log(`Running migration: ${file}`);
       const cypher = await fs.readFile(filePath, 'utf8');
-      const statements = cypher.split(';').filter((s) => s.trim() !== '');
+      const statements = cypher.split(';').filter(s => s.trim() !== '');
       for (const statement of statements) {
         await session.run(statement);
       }

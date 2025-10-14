@@ -1,3 +1,0 @@
-# Optional: Rule sync (kubectl)
-# This workflow would typically sync PrometheusRule objects to a Kubernetes cluster.
-# Example: kubectl apply -f ops/observability/slo-alerts.yaml

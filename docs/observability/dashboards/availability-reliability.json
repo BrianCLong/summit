@@ -1,0 +1,73 @@
+{
+  "title": "Availability & Reliability",
+  "schemaVersion": 38,
+  "refresh": "1m",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Burn Rate (1h)",
+      "targets": [
+        {
+          "expr": "sum(rate(request_error_rate{service=\"$service\"}[1h])) / ($errorBudget)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 2 },
+              { "color": "red", "value": 4 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Burn Rate (6h)",
+      "targets": [
+        {
+          "expr": "sum(rate(request_error_rate{service=\"$service\"}[6h])) / ($errorBudget)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Active Alerts",
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        }
+      ],
+      "targets": [
+        {
+          "expr": "ALERTS{service=\"$service\"}",
+          "refId": "A",
+          "format": "table"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "query": "label_values(requests_total, service)",
+        "type": "query",
+        "datasource": "$datasource"
+      },
+      {
+        "name": "errorBudget",
+        "type": "constant",
+        "query": "0.001"
+      }
+    ]
+  }
+}
