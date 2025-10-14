@@ -5,6 +5,12 @@
 
 import { EventEmitter } from 'events';
 import crypto from 'crypto';
+import {
+  AssetManager,
+  type AssetCriticality,
+  type AssetRegistrationInput,
+  type AssetUsageEvent
+} from '../../../packages/shared/asset-manager';
 
 export interface DataAsset {
   id: string;
@@ -62,14 +68,114 @@ export interface ImpactAnalysis {
   businessImpact: string[];
 }
 
+interface DataAssetMetadata {
+  schema: Record<string, any>;
+  location: string;
+  metadata: Record<string, any>;
+  tags: string[];
+  owner: string;
+  lastQualityMetric?: QualityMetric;
+  qualitySampleSize?: number;
+  lastImpactAssessment?: {
+    changeType: 'schema' | 'data' | 'deletion';
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    impactedAssets: string[];
+    analyzedAt: Date;
+  };
+  lastTransformation?: {
+    id: string;
+    executedAt: Date;
+    status: DataTransformation['status'];
+    type: DataTransformation['type'];
+    executedBy: string;
+  };
+}
+
 export class DataLineageTracker extends EventEmitter {
   private assets = new Map<string, DataAsset>();
   private transformations = new Map<string, DataTransformation>();
   private lineageGraph = new Map<string, LineageEdge[]>();
   private qualityMetrics = new Map<string, QualityMetric[]>();
+  private assetManager: AssetManager<DataAssetMetadata>;
 
-  constructor() {
+  constructor(assetManager?: AssetManager<DataAssetMetadata>) {
     super();
+    this.assetManager = assetManager ?? new AssetManager<DataAssetMetadata>({ usageHistoryLimit: 200 });
+  }
+
+  private syncDataAssetWithManager(asset: DataAsset): void {
+    const registration = this.toDataAssetRegistration(asset);
+    this.assetManager.registerAsset(registration);
+  }
+
+  private toDataAssetRegistration(asset: DataAsset): AssetRegistrationInput<DataAssetMetadata> {
+    return {
+      id: asset.id,
+      name: asset.name,
+      type: asset.type,
+      domain: 'data',
+      owners: [asset.owner],
+      tags: asset.tags,
+      criticality: this.deriveDataAssetCriticality(asset),
+      metadata: {
+        schema: asset.schema,
+        location: asset.location,
+        metadata: asset.metadata,
+        tags: asset.tags,
+        owner: asset.owner
+      }
+    };
+  }
+
+  private deriveDataAssetCriticality(asset: DataAsset): AssetCriticality {
+    const tags = asset.tags.map(tag => tag.toLowerCase());
+    if (tags.some(tag => ['pii', 'phi', 'restricted', 'classified'].includes(tag))) {
+      return 'critical';
+    }
+    if (tags.some(tag => ['financial', 'gold', 'authoritative', 'mission_critical'].includes(tag))) {
+      return 'high';
+    }
+    if (tags.some(tag => ['internal', 'sensitive', 'regulated'].includes(tag))) {
+      return 'medium';
+    }
+    return 'low';
+  }
+
+  private recordDataAssetUsage(assetId: string, event: AssetUsageEvent): void {
+    this.assetManager.recordUsage(assetId, event);
+  }
+
+  private refreshQualityInManager(assetId: string): void {
+    const metrics = this.qualityMetrics.get(assetId) || [];
+    if (metrics.length === 0) {
+      return;
+    }
+
+    const score = this.calculateQualityHealthScore(metrics);
+    const latest = metrics[metrics.length - 1];
+
+    this.assetManager.updateAsset(assetId, {
+      healthScore: score,
+      metadata: {
+        lastQualityMetric: latest,
+        qualitySampleSize: metrics.length
+      }
+    });
+  }
+
+  private calculateQualityHealthScore(metrics: QualityMetric[]): number {
+    if (metrics.length === 0) {
+      return 100;
+    }
+
+    const weight: Record<QualityMetric['status'], number> = {
+      pass: 1,
+      warn: 0.6,
+      fail: 0.2
+    };
+
+    const total = metrics.reduce((sum, metric) => sum + weight[metric.status], 0);
+    return Math.round((total / metrics.length) * 100);
   }
 
   /**
@@ -85,6 +191,15 @@ export class DataLineageTracker extends EventEmitter {
 
     this.assets.set(fullAsset.id, fullAsset);
     this.emit('asset_registered', fullAsset);
+    this.syncDataAssetWithManager(fullAsset);
+    this.recordDataAssetUsage(fullAsset.id, {
+      context: 'asset_registration',
+      outcome: 'success',
+      details: {
+        type: fullAsset.type,
+        location: fullAsset.location
+      }
+    });
 
     return fullAsset;
   }
@@ -102,6 +217,46 @@ export class DataLineageTracker extends EventEmitter {
 
     // Update lineage graph
     this.updateLineageGraph(fullTransformation);
+
+    for (const inputAssetId of fullTransformation.inputAssets) {
+      this.recordDataAssetUsage(inputAssetId, {
+        context: 'transformation_input',
+        outcome: fullTransformation.status === 'failure' ? 'failure' : 'success',
+        details: {
+          transformationId: fullTransformation.id,
+          name: fullTransformation.name,
+          type: fullTransformation.type
+        }
+      });
+    }
+
+    for (const outputAssetId of fullTransformation.outputAssets) {
+      this.recordDataAssetUsage(outputAssetId, {
+        context: 'transformation_output',
+        outcome: fullTransformation.status === 'failure' ? 'warning' : 'success',
+        details: {
+          transformationId: fullTransformation.id,
+          name: fullTransformation.name,
+          type: fullTransformation.type
+        }
+      });
+
+      this.assetManager.updateAsset(outputAssetId, {
+        metadata: {
+          lastTransformation: {
+            id: fullTransformation.id,
+            executedAt: fullTransformation.executedAt,
+            status: fullTransformation.status,
+            type: fullTransformation.type,
+            executedBy: fullTransformation.executedBy
+          }
+        }
+      });
+
+      for (const inputAssetId of fullTransformation.inputAssets) {
+        this.assetManager.linkDependency(outputAssetId, inputAssetId);
+      }
+    }
 
     this.emit('transformation_tracked', fullTransformation);
 
@@ -149,6 +304,39 @@ export class DataLineageTracker extends EventEmitter {
     // Identify business impact
     const businessImpact = this.identifyBusinessImpact(impactedAssets);
 
+    this.recordDataAssetUsage(assetId, {
+      context: 'impact_analysis',
+      outcome: 'analysis',
+      details: {
+        changeType,
+        severity,
+        impactedAssets: impactedAssets.length
+      }
+    });
+
+    for (const impactedAssetId of impactedAssets) {
+      this.recordDataAssetUsage(impactedAssetId, {
+        context: 'impact_analysis',
+        outcome: 'warning',
+        details: {
+          sourceAsset: assetId,
+          severity,
+          changeType
+        }
+      });
+    }
+
+    this.assetManager.updateAsset(assetId, {
+      metadata: {
+        lastImpactAssessment: {
+          changeType,
+          severity,
+          impactedAssets,
+          analyzedAt: new Date()
+        }
+      }
+    });
+
     return {
       assetId,
       impactedAssets,
@@ -181,6 +369,17 @@ export class DataLineageTracker extends EventEmitter {
     if (metric.status === 'fail') {
       this.emit('quality_alert', metric);
     }
+
+    this.recordDataAssetUsage(metric.assetId, {
+      context: 'quality_metric',
+      outcome: metric.status === 'fail' ? 'failure' : metric.status === 'warn' ? 'warning' : 'success',
+      details: {
+        metricType: metric.metricType,
+        value: metric.value,
+        threshold: metric.threshold
+      }
+    });
+    this.refreshQualityInManager(metric.assetId);
   }
 
   /**
@@ -210,6 +409,16 @@ export class DataLineageTracker extends EventEmitter {
       metrics: filteredMetrics,
       trends,
       recommendations
+    };
+  }
+
+  getAssetInventorySnapshot(limit = 20): {
+    summary: ReturnType<AssetManager<DataAssetMetadata>['getDomainSummary']>;
+    assets: ReturnType<AssetManager<DataAssetMetadata>['listAssets']>;
+  } {
+    return {
+      summary: this.assetManager.getDomainSummary('data'),
+      assets: this.assetManager.listAssets({ domain: 'data' }).slice(0, limit)
     };
   }
 

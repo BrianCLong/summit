@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ContactsV1Contract",
+  "title": "ContactsV1Contract", 
   "version": "1.0.0",
   "description": "Contact data source contract for IntelGraph person entities",
   "type": "object",
@@ -55,7 +55,7 @@
       "format": "date-time"
     },
     "updated_at": {
-      "type": "string",
+      "type": "string", 
       "format": "date-time"
     },
     "source": {
@@ -86,7 +86,7 @@
   },
   "metadata": {
     "owner": "sales-team",
-    "contact": "data-team@intelgraph.com",
+    "contact": "data-team@intelgraph.com", 
     "created_at": "2025-08-14T00:00:00Z",
     "classification": "confidential",
     "retention_days": 2555,

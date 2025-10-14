@@ -1,0 +1,56 @@
+// .github/renovate/default.json5
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":semanticCommits",
+    ":separateMajorReleases",
+    "group:allNonMajor",
+    "helpers:pinDigests"
+  ],
+  timezone: "America/Denver",
+  schedule: ["after 3am on Monday"],
+  rangeStrategy: "bump",
+  npm: {
+    enabled: true
+  },
+  pnpm: {
+    enabled: true
+  },
+  packageRules: [
+    // Auto-merge safe dev-only bumps
+    {
+      matchDepTypes: ["devDependencies"],
+      matchUpdateTypes: ["minor", "patch", "pin", "digest"],
+      automerge: true,
+      platformAutomerge: true
+    },
+    // Relax rate, batch by workspace to reduce PR noise
+    {
+      matchManagers: ["npm"],
+      additionalBranchPrefix: "renovate/",
+      prConcurrentLimit: 10,
+      prHourlyLimit: 4
+    },
+    // Group common toolchains
+    {
+      groupName: "eslint-prettier",
+      matchPackagePatterns: ["^eslint", "^@typescript-eslint", "^prettier"]
+    },
+    {
+      groupName: "testing-stack",
+      matchPackagePatterns: ["^jest", "^vitest", "^@vitest", "^@testing-library"]
+    },
+    // Node engine policy
+    {
+      matchPackageNames: ["node"],
+      allowedVersions: "<= 22"
+    }
+  ],
+  // Monorepo detection
+  npmrc: "strict-peer-dependencies=false",
+  lockFileMaintenance: {
+    enabled: true,
+    schedule: ["after 1am on Saturday"]
+  }
+}
