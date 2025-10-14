@@ -1,0 +1,36 @@
+{
+  "title": "Flaky Tests",
+  "panels": [
+    {
+      "type": "table",
+      "title": "Top Flaky Tests (last 7d)",
+      "datasource": "${ds_loki}",
+      "targets": [
+        {
+          "expr": "{job=\"ci\"} |= \"FLAKY\" | json | stats count() by (test) | sort desc"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Flaky Failures Over Time",
+      "datasource": "${ds_loki}",
+      "targets": [
+        {
+          "expr": "sum(count_over_time({job=\"ci\"} |= \"FLAKY\" [1h]))"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "ds_loki",
+        "type": "datasource",
+        "query": "loki"
+      }
+    ]
+  },
+  "schemaVersion": 38,
+  "version": 1
+}

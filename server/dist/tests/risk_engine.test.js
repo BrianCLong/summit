@@ -7,3 +7,4 @@ describe('RiskEngine', () => {
         expect(res.contributions[0].delta).toBe(1);
     });
 });
+//# sourceMappingURL=risk_engine.test.js.map

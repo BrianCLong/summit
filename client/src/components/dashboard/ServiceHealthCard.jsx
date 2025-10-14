@@ -34,57 +34,32 @@ export default function ServiceHealthCard() {
         {loading && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <CircularProgress size={16} />
-            <Typography variant="body2" color="text.secondary">
-              Loading…
-            </Typography>
+            <Typography variant="body2" color="text.secondary">Loading…</Typography>
           </Box>
         )}
         {error && (
-          <Typography variant="body2" color="error">
-            Failed to load health: {String(error)}
-          </Typography>
+          <Typography variant="body2" color="error">Failed to load health: {String(error)}</Typography>
         )}
         {data && (
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto', rowGap: 1, columnGap: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Status
-            </Typography>
+            <Typography variant="body2" color="text.secondary">Status</Typography>
             <Chip size="small" label={data.status} color={kvColor(data.status)} />
 
-            <Typography variant="body2" color="text.secondary">
-              Environment
-            </Typography>
+            <Typography variant="body2" color="text.secondary">Environment</Typography>
             <Chip size="small" label={data.environment} />
 
-            <Typography variant="body2" color="text.secondary">
-              Neo4j
-            </Typography>
-            <Chip
-              size="small"
-              label={data?.services?.neo4j || 'unknown'}
-              color={kvColor(data?.services?.neo4j)}
-            />
+            <Typography variant="body2" color="text.secondary">Neo4j</Typography>
+            <Chip size="small" label={data?.services?.neo4j || 'unknown'} color={kvColor(data?.services?.neo4j)} />
 
-            <Typography variant="body2" color="text.secondary">
-              Postgres
-            </Typography>
-            <Chip
-              size="small"
-              label={data?.services?.postgres || 'unknown'}
-              color={kvColor(data?.services?.postgres)}
-            />
+            <Typography variant="body2" color="text.secondary">Postgres</Typography>
+            <Chip size="small" label={data?.services?.postgres || 'unknown'} color={kvColor(data?.services?.postgres)} />
 
-            <Typography variant="body2" color="text.secondary">
-              Redis
-            </Typography>
-            <Chip
-              size="small"
-              label={data?.services?.redis || 'unknown'}
-              color={kvColor(data?.services?.redis)}
-            />
+            <Typography variant="body2" color="text.secondary">Redis</Typography>
+            <Chip size="small" label={data?.services?.redis || 'unknown'} color={kvColor(data?.services?.redis)} />
           </Box>
         )}
       </CardContent>
     </Card>
   );
 }
+

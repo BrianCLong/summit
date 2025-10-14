@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2025-09-28T15:54:00.002Z",
+  "contracts": [
+    {
+      "name": "customer-profile",
+      "version": "1.0.0",
+      "classification": [
+        "PII"
+      ],
+      "residency": {
+        "allowedRegions": [
+          "us-east-1",
+          "us-west-2",
+          "eu-west-1"
+        ],
+        "defaultRegion": "us-east-1"
+      },
+      "lowerEnvironmentHandling": "tokenize",
+      "deterministic": true,
+      "reversible": true
+    },
+    {
+      "name": "customer-profile",
+      "version": "1.1.0",
+      "classification": [
+        "PII"
+      ],
+      "residency": {
+        "allowedRegions": [
+          "us-east-1",
+          "us-west-2",
+          "eu-west-1"
+        ],
+        "defaultRegion": "us-east-1"
+      },
+      "lowerEnvironmentHandling": "tokenize",
+      "deterministic": true,
+      "reversible": true
+    },
+    {
+      "name": "transaction-events",
+      "version": "1.0.0",
+      "classification": [
+        "Internal"
+      ],
+      "residency": {
+        "allowedRegions": [
+          "us-east-1",
+          "eu-west-1"
+        ],
+        "defaultRegion": "us-east-1"
+      },
+      "lowerEnvironmentHandling": "pass",
+      "deterministic": true,
+      "reversible": true
+    }
+  ],
+  "nonCompliant": []
+}

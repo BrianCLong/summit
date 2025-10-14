@@ -1,7 +1,0 @@
-schema:
-  - "server/src/graphql/schema/*.graphql"
-  - "server/src/graphql/schemas/*.graphql"
-  - "server/src/schema/*.graphql"
-documents:
-  - "client/src/**/*.graphql"
-  - "server/src/**/*.graphql"
