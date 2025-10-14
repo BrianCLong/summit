@@ -1,0 +1,29 @@
+{
+  "name": "@summit/rptc",
+  "version": "0.1.0",
+  "description": "Robust Prompt Template Compiler with typed slots, validation, adapters, and test synthesis.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "test": "jest --config jest.config.ts",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\""
+  },
+  "keywords": [
+    "prompts",
+    "compiler",
+    "llm",
+    "validation"
+  ],
+  "author": "Summit Intelligence Platform",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20"
+  }
+}
