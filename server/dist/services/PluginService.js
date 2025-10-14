@@ -2,11 +2,11 @@
  * Plugin Architecture and Extension Framework - P2 Priority
  * Comprehensive plugin system with dynamic loading, sandboxing, and lifecycle management
  */
-const EventEmitter = require('events');
-const { v4: uuidv4 } = require('uuid');
-const fs = require('fs').promises;
-const path = require('path');
-const vm = require('vm');
+const EventEmitter = require("events");
+const { v4: uuidv4 } = require("uuid");
+const fs = require("fs").promises;
+const path = require("path");
+const vm = require("vm");
 class PluginService extends EventEmitter {
     constructor(logger) {
         super();
@@ -33,155 +33,155 @@ class PluginService extends EventEmitter {
     }
     initializeExtensionPoints() {
         // Core extension points
-        this.extensionPoints.set('ENTITY_PROCESSOR', {
-            id: 'ENTITY_PROCESSOR',
-            name: 'Entity Processing Extension',
-            description: 'Extend entity processing with custom logic',
+        this.extensionPoints.set("ENTITY_PROCESSOR", {
+            id: "ENTITY_PROCESSOR",
+            name: "Entity Processing Extension",
+            description: "Extend entity processing with custom logic",
             interface: {
-                methods: ['processEntity', 'validateEntity', 'enrichEntity'],
-                events: ['entityProcessed', 'entityValidated', 'entityEnriched'],
-                context: ['entity', 'investigation', 'user'],
+                methods: ["processEntity", "validateEntity", "enrichEntity"],
+                events: ["entityProcessed", "entityValidated", "entityEnriched"],
+                context: ["entity", "investigation", "user"],
             },
             security: {
-                permissions: ['ENTITY_READ', 'ENTITY_UPDATE'],
-                dataAccess: ['entities', 'relationships'],
+                permissions: ["ENTITY_READ", "ENTITY_UPDATE"],
+                dataAccess: ["entities", "relationships"],
             },
         });
-        this.extensionPoints.set('VISUALIZATION_RENDERER', {
-            id: 'VISUALIZATION_RENDERER',
-            name: 'Visualization Renderer Extension',
-            description: 'Add custom visualization types and renderers',
+        this.extensionPoints.set("VISUALIZATION_RENDERER", {
+            id: "VISUALIZATION_RENDERER",
+            name: "Visualization Renderer Extension",
+            description: "Add custom visualization types and renderers",
             interface: {
-                methods: ['render', 'getConfig', 'handleInteraction'],
-                events: ['visualizationRendered', 'interactionHandled'],
-                context: ['data', 'configuration', 'theme'],
+                methods: ["render", "getConfig", "handleInteraction"],
+                events: ["visualizationRendered", "interactionHandled"],
+                context: ["data", "configuration", "theme"],
             },
             security: {
-                permissions: ['VISUALIZATION_CREATE'],
-                dataAccess: ['visualization_data'],
+                permissions: ["VISUALIZATION_CREATE"],
+                dataAccess: ["visualization_data"],
             },
         });
-        this.extensionPoints.set('ANALYTICS_ALGORITHM', {
-            id: 'ANALYTICS_ALGORITHM',
-            name: 'Analytics Algorithm Extension',
-            description: 'Add custom analytics algorithms and ML models',
+        this.extensionPoints.set("ANALYTICS_ALGORITHM", {
+            id: "ANALYTICS_ALGORITHM",
+            name: "Analytics Algorithm Extension",
+            description: "Add custom analytics algorithms and ML models",
             interface: {
-                methods: ['analyze', 'train', 'predict'],
-                events: ['analysisComplete', 'modelTrained', 'predictionMade'],
-                context: ['data', 'parameters', 'model'],
+                methods: ["analyze", "train", "predict"],
+                events: ["analysisComplete", "modelTrained", "predictionMade"],
+                context: ["data", "parameters", "model"],
             },
             security: {
-                permissions: ['ANALYTICS_RUN', 'ML_MODEL_ACCESS'],
-                dataAccess: ['analytics_data', 'models'],
+                permissions: ["ANALYTICS_RUN", "ML_MODEL_ACCESS"],
+                dataAccess: ["analytics_data", "models"],
             },
         });
-        this.extensionPoints.set('DATA_CONNECTOR', {
-            id: 'DATA_CONNECTOR',
-            name: 'Data Connector Extension',
-            description: 'Connect to external data sources',
+        this.extensionPoints.set("DATA_CONNECTOR", {
+            id: "DATA_CONNECTOR",
+            name: "Data Connector Extension",
+            description: "Connect to external data sources",
             interface: {
-                methods: ['connect', 'query', 'sync'],
-                events: ['connected', 'dataReceived', 'syncComplete'],
-                context: ['connection', 'query', 'credentials'],
+                methods: ["connect", "query", "sync"],
+                events: ["connected", "dataReceived", "syncComplete"],
+                context: ["connection", "query", "credentials"],
             },
             security: {
-                permissions: ['DATA_IMPORT', 'EXTERNAL_CONNECTIONS'],
-                dataAccess: ['external_data'],
+                permissions: ["DATA_IMPORT", "EXTERNAL_CONNECTIONS"],
+                dataAccess: ["external_data"],
             },
         });
-        this.extensionPoints.set('NOTIFICATION_CHANNEL', {
-            id: 'NOTIFICATION_CHANNEL',
-            name: 'Notification Channel Extension',
-            description: 'Add custom notification delivery channels',
+        this.extensionPoints.set("NOTIFICATION_CHANNEL", {
+            id: "NOTIFICATION_CHANNEL",
+            name: "Notification Channel Extension",
+            description: "Add custom notification delivery channels",
             interface: {
-                methods: ['deliver', 'validate', 'configure'],
-                events: ['delivered', 'failed', 'configured'],
-                context: ['notification', 'recipient', 'channel'],
+                methods: ["deliver", "validate", "configure"],
+                events: ["delivered", "failed", "configured"],
+                context: ["notification", "recipient", "channel"],
             },
             security: {
-                permissions: ['NOTIFICATION_SEND'],
-                dataAccess: ['notifications', 'user_preferences'],
+                permissions: ["NOTIFICATION_SEND"],
+                dataAccess: ["notifications", "user_preferences"],
             },
         });
-        this.extensionPoints.set('SECURITY_SCANNER', {
-            id: 'SECURITY_SCANNER',
-            name: 'Security Scanner Extension',
-            description: 'Add custom security scanning and threat detection',
+        this.extensionPoints.set("SECURITY_SCANNER", {
+            id: "SECURITY_SCANNER",
+            name: "Security Scanner Extension",
+            description: "Add custom security scanning and threat detection",
             interface: {
-                methods: ['scan', 'analyze', 'report'],
-                events: ['scanComplete', 'threatDetected', 'reportGenerated'],
-                context: ['data', 'rules', 'patterns'],
+                methods: ["scan", "analyze", "report"],
+                events: ["scanComplete", "threatDetected", "reportGenerated"],
+                context: ["data", "rules", "patterns"],
             },
             security: {
-                permissions: ['SECURITY_SCAN', 'THREAT_ANALYSIS'],
-                dataAccess: ['security_data', 'audit_logs'],
+                permissions: ["SECURITY_SCAN", "THREAT_ANALYSIS"],
+                dataAccess: ["security_data", "audit_logs"],
             },
         });
-        this.extensionPoints.set('REPORT_GENERATOR', {
-            id: 'REPORT_GENERATOR',
-            name: 'Report Generator Extension',
-            description: 'Add custom report templates and generators',
+        this.extensionPoints.set("REPORT_GENERATOR", {
+            id: "REPORT_GENERATOR",
+            name: "Report Generator Extension",
+            description: "Add custom report templates and generators",
             interface: {
-                methods: ['generate', 'format', 'export'],
-                events: ['reportGenerated', 'formatApplied', 'exportComplete'],
-                context: ['data', 'template', 'format'],
+                methods: ["generate", "format", "export"],
+                events: ["reportGenerated", "formatApplied", "exportComplete"],
+                context: ["data", "template", "format"],
             },
             security: {
-                permissions: ['REPORT_GENERATE', 'DATA_EXPORT'],
-                dataAccess: ['report_data', 'templates'],
+                permissions: ["REPORT_GENERATE", "DATA_EXPORT"],
+                dataAccess: ["report_data", "templates"],
             },
         });
-        this.extensionPoints.set('WORKFLOW_STEP', {
-            id: 'WORKFLOW_STEP',
-            name: 'Workflow Step Extension',
-            description: 'Add custom workflow steps and automation',
+        this.extensionPoints.set("WORKFLOW_STEP", {
+            id: "WORKFLOW_STEP",
+            name: "Workflow Step Extension",
+            description: "Add custom workflow steps and automation",
             interface: {
-                methods: ['execute', 'validate', 'rollback'],
-                events: ['stepExecuted', 'stepValidated', 'stepRolledBack'],
-                context: ['workflow', 'step', 'data'],
+                methods: ["execute", "validate", "rollback"],
+                events: ["stepExecuted", "stepValidated", "stepRolledBack"],
+                context: ["workflow", "step", "data"],
             },
             security: {
-                permissions: ['WORKFLOW_EXECUTE'],
-                dataAccess: ['workflow_data'],
+                permissions: ["WORKFLOW_EXECUTE"],
+                dataAccess: ["workflow_data"],
             },
         });
-        this.extensionPoints.set('OSINT_SOURCE', {
-            id: 'OSINT_SOURCE',
-            name: 'OSINT Source Extension',
-            description: 'Integrate dark web and social media scrapers',
+        this.extensionPoints.set("OSINT_SOURCE", {
+            id: "OSINT_SOURCE",
+            name: "OSINT Source Extension",
+            description: "Integrate dark web and social media scrapers",
             interface: {
-                methods: ['scrape', 'normalize'],
-                events: ['dataCollected', 'error'],
-                context: ['query', 'source', 'auth'],
+                methods: ["scrape", "normalize"],
+                events: ["dataCollected", "error"],
+                context: ["query", "source", "auth"],
             },
             security: {
-                permissions: ['OSINT_READ'],
-                dataAccess: ['osint_data', 'audit_logs'],
+                permissions: ["OSINT_READ"],
+                dataAccess: ["osint_data", "audit_logs"],
             },
         });
     }
     initializePluginSystem() {
         // Initialize hook system
-        this.hooks.set('PRE_ENTITY_CREATE', []);
-        this.hooks.set('POST_ENTITY_CREATE', []);
-        this.hooks.set('PRE_ENTITY_UPDATE', []);
-        this.hooks.set('POST_ENTITY_UPDATE', []);
-        this.hooks.set('PRE_ANALYTICS_RUN', []);
-        this.hooks.set('POST_ANALYTICS_RUN', []);
-        this.hooks.set('PRE_REPORT_GENERATE', []);
-        this.hooks.set('POST_REPORT_GENERATE', []);
-        this.hooks.set('PRE_VISUALIZATION_RENDER', []);
-        this.hooks.set('POST_VISUALIZATION_RENDER', []);
+        this.hooks.set("PRE_ENTITY_CREATE", []);
+        this.hooks.set("POST_ENTITY_CREATE", []);
+        this.hooks.set("PRE_ENTITY_UPDATE", []);
+        this.hooks.set("POST_ENTITY_UPDATE", []);
+        this.hooks.set("PRE_ANALYTICS_RUN", []);
+        this.hooks.set("POST_ANALYTICS_RUN", []);
+        this.hooks.set("PRE_REPORT_GENERATE", []);
+        this.hooks.set("POST_REPORT_GENERATE", []);
+        this.hooks.set("PRE_VISUALIZATION_RENDER", []);
+        this.hooks.set("POST_VISUALIZATION_RENDER", []);
         // Create plugin directories if they don't exist
         this.ensurePluginDirectories();
     }
     async ensurePluginDirectories() {
         const dirs = [
-            'plugins',
-            'plugins/installed',
-            'plugins/disabled',
-            'plugins/cache',
-            'plugins/configs',
+            "plugins",
+            "plugins/installed",
+            "plugins/disabled",
+            "plugins/cache",
+            "plugins/configs",
         ];
         for (const dir of dirs) {
             try {
@@ -204,7 +204,7 @@ class PluginService extends EventEmitter {
             repository: pluginData.repository,
             keywords: pluginData.keywords || [],
             // Technical specifications
-            main: pluginData.main || 'index.js',
+            main: pluginData.main || "index.js",
             extensionPoints: pluginData.extensionPoints || [],
             hooks: pluginData.hooks || [],
             dependencies: pluginData.dependencies || {},
@@ -214,7 +214,7 @@ class PluginService extends EventEmitter {
             trustedDomains: pluginData.trustedDomains || [],
             sandboxed: pluginData.sandboxed !== false,
             // Lifecycle
-            status: 'REGISTERED',
+            status: "REGISTERED",
             registeredAt: new Date(),
             lastUpdated: new Date(),
             activatedAt: null,
@@ -240,7 +240,7 @@ class PluginService extends EventEmitter {
         this.pluginRegistry.set(plugin.id, plugin);
         this.plugins.set(plugin.id, plugin);
         this.metrics.totalPlugins++;
-        this.emit('pluginRegistered', plugin);
+        this.emit("pluginRegistered", plugin);
         return plugin;
     }
     async loadPlugin(pluginId) {
@@ -248,11 +248,11 @@ class PluginService extends EventEmitter {
         if (!plugin) {
             throw new Error(`Plugin not found: ${pluginId}`);
         }
-        if (plugin.status === 'LOADED' || plugin.status === 'ACTIVE') {
+        if (plugin.status === "LOADED" || plugin.status === "ACTIVE") {
             return plugin;
         }
         try {
-            plugin.status = 'LOADING';
+            plugin.status = "LOADING";
             // Create sandbox if needed
             if (plugin.sandboxed) {
                 plugin.sandbox = await this.createPluginSandbox(plugin);
@@ -267,14 +267,14 @@ class PluginService extends EventEmitter {
             await this.registerPluginHooks(plugin);
             // Register extensions
             await this.registerPluginExtensions(plugin);
-            plugin.status = 'LOADED';
+            plugin.status = "LOADED";
             plugin.lastUpdated = new Date();
             this.metrics.loadedPlugins++;
-            this.emit('pluginLoaded', plugin);
+            this.emit("pluginLoaded", plugin);
             return plugin;
         }
         catch (error) {
-            plugin.status = 'FAILED';
+            plugin.status = "FAILED";
             plugin.error = error.message;
             this.metrics.failedPlugins++;
             this.logger.error(`Failed to load plugin ${pluginId}:`, error);
@@ -286,24 +286,24 @@ class PluginService extends EventEmitter {
         if (!plugin) {
             throw new Error(`Plugin not found: ${pluginId}`);
         }
-        if (plugin.status !== 'LOADED') {
+        if (plugin.status !== "LOADED") {
             await this.loadPlugin(pluginId);
         }
         try {
-            plugin.status = 'ACTIVATING';
+            plugin.status = "ACTIVATING";
             // Activate plugin
             if (plugin.instance.activate) {
                 await plugin.instance.activate();
             }
-            plugin.status = 'ACTIVE';
+            plugin.status = "ACTIVE";
             plugin.activatedAt = new Date();
             plugin.metrics.activations++;
             this.metrics.activePlugins++;
-            this.emit('pluginActivated', plugin);
+            this.emit("pluginActivated", plugin);
             return plugin;
         }
         catch (error) {
-            plugin.status = 'FAILED';
+            plugin.status = "FAILED";
             plugin.error = error.message;
             this.logger.error(`Failed to activate plugin ${pluginId}:`, error);
             throw error;
@@ -314,11 +314,11 @@ class PluginService extends EventEmitter {
         if (!plugin) {
             throw new Error(`Plugin not found: ${pluginId}`);
         }
-        if (plugin.status !== 'ACTIVE') {
+        if (plugin.status !== "ACTIVE") {
             return plugin;
         }
         try {
-            plugin.status = 'DEACTIVATING';
+            plugin.status = "DEACTIVATING";
             // Deactivate plugin
             if (plugin.instance.deactivate) {
                 await plugin.instance.deactivate();
@@ -326,10 +326,10 @@ class PluginService extends EventEmitter {
             // Unregister hooks and extensions
             await this.unregisterPluginHooks(plugin);
             await this.unregisterPluginExtensions(plugin);
-            plugin.status = 'LOADED';
+            plugin.status = "LOADED";
             plugin.deactivatedAt = new Date();
             this.metrics.activePlugins--;
-            this.emit('pluginDeactivated', plugin);
+            this.emit("pluginDeactivated", plugin);
             return plugin;
         }
         catch (error) {
@@ -342,7 +342,7 @@ class PluginService extends EventEmitter {
         if (!plugin) {
             throw new Error(`Plugin not found: ${pluginId}`);
         }
-        if (plugin.status === 'ACTIVE') {
+        if (plugin.status === "ACTIVE") {
             await this.deactivatePlugin(pluginId);
         }
         try {
@@ -355,9 +355,9 @@ class PluginService extends EventEmitter {
                 plugin.sandbox = null;
             }
             plugin.instance = null;
-            plugin.status = 'REGISTERED';
+            plugin.status = "REGISTERED";
             this.metrics.loadedPlugins--;
-            this.emit('pluginUnloaded', plugin);
+            this.emit("pluginUnloaded", plugin);
             return plugin;
         }
         catch (error) {
@@ -371,14 +371,14 @@ class PluginService extends EventEmitter {
             throw new Error(`Plugin not found: ${pluginId}`);
         }
         // Unload if loaded
-        if (plugin.status !== 'REGISTERED') {
+        if (plugin.status !== "REGISTERED") {
             await this.unloadPlugin(pluginId);
         }
         // Remove from registry
         this.pluginRegistry.delete(pluginId);
         this.plugins.delete(pluginId);
         this.metrics.totalPlugins--;
-        this.emit('pluginRemoved', plugin);
+        this.emit("pluginRemoved", plugin);
         return true;
     }
     // Plugin validation and security
@@ -386,14 +386,14 @@ class PluginService extends EventEmitter {
         const errors = [];
         // Required fields
         if (!plugin.name)
-            errors.push('Plugin name is required');
+            errors.push("Plugin name is required");
         if (!plugin.version)
-            errors.push('Plugin version is required');
+            errors.push("Plugin version is required");
         if (!plugin.main)
-            errors.push('Plugin main file is required');
+            errors.push("Plugin main file is required");
         // Version format
         if (plugin.version && !/^\d+\.\d+\.\d+/.test(plugin.version)) {
-            errors.push('Invalid version format (expected semver)');
+            errors.push("Invalid version format (expected semver)");
         }
         // Extension points validation
         for (const extPointId of plugin.extensionPoints) {
@@ -403,16 +403,16 @@ class PluginService extends EventEmitter {
         }
         // Permissions validation
         const validPermissions = [
-            'ENTITY_READ',
-            'ENTITY_WRITE',
-            'ANALYTICS_RUN',
-            'VISUALIZATION_CREATE',
-            'REPORT_GENERATE',
-            'DATA_EXPORT',
-            'NOTIFICATION_SEND',
-            'SECURITY_SCAN',
-            'ML_MODEL_ACCESS',
-            'OSINT_READ',
+            "ENTITY_READ",
+            "ENTITY_WRITE",
+            "ANALYTICS_RUN",
+            "VISUALIZATION_CREATE",
+            "REPORT_GENERATE",
+            "DATA_EXPORT",
+            "NOTIFICATION_SEND",
+            "SECURITY_SCAN",
+            "ML_MODEL_ACCESS",
+            "OSINT_READ",
         ];
         for (const permission of plugin.permissions) {
             if (!validPermissions.includes(permission)) {
@@ -420,7 +420,7 @@ class PluginService extends EventEmitter {
             }
         }
         if (errors.length > 0) {
-            throw new Error(`Plugin validation failed: ${errors.join(', ')}`);
+            throw new Error(`Plugin validation failed: ${errors.join(", ")}`);
         }
         return true;
     }
@@ -439,12 +439,13 @@ class PluginService extends EventEmitter {
         // Check peer dependencies
         for (const [depId, version] of Object.entries(plugin.peerDependencies)) {
             const dependency = this.pluginRegistry.get(depId);
-            if (dependency && !this.isVersionCompatible(dependency.version, version)) {
+            if (dependency &&
+                !this.isVersionCompatible(dependency.version, version)) {
                 missing.push(`peer ${depId}@${version} (found ${dependency.version})`);
             }
         }
         if (missing.length > 0) {
-            throw new Error(`Missing dependencies: ${missing.join(', ')}`);
+            throw new Error(`Missing dependencies: ${missing.join(", ")}`);
         }
         // Store dependency relationships
         this.pluginDependencies.set(plugin.id, {
@@ -462,10 +463,12 @@ class PluginService extends EventEmitter {
     }
     isVersionCompatible(available, required) {
         // Simple semver compatibility check
-        const [availMajor, availMinor, availPatch] = available.split('.').map(Number);
+        const [availMajor, availMinor, availPatch] = available
+            .split(".")
+            .map(Number);
         const [reqMajor, reqMinor, reqPatch] = required
-            .replace(/[^\d.]/g, '')
-            .split('.')
+            .replace(/[^\d.]/g, "")
+            .split(".")
             .map(Number);
         if (availMajor !== reqMajor)
             return false;
@@ -477,7 +480,7 @@ class PluginService extends EventEmitter {
     }
     async createPluginSandbox(plugin) {
         if (!plugin?.id) {
-            throw new Error('Invalid plugin: missing id');
+            throw new Error("Invalid plugin: missing id");
         }
         try {
             const sandbox = {
@@ -538,7 +541,7 @@ class PluginService extends EventEmitter {
                 debug: (...args) => this.logger.debug(`[${plugin.name}]`, ...args),
             },
             // Configuration
-            getConfig: (key) => (key ? plugin.configuration[key] : plugin.configuration),
+            getConfig: (key) => key ? plugin.configuration[key] : plugin.configuration,
             setConfig: (key, value) => {
                 plugin.configuration[key] = value;
                 this.savePluginConfiguration(plugin.id);
@@ -556,7 +559,7 @@ class PluginService extends EventEmitter {
             // Utility functions
             utils: {
                 uuid: () => uuidv4(),
-                sanitize: (str) => str.replace(/[<>]/g, ''),
+                sanitize: (str) => str.replace(/[<>]/g, ""),
                 encrypt: (data) => this.encryptPluginData(data, plugin.id),
                 decrypt: (data) => this.decryptPluginData(data, plugin.id),
             },
@@ -566,19 +569,20 @@ class PluginService extends EventEmitter {
         const api = {};
         // Ensure plugin has permissions property
         const permissions = plugin.permissions || [];
-        if (permissions.includes('ENTITY_READ')) {
+        if (permissions.includes("ENTITY_READ")) {
             api.getEntity = async (entityId) => {
                 this.logger.info(`Plugin ${plugin.name || plugin.id} accessing entity ${entityId}`);
                 return this.secureEntityAccess(entityId, plugin);
             };
         }
-        if (permissions.includes('ENTITY_WRITE') || permissions.includes('ENTITY_UPDATE')) {
+        if (permissions.includes("ENTITY_WRITE") ||
+            permissions.includes("ENTITY_UPDATE")) {
             api.updateEntity = async (entityId, updates) => {
                 this.logger.info(`Plugin ${plugin.name || plugin.id} updating entity ${entityId}`);
                 return this.secureEntityUpdate(entityId, updates, plugin);
             };
         }
-        if (plugin.permissions.includes('ANALYTICS_RUN')) {
+        if (plugin.permissions.includes("ANALYTICS_RUN")) {
             api.runAnalytics = async (type, parameters) => {
                 return this.secureAnalyticsRun(type, parameters, plugin);
             };
@@ -587,15 +591,15 @@ class PluginService extends EventEmitter {
     }
     safeRequire(moduleName, plugin) {
         const allowedModules = [
-            'crypto',
-            'util',
-            'events',
-            'stream',
-            'querystring',
-            'url',
-            'path',
-            'lodash',
-            'moment',
+            "crypto",
+            "util",
+            "events",
+            "stream",
+            "querystring",
+            "url",
+            "path",
+            "lodash",
+            "moment",
         ];
         if (!allowedModules.includes(moduleName)) {
             throw new Error(`Module '${moduleName}' is not allowed in plugins`);
@@ -603,9 +607,9 @@ class PluginService extends EventEmitter {
         return require(moduleName);
     }
     async loadPluginCode(plugin) {
-        const pluginPath = path.join('plugins/installed', plugin.id, plugin.main);
+        const pluginPath = path.join("plugins/installed", plugin.id, plugin.main);
         try {
-            const code = await fs.readFile(pluginPath, 'utf8');
+            const code = await fs.readFile(pluginPath, "utf8");
             if (plugin.sandboxed) {
                 // Execute in sandbox
                 vm.runInContext(code, plugin.sandbox.context, {
@@ -632,7 +636,7 @@ class PluginService extends EventEmitter {
                 config: plugin.configuration,
             },
             system: {
-                version: '1.0.0',
+                version: "1.0.0",
                 extensionPoints: Array.from(this.extensionPoints.keys()),
                 hooks: Array.from(this.hooks.keys()),
             },
@@ -744,7 +748,7 @@ class PluginService extends EventEmitter {
             implementation,
             registeredAt: new Date(),
         });
-        this.emit('extensionRegistered', { pluginId, extensionPointId });
+        this.emit("extensionRegistered", { pluginId, extensionPointId });
         return true;
     }
     async unregisterExtension(pluginId, extensionPointId) {
@@ -792,7 +796,7 @@ class PluginService extends EventEmitter {
     // Plugin lifecycle management
     async installPlugin(pluginPackage) {
         const pluginId = uuidv4();
-        const installPath = path.join('plugins/installed', pluginId);
+        const installPath = path.join("plugins/installed", pluginId);
         try {
             // Create plugin directory
             await fs.mkdir(installPath, { recursive: true });
@@ -803,7 +807,7 @@ class PluginService extends EventEmitter {
             const plugin = await this.registerPlugin(pluginData);
             // Save plugin metadata
             await this.savePluginMetadata(plugin);
-            this.emit('pluginInstalled', plugin);
+            this.emit("pluginInstalled", plugin);
             return plugin;
         }
         catch (error) {
@@ -812,7 +816,7 @@ class PluginService extends EventEmitter {
                 await fs.rmdir(installPath, { recursive: true });
             }
             catch (cleanupError) {
-                this.logger.warn('Failed to cleanup failed installation:', cleanupError);
+                this.logger.warn("Failed to cleanup failed installation:", cleanupError);
             }
             throw error;
         }
@@ -822,7 +826,7 @@ class PluginService extends EventEmitter {
         if (!plugin) {
             throw new Error(`Plugin not found: ${pluginId}`);
         }
-        const wasActive = plugin.status === 'ACTIVE';
+        const wasActive = plugin.status === "ACTIVE";
         // Deactivate if active
         if (wasActive) {
             await this.deactivatePlugin(pluginId);
@@ -840,7 +844,7 @@ class PluginService extends EventEmitter {
                 await this.loadPlugin(pluginId);
                 await this.activatePlugin(pluginId);
             }
-            this.emit('pluginUpdated', plugin);
+            this.emit("pluginUpdated", plugin);
             return plugin;
         }
         catch (error) {
@@ -854,16 +858,16 @@ class PluginService extends EventEmitter {
         const plugin = this.pluginRegistry.get(pluginId);
         if (!plugin)
             return false;
-        const configPath = path.join('plugins/configs', `${pluginId}.json`);
+        const configPath = path.join("plugins/configs", `${pluginId}.json`);
         const writer = this.fs?.writeFile || fs.writeFile;
         await writer(configPath, JSON.stringify(plugin.configuration, null, 2));
         return true;
     }
     async loadPluginConfiguration(pluginId) {
-        const configPath = path.join('plugins/configs', `${pluginId}.json`);
+        const configPath = path.join("plugins/configs", `${pluginId}.json`);
         try {
             const reader = this.fs?.readFile || fs.readFile;
-            const configData = await reader(configPath, 'utf8');
+            const configData = await reader(configPath, "utf8");
             return JSON.parse(configData);
         }
         catch (error) {
@@ -885,15 +889,15 @@ class PluginService extends EventEmitter {
     async secureAnalyticsRun(type, parameters, plugin) {
         // Implement secure analytics execution
         this.logger.info(`Plugin ${plugin.name} running analytics ${type}`);
-        return { result: 'analytics_result' };
+        return { result: "analytics_result" };
     }
     encryptPluginData(data, pluginId) {
         // Implement encryption for plugin data
-        return Buffer.from(JSON.stringify(data)).toString('base64');
+        return Buffer.from(JSON.stringify(data)).toString("base64");
     }
     decryptPluginData(encryptedData, pluginId) {
         // Implement decryption for plugin data
-        return JSON.parse(Buffer.from(encryptedData, 'base64').toString());
+        return JSON.parse(Buffer.from(encryptedData, "base64").toString());
     }
     // Public API methods
     getPlugins(filter = {}) {
@@ -919,16 +923,16 @@ class PluginService extends EventEmitter {
         return {
             ...this.metrics,
             pluginBreakdown: {
-                active: this.getPlugins({ status: 'ACTIVE' }).length,
-                loaded: this.getPlugins({ status: 'LOADED' }).length,
-                failed: this.getPlugins({ status: 'FAILED' }).length,
-                registered: this.getPlugins({ status: 'REGISTERED' }).length,
+                active: this.getPlugins({ status: "ACTIVE" }).length,
+                loaded: this.getPlugins({ status: "LOADED" }).length,
+                failed: this.getPlugins({ status: "FAILED" }).length,
+                registered: this.getPlugins({ status: "REGISTERED" }).length,
             },
         };
     }
     // Placeholder methods for full implementation
     async extractPluginPackage(packageData, installPath) {
-        return { name: 'Sample Plugin', version: '1.0.0', main: 'index.js' };
+        return { name: "Sample Plugin", version: "1.0.0", main: "index.js" };
     }
     async savePluginMetadata(plugin) { }
     async backupPlugin(plugin) { }
@@ -936,3 +940,4 @@ class PluginService extends EventEmitter {
     async restorePlugin(plugin) { }
 }
 module.exports = PluginService;
+//# sourceMappingURL=PluginService.js.map

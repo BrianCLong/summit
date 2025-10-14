@@ -2,14 +2,13 @@ import { EventEmitter } from 'events';
 import { PubSub } from 'graphql-subscriptions';
 import { cacheService } from './cacheService';
 export class CollaborationService extends EventEmitter {
-    activeUsers = new Map();
-    pendingEdits = new Map();
-    comments = new Map();
-    notifications = [];
-    maxNotifications = 100;
-    pubsub;
     constructor() {
         super();
+        this.activeUsers = new Map();
+        this.pendingEdits = new Map();
+        this.comments = new Map();
+        this.notifications = [];
+        this.maxNotifications = 100;
         this.pubsub = new PubSub();
         console.log('[COLLABORATION] Real-time collaboration service initialized');
         // Clean up inactive users every minute
@@ -303,3 +302,4 @@ export class CollaborationService extends EventEmitter {
 }
 // Global collaboration service instance
 export const collaborationService = new CollaborationService();
+//# sourceMappingURL=collaborationService.js.map

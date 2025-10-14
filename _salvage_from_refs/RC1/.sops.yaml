@@ -1,9 +1,0 @@
-creation_rules:
-  - encrypted_regex: '^(data|stringData|password|secret|access_key|secret_key)$'
-    path_regex: '\\.(secret|secrets)\\.ya?ml$'
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    age:
-      - AGE-SECRET-KEY
-
