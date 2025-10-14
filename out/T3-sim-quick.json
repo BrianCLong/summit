@@ -1,0 +1,53 @@
+{
+  "simulation_metadata": {
+    "simulation_id": "93163ec7-38a4-4e3a-b923-1ff8ddaff9fe",
+    "tenant": "TENANT_003",
+    "start_time": "2025-09-26T05:53:14.568295Z",
+    "end_time": "2025-09-26T05:53:42.715329Z",
+    "duration_seconds": 28.147034,
+    "platform_version": "v0.3.3-mc",
+    "tier": "T3_COMPUTED"
+  },
+  "configuration": {
+    "target_operations": 100,
+    "operation_mix": {
+      "data_query": 0.4,
+      "computed_write": 0.2,
+      "data_aggregation": 0.15,
+      "index_update": 0.1,
+      "cache_refresh": 0.1,
+      "derived_calculation": 0.05
+    },
+    "success_threshold": 99.9,
+    "compensation_threshold": 0.5
+  },
+  "results": {
+    "total_operations": 100,
+    "successful_operations": 99,
+    "failed_operations": 1,
+    "success_rate_percent": 99.0,
+    "compensation_events": 1,
+    "compensation_rate_percent": 1.0,
+    "policy_violations": 0,
+    "residency_violations": 0,
+    "avg_execution_time_ms": 269.97
+  },
+  "safety_assessment": {
+    "success_rate_meets_threshold": false,
+    "compensation_rate_meets_threshold": false,
+    "no_residency_violations": true,
+    "overall_safety_passed": false
+  },
+  "recommendations": [
+    "SUCCESS RATE: 99.00% below 99.9% threshold - review operation reliability",
+    "COMPENSATION RATE: 1.00% above 0.5% threshold - investigate failure patterns"
+  ],
+  "evidence_artifacts": {
+    "artifacts_saved": [
+      "evidence/v0.3.3/autonomy/TENANT_003/operations_93163ec7-38a4-4e3a-b923-1ff8ddaff9fe.json",
+      "evidence/v0.3.3/autonomy/TENANT_003/violations_93163ec7-38a4-4e3a-b923-1ff8ddaff9fe.json",
+      "evidence/v0.3.3/autonomy/TENANT_003/compensation_93163ec7-38a4-4e3a-b923-1ff8ddaff9fe.json"
+    ],
+    "output_directory": "evidence/v0.3.3/autonomy/TENANT_003"
+  }
+}

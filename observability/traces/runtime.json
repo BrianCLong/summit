@@ -1,0 +1,16 @@
+{
+  "$schema": "https://intelgraph.example/schemas/otel-trace-sample-1.json",
+  "description": "Sample trace export for runtime benchmark validation",
+  "spans": [
+    {
+      "name": "mcp.session.start",
+      "attributes": {
+        "tenant_id": "demo",
+        "benchmark_id": "pooler-baseline-2025-09"
+      },
+      "metrics": {
+        "duration_ms": 214
+      }
+    }
+  ]
+}

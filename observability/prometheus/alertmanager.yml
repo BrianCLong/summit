@@ -1,0 +1,116 @@
+global:
+  resolve_timeout: 5m
+  slack_api_url: '${SLACK_WEBHOOK_URL}'
+
+route:
+  group_by: ['alertname', 'severity', 'slo']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+  routes:
+    # Critical alerts go to PagerDuty and Slack
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      continue: true
+
+    # Warning alerts go to Slack only
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+
+    # SLO-specific routing
+    - match:
+        slo: opa_latency
+      receiver: 'opa-slo-alerts'
+
+receivers:
+  # Default receiver (Slack)
+  - name: 'default'
+    slack_configs:
+      - channel: '#alerts'
+        title: '{{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Dashboard:* {{ .Annotations.dashboard_url }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          *Severity:* {{ .Labels.severity }}
+          {{ end }}
+        send_resolved: true
+
+  # Critical alerts (PagerDuty + Slack)
+  - name: 'critical-alerts'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY}'
+        description: '{{ .GroupLabels.alertname }}: {{ .Annotations.summary }}'
+        details:
+          firing: '{{ template "pagerduty.default.instances" .Alerts.Firing }}'
+          num_firing: '{{ .Alerts.Firing | len }}'
+          num_resolved: '{{ .Alerts.Resolved | len }}'
+          resolved: '{{ template "pagerduty.default.instances" .Alerts.Resolved }}'
+    slack_configs:
+      - channel: '#critical-alerts'
+        color: 'danger'
+        title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Dashboard:* <{{ .Annotations.dashboard_url }}|View Dashboard>
+          *Runbook:* <{{ .Annotations.runbook_url }}|View Runbook>
+          *Panel UID:* {{ .Labels.panel_uid }}
+          {{ end }}
+        send_resolved: true
+
+  # Warning alerts (Slack only)
+  - name: 'warning-alerts'
+    slack_configs:
+      - channel: '#slo-warnings'
+        color: 'warning'
+        title: '⚠️ WARNING: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Dashboard:* <{{ .Annotations.dashboard_url }}|View Dashboard>
+          *Runbook:* <{{ .Annotations.runbook_url }}|View Runbook>
+          *Panel UID:* {{ .Labels.panel_uid }}
+          {{ end }}
+        send_resolved: true
+
+  # OPA SLO-specific alerts
+  - name: 'opa-slo-alerts'
+    slack_configs:
+      - channel: '#opa-performance'
+        color: 'warning'
+        title: '🔍 OPA SLO Violation: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Dashboard:* <{{ .Annotations.dashboard_url }}|View OPA Panel>
+          *Runbook:* <{{ .Annotations.runbook_url }}|Troubleshooting Guide>
+          *Exemplar Query:* `{{ .Annotations.exemplar_query }}`
+          *Panel UID:* {{ .Labels.panel_uid }}
+
+          **Trace Exemplars**: Click the dashboard link and check trace exemplars for slow requests.
+          {{ end }}
+        send_resolved: true
+
+inhibit_rules:
+  # Inhibit warning alerts if critical alert is firing for same SLO
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['slo']
+
+  # Inhibit individual SLO alerts if multiple SLO violation alert is firing
+  - source_match:
+      alertname: 'MultipleSLOViolations'
+    target_match_re:
+      alertname: '.*SLOViolation'
+    equal: ['instance']

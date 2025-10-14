@@ -1,0 +1,21 @@
+import { issueHIT, verifyHIT } from '../src';
+
+describe('HRN', () => {
+  const nodes = [
+    { id: 'node1', publicKey: 'pub1', weight: 1 },
+    { id: 'node2', publicKey: 'pub2', weight: 1 },
+    { id: 'node3', publicKey: 'pub3', weight: 1 },
+  ];
+
+  test('should issue and verify HIT with enough signatures', () => {
+    const signatures = ['sig1', 'sig2']; // 2/3 of nodes
+    const hit = issueHIT('subject1', nodes, signatures);
+    expect(hit).toBeDefined();
+    expect(verifyHIT(hit, nodes)).toBe(true);
+  });
+
+  test('should throw error if not enough signatures', () => {
+    const signatures = ['sig1']; // Less than 2/3
+    expect(() => issueHIT('subject1', nodes, signatures)).toThrow("Not enough weighted signatures to issue HIT");
+  });
+});
