@@ -1,0 +1,38 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disclosure-bundle-cosign
+  annotations:
+    policies.kyverno.io/title: Require cosign verification for disclosure bundles
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/severity: high
+spec:
+  validationFailureAction: enforce
+  rules:
+    - name: require-cosign-verification-label
+      match:
+        resources:
+          kinds:
+            - BatchJob
+          namespaces:
+            - disclosures
+      validate:
+        message: >-
+          Disclosure export jobs must include cosign.sigstore.dev/verified=true to satisfy Starkey dissent controls.
+        pattern:
+          metadata:
+            labels:
+              cosign.sigstore.dev/verified: "true"
+    - name: require-slsa-attestation-digest
+      match:
+        resources:
+          kinds:
+            - BatchJob
+          namespaces:
+            - disclosures
+      validate:
+        message: Disclosure exports must provide a SHA256 digest annotation for the signed bundle.
+        pattern:
+          metadata:
+            annotations:
+              disclosures.intelgraph.com/bundle-sha256: "?*"

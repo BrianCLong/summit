@@ -1,1 +1,1 @@
--       @your-org/maintainers
+*       @your-org/maintainers

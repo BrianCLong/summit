@@ -52,14 +52,10 @@ describe('VideoFrameExtractor', () => {
   it('should extract frames with default options', async () => {
     const { frames, audio } = await extractor.extract(mockVideoPath);
 
-    expect(fs.mkdir).toHaveBeenCalledWith(expect.stringContaining(mockTempDir), {
-      recursive: true,
-    });
+    expect(fs.mkdir).toHaveBeenCalledWith(expect.stringContaining(mockTempDir), { recursive: true });
     expect(ffmpeg).toHaveBeenCalledWith(mockVideoPath);
     expect((ffmpeg as any).mock.results[0].value.fps).toHaveBeenCalledWith(1); // Default fps
-    expect((ffmpeg as any).mock.results[0].value.output).toHaveBeenCalledWith(
-      expect.stringContaining('frame-%s.png'),
-    );
+    expect((ffmpeg as any).mock.results[0].value.output).toHaveBeenCalledWith(expect.stringContaining('frame-%s.png'));
     expect((ffmpeg as any).mock.results[0].value.run).toHaveBeenCalled();
     expect(frames.length).toBe(2);
     expect(frames[0].framePath).toContain('frame-0.000.png');
