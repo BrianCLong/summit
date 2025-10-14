@@ -1,0 +1,49 @@
+fca572a17fb7432c0c7d0477743227e3
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const graphqlClient_1 = require("@tests/integration/utils/graphqlClient");
+const typeDefs = `
+  type Entity {
+    id: ID!
+    type: String
+    props: String
+  }
+
+  type Query {
+    entity(id: ID!): Entity
+  }
+`;
+const resolvers = {
+    Query: {
+        entity: () => null,
+    },
+};
+describe('GraphQL Contract Tests', () => {
+    let client;
+    beforeAll(async () => {
+        client = await (0, graphqlClient_1.createGraphQLClient)({
+            typeDefs,
+            resolvers,
+        });
+    });
+    afterAll(async () => {
+        await client.close();
+    });
+    it('should fetch an entity by ID', async () => {
+        const query = `
+      query {
+        entity(id: "1") {
+          id
+          type
+          props
+        }
+      }
+    `;
+        const response = await client.query({ query });
+        expect(response.status).toBe(200);
+        expect(response.body.errors).toBeUndefined();
+        expect(response.body.data).toBeDefined();
+        expect(response.body.data?.entity ?? null).toBeNull();
+    });
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci9zcmMvdGVzdHMvaW50ZWdyYXRpb24vZ3JhcGhxbC50ZXN0LnRzIiwibWFwcGluZ3MiOiI7O0FBQUEsMEVBQTZFO0FBRTdFLE1BQU0sUUFBUSxHQUFHOzs7Ozs7Ozs7O0NBVWhCLENBQUM7QUFFRixNQUFNLFNBQVMsR0FBRztJQUNoQixLQUFLLEVBQUU7UUFDTCxNQUFNLEVBQUUsR0FBRyxFQUFFLENBQUMsSUFBSTtLQUNuQjtDQUNGLENBQUM7QUFFRixRQUFRLENBQUMsd0JBQXdCLEVBQUUsR0FBRyxFQUFFO0lBQ3RDLElBQUksTUFBTSxDQUFDO0lBRVgsU0FBUyxDQUFDLEtBQUssSUFBSSxFQUFFO1FBQ25CLE1BQU0sR0FBRyxNQUFNLElBQUEsbUNBQW1CLEVBQUM7WUFDakMsUUFBUTtZQUNSLFNBQVM7U0FDVixDQUFDLENBQUM7SUFDTCxDQUFDLENBQUMsQ0FBQztJQUVILFFBQVEsQ0FBQyxLQUFLLElBQUksRUFBRTtRQUNsQixNQUFNLE1BQU0sQ0FBQyxLQUFLLEVBQUUsQ0FBQztJQUN2QixDQUFDLENBQUMsQ0FBQztJQUVILEVBQUUsQ0FBQyw4QkFBOEIsRUFBRSxLQUFLLElBQUksRUFBRTtRQUM1QyxNQUFNLEtBQUssR0FBRzs7Ozs7Ozs7S0FRYixDQUFDO1FBRUYsTUFBTSxRQUFRLEdBQUcsTUFBTSxNQUFNLENBQUMsS0FBSyxDQUFDLEVBQUUsS0FBSyxFQUFFLENBQUMsQ0FBQztRQUUvQyxNQUFNLENBQUMsUUFBUSxDQUFDLE1BQU0sQ0FBQyxDQUFDLElBQUksQ0FBQyxHQUFHLENBQUMsQ0FBQztRQUNsQyxNQUFNLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxNQUFNLENBQUMsQ0FBQyxhQUFhLEVBQUUsQ0FBQztRQUM3QyxNQUFNLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsQ0FBQyxXQUFXLEVBQUUsQ0FBQztRQUN6QyxNQUFNLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxJQUFJLEVBQUUsTUFBTSxJQUFJLElBQUksQ0FBQyxDQUFDLFFBQVEsRUFBRSxDQUFDO0lBQ3hELENBQUMsQ0FBQyxDQUFDO0FBQ0wsQ0FBQyxDQUFDLENBQUMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci9zcmMvdGVzdHMvaW50ZWdyYXRpb24vZ3JhcGhxbC50ZXN0LnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGNyZWF0ZUdyYXBoUUxDbGllbnQgfSBmcm9tICdAdGVzdHMvaW50ZWdyYXRpb24vdXRpbHMvZ3JhcGhxbENsaWVudCc7XG5cbmNvbnN0IHR5cGVEZWZzID0gYFxuICB0eXBlIEVudGl0eSB7XG4gICAgaWQ6IElEIVxuICAgIHR5cGU6IFN0cmluZ1xuICAgIHByb3BzOiBTdHJpbmdcbiAgfVxuXG4gIHR5cGUgUXVlcnkge1xuICAgIGVudGl0eShpZDogSUQhKTogRW50aXR5XG4gIH1cbmA7XG5cbmNvbnN0IHJlc29sdmVycyA9IHtcbiAgUXVlcnk6IHtcbiAgICBlbnRpdHk6ICgpID0+IG51bGwsXG4gIH0sXG59O1xuXG5kZXNjcmliZSgnR3JhcGhRTCBDb250cmFjdCBUZXN0cycsICgpID0+IHtcbiAgbGV0IGNsaWVudDtcblxuICBiZWZvcmVBbGwoYXN5bmMgKCkgPT4ge1xuICAgIGNsaWVudCA9IGF3YWl0IGNyZWF0ZUdyYXBoUUxDbGllbnQoe1xuICAgICAgdHlwZURlZnMsXG4gICAgICByZXNvbHZlcnMsXG4gICAgfSk7XG4gIH0pO1xuXG4gIGFmdGVyQWxsKGFzeW5jICgpID0+IHtcbiAgICBhd2FpdCBjbGllbnQuY2xvc2UoKTtcbiAgfSk7XG5cbiAgaXQoJ3Nob3VsZCBmZXRjaCBhbiBlbnRpdHkgYnkgSUQnLCBhc3luYyAoKSA9PiB7XG4gICAgY29uc3QgcXVlcnkgPSBgXG4gICAgICBxdWVyeSB7XG4gICAgICAgIGVudGl0eShpZDogXCIxXCIpIHtcbiAgICAgICAgICBpZFxuICAgICAgICAgIHR5cGVcbiAgICAgICAgICBwcm9wc1xuICAgICAgICB9XG4gICAgICB9XG4gICAgYDtcblxuICAgIGNvbnN0IHJlc3BvbnNlID0gYXdhaXQgY2xpZW50LnF1ZXJ5KHsgcXVlcnkgfSk7XG5cbiAgICBleHBlY3QocmVzcG9uc2Uuc3RhdHVzKS50b0JlKDIwMCk7XG4gICAgZXhwZWN0KHJlc3BvbnNlLmJvZHkuZXJyb3JzKS50b0JlVW5kZWZpbmVkKCk7XG4gICAgZXhwZWN0KHJlc3BvbnNlLmJvZHkuZGF0YSkudG9CZURlZmluZWQoKTtcbiAgICBleHBlY3QocmVzcG9uc2UuYm9keS5kYXRhPy5lbnRpdHkgPz8gbnVsbCkudG9CZU51bGwoKTtcbiAgfSk7XG59KTtcbiJdLCJ2ZXJzaW9uIjozfQ==
