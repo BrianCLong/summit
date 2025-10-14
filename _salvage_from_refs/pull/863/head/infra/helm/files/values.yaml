@@ -1,3 +1,0 @@
-image: files:latest
-service:
-  port: 4020

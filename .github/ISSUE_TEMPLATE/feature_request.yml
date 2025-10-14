@@ -1,21 +1,22 @@
 name: Feature request
-description: Propose new functionality
-labels: ['type:feature']
+labels: ["prio:P1"]
 body:
   - type: textarea
-    id: problem
+    id: context
     attributes:
-      label: Problem
-      description: What problem does this solve?
-    validations:
-      required: true
+      label: Context & problem
+      description: Who needs this and why?
   - type: textarea
-    id: proposal
+    id: acceptance
     attributes:
-      label: Proposal
-      description: Describe the solution
-  - type: textarea
-    id: ac
+      label: Acceptance criteria
+      description: Gherkin-style tests or measurable outcomes
+  - type: dropdown
+    id: area
     attributes:
-      label: Acceptance Criteria
-      description: List checkboxes of AC
+      label: Area
+      options: [Graph, Ingest, ER, Analytics, Copilot, Governance, Prov-Ledger, Ops, UI, Docs, Fuzzer]
+  - type: input
+    id: exit
+    attributes:
+      label: Exit Criteria

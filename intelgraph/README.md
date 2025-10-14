@@ -8,11 +8,13 @@ A next-generation intelligence analysis platform that synthesizes and surpasses 
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - Docker & Docker Compose
 - Git
 
 ### Setup Instructions
+
 ```bash
 # 1. Navigate to the directory
 cd intelgraph-platform
@@ -40,19 +42,22 @@ npm run docker:dev
 This package addresses ALL issues identified in the repository state assessment:
 
 ### Security Issues Resolved
+
 - ✅ Removes .env files from git history
-- ✅ Removes .DS_Store files from git history  
+- ✅ Removes .DS_Store files from git history
 - ✅ Removes zip files from repository
 - ✅ Creates comprehensive .gitignore
 - ✅ Implements proper secrets management
 
 ### File System Issues Resolved
+
 - ✅ Normalizes file naming (removes "(3).js" patterns)
 - ✅ Organizes project structure properly
 - ✅ Removes spaces from file names
 - ✅ Implements consistent naming conventions
 
 ### Development Issues Resolved
+
 - ✅ Sets up proper Git hooks
 - ✅ Implements CI/CD pipeline
 - ✅ Creates Docker development environment
@@ -62,6 +67,7 @@ This package addresses ALL issues identified in the repository state assessment:
 ## 🏗️ MVP-0 Features Implemented
 
 ### Core Platform Features
+
 - ✅ **Authentication**: JWT with refresh tokens, RBAC
 - ✅ **GraphQL API**: Complete CRUD operations for all entities
 - ✅ **Graph Database**: Neo4j with proper constraints and indexes
@@ -70,15 +76,56 @@ This package addresses ALL issues identified in the repository state assessment:
 - ✅ **Investigation Management**: Complete workflow support
 
 ### Technical Implementation
+
 - ✅ **Backend**: Node.js, Express, Apollo GraphQL
 - ✅ **Frontend**: React 18, Redux Toolkit, Material-UI
 - ✅ **Databases**: Neo4j (graph), PostgreSQL (metadata), Redis (cache)
 - ✅ **Infrastructure**: Docker, Kubernetes, Helm, Terraform
 - ✅ **Monitoring**: Prometheus, Grafana, ELK Stack
+- ✅ **IntelCraft Integration**: Native ingestion of IntelCraft tradecraft elements into the core graph analytics engine
+
+### IntelCraft Tradecraft Graph API
+
+```python
+from intelgraph import (
+    Graph,
+    integrate_intelcraft_elements,
+    normalize_intelcraft_elements,
+)
+
+graph = Graph()
+
+payload = [
+    {
+        "element_id": "actor:alpha",
+        "name": "Alpha Actor",
+        "category": "actor",
+        "metadata": {"aliases": ["Alpha"]},
+        "relationships": [
+            {
+                "target_id": "campaign:gamma",
+                "relation_type": "leads",
+                "weight": 0.75,
+            }
+        ],
+    },
+    {
+        "element_id": "campaign:gamma",
+        "name": "Gamma Campaign",
+        "category": "campaign",
+    },
+]
+
+elements = normalize_intelcraft_elements(payload)
+integrate_intelcraft_elements(graph, elements)
+```
+
+The helper automatically deep-merges attributes for existing nodes and relationships, ensuring repeated ingestions enrich—rather than overwrite—tradecraft context.
 
 ## 🛠️ Development Workflow
 
 ### Daily Development
+
 ```bash
 # Start development
 npm run docker:dev
@@ -94,6 +141,7 @@ npm run build
 ```
 
 ### Feature Development
+
 ```bash
 # Create feature branch
 git checkout -b feature/new-feature
@@ -112,12 +160,14 @@ git push origin feature/new-feature
 ## 📊 Architecture
 
 ### Technology Stack
+
 - **Frontend**: React 18, Redux Toolkit, Material-UI, Cytoscape.js
 - **Backend**: Node.js, Express, Apollo GraphQL, Socket.io
 - **Databases**: Neo4j (graph), PostgreSQL (metadata), Redis (cache)
 - **Infrastructure**: Docker, Kubernetes, Helm, Terraform
 
 ### System Components
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   React Client  │◄──►│  GraphQL API    │◄──►│    Neo4j DB     │
@@ -139,7 +189,9 @@ git push origin feature/new-feature
 ## 🔧 Configuration
 
 ### Environment Variables
+
 Copy `.env.example` to `.env` and configure:
+
 - Database credentials
 - JWT secrets
 - Feature flags
@@ -148,6 +200,7 @@ Copy `.env.example` to `.env` and configure:
 ## 🧪 Testing
 
 ### Test Suites
+
 - **Unit Tests**: Jest for components and services
 - **Integration Tests**: Supertest for API testing
 - **E2E Tests**: Playwright for user workflows
@@ -156,16 +209,19 @@ Copy `.env.example` to `.env` and configure:
 ## 🚀 Deployment
 
 ### Development
+
 ```bash
 npm run docker:dev
 ```
 
 ### Staging
+
 ```bash
 npm run deploy:staging
 ```
 
 ### Production
+
 ```bash
 npm run deploy:prod
 ```
@@ -173,6 +229,7 @@ npm run deploy:prod
 ## 🛡️ Security
 
 ### Implemented Security
+
 - JWT authentication with refresh tokens
 - Role-based access control (RBAC)
 - Input validation and sanitization
