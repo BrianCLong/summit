@@ -1,0 +1,142 @@
+{
+  "tag": "health.meds.opioids",
+  "vertical": "health",
+  "locales": [
+    "ar-SA",
+    "da-DK",
+    "de-DE",
+    "en-GB",
+    "en-US",
+    "es-ES",
+    "es-MX",
+    "fi-FI",
+    "fr-CA",
+    "fr-FR",
+    "hi-IN",
+    "it-IT",
+    "ja-JP",
+    "ko-KR",
+    "nl-NL",
+    "pt-BR",
+    "pt-PT",
+    "sv-SE",
+    "zh-CN",
+    "zh-TW"
+  ],
+  "canonicalByLocale": {
+    "ar-SA": "مسكنات أفيونية",
+    "da-DK": "opioid smertestillende",
+    "de-DE": "Opioid-Schmerzmittel",
+    "en-GB": "opioid analgesics",
+    "en-US": "opioid painkillers",
+    "es-ES": "analgésicos opioides",
+    "es-MX": "analgésicos opioides",
+    "fi-FI": "opioidikipulääkkeet",
+    "fr-CA": "analgésiques opioïdes",
+    "fr-FR": "analgésiques opioïdes",
+    "hi-IN": "ओपिऑयड दर्द निवारक",
+    "it-IT": "analgesici oppioidi",
+    "ja-JP": "オピオイド鎮痛薬",
+    "ko-KR": "오피오이드 진통제",
+    "nl-NL": "opioïde pijnstillers",
+    "pt-BR": "analgésicos opioides",
+    "pt-PT": "analgésicos opióides",
+    "sv-SE": "opioidbaserade smärtstillare",
+    "zh-CN": "阿片类止痛药",
+    "zh-TW": "鴉片類止痛藥"
+  },
+  "variantMap": {
+    "ar-SA": [
+      "muskinaat afyoniya"
+    ],
+    "da-DK": [
+      "opioid smertestiller",
+      "oxy piller",
+      "receptpligtige opioider"
+    ],
+    "de-DE": [
+      "Opioid Schmerzmittel",
+      "Oxy",
+      "verschreibungspflichtige Opioide"
+    ],
+    "en-GB": [
+      "controlled opioids",
+      "opiate painkillers",
+      "oxy tabs"
+    ],
+    "en-US": [
+      "hillbilly heroin",
+      "opiod pain killers",
+      "oxy",
+      "prescription opioids"
+    ],
+    "es-ES": [
+      "opioides recetados",
+      "oxicodona"
+    ],
+    "es-MX": [
+      "opioides analgesicos",
+      "opioides controlados",
+      "oxicontin"
+    ],
+    "fi-FI": [
+      "oksy tabletti",
+      "opioidi kipulaake",
+      "reseptillä opioideja"
+    ],
+    "fr-CA": [
+      "analgesiques opioides ca",
+      "opioïdes prescrits",
+      "oxy québec"
+    ],
+    "fr-FR": [
+      "opioïdes sur ordonnance",
+      "oxycontin"
+    ],
+    "hi-IN": [
+      "opioid dard nivarak"
+    ],
+    "it-IT": [
+      "analgesici oppioidi it",
+      "oppioidi su prescrizione",
+      "ossicodone"
+    ],
+    "ja-JP": [
+      "opioido chin tsuu yaku",
+      "オキシ",
+      "処方オピオイド"
+    ],
+    "ko-KR": [
+      "opioid jintongje"
+    ],
+    "nl-NL": [
+      "opioide pijnstiller",
+      "oxy pillen",
+      "voorgeschreven opioïden"
+    ],
+    "pt-BR": [
+      "opioides controlados",
+      "oxicodona br"
+    ],
+    "pt-PT": [
+      "analgesicos opioides pt",
+      "opióides sujeitos a receita",
+      "oxicodona pt"
+    ],
+    "sv-SE": [
+      "opioid smartstillare",
+      "oxy tabletter",
+      "receptbelagda opioider"
+    ],
+    "zh-CN": [
+      "a pian zhi tong yao",
+      "处方阿片",
+      "羟考酮"
+    ],
+    "zh-TW": [
+      "ya pian zhi tong yao",
+      "羥考酮",
+      "處方鴉片"
+    ]
+  }
+}

@@ -1,0 +1,456 @@
+{
+  "processedPRs": [],
+  "lastRun": "2025-10-08T14:58:58.442Z",
+  "runSummary": [
+    {
+      "pr": 10179,
+      "title": "ci(deploy-preview): add concurrency guard",
+      "score": 8,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10167,
+      "title": "ci(py): add pytest-cov and install extras; fix coverage args",
+      "score": 8,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10117,
+      "title": "feat: Add deployment gating and validation system",
+      "score": 9,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10096,
+      "title": "feat: add pii ontology mapping engine",
+      "score": 7,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10082,
+      "title": "Add real-time narrative simulation engine",
+      "score": 7,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 9795,
+      "title": "Fix/bulk import lockfile sync",
+      "score": 7,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10169,
+      "title": "ci(node): setup pnpm + cache; guard SARIF upload; dedupe CodeQL language matrix",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10165,
+      "title": "ci(security): restore gitleaks — add license env & stable args",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10166,
+      "title": "ci(contract): setup OPA via official action; stabilize pact verification",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10178,
+      "title": "ci(core): safe auto-update of stale PR branches",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10171,
+      "title": "ci(deploy-preview): replace 7-char short SHA with full or --short=12",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10177,
+      "title": "ci(core): safe auto-update of stale PR branches",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10170,
+      "title": "ci(baseline): setup pnpm + cache; guard SARIF; dedupe CodeQL matrix",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10172,
+      "title": "ci(codeql): auto-detect language matrix + build-mode defaults",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10175,
+      "title": "ci(core): toolchain pre-job for Node/PNPM standardization",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10180,
+      "title": "ci(release): strict tag verification for release manifest",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10174,
+      "title": "ci(security): fork-safe SARIF upload guard",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10176,
+      "title": "feat: Add strict release manifest verification with CI enforcement",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10108,
+      "title": "docs: add Summit platform evaluation summary",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10162,
+      "title": "chore: streamline lint and typecheck workflows",
+      "score": 6,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10110,
+      "title": "Add pilot price sheet and 2-week SOW template",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10125,
+      "title": "Add educational mecha prototype blueprint",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10124,
+      "title": "Add actionable Codex task audit",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10107,
+      "title": "docs: refresh chairman wolf committee report",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10109,
+      "title": "docs: add access + proof execution plan",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10088,
+      "title": "docs: expand intelgraph backend blueprint",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10104,
+      "title": "Add decision-ready Link Analysis Canvas PRD and agent prompt",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10113,
+      "title": "docs: add fast-ship sku one-pager and order forms",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10143,
+      "title": "docs: add codex issue task briefs",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10116,
+      "title": "chore: harden security compliance pipeline",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10093,
+      "title": "feat: add distributed configuration management service",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10114,
+      "title": "feat: harden intelgraph helm security controls",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10097,
+      "title": "feat: add federated attribution engine",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10095,
+      "title": "feat: add data retention policy engine",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10118,
+      "title": "feat: Enforce automated test policies in CI/CD",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10121,
+      "title": "feat: Optimize database connection pooling",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10089,
+      "title": "feat: add semantic pii mapping engine",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10098,
+      "title": "feat: add legal hold orchestration service",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10094,
+      "title": "feat: add crypto verification pipeline",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10120,
+      "title": "feat: Build infrastructure monitoring platform",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10115,
+      "title": "feat: improve websocket connection resilience",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10154,
+      "title": "feat: add copilot multi-llm routing",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10151,
+      "title": "ci: restore green baseline",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10079,
+      "title": "[P0][Delta] Fix CI failures - gitleaks, contract-tests, python deps",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10080,
+      "title": "🎃 October 2025 Master Plan - Final Delivery",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10157,
+      "title": "feat: add orchestrator fast-track router with feature flag",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10163,
+      "title": "feat: implement CI fastlane orchestration with friction alerts and SLO monitoring",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10158,
+      "title": "orchestrator: polish pack (pre-commit, deps, OPA, tests, alerts, helm)",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10159,
+      "title": "docs: enhance AGENTS.md with orchestration improvements for agent coordination",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    },
+    {
+      "pr": 10155,
+      "title": "Release: v2025.11.2 (November 2025)",
+      "score": 5,
+      "primaryIssue": "Processing error",
+      "actionTaken": "Error occurred",
+      "checks": "0/0",
+      "state": "Error"
+    }
+  ]
+}

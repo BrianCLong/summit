@@ -1,0 +1,48 @@
+groups:
+  - name: mc-v035-slo-alerts
+    interval: 30s
+    rules:
+      - alert: AttestationJWSFailureBudget
+        expr: mc_attest_jws_failure_rate_15m > 0.001
+        for: 15m
+        labels:
+          severity: page
+          service: agent-workbench
+          slo: jws-failure-rate
+        annotations:
+          summary: "JWS attestation failures >0.1%"
+          description: |
+            JWS failure rate over 15m is {{ $value | printf "%.4f" }} (>0.1%).
+            Investigate signing/verification pipeline, JWKS, and response attestations.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.5-ops.md#jws-failure-rate
+          dashboard_url: https://grafana.example.com/d/mc-v035-tiles?var-tenant={{ $labels.tenant | urlquery }}&from=now-1h&to=now
+
+      - alert: BudgetV2NoiseHigh
+        expr: mc_budget_v2_noise_fp_rate_15m > 0.05
+        for: 15m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: budget-noise
+        annotations:
+          summary: "Budget v2 false-positive rate >5%"
+          description: |
+            Budget v2 noise (FP) rate is {{ $value | printf "%.2%" }} over 15m.
+            Tune ML thresholds/dampening or fall back to static budgets.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.5-ops.md#budget-noise
+          dashboard_url: https://grafana.example.com/d/mc-v035-tiles?var-tenant={{ $labels.tenant | urlquery }}&from=now-1h&to=now
+
+      - alert: CanaryCompositeScoreLow
+        expr: mc_canary_composite_score < 0.85
+        for: 10m
+        labels:
+          severity: page
+          service: agent-workbench
+          slo: canary-composite
+        annotations:
+          summary: "Composite canary score below promote threshold"
+          description: |
+            Composite score is {{ $value | printf "%.2f" }} (<0.85). Auto‑HOLD expected.
+            Inspect p95/error/cost/p99 contributors and extend bake or roll back.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.5-ops.md#canary-composite
+          dashboard_url: https://grafana.example.com/d/mc-v035-tiles?var-tenant={{ $labels.tenant | urlquery }}&from=now-30m&to=now

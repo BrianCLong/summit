@@ -5,8 +5,8 @@
  * Prevents cross-tenant data access at the resolver level.
  */
 import { GraphQLError } from 'graphql';
-import baseLogger from '../config/logger';
-const logger = baseLogger.child({ name: 'withTenant' });
+import pino from 'pino';
+const logger = pino({ name: 'withTenant' });
 /**
  * Middleware factory that wraps resolvers to enforce tenant scoping
  */
@@ -56,3 +56,4 @@ export const addTenantFilter = (cypher, params, tenantId) => {
         params: { ...params, tenantId },
     };
 };
+//# sourceMappingURL=withTenant.js.map

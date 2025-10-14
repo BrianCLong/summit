@@ -1,0 +1,125 @@
+groups:
+  - name: mc-tenant-budgets
+    interval: 60s
+    rules:
+      # Recording rules for tenant budget calculations
+      - record: mc:tenant_budget_utilization:rate5m
+        expr: |
+          (
+            mc_tenant_cost_daily_usd / mc_tenant_budget_limit_usd
+          ) * 100
+        labels:
+          rule_type: "budget_utilization"
+
+      - record: mc:tenant_budget_burn_rate:1h
+        expr: |
+          (
+            rate(mc_tenant_cost_total_usd[1h]) * 24 * 30
+          ) / mc_tenant_budget_monthly_usd
+        labels:
+          rule_type: "budget_burn_rate"
+
+      - record: mc:tenant_budget_remaining:current
+        expr: |
+          mc_tenant_budget_limit_usd - mc_tenant_cost_daily_usd
+        labels:
+          rule_type: "budget_remaining"
+
+      # Alert rules for budget thresholds
+      - alert: TenantBudgetWarning80Percent
+        expr: mc:tenant_budget_utilization:rate5m >= 80
+        for: 5m
+        labels:
+          severity: warning
+          tenant: "{{ $labels.tenant }}"
+          alert_type: "budget_warning"
+        annotations:
+          summary: "Tenant {{ $labels.tenant }} budget utilization at {{ $value }}%"
+          description: |
+            Tenant {{ $labels.tenant }} has reached {{ $value | humanizePercentage }} of daily budget limit.
+            Current cost: ${{ with query "mc_tenant_cost_daily_usd{tenant=\"" }}{{ . | first | value | humanize }}{{ end }}
+            Budget limit: ${{ with query "mc_tenant_budget_limit_usd{tenant=\"" }}{{ . | first | value | humanize }}{{ end }}
+          runbook_url: "https://runbooks.example.com/mc-platform/tenant-budget-warning"
+          slack_channel: "#mc-platform-alerts"
+
+      - alert: TenantBudgetCritical90Percent
+        expr: mc:tenant_budget_utilization:rate5m >= 90
+        for: 2m
+        labels:
+          severity: critical
+          tenant: "{{ $labels.tenant }}"
+          alert_type: "budget_critical"
+          pager_duty: "true"
+        annotations:
+          summary: "CRITICAL: Tenant {{ $labels.tenant }} budget utilization at {{ $value }}%"
+          description: |
+            CRITICAL: Tenant {{ $labels.tenant }} has reached {{ $value | humanizePercentage }} of daily budget limit.
+            Immediate action required to prevent budget overrun.
+            Current cost: ${{ with query "mc_tenant_cost_daily_usd{tenant=\"" }}{{ . | first | value | humanize }}{{ end }}
+            Budget limit: ${{ with query "mc_tenant_budget_limit_usd{tenant=\"" }}{{ . | first | value | humanize }}{{ end }}
+            Projected monthly: ${{ with query "mc:tenant_budget_burn_rate:1h{tenant=\"" }}{{ . | first | value | humanize }}{{ end }}
+          runbook_url: "https://runbooks.example.com/mc-platform/tenant-budget-critical"
+          slack_channel: "#mc-platform-alerts"
+          pager_duty_key: "mc-tenant-budget-critical"
+
+      - alert: TenantBudgetBurnRateHigh
+        expr: mc:tenant_budget_burn_rate:1h > 1.2
+        for: 10m
+        labels:
+          severity: warning
+          tenant: "{{ $labels.tenant }}"
+          alert_type: "budget_burn_rate"
+        annotations:
+          summary: "Tenant {{ $labels.tenant }} budget burn rate {{ $value }}x above normal"
+          description: |
+            Tenant {{ $labels.tenant }} current burn rate is {{ $value | humanizePercentage }} above projected monthly budget.
+            At current rate, monthly budget will be exceeded by {{ $value | humanizePercentage }}.
+            Review usage patterns and consider optimization.
+          runbook_url: "https://runbooks.example.com/mc-platform/tenant-budget-burn-rate"
+          slack_channel: "#mc-platform-alerts"
+
+      # Cost anomaly detection
+      - alert: TenantCostAnomaly
+        expr: |
+          (
+            mc_tenant_cost_daily_usd -
+            avg_over_time(mc_tenant_cost_daily_usd[7d])
+          ) / avg_over_time(mc_tenant_cost_daily_usd[7d]) > 0.5
+        for: 15m
+        labels:
+          severity: warning
+          tenant: "{{ $labels.tenant }}"
+          alert_type: "cost_anomaly"
+        annotations:
+          summary: "Tenant {{ $labels.tenant }} cost anomaly detected"
+          description: |
+            Tenant {{ $labels.tenant }} daily cost has increased {{ $value | humanizePercentage }} above 7-day average.
+            Current: ${{ with query "mc_tenant_cost_daily_usd{tenant=\"" }}{{ . | first | value | humanize }}{{ end }}
+            7-day average: ${{ with query "avg_over_time(mc_tenant_cost_daily_usd{tenant=\"" }}{{ . | first | value | humanize }}{{ end }}
+            Investigate usage patterns and resource scaling.
+          runbook_url: "https://runbooks.example.com/mc-platform/tenant-cost-anomaly"
+          slack_channel: "#mc-platform-alerts"
+
+      # Budget forecasting alerts
+      - alert: TenantBudgetExhaustionForecasted
+        expr: |
+          (
+            mc:tenant_budget_remaining:current /
+            rate(mc_tenant_cost_total_usd[6h]) / 3600 / 24
+          ) < 3
+        for: 30m
+        labels:
+          severity: critical
+          tenant: "{{ $labels.tenant }}"
+          alert_type: "budget_exhaustion_forecast"
+          pager_duty: "true"
+        annotations:
+          summary: "Tenant {{ $labels.tenant }} budget exhaustion forecasted in {{ $value }} days"
+          description: |
+            Based on current spend rate, tenant {{ $labels.tenant }} will exhaust budget in {{ $value }} days.
+            Remaining budget: ${{ with query "mc:tenant_budget_remaining:current{tenant=\"" }}{{ . | first | value | humanize }}{{ end }}
+            Current daily rate: ${{ with query "rate(mc_tenant_cost_total_usd{tenant=\"" }}{{ . | first | value | humanize }}{{ end }}
+            Immediate intervention required.
+          runbook_url: "https://runbooks.example.com/mc-platform/tenant-budget-exhaustion"
+          slack_channel: "#mc-platform-alerts"
+          pager_duty_key: "mc-tenant-budget-exhaustion"
