@@ -1,8 +1,8 @@
-import { getNeo4jDriver } from '../config/database.js';
+import { getNeo4jDriver } from '../db/neo4j.js';
 import { getPostgresPool } from '../db/postgres.js';
-import { randomUUID as uuidv4 } from 'crypto';
-import baseLogger from '../config/logger';
-const logger = baseLogger.child({ name: 'sampleData' });
+import { v4 as uuidv4 } from 'uuid';
+import pino from 'pino';
+const logger = pino();
 export async function createSampleData() {
     logger.info('Creating sample data for development...');
     try {
@@ -28,8 +28,8 @@ async function createSampleEntities() {
                     name: 'John Smith',
                     email: 'john.smith@example.com',
                     phone: '+1-555-0101',
-                    location: 'New York, NY',
-                },
+                    location: 'New York, NY'
+                }
             },
             {
                 id: uuidv4(),
@@ -38,8 +38,8 @@ async function createSampleEntities() {
                     name: 'Tech Corp Industries',
                     industry: 'Technology',
                     headquarters: 'San Francisco, CA',
-                    website: 'https://techcorp.example.com',
-                },
+                    website: 'https://techcorp.example.com'
+                }
             },
             {
                 id: uuidv4(),
@@ -48,8 +48,8 @@ async function createSampleEntities() {
                     name: 'Data Breach Incident',
                     date: '2024-08-01',
                     severity: 'HIGH',
-                    status: 'INVESTIGATING',
-                },
+                    status: 'INVESTIGATING'
+                }
             },
             {
                 id: uuidv4(),
@@ -57,8 +57,8 @@ async function createSampleEntities() {
                 props: {
                     name: 'Corporate Headquarters',
                     address: '100 Market Street, San Francisco, CA 94105',
-                    coordinates: { lat: 37.7749, lng: -122.4194 },
-                },
+                    coordinates: { lat: 37.7749, lng: -122.4194 }
+                }
             },
             {
                 id: uuidv4(),
@@ -67,9 +67,9 @@ async function createSampleEntities() {
                     name: 'Database Server DB-01',
                     type: 'SERVER',
                     ip_address: '192.168.1.100',
-                    status: 'ACTIVE',
-                },
-            },
+                    status: 'ACTIVE'
+                }
+            }
         ];
         for (const entity of entities) {
             await session.run(`
@@ -81,7 +81,7 @@ async function createSampleEntities() {
       `, {
                 id: entity.id,
                 type: entity.type,
-                props: entity.props,
+                props: entity.props
             });
         }
         logger.info(`Created ${entities.length} sample entities`);
@@ -96,7 +96,7 @@ async function createSampleRelationships() {
     try {
         // Get some entities to create relationships between
         const entitiesResult = await session.run('MATCH (e:Entity) RETURN e LIMIT 5');
-        const entities = entitiesResult.records.map((r) => r.get('e'));
+        const entities = entitiesResult.records.map(r => r.get('e'));
         if (entities.length >= 2) {
             const relationships = [
                 {
@@ -106,8 +106,8 @@ async function createSampleRelationships() {
                     type: 'WORKS_FOR',
                     props: {
                         position: 'Senior Developer',
-                        start_date: '2023-01-15',
-                    },
+                        start_date: '2023-01-15'
+                    }
                 },
                 {
                     id: uuidv4(),
@@ -116,9 +116,9 @@ async function createSampleRelationships() {
                     type: 'INVOLVED_IN',
                     props: {
                         role: 'Primary Suspect',
-                        confidence: 0.85,
-                    },
-                },
+                        confidence: 0.85
+                    }
+                }
             ];
             for (const rel of relationships) {
                 await session.run(`
@@ -130,7 +130,7 @@ async function createSampleRelationships() {
                     id: rel.id,
                     from: rel.from,
                     to: rel.to,
-                    props: rel.props,
+                    props: rel.props
                 });
             }
             logger.info(`Created ${relationships.length} sample relationships`);
@@ -148,14 +148,14 @@ async function createSampleUsers() {
                 id: uuidv4(),
                 email: 'admin@intelgraph.com',
                 username: 'admin',
-                role: 'ADMIN',
+                role: 'ADMIN'
             },
             {
                 id: uuidv4(),
                 email: 'analyst@intelgraph.com',
                 username: 'analyst',
-                role: 'ANALYST',
-            },
+                role: 'ANALYST'
+            }
         ];
         for (const user of users) {
             await pool.query(`
@@ -178,14 +178,14 @@ async function createSampleInvestigations() {
                 id: uuidv4(),
                 name: 'Corporate Espionage Investigation',
                 description: 'Investigating potential data theft and corporate espionage activities',
-                status: 'ACTIVE',
+                status: 'ACTIVE'
             },
             {
                 id: uuidv4(),
                 name: 'Cybersecurity Incident Response',
                 description: 'Response to recent data breach and security incident',
-                status: 'IN_PROGRESS',
-            },
+                status: 'IN_PROGRESS'
+            }
         ];
         for (const investigation of investigations) {
             await pool.query(`
@@ -200,3 +200,4 @@ async function createSampleInvestigations() {
         logger.debug('Investigations table may not exist yet, skipping investigation creation');
     }
 }
+//# sourceMappingURL=sampleData.js.map
