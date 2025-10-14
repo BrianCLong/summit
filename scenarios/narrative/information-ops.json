@@ -1,0 +1,98 @@
+{
+  "name": "Cross-Platform Disinformation Surge",
+  "themes": ["network propagation", "fact-checking", "audience resilience"],
+  "tickIntervalMinutes": 45,
+  "initialEntities": [
+    {
+      "id": "adversarial_network",
+      "name": "Coordinated Bot Network",
+      "type": "group",
+      "alignment": "opposition",
+      "influence": 0.7,
+      "sentiment": -0.4,
+      "volatility": 0.7,
+      "resilience": 0.3,
+      "themes": { "network propagation": 0.9, "fact-checking": 0.2, "audience resilience": 0.3 },
+      "relationships": [{ "targetId": "swing_audience", "strength": 0.8 }]
+    },
+    {
+      "id": "intel_fusion_cell",
+      "name": "Intelligence Fusion Cell",
+      "type": "group",
+      "alignment": "ally",
+      "influence": 0.6,
+      "sentiment": 0.1,
+      "volatility": 0.4,
+      "resilience": 0.7,
+      "themes": { "network propagation": 0.5, "fact-checking": 0.9, "audience resilience": 0.6 },
+      "relationships": [{ "targetId": "regional_media_pool", "strength": 0.7 }]
+    },
+    {
+      "id": "regional_media_pool",
+      "name": "Regional Media Pool",
+      "type": "group",
+      "alignment": "neutral",
+      "influence": 0.55,
+      "sentiment": -0.05,
+      "volatility": 0.5,
+      "resilience": 0.5,
+      "themes": { "network propagation": 0.6, "fact-checking": 0.6, "audience resilience": 0.5 },
+      "relationships": []
+    },
+    {
+      "id": "swing_audience",
+      "name": "Undecided Audience Cluster",
+      "type": "group",
+      "alignment": "neutral",
+      "influence": 0.45,
+      "sentiment": -0.1,
+      "volatility": 0.6,
+      "resilience": 0.4,
+      "themes": { "network propagation": 0.7, "fact-checking": 0.5, "audience resilience": 0.8 },
+      "relationships": []
+    }
+  ],
+  "initialParameters": [
+    { "name": "misinformation_velocity", "value": 0.6 },
+    { "name": "countermessage_reach", "value": 0.35 }
+  ],
+  "events": [
+    {
+      "id": "bot-amplification",
+      "type": "information",
+      "actorId": "adversarial_network",
+      "targetIds": ["swing_audience"],
+      "theme": "network propagation",
+      "intensity": 1,
+      "sentimentShift": -0.35,
+      "influenceShift": 0.15,
+      "parameterAdjustments": [{ "name": "misinformation_velocity", "delta": 0.15 }],
+      "description": "Coordinated drop of manipulated videos",
+      "scheduledTick": 1
+    },
+    {
+      "id": "fusion-response",
+      "type": "information",
+      "actorId": "intel_fusion_cell",
+      "targetIds": ["regional_media_pool", "swing_audience"],
+      "theme": "fact-checking",
+      "intensity": 0.9,
+      "sentimentShift": 0.25,
+      "influenceShift": 0.1,
+      "parameterAdjustments": [{ "name": "countermessage_reach", "delta": 0.2 }],
+      "description": "Rapid fact-check package deployed",
+      "scheduledTick": 2
+    },
+    {
+      "id": "media-briefing",
+      "type": "social",
+      "actorId": "regional_media_pool",
+      "targetIds": ["swing_audience"],
+      "theme": "audience resilience",
+      "intensity": 0.7,
+      "sentimentShift": 0.2,
+      "description": "Anchor coalition hosts live debunk session",
+      "scheduledTick": 3
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "name": "Regional Election Pulse",
+  "themes": ["voter enthusiasm", "policy debate", "misinformation"],
+  "tickIntervalMinutes": 120,
+  "initialEntities": [
+    {
+      "id": "candidate_aurora",
+      "name": "Candidate Aurora",
+      "type": "actor",
+      "alignment": "ally",
+      "influence": 0.68,
+      "sentiment": 0.15,
+      "volatility": 0.4,
+      "resilience": 0.6,
+      "themes": { "voter enthusiasm": 0.8, "policy debate": 0.7, "misinformation": 0.2 },
+      "relationships": [{ "targetId": "youth_bloc", "strength": 0.6 }]
+    },
+    {
+      "id": "candidate_zephyr",
+      "name": "Candidate Zephyr",
+      "type": "actor",
+      "alignment": "opposition",
+      "influence": 0.72,
+      "sentiment": -0.05,
+      "volatility": 0.5,
+      "resilience": 0.5,
+      "themes": { "voter enthusiasm": 0.6, "policy debate": 0.8, "misinformation": 0.4 },
+      "relationships": [{ "targetId": "regional_press", "strength": 0.7 }]
+    },
+    {
+      "id": "regional_press",
+      "name": "Regional Press Guild",
+      "type": "group",
+      "alignment": "neutral",
+      "influence": 0.55,
+      "sentiment": -0.1,
+      "volatility": 0.6,
+      "resilience": 0.4,
+      "themes": { "voter enthusiasm": 0.4, "policy debate": 0.7, "misinformation": 0.5 },
+      "relationships": []
+    },
+    {
+      "id": "youth_bloc",
+      "name": "Youth Voting Bloc",
+      "type": "group",
+      "alignment": "neutral",
+      "influence": 0.48,
+      "sentiment": 0.05,
+      "volatility": 0.7,
+      "resilience": 0.3,
+      "themes": { "voter enthusiasm": 0.9, "policy debate": 0.5, "misinformation": 0.6 },
+      "relationships": []
+    }
+  ],
+  "initialParameters": [
+    { "name": "turnout_projection", "value": 0.52 },
+    { "name": "policy_alignment_index", "value": 0.43 }
+  ],
+  "events": [
+    {
+      "id": "debate-night",
+      "type": "political",
+      "actorId": "candidate_aurora",
+      "targetIds": ["regional_press"],
+      "theme": "policy debate",
+      "intensity": 0.9,
+      "sentimentShift": 0.3,
+      "influenceShift": 0.1,
+      "parameterAdjustments": [{ "name": "policy_alignment_index", "delta": 0.08 }],
+      "description": "Debate performance scored highly by fact-checkers",
+      "scheduledTick": 1
+    },
+    {
+      "id": "attack-ad",
+      "type": "information",
+      "actorId": "candidate_zephyr",
+      "targetIds": ["candidate_aurora"],
+      "theme": "misinformation",
+      "intensity": 0.7,
+      "sentimentShift": -0.25,
+      "description": "Negative advertising blitz targeting Aurora",
+      "scheduledTick": 2
+    },
+    {
+      "id": "youth-march",
+      "type": "social",
+      "actorId": "youth_bloc",
+      "targetIds": ["candidate_aurora"],
+      "theme": "voter enthusiasm",
+      "intensity": 0.8,
+      "sentimentShift": 0.2,
+      "influenceShift": 0.05,
+      "description": "Youth march rallies around increased early voting",
+      "scheduledTick": 3
+    }
+  ]
+}
