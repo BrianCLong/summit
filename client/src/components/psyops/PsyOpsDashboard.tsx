@@ -159,21 +159,14 @@ const PsyOpsDashboard: React.FC = () => {
       </Typography>
 
       <Alert severity="warning" sx={{ mb: 3 }}>
-        <strong>DEFENSIVE SECURITY TOOL:</strong> This dashboard is designed for defensive security
-        operations, threat analysis, and simulation-based training only. All features comply with
-        ethical AI guidelines.
+        <strong>DEFENSIVE SECURITY TOOL:</strong> This dashboard is designed for defensive security operations, 
+        threat analysis, and simulation-based training only. All features comply with ethical AI guidelines.
       </Alert>
 
       {/* Status Overview Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} md={4}>
-          <Card
-            sx={{
-              height: '100%',
-              background: 'linear-gradient(135deg, #4caf50 0%, #81c784 100%)',
-              color: 'white',
-            }}
-          >
+          <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #4caf50 0%, #81c784 100%)', color: 'white' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <Security />
@@ -191,21 +184,13 @@ const PsyOpsDashboard: React.FC = () => {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card
-            sx={{
-              height: '100%',
-              background: 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)',
-              color: 'white',
-            }}
-          >
+          <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)', color: 'white' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <Report />
                 <Typography variant="h6">Disinformation Detection</Typography>
               </Box>
-              <Typography variant="h4">
-                {disinformationDetection?.detectedCampaigns || 0}
-              </Typography>
+              <Typography variant="h4">{disinformationDetection?.detectedCampaigns || 0}</Typography>
               <Typography variant="body2">Campaigns Identified</Typography>
               <LinearProgress
                 variant="determinate"
@@ -217,13 +202,7 @@ const PsyOpsDashboard: React.FC = () => {
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card
-            sx={{
-              height: '100%',
-              background: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)',
-              color: 'white',
-            }}
-          >
+          <Card sx={{ height: '100%', background: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)', color: 'white' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <Psychology />
@@ -258,9 +237,7 @@ const PsyOpsDashboard: React.FC = () => {
             <Grid item xs={12} md={6}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Engine Control
-                  </Typography>
+                  <Typography variant="h6" gutterBottom>Engine Control</Typography>
                   <FormControlLabel
                     control={
                       <Switch
@@ -274,10 +251,7 @@ const PsyOpsDashboard: React.FC = () => {
                     Status: {counterPsyOpsEngine?.status || 'Unknown'}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Last Update:{' '}
-                    {counterPsyOpsEngine?.lastUpdate
-                      ? new Date(counterPsyOpsEngine.lastUpdate).toLocaleString()
-                      : 'Never'}
+                    Last Update: {counterPsyOpsEngine?.lastUpdate ? new Date(counterPsyOpsEngine.lastUpdate).toLocaleString() : 'Never'}
                   </Typography>
                 </CardContent>
               </Card>
@@ -286,9 +260,7 @@ const PsyOpsDashboard: React.FC = () => {
             <Grid item xs={12} md={6}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Active Countermeasures
-                  </Typography>
+                  <Typography variant="h6" gutterBottom>Active Countermeasures</Typography>
                   <List dense>
                     <ListItem>
                       <ListItemText
@@ -319,12 +291,9 @@ const PsyOpsDashboard: React.FC = () => {
             <Grid item xs={12}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Recent Threat Analysis
-                  </Typography>
+                  <Typography variant="h6" gutterBottom>Recent Threat Analysis</Typography>
                   <Alert severity="info" sx={{ mb: 2 }}>
-                    All threat data shown is simulated for training purposes and does not represent
-                    real threats.
+                    All threat data shown is simulated for training purposes and does not represent real threats.
                   </Alert>
                   <List>
                     <ListItem>
@@ -361,9 +330,7 @@ const PsyOpsDashboard: React.FC = () => {
             <Grid item xs={12} md={6}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Detection Metrics
-                  </Typography>
+                  <Typography variant="h6" gutterBottom>Detection Metrics</Typography>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2">Content Processed</Typography>
                     <Typography variant="h4" color="primary">
@@ -388,9 +355,7 @@ const PsyOpsDashboard: React.FC = () => {
             <Grid item xs={12} md={6}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Detection Capabilities
-                  </Typography>
+                  <Typography variant="h6" gutterBottom>Detection Capabilities</Typography>
                   <List dense>
                     <ListItem>
                       <ListItemText primary="SBERT Semantic Analysis" />
@@ -416,9 +381,7 @@ const PsyOpsDashboard: React.FC = () => {
             <Grid item xs={12}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Detected Campaigns
-                  </Typography>
+                  <Typography variant="h6" gutterBottom>Detected Campaigns</Typography>
                   <Alert severity="warning" sx={{ mb: 2 }}>
                     Campaign data is anonymized and used for defensive analysis only.
                   </Alert>
@@ -469,9 +432,7 @@ const PsyOpsDashboard: React.FC = () => {
             <Grid item xs={12} md={6}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Simulation Control
-                  </Typography>
+                  <Typography variant="h6" gutterBottom>Simulation Control</Typography>
                   <Button
                     variant="contained"
                     onClick={() => setSimulationDialog(true)}
@@ -493,9 +454,7 @@ const PsyOpsDashboard: React.FC = () => {
             <Grid item xs={12} md={6}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    MITRE ATT&CK Integration
-                  </Typography>
+                  <Typography variant="h6" gutterBottom>MITRE ATT&CK Integration</Typography>
                   <List dense>
                     <ListItem>
                       <ListItemText primary="TTP Chain Generation" />
@@ -517,9 +476,7 @@ const PsyOpsDashboard: React.FC = () => {
             <Grid item xs={12}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Recent Simulations
-                  </Typography>
+                  <Typography variant="h6" gutterBottom>Recent Simulations</Typography>
                   <Alert severity="info" sx={{ mb: 2 }}>
                     All simulations are hypothetical and for training/research purposes only.
                   </Alert>
@@ -551,81 +508,38 @@ const PsyOpsDashboard: React.FC = () => {
             <Grid item xs={12}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Live Monitoring Dashboard
-                  </Typography>
+                  <Typography variant="h6" gutterBottom>Live Monitoring Dashboard</Typography>
                   <Alert severity="info" sx={{ mb: 2 }}>
-                    Real-time monitoring provides continuous threat assessment and response
-                    capabilities.
+                    Real-time monitoring provides continuous threat assessment and response capabilities.
                   </Alert>
-
+                  
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={3}>
-                      <Box
-                        sx={{
-                          textAlign: 'center',
-                          p: 2,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          borderRadius: 1,
-                        }}
-                      >
+                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
                         <TrendingUp color="primary" sx={{ fontSize: 40 }} />
                         <Typography variant="h6">Signal Strength</Typography>
-                        <Typography variant="h4" color="primary">
-                          87%
-                        </Typography>
+                        <Typography variant="h4" color="primary">87%</Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} md={3}>
-                      <Box
-                        sx={{
-                          textAlign: 'center',
-                          p: 2,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          borderRadius: 1,
-                        }}
-                      >
+                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
                         <Speed color="warning" sx={{ fontSize: 40 }} />
                         <Typography variant="h6">Processing Rate</Typography>
-                        <Typography variant="h4" color="warning.main">
-                          1.2k/min
-                        </Typography>
+                        <Typography variant="h4" color="warning.main">1.2k/min</Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} md={3}>
-                      <Box
-                        sx={{
-                          textAlign: 'center',
-                          p: 2,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          borderRadius: 1,
-                        }}
-                      >
+                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
                         <Analytics color="success" sx={{ fontSize: 40 }} />
                         <Typography variant="h6">Detection Rate</Typography>
-                        <Typography variant="h4" color="success.main">
-                          94%
-                        </Typography>
+                        <Typography variant="h4" color="success.main">94%</Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} md={3}>
-                      <Box
-                        sx={{
-                          textAlign: 'center',
-                          p: 2,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          borderRadius: 1,
-                        }}
-                      >
+                      <Box sx={{ textAlign: 'center', p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
                         <Warning color="error" sx={{ fontSize: 40 }} />
                         <Typography variant="h6">Active Alerts</Typography>
-                        <Typography variant="h4" color="error.main">
-                          3
-                        </Typography>
+                        <Typography variant="h4" color="error.main">3</Typography>
                       </Box>
                     </Grid>
                   </Grid>
@@ -637,26 +551,18 @@ const PsyOpsDashboard: React.FC = () => {
       </Card>
 
       {/* Adversary Simulation Dialog */}
-      <Dialog
-        open={simulationDialog}
-        onClose={() => setSimulationDialog(false)}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={simulationDialog} onClose={() => setSimulationDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Generate Adversary Simulation</DialogTitle>
         <DialogContent>
           <Alert severity="warning" sx={{ mb: 2 }}>
-            This will generate a hypothetical adversary simulation for defensive training purposes
-            only.
+            This will generate a hypothetical adversary simulation for defensive training purposes only.
           </Alert>
           <TextField
             select
             fullWidth
             label="Adversary Type"
             value={simulationConfig.adversaryType}
-            onChange={(e) =>
-              setSimulationConfig({ ...simulationConfig, adversaryType: e.target.value })
-            }
+            onChange={(e) => setSimulationConfig({ ...simulationConfig, adversaryType: e.target.value })}
             sx={{ mb: 2 }}
           >
             <MenuItem value="APT">Advanced Persistent Threat</MenuItem>
@@ -669,9 +575,7 @@ const PsyOpsDashboard: React.FC = () => {
             label="Temperature (Creativity)"
             type="number"
             value={simulationConfig.temperature}
-            onChange={(e) =>
-              setSimulationConfig({ ...simulationConfig, temperature: parseFloat(e.target.value) })
-            }
+            onChange={(e) => setSimulationConfig({ ...simulationConfig, temperature: parseFloat(e.target.value) })}
             inputProps={{ min: 0, max: 1, step: 0.1 }}
             sx={{ mb: 2 }}
           />
@@ -680,9 +584,7 @@ const PsyOpsDashboard: React.FC = () => {
             fullWidth
             label="Persistence Level"
             value={simulationConfig.persistence}
-            onChange={(e) =>
-              setSimulationConfig({ ...simulationConfig, persistence: e.target.value })
-            }
+            onChange={(e) => setSimulationConfig({ ...simulationConfig, persistence: e.target.value })}
           >
             <MenuItem value="low">Low</MenuItem>
             <MenuItem value="medium">Medium</MenuItem>

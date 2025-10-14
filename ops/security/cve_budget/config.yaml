@@ -1,0 +1,41 @@
+services:
+  conductor-api:
+    owner: sre-team@intelgraph.example
+    budgets:
+      critical: 0
+      high: 2
+      medium: 6
+      low: 20
+  inference-worker:
+    owner: ml-ops@intelgraph.example
+    budgets:
+      critical: 0
+      high: 1
+      medium: 4
+      low: 15
+  reporting-api:
+    owner: risk-office@intelgraph.example
+    budgets:
+      critical: 0
+      high: 0
+      medium: 2
+      low: 10
+waivers:
+  - service: conductor-api
+    cve: CVE-2024-9999
+    severity: high
+    owner: priya.sre
+    reason: Awaiting upstream patch; vendor ETA 2025-09-10
+    expires_on: 2025-09-12
+  - service: inference-worker
+    cve: CVE-2024-55555
+    severity: medium
+    owner: marco.mlops
+    reason: Batch job pinned until new GPU AMI certified
+    expires_on: 2025-09-02
+  - service: reporting-api
+    cve: CVE-2023-42442
+    severity: low
+    owner: claire.risk
+    reason: False positive in legacy dependency tree
+    expires_on: 2025-10-31

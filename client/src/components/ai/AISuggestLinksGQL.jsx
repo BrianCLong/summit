@@ -42,10 +42,7 @@ export default function AISuggestLinksGQL({ entityId, limit = 5 }) {
         <List dense>
           {items.map((s, idx) => (
             <ListItem key={`${s.to}-${idx}`}>
-              <ListItemText
-                primary={`${s.from} → ${s.to}`}
-                secondary={`score: ${s.score.toFixed(3)}${s.reason ? ` — ${s.reason}` : ''}`}
-              />
+              <ListItemText primary={`${s.from} → ${s.to}`} secondary={`score: ${s.score.toFixed(3)}${s.reason ? ` — ${s.reason}` : ''}`} />
             </ListItem>
           ))}
         </List>

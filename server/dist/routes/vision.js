@@ -11,12 +11,7 @@ router.post('/analyze', async (req, res) => {
         const input = imageUrl || imageBase64 || JSON.stringify(req.body || {});
         const objects = await vision.analyzeImageObjects(input);
         const micro = await vision.analyzeMicroexpressions(input);
-        await writeAudit({
-            userId: req.user?.id,
-            action: 'VISION_ANALYZE',
-            resourceType: 'Vision',
-            details: { mode: mode || 'auto' },
-        });
+        await writeAudit({ userId: req.user?.id, action: 'VISION_ANALYZE', resourceType: 'Vision', details: { mode: mode || 'auto' } });
         res.json({ ...objects, ...micro });
     }
     catch (e) {
@@ -24,3 +19,4 @@ router.post('/analyze', async (req, res) => {
     }
 });
 module.exports = router;
+//# sourceMappingURL=vision.js.map

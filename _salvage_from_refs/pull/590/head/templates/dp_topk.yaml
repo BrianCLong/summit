@@ -1,6 +1,0 @@
-name: dp_topk
-defaults:
-  epsilon: 1
-  k: 10
-  kMin: 25
-  cooldownSeconds: 60

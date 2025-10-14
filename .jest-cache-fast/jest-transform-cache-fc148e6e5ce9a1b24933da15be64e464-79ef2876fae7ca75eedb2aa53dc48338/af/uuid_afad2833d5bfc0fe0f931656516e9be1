@@ -1,0 +1,7 @@
+e727f347278716ee31d4b026e400006e
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.v4 = void 0;
+const v4 = () => "00000000-0000-4000-8000-000000000000";
+exports.v4 = v4;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L19fbW9ja3NfXy91dWlkLnRzIiwibWFwcGluZ3MiOiI7OztBQUFPLE1BQU0sRUFBRSxHQUFHLEdBQUcsRUFBRSxDQUFDLHNDQUFzQyxDQUFDO0FBQWxELFFBQUEsRUFBRSxNQUFnRCIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvVXNlcnMvYnJpYW5sb25nL0RldmVsb3Blci9zdW1taXQvX19tb2Nrc19fL3V1aWQudHMiXSwic291cmNlc0NvbnRlbnQiOlsiZXhwb3J0IGNvbnN0IHY0ID0gKCkgPT4gXCIwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDBcIjsiXSwidmVyc2lvbiI6M30=
