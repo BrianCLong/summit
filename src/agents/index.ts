@@ -1,6 +1,7 @@
 import { CriticAgent } from './critic';
 import { FixerAgent } from './fixer';
 import { ReflectiveLoop } from './reflectiveLoop';
+import { StrategicCounterAntifragileOrchestrationNetwork } from './strategicCounterAntifragileNetwork';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 
@@ -19,12 +20,14 @@ export class AgentOrchestrator {
   private critic: CriticAgent;
   private fixer: FixerAgent;
   private reflectiveLoop: ReflectiveLoop;
+  private strategicNetwork: StrategicCounterAntifragileOrchestrationNetwork;
 
   constructor(projectRoot: string = process.cwd()) {
     this.projectRoot = projectRoot;
     this.critic = new CriticAgent(projectRoot);
     this.fixer = new FixerAgent(projectRoot);
     this.reflectiveLoop = new ReflectiveLoop(projectRoot);
+    this.strategicNetwork = new StrategicCounterAntifragileOrchestrationNetwork();
   }
 
   async orchestrate(mode: 'ci' | 'pr' | 'dev' = 'ci'): Promise<AgentOrchestrationResult[]> {
@@ -37,6 +40,10 @@ export class AgentOrchestrator {
       console.log('\n📋 Phase 1: Planning & Analysis');
       const planningResult = await this.runPhase('planning', async () => {
         const criticResult = await this.critic.analyze();
+        const strategicCycle = this.strategicNetwork.evaluateCycle({
+          criticSnapshot: criticResult,
+          mode
+        });
         return {
           riskScore: criticResult.riskScore,
           shouldProceed: criticResult.shouldProceed,
@@ -45,7 +52,9 @@ export class AgentOrchestrator {
             tool: r.tool,
             passed: r.passed,
             issueCount: r.issues.length
-          }))
+          })),
+          strategicCycle,
+          autoPush: strategicCycle.autoPush
         };
       });
       
@@ -263,6 +272,12 @@ export class AgentOrchestrator {
       // Show key metrics for each phase
       if (result.phase === 'planning' && result.results.riskScore !== undefined) {
         console.log(`    Risk Score: ${result.results.riskScore}`);
+        if (result.results.strategicCycle) {
+          console.log(
+            `    Strategic Network: ${result.results.strategicCycle.validation.tcoReductionMultiplier}x TCO ↓, ` +
+            `${result.results.strategicCycle.validation.valueExpansionMultiplier}x value ↑`
+          );
+        }
       }
       if (result.phase === 'implementation' && result.results.finalState) {
         console.log(`    Final State: ${result.results.finalState}`);
@@ -278,13 +293,21 @@ export class AgentOrchestrator {
     if (lastResult.phase === 'review') {
       console.log('\n🚪 Final Gate Decision:');
       console.log(`  ${lastResult.results.gate?.toUpperCase() || 'UNKNOWN'}`);
-      
+
       if (lastResult.results.finalRecommendations) {
         console.log('\n💡 Final Recommendations:');
-        lastResult.results.finalRecommendations.forEach(rec => 
+        lastResult.results.finalRecommendations.forEach(rec =>
           console.log(`  ${rec}`)
         );
       }
+    }
+
+    const planningPhase = results.find(result => result.phase === 'planning');
+    const autoPush = planningPhase?.results?.autoPush;
+    if (autoPush) {
+      console.log('\n🚀 Strategic Auto-Push Payload:');
+      console.log(`  Recommendations: ${autoPush.recommendations.join(' | ')}`);
+      console.log(`  Optimization Plan: ${autoPush.optimizationPlan.headline}`);
     }
 
     console.log('='.repeat(70));
@@ -309,4 +332,9 @@ export async function runAgentPipeline(mode: 'ci' | 'pr' | 'dev' = 'ci'): Promis
   }
 }
 
-export { CriticAgent, FixerAgent, ReflectiveLoop };
+export {
+  CriticAgent,
+  FixerAgent,
+  ReflectiveLoop,
+  StrategicCounterAntifragileOrchestrationNetwork
+};

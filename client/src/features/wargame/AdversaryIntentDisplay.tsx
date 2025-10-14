@@ -52,8 +52,7 @@ const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({ scenari
 
       {estimates.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
-          No adversary intent estimates available for this scenario yet. Run a simulation to
-          generate data.
+          No adversary intent estimates available for this scenario yet. Run a simulation to generate data.
         </Typography>
       ) : (
         <List>
@@ -74,13 +73,7 @@ const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({ scenari
                     variant="determinate"
                     value={estimate.likelihood * 100}
                     sx={{ flexGrow: 1, height: 10, borderRadius: 5 }}
-                    color={
-                      estimate.likelihood > 0.7
-                        ? 'error'
-                        : estimate.likelihood > 0.4
-                          ? 'warning'
-                          : 'success'
-                    }
+                    color={estimate.likelihood > 0.7 ? 'error' : estimate.likelihood > 0.4 ? 'warning' : 'success'}
                   />
                 </Box>
                 <Typography variant="body2" sx={{ mt: 1 }}>

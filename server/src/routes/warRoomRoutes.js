@@ -15,15 +15,15 @@ const createWarRoomSchema = {
     type: 'string',
     required: true,
     minLength: 3,
-    maxLength: 100,
+    maxLength: 100
   },
   description: {
     type: 'string',
-    maxLength: 500,
+    maxLength: 500
   },
   investigationId: {
     type: 'string',
-    required: true,
+    required: true
   },
   participants: {
     type: 'array',
@@ -31,25 +31,25 @@ const createWarRoomSchema = {
       type: 'object',
       properties: {
         userId: { type: 'string', required: true },
-        role: {
-          type: 'string',
+        role: { 
+          type: 'string', 
           enum: ['admin', 'lead', 'analyst', 'viewer'],
-          default: 'analyst',
-        },
-      },
-    },
-  },
+          default: 'analyst'
+        }
+      }
+    }
+  }
 };
 
 const updateWarRoomSchema = {
   name: {
     type: 'string',
     minLength: 3,
-    maxLength: 100,
+    maxLength: 100
   },
   description: {
     type: 'string',
-    maxLength: 500,
+    maxLength: 500
   },
   settings: {
     type: 'object',
@@ -57,38 +57,38 @@ const updateWarRoomSchema = {
       maxParticipants: { type: 'number', min: 2, max: 50 },
       allowGuestAccess: { type: 'boolean' },
       recordSession: { type: 'boolean' },
-      autoArchiveAfterHours: { type: 'number', min: 1, max: 168 },
-    },
-  },
+      autoArchiveAfterHours: { type: 'number', min: 1, max: 168 }
+    }
+  }
 };
 
 const addParticipantSchema = {
   userId: {
     type: 'string',
-    required: true,
+    required: true
   },
   role: {
     type: 'string',
     enum: ['admin', 'lead', 'analyst', 'viewer'],
-    default: 'analyst',
-  },
+    default: 'analyst'
+  }
 };
 
 const resolveConflictSchema = {
   resolution: {
     type: 'string',
     enum: ['accept', 'reject', 'manual'],
-    required: true,
+    required: true
   },
   selectedOperation: {
-    type: 'object',
-  },
+    type: 'object'
+  }
 };
 
 const initializeRoutes = (warRoomSyncService, authService) => {
   const router = express.Router();
   const warRoomController = new WarRoomController(warRoomSyncService, authService);
-
+  
   // Apply authentication to all routes
   router.use(ensureAuthenticated);
 
@@ -137,14 +137,13 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       403:
    *         description: Insufficient permissions
    */
-  router.post(
-    '/',
+  router.post('/', 
     rateLimiter({ windowMs: 60000, max: 10 }), // 10 requests per minute
     validateRequest(createWarRoomSchema),
     requirePermission('warroom:manage'),
     async (req, res) => {
       await warRoomController.createWarRoom(req, res);
-    },
+    }
   );
 
   /**
@@ -244,13 +243,12 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       404:
    *         description: War room not found
    */
-  router.patch(
-    '/:id',
+  router.patch('/:id',
     validateRequest(updateWarRoomSchema),
     requirePermission('warroom:manage'),
     async (req, res) => {
       await warRoomController.updateWarRoom(req, res);
-    },
+    }
   );
 
   /**
@@ -289,13 +287,12 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       403:
    *         description: Insufficient permissions
    */
-  router.post(
-    '/:id/participants',
+  router.post('/:id/participants',
     validateRequest(addParticipantSchema),
     requirePermission('warroom:manage'),
     async (req, res) => {
       await warRoomController.addParticipant(req, res);
-    },
+    }
   );
 
   /**
@@ -351,9 +348,12 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       404:
    *         description: War room not found
    */
-  router.post('/:id/archive', requirePermission('warroom:manage'), async (req, res) => {
-    await warRoomController.archiveWarRoom(req, res);
-  });
+  router.post('/:id/archive',
+    requirePermission('warroom:manage'),
+    async (req, res) => {
+      await warRoomController.archiveWarRoom(req, res);
+    }
+  );
 
   /**
    * @swagger
@@ -466,27 +466,24 @@ const initializeRoutes = (warRoomSyncService, authService) => {
    *       404:
    *         description: Conflict not found
    */
-  router.post(
-    '/:id/conflicts/:conflictId/resolve',
+  router.post('/:id/conflicts/:conflictId/resolve',
     validateRequest(resolveConflictSchema),
     requirePermission('warroom:manage'),
     async (req, res) => {
       await warRoomController.resolveConflict(req, res);
-    },
+    }
   );
 
   // Health check for war room service
   router.get('/health', (req, res) => {
-    const activeRooms = warRoomController.warRoomSync
-      ? warRoomController.warRoomSync.warRooms.size
-      : 0;
-
+    const activeRooms = warRoomController.warRoomSync ? warRoomController.warRoomSync.warRooms.size : 0;
+    
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
       activeWarRooms: activeRooms,
       service: 'war-room-api',
-      version: '1.0.0',
+      version: '1.0.0'
     });
   });
 
@@ -494,5 +491,5 @@ const initializeRoutes = (warRoomSyncService, authService) => {
 };
 
 module.exports = {
-  initializeRoutes,
+  initializeRoutes
 };
