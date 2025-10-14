@@ -31,3 +31,4 @@ export async function emitInvalidation(patterns) {
         flushLocalCache(); // ensure local fallback cache is cleared as well
     }
 }
+//# sourceMappingURL=invalidation.js.map
