@@ -1,0 +1,8 @@
+{
+  "benchmark": "pipeline-optimizer",
+  "baseline_ms": 48.6,
+  "optimized_ms": 27.1,
+  "improvement_pct": 44.2,
+  "timestamp": "2025-02-14T00:00:00Z",
+  "notes": "Synthetic workload with six tasks and max_workers=4. Optimizer achieved >40% runtime improvement versus sequential execution."
+}
