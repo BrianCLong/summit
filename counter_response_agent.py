@@ -191,7 +191,7 @@ class CounterResponseAgent:
 
         self.history.append(action)
         self.next_id += 1
-        logging.info("Countermeasure applied", action)
+        logging.info("Countermeasure applied: %r", action)
         return deepcopy(action)
 
     def list_playbooks(self) -> dict[str, dict[str, object]]:
