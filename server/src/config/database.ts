@@ -1,11 +1,15 @@
 import neo4j, { Driver, Session } from "neo4j-driver";
-import { Pool, PoolClient } from "pg";
 import Redis from "ioredis";
 import config from "./index.js";
 import logger from "../utils/logger.js";
+import {
+  getPostgresPool as getManagedPostgresPool,
+  closePostgresPool as closeManagedPostgresPool,
+  ManagedPostgresPool,
+} from "../db/postgres";
 
 let neo4jDriver: Driver | null = null;
-let postgresPool: Pool | null = null;
+let postgresPool: ManagedPostgresPool | null = null;
 let redisClient: Redis | null = null;
 
 // Neo4j Connection
@@ -103,22 +107,16 @@ async function createNeo4jConstraints(): Promise<void> {
 }
 
 // PostgreSQL Connection
-async function connectPostgres(): Promise<Pool> {
+async function connectPostgres(): Promise<ManagedPostgresPool> {
   try {
-    postgresPool = new Pool({
-      host: config.postgres.host,
-      port: config.postgres.port,
-      database: config.postgres.database,
-      user: config.postgres.username,
-      password: config.postgres.password,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
-    });
+    postgresPool = getManagedPostgresPool();
 
     const client = await postgresPool.connect();
-    await client.query("SELECT NOW()");
-    client.release();
+    try {
+      await client.query("SELECT NOW()");
+    } finally {
+      client.release();
+    }
 
     await createPostgresTables();
 
@@ -283,7 +281,7 @@ function getNeo4jDriver(): Driver {
   return neo4jDriver;
 }
 
-function getPostgresPool(): Pool {
+function getPostgresPool(): ManagedPostgresPool {
   if (!postgresPool) throw new Error("PostgreSQL pool not initialized");
   return postgresPool;
 }
@@ -302,7 +300,8 @@ async function closeConnections(): Promise<void> {
     logger.info("Neo4j connection closed");
   }
   if (postgresPool) {
-    await postgresPool.end();
+    await closeManagedPostgresPool();
+    postgresPool = null;
     logger.info("PostgreSQL connection closed");
   }
   if (redisClient) {
