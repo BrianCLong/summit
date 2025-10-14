@@ -1,0 +1,17 @@
+{
+  "keys": [
+    {
+      "key_id": "mc-v035-demo-202509",
+      "private_key": "0HgocX1kx2ytPZ8fJ4JAPsQCXw/Il6S60oERYlDN1BQ=",
+      "public_key": "PXW7pi7JRr89q5TkKOgqOyYRYTQSCtf8sXdpH3I+BGE=",
+      "jwk": {
+        "kty": "oct",
+        "use": "sig",
+        "kid": "mc-v035-demo-202509",
+        "alg": "HS256",
+        "k": "0HgocX1kx2ytPZ8fJ4JAPsQCXw_Il6S60oERYlDN1BQ"
+      },
+      "created": "2025-09-26T23:29:12.251613Z"
+    }
+  ]
+}

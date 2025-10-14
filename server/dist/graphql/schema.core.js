@@ -226,3 +226,4 @@ export const coreTypeDefs = gql `
     investigationUpdated(tenantId: String!): Investigation!
   }
 `;
+//# sourceMappingURL=schema.core.js.map

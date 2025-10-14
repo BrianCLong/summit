@@ -1,0 +1,78 @@
+# MC Platform v0.3.3 Egress Gateway Configuration - SECONDARY (Chaos Test)
+# Generated for chaos engineering failover test
+
+egressGateway:
+  enabled: true
+  mode: "secondary_failover"
+
+  # PRIMARY GATEWAY (temporarily disabled for chaos test)
+  primary:
+    enabled: false
+    url: "https://primary-gateway.example.com"
+    healthPath: "/health"
+    timeout: "30s"
+
+  # SECONDARY GATEWAY (active during chaos test)
+  secondary:
+    enabled: true
+    url: "https://secondary-gateway.example.com"
+    healthPath: "/health"
+    timeout: "30s"
+    failoverThreshold: 3
+
+  # Network Policy Configuration
+  networkPolicy:
+    enabled: true
+    egressRules:
+      - to:
+        - namespaceSelector:
+            matchLabels:
+              name: "gateway-secondary"
+        ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+
+    # CIDR restrictions for secondary gateway
+    allowedCIDRs:
+      - "10.100.1.0/24"  # Secondary gateway subnet
+      - "10.100.2.0/24"  # Secondary failover subnet
+
+  # Environment Variables for LLM Provider Routing
+  env:
+    EGRESS_GATEWAY_URL: "https://secondary-gateway.example.com"
+    EGRESS_MODE: "secondary"
+    FAILOVER_ENABLED: "true"
+    HEALTH_CHECK_INTERVAL: "10s"
+
+  # Service Configuration
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+
+  # Health Check Configuration
+  healthCheck:
+    enabled: true
+    path: "/egress/health"
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  # Resource Limits
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+  # Chaos Test Metadata
+  chaosTest:
+    enabled: true
+    testType: "gateway_failover"
+    startTime: "2025-09-26T15:15:57Z"
+    duration: "15m"
