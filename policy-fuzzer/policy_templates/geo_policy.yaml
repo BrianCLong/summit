@@ -1,0 +1,7 @@
+rules:
+  - effect: deny
+    condition:
+      AND:
+        - geo: EU
+        - NOT:
+            - location: EU

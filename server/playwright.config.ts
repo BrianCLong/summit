@@ -21,22 +21,22 @@ export default defineConfig({
   reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['junit', { outputFile: 'test-results/playwright-results.xml' }],
-    ['list'],
+    ['list']
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
-
+    
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'retain-on-failure',
-
+    
     /* Record video on failure */
     video: 'retain-on-failure',
-
+    
     /* Take screenshot on failure */
     screenshot: 'only-on-failure',
-
+    
     /* Ignore HTTPS errors */
     ignoreHTTPSErrors: true,
   },
@@ -48,7 +48,7 @@ export default defineConfig({
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
     },
-
+    
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
@@ -93,24 +93,22 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: process.env.CI
-    ? undefined
-    : [
-        {
-          command: 'npm run dev',
-          cwd: '../client',
-          port: 3000,
-          reuseExistingServer: !process.env.CI,
-          timeout: 120000,
-        },
-        {
-          command: 'npm run dev',
-          cwd: '../server',
-          port: 4000,
-          reuseExistingServer: !process.env.CI,
-          timeout: 120000,
-        },
-      ],
+  webServer: process.env.CI ? undefined : [
+    {
+      command: 'npm run dev',
+      cwd: '../client',
+      port: 3000,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120000,
+    },
+    {
+      command: 'npm run dev',
+      cwd: '../server', 
+      port: 4000,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120000,
+    }
+  ],
 
   /* Global setup and teardown */
   globalSetup: require.resolve('./tests/e2e/global-setup.ts'),

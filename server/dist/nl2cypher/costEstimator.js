@@ -4,3 +4,4 @@ export function estimateCost(ast) {
         cost += 1;
     return cost;
 }
+//# sourceMappingURL=costEstimator.js.map

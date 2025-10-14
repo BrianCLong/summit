@@ -19,45 +19,17 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 interface ScenarioInputProps {
   onRunSimulation: (input: any) => void;
-  existingScenarios: Array<{
-    id: string;
-    crisisType: string;
-    targetAudiences: string[];
-    keyNarratives: string[];
-    adversaryProfiles: string[];
-    createdAt: string;
-  }>;
+  existingScenarios: Array<{ id: string; crisisType: string; targetAudiences: string[]; keyNarratives: string[]; adversaryProfiles: string[]; createdAt: string }>;
   onSelectScenario: (scenarioId: string | null) => void;
   selectedScenarioId: string | null;
 }
 
-const predefinedCrisisTypes = [
-  'geopolitical_conflict',
-  'cyber_attack',
-  'natural_disaster',
-  'public_health_crisis',
-];
-const predefinedTargetAudiences = [
-  'allies',
-  'neutrals',
-  'adversaries',
-  'domestic_population',
-  'international_community',
-];
-const predefinedKeyNarratives = [
-  'disinformation_campaigns',
-  'unity_messaging',
-  'threat_mitigation',
-  'economic_stability',
-];
+const predefinedCrisisTypes = ['geopolitical_conflict', 'cyber_attack', 'natural_disaster', 'public_health_crisis'];
+const predefinedTargetAudiences = ['allies', 'neutrals', 'adversaries', 'domestic_population', 'international_community'];
+const predefinedKeyNarratives = ['disinformation_campaigns', 'unity_messaging', 'threat_mitigation', 'economic_stability'];
 const predefinedAdversaryProfiles = ['state_actor_X', 'non_state_actor_Y', 'insider_threat_Z'];
 
-const ScenarioInput: React.FC<ScenarioInputProps> = ({
-  onRunSimulation,
-  existingScenarios,
-  onSelectScenario,
-  selectedScenarioId,
-}) => {
+const ScenarioInput: React.FC<ScenarioInputProps> = ({ onRunSimulation, existingScenarios, onSelectScenario, selectedScenarioId }) => {
   const [crisisType, setCrisisType] = useState<string>('');
   const [targetAudiences, setTargetAudiences] = useState<string[]>([]);
   const [keyNarratives, setKeyNarratives] = useState<string[]>([]);
@@ -67,7 +39,7 @@ const ScenarioInput: React.FC<ScenarioInputProps> = ({
 
   useEffect(() => {
     if (selectedScenarioId) {
-      const scenario = existingScenarios.find((s) => s.id === selectedScenarioId);
+      const scenario = existingScenarios.find(s => s.id === selectedScenarioId);
       if (scenario) {
         setCrisisType(scenario.crisisType);
         setTargetAudiences(scenario.targetAudiences);
@@ -123,9 +95,7 @@ const ScenarioInput: React.FC<ScenarioInputProps> = ({
           label="Select Existing Scenario"
           onChange={handleSelectExistingScenario}
         >
-          <MenuItem value="">
-            <em>Create New Scenario</em>
-          </MenuItem>
+          <MenuItem value=""><em>Create New Scenario</em></MenuItem>
           {existingScenarios.map((scenario) => (
             <MenuItem key={scenario.id} value={scenario.id}>
               {scenario.crisisType} - {new Date(scenario.createdAt).toLocaleDateString()}
@@ -217,12 +187,7 @@ const ScenarioInput: React.FC<ScenarioInputProps> = ({
         variant="contained"
         startIcon={<PlayArrowIcon />}
         onClick={handleRunClick}
-        disabled={
-          !crisisType ||
-          targetAudiences.length === 0 ||
-          keyNarratives.length === 0 ||
-          adversaryProfiles.length === 0
-        }
+        disabled={!crisisType || targetAudiences.length === 0 || keyNarratives.length === 0 || adversaryProfiles.length === 0}
       >
         Run War-Game Simulation
       </Button>
