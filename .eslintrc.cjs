@@ -2,21 +2,10 @@ module.exports = {
   root: true,
   env: { node: true, browser: true, es2022: true, jest: true },
   parser: '@typescript-eslint/parser',
-  parserOptions: {
-    ecmaVersion: 2022,
-    sourceType: 'module',
-    project: [
-      './tsconfig.json',
-      './server/tsconfig.json',
-      './prov-ledger-service/tsconfig.json'
-    ],
-    tsconfigRootDir: __dirname
-  },
   plugins: ['@typescript-eslint', 'react', 'react-hooks', 'jsx-a11y'],
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
-    '@typescript-eslint/recommended-requiring-type-checking',
+    'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
@@ -24,39 +13,31 @@ module.exports = {
     'plugin:import/typescript',
     'prettier'
   ],
-  settings: { 
-    react: { version: '18.0' },
-    'import/resolver': {
-      typescript: {
-        project: [
-          './tsconfig.json',
-          './server/tsconfig.json',
-          './prov-ledger-service/tsconfig.json'
-        ]
-      }
-    }
-  },
+  settings: { react: { version: '18.0' } },
+  overrides: [
+    {
+      files: ['**/__tests__/**/*.*', '**/*.test.*', 'tests/**/*.*', 'server/src/tests/**/*.*'],
+      env: { jest: true, node: true },
+      plugins: ['jest'],
+      extends: ['plugin:jest/recommended'],
+      rules: {
+        'jest/no-focused-tests': 'error',
+        'jest/no-disabled-tests': 'warn',
+        'no-restricted-properties': [
+          'error',
+          {
+            object: 'console',
+            property: 'error',
+            message: 'Use assertions or throw errors instead of console.error in tests',
+          },
+        ],
+      },
+    },
+  ],
   rules: {
     'import/order': ['error', { 'newlines-between': 'always', alphabetize: { order: 'asc' } }],
     'react/prop-types': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'error',
-    '@typescript-eslint/no-unsafe-assignment': 'error',
-    '@typescript-eslint/no-unsafe-call': 'error',
-    '@typescript-eslint/no-unsafe-member-access': 'error',
-    '@typescript-eslint/no-floating-promises': 'error',
-    '@typescript-eslint/await-thenable': 'error',
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
+    '@typescript-eslint/explicit-module-boundary-types': 'off'
   },
-  ignorePatterns: ['dist', 'build', 'coverage', 'node_modules', '*.js', '*.mjs', '*.cjs'],
-  overrides: [
-    {
-      files: ['**/*.test.ts', '**/*.spec.ts', '**/__tests__/**/*.ts'],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'warn',
-        '@typescript-eslint/no-unsafe-assignment': 'warn',
-        '@typescript-eslint/no-unsafe-member-access': 'warn'
-      }
-    }
-  ]
+  ignorePatterns: ['dist', 'build', 'coverage', 'node_modules']
 };

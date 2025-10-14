@@ -1,1 +1,0 @@
-AI agents designed to detect and flood influence channels with truth-saturated counter-narratives in seconds, not hours. In graph terms, that’s a “real-time narrative inoculation” layer with nodes for counter-message origins, reach, and effectiveness scoring.
