@@ -1,7 +1,0 @@
-{
-  "title": "Cache Coherency",
-  "charts": [
-    { "metric": "cache_hits" },
-    { "metric": "cache_misses" }
-  ]
-}

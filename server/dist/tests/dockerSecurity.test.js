@@ -213,7 +213,7 @@ describe('Docker Security Configuration', () => {
             expect(packageJson.scripts).toHaveProperty('lint');
             expect(packageJson.scripts).toHaveProperty('test');
             // Check if security audit scripts could be added
-            const hasSecurityScript = Object.keys(packageJson.scripts).some((script) => script.includes('security') || script.includes('audit'));
+            const hasSecurityScript = Object.keys(packageJson.scripts).some(script => script.includes('security') || script.includes('audit'));
             if (!hasSecurityScript) {
                 // This is informational - could add docker:security script
                 console.log('Info: Could add docker:security script to package.json');
@@ -223,7 +223,10 @@ describe('Docker Security Configuration', () => {
     describe('Security Best Practices', () => {
         test('should use secure secrets management in secure configurations', async () => {
             // Only check the secure files, not the template/example files
-            const secureFiles = ['Dockerfile.secure', 'docker-compose.secure.yml'];
+            const secureFiles = [
+                'Dockerfile.secure',
+                'docker-compose.secure.yml'
+            ];
             for (const file of secureFiles) {
                 const filePath = path.join(projectRoot, file);
                 try {
@@ -267,7 +270,11 @@ describe('Docker Security Configuration', () => {
         });
         test('should use proper file structure for security', async () => {
             // Check for security configuration directory
-            const securityDirs = ['config/nginx', 'config/falco/rules', 'scripts'];
+            const securityDirs = [
+                'config/nginx',
+                'config/falco/rules',
+                'scripts'
+            ];
             for (const dir of securityDirs) {
                 const dirPath = path.join(projectRoot, dir);
                 try {
@@ -288,7 +295,7 @@ describe('Docker Security Configuration', () => {
     describe('Security Documentation', () => {
         test('should have security documentation', () => {
             // This test verifies that security configurations are documented
-            // In a real implementation, you would check for README files,
+            // In a real implementation, you would check for README files, 
             // security guidelines, etc.
             const securityFeatures = [
                 'Multi-stage builds',
@@ -300,7 +307,7 @@ describe('Docker Security Configuration', () => {
                 'Container isolation',
                 'Resource limits',
                 'Security monitoring',
-                'Vulnerability scanning',
+                'Vulnerability scanning'
             ];
             // This is a placeholder test that always passes
             // In practice, you would check documentation files
@@ -308,3 +315,4 @@ describe('Docker Security Configuration', () => {
         });
     });
 });
+//# sourceMappingURL=dockerSecurity.test.js.map

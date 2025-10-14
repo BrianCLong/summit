@@ -1,0 +1,7 @@
+rules:
+  - effect: deny
+    condition:
+      AND:
+        - purpose: marketing
+        - NOT:
+            - consent: marketing

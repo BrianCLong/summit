@@ -17,12 +17,20 @@ import { createServer } from 'http';
 
 import { typeDefs } from './graphql/schema.js';
 import { resolvers } from './graphql/resolvers/index.js';
+import { persistedGuard } from './graphql/persisted.js';
 import { createContext } from './graphql/context.js';
 import { authMiddleware } from './middleware/auth.js';
 import { tenantMiddleware } from './middleware/tenant.js';
 import { auditMiddleware } from './middleware/audit.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { logger } from './utils/logger.js';
+import { ingestRouter } from './routes/ingest.js';
+import { copilotRouter } from './routes/copilot.js';
+import { adminRouter } from './routes/admin.js';
+import { casesRouter } from './routes/cases.js';
+import { evidenceRouter } from './routes/evidence.js';
+import { analyticsExtRouter } from './routes/analytics_ext.js';
+import { triageRouter } from './routes/triage.js';
 
 export async function createApp() {
   const app = express();
@@ -69,6 +77,21 @@ export async function createApp() {
     });
   });
 
+  // Ingest wizard API (scaffold)
+  app.use('/ingest', ingestRouter);
+  // Copilot utility
+  app.use('/copilot', copilotRouter);
+  // Admin console
+  app.use('/admin', adminRouter);
+  // Cases
+  app.use('/cases', casesRouter);
+  // Evidence
+  app.use('/evidence', evidenceRouter);
+  // Analytics expansion
+  app.use('/analytics', analyticsExtRouter);
+  // Triage queue
+  app.use('/triage', triageRouter);
+
   // Create Apollo Server
   const server = new ApolloServer({
     typeDefs,
@@ -96,9 +119,28 @@ export async function createApp() {
   // Start Apollo Server
   await server.start();
 
+  // Basic GraphQL guard: require operationName (optional) and limit naive complexity by brace count
+  function graphGuard(req: any, res: any, next: any){
+    try{
+      if(req.method === 'POST'){
+        const body = req.body || {};
+        if(process.env.ENFORCE_GRAPHQL_OPNAME === 'true' && !body.operationName){
+          return res.status(400).json({ error:'operation_name_required' });
+        }
+        const q = String(body.query||'');
+        const braces = (q.match(/[{}]/g)||[]).length;
+        const maxBraces = Number(process.env.GQL_MAX_BRACES || '200');
+        if(braces > maxBraces) return res.status(400).json({ error:'query_too_complex' });
+      }
+    }catch{}
+    next();
+  }
+
   // Apply GraphQL middleware with authentication and tenant isolation
+  app.post('/graphql', persistedGuard);
   app.use(
     '/graphql',
+    graphGuard,
     rateLimitMiddleware,
     authMiddleware,
     tenantMiddleware,

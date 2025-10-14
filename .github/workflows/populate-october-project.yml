@@ -1,0 +1,164 @@
+name: Populate October Project
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_owner:
+        description: "GitHub org or user that owns the Project (defaults to repository owner)"
+        required: false
+      project_number:
+        description: "Numeric Project (v2) identifier; resolves the GraphQL project ID"
+        required: false
+      project_id:
+        description: "Project (v2) GraphQL node ID; overrides project_number when provided"
+        required: false
+      repo_owner:
+        description: "Repository owner (defaults to trigger repository owner)"
+        required: false
+      repo_name:
+        description: "Repository name (defaults to trigger repository)"
+        required: false
+      start_batch:
+        description: "First batch file to import (1-indexed)"
+        required: false
+        default: "1"
+      end_batch:
+        description: "Last batch file to import"
+        required: false
+        default: "999999"
+      add_to_project:
+        description: "Attach created issues to the Project"
+        required: false
+        default: "true"
+      sleep_ms:
+        description: "Delay in milliseconds between GitHub API calls"
+        required: false
+        default: "200"
+
+jobs:
+  import:
+    name: Bulk import October issues
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      projects: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Derive context
+        id: context
+        shell: bash
+        env:
+          DEFAULT_REPO_OWNER: ${{ github.repository_owner }}
+          DEFAULT_REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          set -euo pipefail
+          repo_owner="${{ inputs.repo_owner }}"
+          repo_name="${{ inputs.repo_name }}"
+          project_owner="${{ inputs.project_owner }}"
+
+          if [[ -z "$repo_owner" ]]; then
+            repo_owner="$DEFAULT_REPO_OWNER"
+          fi
+          if [[ -z "$repo_name" ]]; then
+            repo_name="$DEFAULT_REPO_NAME"
+          fi
+          if [[ -z "$project_owner" ]]; then
+            project_owner="$repo_owner"
+          fi
+
+          echo "repo_owner=$repo_owner" >> "$GITHUB_OUTPUT"
+          echo "repo_name=$repo_name" >> "$GITHUB_OUTPUT"
+          echo "project_owner=$project_owner" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve Project ID
+        id: project
+        if: ${{ inputs.add_to_project != 'false' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN || github.token }}
+          PROJECT_ID_INPUT: ${{ inputs.project_id }}
+          PROJECT_NUMBER_INPUT: ${{ inputs.project_number }}
+          PROJECT_OWNER: ${{ steps.context.outputs.project_owner }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$PROJECT_ID_INPUT" ]]; then
+            echo "project_id=$PROJECT_ID_INPUT" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ -z "$PROJECT_NUMBER_INPUT" ]]; then
+            echo "::error::Provide either project_id or project_number when add_to_project is enabled."
+            exit 1
+          fi
+
+          if ! command -v gh >/dev/null; then
+            echo "::error::GitHub CLI (gh) not available"
+            exit 1
+          fi
+
+          QUERY='query($owner:String!,$number:Int!){ organization(login:$owner){ projectV2(number:$number){ id } } user(login:$owner){ projectV2(number:$number){ id } } }'
+          PROJECT_ID=$(gh api graphql -f query="$QUERY" -F owner="$PROJECT_OWNER" -F number="$PROJECT_NUMBER_INPUT" --jq '.data.organization.projectV2.id // .data.user.projectV2.id')
+
+          if [[ -z "$PROJECT_ID" || "$PROJECT_ID" == "null" ]]; then
+            echo "::error::Unable to resolve project ID for owner=$PROJECT_OWNER number=$PROJECT_NUMBER_INPUT"
+            exit 1
+          fi
+
+          echo "Resolved project ID: $PROJECT_ID"
+          echo "project_id=$PROJECT_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Import October issues
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN || github.token }}
+          OWNER: ${{ steps.context.outputs.repo_owner }}
+          REPO: ${{ steps.context.outputs.repo_name }}
+          START_BATCH: ${{ inputs.start_batch }}
+          END_BATCH: ${{ inputs.end_batch }}
+          SLEEP_MS: ${{ inputs.sleep_ms }}
+          PROJECT_ID_RESOLVED: ${{ steps.project.outputs.project_id }}
+          ADD_TO_PROJECT_INPUT: ${{ inputs.add_to_project }}
+        run: |
+          set -euo pipefail
+          PROJECT_ID="$PROJECT_ID_RESOLVED"
+
+          if [[ "${ADD_TO_PROJECT_INPUT,,}" == "false" ]]; then
+            ADD_TO_PROJECT=0
+          else
+            if [[ -n "$PROJECT_ID" ]]; then
+              ADD_TO_PROJECT=1
+            else
+              ADD_TO_PROJECT=0
+            fi
+          fi
+
+          if [[ "$ADD_TO_PROJECT" == "1" && -z "$PROJECT_ID" ]]; then
+            echo "::error::Project ID required when add_to_project is true"
+            exit 1
+          fi
+
+          export OWNER REPO START_BATCH END_BATCH SLEEP_MS PROJECT_ID ADD_TO_PROJECT
+
+          echo "OWNER=$OWNER"
+          echo "REPO=$REPO"
+          echo "START_BATCH=$START_BATCH"
+          echo "END_BATCH=$END_BATCH"
+          echo "ADD_TO_PROJECT=$ADD_TO_PROJECT"
+
+          node scripts/oct25_bulk_issue_import.cjs
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "October project population workflow finished. Review the run logs for counts and any skipped entries."

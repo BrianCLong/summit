@@ -1,122 +1,77 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>IntelGraph GraphQL Playground</title>
     <script src="https://unpkg.com/graphiql/graphiql.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
     <style>
-      body {
-        margin: 0;
-        height: 100vh;
-        overflow: hidden;
-      }
-      .header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 15px 20px;
-        font-family: Arial, sans-serif;
-      }
-      .header h1 {
-        margin: 0;
-        font-size: 24px;
-      }
-      .header p {
-        margin: 5px 0 0 0;
-        opacity: 0.9;
-      }
-      .playground-container {
-        height: calc(100vh - 80px);
-      }
-      .sample-queries {
-        position: absolute;
-        top: 90px;
-        right: 20px;
-        width: 300px;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        padding: 15px;
-        font-family: Arial, sans-serif;
-        z-index: 1000;
-        max-height: 400px;
-        overflow-y: auto;
-      }
-      .sample-queries h3 {
-        margin: 0 0 10px 0;
-        color: #333;
-      }
-      .sample-query {
-        margin: 8px 0;
-        padding: 8px;
-        background: #f5f5f5;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px;
-      }
-      .sample-query:hover {
-        background: #e0e0e0;
-      }
-      .sample-query code {
-        display: block;
-        white-space: pre-wrap;
-      }
+        body { margin: 0; height: 100vh; overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; font-family: Arial, sans-serif; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header p { margin: 5px 0 0 0; opacity: 0.9; }
+        .playground-container { height: calc(100vh - 80px); }
+        .sample-queries { position: absolute; top: 90px; right: 20px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 15px; font-family: Arial, sans-serif; z-index: 1000; max-height: 400px; overflow-y: auto; }
+        .sample-queries h3 { margin: 0 0 10px 0; color: #333; }
+        .sample-query { margin: 8px 0; padding: 8px; background: #f5f5f5; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .sample-query:hover { background: #e0e0e0; }
+        .sample-query code { display: block; white-space: pre-wrap; }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div class="header">
-      <h1>🚀 IntelGraph GraphQL Playground</h1>
-      <p>Interactive exploration of the IntelGraph intelligence analysis platform API</p>
+        <h1>🚀 IntelGraph GraphQL Playground</h1>
+        <p>Interactive exploration of the IntelGraph intelligence analysis platform API</p>
     </div>
-
+    
     <div class="sample-queries">
-      <h3>Sample Queries</h3>
-
-      <div class="sample-query" onclick="loadQuery(healthQuery)">
-        <strong>Health Check</strong>
-        <code>query HealthCheck</code>
-      </div>
-
-      <div class="sample-query" onclick="loadQuery(investigationsQuery)">
-        <strong>List Investigations</strong>
-        <code>query GetInvestigations</code>
-      </div>
-
-      <div class="sample-query" onclick="loadQuery(entitiesQuery)">
-        <strong>Search Entities</strong>
-        <code>query SearchEntities</code>
-      </div>
-
-      <div class="sample-query" onclick="loadQuery(relationshipsQuery)">
-        <strong>Find Relationships</strong>
-        <code>query FindRelationships</code>
-      </div>
-
-      <div class="sample-query" onclick="loadQuery(createInvestigationMutation)">
-        <strong>Create Investigation</strong>
-        <code>mutation CreateInvestigation</code>
-      </div>
-
-      <div class="sample-query" onclick="loadQuery(copilotQuery)">
-        <strong>Copilot Analysis</strong>
-        <code>query CopilotRuns</code>
-      </div>
-
-      <div class="sample-query" onclick="loadQuery(graphAnalyticsQuery)">
-        <strong>Graph Analytics</strong>
-        <code>query GraphMetrics</code>
-      </div>
-
-      <div class="sample-query" onclick="loadQuery(complexAnalysisQuery)">
-        <strong>Complex Analysis</strong>
-        <code>query EntityNetwork</code>
-      </div>
+        <h3>Sample Queries</h3>
+        
+        <div class="sample-query" onclick="loadQuery(healthQuery)">
+            <strong>Health Check</strong>
+            <code>query HealthCheck</code>
+        </div>
+        
+        <div class="sample-query" onclick="loadQuery(investigationsQuery)">
+            <strong>List Investigations</strong>
+            <code>query GetInvestigations</code>
+        </div>
+        
+        <div class="sample-query" onclick="loadQuery(entitiesQuery)">
+            <strong>Search Entities</strong>
+            <code>query SearchEntities</code>
+        </div>
+        
+        <div class="sample-query" onclick="loadQuery(relationshipsQuery)">
+            <strong>Find Relationships</strong>
+            <code>query FindRelationships</code>
+        </div>
+        
+        <div class="sample-query" onclick="loadQuery(createInvestigationMutation)">
+            <strong>Create Investigation</strong>
+            <code>mutation CreateInvestigation</code>
+        </div>
+        
+        <div class="sample-query" onclick="loadQuery(copilotQuery)">
+            <strong>Copilot Analysis</strong>
+            <code>query CopilotRuns</code>
+        </div>
+        
+        <div class="sample-query" onclick="loadQuery(graphAnalyticsQuery)">
+            <strong>Graph Analytics</strong>
+            <code>query GraphMetrics</code>
+        </div>
+        
+        <div class="sample-query" onclick="loadQuery(complexAnalysisQuery)">
+            <strong>Complex Analysis</strong>
+            <code>query EntityNetwork</code>
+        </div>
     </div>
-
+    
     <div id="graphiql" class="playground-container"></div>
 
     <script>
-      // Sample queries demonstrating IntelGraph capabilities
-      const healthQuery = `# Health Check - Verify system status
+        // Sample queries demonstrating IntelGraph capabilities
+        const healthQuery = `# Health Check - Verify system status
 query HealthCheck {
   __type(name: "Query") {
     name
@@ -129,7 +84,7 @@ query HealthCheck {
   }
 }`;
 
-      const investigationsQuery = `# List all investigations with metadata
+        const investigationsQuery = `# List all investigations with metadata
 query GetInvestigations {
   investigations {
     id
@@ -148,7 +103,7 @@ query GetInvestigations {
   }
 }`;
 
-      const entitiesQuery = `# Search entities by type and properties
+        const entitiesQuery = `# Search entities by type and properties
 query SearchEntities($type: String, $search: String) {
   entities(type: $type, search: $search) {
     id
@@ -177,7 +132,7 @@ query SearchEntities($type: String, $search: String) {
 #   "search": "analyst"
 # }`;
 
-      const relationshipsQuery = `# Find relationships between entities
+        const relationshipsQuery = `# Find relationships between entities
 query FindRelationships($entity_id: ID!) {
   relationships(entity_id: $entity_id) {
     id
@@ -204,7 +159,7 @@ query FindRelationships($entity_id: ID!) {
 #   "entity_id": "your-entity-id-here"
 # }`;
 
-      const createInvestigationMutation = `# Create a new investigation
+        const createInvestigationMutation = `# Create a new investigation
 mutation CreateInvestigation($input: CreateInvestigationInput!) {
   createInvestigation(input: $input) {
     id
@@ -228,7 +183,7 @@ mutation CreateInvestigation($input: CreateInvestigationInput!) {
 #   }
 # }`;
 
-      const copilotQuery = `# Query Copilot analysis runs
+        const copilotQuery = `# Query Copilot analysis runs
 query CopilotRuns($investigation_id: ID) {
   copilotRuns(investigation_id: $investigation_id) {
     id
@@ -260,7 +215,7 @@ query CopilotRuns($investigation_id: ID) {
 #   "investigation_id": "your-investigation-id"
 # }`;
 
-      const graphAnalyticsQuery = `# Graph analytics and metrics
+        const graphAnalyticsQuery = `# Graph analytics and metrics
 query GraphMetrics {
   graphStats {
     total_entities
@@ -287,7 +242,7 @@ query GraphMetrics {
   }
 }`;
 
-      const complexAnalysisQuery = `# Complex entity network analysis
+        const complexAnalysisQuery = `# Complex entity network analysis
 query EntityNetwork($center_entity: ID!, $depth: Int = 2) {
   entityNetwork(center_entity: $center_entity, depth: $depth) {
     entities {
@@ -328,45 +283,45 @@ query EntityNetwork($center_entity: ID!, $depth: Int = 2) {
 #   "depth": 3
 # }`;
 
-      // Initialize GraphiQL
-      function loadQuery(query) {
-        if (window.graphiqlInstance) {
-          window.graphiqlInstance.setState({ query });
+        // Initialize GraphiQL
+        function loadQuery(query) {
+            if (window.graphiqlInstance) {
+                window.graphiqlInstance.setState({ query });
+            }
         }
-      }
 
-      const graphiqlContainer = document.getElementById('graphiql');
+        const graphiqlContainer = document.getElementById('graphiql');
+        
+        // Create GraphiQL instance
+        const fetcher = GraphiQL.createFetcher({
+            url: '/graphql', // Adjust this to your GraphQL endpoint
+        });
 
-      // Create GraphiQL instance
-      const fetcher = GraphiQL.createFetcher({
-        url: '/graphql', // Adjust this to your GraphQL endpoint
-      });
+        const root = ReactDOM.createRoot(graphiqlContainer);
+        
+        const graphiqlElement = React.createElement(GraphiQL, {
+            fetcher,
+            query: healthQuery,
+            variables: '{}',
+            headers: '{"Authorization": "Bearer your-jwt-token"}',
+            onEditQuery: (query) => {
+                // Store reference to update query programmatically
+            }
+        });
 
-      const root = ReactDOM.createRoot(graphiqlContainer);
+        root.render(graphiqlElement);
 
-      const graphiqlElement = React.createElement(GraphiQL, {
-        fetcher,
-        query: healthQuery,
-        variables: '{}',
-        headers: '{"Authorization": "Bearer your-jwt-token"}',
-        onEditQuery: (query) => {
-          // Store reference to update query programmatically
-        },
-      });
+        // Store reference for query loading
+        window.graphiqlInstance = {
+            setState: (newState) => {
+                // This would need to be properly implemented with React state management
+                console.log('Loading query:', newState.query);
+            }
+        };
 
-      root.render(graphiqlElement);
-
-      // Store reference for query loading
-      window.graphiqlInstance = {
-        setState: (newState) => {
-          // This would need to be properly implemented with React state management
-          console.log('Loading query:', newState.query);
-        },
-      };
-
-      // Add welcome message
-      setTimeout(() => {
-        console.log(`
+        // Add welcome message
+        setTimeout(() => {
+            console.log(`
 🚀 Welcome to IntelGraph GraphQL Playground!
 
 Features available:
@@ -386,10 +341,10 @@ Try the sample queries on the right to explore:
 
 Happy querying! 🎯
             `);
-      }, 1000);
+        }, 1000);
     </script>
-
+    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  </body>
+</body>
 </html>
