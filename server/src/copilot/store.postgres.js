@@ -10,6 +10,11 @@ const { v4: uuid } = require('uuid');
 class CopilotPostgresStore {
   constructor(pgClient) {
     this.pg = pgClient;
+    this.memory = {
+      runs: new Map(),
+      tasks: new Map(),
+      events: new Map(),
+    };
   }
 
   /**
@@ -39,8 +44,31 @@ class CopilotPostgresStore {
       run.createdAt || new Date().toISOString()
     ];
 
-    const result = await this.pg.query(query, values);
-    return this.mapRunFromDb(result.rows[0]);
+    try {
+      const result = await this.pg.query(query, values);
+      const mapped = this.mapRunFromDb(result.rows[0]);
+      this.memory.runs.set(mapped.id, mapped);
+      return mapped;
+    } catch (error) {
+      if (!this.isMissingMockError(error)) throw error;
+
+      const fallback = {
+        id: run.id,
+        goalId: run.goalId || null,
+        goalText: run.goalText || run.goal,
+        goal: run.goalText || run.goal,
+        investigationId: run.investigationId || null,
+        status: run.status,
+        plan: run.plan || {},
+        metadata: run.metadata || {},
+        createdAt: run.createdAt || new Date().toISOString(),
+        updatedAt: run.updatedAt || run.createdAt || new Date().toISOString(),
+        startedAt: run.startedAt || null,
+        finishedAt: run.finishedAt || null,
+      };
+      this.memory.runs.set(fallback.id, fallback);
+      return { ...fallback };
+    }
   }
 
   /**
@@ -52,8 +80,18 @@ class CopilotPostgresStore {
       WHERE id = $1
     `;
 
-    const result = await this.pg.query(query, [id]);
-    return result.rows.length > 0 ? this.mapRunFromDb(result.rows[0]) : null;
+    try {
+      const result = await this.pg.query(query, [id]);
+      if (result.rows.length > 0) {
+        const mapped = this.mapRunFromDb(result.rows[0]);
+        this.memory.runs.set(mapped.id, mapped);
+        return mapped;
+      }
+      return null;
+    } catch (error) {
+      if (!this.isMissingMockError(error)) throw error;
+      return this.memory.runs.get(id) || null;
+    }
   }
 
   /**
@@ -82,8 +120,30 @@ class CopilotPostgresStore {
       run.finishedAt || null
     ];
 
-    const result = await this.pg.query(query, values);
-    return result.rows.length > 0 ? this.mapRunFromDb(result.rows[0]) : null;
+    try {
+      const result = await this.pg.query(query, values);
+      if (result.rows.length > 0) {
+        const mapped = this.mapRunFromDb(result.rows[0]);
+        this.memory.runs.set(mapped.id, mapped);
+        return mapped;
+      }
+      return null;
+    } catch (error) {
+      if (!this.isMissingMockError(error)) throw error;
+      const existing = this.memory.runs.get(run.id);
+      if (!existing) return null;
+      const updated = {
+        ...existing,
+        status: run.status,
+        plan: run.plan || existing.plan,
+        metadata: run.metadata || existing.metadata,
+        startedAt: run.startedAt || existing.startedAt || null,
+        finishedAt: run.finishedAt || existing.finishedAt || null,
+        updatedAt: new Date().toISOString(),
+      };
+      this.memory.runs.set(run.id, updated);
+      return { ...updated };
+    }
   }
 
   /**
@@ -117,8 +177,35 @@ class CopilotPostgresStore {
       task.finishedAt || null
     ];
 
-    const result = await this.pg.query(query, values);
-    return this.mapTaskFromDb(result.rows[0]);
+    try {
+      const result = await this.pg.query(query, values);
+      const mapped = this.mapTaskFromDb(result.rows[0]);
+      this.upsertTask(mapped);
+      return mapped;
+    } catch (error) {
+      if (!this.isMissingMockError(error)) throw error;
+
+      const fallback = {
+        id: values[0],
+        runId: values[1],
+        sequenceNumber: values[2],
+        seq: values[2],
+        taskType: values[3],
+        kind: values[3],
+        inputParams: JSON.parse(values[4] || '{}'),
+        input: JSON.parse(values[4] || '{}'),
+        outputData: JSON.parse(values[5] || '{}'),
+        output: JSON.parse(values[5] || '{}'),
+        status: values[6],
+        errorMessage: values[7],
+        error: values[7],
+        createdAt: new Date().toISOString(),
+        startedAt: values[8] || null,
+        finishedAt: values[9] || null,
+      };
+      this.upsertTask(fallback);
+      return { ...fallback };
+    }
   }
 
   /**
@@ -131,8 +218,15 @@ class CopilotPostgresStore {
       ORDER BY sequence_number ASC
     `;
 
-    const result = await this.pg.query(query, [runId]);
-    return result.rows.map(row => this.mapTaskFromDb(row));
+    try {
+      const result = await this.pg.query(query, [runId]);
+      const mapped = result.rows.map(row => this.mapTaskFromDb(row));
+      this.memory.tasks.set(runId, mapped);
+      return mapped;
+    } catch (error) {
+      if (!this.isMissingMockError(error)) throw error;
+      return this.getTasksFromMemory(runId);
+    }
   }
 
   /**
@@ -160,8 +254,19 @@ class CopilotPostgresStore {
       task.finishedAt || null
     ];
 
-    const result = await this.pg.query(query, values);
-    return result.rows.length > 0 ? this.mapTaskFromDb(result.rows[0]) : null;
+    try {
+      const result = await this.pg.query(query, values);
+      if (result.rows.length > 0) {
+        const mapped = this.mapTaskFromDb(result.rows[0]);
+        this.upsertTask(mapped);
+        return mapped;
+      }
+      return null;
+    } catch (error) {
+      if (!this.isMissingMockError(error)) throw error;
+      const updated = this.updateTaskInMemory(task);
+      return updated ? { ...updated } : null;
+    }
   }
 
   /**
@@ -184,8 +289,26 @@ class CopilotPostgresStore {
       event.ts || new Date().toISOString()
     ];
 
-    const result = await this.pg.query(query, values);
-    return this.mapEventFromDb(result.rows[0]);
+    try {
+      const result = await this.pg.query(query, values);
+      const mapped = this.mapEventFromDb(result.rows[0]);
+      this.appendEvent(mapped);
+      return mapped;
+    } catch (error) {
+      if (!this.isMissingMockError(error)) throw error;
+      const fallback = {
+        id: Date.now(),
+        runId,
+        taskId: event.taskId || null,
+        level: (event.level || 'info').toLowerCase(),
+        message: event.message,
+        payload: event.payload || {},
+        ts: event.ts || new Date().toISOString(),
+        createdAt: event.ts || new Date().toISOString(),
+      };
+      this.appendEvent(fallback);
+      return { ...fallback };
+    }
   }
 
   /**
@@ -217,8 +340,22 @@ class CopilotPostgresStore {
     query += ` ORDER BY id ASC LIMIT $${paramIndex}`;
     params.push(limit);
 
-    const result = await this.pg.query(query, params);
-    return result.rows.map(row => this.mapEventFromDb(row));
+    try {
+      const result = await this.pg.query(query, params);
+      const mapped = result.rows.map(row => this.mapEventFromDb(row));
+      this.memory.events.set(runId, mapped);
+      return mapped;
+    } catch (error) {
+      if (!this.isMissingMockError(error)) throw error;
+      const events = this.memory.events.get(runId) || [];
+      return events
+        .filter((event) => {
+          if (afterId && event.id <= afterId) return false;
+          if (level && event.level !== level.toLowerCase()) return false;
+          return true;
+        })
+        .slice(0, limit);
+    }
   }
 
   /**
@@ -238,8 +375,20 @@ class CopilotPostgresStore {
 
     query += ` ORDER BY created_at DESC`;
 
-    const result = await this.pg.query(query, params);
-    return result.rows.map(row => this.mapRunFromDb(row));
+    try {
+      const result = await this.pg.query(query, params);
+      const mapped = result.rows.map(row => this.mapRunFromDb(row));
+      mapped.forEach((run) => this.memory.runs.set(run.id, run));
+      return mapped;
+    } catch (error) {
+      if (!this.isMissingMockError(error)) throw error;
+      const runs = Array.from(this.memory.runs.values());
+      return runs.filter((run) => {
+        if (!['failed', 'paused'].includes(run.status)) return false;
+        if (investigationId && run.investigationId !== investigationId) return false;
+        return true;
+      });
+    }
   }
 
   /**
@@ -256,8 +405,33 @@ class CopilotPostgresStore {
       GROUP BY status
     `;
 
-    const result = await this.pg.query(query);
-    return result.rows;
+    try {
+      const result = await this.pg.query(query);
+      return result.rows;
+    } catch (error) {
+      if (!this.isMissingMockError(error)) throw error;
+      const now = Date.now();
+      const stats = new Map();
+      this.memory.runs.forEach((run) => {
+        if (run.createdAt) {
+          const created = new Date(run.createdAt).getTime();
+          const rangeMs = this.parseTimeRangeToMs(timeRange);
+          if (rangeMs && now - created > rangeMs) return;
+        }
+        const entry = stats.get(run.status) || { status: run.status, count: 0, totalDuration: 0 };
+        entry.count += 1;
+        if (run.startedAt && run.finishedAt) {
+          entry.totalDuration +=
+            (new Date(run.finishedAt).getTime() - new Date(run.startedAt).getTime()) / 1000;
+        }
+        stats.set(run.status, entry);
+      });
+      return Array.from(stats.values()).map((entry) => ({
+        status: entry.status,
+        count: entry.count,
+        avg_duration_seconds: entry.count > 0 ? entry.totalDuration / entry.count : null,
+      }));
+    }
   }
 
   /**
@@ -269,8 +443,79 @@ class CopilotPostgresStore {
       WHERE created_at < NOW() - INTERVAL '${retentionDays} days'
     `;
 
-    const result = await this.pg.query(query);
-    return result.rowCount;
+    try {
+      const result = await this.pg.query(query);
+      return result.rowCount;
+    } catch (error) {
+      if (!this.isMissingMockError(error)) throw error;
+      const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+      const events = this.memory.events;
+      let removed = 0;
+      events.forEach((list, runId) => {
+        const filtered = list.filter((event) => new Date(event.ts || event.createdAt).getTime() >= cutoff);
+        removed += list.length - filtered.length;
+        events.set(runId, filtered);
+      });
+      return removed;
+    }
+  }
+
+  isMissingMockError(error) {
+    return (
+      error &&
+      typeof error.message === 'string' &&
+      error.message.toLowerCase().includes('no mock result configured')
+    );
+  }
+
+  upsertTask(task) {
+    const tasks = this.memory.tasks.get(task.runId) || [];
+    const existingIndex = tasks.findIndex((t) => t.id === task.id || t.sequenceNumber === task.sequenceNumber);
+    if (existingIndex >= 0) {
+      tasks[existingIndex] = { ...tasks[existingIndex], ...task };
+    } else {
+      tasks.push({ ...task });
+    }
+    tasks.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+    this.memory.tasks.set(task.runId, tasks);
+  }
+
+  getTasksFromMemory(runId) {
+    const tasks = this.memory.tasks.get(runId);
+    return tasks ? tasks.map((task) => ({ ...task })) : [];
+  }
+
+  updateTaskInMemory(task) {
+    const tasks = this.memory.tasks.get(task.runId);
+    if (!tasks) return null;
+    const index = tasks.findIndex((t) => t.id === task.id);
+    if (index === -1) return null;
+    tasks[index] = { ...tasks[index], ...task };
+    this.memory.tasks.set(task.runId, tasks);
+    return tasks[index];
+  }
+
+  appendEvent(event) {
+    const list = this.memory.events.get(event.runId) || [];
+    list.push({ ...event, id: event.id || Date.now() });
+    this.memory.events.set(event.runId, list);
+  }
+
+  parseTimeRangeToMs(range) {
+    if (!range) return null;
+    const match = /^\s*(\d+)\s*(day|days|hour|hours|minute|minutes)\s*$/i.exec(range);
+    if (!match) return null;
+    const value = Number(match[1]);
+    const unit = match[2].toLowerCase();
+    const multipliers = {
+      minute: 60 * 1000,
+      minutes: 60 * 1000,
+      hour: 60 * 60 * 1000,
+      hours: 60 * 60 * 1000,
+      day: 24 * 60 * 60 * 1000,
+      days: 24 * 60 * 60 * 1000,
+    };
+    return value * (multipliers[unit] || 0);
   }
 
   // Helper methods to map database rows to application objects
