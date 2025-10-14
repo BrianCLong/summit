@@ -9,3 +9,4 @@ export async function getCached(tenant, input) {
 export async function setCached(tenant, input, text, ttl = 60) {
     await r.setex(key(tenant, input), ttl, text);
 }
+//# sourceMappingURL=answers.js.map

@@ -5,3 +5,4 @@ export const denyWhenHold = async (req, reply) => {
         return reply.code(423).send({ error: 'Legal hold active: operation locked' });
     }
 };
+//# sourceMappingURL=legal-hold-guard.js.map

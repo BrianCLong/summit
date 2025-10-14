@@ -1,0 +1,98 @@
+name: 🛠️ Reusable Toolchain Setup (Node + PNPM)
+
+# Reusable workflow to detect Node version and set up toolchain
+# Auto-detects from .nvmrc or package.json engines, with fallback to Node 20
+
+on:
+  workflow_call:
+    inputs:
+      node-version-file:
+        description: 'Path to .nvmrc or package.json (optional, defaults to auto-detect)'
+        required: false
+        type: string
+      pnpm-version:
+        description: 'PNPM version (optional, defaults to latest)'
+        required: false
+        type: string
+        default: 'latest'
+      install-deps:
+        description: 'Whether to install dependencies (defaults to true)'
+        required: false
+        type: boolean
+        default: true
+    outputs:
+      node-version:
+        description: 'The detected/resolved Node.js version'
+        value: ${{ jobs.toolchain.outputs.node }}
+
+permissions:
+  contents: read
+
+jobs:
+  toolchain:
+    name: Detect and Setup Toolchain
+    runs-on: ubuntu-latest
+    outputs:
+      node: ${{ steps.detect.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect Node.js version
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          # Priority 1: Check for .nvmrc
+          if [[ -f .nvmrc ]]; then
+            v=$(tr -d 'v' < .nvmrc | xargs)
+            echo "✅ Detected from .nvmrc: $v"
+          
+          # Priority 2: Check for package.json engines.node
+          elif command -v jq >/dev/null 2>&1 && jq -e '.engines.node' package.json >/dev/null 2>&1; then
+            v=$(jq -r '.engines.node' package.json | sed 's/[^0-9.]*//' | sed 's/\.x$//' | xargs)
+            echo "✅ Detected from package.json engines: $v"
+          
+          # Priority 3: Fallback to Node 20 (LTS)
+          else
+            v=20
+            echo "⚠️  No .nvmrc or engines.node found, using fallback: Node $v"
+          fi
+          
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "🚀 Will use Node.js version: $v"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.detect.outputs.version }}
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ inputs.pnpm-version }}
+          run_install: ${{ inputs.install-deps }}
+
+      - name: Log toolchain versions
+        shell: bash
+        run: |
+          echo "🔧 Toolchain Summary:"
+          echo "  Node.js: $(node --version)"
+          echo "  PNPM: $(pnpm --version)"
+          echo "  npm: $(npm --version)"
+          echo ""
+          echo "📦 pnpm store location:"
+          pnpm store path
+
+      - name: Cache validation
+        shell: bash
+        run: |
+          echo "📋 Cache hit status:"
+          echo "  Node modules: ${{ steps.cache-node.outputs.cache-hit || 'N/A' }}"
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "✅ pnpm-lock.yaml found"
+          else
+            echo "⚠️  No pnpm-lock.yaml - cache may not be effective"
+          fi
