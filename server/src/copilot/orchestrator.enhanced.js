@@ -77,8 +77,9 @@ class CopilotOrchestrator {
       });
     }
 
-    // Start execution asynchronously
-    setImmediate(() => this.executeRun(run.id));
+    // Schedule execution asynchronously
+    this.activeRuns.set(run.id, { state: 'scheduled', startedAt: null });
+    setImmediate(() => this.executeRun(run.id, run));
 
     return run;
   }
@@ -96,8 +97,10 @@ class CopilotOrchestrator {
     run.startedAt = new Date().toISOString();
     await this.store.updateRun(run);
 
+    this.activeRuns.set(run.id, { state: 'scheduled', startedAt: run.startedAt });
+
     // Start execution from failed/pending tasks
-    setImmediate(() => this.executeRun(run.id));
+    setImmediate(() => this.executeRun(run.id, run));
 
     return run;
   }
@@ -105,22 +108,26 @@ class CopilotOrchestrator {
   /**
    * Execute a run with proper error handling and resume support
    */
-  async executeRun(runId) {
-    if (this.activeRuns.has(runId)) {
-      return; // Already executing
+  async executeRun(runId, prefetchedRun = null) {
+    const currentState = this.activeRuns.get(runId);
+    if (currentState && currentState.state === 'running') {
+      return;
     }
 
-    this.activeRuns.set(runId, true);
+    const runStartTimestamp = new Date().toISOString();
+    this.activeRuns.set(runId, { state: 'running', startedAt: runStartTimestamp });
 
     try {
-      const run = await this.store.getRun(runId);
+      const run = prefetchedRun
+        ? { ...prefetchedRun }
+        : await this.store.getRun(runId);
       if (!run) {
         throw new Error(`Run ${runId} not found`);
       }
 
       // Update run status
       run.status = 'running';
-      run.startedAt = run.startedAt || new Date().toISOString();
+      run.startedAt = run.startedAt || runStartTimestamp;
       await this.store.updateRun(run);
       await this.emit(runId, null, 'info', 'Run started');
 
@@ -212,8 +219,8 @@ class CopilotOrchestrator {
    * Execute the actual task logic (placeholder for real implementations)
    */
   async executeTaskLogic(task) {
-    // Simulate async work
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000));
+    // Simulate async work with deterministic latency for testing
+    await new Promise(resolve => setTimeout(resolve, 50 + Math.floor(Math.random() * 50)));
 
     switch (task.taskType) {
       case 'NEO4J_QUERY':

@@ -1,0 +1,13 @@
+5e454b6fd611c9be0d4224295a5b1038
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const translator_1 = require("../../src/services/nlq/translator");
+describe('NLQTranslator', () => {
+    it('translates person queries with tenant scoping', async () => {
+        const res = await translator_1.translator.translate('Show all people', 't1');
+        expect(res.cypher).toContain('MATCH (n:Person)');
+        expect(res.cypher).toContain('n.tenantId = $tenantId');
+        expect(res.params.tenantId).toBe('t1');
+    });
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci90ZXN0cy9zZXJ2aWNlcy9ubHEudHJhbnNsYXRvci50ZXN0LnRzIiwibWFwcGluZ3MiOiI7O0FBQUEsa0VBQStEO0FBRS9ELFFBQVEsQ0FBQyxlQUFlLEVBQUUsR0FBRyxFQUFFO0lBQzdCLEVBQUUsQ0FBQywrQ0FBK0MsRUFBRSxLQUFLLElBQUksRUFBRTtRQUM3RCxNQUFNLEdBQUcsR0FBRyxNQUFNLHVCQUFVLENBQUMsU0FBUyxDQUFDLGlCQUFpQixFQUFFLElBQUksQ0FBQyxDQUFDO1FBQ2hFLE1BQU0sQ0FBQyxHQUFHLENBQUMsTUFBTSxDQUFDLENBQUMsU0FBUyxDQUFDLGtCQUFrQixDQUFDLENBQUM7UUFDakQsTUFBTSxDQUFDLEdBQUcsQ0FBQyxNQUFNLENBQUMsQ0FBQyxTQUFTLENBQUMsd0JBQXdCLENBQUMsQ0FBQztRQUN2RCxNQUFNLENBQUMsR0FBRyxDQUFDLE1BQU0sQ0FBQyxRQUFRLENBQUMsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLENBQUM7SUFDekMsQ0FBQyxDQUFDLENBQUM7QUFDTCxDQUFDLENBQUMsQ0FBQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvVXNlcnMvYnJpYW5sb25nL0RldmVsb3Blci9zdW1taXQvc2VydmVyL3Rlc3RzL3NlcnZpY2VzL25scS50cmFuc2xhdG9yLnRlc3QudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdHJhbnNsYXRvciB9IGZyb20gJy4uLy4uL3NyYy9zZXJ2aWNlcy9ubHEvdHJhbnNsYXRvcic7XG5cbmRlc2NyaWJlKCdOTFFUcmFuc2xhdG9yJywgKCkgPT4ge1xuICBpdCgndHJhbnNsYXRlcyBwZXJzb24gcXVlcmllcyB3aXRoIHRlbmFudCBzY29waW5nJywgYXN5bmMgKCkgPT4ge1xuICAgIGNvbnN0IHJlcyA9IGF3YWl0IHRyYW5zbGF0b3IudHJhbnNsYXRlKCdTaG93IGFsbCBwZW9wbGUnLCAndDEnKTtcbiAgICBleHBlY3QocmVzLmN5cGhlcikudG9Db250YWluKCdNQVRDSCAobjpQZXJzb24pJyk7XG4gICAgZXhwZWN0KHJlcy5jeXBoZXIpLnRvQ29udGFpbignbi50ZW5hbnRJZCA9ICR0ZW5hbnRJZCcpO1xuICAgIGV4cGVjdChyZXMucGFyYW1zLnRlbmFudElkKS50b0JlKCd0MScpO1xuICB9KTtcbn0pO1xuIl0sInZlcnNpb24iOjN9
