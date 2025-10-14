@@ -1,29 +1,24 @@
 {
-  "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
     "rootDir": "./src",
     "outDir": "./dist",
-    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": false,
     "noImplicitAny": false,
+    "allowJs": true,
     "skipLibCheck": true,
-    "noImplicitReturns": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "exactOptionalPropertyTypes": false,
-    "lib": ["ES2022"]
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "lib": ["ES2020"]
   },
   "ts-node": {
     "esm": true
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "src/**/*.test.ts",
-    "src/**/__tests__/**/*",
-    "src/tests/**/*",
-    "src/migrations/017_v17_wasm_plugins_integrity.ts",
-    "src/migrations/020_v110_confcompute_privacy.ts"
-  ]
+  "exclude": ["node_modules", "dist"]
 }

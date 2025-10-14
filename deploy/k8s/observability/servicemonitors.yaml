@@ -1,0 +1,56 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: companyos-api
+  namespace: observability
+  labels: { release: kube-prometheus-stack }
+spec:
+  namespaceSelector: { matchNames: ["companyos-core"] }
+  selector: { matchLabels: { app: api } }
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: companyos-workers
+  namespace: observability
+  labels: { release: kube-prometheus-stack }
+spec:
+  namespaceSelector: { matchNames: ["companyos-core"] }
+  selector: { matchLabels: { app: workers } }
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      # if workers expose metrics on 9091, use targetPort instead:
+      targetPort: 9091
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: asr-bridge
+  namespace: companyos-media
+  labels: { app: asr-bridge }
+spec:
+  selector: { app: asr-bridge }
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: companyos-asr-bridge
+  namespace: observability
+  labels: { release: kube-prometheus-stack }
+spec:
+  namespaceSelector: { matchNames: ["companyos-media"] }
+  selector: { matchLabels: { app: asr-bridge } }
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

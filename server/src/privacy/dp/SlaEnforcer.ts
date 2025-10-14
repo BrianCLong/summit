@@ -5,7 +5,7 @@ export class SlaEnforcer {
     private deps: {
       orders: { credit: (orderId: string) => Promise<void> };
       entitlements: { pause: (entId: string) => Promise<void> };
-    },
+    }
   ) {}
 
   async check(observed: number, expectedVar: number, entId: string, orderId: string) {

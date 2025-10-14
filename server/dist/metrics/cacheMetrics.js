@@ -42,3 +42,4 @@ export function recSet(store, op, tenant) {
 export function recInvalidation(pattern, tenant) {
     cacheInvalidations.labels(pattern, tenant ?? 'unknown').inc();
 }
+//# sourceMappingURL=cacheMetrics.js.map

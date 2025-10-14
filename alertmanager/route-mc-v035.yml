@@ -1,0 +1,59 @@
+route:
+  group_by: ['alertname', 'service', 'tenant']
+  group_wait: 10s
+  group_interval: 5m
+  repeat_interval: 1h
+  receiver: slack-mc
+  routes:
+    - matchers:
+        - service="agent-workbench"
+        - alertname=~"AttestationJWSFailureBudget|BudgetV2NoiseHigh|CanaryCompositeScoreLow|GraphQLFastBurn|GraphQLSlowBurn"
+      continue: false
+      receiver: slack-mc-threaded
+    - matchers:
+        - service="disclosure-packager"
+      continue: false
+      receiver: slack-mc
+
+receivers:
+  - name: slack-mc
+    slack_configs:
+      - api_url: ${SLACK_WEBHOOK_URL}
+        channel: "#mc-ops"
+        send_resolved: true
+        title: ':rotating_light: {{ .CommonLabels.alertname }} ({{ .Status | toUpper }})'
+        text: >-
+          *Service:* {{ .CommonLabels.service }} | *Severity:* {{ .CommonLabels.severity }}
+
+          *Summary:* {{ (index .Alerts 0).Annotations.summary }}
+
+          *Description:* {{ (index .Alerts 0).Annotations.description }}
+
+  - name: slack-mc-threaded
+    slack_configs:
+      - api_url: ${SLACK_WEBHOOK_URL}
+        channel: "#mc-ops"
+        send_resolved: true
+        # Thread under deployment message using thread_ts from environment
+        thread_ts: '{{ if $externalURL }}{{ $externalURL }}{{ end }}'
+        title: ':rotating_light: {{ .CommonLabels.alertname }} ({{ .Status | toUpper }})'
+        title_link: '{{ (index .Alerts 0).Annotations.dashboard_url }}'
+        text: >-
+          *Service:* {{ .CommonLabels.service }} | *Severity:* {{ .CommonLabels.severity }} | *SLO:* {{ .CommonLabels.slo }}
+
+          *Summary:* {{ (index .Alerts 0).Annotations.summary }}
+
+          *Description:* {{ (index .Alerts 0).Annotations.description }}
+
+          :books: <{{ (index .Alerts 0).Annotations.runbook_url }}|Runbook> | :chart_with_upwards_trend: <{{ (index .Alerts 0).Annotations.dashboard_url }}|Dashboard>
+        actions:
+          - type: button
+            text: 'View Dashboard'
+            url: '{{ (index .Alerts 0).Annotations.dashboard_url }}'
+          - type: button
+            text: 'Runbook'
+            url: '{{ (index .Alerts 0).Annotations.runbook_url }}'
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
