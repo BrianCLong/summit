@@ -1,0 +1,6 @@
+5ca1b71bea87ee3097d43966c02e4953
+import assert from 'node:assert/strict';
+import { configure, score } from './index.js';
+
+assert.equal(typeof configure, 'function');
+assert.equal(typeof score, 'function');

@@ -3,8 +3,8 @@
  * Provides comprehensive tenant isolation at API, DB, and cache layers
  */
 import { GraphQLError } from 'graphql';
-import baseLogger from '../config/logger';
-const logger = baseLogger.child({ name: 'tenantValidator' });
+import pino from 'pino';
+const logger = pino({ name: 'tenantValidator' });
 /**
  * Validates tenant access and creates secure tenant context
  */
@@ -13,7 +13,7 @@ export class TenantValidator {
      * Validate tenant access for a given operation
      */
     static validateTenantAccess(context, resourceTenantId, options = {}) {
-        const { requireExplicitTenant = true, allowSystemAccess = false, validateOwnership = true, } = options;
+        const { requireExplicitTenant = true, allowSystemAccess = false, validateOwnership = true } = options;
         // Extract tenant context from request
         const userTenantId = context.user?.tenantId;
         const userId = context.user?.id;
@@ -25,7 +25,7 @@ export class TenantValidator {
                 tenantId: resourceTenantId || userTenantId || 'system',
                 userId,
                 roles,
-                permissions: ['*'],
+                permissions: ['*']
             };
         }
         // Validate user has tenant context
@@ -34,8 +34,8 @@ export class TenantValidator {
             throw new GraphQLError('Tenant context required', {
                 extensions: {
                     code: 'TENANT_REQUIRED',
-                    userId,
-                },
+                    userId
+                }
             });
         }
         // Cross-tenant access validation
@@ -45,8 +45,8 @@ export class TenantValidator {
                 extensions: {
                     code: 'CROSS_TENANT_ACCESS_DENIED',
                     userTenant: userTenantId,
-                    resourceTenant: resourceTenantId,
-                },
+                    resourceTenant: resourceTenantId
+                }
             });
         }
         const effectiveTenantId = resourceTenantId || userTenantId;
@@ -55,7 +55,7 @@ export class TenantValidator {
             tenantId: effectiveTenantId,
             userId,
             roles,
-            permissions: this.calculatePermissions(roles),
+            permissions: this.calculatePermissions(roles)
         };
     }
     /**
@@ -81,7 +81,7 @@ export class TenantValidator {
             tenantId: tenantContext.tenantId,
             // Additional constraints for multi-tenancy
             deletedAt: null,
-            status: { $ne: 'archived' },
+            status: { $ne: 'archived' }
         };
     }
     /**
@@ -91,7 +91,7 @@ export class TenantValidator {
         // Add tenant parameter
         const enhancedParams = {
             ...parameters,
-            tenantId: tenantContext.tenantId,
+            tenantId: tenantContext.tenantId
         };
         // Inject tenant filtering into WHERE clauses
         let enhancedQuery = cypherQuery;
@@ -110,7 +110,7 @@ export class TenantValidator {
         logger.debug(`Enhanced Neo4j query with tenant constraints for tenant ${tenantContext.tenantId}`);
         return {
             query: enhancedQuery,
-            parameters: enhancedParams,
+            parameters: enhancedParams
         };
     }
     /**
@@ -118,7 +118,7 @@ export class TenantValidator {
      */
     static calculatePermissions(roles) {
         const permissions = new Set();
-        roles.forEach((role) => {
+        roles.forEach(role => {
             switch (role.toUpperCase()) {
                 case 'SUPER_ADMIN':
                 case 'SYSTEM':
@@ -167,7 +167,7 @@ export class TenantValidator {
                         tenant: tenantContext,
                         getTenantCacheKey: (baseKey, scope) => TenantValidator.getTenantCacheKey(baseKey, tenantContext, scope),
                         getTenantQueryConstraints: () => TenantValidator.getTenantQueryConstraints(tenantContext),
-                        addTenantToNeo4jQuery: (query, params) => TenantValidator.addTenantToNeo4jQuery(query, params, tenantContext),
+                        addTenantToNeo4jQuery: (query, params) => TenantValidator.addTenantToNeo4jQuery(query, params, tenantContext)
                     };
                     // Call original resolver with enhanced context
                     return await resolver(parent, args, enhancedContext, info);
@@ -182,3 +182,4 @@ export class TenantValidator {
 }
 export const { validateTenantAccess, getTenantCacheKey, addTenantToNeo4jQuery } = TenantValidator;
 export const tenantMiddleware = TenantValidator.createTenantMiddleware;
+//# sourceMappingURL=tenantValidator.js.map

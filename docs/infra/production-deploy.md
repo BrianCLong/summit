@@ -9,10 +9,9 @@
 - Configure DNS to point to the ingress controller.
 
 Branching:
-
 - `main` → staging deploy
 - `v*.*.*` tags → production deploy
 
 Rollback:
-
 - `helm rollback <release> <revision>`
+

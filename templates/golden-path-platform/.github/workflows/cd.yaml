@@ -1,0 +1,68 @@
+name: golden-path-cd
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment (dev|stage|prod)
+        required: true
+        default: dev
+      namespace:
+        description: Kubernetes namespace
+        required: true
+        default: golden-path
+      serviceImage:
+        description: Fully-qualified hello-service image reference
+        required: true
+      jobImage:
+        description: Fully-qualified hello-job image reference
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    environment: ${{ github.event.inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129b4052e0f3944c0e437ac31d59
+      - name: Install Helm
+        uses: Azure/setup-helm@1e96d927b67c45aee1a50ac46ce6626a9014606d
+      - name: Install kubectl
+        uses: Azure/setup-kubectl@4d23b307dc2f53a94af92c292c258773d08300cc
+      - name: Install OPA
+        uses: open-policy-agent/setup-opa@ea887bb87f4035764de1b0b04aec994230289fd1
+        with:
+          version: v0.65.0
+      - name: Install cosign
+        uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62
+      - name: Verify cosign signatures
+        env:
+          COSIGN_YES: "1"
+        run: |
+          cosign verify --keyless ${{ github.event.inputs.serviceImage }}
+          cosign verify --keyless ${{ github.event.inputs.jobImage }}
+      - name: Evaluate policy gate
+        run: |
+          jq --arg image "${{ github.event.inputs.serviceImage }}" --arg job "${{ github.event.inputs.jobImage }}" \
+            '.artifacts = [$image, $job] | .provenance.slsaLevel = 3' \
+            templates/golden-path-platform/scripts/policy/input.json > opa-input.json
+          opa eval --format pretty --data templates/golden-path-platform/scripts/policy/bundle.rego --input opa-input.json 'data.cicd.allow'
+      - name: Canary deploy hello-service
+        run: |
+          helm upgrade --install hello-service templates/golden-path-platform/helm/hello-service \
+            --namespace ${{ github.event.inputs.namespace }} \
+            --create-namespace \
+            -f templates/golden-path-platform/helm/environments/${{ github.event.inputs.environment }}/hello-service.yaml \
+            --set-string image.fullRef=${{ github.event.inputs.serviceImage }} \
+            --atomic --timeout 10m
+      - name: Deploy hello-job
+        run: |
+          helm upgrade --install hello-job templates/golden-path-platform/helm/hello-job \
+            --namespace ${{ github.event.inputs.namespace }} \
+            --create-namespace \
+            -f templates/golden-path-platform/helm/environments/${{ github.event.inputs.environment }}/hello-job.yaml \
+            --set-string image.fullRef=${{ github.event.inputs.jobImage }} \
+            --atomic --timeout 10m

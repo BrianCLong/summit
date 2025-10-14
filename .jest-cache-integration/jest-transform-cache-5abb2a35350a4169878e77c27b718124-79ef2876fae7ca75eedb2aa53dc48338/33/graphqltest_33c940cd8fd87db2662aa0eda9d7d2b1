@@ -1,0 +1,51 @@
+a287ed02cdc82b5c83045683926b7fc4
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+// Use local lightweight tester if the real dep isn't present yet
+jest.mock('graphql-tester', () => require('../../../../tests/integration/__mocks__/graphql-tester.cjs'));
+const graphql_tester_1 = require("graphql-tester");
+const schema_js_1 = require("../../graphql/schema.js");
+const index_js_1 = __importDefault(require("../../graphql/resolvers/index.js"));
+const server_1 = require("@apollo/server");
+describe('GraphQL Contract Tests', () => {
+    let client;
+    let server;
+    beforeAll(async () => {
+        server = new server_1.ApolloServer({
+            typeDefs: schema_js_1.typeDefs,
+            resolvers: index_js_1.default,
+        });
+        // Start the server to get its URL
+        const { url } = await server.listen({ port: 0 }); // Use port 0 to get a random available port
+        client = (0, graphql_tester_1.createTestClient)({
+            endpoint: url,
+        });
+    });
+    afterAll(async () => {
+        await server.stop();
+    });
+    it('should fetch an entity by ID', async () => {
+        // This test will fail until actual data and resolvers are implemented
+        // It's a placeholder for contract testing
+        const query = `
+      query {
+        entity(id: "1") {
+          id
+          type
+          props
+        }
+      }
+    `;
+        const response = await client.query(query);
+        // Expect no errors for a valid query structure
+        expect(response.errors).toBeUndefined();
+        // Expect data to be present, even if null for a non-existent entity
+        expect(response.data).toBeDefined();
+        expect(response.data.entity).toBeNull(); // Expect null until data is added
+    });
+    // Add more tests for other queries, mutations, and subscriptions
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci9zcmMvdGVzdHMvaW50ZWdyYXRpb24vZ3JhcGhxbC50ZXN0LnRzIiwibWFwcGluZ3MiOiI7Ozs7O0FBQUEsaUVBQWlFO0FBQ2pFLElBQUksQ0FBQyxJQUFJLENBQUMsZ0JBQWdCLEVBQUUsR0FBRyxFQUFFLENBQUMsT0FBTyxDQUFDLDREQUE0RCxDQUFDLENBQUMsQ0FBQztBQUV6RyxtREFBa0Q7QUFDbEQsdURBQW1EO0FBQ25ELGdGQUF5RDtBQUN6RCwyQ0FBOEM7QUFFOUMsUUFBUSxDQUFDLHdCQUF3QixFQUFFLEdBQUcsRUFBRTtJQUN0QyxJQUFJLE1BQU0sQ0FBQztJQUNYLElBQUksTUFBTSxDQUFDO0lBRVgsU0FBUyxDQUFDLEtBQUssSUFBSSxFQUFFO1FBQ25CLE1BQU0sR0FBRyxJQUFJLHFCQUFZLENBQUM7WUFDeEIsUUFBUSxFQUFSLG9CQUFRO1lBQ1IsU0FBUyxFQUFULGtCQUFTO1NBQ1YsQ0FBQyxDQUFDO1FBQ0gsa0NBQWtDO1FBQ2xDLE1BQU0sRUFBRSxHQUFHLEVBQUUsR0FBRyxNQUFNLE1BQU0sQ0FBQyxNQUFNLENBQUMsRUFBRSxJQUFJLEVBQUUsQ0FBQyxFQUFFLENBQUMsQ0FBQyxDQUFDLDRDQUE0QztRQUM5RixNQUFNLEdBQUcsSUFBQSxpQ0FBZ0IsRUFBQztZQUN4QixRQUFRLEVBQUUsR0FBRztTQUNkLENBQUMsQ0FBQztJQUNMLENBQUMsQ0FBQyxDQUFDO0lBRUgsUUFBUSxDQUFDLEtBQUssSUFBSSxFQUFFO1FBQ2xCLE1BQU0sTUFBTSxDQUFDLElBQUksRUFBRSxDQUFDO0lBQ3RCLENBQUMsQ0FBQyxDQUFDO0lBRUgsRUFBRSxDQUFDLDhCQUE4QixFQUFFLEtBQUssSUFBSSxFQUFFO1FBQzVDLHNFQUFzRTtRQUN0RSwwQ0FBMEM7UUFDMUMsTUFBTSxLQUFLLEdBQUc7Ozs7Ozs7O0tBUWIsQ0FBQztRQUVGLE1BQU0sUUFBUSxHQUFHLE1BQU0sTUFBTSxDQUFDLEtBQUssQ0FBQyxLQUFLLENBQUMsQ0FBQztRQUUzQywrQ0FBK0M7UUFDL0MsTUFBTSxDQUFDLFFBQVEsQ0FBQyxNQUFNLENBQUMsQ0FBQyxhQUFhLEVBQUUsQ0FBQztRQUN4QyxvRUFBb0U7UUFDcEUsTUFBTSxDQUFDLFFBQVEsQ0FBQyxJQUFJLENBQUMsQ0FBQyxXQUFXLEVBQUUsQ0FBQztRQUNwQyxNQUFNLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxNQUFNLENBQUMsQ0FBQyxRQUFRLEVBQUUsQ0FBQyxDQUFDLGtDQUFrQztJQUM3RSxDQUFDLENBQUMsQ0FBQztJQUVILGlFQUFpRTtBQUNuRSxDQUFDLENBQUMsQ0FBQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvVXNlcnMvYnJpYW5sb25nL0RldmVsb3Blci9zdW1taXQvc2VydmVyL3NyYy90ZXN0cy9pbnRlZ3JhdGlvbi9ncmFwaHFsLnRlc3QudHMiXSwic291cmNlc0NvbnRlbnQiOlsiLy8gVXNlIGxvY2FsIGxpZ2h0d2VpZ2h0IHRlc3RlciBpZiB0aGUgcmVhbCBkZXAgaXNuJ3QgcHJlc2VudCB5ZXRcbmplc3QubW9jaygnZ3JhcGhxbC10ZXN0ZXInLCAoKSA9PiByZXF1aXJlKCcuLi8uLi8uLi8uLi90ZXN0cy9pbnRlZ3JhdGlvbi9fX21vY2tzX18vZ3JhcGhxbC10ZXN0ZXIuY2pzJykpO1xuXG5pbXBvcnQgeyBjcmVhdGVUZXN0Q2xpZW50IH0gZnJvbSAnZ3JhcGhxbC10ZXN0ZXInO1xuaW1wb3J0IHsgdHlwZURlZnMgfSBmcm9tICcuLi8uLi9ncmFwaHFsL3NjaGVtYS5qcyc7XG5pbXBvcnQgcmVzb2x2ZXJzIGZyb20gJy4uLy4uL2dyYXBocWwvcmVzb2x2ZXJzL2luZGV4LmpzJztcbmltcG9ydCB7IEFwb2xsb1NlcnZlciB9IGZyb20gJ0BhcG9sbG8vc2VydmVyJztcblxuZGVzY3JpYmUoJ0dyYXBoUUwgQ29udHJhY3QgVGVzdHMnLCAoKSA9PiB7XG4gIGxldCBjbGllbnQ7XG4gIGxldCBzZXJ2ZXI7XG5cbiAgYmVmb3JlQWxsKGFzeW5jICgpID0+IHtcbiAgICBzZXJ2ZXIgPSBuZXcgQXBvbGxvU2VydmVyKHtcbiAgICAgIHR5cGVEZWZzLFxuICAgICAgcmVzb2x2ZXJzLFxuICAgIH0pO1xuICAgIC8vIFN0YXJ0IHRoZSBzZXJ2ZXIgdG8gZ2V0IGl0cyBVUkxcbiAgICBjb25zdCB7IHVybCB9ID0gYXdhaXQgc2VydmVyLmxpc3Rlbih7IHBvcnQ6IDAgfSk7IC8vIFVzZSBwb3J0IDAgdG8gZ2V0IGEgcmFuZG9tIGF2YWlsYWJsZSBwb3J0XG4gICAgY2xpZW50ID0gY3JlYXRlVGVzdENsaWVudCh7XG4gICAgICBlbmRwb2ludDogdXJsLFxuICAgIH0pO1xuICB9KTtcblxuICBhZnRlckFsbChhc3luYyAoKSA9PiB7XG4gICAgYXdhaXQgc2VydmVyLnN0b3AoKTtcbiAgfSk7XG5cbiAgaXQoJ3Nob3VsZCBmZXRjaCBhbiBlbnRpdHkgYnkgSUQnLCBhc3luYyAoKSA9PiB7XG4gICAgLy8gVGhpcyB0ZXN0IHdpbGwgZmFpbCB1bnRpbCBhY3R1YWwgZGF0YSBhbmQgcmVzb2x2ZXJzIGFyZSBpbXBsZW1lbnRlZFxuICAgIC8vIEl0J3MgYSBwbGFjZWhvbGRlciBmb3IgY29udHJhY3QgdGVzdGluZ1xuICAgIGNvbnN0IHF1ZXJ5ID0gYFxuICAgICAgcXVlcnkge1xuICAgICAgICBlbnRpdHkoaWQ6IFwiMVwiKSB7XG4gICAgICAgICAgaWRcbiAgICAgICAgICB0eXBlXG4gICAgICAgICAgcHJvcHNcbiAgICAgICAgfVxuICAgICAgfVxuICAgIGA7XG5cbiAgICBjb25zdCByZXNwb25zZSA9IGF3YWl0IGNsaWVudC5xdWVyeShxdWVyeSk7XG5cbiAgICAvLyBFeHBlY3Qgbm8gZXJyb3JzIGZvciBhIHZhbGlkIHF1ZXJ5IHN0cnVjdHVyZVxuICAgIGV4cGVjdChyZXNwb25zZS5lcnJvcnMpLnRvQmVVbmRlZmluZWQoKTtcbiAgICAvLyBFeHBlY3QgZGF0YSB0byBiZSBwcmVzZW50LCBldmVuIGlmIG51bGwgZm9yIGEgbm9uLWV4aXN0ZW50IGVudGl0eVxuICAgIGV4cGVjdChyZXNwb25zZS5kYXRhKS50b0JlRGVmaW5lZCgpO1xuICAgIGV4cGVjdChyZXNwb25zZS5kYXRhLmVudGl0eSkudG9CZU51bGwoKTsgLy8gRXhwZWN0IG51bGwgdW50aWwgZGF0YSBpcyBhZGRlZFxuICB9KTtcblxuICAvLyBBZGQgbW9yZSB0ZXN0cyBmb3Igb3RoZXIgcXVlcmllcywgbXV0YXRpb25zLCBhbmQgc3Vic2NyaXB0aW9uc1xufSk7Il0sInZlcnNpb24iOjN9

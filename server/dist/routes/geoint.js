@@ -27,3 +27,4 @@ router.post('/clusters', async (req, res) => {
     }
 });
 module.exports = router;
+//# sourceMappingURL=geoint.js.map
