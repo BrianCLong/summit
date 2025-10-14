@@ -13,3 +13,4 @@
   - Apply hotfix for recent deployment causing widespread failures.
 - Validation: Availability returns to baseline; burn rate < 1 on next windows.
 - Recovery expectation: 15–30 minutes for transient outages, 1–2 hours for dependency failures.
+

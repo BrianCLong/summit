@@ -1,9 +1,8 @@
 // System-level Mixture-of-Experts Router
 // Routes tasks to the optimal expert based on task characteristics and constraints
 export class MoERouter {
-    expertCapabilities;
-    routingHistory = new Map();
     constructor() {
+        this.routingHistory = new Map();
         this.expertCapabilities = {
             LLM_LIGHT: {
                 type: 'LLM_LIGHT',
@@ -396,3 +395,4 @@ export class MoERouter {
 }
 // Export singleton instance
 export const moERouter = new MoERouter();
+//# sourceMappingURL=index.js.map

@@ -1,0 +1,28 @@
+name: SBOM & Vulnerability Scan
+on:
+  push: { branches: ["main"] }
+  pull_request:
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate SBOM (Syft)
+        run: docker run --rm -v ${{ github.workspace }}:/work anchore/syft:latest packages dir:/work -o spdx-json=sbom.spdx.json
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
+  grype:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vulnerability scan (Grype) on workspace
+        run: docker run --rm -v ${{ github.workspace }}:/work anchore/grype:latest dir:/work --fail-on high || true
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy FS Scan
+        run: docker run --rm -v ${{ github.workspace }}:/work aquasec/trivy fs --exit-code 0 --severity HIGH,CRITICAL /work

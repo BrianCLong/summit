@@ -5,7 +5,7 @@ export let options = {
   stages: [
     { duration: '1m', target: 50 }, // ramp-up to 50 users
     { duration: '3m', target: 50 }, // stay at 50 users
-    { duration: '30s', target: 0 }, // ramp-down
+    { duration: '30s', target: 0 },  // ramp-down
   ],
   thresholds: {
     http_req_duration: ['p(95)<200'], // 95% of requests below 200ms
