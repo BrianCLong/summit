@@ -1,0 +1,102 @@
+{
+  "bomFormat": "SPDX",
+  "specVersion": "2.3",
+  "serialNumber": "urn:uuid:mc-platform-v0.4.5-$(date +%s)",
+  "creationInfo": {
+    "created": "$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)",
+    "creators": [
+      "Tool: MC Platform SBOM Generator",
+      "Organization: MC Platform Engineering"
+    ]
+  },
+  "name": "MC Platform v0.4.5 Adaptive Quantum Excellence",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-mc-platform-core",
+      "name": "mc-platform-core",
+      "versionInfo": "0.4.5",
+      "packageFileName": "server/src/qam/",
+      "supplier": "Organization: MC Platform",
+      "filesAnalyzed": true,
+      "packageVerificationCode": {
+        "packageVerificationCodeValue": "sha256:$(find server/src/qam/ -type f -exec sha256sum {} + | sort | sha256sum | cut -d' ' -f1)"
+      },
+      "licenseConcluded": "MIT",
+      "copyrightText": "Copyright (c) 2025 MC Platform"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-adaptive-quantum-app",
+      "name": "AdaptiveQuantumApp",
+      "versionInfo": "0.4.5",
+      "packageFileName": "server/src/qam/AdaptiveQuantumApp.ts",
+      "supplier": "Organization: MC Platform",
+      "filesAnalyzed": true,
+      "packageVerificationCode": {
+        "packageVerificationCodeValue": "sha256:$(sha256sum server/src/qam/AdaptiveQuantumApp.ts | cut -d' ' -f1)"
+      }
+    },
+    {
+      "SPDXID": "SPDXRef-Package-linucb-optimizer",
+      "name": "LinUCBOptimizer",
+      "versionInfo": "0.4.5",
+      "packageFileName": "server/src/qam/LinUCBOptimizer.ts",
+      "supplier": "Organization: MC Platform"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-redis-state-manager",
+      "name": "RedisStateManager",
+      "versionInfo": "0.4.5",
+      "packageFileName": "server/src/qam/RedisStateManager.ts",
+      "supplier": "Organization: MC Platform"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-differential-privacy-accountant",
+      "name": "DifferentialPrivacyAccountant",
+      "versionInfo": "0.4.5",
+      "packageFileName": "server/src/qam/DifferentialPrivacyAccountant.ts",
+      "supplier": "Organization: MC Platform"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-contextual-rewards-v2",
+      "name": "ContextualRewardsV2",
+      "versionInfo": "0.4.5",
+      "packageFileName": "server/src/qam/ContextualRewardsV2.ts",
+      "supplier": "Organization: MC Platform"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-key-risk-ml-explainer",
+      "name": "KeyRiskMLExplainer",
+      "versionInfo": "0.4.5",
+      "packageFileName": "server/src/qam/KeyRiskMLExplainer.ts",
+      "supplier": "Organization: MC Platform"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-state-merkle-anchor",
+      "name": "StateMerkleAnchor",
+      "versionInfo": "0.4.5",
+      "packageFileName": "server/src/qam/StateMerkleAnchor.ts",
+      "supplier": "Organization: MC Platform"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-incident-auto-reweighter",
+      "name": "IncidentAutoReweighter",
+      "versionInfo": "0.4.5",
+      "packageFileName": "server/src/qam/IncidentAutoReweighter.ts",
+      "supplier": "Organization: MC Platform"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-pq-dual-sig-gate",
+      "name": "PQ-Dual-Sig-Gate",
+      "versionInfo": "0.4.5",
+      "packageFileName": ".github/workflows/pq-dual-sig-gate.yml",
+      "supplier": "Organization: MC Platform"
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-Package-mc-platform-core"
+    }
+  ]
+}

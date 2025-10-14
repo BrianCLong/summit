@@ -1,5 +1,0 @@
-version: 1.0.0
-entity: Person
-$include:
-  - person-props.yml
-  - person-extra.yml

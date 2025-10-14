@@ -17,7 +17,7 @@ type Story = StoryObj<typeof KPIStrip>
 export const Default: Story = {
   args: {
     data: mockData.kpiMetrics,
-    onSelect: metric => console.log('Selected metric:', metric),
+    onSelect: (metric) => console.log('Selected metric:', metric),
   },
 }
 
@@ -41,7 +41,7 @@ export const TwoColumns: Story = {
   args: {
     data: mockData.kpiMetrics.slice(0, 2),
     columns: 2,
-    onSelect: metric => console.log('Selected metric:', metric),
+    onSelect: (metric) => console.log('Selected metric:', metric),
   },
 }
 
@@ -70,7 +70,7 @@ export const SixColumns: Story = {
       },
     ],
     columns: 6,
-    onSelect: metric => console.log('Selected metric:', metric),
+    onSelect: (metric) => console.log('Selected metric:', metric),
   },
 }
 
@@ -123,6 +123,6 @@ export const CommandCenterStyle: Story = {
     ],
     columns: 4,
     className: 'bg-slate-900 p-6 rounded-lg',
-    onSelect: metric => console.log('Selected metric:', metric),
+    onSelect: (metric) => console.log('Selected metric:', metric),
   },
 }

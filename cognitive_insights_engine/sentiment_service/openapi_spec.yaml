@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
   title: Graph Sentiment Service
-  version: '0.1.0'
+  version: "0.1.0"
 paths:
   /sentiment/analyze:
     post:
@@ -11,14 +11,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SentimentRequest'
+              $ref: "#/components/schemas/SentimentRequest"
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SentimentResponse'
+                $ref: "#/components/schemas/SentimentResponse"
 components:
   schemas:
     SentimentRequest:

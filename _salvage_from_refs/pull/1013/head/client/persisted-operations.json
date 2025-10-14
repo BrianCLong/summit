@@ -1,5 +1,0 @@
-{
-  "dbf54ecddb88ead31dfcf288fcdcaef7d14ecc61ff1d1dc5abd375db66d9989f": "subscription LiveGraphUpdates {\n  graphUpdated {\n    type\n    entity {\n      id\n      label\n      type\n      properties\n      timestamp\n    }\n    relationship {\n      id\n      from\n      to\n      type\n      strength\n      timestamp\n    }\n    user {\n      id\n      name\n      action\n    }\n  }\n}",
-  "e4847b57b01d7beddb5a1cdd2951ebb00f6c560e80b29f7a6dc579229852802f": "subscription LiveInvestigationUpdates($investigationId: ID!) {\n  investigationUpdated(investigationId: $investigationId) {\n    id\n    name\n    status\n    priority\n    lastModified\n    collaborators {\n      id\n      name\n      isOnline\n      lastActivity\n    }\n    recentActivity {\n      id\n      action\n      user\n      timestamp\n      details\n    }\n  }\n}",
-  "3813808d02339c0d102eaccd76d4894dc4612bce93d48b2ef9c80f6fc54264e7": "subscription LiveAIInsights {\n  aiInsightGenerated {\n    id\n    type\n    confidence\n    message\n    affectedEntities\n    suggestedActions\n    timestamp\n  }\n}"
-}

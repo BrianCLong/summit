@@ -1,0 +1,21 @@
+# Requires `just` command runner
+sbom:
+  docker run --rm -v $PWD:/work anchore/syft:latest packages dir:/work -o spdx-json=sbom.spdx.json
+
+vulns:
+  docker run --rm -v $PWD:/work anchore/grype:latest dir:/work --fail-on high || true
+
+trivy:
+  docker run --rm -v $PWD:/work aquasec/trivy fs --exit-code 0 --severity HIGH,CRITICAL /work
+
+tf-validate:
+  terraform fmt -check -recursive && terraform validate || true
+
+tflint:
+  docker run --rm -v $PWD:/work ghcr.io/terraform-linters/tflint /work
+
+kube-lint:
+  docker run --rm -v $PWD:/work stackrox/kube-linter lint /work
+
+pre-commit:
+  pre-commit run -a
