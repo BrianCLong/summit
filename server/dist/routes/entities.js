@@ -158,3 +158,4 @@ router.delete('/:id', requirePermission('entity:delete'), async (req, res) => {
     }
 });
 module.exports = router;
+//# sourceMappingURL=entities.js.map

@@ -1,0 +1,190 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "고리대금",
+    "locale": "ko-KR",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "goridaegeum"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FSC / FSS",
+        "note": "폰지 사기, 대부업, 불법 스포츠 도박 광고를 단속."
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "불법 스포츠 베팅",
+    "locale": "ko-KR",
+    "vertical": "finance",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "FSC / FSS",
+        "note": "폰지 사기, 대부업, 불법 스포츠 도박 광고를 단속."
+      }
+    ],
+    "confidence": 0.89
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "폰지 투자 사기",
+    "locale": "ko-KR",
+    "vertical": "finance",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "FSC / FSS",
+        "note": "폰지 사기, 대부업, 불법 스포츠 도박 광고를 단속."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "성매개감염 검사",
+    "locale": "ko-KR",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "STI 검사"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MFDS",
+        "note": "오피오이드 관리와 응급피임 정보 제공을 감독."
+      }
+    ],
+    "confidence": 0.91
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "응급 피임약",
+    "locale": "ko-KR",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "플랜B 한국"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MFDS",
+        "note": "오피오이드 관리와 응급피임 정보 제공을 감독."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "오피오이드 진통제",
+    "locale": "ko-KR",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "opioid jintongje"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MFDS",
+        "note": "오피오이드 관리와 응급피임 정보 제공을 감독."
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "미성년자 사이버 괴롭힘",
+    "locale": "ko-KR",
+    "vertical": "minors",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "KCC",
+        "note": "미성년자 대상 그루밍, 사이버 괴롭힘, 자해 조장 콘텐츠를 모니터링."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "미성년자 온라인 그루밍",
+    "locale": "ko-KR",
+    "vertical": "minors",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "KCC",
+        "note": "미성년자 대상 그루밍, 사이버 괴롭힘, 자해 조장 콘텐츠를 모니터링."
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "자해 조장 콘텐츠",
+    "locale": "ko-KR",
+    "vertical": "minors",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "KCC",
+        "note": "미성년자 대상 그루밍, 사이버 괴롭힘, 자해 조장 콘텐츠를 모니터링."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "임금 차별",
+    "locale": "ko-KR",
+    "vertical": "workplace",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "MOEL",
+        "note": "직장 내 성희롱, 임금차별, 폭력 예방 지침을 시행."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "직장 내 성희롱",
+    "locale": "ko-KR",
+    "vertical": "workplace",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "MOEL",
+        "note": "직장 내 성희롱, 임금차별, 폭력 예방 지침을 시행."
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "직장 폭력 위협",
+    "locale": "ko-KR",
+    "vertical": "workplace",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "MOEL",
+        "note": "직장 내 성희롱, 임금차별, 폭력 예방 지침을 시행."
+      }
+    ],
+    "confidence": 0.92
+  }
+]

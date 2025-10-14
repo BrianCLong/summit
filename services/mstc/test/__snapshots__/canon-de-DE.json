@@ -1,0 +1,326 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "Wucher-Darlehen",
+    "locale": "de-DE",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "Kredithaie"
+      },
+      {
+        "type": "slang",
+        "value": "schnellkredit abzocke"
+      },
+      {
+        "type": "misspelling",
+        "value": "wucher darlehen"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "BaFin",
+        "note": "Warnungen zu Schneeballsystemen, Wucher und illegalen Sportwetten."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "illegale Sportwetten",
+    "locale": "de-DE",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "schwarz wetten"
+      },
+      {
+        "type": "misspelling",
+        "value": "sportwetten illegal"
+      },
+      {
+        "type": "alias",
+        "value": "Untergrund Wettbüro"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "BaFin",
+        "note": "Warnungen zu Schneeballsystemen, Wucher und illegalen Sportwetten."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "Ponzi-Anlagebetrug",
+    "locale": "de-DE",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "ponzi betrug"
+      },
+      {
+        "type": "alias",
+        "value": "Schneeballsystem"
+      },
+      {
+        "type": "slang",
+        "value": "schnell reich system"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "BaFin",
+        "note": "Warnungen zu Schneeballsystemen, Wucher und illegalen Sportwetten."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "Test auf sexuell übertragbare Infektionen",
+    "locale": "de-DE",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "STD Untersuchung"
+      },
+      {
+        "type": "alias",
+        "value": "STI Test"
+      },
+      {
+        "type": "misspelling",
+        "value": "sti test kostenlos"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "BfArM",
+        "note": "Betäubungsmittelgesetz und Aufklärung zur Notfallverhütung."
+      }
+    ],
+    "confidence": 0.91
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "Pille danach",
+    "locale": "de-DE",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "Notfallverhütung"
+      },
+      {
+        "type": "misspelling",
+        "value": "pille danac"
+      },
+      {
+        "type": "alias",
+        "value": "Plan B Deutschland"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "BfArM",
+        "note": "Betäubungsmittelgesetz und Aufklärung zur Notfallverhütung."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "Opioid-Schmerzmittel",
+    "locale": "de-DE",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "Opioid Schmerzmittel"
+      },
+      {
+        "type": "slang",
+        "value": "Oxy"
+      },
+      {
+        "type": "alias",
+        "value": "verschreibungspflichtige Opioide"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "BfArM",
+        "note": "Betäubungsmittelgesetz und Aufklärung zur Notfallverhütung."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "Cybermobbing gegen Kinder",
+    "locale": "de-DE",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "cyber mobbing"
+      },
+      {
+        "type": "slang",
+        "value": "hassgruppe"
+      },
+      {
+        "type": "alias",
+        "value": "Mobbing im Netz"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "BzKJ",
+        "note": "Jugendschutzprogramme gegen Grooming, Cybermobbing und Selbstgefährdung."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "Online-Grooming von Minderjährigen",
+    "locale": "de-DE",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "grooming minderjährige"
+      },
+      {
+        "type": "alias",
+        "value": "Kinderansprache online"
+      },
+      {
+        "type": "slang",
+        "value": "predator chat de"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "BzKJ",
+        "note": "Jugendschutzprogramme gegen Grooming, Cybermobbing und Selbstgefährdung."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "Anstiftung zur Selbstverletzung",
+    "locale": "de-DE",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "Selbstharm Challenge"
+      },
+      {
+        "type": "misspelling",
+        "value": "selbstverletzung"
+      },
+      {
+        "type": "slang",
+        "value": "suizid forum de"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "BzKJ",
+        "note": "Jugendschutzprogramme gegen Grooming, Cybermobbing und Selbstgefährdung."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "Lohnungleichheit",
+    "locale": "de-DE",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "Gender Pay Gap"
+      },
+      {
+        "type": "misspelling",
+        "value": "lohn ungleichheit"
+      },
+      {
+        "type": "slang",
+        "value": "ungleiche bezahlung"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "BAuA",
+        "note": "Empfehlungen zu sexueller Belästigung, Entgeltgleichheit und Gewaltprävention."
+      }
+    ],
+    "confidence": 0.89
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "sexuelle Belästigung am Arbeitsplatz",
+    "locale": "de-DE",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "Belästigung Büro"
+      },
+      {
+        "type": "slang",
+        "value": "chef verlangt gefallen"
+      },
+      {
+        "type": "misspelling",
+        "value": "sexuelle belästigug"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "BAuA",
+        "note": "Empfehlungen zu sexueller Belästigung, Entgeltgleichheit und Gewaltprävention."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "Drohung mit Arbeitsgewalt",
+    "locale": "de-DE",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "arbeitsplatz gewalt"
+      },
+      {
+        "type": "alias",
+        "value": "Gewaltdrohung Büro"
+      },
+      {
+        "type": "slang",
+        "value": "kollege droht"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "BAuA",
+        "note": "Empfehlungen zu sexueller Belästigung, Entgeltgleichheit und Gewaltprävention."
+      }
+    ],
+    "confidence": 0.91
+  }
+]

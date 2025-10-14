@@ -22,7 +22,12 @@ query GraphRagAnswer($input: GraphRAGQueryInput!) {
   }
 }
 
-query SimilarEntities($entityId: ID, $text: String, $topK: Int, $investigationId: ID!) {
+query SimilarEntities(
+  $entityId: ID
+  $text: String
+  $topK: Int
+  $investigationId: ID!
+) {
   similarEntities(
     entityId: $entityId
     text: $text

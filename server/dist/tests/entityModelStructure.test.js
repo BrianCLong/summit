@@ -17,7 +17,7 @@ describe('Entity Model Structure', () => {
             const migrationsPath = path.join(__dirname, '../db/migrations/neo4j');
             try {
                 const files = await fs.readdir(migrationsPath);
-                const migrationFiles = files.filter((f) => f.endsWith('.js'));
+                const migrationFiles = files.filter(f => f.endsWith('.js'));
                 expect(migrationFiles.length).toBeGreaterThan(0);
                 expect(migrationFiles).toContain('001_initial_entity_model.js');
                 expect(migrationFiles).toContain('002_entity_type_specialization.js');
@@ -43,7 +43,7 @@ describe('Entity Model Structure', () => {
             const migrationsPath = path.join(__dirname, '../db/migrations/neo4j');
             try {
                 const files = await fs.readdir(migrationsPath);
-                const migrationFiles = files.filter((f) => f.endsWith('.js'));
+                const migrationFiles = files.filter(f => f.endsWith('.js'));
                 for (const file of migrationFiles) {
                     // Should follow pattern: NNN_description.js
                     expect(file).toMatch(/^\d{3}_[a-z_]+\.js$/);
@@ -73,7 +73,7 @@ describe('Entity Model Structure', () => {
                 'findShortestPath',
                 'getEntityClusters',
                 'validateModelIntegrity',
-                'getQueryPerformanceStats',
+                'getQueryPerformanceStats'
             ];
             for (const method of requiredMethods) {
                 expect(entityModelService).toHaveProperty(method);
@@ -176,3 +176,4 @@ describe('Entity Model Structure', () => {
         });
     });
 });
+//# sourceMappingURL=entityModelStructure.test.js.map

@@ -1,9 +1,0 @@
-{
-  "KNOWS": {
-    "from": "Person",
-    "to": "Person",
-    "fields": {
-      "since": {"type": "date", "mandatory": true}
-    }
-  }
-}
