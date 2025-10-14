@@ -1,0 +1,20 @@
+groups:
+  - name: availability
+    rules:
+      - alert: Neo4jDown
+        expr: probe_success{instance="http://neo4j:7474"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Neo4j HTTP is down"
+          description: "Blackbox probe failed for Neo4j at {{ $labels.instance }}"
+
+      - alert: APIHealthFailing
+        expr: probe_success{instance="http://api:18080/health"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API health failing"
+          description: "API health endpoint failing at {{ $labels.instance }}"
