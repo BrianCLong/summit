@@ -1,4 +1,4 @@
-import { EntityResolutionService } from '../services/EntityResolutionService.js';
+import { EntityResolutionService } from "../services/EntityResolutionService.js";
 export async function runBehavioralFingerprintJob(identities) {
     const er = new EntityResolutionService();
     const fingerprints = identities.map((i) => {
@@ -8,3 +8,4 @@ export async function runBehavioralFingerprintJob(identities) {
     const clusters = er.clusterIdentitiesAcrossProjects(identities);
     return { fingerprints, clusters };
 }
+//# sourceMappingURL=behavioralFingerprintWorker.js.map

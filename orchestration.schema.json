@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "required": ["env", "policies", "routing"],
+  "required": ["env", "policies", "routing", "observability", "fastlane", "friction_alerts"],
   "properties": {
     "env": {
       "type": "object",
@@ -11,6 +11,35 @@
       }
     },
     "policies": { "type": "object" },
-    "routing": { "type": "array" }
+    "routing": { "type": "array" },
+    "observability": {
+      "type": "object",
+      "required": ["metrics", "logging"],
+      "properties": {
+        "metrics": { "type": "object" },
+        "logging": { "type": "object" },
+        "tracing": { "type": "object" }
+      }
+    },
+    "fastlane": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "handoff_timeout_ms": { "type": "integer" },
+        "signal_threshold": { "type": "number" },
+        "routes": { "type": "array" }
+      }
+    },
+    "friction_alerts": {
+      "type": "object",
+      "required": ["enabled", "thresholds"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "thresholds": { "type": "object" },
+        "notifications": { "type": "object" },
+        "escalation": { "type": "object" }
+      }
+    }
   }
 }

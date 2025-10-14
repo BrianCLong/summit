@@ -155,6 +155,11 @@ export class IntelligentRollbackSystem extends EventEmitter {
     try {
       // Create state snapshot before deployment
       const stateSnapshot = await this.stateManager.createSnapshot(deploymentId, config.services);
+      this.logger.debug(`Captured pre-deployment snapshot for ${deploymentId}`, {
+        snapshotId: stateSnapshot.id,
+        checksum: stateSnapshot.checksum,
+        services: stateSnapshot.services.length
+      });
 
       // Register with health monitor
       await this.healthMonitor.startMonitoring(deploymentId, config.services);

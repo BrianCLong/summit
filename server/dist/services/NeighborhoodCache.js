@@ -4,20 +4,18 @@
  * Redis-backed cache for graph neighborhoods to improve performance
  * of frequent graph traversal queries.
  */
-import baseLogger from '../config/logger';
+import pino from 'pino';
 import { TenantValidator } from '../middleware/tenantValidator.js';
-const logger = baseLogger.child({ name: 'neighborhoodCache' });
+const logger = pino({ name: 'neighborhoodCache' });
 /**
  * Intelligent neighborhood caching with Redis
  */
 export class NeighborhoodCache {
-    redis;
-    stats;
-    keyPrefix = 'nbhd';
-    indexPrefix = 'idx';
-    defaultTTL = 1800; // 30 minutes
-    maxNeighborhoods = 10000;
     constructor(redis) {
+        this.keyPrefix = 'nbhd';
+        this.indexPrefix = 'idx';
+        this.defaultTTL = 1800; // 30 minutes
+        this.maxNeighborhoods = 10000;
         this.redis = redis;
         this.stats = {
             hits: 0,
@@ -25,7 +23,7 @@ export class NeighborhoodCache {
             sets: 0,
             invalidations: 0,
             hitRate: 0,
-            memoryUsage: 0,
+            memoryUsage: 0
         };
         // Initialize cache monitoring
         this.initializeMonitoring();
@@ -67,7 +65,7 @@ export class NeighborhoodCache {
      * Store neighborhood data in cache
      */
     async setNeighborhood(nodeId, data, tenantContext, options = {}) {
-        const { ttl = this.defaultTTL, maxDepth = 2, maxNeighbors = 100, compressionEnabled = true, } = options;
+        const { ttl = this.defaultTTL, maxDepth = 2, maxNeighbors = 100, compressionEnabled = true } = options;
         const cacheKey = this.generateNeighborhoodKey(nodeId, tenantContext, maxDepth, maxNeighbors);
         try {
             const start = Date.now();
@@ -77,13 +75,13 @@ export class NeighborhoodCache {
                 metadata: {
                     ...data.metadata,
                     lastUpdated: new Date().toISOString(),
-                    ttl: ttl,
-                },
+                    ttl: ttl
+                }
             };
             // Compress data if enabled
-            const serializedData = compressionEnabled
-                ? this.compress(enhancedData)
-                : JSON.stringify(enhancedData);
+            const serializedData = compressionEnabled ?
+                this.compress(enhancedData) :
+                JSON.stringify(enhancedData);
             // Set in cache with TTL
             await this.redis.setex(cacheKey, ttl, serializedData);
             // Update indexes for efficient invalidation
@@ -220,15 +218,15 @@ export class NeighborhoodCache {
                 status: 'healthy',
                 stats: {
                     ...stats,
-                    memory: info,
-                },
+                    memory: info
+                }
             };
         }
         catch (error) {
             logger.error({ error }, 'Neighborhood cache health check failed');
             return {
                 status: 'unhealthy',
-                stats: await this.getStats(), // Use await here
+                stats: await this.getStats() // Use await here
             };
         }
     }
@@ -262,7 +260,7 @@ export class NeighborhoodCache {
             return false;
         }
         const lastUpdated = new Date(data.metadata.lastUpdated);
-        const expiry = new Date(lastUpdated.getTime() + data.metadata.ttl * 1000);
+        const expiry = new Date(lastUpdated.getTime() + (data.metadata.ttl * 1000));
         return new Date() < expiry;
     }
     compress(data) {
@@ -298,3 +296,4 @@ export class NeighborhoodCache {
     }
 }
 export default NeighborhoodCache;
+//# sourceMappingURL=NeighborhoodCache.js.map

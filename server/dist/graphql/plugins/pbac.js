@@ -57,3 +57,5 @@ export default function pbacPlugin() {
         },
     };
 }
+;
+//# sourceMappingURL=pbac.js.map

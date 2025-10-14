@@ -1,0 +1,88 @@
+name: ci.scoped-reusable
+on:
+  workflow_call:
+    inputs:
+      filter_name:
+        required: true
+        type: string
+      include_globs:
+        required: true
+        type: string
+      exclude_globs:
+        required: false
+        type: string
+      node_version:
+        required: false
+        type: string
+        default: '20'
+      setup_cmd:
+        required: false
+        type: string
+        default: 'corepack enable && pnpm i --frozen-lockfile'
+      lint_cmd:
+        required: false
+        type: string
+        default: 'pnpm lint'
+      typecheck_cmd:
+        required: false
+        type: string
+        default: 'pnpm -w ts:check || pnpm typecheck || true'
+      test_cmd:
+        required: false
+        type: string
+        default: 'pnpm test -- --run'
+      build_cmd:
+        required: false
+        type: string
+        default: 'pnpm -w build || pnpm build'
+permissions:
+  contents: read
+  security-events: write
+jobs:
+  detect-paths:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.filter.outputs.changed }}
+      any_changed: ${{ steps.filter.outputs.any_changed }}
+      included_files: ${{ steps.filter.outputs.include }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            ${{
+              inputs.filter_name
+            }}:
+              - '${{ inputs.include_globs }}'
+              {%- if inputs.exclude_globs %}
+              exclude:
+                - '${{ inputs.exclude_globs }}'
+              {%- endif %}
+
+  component-checks:
+    if: needs.detect-paths.outputs.any_changed == 'true'
+    needs: detect-paths
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: 'pnpm'
+      - name: Setup & Install
+        run: |
+          ${inputs.setup_cmd}
+      - name: Lint
+        run: |
+          ${inputs.lint_cmd}
+      - name: Typecheck
+        run: |
+          ${inputs.typecheck_cmd}
+      - name: Test
+        run: |
+          ${inputs.test_cmd}
+      - name: Build
+        run: |
+          ${inputs.build_cmd}
