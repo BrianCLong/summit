@@ -1,29 +1,18 @@
-import baseLogger from '../config/logger';
+import pino from 'pino';
 import { writeAudit } from '../utils/audit'; // Assuming audit utility exists
-const logger = baseLogger.child({ name: 'DataRetentionService' });
+const logger = pino();
 export class DataRetentionService {
-    neo4j;
-    policies;
-    cleanupInterval = null;
     constructor(neo4jDriver) {
+        this.cleanupInterval = null;
         this.neo4j = neo4jDriver;
         // Define default retention policies
         this.policies = [
-            {
-                label: 'Entity',
-                ttlDays: Number(process.env.ENTITY_TTL_DAYS || 365),
-                auditAction: 'ENTITY_DELETED_TTL',
-            },
-            {
-                label: 'Relationship',
-                ttlDays: Number(process.env.RELATIONSHIP_TTL_DAYS || 365),
-                auditAction: 'RELATIONSHIP_DELETED_TTL',
-            },
+            { label: 'Entity', ttlDays: Number(process.env.ENTITY_TTL_DAYS || 365), auditAction: 'ENTITY_DELETED_TTL' },
+            { label: 'Relationship', ttlDays: Number(process.env.RELATIONSHIP_TTL_DAYS || 365), auditAction: 'RELATIONSHIP_DELETED_TTL' },
             // Add more policies as needed for other labels
         ];
     }
     startCleanupJob(intervalMs = 24 * 60 * 60 * 1000) {
-        // Default to every 24 hours
         if (this.cleanupInterval) {
             logger.warn('Data retention cleanup job already running. Stopping existing job.');
             this.stopCleanupJob();
@@ -79,3 +68,4 @@ export class DataRetentionService {
         }
     }
 }
+//# sourceMappingURL=DataRetentionService.js.map

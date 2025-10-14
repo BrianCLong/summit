@@ -1,6 +1,6 @@
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
-import { randomUUID as uuidv4 } from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
@@ -27,34 +27,6 @@ const ROLE_PERMISSIONS = {
         'graph:read',
         'graph:export',
         'ai:request',
-        // Maestro permissions
-        'pipeline:create',
-        'pipeline:read',
-        'pipeline:update',
-        'pipeline:execute',
-        'run:create',
-        'run:read',
-        'run:update',
-        'dashboard:read',
-        'autonomy:read',
-        'autonomy:update',
-        'recipe:read',
-        'executor:read',
-    ],
-    OPERATOR: [
-        // Operations-focused role for pipeline management
-        'pipeline:read',
-        'pipeline:update',
-        'pipeline:execute',
-        'run:create',
-        'run:read',
-        'run:update',
-        'run:cancel',
-        'dashboard:read',
-        'autonomy:read',
-        'recipe:read',
-        'executor:read',
-        'executor:update',
     ],
     VIEWER: [
         'investigation:read',
@@ -63,25 +35,14 @@ const ROLE_PERMISSIONS = {
         'tag:read',
         'graph:read',
         'graph:export',
-        // Read-only Maestro permissions
-        'pipeline:read',
-        'run:read',
-        'dashboard:read',
-        'autonomy:read',
-        'recipe:read',
-        'executor:read',
     ],
 };
 export class AuthService {
-    pool = null;
-    getPool() {
-        if (!this.pool) {
-            this.pool = getPostgresPool();
-        }
-        return this.pool;
+    constructor() {
+        this.pool = getPostgresPool();
     }
     async register(userData) {
-        const client = await this.getPool().connect();
+        const client = await this.pool.connect();
         try {
             await client.query('BEGIN');
             const existingUser = await client.query('SELECT id FROM users WHERE email = $1 OR username = $2', [userData.email, userData.username]);
@@ -99,7 +60,7 @@ export class AuthService {
                 passwordHash,
                 userData.firstName,
                 userData.lastName,
-                userData.role || 'ANALYST',
+                userData.role || 'ANALYST'
             ]);
             const user = userResult.rows[0];
             const { token, refreshToken } = await this.generateTokens(user, client);
@@ -108,7 +69,7 @@ export class AuthService {
                 user: this.formatUser(user),
                 token,
                 refreshToken,
-                expiresIn: 24 * 60 * 60,
+                expiresIn: 24 * 60 * 60
             };
         }
         catch (error) {
@@ -121,7 +82,7 @@ export class AuthService {
         }
     }
     async login(email, password, ipAddress, userAgent) {
-        const client = await this.getPool().connect();
+        const client = await this.pool.connect();
         try {
             const userResult = await client.query('SELECT * FROM users WHERE email = $1 AND is_active = true', [email]);
             if (userResult.rows.length === 0) {
@@ -132,15 +93,13 @@ export class AuthService {
             if (!validPassword) {
                 throw new Error('Invalid credentials');
             }
-            await client.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [
-                user.id,
-            ]);
+            await client.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [user.id]);
             const { token, refreshToken } = await this.generateTokens(user, client);
             return {
                 user: this.formatUser(user),
                 token,
                 refreshToken,
-                expiresIn: 24 * 60 * 60,
+                expiresIn: 24 * 60 * 60
             };
         }
         catch (error) {
@@ -151,40 +110,14 @@ export class AuthService {
             client.release();
         }
     }
-    /**
-     * Issue JWT and refresh token for an already authenticated (OIDC/SSO) user.
-     */
-    async loginOIDC(email) {
-        const client = await this.getPool().connect();
-        try {
-            const userResult = await client.query('SELECT * FROM users WHERE email = $1 AND is_active = true', [email]);
-            if (userResult.rows.length === 0) {
-                throw new Error('User not found or inactive');
-            }
-            const user = userResult.rows[0];
-            await client.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [
-                user.id,
-            ]);
-            const { token, refreshToken } = await this.generateTokens(user, client);
-            return {
-                user: this.formatUser(user),
-                token,
-                refreshToken,
-                expiresIn: 24 * 60 * 60,
-            };
-        }
-        finally {
-            client.release();
-        }
-    }
     async generateTokens(user, client) {
         const tokenPayload = {
             userId: user.id,
             email: user.email,
-            role: user.role,
+            role: user.role
         };
         const token = jwt.sign(tokenPayload, config.jwt.secret, {
-            expiresIn: config.jwt.expiresIn,
+            expiresIn: config.jwt.expiresIn
         });
         const refreshToken = uuidv4();
         const expiresAt = new Date();
@@ -200,7 +133,7 @@ export class AuthService {
             if (!token)
                 return null;
             const decoded = jwt.verify(token, config.jwt.secret);
-            const client = await this.getPool().connect();
+            const client = await this.pool.connect();
             const userResult = await client.query('SELECT * FROM users WHERE id = $1 AND is_active = true', [decoded.userId]);
             client.release();
             if (userResult.rows.length === 0) {
@@ -213,53 +146,15 @@ export class AuthService {
             return null;
         }
     }
-    /**
-     * Check if a user has a specific permission
-     */
     hasPermission(user, permission) {
-        if (!user || !user.role || !user.isActive) {
+        if (!user || !user.role)
             return false;
-        }
-        const userPermissions = ROLE_PERMISSIONS[user.role.toUpperCase()] || [];
-        // Admin has wildcard permission
-        if (userPermissions.includes('*')) {
-            return true;
-        }
-        // Check exact permission match
-        if (userPermissions.includes(permission)) {
-            return true;
-        }
-        // Check wildcard permissions (e.g., 'investigation:*' matches 'investigation:create')
-        const wildcardPermissions = userPermissions.filter((p) => p.endsWith(':*'));
-        const permissionPrefix = permission.split(':')[0];
-        for (const wildcardPerm of wildcardPermissions) {
-            const wildcardPrefix = wildcardPerm.replace(':*', '');
-            if (permissionPrefix === wildcardPrefix) {
-                return true;
-            }
-        }
-        return false;
-    }
-    /**
-     * Check if a user has any of the specified permissions
-     */
-    hasAnyPermission(user, permissions) {
-        return permissions.some((permission) => this.hasPermission(user, permission));
-    }
-    /**
-     * Check if a user has all of the specified permissions
-     */
-    hasAllPermissions(user, permissions) {
-        return permissions.every((permission) => this.hasPermission(user, permission));
-    }
-    /**
-     * Get all permissions for a user
-     */
-    getUserPermissions(user) {
-        if (!user || !user.role || !user.isActive) {
-            return [];
-        }
-        return ROLE_PERMISSIONS[user.role.toUpperCase()] || [];
+        const userPermissions = ROLE_PERMISSIONS[user.role.toUpperCase()];
+        if (!userPermissions)
+            return false;
+        if (userPermissions.includes('*'))
+            return true; // Admin or super role
+        return userPermissions.includes(permission);
     }
     formatUser(user) {
         return {
@@ -273,8 +168,9 @@ export class AuthService {
             isActive: user.is_active,
             lastLogin: user.last_login,
             createdAt: user.created_at,
-            updatedAt: user.updated_at,
+            updatedAt: user.updated_at
         };
     }
 }
 export default AuthService;
+//# sourceMappingURL=AuthService.js.map
