@@ -1,12 +1,12 @@
 import { EventEmitter } from 'events';
 import { cacheService } from './cacheService';
 export class ThreatHuntingService extends EventEmitter {
-    iocs = new Map();
-    detections = new Map();
-    hunts = new Map();
-    feedSources = new Map();
     constructor() {
         super();
+        this.iocs = new Map();
+        this.detections = new Map();
+        this.hunts = new Map();
+        this.feedSources = new Map();
         console.log('[THREAT_HUNTING] Advanced threat hunting service initialized');
         this.initializeThreatFeeds();
         this.initializeSampleIOCs();
@@ -523,3 +523,4 @@ export class ThreatHuntingService extends EventEmitter {
 }
 // Global threat hunting service instance
 export const threatHuntingService = new ThreatHuntingService();
+//# sourceMappingURL=threatHuntingService.js.map

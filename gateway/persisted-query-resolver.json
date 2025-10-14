@@ -1,0 +1,9 @@
+{
+  "strategy": "persisted-only",
+  "manifest": "graphql/persisted/persisted-manifest.json",
+  "headers": {
+    "x-persisted-only": "true",
+    "x-provenance-capture": "true"
+  },
+  "audit": { "emit": true }
+}
