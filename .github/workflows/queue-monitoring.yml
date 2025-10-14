@@ -1,9 +1,10 @@
 name: Queue Performance Monitoring
 
 on:
-  schedule:
-    # Run every 15 minutes during business hours (UTC)
-    - cron: '*/15 8-18 * * 1-5'
+  # Disabled scheduled trigger until production environment is configured
+  # schedule:
+  #   # Run every 15 minutes during business hours (UTC)
+  #   - cron: '*/15 8-18 * * 1-5'
   workflow_dispatch:
     inputs:
       immediate_analysis:
@@ -28,6 +29,7 @@ env:
 jobs:
   queue-performance-check:
     name: Queue Performance Analysis
+    if: false  # Belt-and-suspenders guard during stabilization
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

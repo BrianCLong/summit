@@ -1,12 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: { { include "osint-service.fullname" . } }
+  name: {{ include "osint-service.fullname" . }}
 spec:
-  type: { { .Values.service.type } }
+  type: {{ .Values.service.type }}
   selector:
-    app.kubernetes.io/name: { { include "osint-service.name" . } }
-    app.kubernetes.io/instance: { { .Release.Name } }
+    app.kubernetes.io/name: {{ include "osint-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
     - name: http
-      port: { { .Values.service.port } }
+      port: {{ .Values.service.port }}
+

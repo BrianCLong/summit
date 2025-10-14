@@ -1,0 +1,144 @@
+version: 1
+updated: 2025-09-28
+owners:
+  team: sre-observability
+  slack: "#observability"
+  pagerduty_service: summit-observability
+metrics:
+  - id: api_request_latency
+    name: request_latency_ms
+    description: End-to-end API request latency measured at the ingress gateway.
+    type: histogram
+    unit: milliseconds
+    source: otel
+    dimensions:
+      - service
+      - route
+      - method
+      - status
+    slo_alignment:
+      - latency
+    alerts:
+      - latency-burn-multiwindow
+    retention:
+      hot: 30d
+      cold: 180d
+  - id: api_request_errors
+    name: request_error_rate
+    description: Count of API responses outside the 2xx range.
+    type: counter
+    unit: events
+    source: otel
+    dimensions:
+      - service
+      - route
+      - status
+    slo_alignment:
+      - error
+    alerts:
+      - error-budget-burn
+    retention:
+      hot: 30d
+      cold: 180d
+  - id: worker_job_processing
+    name: job_processing_time_ms
+    description: Execution time per asynchronous worker job.
+    type: histogram
+    unit: milliseconds
+    source: otel
+    dimensions:
+      - service
+      - queue
+      - result
+    slo_alignment:
+      - latency
+      - saturation
+    alerts:
+      - worker-latency-burn
+    retention:
+      hot: 30d
+      cold: 90d
+  - id: worker_job_failures
+    name: job_failures_total
+    description: Number of failed asynchronous jobs partitioned by error type.
+    type: counter
+    unit: events
+    source: otel
+    dimensions:
+      - service
+      - queue
+      - error_type
+    slo_alignment:
+      - error
+    alerts:
+      - worker-failure-spike
+    retention:
+      hot: 30d
+      cold: 90d
+  - id: database_query_latency
+    name: db_query_time_ms
+    description: Time taken for database queries executed by the service.
+    type: histogram
+    unit: milliseconds
+    source: otel
+    dimensions:
+      - service
+      - db_cluster
+      - operation
+    slo_alignment:
+      - latency
+    alerts:
+      - db-latency-breach
+    retention:
+      hot: 30d
+      cold: 180d
+  - id: telemetry_export_failures
+    name: telemetry_export_failures_total
+    description: Count of failed exports from the telemetry pipeline.
+    type: counter
+    unit: events
+    source: otel-collector
+    dimensions:
+      - service
+      - exporter
+      - reason
+    slo_alignment:
+      - reliability
+    alerts:
+      - telemetry-pipeline-degraded
+    retention:
+      hot: 30d
+      cold: 365d
+  - id: log_drop_ratio
+    name: log_drop_ratio
+    description: Ratio of logs dropped to logs produced at the collector.
+    type: gauge
+    unit: percent
+    source: otel-collector
+    dimensions:
+      - service
+      - pipeline
+      - environment
+    slo_alignment:
+      - reliability
+    alerts:
+      - telemetry-pipeline-degraded
+    retention:
+      hot: 30d
+      cold: 365d
+  - id: saturation_worker_queue_depth
+    name: worker_queue_depth
+    description: Number of pending jobs in the worker queue.
+    type: gauge
+    unit: count
+    source: custom-exporter
+    dimensions:
+      - service
+      - queue
+    slo_alignment:
+      - saturation
+    alerts:
+      - saturation-queue-depth
+    retention:
+      hot: 30d
+      cold: 90d

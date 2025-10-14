@@ -4,17 +4,17 @@ const copilotResolvers = require('./resolvers.copilot.js');
 const graphResolvers = require('./resolvers.graphops.js');
 const aiResolvers = require('./resolvers.ai.js');
 const annotationsResolvers = require('./resolvers.annotations.js');
-import crystalResolvers from './resolvers.crystal.js';
+import { v040Resolvers } from './resolvers/v040/index';
 const pubsub = new PubSub();
 const authService = new AuthService();
 const goals = []; // replace with DB later
 let seq = 1;
 export const resolvers = {
     Query: {
-        ...(crystalResolvers.Query || {}),
         ...(copilotResolvers.Query || {}),
         ...(aiResolvers.Query || {}),
         ...(annotationsResolvers.Query || {}),
+        ...(v040Resolvers.Query || {}),
         me: async (_, __, { user }) => {
             if (!user)
                 throw new Error('Not authenticated');
@@ -22,16 +22,16 @@ export const resolvers = {
         },
         copilotGoals: async (_, { investigationId }) => {
             return investigationId
-                ? goals.filter((g) => g.investigationId === String(investigationId))
+                ? goals.filter(g => g.investigationId === String(investigationId))
                 : goals;
-        },
+        }
     },
     Mutation: {
-        ...(crystalResolvers.Mutation || {}),
         ...(copilotResolvers.Mutation || {}),
         ...(graphResolvers.Mutation || {}),
         ...(aiResolvers.Mutation || {}),
         ...(annotationsResolvers.Mutation || {}),
+        ...(v040Resolvers.Mutation || {}),
         login: async (_, { input }, { req }) => {
             const { email, password } = input;
             const ipAddress = req?.ip;
@@ -56,22 +56,21 @@ export const resolvers = {
         },
         logout: async () => {
             return true;
-        },
+        }
     },
     Subscription: {
-        ...(crystalResolvers.Subscription || {}),
         ...(copilotResolvers.Subscription || {}),
         ...(aiResolvers.Subscription || {}),
         ...(annotationsResolvers.Subscription || {}),
         investigationUpdated: {
-            subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED']),
+            subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED'])
         },
         entityAdded: {
-            subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED']),
-        },
+            subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED'])
+        }
     },
     User: {
-        fullName: (user) => `${user.firstName} ${user.lastName}`,
+        fullName: (user) => `${user.firstName} ${user.lastName}`
     },
     Entity: {
         ...(annotationsResolvers.Entity || {}),
@@ -84,3 +83,4 @@ export const resolvers = {
     },
 };
 export default resolvers;
+//# sourceMappingURL=resolvers-combined.js.map
