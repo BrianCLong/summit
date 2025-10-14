@@ -10,7 +10,7 @@ function ensureRole(user, allowedRoles = []) {
     if (allowedRoles.length === 0)
         return true;
     const role = (user.role || '').toUpperCase();
-    if (!allowedRoles.map((r) => r.toUpperCase()).includes(role)) {
+    if (!allowedRoles.map(r => r.toUpperCase()).includes(role)) {
         const err = new Error('Forbidden');
         err.code = 'FORBIDDEN';
         throw err;
@@ -29,7 +29,7 @@ const resolvers = {
           ORDER BY a.createdAt DESC
         `;
                 const result = await session.run(cypher, { entityId: parent.id });
-                const annotations = result.records.map((record) => record.get('annotation'));
+                const annotations = result.records.map(record => record.get('annotation'));
                 // Filter annotations based on OPA policy
                 const filteredAnnotations = [];
                 for (const annotation of annotations) {
@@ -62,7 +62,7 @@ const resolvers = {
           ORDER BY a.createdAt DESC
         `;
                 const result = await session.run(cypher, { edgeId: parent.id });
-                const annotations = result.records.map((record) => record.get('annotation'));
+                const annotations = result.records.map(record => record.get('annotation'));
                 // Filter annotations based on OPA policy
                 const filteredAnnotations = [];
                 for (const annotation of annotations) {
@@ -125,13 +125,7 @@ const resolvers = {
                 }
                 const annotation = result.records[0].get('annotation');
                 // Audit trail
-                await pg.query('INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5)', [
-                    user.id,
-                    'CREATE_ANNOTATION',
-                    'Annotation',
-                    annotation.id,
-                    { entityId, content: input.content, enclave: input.enclave },
-                ]);
+                await pg.query('INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5)', [user.id, 'CREATE_ANNOTATION', 'Annotation', annotation.id, { entityId, content: input.content, enclave: input.enclave }]);
                 return annotation;
             }
             catch (e) {
@@ -184,13 +178,7 @@ const resolvers = {
                 }
                 const annotation = result.records[0].get('annotation');
                 // Audit trail
-                await pg.query('INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5)', [
-                    user.id,
-                    'CREATE_ANNOTATION',
-                    'Annotation',
-                    annotation.id,
-                    { edgeId, content: input.content, enclave: input.enclave },
-                ]);
+                await pg.query('INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5)', [user.id, 'CREATE_ANNOTATION', 'Annotation', annotation.id, { edgeId, content: input.content, enclave: input.enclave }]);
                 return annotation;
             }
             catch (e) {
@@ -312,3 +300,4 @@ const resolvers = {
     },
 };
 module.exports = resolvers;
+//# sourceMappingURL=resolvers.annotations.js.map

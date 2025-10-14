@@ -1,0 +1,225 @@
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07 from 2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[31m[fail][0m Announcement does not link to: .github/workflows/nightly-verify.yml
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07 from 2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[32m[ok][0m   Announcement links to .github/workflows/nightly-verify.yml
+[32m[ok][0m   Announcement links to ops/tag-protection-ruleset.json
+[32m[ok][0m   Announcement links to ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Announcement links to RUNBOOK.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating GA packet content: docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[31m[fail][0m Packet missing Go/No-Go Checklist section
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07 from 2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[32m[ok][0m   Announcement links to .github/workflows/nightly-verify.yml
+[32m[ok][0m   Announcement links to ops/tag-protection-ruleset.json
+[32m[ok][0m   Announcement links to ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Announcement links to RUNBOOK.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating GA packet content: docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[31m[fail][0m Packet missing Go/No-Go Checklist section
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07 from 2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[32m[ok][0m   Announcement links to .github/workflows/nightly-verify.yml
+[32m[ok][0m   Announcement links to ops/tag-protection-ruleset.json
+[32m[ok][0m   Announcement links to ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Announcement links to RUNBOOK.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating GA packet content: docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[31m[fail][0m Packet missing Go/No-Go Checklist section
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07 from 2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[32m[ok][0m   Announcement links to .github/workflows/nightly-verify.yml
+[32m[ok][0m   Announcement links to ops/tag-protection-ruleset.json
+[32m[ok][0m   Announcement links to ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Announcement links to RUNBOOK.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating GA packet content: docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[31m[fail][0m Packet missing Go/No-Go Checklist section
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07 from 2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[32m[ok][0m   Announcement links to .github/workflows/nightly-verify.yml
+[32m[ok][0m   Announcement links to ops/tag-protection-ruleset.json
+[32m[ok][0m   Announcement links to ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Announcement links to RUNBOOK.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating GA packet content: docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[31m[fail][0m Packet missing Go/No-Go Checklist section
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07 from 2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[32m[ok][0m   Announcement links to .github/workflows/nightly-verify.yml
+[32m[ok][0m   Announcement links to ops/tag-protection-ruleset.json
+[32m[ok][0m   Announcement links to ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Announcement links to RUNBOOK.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating GA packet content: docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[31m[fail][0m Packet missing Go/No-Go Checklist section
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07 from 2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[32m[ok][0m   Announcement links to .github/workflows/nightly-verify.yml
+[32m[ok][0m   Announcement links to ops/tag-protection-ruleset.json
+[32m[ok][0m   Announcement links to ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Announcement links to RUNBOOK.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating GA packet content: docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[32m[ok][0m   Packet contains Go/No-Go Checklist
+[32m[ok][0m   Packet contains Final Hardening section
+[32m[ok][0m   Packet contains Acceptance Criteria
+[32m[ok][0m   Announcement documents nightly verification schedule (04:17 UTC)
+[32m[ok][0m   GA Packet & Links verification passed for RELEASE_ID=2025.10.07
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07 from 2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[32m[ok][0m   Announcement links to .github/workflows/nightly-verify.yml
+[32m[ok][0m   Announcement links to ops/tag-protection-ruleset.json
+[32m[ok][0m   Announcement links to ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Announcement links to RUNBOOK.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[34m[info][0m Validating GA packet content: docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[32m[ok][0m   Packet contains Go/No-Go Checklist
+[32m[ok][0m   Packet contains Final Hardening section
+[32m[ok][0m   Packet contains Acceptance Criteria
+[32m[ok][0m   Announcement documents nightly verification schedule (04:17 UTC)
+[32m[ok][0m   GA Packet & Links verification passed for RELEASE_ID=2025.10.07
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_SHEET.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[32m[ok][0m   Announcement links to .github/workflows/nightly-verify.yml
+[32m[ok][0m   Announcement links to ops/tag-protection-ruleset.json
+[32m[ok][0m   Announcement links to ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Announcement links to RUNBOOK.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[31m[fail][0m Announcement does not link to: docs/releases/ga-signoff/GA_SIGNOFF_SHEET.md
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_SHEET.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[32m[ok][0m   Announcement links to .github/workflows/nightly-verify.yml
+[32m[ok][0m   Announcement links to ops/tag-protection-ruleset.json
+[32m[ok][0m   Announcement links to ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Announcement links to RUNBOOK.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_SHEET.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md
+[34m[info][0m Validating GA packet content: docs/releases/GA_SIGNOFF_PACKET.md
+[33m[warn][0m Canonical packet missing Go/No-Go Checklist section
+[33m[warn][0m Canonical packet missing Final Verification Summary section
+[32m[ok][0m   GA Packet & Links verification passed for RELEASE_ID=2025.10.07
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_SHEET.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md
+[32m[ok][0m   Found docs/releases/FINAL_GA_RELEASE_SUMMARY.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[32m[ok][0m   Announcement links to .github/workflows/nightly-verify.yml
+[32m[ok][0m   Announcement links to ops/tag-protection-ruleset.json
+[32m[ok][0m   Announcement links to ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Announcement links to RUNBOOK.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_SHEET.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md
+[32m[ok][0m   Announcement links to docs/releases/FINAL_GA_RELEASE_SUMMARY.md
+[34m[info][0m Validating GA packet content: docs/releases/GA_SIGNOFF_PACKET.md
+[33m[warn][0m Canonical packet missing Go/No-Go Checklist section
+[33m[warn][0m Canonical packet missing Final Verification Summary section
+[34m[info][0m Validating FINAL_GA_RELEASE_SUMMARY.md
+[31m[fail][0m Final GA summary missing Executive Overview section
+[32m[ok][0m   Discovered RELEASE_ID=2025.10.07
+[34m[info][0m Checking required files exist
+[32m[ok][0m   Found .github/workflows/nightly-verify.yml
+[32m[ok][0m   Found ops/tag-protection-ruleset.json
+[32m[ok][0m   Found ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Found RUNBOOK.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_SIGNOFF_SHEET.md
+[32m[ok][0m   Found docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md
+[32m[ok][0m   Found docs/releases/FINAL_GA_RELEASE_SUMMARY.md
+[34m[info][0m Validating required links are referenced in: docs/releases/2025.10.07_MAESTRO_CONDUCTOR_GA_ANNOUNCEMENT.md
+[32m[ok][0m   Announcement links to .github/workflows/nightly-verify.yml
+[32m[ok][0m   Announcement links to ops/tag-protection-ruleset.json
+[32m[ok][0m   Announcement links to ops/grafana/ga-health-dashboard.json
+[32m[ok][0m   Announcement links to RUNBOOK.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_SIGNOFF_SHEET.md
+[32m[ok][0m   Announcement links to docs/releases/ga-signoff/GA_QUICK_SIGNOFF.md
+[32m[ok][0m   Announcement links to docs/releases/FINAL_GA_RELEASE_SUMMARY.md
+[34m[info][0m Validating GA packet content: docs/releases/ga-signoff/GA_SIGNOFF_PACKET.md
+[33m[warn][0m Canonical packet missing Go/No-Go Checklist section
+[33m[warn][0m Canonical packet missing Final Verification Summary section
+[34m[info][0m Validating docs/releases/FINAL_GA_RELEASE_SUMMARY.md
+[32m[ok][0m   Final GA summary contains Executive Overview
+[32m[ok][0m   Final GA summary contains Deliverables at a Glance
+[32m[ok][0m   Final GA summary contains Verification Status
+[32m[ok][0m   GA Packet & Links verification passed for RELEASE_ID=2025.10.07

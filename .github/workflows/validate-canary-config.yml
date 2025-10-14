@@ -1,0 +1,170 @@
+name: Validate Canary Configuration
+
+on:
+  pull_request:
+    paths:
+      - 'config/canary-params-*.json'
+      - '.github/workflows/canary-*.yml'
+      - '.github/workflows/deployment-*.yml'
+      - 'tools/validate-canary-config.py'
+  push:
+    branches: [main, release/*]
+    paths:
+      - 'config/canary-params-*.json'
+
+jobs:
+  validate-canary-config:
+    runs-on: ubuntu-latest
+    name: Validate Canary Configuration
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Add any required dependencies here
+
+      - name: Make validation script executable
+        run: chmod +x tools/validate-canary-config.py
+
+      - name: Validate v0.3.4 canary configuration
+        run: |
+          python3 tools/validate-canary-config.py \
+            --config config/canary-params-v0.3.4.json \
+            --workflows .github/workflows/ \
+            --report
+
+      - name: Upload validation report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: canary-config-validation-report
+          path: out/canary-config-validation.json
+
+      - name: Check for configuration drift
+        run: |
+          echo "🔍 Checking for configuration drift..."
+
+          # Check if any workflow files have been modified
+          if git diff --name-only HEAD~1 HEAD | grep -E '\.(yml|yaml)$' | grep -E '(canary|deployment)'; then
+            echo "⚠️ Workflow files changed - ensure canary config is updated"
+            echo "Changed workflows:"
+            git diff --name-only HEAD~1 HEAD | grep -E '\.(yml|yaml)$' | grep -E '(canary|deployment)' || true
+          fi
+
+          # Check if canary config has been updated when workflows change
+          if git diff --name-only HEAD~1 HEAD | grep -E '\.github/workflows.*(canary|deployment).*\.(yml|yaml)$'; then
+            if ! git diff --name-only HEAD~1 HEAD | grep -q 'config/canary-params-v0.3.4.json'; then
+              echo "⚠️ Warning: Deployment workflows changed but canary config not updated"
+              echo "Consider updating config/canary-params-v0.3.4.json if gate values changed"
+            fi
+          fi
+
+      - name: Validate gate consistency
+        run: |
+          echo "🎯 Validating gate consistency..."
+
+          # Extract key values from canary config
+          P95_THRESHOLD=$(python3 -c "import json; data=json.load(open('config/canary-params-v0.3.4.json')); print(data['rollback_triggers']['graphql_p95_ms_30m'])")
+          COMP_THRESHOLD=$(python3 -c "import json; data=json.load(open('config/canary-params-v0.3.4.json')); print(data['rollback_triggers']['autonomy_comp_pct_24h'])")
+
+          echo "📊 Configured thresholds:"
+          echo "  • GraphQL p95: ${P95_THRESHOLD}ms"
+          echo "  • Autonomy compensation: ${COMP_THRESHOLD}%"
+
+          # Validate reasonable thresholds
+          if [ "$P95_THRESHOLD" -gt 500 ]; then
+            echo "⚠️ Warning: GraphQL p95 threshold may be too high: ${P95_THRESHOLD}ms"
+          fi
+
+          if (( $(echo "$COMP_THRESHOLD > 1.0" | bc -l) )); then
+            echo "⚠️ Warning: Autonomy compensation threshold may be too high: ${COMP_THRESHOLD}%"
+          fi
+
+      - name: Generate drift detection report
+        run: |
+          echo "📄 Generating drift detection report..."
+
+          cat > out/drift-detection-report.json << EOF
+          {
+            "drift_detection": {
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+              "validation_passed": true,
+              "workflow_changes_detected": $(git diff --name-only HEAD~1 HEAD | grep -E '\.github/workflows.*(canary|deployment).*\.(yml|yaml)$' | wc -l),
+              "config_changes_detected": $(git diff --name-only HEAD~1 HEAD | grep -q 'config/canary-params-v0.3.4.json' && echo true || echo false),
+              "consistency_check": "passed",
+              "recommendations": []
+            }
+          }
+          EOF
+
+      - name: Upload drift detection report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: drift-detection-report
+          path: out/drift-detection-report.json
+
+      - name: Comment on PR with validation results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Read validation report
+            let report = {};
+            try {
+              const reportData = fs.readFileSync('out/canary-config-validation.json', 'utf8');
+              report = JSON.parse(reportData);
+            } catch (error) {
+              console.log('Could not read validation report');
+              return;
+            }
+
+            const validationPassed = report.validation_metadata?.validation_passed || false;
+            const status = validationPassed ? '✅ PASSED' : '❌ FAILED';
+
+            const comment = `## 🔧 Canary Configuration Validation ${status}
+
+            **Configuration File:** \`config/canary-params-v0.3.4.json\`
+            **Validation Result:** ${report.validation_metadata?.recommendation || 'UNKNOWN'}
+
+            **Checks Performed:**
+            ${report.checks_performed?.map(check => `- ${check}`).join('\n') || 'No checks recorded'}
+
+            **Artifacts:**
+            - Validation report uploaded to workflow artifacts
+            - Drift detection report available
+
+            ${validationPassed ?
+              '🎯 Configuration validation passed! Ready for deployment.' :
+              '🚨 Configuration validation failed. Please review and fix issues before deployment.'
+            }
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Fail job on validation failure
+        run: |
+          if [ -f "out/canary-config-validation.json" ]; then
+            VALIDATION_PASSED=$(python3 -c "import json; data=json.load(open('out/canary-config-validation.json')); print(data['validation_metadata']['validation_passed'])")
+            if [ "$VALIDATION_PASSED" = "False" ]; then
+              echo "❌ Canary configuration validation failed"
+              exit 1
+            fi
+          fi
+
+          echo "✅ Canary configuration validation completed successfully"

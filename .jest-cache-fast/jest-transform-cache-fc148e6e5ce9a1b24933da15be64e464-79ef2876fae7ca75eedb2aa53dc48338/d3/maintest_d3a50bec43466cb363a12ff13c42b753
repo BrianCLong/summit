@@ -1,0 +1,10 @@
+3f8d9640bbb110e458d410a888871794
+import React from 'react';
+import { render } from '@testing-library/react';
+import TestApp from './App.test-simple.jsx';
+
+test('mounts TestApp without crashing', () => {
+  const { container } = render(<TestApp />);
+  expect(container.firstChild).toBeTruthy();
+});
+

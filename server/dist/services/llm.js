@@ -2,6 +2,10 @@ import { Readable } from 'node:stream';
 // Example impl: replace with your real provider(s)
 import { wrapStream } from './llmBreaker'; // New import
 export class MockLLM {
+    constructor() {
+        // Wrapped stream with circuit breaker
+        this.stream = wrapStream(this._stream);
+    }
     // Original stream implementation
     async *_stream(input, signal) {
         const out = `I understand your query: ${input}`;
@@ -12,8 +16,6 @@ export class MockLLM {
             yield token;
         }
     }
-    // Wrapped stream with circuit breaker
-    stream = wrapStream(this._stream);
 }
 // Helper: turn generator -> Node Readable (for tests or piping)
 export function generatorToReadable(gen) {
@@ -33,3 +35,4 @@ export function generatorToReadable(gen) {
     })();
     return r;
 }
+//# sourceMappingURL=llm.js.map
