@@ -5,7 +5,7 @@ replicaCount: 3
 image:
   repository: intelgraph/server
   pullPolicy: Always
-  tag: 'prod'
+  tag: "prod"
 
 service:
   type: ClusterIP
@@ -26,11 +26,11 @@ ingress:
 env:
   NODE_ENV: production
   LOG_LEVEL: error
-  FEATURE_FLAG_AI: 'true'
+  FEATURE_FLAG_AI: "true"
   # Database connection strings (usually managed by secrets)
-  NEO4J_URI: 'bolt://neo4j-prod:7687'
-  POSTGRES_HOST: 'postgres-prod'
-  REDIS_HOST: 'redis-prod'
+  NEO4J_URI: "bolt://neo4j-prod:7687"
+  POSTGRES_HOST: "postgres-prod"
+  REDIS_HOST: "redis-prod"
 
 # Resource limits for production
 resources:

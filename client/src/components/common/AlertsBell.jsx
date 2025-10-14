@@ -1,14 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery, useMutation, gql } from '@apollo/client';
-import {
-  IconButton,
-  Badge,
-  Menu,
-  MenuItem,
-  ListItemText,
-  Snackbar,
-  Alert as MUIAlert,
-} from '@mui/material';
+import { IconButton, Badge, Menu, MenuItem, ListItemText, Snackbar, Alert as MUIAlert } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 
 const GET_ALERTS = gql`
@@ -34,10 +26,7 @@ export default function AlertsBell() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [snack, setSnack] = useState(null);
   const open = Boolean(anchorEl);
-  const { data, refetch } = useQuery(GET_ALERTS, {
-    variables: { limit: 10, onlyUnread: true },
-    pollInterval: 15000,
-  });
+  const { data, refetch } = useQuery(GET_ALERTS, { variables: { limit: 10, onlyUnread: true }, pollInterval: 15000 });
   const [markRead] = useMutation(MARK_READ, { onCompleted: () => refetch() });
 
   const alerts = data?.alerts || [];
@@ -47,11 +36,7 @@ export default function AlertsBell() {
   useEffect(() => {
     if (alerts.length > 0) {
       const latest = alerts[0];
-      setSnack({
-        severity: latest.severity || 'info',
-        title: latest.title,
-        message: latest.message,
-      });
+      setSnack({ severity: latest.severity || 'info', title: latest.title, message: latest.message });
     }
   }, [alerts.length]);
 
@@ -79,15 +64,11 @@ export default function AlertsBell() {
         ))}
       </Menu>
       <Snackbar open={!!snack} autoHideDuration={6000} onClose={() => setSnack(null)}>
-        <MUIAlert
-          onClose={() => setSnack(null)}
-          severity={snack?.severity || 'info'}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
+        <MUIAlert onClose={() => setSnack(null)} severity={snack?.severity || 'info'} variant="filled" sx={{ width: '100%' }}>
           <strong>{snack?.title}:</strong> {snack?.message}
         </MUIAlert>
       </Snackbar>
     </>
   );
 }
+
