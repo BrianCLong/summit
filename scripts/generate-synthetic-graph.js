@@ -6,7 +6,7 @@ const edgeCount = parseInt(process.argv[3] || String(nodeCount * 2), 10);
 
 const nodes = Array.from({ length: nodeCount }, (_, i) => ({
   id: `n${i}`,
-  properties: { name: `Node ${i}` },
+  properties: { name: `Node ${i}` }
 }));
 
 const edges = [];

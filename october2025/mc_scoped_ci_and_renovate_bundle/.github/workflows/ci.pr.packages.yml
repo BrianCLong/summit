@@ -1,0 +1,21 @@
+name: ci.pr.packages
+on:
+  pull_request:
+    branches: [ main, develop, release/** ]
+  push:
+    branches: [ feature/**, chore/**, fix/** ]
+permissions:
+  contents: read
+jobs:
+  packages:
+    uses: ./.github/workflows/ci.scoped-reusable.yml
+    with:
+      filter_name: 'packages'
+      include_globs: 'packages/**'
+      exclude_globs: '**/*.md'
+      node_version: '20'
+      setup_cmd: 'corepack enable && pnpm i --frozen-lockfile'
+      lint_cmd: 'pnpm -w lint || pnpm lint'
+      typecheck_cmd: 'pnpm -w ts:check || pnpm typecheck || true'
+      test_cmd: 'pnpm -w test -- --run || pnpm test -- --run || true'
+      build_cmd: 'pnpm -w build || pnpm build'

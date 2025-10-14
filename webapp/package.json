@@ -1,0 +1,8 @@
+{
+  "name": "webapp",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "node src/index.js", "lint": "prettier -c ."},
+  "devDependencies": { "prettier": "^3.3.3" },
+  "dependencies": { "hono": "^4.5.10" }
+}
