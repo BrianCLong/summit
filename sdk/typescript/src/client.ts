@@ -1,4 +1,4 @@
-import { getMaestroOrchestrationAPI } from '../sdk/typescript/src/generated';
+import { getMaestroOrchestrationAPI } from '../sdk/ts/src/generated';
 import axios, { AxiosRequestConfig } from 'axios'; // Import AxiosRequestConfig
 
 // Simple retry function
