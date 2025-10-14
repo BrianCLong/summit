@@ -4,19 +4,30 @@ on:
   push:         { branches: [ main ] }
 permissions:
   contents: read
+  security-events: write
 jobs:
   build-test:
     runs-on: ubuntu-latest
     strategy: { matrix: { node: [18, 20] } }
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: ${{ matrix.node }}, cache: 'pnpm' }
-      - run: corepack enable
-      - run: pnpm i --frozen-lockfile
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: true
       - name: Typecheck
         run: pnpm -w run typecheck || npx tsc -p .
       - name: Lint
         run: pnpm -w run lint
       - name: Unit tests (Jest+SWC)
         run: pnpm -w exec jest --ci --maxWorkers=50% --coverage
+      - name: Upload SARIF (if present)
+        if: always() && hashFiles('**/*.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ hashFiles('**/*.sarif') }}

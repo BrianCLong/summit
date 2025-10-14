@@ -1,6 +1,17 @@
 'use client';
 import { useState } from 'react';
-import { Mic, PhoneCall, Video, MessageSquare, Rocket, Activity, Users, Brain } from 'lucide-react';
+import {
+  Mic,
+  PhoneCall,
+  Video,
+  MessageSquare,
+  Rocket,
+  Activity,
+  Users,
+  Brain,
+  Sparkles,
+  ListChecks,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const agents = [
@@ -16,6 +27,86 @@ const tiles = [
   { id: 'deploys', title: 'Deploys', metric: '3', desc: 'prod canary live' },
   { id: 'cost', title: 'LLM Spend', metric: '$42', desc: '24h window' },
 ];
+
+const prahaladPrompts = [
+  {
+    id: 'core-competency',
+    name: 'Core Competency Identifier',
+    focus: 'Identify fundamental capabilities that drive sustainable advantage.',
+    questions: [
+      'What unique skills or processes are hard to replicate?',
+      'Which give access to multiple markets?',
+    ],
+  },
+  {
+    id: 'future-market',
+    name: 'Future Market Architect',
+    focus: 'Anticipate emerging needs and design a roadmap for future market leadership.',
+    questions: [
+      'What invisible customer needs exist?',
+      'How will technology and demographics reshape the industry?',
+    ],
+  },
+  {
+    id: 'bop-strategist',
+    name: 'Bottom of the Pyramid Strategist',
+    focus: 'Discover profit and impact in underserved, low-income markets.',
+    questions: [
+      'How to redesign offerings for overlooked segments?',
+      'What low-margin, high-volume models unlock markets?',
+    ],
+  },
+  {
+    id: 'strategic-intent',
+    name: 'Strategic Intent Clarifier',
+    focus: 'Set ambitious, motivating goals that create intentional resource imbalances.',
+    questions: [
+      'What audacious but achievable position to target?',
+      'Which obsession should drive all strategic decisions?',
+    ],
+  },
+  {
+    id: 'resource-leverage',
+    name: 'Resource Leverage Expert',
+    focus: 'Maximize value using partnerships, ecosystems, and recombining existing assets.',
+    questions: [
+      'How to borrow, share, or combine resources uniquely?',
+      'What resource blind spots exist?',
+    ],
+  },
+  {
+    id: 'co-creation',
+    name: 'Co-Creation Facilitator',
+    focus: 'Shift from isolated development to customer-driven innovation.',
+    questions: [
+      'How to involve customers directly?',
+      'What platforms enable ongoing collaboration?',
+      'How to create personalized experiences?',
+    ],
+  },
+  {
+    id: 'industry-foresight',
+    name: 'Industry Foresight Builder',
+    focus: 'Build early-warning systems for spotting strategic shifts and trends.',
+    questions: [
+      'What discontinuities could reshape the landscape?',
+      'What weak signals could become dominant trends?',
+    ],
+  },
+];
+
+const prahaladPrinciples = [
+  'Core competencies are strategic DNA that outlive product cycles.',
+  'Competing for tomorrow beats fighting for today’s market share.',
+  'Overlooked markets hold transformative opportunities.',
+  'Strategic intent energizes extraordinary effort and innovation.',
+  'Resource leverage through access and partnerships can trump ownership.',
+  'Value co-creation with customers generates richer innovation.',
+  'Constant industry foresight prevents strategic blindness and creates advantage.',
+];
+
+const prahaladMindset =
+  'What unique capabilities can I leverage for future opportunities? How can I create value where others don’t look? What audacious future can I shape?';
 
 export default function Switchboard(){
   const [open, setOpen] = useState(false);
@@ -76,6 +167,32 @@ export default function Switchboard(){
             <button className="px-3 py-2 rounded-xl border">Present</button>
           </div>
           <div className="text-xs opacity-70 mt-2">Context loaded: org, agenda, metrics. Actions will be policy‑checked.</div>
+        </div>
+        <div className="rounded-2xl border p-3 space-y-3">
+          <div className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4"/>Prahalad Strategy Prompts</div>
+          <p className="text-xs opacity-70">Use these prompt lenses to shift from incremental to transformational thinking.</p>
+          <div className="space-y-2">
+            {prahaladPrompts.map((prompt) => (
+              <div key={prompt.id} className="rounded-xl border p-3 bg-gray-50/80 dark:bg-gray-800/60">
+                <p className="font-medium text-sm">{prompt.name}</p>
+                <p className="text-xs opacity-70 mb-2">{prompt.focus}</p>
+                <ul className="list-disc pl-4 space-y-1 text-xs">
+                  {prompt.questions.map((question) => (
+                    <li key={question}>{question}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div className="rounded-xl border p-3">
+            <div className="font-medium flex items-center gap-2 text-sm"><ListChecks className="h-4 w-4"/>Prahalad Principles</div>
+            <ul className="list-disc pl-4 space-y-1 mt-2 text-xs">
+              {prahaladPrinciples.map((principle) => (
+                <li key={principle}>{principle}</li>
+              ))}
+            </ul>
+          </div>
+          <p className="text-xs italic">Mindset check: “{prahaladMindset}”</p>
         </div>
       </aside>
 
