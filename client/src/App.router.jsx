@@ -40,6 +40,7 @@ import {
   Map,
   Assessment,
   Settings,
+  RocketLaunch,
 } from "@mui/icons-material";
 import { getIntelGraphTheme } from "./theme/intelgraphTheme";
 import { store } from "./store";
@@ -59,6 +60,7 @@ import { MilitaryTech } from "@mui/icons-material"; // WAR-GAMED SIMULATION - FO
 import AccessIntelPage from "./features/rbac/AccessIntelPage.jsx";
 import { Security } from "@mui/icons-material";
 import DisclosurePackagerPage from "./pages/DisclosurePackagerPage";
+import OrchestratorDashboard from "./features/orchestrator/OrchestratorDashboard";
 
 // Navigation items
 const ADMIN = "ADMIN";
@@ -67,6 +69,7 @@ const navigationItems = [
   { path: "/investigations", label: "Timeline", icon: <Search /> },
   { path: "/graph", label: "Graph Explorer", icon: <Timeline /> },
   { path: "/copilot", label: "AI Copilot", icon: <Psychology /> },
+  { path: "/orchestrator", label: "Orchestrator", icon: <RocketLaunch /> },
   { path: "/threats", label: "Threat Assessment", icon: <Assessment /> },
   { path: "/disclosures", label: "Disclosures", icon: <Assessment /> },
   { path: "/access-intel", label: "Access Intel", icon: <Security /> },
@@ -569,6 +572,14 @@ function ThreatsPage() {
   );
 }
 
+function OrchestratorPage() {
+  return (
+    <Container maxWidth="xl" sx={{ py: 2 }}>
+      <OrchestratorDashboard />
+    </Container>
+  );
+}
+
 function NotFoundPage() {
   const navigate = useNavigate();
 
@@ -612,6 +623,7 @@ function MainLayout() {
             <Route path="/investigations" element={<InvestigationsPage />} />
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
+            <Route path="/orchestrator" element={<OrchestratorPage />} />
             <Route path="/threats" element={<ThreatsPage />} />
             <Route path="/disclosures" element={<DisclosurePackagerPage />} />
             <Route path="/access-intel" element={<AccessIntelPage />} />
