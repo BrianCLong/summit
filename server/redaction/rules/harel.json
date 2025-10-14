@@ -1,0 +1,14 @@
+{
+  "name": "harel-protective-ops",
+  "redactionMask": "#",
+  "rules": {
+    "email": "pii",
+    "phone": "pii",
+    "iban": "sensitive",
+    "card": "sensitive",
+    "geo": "coarse", 
+    "notes": "sensitive",
+    "attachments": "sensitive"
+  }
+}
+

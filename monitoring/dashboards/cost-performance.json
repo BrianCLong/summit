@@ -18,13 +18,17 @@
       "type": "graph",
       "title": "Memory Usage",
       "datasource": "Prometheus",
-      "targets": [{ "expr": "sum(container_memory_usage_bytes{namespace=\"intelgraph\"})" }]
+      "targets": [
+        { "expr": "sum(container_memory_usage_bytes{namespace=\"intelgraph\"})" }
+      ]
     },
     {
       "type": "stat",
       "title": "Estimated Cloud Cost",
       "datasource": "Prometheus",
-      "targets": [{ "expr": "sum(cloud_cost_hourly{namespace=\"intelgraph\"})" }]
+      "targets": [
+        { "expr": "sum(cloud_cost_hourly{namespace=\"intelgraph\"})" }
+      ]
     }
   ]
 }

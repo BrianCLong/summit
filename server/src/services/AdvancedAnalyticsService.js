@@ -3,8 +3,8 @@
  * Machine Learning and Advanced Analytics Engine
  */
 
-const EventEmitter = require('events');
-const { v4: uuidv4 } = require('uuid');
+const EventEmitter = require("events");
+const { v4: uuidv4 } = require("uuid");
 
 class AdvancedAnalyticsService extends EventEmitter {
   constructor(neo4jDriver, multimodalService, simulationService, logger) {
@@ -36,90 +36,90 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   initializeMLModels() {
-    this.mlModels.set('LINK_PREDICTION', {
-      name: 'Graph Link Prediction',
-      type: 'supervised',
-      algorithm: 'random_forest',
+    this.mlModels.set("LINK_PREDICTION", {
+      name: "Graph Link Prediction",
+      type: "supervised",
+      algorithm: "random_forest",
       features: [
-        'node_centrality',
-        'common_neighbors',
-        'jaccard_coefficient',
-        'temporal_proximity',
+        "node_centrality",
+        "common_neighbors",
+        "jaccard_coefficient",
+        "temporal_proximity",
       ],
       accuracy: 0.87,
       lastTrained: new Date(),
       trainingData: 0,
     });
 
-    this.mlModels.set('ENTITY_CLASSIFICATION', {
-      name: 'Entity Type Classification',
-      type: 'supervised',
-      algorithm: 'gradient_boosting',
+    this.mlModels.set("ENTITY_CLASSIFICATION", {
+      name: "Entity Type Classification",
+      type: "supervised",
+      algorithm: "gradient_boosting",
       features: [
-        'text_features',
-        'network_properties',
-        'temporal_patterns',
-        'multimodal_embeddings',
+        "text_features",
+        "network_properties",
+        "temporal_patterns",
+        "multimodal_embeddings",
       ],
       accuracy: 0.92,
       lastTrained: new Date(),
       trainingData: 0,
     });
 
-    this.mlModels.set('BEHAVIOR_PREDICTION', {
-      name: 'Behavioral Pattern Prediction',
-      type: 'time_series',
-      algorithm: 'lstm_neural_network',
+    this.mlModels.set("BEHAVIOR_PREDICTION", {
+      name: "Behavioral Pattern Prediction",
+      type: "time_series",
+      algorithm: "lstm_neural_network",
       features: [
-        'historical_patterns',
-        'network_influence',
-        'temporal_context',
-        'external_factors',
+        "historical_patterns",
+        "network_influence",
+        "temporal_context",
+        "external_factors",
       ],
       accuracy: 0.84,
       lastTrained: new Date(),
       trainingData: 0,
     });
 
-    this.mlModels.set('RISK_SCORING', {
-      name: 'Dynamic Risk Assessment',
-      type: 'ensemble',
-      algorithm: 'stacked_ensemble',
+    this.mlModels.set("RISK_SCORING", {
+      name: "Dynamic Risk Assessment",
+      type: "ensemble",
+      algorithm: "stacked_ensemble",
       features: [
-        'connectivity_metrics',
-        'activity_patterns',
-        'association_strength',
-        'temporal_volatility',
+        "connectivity_metrics",
+        "activity_patterns",
+        "association_strength",
+        "temporal_volatility",
       ],
       accuracy: 0.89,
       lastTrained: new Date(),
       trainingData: 0,
     });
 
-    this.mlModels.set('COMMUNITY_DETECTION', {
-      name: 'Dynamic Community Detection',
-      type: 'unsupervised',
-      algorithm: 'spectral_clustering',
+    this.mlModels.set("COMMUNITY_DETECTION", {
+      name: "Dynamic Community Detection",
+      type: "unsupervised",
+      algorithm: "spectral_clustering",
       features: [
-        'edge_weights',
-        'interaction_frequency',
-        'shared_attributes',
-        'temporal_stability',
+        "edge_weights",
+        "interaction_frequency",
+        "shared_attributes",
+        "temporal_stability",
       ],
       silhouette_score: 0.73,
       lastTrained: new Date(),
       trainingData: 0,
     });
 
-    this.mlModels.set('INFLUENCE_PREDICTION', {
-      name: 'Network Influence Modeling',
-      type: 'graph_neural_network',
-      algorithm: 'graph_attention',
+    this.mlModels.set("INFLUENCE_PREDICTION", {
+      name: "Network Influence Modeling",
+      type: "graph_neural_network",
+      algorithm: "graph_attention",
       features: [
-        'centrality_measures',
-        'information_flow',
-        'cascade_patterns',
-        'authority_metrics',
+        "centrality_measures",
+        "information_flow",
+        "cascade_patterns",
+        "authority_metrics",
       ],
       accuracy: 0.86,
       lastTrained: new Date(),
@@ -128,46 +128,56 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   initializeAnomalyDetectors() {
-    this.anomalyDetectors.set('STRUCTURAL_ANOMALY', {
-      name: 'Graph Structure Anomaly Detection',
-      algorithm: 'isolation_forest',
-      features: ['degree_distribution', 'clustering_coefficient', 'path_lengths', 'motif_counts'],
+    this.anomalyDetectors.set("STRUCTURAL_ANOMALY", {
+      name: "Graph Structure Anomaly Detection",
+      algorithm: "isolation_forest",
+      features: [
+        "degree_distribution",
+        "clustering_coefficient",
+        "path_lengths",
+        "motif_counts",
+      ],
       threshold: 0.15,
-      sensitivity: 'medium',
+      sensitivity: "medium",
     });
 
-    this.anomalyDetectors.set('TEMPORAL_ANOMALY', {
-      name: 'Temporal Pattern Anomaly Detection',
-      algorithm: 'autoencoder',
+    this.anomalyDetectors.set("TEMPORAL_ANOMALY", {
+      name: "Temporal Pattern Anomaly Detection",
+      algorithm: "autoencoder",
       features: [
-        'activity_spikes',
-        'interaction_timing',
-        'frequency_changes',
-        'seasonal_deviations',
+        "activity_spikes",
+        "interaction_timing",
+        "frequency_changes",
+        "seasonal_deviations",
       ],
       threshold: 0.12,
-      sensitivity: 'high',
+      sensitivity: "high",
     });
 
-    this.anomalyDetectors.set('BEHAVIORAL_ANOMALY', {
-      name: 'Behavioral Anomaly Detection',
-      algorithm: 'one_class_svm',
+    this.anomalyDetectors.set("BEHAVIORAL_ANOMALY", {
+      name: "Behavioral Anomaly Detection",
+      algorithm: "one_class_svm",
       features: [
-        'communication_patterns',
-        'movement_patterns',
-        'association_changes',
-        'activity_levels',
+        "communication_patterns",
+        "movement_patterns",
+        "association_changes",
+        "activity_levels",
       ],
       threshold: 0.08,
-      sensitivity: 'medium',
+      sensitivity: "medium",
     });
 
-    this.anomalyDetectors.set('CONTENT_ANOMALY', {
-      name: 'Content-based Anomaly Detection',
-      algorithm: 'variational_autoencoder',
-      features: ['text_embeddings', 'image_features', 'audio_patterns', 'multimodal_consistency'],
+    this.anomalyDetectors.set("CONTENT_ANOMALY", {
+      name: "Content-based Anomaly Detection",
+      algorithm: "variational_autoencoder",
+      features: [
+        "text_embeddings",
+        "image_features",
+        "audio_patterns",
+        "multimodal_consistency",
+      ],
       threshold: 0.18,
-      sensitivity: 'low',
+      sensitivity: "low",
     });
   }
 
@@ -181,32 +191,32 @@ class AdvancedAnalyticsService extends EventEmitter {
 
   async processAnalyticsQueue() {
     const activeJobs = Array.from(this.analyticsJobs.values()).filter(
-      (job) => job.status === 'QUEUED' || job.status === 'PROCESSING',
+      (job) => job.status === "QUEUED" || job.status === "PROCESSING",
     );
 
     for (const job of activeJobs) {
-      if (job.status === 'QUEUED') {
+      if (job.status === "QUEUED") {
         try {
-          job.status = 'PROCESSING';
+          job.status = "PROCESSING";
           job.startTime = Date.now();
-          this.emit('analyticsStarted', job);
+          this.emit("analyticsStarted", job);
 
           const results = await this.executeAnalyticsJob(job);
           job.results = results;
-          job.status = 'COMPLETED';
+          job.status = "COMPLETED";
           job.endTime = Date.now();
           job.executionTime = job.endTime - job.startTime;
 
           this.metrics.completedAnalytics++;
           this.updateExecutionTimeMetric(job.executionTime);
-          this.emit('analyticsCompleted', job);
+          this.emit("analyticsCompleted", job);
         } catch (error) {
-          job.status = 'FAILED';
+          job.status = "FAILED";
           job.error = error.message;
           job.endTime = Date.now();
           this.metrics.failedAnalytics++;
-          this.logger.error('Analytics job failed:', error);
-          this.emit('analyticsFailed', job);
+          this.logger.error("Analytics job failed:", error);
+          this.emit("analyticsFailed", job);
         }
       }
     }
@@ -214,21 +224,21 @@ class AdvancedAnalyticsService extends EventEmitter {
 
   async executeAnalyticsJob(job) {
     switch (job.type) {
-      case 'LINK_PREDICTION':
+      case "LINK_PREDICTION":
         return await this.performLinkPrediction(job.parameters);
-      case 'ENTITY_CLASSIFICATION':
+      case "ENTITY_CLASSIFICATION":
         return await this.performEntityClassification(job.parameters);
-      case 'BEHAVIOR_PREDICTION':
+      case "BEHAVIOR_PREDICTION":
         return await this.performBehaviorPrediction(job.parameters);
-      case 'RISK_SCORING':
+      case "RISK_SCORING":
         return await this.performRiskScoring(job.parameters);
-      case 'COMMUNITY_DETECTION':
+      case "COMMUNITY_DETECTION":
         return await this.performCommunityDetection(job.parameters);
-      case 'INFLUENCE_ANALYSIS':
+      case "INFLUENCE_ANALYSIS":
         return await this.performInfluenceAnalysis(job.parameters);
-      case 'PATTERN_MINING':
+      case "PATTERN_MINING":
         return await this.performPatternMining(job.parameters);
-      case 'TREND_ANALYSIS':
+      case "TREND_ANALYSIS":
         return await this.performTrendAnalysis(job.parameters);
       default:
         throw new Error(`Unknown analytics job type: ${job.type}`);
@@ -236,7 +246,12 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   async performLinkPrediction(params) {
-    const { investigationId, nodeIds, predictionHorizon = 30, confidenceThreshold = 0.7 } = params;
+    const {
+      investigationId,
+      nodeIds,
+      predictionHorizon = 30,
+      confidenceThreshold = 0.7,
+    } = params;
 
     // Get graph structure
     const session = this.neo4jDriver.session();
@@ -252,9 +267,9 @@ class AdvancedAnalyticsService extends EventEmitter {
       const edges = [];
 
       result.records.forEach((record) => {
-        const nodeA = record.get('n');
-        const nodeB = record.get('m');
-        const relationship = record.get('r');
+        const nodeA = record.get("n");
+        const nodeB = record.get("m");
+        const relationship = record.get("r");
 
         if (!nodes.has(nodeA.properties.id)) {
           nodes.set(nodeA.properties.id, nodeA.properties);
@@ -288,7 +303,12 @@ class AdvancedAnalyticsService extends EventEmitter {
           );
 
           if (!existingLink) {
-            const features = this.calculateLinkPredictionFeatures(nodeA, nodeB, nodes, edges);
+            const features = this.calculateLinkPredictionFeatures(
+              nodeA,
+              nodeB,
+              nodes,
+              edges,
+            );
             const probability = this.predictLinkProbability(features);
 
             if (probability >= confidenceThreshold) {
@@ -310,10 +330,10 @@ class AdvancedAnalyticsService extends EventEmitter {
       this.metrics.predictionsGenerated += predictions.length;
 
       return {
-        type: 'LINK_PREDICTION',
+        type: "LINK_PREDICTION",
         investigationId,
         predictions: predictions.slice(0, 50), // Top 50 predictions
-        modelAccuracy: this.mlModels.get('LINK_PREDICTION').accuracy,
+        modelAccuracy: this.mlModels.get("LINK_PREDICTION").accuracy,
         featureImportance: this.getLinkPredictionFeatureImportance(),
         executionTime: Date.now(),
         parameters: params,
@@ -381,7 +401,7 @@ class AdvancedAnalyticsService extends EventEmitter {
     const {
       investigationId,
       entityIds,
-      classificationTypes = ['PERSON', 'ORGANIZATION', 'LOCATION', 'EVENT'],
+      classificationTypes = ["PERSON", "ORGANIZATION", "LOCATION", "EVENT"],
     } = params;
 
     const session = this.neo4jDriver.session();
@@ -400,9 +420,12 @@ class AdvancedAnalyticsService extends EventEmitter {
       const classifications = [];
 
       for (const record of result.records) {
-        const entity = record.get('e');
+        const entity = record.get("e");
         const features = await this.extractEntityFeatures(entity.properties);
-        const classification = this.classifyEntity(features, classificationTypes);
+        const classification = this.classifyEntity(
+          features,
+          classificationTypes,
+        );
 
         classifications.push({
           entityId: entity.properties.id,
@@ -416,10 +439,10 @@ class AdvancedAnalyticsService extends EventEmitter {
       }
 
       return {
-        type: 'ENTITY_CLASSIFICATION',
+        type: "ENTITY_CLASSIFICATION",
         investigationId,
         classifications,
-        modelAccuracy: this.mlModels.get('ENTITY_CLASSIFICATION').accuracy,
+        modelAccuracy: this.mlModels.get("ENTITY_CLASSIFICATION").accuracy,
         classificationTypes,
         executionTime: Date.now(),
       };
@@ -431,11 +454,13 @@ class AdvancedAnalyticsService extends EventEmitter {
   async extractEntityFeatures(entityProperties) {
     const features = {
       textFeatures: {
-        labelLength: (entityProperties.label || '').length,
-        hasNumericContent: /\d/.test(entityProperties.label || ''),
-        hasSpecialChars: /[^a-zA-Z0-9\s]/.test(entityProperties.label || ''),
-        wordCount: (entityProperties.label || '').split(/\s+/).length,
-        containsTitle: /^(mr|mrs|ms|dr|prof|sir|madam)/i.test(entityProperties.label || ''),
+        labelLength: (entityProperties.label || "").length,
+        hasNumericContent: /\d/.test(entityProperties.label || ""),
+        hasSpecialChars: /[^a-zA-Z0-9\s]/.test(entityProperties.label || ""),
+        wordCount: (entityProperties.label || "").split(/\s+/).length,
+        containsTitle: /^(mr|mrs|ms|dr|prof|sir|madam)/i.test(
+          entityProperties.label || "",
+        ),
       },
       networkFeatures: {
         connectionCount: entityProperties.connectionCount || 0,
@@ -443,7 +468,9 @@ class AdvancedAnalyticsService extends EventEmitter {
         clustering: entityProperties.clusteringCoefficient || 0,
       },
       temporalFeatures: {
-        creationDate: entityProperties.createdAt ? new Date(entityProperties.createdAt) : null,
+        creationDate: entityProperties.createdAt
+          ? new Date(entityProperties.createdAt)
+          : null,
         lastActivity: entityProperties.lastActivity
           ? new Date(entityProperties.lastActivity)
           : null,
@@ -467,14 +494,18 @@ class AdvancedAnalyticsService extends EventEmitter {
     // PERSON classification logic
     scores.PERSON = 0;
     if (features.textFeatures.containsTitle) scores.PERSON += 0.3;
-    if (features.textFeatures.wordCount >= 2 && features.textFeatures.wordCount <= 4)
+    if (
+      features.textFeatures.wordCount >= 2 &&
+      features.textFeatures.wordCount <= 4
+    )
       scores.PERSON += 0.2;
     if (features.multimodalFeatures.hasImageContent) scores.PERSON += 0.15;
 
     // ORGANIZATION classification logic
     scores.ORGANIZATION = 0;
     if (features.textFeatures.hasSpecialChars) scores.ORGANIZATION += 0.2;
-    if (features.networkFeatures.connectionCount > 10) scores.ORGANIZATION += 0.25;
+    if (features.networkFeatures.connectionCount > 10)
+      scores.ORGANIZATION += 0.25;
     if (features.textFeatures.labelLength > 20) scores.ORGANIZATION += 0.15;
 
     // LOCATION classification logic
@@ -500,7 +531,9 @@ class AdvancedAnalyticsService extends EventEmitter {
       type: bestType,
       confidence,
       reasoning: this.generateClassificationReasoning(bestType, features),
-      alternatives: sortedScores.slice(1, 3).map(([type, score]) => ({ type, confidence: score })),
+      alternatives: sortedScores
+        .slice(1, 3)
+        .map(([type, score]) => ({ type, confidence: score })),
     };
   }
 
@@ -509,7 +542,7 @@ class AdvancedAnalyticsService extends EventEmitter {
       investigationId,
       entityId,
       predictionHorizon = 30,
-      behaviorTypes = ['ACTIVITY', 'COMMUNICATION', 'MOVEMENT'],
+      behaviorTypes = ["ACTIVITY", "COMMUNICATION", "MOVEMENT"],
     } = params;
 
     const session = this.neo4jDriver.session();
@@ -533,8 +566,14 @@ class AdvancedAnalyticsService extends EventEmitter {
       const predictions = [];
 
       for (const behaviorType of behaviorTypes) {
-        const historicalPattern = this.analyzeHistoricalPattern(behaviorData, behaviorType);
-        const prediction = this.predictBehavior(historicalPattern, predictionHorizon);
+        const historicalPattern = this.analyzeHistoricalPattern(
+          behaviorData,
+          behaviorType,
+        );
+        const prediction = this.predictBehavior(
+          historicalPattern,
+          predictionHorizon,
+        );
 
         predictions.push({
           behaviorType,
@@ -546,11 +585,11 @@ class AdvancedAnalyticsService extends EventEmitter {
       }
 
       return {
-        type: 'BEHAVIOR_PREDICTION',
+        type: "BEHAVIOR_PREDICTION",
         investigationId,
         entityId,
         predictions,
-        modelAccuracy: this.mlModels.get('BEHAVIOR_PREDICTION').accuracy,
+        modelAccuracy: this.mlModels.get("BEHAVIOR_PREDICTION").accuracy,
         historicalDataPoints: behaviorData.length,
         executionTime: Date.now(),
       };
@@ -563,12 +602,12 @@ class AdvancedAnalyticsService extends EventEmitter {
     const behaviorData = [];
 
     records.forEach((record) => {
-      const relationship = record.get('r');
+      const relationship = record.get("r");
       if (relationship && relationship.properties.timestamp) {
         behaviorData.push({
           timestamp: new Date(relationship.properties.timestamp),
           type: relationship.type,
-          target: record.get('other')?.properties?.id,
+          target: record.get("other")?.properties?.id,
           properties: relationship.properties,
         });
       }
@@ -578,10 +617,12 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   analyzeHistoricalPattern(behaviorData, behaviorType) {
-    const relevantData = behaviorData.filter((d) => this.isBehaviorTypeMatch(d.type, behaviorType));
+    const relevantData = behaviorData.filter((d) =>
+      this.isBehaviorTypeMatch(d.type, behaviorType),
+    );
 
     if (relevantData.length === 0) {
-      return { pattern: 'NO_DATA', frequency: 0, trend: 'UNKNOWN' };
+      return { pattern: "NO_DATA", frequency: 0, trend: "UNKNOWN" };
     }
 
     // Calculate frequency over time
@@ -590,10 +631,11 @@ class AdvancedAnalyticsService extends EventEmitter {
 
     // Calculate trend
     const trend = this.calculateTrend(frequencies);
-    const averageFrequency = frequencies.reduce((sum, freq) => sum + freq, 0) / frequencies.length;
+    const averageFrequency =
+      frequencies.reduce((sum, freq) => sum + freq, 0) / frequencies.length;
 
     return {
-      pattern: 'PERIODIC',
+      pattern: "PERIODIC",
       frequency: averageFrequency,
       trend,
       variance: this.calculateVariance(frequencies),
@@ -603,20 +645,20 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   predictBehavior(historicalPattern, horizonDays) {
-    if (historicalPattern.pattern === 'NO_DATA') {
+    if (historicalPattern.pattern === "NO_DATA") {
       return {
         expectedEvents: 0,
         confidence: 0,
-        factors: ['No historical data available'],
+        factors: ["No historical data available"],
       };
     }
 
     let expectedFrequency = historicalPattern.frequency;
 
     // Adjust for trend
-    if (historicalPattern.trend === 'INCREASING') {
+    if (historicalPattern.trend === "INCREASING") {
       expectedFrequency *= 1.2;
-    } else if (historicalPattern.trend === 'DECREASING') {
+    } else if (historicalPattern.trend === "DECREASING") {
       expectedFrequency *= 0.8;
     }
 
@@ -626,12 +668,19 @@ class AdvancedAnalyticsService extends EventEmitter {
     }
 
     const expectedEvents = Math.round(expectedFrequency * (horizonDays / 7));
-    const confidence = Math.max(0, 1 - historicalPattern.variance / historicalPattern.frequency);
+    const confidence = Math.max(
+      0,
+      1 - historicalPattern.variance / historicalPattern.frequency,
+    );
 
     const factors = [];
-    if (historicalPattern.trend !== 'STABLE') factors.push(`${historicalPattern.trend} trend`);
-    if (historicalPattern.seasonality) factors.push('Seasonal patterns detected');
-    factors.push(`Based on ${Math.round(historicalPattern.frequency * 4)} events per month`);
+    if (historicalPattern.trend !== "STABLE")
+      factors.push(`${historicalPattern.trend} trend`);
+    if (historicalPattern.seasonality)
+      factors.push("Seasonal patterns detected");
+    factors.push(
+      `Based on ${Math.round(historicalPattern.frequency * 4)} events per month`,
+    );
 
     return {
       expectedEvents,
@@ -646,7 +695,7 @@ class AdvancedAnalyticsService extends EventEmitter {
     const {
       investigationId,
       entityIds,
-      riskFactors = ['CONNECTIVITY', 'ACTIVITY', 'ASSOCIATIONS', 'TEMPORAL'],
+      riskFactors = ["CONNECTIVITY", "ACTIVITY", "ASSOCIATIONS", "TEMPORAL"],
     } = params;
 
     const session = this.neo4jDriver.session();
@@ -667,9 +716,9 @@ class AdvancedAnalyticsService extends EventEmitter {
         if (result.records.length === 0) continue;
 
         const record = result.records[0];
-        const entity = record.get('e').properties;
-        const connectionCount = record.get('connectionCount').toNumber();
-        const relationships = record.get('relationships');
+        const entity = record.get("e").properties;
+        const connectionCount = record.get("connectionCount").toNumber();
+        const relationships = record.get("relationships");
 
         const riskAssessment = await this.calculateRiskScore(
           entity,
@@ -681,11 +730,11 @@ class AdvancedAnalyticsService extends EventEmitter {
       }
 
       return {
-        type: 'RISK_SCORING',
+        type: "RISK_SCORING",
         investigationId,
         riskScores: riskScores.sort((a, b) => b.totalRisk - a.totalRisk),
         riskFactors,
-        modelAccuracy: this.mlModels.get('RISK_SCORING').accuracy,
+        modelAccuracy: this.mlModels.get("RISK_SCORING").accuracy,
         executionTime: Date.now(),
       };
     } finally {
@@ -693,24 +742,32 @@ class AdvancedAnalyticsService extends EventEmitter {
     }
   }
 
-  async calculateRiskScore(entity, connectionCount, relationships, riskFactors) {
+  async calculateRiskScore(
+    entity,
+    connectionCount,
+    relationships,
+    riskFactors,
+  ) {
     const riskComponents = {};
 
-    if (riskFactors.includes('CONNECTIVITY')) {
+    if (riskFactors.includes("CONNECTIVITY")) {
       riskComponents.connectivity = Math.min(connectionCount / 50, 1.0); // Normalize to 0-1
     }
 
-    if (riskFactors.includes('ACTIVITY')) {
+    if (riskFactors.includes("ACTIVITY")) {
       const activityScore = this.calculateActivityRisk(relationships);
       riskComponents.activity = activityScore;
     }
 
-    if (riskFactors.includes('ASSOCIATIONS')) {
-      const associationScore = await this.calculateAssociationRisk(entity, relationships);
+    if (riskFactors.includes("ASSOCIATIONS")) {
+      const associationScore = await this.calculateAssociationRisk(
+        entity,
+        relationships,
+      );
       riskComponents.associations = associationScore;
     }
 
-    if (riskFactors.includes('TEMPORAL')) {
+    if (riskFactors.includes("TEMPORAL")) {
       const temporalScore = this.calculateTemporalRisk(relationships);
       riskComponents.temporal = temporalScore;
     }
@@ -738,7 +795,10 @@ class AdvancedAnalyticsService extends EventEmitter {
       totalRisk,
       riskLevel,
       riskComponents,
-      recommendations: this.generateRiskRecommendations(totalRisk, riskComponents),
+      recommendations: this.generateRiskRecommendations(
+        totalRisk,
+        riskComponents,
+      ),
       lastAssessed: new Date(),
     };
   }
@@ -746,7 +806,7 @@ class AdvancedAnalyticsService extends EventEmitter {
   async performCommunityDetection(params) {
     const {
       investigationId,
-      algorithm = 'LEIDEN',
+      algorithm = "LEIDEN",
       resolution = 1.0,
       minCommunitySize = 3,
     } = params;
@@ -762,9 +822,9 @@ class AdvancedAnalyticsService extends EventEmitter {
 
       const result = await session.run(graphQuery, { investigationId });
       const edges = result.records.map((record) => ({
-        source: record.get('nodeId'),
-        target: record.get('connectedNodeId'),
-        weight: record.get('weight') || 1.0,
+        source: record.get("nodeId"),
+        target: record.get("connectedNodeId"),
+        weight: record.get("weight") || 1.0,
       }));
 
       const communities = await this.detectCommunities(
@@ -775,18 +835,22 @@ class AdvancedAnalyticsService extends EventEmitter {
       );
 
       // Analyze community characteristics
-      const communityAnalysis = await this.analyzeCommunities(communities, investigationId);
+      const communityAnalysis = await this.analyzeCommunities(
+        communities,
+        investigationId,
+      );
 
       this.metrics.clustersIdentified += communities.length;
 
       return {
-        type: 'COMMUNITY_DETECTION',
+        type: "COMMUNITY_DETECTION",
         investigationId,
         communities: communityAnalysis,
         algorithm,
         parameters: { resolution, minCommunitySize },
         modularity: this.calculateModularity(communities, edges),
-        silhouetteScore: this.mlModels.get('COMMUNITY_DETECTION').silhouette_score,
+        silhouetteScore: this.mlModels.get("COMMUNITY_DETECTION")
+          .silhouette_score,
         executionTime: Date.now(),
       };
     } finally {
@@ -804,13 +868,13 @@ class AdvancedAnalyticsService extends EventEmitter {
     let communities;
 
     switch (algorithm) {
-      case 'LEIDEN':
+      case "LEIDEN":
         communities = this.leidenAlgorithm(graph, nodes, resolution);
         break;
-      case 'LOUVAIN':
+      case "LOUVAIN":
         communities = this.louvainAlgorithm(graph, nodes, resolution);
         break;
-      case 'SPECTRAL':
+      case "SPECTRAL":
         communities = this.spectralClustering(graph, nodes);
         break;
       default:
@@ -818,7 +882,9 @@ class AdvancedAnalyticsService extends EventEmitter {
     }
 
     // Filter communities by minimum size
-    return communities.filter((community) => community.members.length >= minCommunitySize);
+    return communities.filter(
+      (community) => community.members.length >= minCommunitySize,
+    );
   }
 
   leidenAlgorithm(graph, nodes, resolution) {
@@ -828,7 +894,12 @@ class AdvancedAnalyticsService extends EventEmitter {
 
     for (const node of nodes) {
       if (!visited.has(node)) {
-        const community = this.expandCommunity(node, graph, visited, resolution);
+        const community = this.expandCommunity(
+          node,
+          graph,
+          visited,
+          resolution,
+        );
         if (community.length > 0) {
           communities.push({
             id: uuidv4(),
@@ -870,10 +941,14 @@ class AdvancedAnalyticsService extends EventEmitter {
 
       for (const investigationId of investigations) {
         for (const [detectorType, detector] of this.anomalyDetectors) {
-          const anomalies = await this.detectAnomalies(investigationId, detectorType, detector);
+          const anomalies = await this.detectAnomalies(
+            investigationId,
+            detectorType,
+            detector,
+          );
 
           if (anomalies.length > 0) {
-            this.emit('anomaliesDetected', {
+            this.emit("anomaliesDetected", {
               investigationId,
               detectorType,
               anomalies,
@@ -885,7 +960,7 @@ class AdvancedAnalyticsService extends EventEmitter {
         }
       }
     } catch (error) {
-      this.logger.error('Anomaly detection failed:', error);
+      this.logger.error("Anomaly detection failed:", error);
     }
   }
 
@@ -893,14 +968,30 @@ class AdvancedAnalyticsService extends EventEmitter {
     const session = this.neo4jDriver.session();
     try {
       switch (detectorType) {
-        case 'STRUCTURAL_ANOMALY':
-          return await this.detectStructuralAnomalies(investigationId, detector, session);
-        case 'TEMPORAL_ANOMALY':
-          return await this.detectTemporalAnomalies(investigationId, detector, session);
-        case 'BEHAVIORAL_ANOMALY':
-          return await this.detectBehavioralAnomalies(investigationId, detector, session);
-        case 'CONTENT_ANOMALY':
-          return await this.detectContentAnomalies(investigationId, detector, session);
+        case "STRUCTURAL_ANOMALY":
+          return await this.detectStructuralAnomalies(
+            investigationId,
+            detector,
+            session,
+          );
+        case "TEMPORAL_ANOMALY":
+          return await this.detectTemporalAnomalies(
+            investigationId,
+            detector,
+            session,
+          );
+        case "BEHAVIORAL_ANOMALY":
+          return await this.detectBehavioralAnomalies(
+            investigationId,
+            detector,
+            session,
+          );
+        case "CONTENT_ANOMALY":
+          return await this.detectContentAnomalies(
+            investigationId,
+            detector,
+            session,
+          );
         default:
           return [];
       }
@@ -919,28 +1010,31 @@ class AdvancedAnalyticsService extends EventEmitter {
     const result = await session.run(query, { investigationId });
     const anomalies = [];
 
-    const degrees = result.records.map((record) => record.get('degree').toNumber());
+    const degrees = result.records.map((record) =>
+      record.get("degree").toNumber(),
+    );
     const avgDegree = degrees.reduce((sum, d) => sum + d, 0) / degrees.length;
     const stdDev = Math.sqrt(
-      degrees.reduce((sum, d) => sum + Math.pow(d - avgDegree, 2), 0) / degrees.length,
+      degrees.reduce((sum, d) => sum + Math.pow(d - avgDegree, 2), 0) /
+        degrees.length,
     );
 
     result.records.forEach((record) => {
-      const node = record.get('n').properties;
-      const degree = record.get('degree').toNumber();
+      const node = record.get("n").properties;
+      const degree = record.get("degree").toNumber();
 
       // Detect degree anomalies
       const zScore = Math.abs((degree - avgDegree) / stdDev);
       if (zScore > 2.5) {
         // 2.5 standard deviations
         anomalies.push({
-          type: 'STRUCTURAL_ANOMALY',
-          subtype: 'DEGREE_ANOMALY',
+          type: "STRUCTURAL_ANOMALY",
+          subtype: "DEGREE_ANOMALY",
           entityId: node.id,
           entityLabel: node.label,
           anomalyScore: zScore,
           description: `Unusual connection count: ${degree} (avg: ${avgDegree.toFixed(1)})`,
-          severity: zScore > 3.5 ? 'HIGH' : 'MEDIUM',
+          severity: zScore > 3.5 ? "HIGH" : "MEDIUM",
         });
       }
     });
@@ -982,7 +1076,8 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   updateExecutionTimeMetric(executionTime) {
-    const totalTime = this.metrics.averageExecutionTime * this.metrics.completedAnalytics;
+    const totalTime =
+      this.metrics.averageExecutionTime * this.metrics.completedAnalytics;
     this.metrics.averageExecutionTime =
       (totalTime + executionTime) / (this.metrics.completedAnalytics + 1);
   }
@@ -993,7 +1088,7 @@ class AdvancedAnalyticsService extends EventEmitter {
       id: uuidv4(),
       type: jobData.type,
       parameters: jobData.parameters,
-      status: 'QUEUED',
+      status: "QUEUED",
       createdAt: new Date(),
       userId: jobData.userId,
       investigationId: jobData.investigationId,
@@ -1002,7 +1097,7 @@ class AdvancedAnalyticsService extends EventEmitter {
     this.analyticsJobs.set(job.id, job);
     this.metrics.totalAnalytics++;
 
-    this.emit('analyticsQueued', job);
+    this.emit("analyticsQueued", job);
     return job;
   }
 
@@ -1012,15 +1107,18 @@ class AdvancedAnalyticsService extends EventEmitter {
 
   getActiveJobs() {
     return Array.from(this.analyticsJobs.values()).filter(
-      (job) => job.status === 'QUEUED' || job.status === 'PROCESSING',
+      (job) => job.status === "QUEUED" || job.status === "PROCESSING",
     );
   }
 
   getMetrics() {
     const successRate =
       this.metrics.totalAnalytics > 0
-        ? ((this.metrics.completedAnalytics / this.metrics.totalAnalytics) * 100).toFixed(2)
-        : '0';
+        ? (
+            (this.metrics.completedAnalytics / this.metrics.totalAnalytics) *
+            100
+          ).toFixed(2)
+        : "0";
 
     return {
       ...this.metrics,
@@ -1037,10 +1135,12 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   getAvailableDetectors() {
-    return Array.from(this.anomalyDetectors.entries()).map(([id, detector]) => ({
-      id,
-      ...detector,
-    }));
+    return Array.from(this.anomalyDetectors.entries()).map(
+      ([id, detector]) => ({
+        id,
+        ...detector,
+      }),
+    );
   }
 
   // Helper method stubs (would be fully implemented in production)
@@ -1048,9 +1148,11 @@ class AdvancedAnalyticsService extends EventEmitter {
     const reasons = [];
     if (features.commonNeighbors > 2)
       reasons.push(`${features.commonNeighbors} shared connections`);
-    if (features.jaccardCoefficient > 0.3) reasons.push('High network similarity');
-    if (features.shortestPathLength <= 2) reasons.push('Close network proximity');
-    return reasons.join(', ');
+    if (features.jaccardCoefficient > 0.3)
+      reasons.push("High network similarity");
+    if (features.shortestPathLength <= 2)
+      reasons.push("Close network proximity");
+    return reasons.join(", ");
   }
 
   getLinkPredictionFeatureImportance() {
@@ -1065,18 +1167,18 @@ class AdvancedAnalyticsService extends EventEmitter {
 
   generateClassificationReasoning(type, features) {
     switch (type) {
-      case 'PERSON':
+      case "PERSON":
         return features?.textFeatures?.containsTitle
-          ? 'Contains title and personal attributes'
-          : 'Name-like structure and personal attributes detected';
-      case 'ORGANIZATION':
-        return 'Organizational indicators and high connectivity';
-      case 'LOCATION':
-        return 'Geographic indicators and centrality patterns';
-      case 'EVENT':
-        return 'Temporal characteristics and event-like content';
+          ? "Contains title and personal attributes"
+          : "Name-like structure and personal attributes detected";
+      case "ORGANIZATION":
+        return "Organizational indicators and high connectivity";
+      case "LOCATION":
+        return "Geographic indicators and centrality patterns";
+      case "EVENT":
+        return "Temporal characteristics and event-like content";
       default:
-        return 'Classification based on multimodal feature analysis';
+        return "Classification based on multimodal feature analysis";
     }
   }
 
@@ -1087,7 +1189,7 @@ class AdvancedAnalyticsService extends EventEmitter {
         MATCH (e:MultimodalEntity)
         RETURN DISTINCT e.investigationId as investigationId
       `);
-      return result.records.map((record) => record.get('investigationId'));
+      return result.records.map((record) => record.get("investigationId"));
     } finally {
       await session.close();
     }
@@ -1099,9 +1201,9 @@ class AdvancedAnalyticsService extends EventEmitter {
     if (relationshipType === behaviorType) return true;
 
     const mappings = {
-      ACTIVITY: ['ACCESSED', 'CREATED', 'MODIFIED', 'VIEWED'],
-      COMMUNICATION: ['CALLED', 'EMAILED', 'MESSAGED', 'MET'],
-      MOVEMENT: ['TRAVELED', 'VISITED', 'LOCATED_AT', 'MOVED'],
+      ACTIVITY: ["ACCESSED", "CREATED", "MODIFIED", "VIEWED"],
+      COMMUNICATION: ["CALLED", "EMAILED", "MESSAGED", "MET"],
+      MOVEMENT: ["TRAVELED", "VISITED", "LOCATED_AT", "MOVED"],
     };
 
     return mappings[behaviorType]?.includes(relationshipType) || false;
@@ -1115,7 +1217,11 @@ class AdvancedAnalyticsService extends EventEmitter {
     const endDate = data[data.length - 1].timestamp;
     const windowMs = windowDays * 24 * 60 * 60 * 1000;
 
-    for (let time = startDate.getTime(); time <= endDate.getTime(); time += windowMs) {
+    for (
+      let time = startDate.getTime();
+      time <= endDate.getTime();
+      time += windowMs
+    ) {
       const windowStart = new Date(time);
       const windowEnd = new Date(time + windowMs);
 
@@ -1130,7 +1236,7 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   calculateTrend(values) {
-    if (values.length < 2) return 'UNKNOWN';
+    if (values.length < 2) return "UNKNOWN";
 
     let increasing = 0;
     let decreasing = 0;
@@ -1140,15 +1246,18 @@ class AdvancedAnalyticsService extends EventEmitter {
       else if (values[i] < values[i - 1]) decreasing++;
     }
 
-    if (increasing > decreasing * 1.5) return 'INCREASING';
-    if (decreasing > increasing * 1.5) return 'DECREASING';
-    return 'STABLE';
+    if (increasing > decreasing * 1.5) return "INCREASING";
+    if (decreasing > increasing * 1.5) return "DECREASING";
+    return "STABLE";
   }
 
   calculateVariance(values) {
     if (values.length === 0) return 0;
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-    return values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    return (
+      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+      values.length
+    );
   }
 
   detectSeasonality(frequencies) {
@@ -1159,7 +1268,7 @@ class AdvancedAnalyticsService extends EventEmitter {
     if (frequencies.length >= 7) {
       const weeklyCorrelation = this.calculateAutocorrelation(frequencies, 7);
       if (weeklyCorrelation > 0.7) {
-        return { type: 'WEEKLY', factor: 1.2 };
+        return { type: "WEEKLY", factor: 1.2 };
       }
     }
 
@@ -1213,11 +1322,18 @@ class AdvancedAnalyticsService extends EventEmitter {
 
   async calculateAssociationRisk(entity, relationships) {
     // Check for high-risk associations (simplified)
-    const highRiskTypes = ['CRIMINAL_ORGANIZATION', 'SANCTIONED_ENTITY', 'SUSPICIOUS_ACTIVITY'];
+    const highRiskTypes = [
+      "CRIMINAL_ORGANIZATION",
+      "SANCTIONED_ENTITY",
+      "SUSPICIOUS_ACTIVITY",
+    ];
     let riskScore = 0;
 
     relationships.forEach((r) => {
-      if (r.properties?.riskFlag && highRiskTypes.includes(r.properties.riskFlag)) {
+      if (
+        r.properties?.riskFlag &&
+        highRiskTypes.includes(r.properties.riskFlag)
+      ) {
         riskScore += 0.3;
       }
     });
@@ -1239,27 +1355,27 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   determineRiskLevel(totalRisk) {
-    if (totalRisk >= 0.8) return 'CRITICAL';
-    if (totalRisk >= 0.6) return 'HIGH';
-    if (totalRisk >= 0.4) return 'MEDIUM';
-    if (totalRisk >= 0.2) return 'LOW';
-    return 'MINIMAL';
+    if (totalRisk >= 0.8) return "CRITICAL";
+    if (totalRisk >= 0.6) return "HIGH";
+    if (totalRisk >= 0.4) return "MEDIUM";
+    if (totalRisk >= 0.2) return "LOW";
+    return "MINIMAL";
   }
 
   generateRiskRecommendations(totalRisk, riskComponents) {
     const recommendations = [];
 
     if (totalRisk >= 0.8) {
-      recommendations.push('Immediate review required');
-      recommendations.push('Escalate to security team');
+      recommendations.push("Immediate review required");
+      recommendations.push("Escalate to security team");
     }
 
     if (riskComponents.connectivity > 0.7) {
-      recommendations.push('Monitor network connections');
+      recommendations.push("Monitor network connections");
     }
 
     if (riskComponents.activity > 0.7) {
-      recommendations.push('Analyze recent activity patterns');
+      recommendations.push("Analyze recent activity patterns");
     }
 
     return recommendations;
@@ -1295,7 +1411,9 @@ class AdvancedAnalyticsService extends EventEmitter {
 
     for (const node of community) {
       const neighbors = graph[node] || [];
-      internalEdges += neighbors.filter((n) => community.includes(n.node)).length;
+      internalEdges += neighbors.filter((n) =>
+        community.includes(n.node),
+      ).length;
     }
 
     return possibleEdges === 0 ? 0 : internalEdges / 2 / possibleEdges;
@@ -1314,7 +1432,12 @@ class AdvancedAnalyticsService extends EventEmitter {
     return {
       size: community.members.length,
       density: community.density,
-      cohesion: community.density > 0.5 ? 'HIGH' : community.density > 0.2 ? 'MEDIUM' : 'LOW',
+      cohesion:
+        community.density > 0.5
+          ? "HIGH"
+          : community.density > 0.2
+            ? "MEDIUM"
+            : "LOW",
     };
   }
 
@@ -1325,9 +1448,9 @@ class AdvancedAnalyticsService extends EventEmitter {
 
   analyzeCommunityTemporal(community) {
     return {
-      stability: 'STABLE', // Would be calculated from historical data
-      growth: 'STEADY',
-      activityLevel: 'MEDIUM',
+      stability: "STABLE", // Would be calculated from historical data
+      growth: "STEADY",
+      activityLevel: "MEDIUM",
     };
   }
 

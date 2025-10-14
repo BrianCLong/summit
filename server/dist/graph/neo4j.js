@@ -16,3 +16,4 @@ export async function runCypher(cypher, params = {}) {
         await session.close();
     }
 }
+//# sourceMappingURL=neo4j.js.map

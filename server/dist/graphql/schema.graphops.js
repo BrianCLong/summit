@@ -1,11 +1,6 @@
 const gql = require('graphql-tag');
 const typeDefs = gql `
-  extend type Entity {
-    id: ID!
-    label: String!
-    type: String!
-    tags: [String!]!
-  }
+  extend type Entity { id: ID!, label: String!, type: String!, tags: [String!]! }
 
   extend type Mutation {
     # Expands neighbors around a given entity with role-based limits
@@ -30,3 +25,4 @@ const typeDefs = gql `
   }
 `;
 module.exports = { graphTypeDefs: typeDefs };
+//# sourceMappingURL=schema.graphops.js.map

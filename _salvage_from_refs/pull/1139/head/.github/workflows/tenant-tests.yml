@@ -1,8 +1,0 @@
-name: tenant-tests
-on: [pull_request]
-jobs:
-  run:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm ci && npm test tests/tenant/isolation.test.ts

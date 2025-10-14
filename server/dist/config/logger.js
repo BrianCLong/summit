@@ -14,3 +14,4 @@ const logger = pino({
     // In production, logs should be structured JSON for log aggregation
 });
 export default logger;
+//# sourceMappingURL=logger.js.map

@@ -1,17 +1,16 @@
 import { EventEmitter } from 'events';
 import { RedisCache } from '../cache/redis';
 export class MonitoringObservabilityService extends EventEmitter {
-    alerts = new Map();
-    logs = [];
-    traces = new Map();
-    serviceHealth = new Map();
-    dashboards = new Map();
-    cache;
-    maxLogs = 10000;
-    logRetentionDays = 30;
-    alertRetentionDays = 90;
     constructor() {
         super();
+        this.alerts = new Map();
+        this.logs = [];
+        this.traces = new Map();
+        this.serviceHealth = new Map();
+        this.dashboards = new Map();
+        this.maxLogs = 10000;
+        this.logRetentionDays = 30;
+        this.alertRetentionDays = 90;
         this.cache = new RedisCache();
         this.initializeServices();
         this.startHealthChecks();
@@ -452,3 +451,4 @@ export class MonitoringObservabilityService extends EventEmitter {
         this.removeAllListeners();
     }
 }
+//# sourceMappingURL=monitoringObservabilityService.js.map
