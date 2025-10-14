@@ -1,0 +1,17 @@
+{
+  "chaos_test_metadata": {
+    "test_type": "egress_gateway_failover",
+    "start_timestamp": "2025-09-26T15:15:57Z",
+    "target_gateway": "https://secondary-gateway.example.com",
+    "test_duration_minutes": 15
+  },
+  "baseline_metrics": {
+    "latency_p95_ms": 145,
+    "success_rate_percent": 99.97,
+    "requests_per_second": 847
+  },
+  "configuration_swap": {
+    "swap_timestamp": "2025-09-26T15:15:57Z",
+    "configuration_applied": true,
+    "backup_location": "out/victory-lap/d3-20250926/values-egress-gateway-backup.yaml"
+  },

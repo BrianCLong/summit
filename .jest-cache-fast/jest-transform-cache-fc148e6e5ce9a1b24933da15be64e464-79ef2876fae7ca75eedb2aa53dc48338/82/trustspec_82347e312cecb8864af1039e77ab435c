@@ -1,0 +1,15 @@
+abe7665417c6e8092c119cc9244f99b2
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const trust_1 = require("../src/conductor/contracts/trust");
+test("rejects expired contract", async () => {
+    await expect((0, trust_1.verifyTrustContract)({
+        providerTenant: "a",
+        consumerTenant: "b",
+        scope: {},
+        residency: "EU",
+        expiresAt: "2000-01-01",
+        signature: "x",
+    })).rejects.toBeTruthy();
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci90ZXN0cy90cnVzdC5zcGVjLnRzIiwibWFwcGluZ3MiOiI7O0FBQUEsNERBQXVFO0FBRXZFLElBQUksQ0FBQywwQkFBMEIsRUFBRSxLQUFLLElBQUksRUFBRTtJQUMxQyxNQUFNLE1BQU0sQ0FDVixJQUFBLDJCQUFtQixFQUFDO1FBQ2xCLGNBQWMsRUFBRSxHQUFHO1FBQ25CLGNBQWMsRUFBRSxHQUFHO1FBQ25CLEtBQUssRUFBRSxFQUFFO1FBQ1QsU0FBUyxFQUFFLElBQUk7UUFDZixTQUFTLEVBQUUsWUFBWTtRQUN2QixTQUFTLEVBQUUsR0FBRztLQUNmLENBQUMsQ0FDSCxDQUFDLE9BQU8sQ0FBQyxVQUFVLEVBQUUsQ0FBQztBQUN6QixDQUFDLENBQUMsQ0FBQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvVXNlcnMvYnJpYW5sb25nL0RldmVsb3Blci9zdW1taXQvc2VydmVyL3Rlc3RzL3RydXN0LnNwZWMudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdmVyaWZ5VHJ1c3RDb250cmFjdCB9IGZyb20gXCIuLi9zcmMvY29uZHVjdG9yL2NvbnRyYWN0cy90cnVzdFwiO1xuXG50ZXN0KFwicmVqZWN0cyBleHBpcmVkIGNvbnRyYWN0XCIsIGFzeW5jICgpID0+IHtcbiAgYXdhaXQgZXhwZWN0KFxuICAgIHZlcmlmeVRydXN0Q29udHJhY3Qoe1xuICAgICAgcHJvdmlkZXJUZW5hbnQ6IFwiYVwiLFxuICAgICAgY29uc3VtZXJUZW5hbnQ6IFwiYlwiLFxuICAgICAgc2NvcGU6IHt9LFxuICAgICAgcmVzaWRlbmN5OiBcIkVVXCIsXG4gICAgICBleHBpcmVzQXQ6IFwiMjAwMC0wMS0wMVwiLFxuICAgICAgc2lnbmF0dXJlOiBcInhcIixcbiAgICB9KSxcbiAgKS5yZWplY3RzLnRvQmVUcnV0aHkoKTtcbn0pO1xuXG4iXSwidmVyc2lvbiI6M30=

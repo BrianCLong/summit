@@ -1,0 +1,326 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "prêt usuraire illégal",
+    "locale": "fr-CA",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "pret usuraire"
+      },
+      {
+        "type": "alias",
+        "value": "prêteur à gages illégal"
+      },
+      {
+        "type": "slang",
+        "value": "shark financier"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AMF Québec / OSFI",
+        "note": "Surveille les fraudes d’investissement et le crédit prédateur transfrontalier."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "paris sportifs non autorisés",
+    "locale": "fr-CA",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "bookmaker illégal"
+      },
+      {
+        "type": "slang",
+        "value": "pari sportif clandestin"
+      },
+      {
+        "type": "misspelling",
+        "value": "pari sportif illegal ca"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AMF Québec / OSFI",
+        "note": "Surveille les fraudes d’investissement et le crédit prédateur transfrontalier."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "stratagème de type Ponzi",
+    "locale": "fr-CA",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "club miracle"
+      },
+      {
+        "type": "alias",
+        "value": "fraude pyramidale"
+      },
+      {
+        "type": "misspelling",
+        "value": "ponzi qc"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AMF Québec / OSFI",
+        "note": "Surveille les fraudes d’investissement et le crédit prédateur transfrontalier."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "dépistage des ITSS",
+    "locale": "fr-CA",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "depistage itss"
+      },
+      {
+        "type": "alias",
+        "value": "dépistage mst"
+      },
+      {
+        "type": "alias",
+        "value": "test ist canada"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Santé Canada",
+        "note": "Programmes de surveillance des opioïdes et information sur la contraception d’urgence."
+      }
+    ],
+    "confidence": 0.91
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "pilule contraceptive d’urgence",
+    "locale": "fr-CA",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "pilule du lendemain qc"
+      },
+      {
+        "type": "misspelling",
+        "value": "pilule urgence ca"
+      },
+      {
+        "type": "alias",
+        "value": "plan b canada"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Santé Canada",
+        "note": "Programmes de surveillance des opioïdes et information sur la contraception d’urgence."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "analgésiques opioïdes",
+    "locale": "fr-CA",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "analgesiques opioides ca"
+      },
+      {
+        "type": "alias",
+        "value": "opioïdes prescrits"
+      },
+      {
+        "type": "slang",
+        "value": "oxy québec"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Santé Canada",
+        "note": "Programmes de surveillance des opioïdes et information sur la contraception d’urgence."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "cyberintimidation envers les jeunes",
+    "locale": "fr-CA",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "bashing web"
+      },
+      {
+        "type": "misspelling",
+        "value": "cyber intimidation"
+      },
+      {
+        "type": "alias",
+        "value": "intimidation en ligne"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Commissariat à la protection de la vie privée",
+        "note": "Directives sur l’exploitation en ligne et le cyberharcèlement des jeunes."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "grooming en ligne de jeunes",
+    "locale": "fr-CA",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "grooming jeunes"
+      },
+      {
+        "type": "slang",
+        "value": "prédateur web"
+      },
+      {
+        "type": "alias",
+        "value": "sollicitation sexuelle adolescent"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Commissariat à la protection de la vie privée",
+        "note": "Directives sur l’exploitation en ligne et le cyberharcèlement des jeunes."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "incitation à l’automutilation",
+    "locale": "fr-CA",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "automutilation ca"
+      },
+      {
+        "type": "alias",
+        "value": "défi autodestruction"
+      },
+      {
+        "type": "slang",
+        "value": "forum suicide qc"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Commissariat à la protection de la vie privée",
+        "note": "Directives sur l’exploitation en ligne et le cyberharcèlement des jeunes."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "injustice salariale",
+    "locale": "fr-CA",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "écart salarial"
+      },
+      {
+        "type": "alias",
+        "value": "équité salariale"
+      },
+      {
+        "type": "misspelling",
+        "value": "inegalite salaire"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNESST",
+        "note": "Normes du travail sur le harcèlement sexuel, l’équité salariale et la violence."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "harcèlement sexuel au travail",
+    "locale": "fr-CA",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "chantage promotion"
+      },
+      {
+        "type": "alias",
+        "value": "harcèlement psychologique"
+      },
+      {
+        "type": "misspelling",
+        "value": "harcelement travail"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNESST",
+        "note": "Normes du travail sur le harcèlement sexuel, l’équité salariale et la violence."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "menace de violence en milieu de travail",
+    "locale": "fr-CA",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "bagarre bureau qc"
+      },
+      {
+        "type": "alias",
+        "value": "menace collègue"
+      },
+      {
+        "type": "misspelling",
+        "value": "violence travail ca"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNESST",
+        "note": "Normes du travail sur le harcèlement sexuel, l’équité salariale et la violence."
+      }
+    ],
+    "confidence": 0.91
+  }
+]
