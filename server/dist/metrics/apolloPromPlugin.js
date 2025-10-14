@@ -87,3 +87,4 @@ export function apolloPromPlugin() {
         },
     };
 }
+//# sourceMappingURL=apolloPromPlugin.js.map

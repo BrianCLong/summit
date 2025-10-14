@@ -1,4 +1,4 @@
-import { graphqlResolverDurationSeconds, graphqlResolverErrorsTotal, graphqlResolverCallsTotal, } from '../../monitoring/metrics.js';
+import { graphqlResolverDurationSeconds, graphqlResolverErrorsTotal, graphqlResolverCallsTotal, } from "../../monitoring/metrics.js";
 const resolverMetricsPlugin = {
     requestDidStart() {
         return {
@@ -14,9 +14,9 @@ const resolverMetricsPlugin = {
                         graphqlResolverCallsTotal.inc(labels);
                         return (error) => {
                             const duration = Number(process.hrtime.bigint() - start) / 1e9;
-                            graphqlResolverDurationSeconds.observe({ ...labels, status: error ? 'error' : 'success' }, duration);
+                            graphqlResolverDurationSeconds.observe({ ...labels, status: error ? "error" : "success" }, duration);
                             if (error) {
-                                const errType = error?.constructor?.name || 'Error';
+                                const errType = error?.constructor?.name || "Error";
                                 graphqlResolverErrorsTotal.inc({
                                     ...labels,
                                     error_type: errType,
@@ -30,3 +30,4 @@ const resolverMetricsPlugin = {
     },
 };
 export default resolverMetricsPlugin;
+//# sourceMappingURL=resolverMetrics.js.map

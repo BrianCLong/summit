@@ -7,7 +7,7 @@
   },
   "types": "./src/index.ts",
   "scripts": {
-    "test": "node --loader ts-node/esm ./tests/canvas.test.ts"
+    "test": "vitest run"
   },
   "dependencies": {
     "common-types": "file:../common-types",
@@ -16,6 +16,7 @@
   "devDependencies": {
     "@types/node": "^20.12.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
   }
 }

@@ -1,0 +1,80 @@
+name: Dev Environment Support
+description: Report problems getting the local dev kit up, seeded, or through the smoke test
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping us keep the local developer experience sharp! Please
+        include as much context as possible so we can reproduce the issue.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: What is broken or blocking you?
+      placeholder: Smoke test fails to find Jaeger service
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: Commands Executed
+      description: List the dev kit commands you ran (e.g., ./dev up, ./dev test) in order.
+      placeholder: |
+        ./dev up --no-build
+        ./dev test
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Relevant Output or Logs
+      description: Paste CLI output or attach excerpts from runs/dev-smoke/latest.json.
+    validations:
+      required: true
+  - type: input
+    id: timestamp
+    attributes:
+      label: When did this occur?
+      placeholder: 2026-03-04T15:20:00-07:00
+    validations:
+      required: false
+  - type: input
+    id: host-os
+    attributes:
+      label: Host OS & Version
+      placeholder: macOS 14.5 / Ubuntu 24.04 / Windows 11
+    validations:
+      required: true
+  - type: input
+    id: docker-version
+    attributes:
+      label: Docker Engine & Compose Versions
+      placeholder: Docker 26.1.3, Compose v2.27.1
+    validations:
+      required: true
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Container Runtime
+      description: Which runtime or desktop are you using?
+      options:
+        - Docker Desktop
+        - Rancher Desktop
+        - Colima
+        - Podman
+        - Other / Not sure
+    validations:
+      required: true
+  - type: checkboxes
+    id: smoke
+    attributes:
+      label: Smoke Test Status
+      options:
+        - label: I ran `./dev test`
+        - label: `runs/dev-smoke/latest.json` is attached or referenced
+        - label: Containers were left running for follow-up debugging
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Context
+      description: Anything else we should know (recent code changes, network restrictions, etc.).

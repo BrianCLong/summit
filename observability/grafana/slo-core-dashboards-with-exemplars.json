@@ -1,0 +1,200 @@
+{
+  "dashboard": {
+    "title": "SLO Core Dashboards (with Trace Exemplars)",
+    "tags": ["slo", "observability", "october-2025"],
+    "timezone": "browser",
+    "schemaVersion": 36,
+    "version": 2,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "API p95 Latency",
+        "type": "timeseries",
+        "uid": "api-p95-latency-001",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"intelgraph-api\"}[5m]))",
+            "legendFormat": "p95 latency",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 1.2, "color": "yellow" },
+                { "value": 1.5, "color": "red" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": { "displayMode": "list", "placement": "bottom" }
+        }
+      },
+      {
+        "id": 2,
+        "title": "OPA Decision p95 Latency (with Trace Exemplars)",
+        "type": "timeseries",
+        "uid": "opa-p95-latency-002",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(opa_decision_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 latency",
+            "refId": "A",
+            "exemplar": true
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 0.4, "color": "yellow" },
+                { "value": 0.5, "color": "red" }
+              ]
+            },
+            "custom": {
+              "showPoints": "always",
+              "pointSize": 5
+            }
+          }
+        },
+        "options": {
+          "legend": { "displayMode": "list", "placement": "bottom" },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "none"
+          }
+        },
+        "description": "OPA policy decision latency with trace exemplars. Click on data points to view associated traces in Tempo."
+      },
+      {
+        "id": 3,
+        "title": "Queue Lag",
+        "type": "timeseries",
+        "uid": "queue-lag-003",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "kafka_consumer_lag_total",
+            "legendFormat": "consumer lag",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 8000, "color": "yellow" },
+                { "value": 10000, "color": "red" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": { "displayMode": "list", "placement": "bottom" }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Ingest Failure Rate",
+        "type": "timeseries",
+        "uid": "ingest-failure-rate-004",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "(rate(ingest_failures_total[5m]) / rate(ingest_attempts_total[5m])) * 100",
+            "legendFormat": "failure rate %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "green" },
+                { "value": 0.8, "color": "yellow" },
+                { "value": 1.0, "color": "red" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": { "displayMode": "list", "placement": "bottom" }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Golden Flow Pass %",
+        "type": "timeseries",
+        "uid": "golden-flow-pass-005",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "(rate(golden_flow_success_total[5m]) / rate(golden_flow_total[5m])) * 100",
+            "legendFormat": "pass rate %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 95,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": null, "color": "red" },
+                { "value": 99, "color": "green" }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": { "displayMode": "list", "placement": "bottom" }
+        }
+      }
+    ],
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": [
+        {
+          "datasource": "Prometheus",
+          "enable": true,
+          "expr": "ALERTS{alertname=~\".*SLOViolation\"}",
+          "iconColor": "red",
+          "name": "SLO Alerts",
+          "tagKeys": "alertname,severity,panel_uid"
+        }
+      ]
+    },
+    "links": [
+      {
+        "title": "Trace Exemplars Guide",
+        "url": "https://grafana.com/docs/grafana/latest/fundamentals/exemplars/",
+        "type": "link"
+      },
+      {
+        "title": "Runbooks",
+        "url": "https://runbooks.example.com/slo-alerts/",
+        "type": "link"
+      }
+    ]
+  }
+}
