@@ -1,0 +1,584 @@
+# Federal/Government Pack Deployment with FIPS and Air-Gap Support
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conductor-federal
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    app: conductor
+    component: orchestration
+    classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+    fips-validated: "true"
+    air-gap: "{{ .Values.federal.airGap.enabled | default false }}"
+  annotations:
+    security.classification: "{{ .Values.federal.classification | default "UNCLASSIFIED" }}"
+    compliance.fips-140-2: "Level-{{ .Values.federal.fips.level | default 3 }}"
+    deployment.air-gap: "{{ .Values.federal.airGap.mode | default "STRICT" }}"
+spec:
+  replicas: {{ .Values.conductor.replicas | default 3 }}
+  strategy:
+    type: {{ if .Values.federal.airGap.enabled }}Recreate{{ else }}RollingUpdate{{ end }}
+    {{- if not .Values.federal.airGap.enabled }}
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+    {{- end }}
+  selector:
+    matchLabels:
+      app: conductor
+      deployment: federal
+  template:
+    metadata:
+      labels:
+        app: conductor
+        component: orchestration
+        deployment: federal
+        version: {{ .Values.image.tag | default "latest" }}
+        classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+      annotations:
+        spiffe.io/spiffe-id: "spiffe://{{ .Values.spire.trustDomain | default "intelgraph.local" }}/ns/{{ .Values.namespace | default "intelgraph" }}/sa/conductor"
+        security.classification: "{{ .Values.federal.classification | default "UNCLASSIFIED" }}"
+        compliance.fips-140-2: "enabled"
+        airgap.mode: "{{ .Values.federal.airGap.mode | default "STRICT" }}"
+    spec:
+      serviceAccountName: conductor-federal
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: conductor
+        image: {{ .Values.image.repository }}/conductor-federal:{{ .Values.image.tag | default "latest" }}
+        ports:
+        - containerPort: 8000
+          name: https
+          protocol: TCP
+        - containerPort: 9090
+          name: metrics
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "8000"
+        - name: METRICS_PORT
+          value: "9090"
+        - name: FIPS_ENABLED
+          value: "{{ .Values.federal.fips.enabled | default true }}"
+        - name: FIPS_MODE
+          value: "FIPS_140_2_LEVEL_{{ .Values.federal.fips.level | default 3 }}"
+        - name: AIRGAP_ENABLED
+          value: "{{ .Values.federal.airGap.enabled | default false }}"
+        - name: AIRGAP_MODE
+          value: "{{ .Values.federal.airGap.mode | default "STRICT" }}"
+        - name: CLASSIFICATION_LEVEL
+          value: "{{ .Values.federal.classification | default "UNCLASSIFIED" }}"
+        - name: POSTGRES_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials-federal
+              key: url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials-federal
+              key: url
+        - name: SPIFFE_ENDPOINT_SOCKET
+          value: "unix:///run/spire/sockets/agent.sock"
+        - name: SPIRE_TRUST_DOMAIN
+          value: {{ .Values.spire.trustDomain | default "intelgraph.local" }}
+        - name: ZERO_TRUST_ENABLED
+          value: "true"
+        - name: MTLS_ENABLED
+          value: "true"
+        - name: AUDIT_WORM_ENABLED
+          value: "true"
+        - name: AUDIT_BUCKET
+          value: {{ .Values.audit.bucket }}
+        - name: HSM_PROVIDER
+          value: "{{ .Values.federal.hsm.provider | default "AWS_CloudHSM" }}"
+        - name: HSM_CLUSTER_ID
+          valueFrom:
+            secretKeyRef:
+              name: hsm-credentials
+              key: cluster_id
+        - name: BREAKGLASS_ENABLED
+          value: "{{ .Values.federal.breakGlass.enabled | default true }}"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTPS
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+            scheme: HTTPS
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 5
+          successThreshold: 2
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: HTTPS
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 12
+        volumeMounts:
+        - name: spire-agent-socket
+          mountPath: /run/spire/sockets
+          readOnly: true
+        - name: federal-config
+          mountPath: /app/config
+          readOnly: true
+        - name: fips-crypto
+          mountPath: /app/crypto
+          readOnly: true
+        - name: tls-certs
+          mountPath: /app/certs
+          readOnly: true
+        - name: offline-registry
+          mountPath: /opt/intelgraph/registry
+        - name: audit-logs
+          mountPath: /app/audit
+        - name: break-glass
+          mountPath: /opt/intelgraph/break-glass
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
+      # SPIFFE Helper Sidecar with FIPS validation
+      - name: spiffe-helper
+        image: {{ .Values.spire.helper.image | default "ghcr.io/spiffe/spiffe-helper:0.6.0" }}
+        args:
+        - -config
+        - /run/spire/config/helper.conf
+        volumeMounts:
+        - name: spire-agent-socket
+          mountPath: /run/spire/sockets
+          readOnly: true
+        - name: spiffe-helper-config
+          mountPath: /run/spire/config
+          readOnly: true
+        - name: tls-certs
+          mountPath: /run/spire/certs
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+      # FIPS Crypto Validation Sidecar
+      - name: fips-validator
+        image: {{ .Values.federal.fips.validatorImage | default "nist/fips-validator:latest" }}
+        command:
+        - /bin/sh
+        - -c
+        - |
+          while true; do
+            # Continuous FIPS validation
+            echo "$(date): Running FIPS validation..."
+            
+            # Validate crypto modules
+            fipscheck /usr/lib64/libssl.so.1.1
+            fipscheck /usr/lib64/libcrypto.so.1.1
+            
+            # Validate HSM connection
+            if [ -f /app/crypto/hsm-status ]; then
+              hsm_status=$(cat /app/crypto/hsm-status)
+              if [ "$hsm_status" != "connected" ]; then
+                echo "WARNING: HSM connection lost"
+                # Alert mechanism would go here
+              fi
+            fi
+            
+            # Check key rotation status
+            if [ -f /app/crypto/key-rotation-due ]; then
+              echo "WARNING: Key rotation is due"
+            fi
+            
+            sleep 300 # Check every 5 minutes
+          done
+        volumeMounts:
+        - name: fips-crypto
+          mountPath: /app/crypto
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "25m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+      {{- if .Values.federal.airGap.enabled }}
+      # Air-Gap Compliance Monitor
+      - name: airgap-monitor
+        image: {{ .Values.federal.airGap.monitorImage | default "intelgraph/airgap-monitor:latest" }}
+        command:
+        - /bin/sh
+        - -c
+        - |
+          while true; do
+            echo "$(date): Air-gap compliance check..."
+            
+            # Check for outbound network attempts
+            if netstat -an | grep -E ':80|:443|:53' | grep ESTABLISHED; then
+              echo "CRITICAL: Outbound network connection detected - Air-gap compromised!"
+              # Emergency shutdown would be triggered here
+            fi
+            
+            # Monitor offline registry integrity
+            if [ -f /opt/intelgraph/registry/index.json ]; then
+              registry_hash=$(sha256sum /opt/intelgraph/registry/index.json | cut -d' ' -f1)
+              if [ -f /opt/intelgraph/registry/.last-hash ] && [ "$(cat /opt/intelgraph/registry/.last-hash)" != "$registry_hash" ]; then
+                echo "WARNING: Registry modification detected"
+              fi
+              echo "$registry_hash" > /opt/intelgraph/registry/.last-hash
+            fi
+            
+            # Check break-glass sessions
+            if [ -f /opt/intelgraph/break-glass-sessions.json ]; then
+              active_sessions=$(grep -c '"status":"active"' /opt/intelgraph/break-glass-sessions.json 2>/dev/null || echo 0)
+              if [ "$active_sessions" -gt 0 ]; then
+                echo "INFO: $active_sessions active break-glass sessions"
+              fi
+            fi
+            
+            sleep 60 # Check every minute
+          done
+        volumeMounts:
+        - name: offline-registry
+          mountPath: /opt/intelgraph/registry
+        - name: break-glass
+          mountPath: /opt/intelgraph/break-glass
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "10m"
+          limits:
+            memory: "64Mi"
+            cpu: "50m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+      {{- end }}
+      # WORM Audit Sidecar with Federal Compliance
+      - name: worm-audit-federal
+        image: {{ .Values.audit.worm.image | default "amazon/aws-cli:2.13.32" }}
+        command: 
+        - /bin/sh
+        - -c
+        - |
+          while true; do
+            if [ -f /app/audit/pending/*.json ]; then
+              for audit_file in /app/audit/pending/*.json; do
+                if [ -f "$audit_file" ]; then
+                  filename=$(basename "$audit_file")
+                  
+                  # Add federal metadata
+                  classification="{{ .Values.federal.classification | default "UNCLASSIFIED" }}"
+                  
+                  aws s3 cp "$audit_file" "s3://{{ .Values.audit.bucket }}/federal-audit/$(date +%Y/%m/%d)/${filename}" \
+                    --object-lock-mode GOVERNANCE \
+                    --object-lock-retain-until-date "$(date -d '+{{ .Values.audit.retentionDays | default 7300 }} days' -Iseconds)" \
+                    --metadata classification="$classification",fips-validated="true",air-gap="{{ .Values.federal.airGap.enabled | default false }}",compliance="federal-gov"
+                  
+                  if [ $? -eq 0 ]; then
+                    mv "$audit_file" "/app/audit/synced/"
+                    echo "$(date): Federal audit log $filename archived with classification: $classification"
+                  fi
+                fi
+              done
+            fi
+            sleep 30
+          done
+        env:
+        - name: AWS_REGION
+          value: {{ .Values.aws.region | default "us-gov-east-1" }}
+        - name: AWS_DEFAULT_REGION
+          value: {{ .Values.aws.region | default "us-gov-east-1" }}
+        volumeMounts:
+        - name: audit-logs
+          mountPath: /app/audit
+        - name: aws-credentials-federal
+          mountPath: /root/.aws
+          readOnly: true
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: spire-agent-socket
+        hostPath:
+          path: /run/spire/sockets
+          type: Directory
+      - name: federal-config
+        configMap:
+          name: conductor-federal-config
+      - name: fips-crypto
+        persistentVolumeClaim:
+          claimName: fips-crypto-storage
+      - name: tls-certs
+        emptyDir:
+          sizeLimit: 1Mi
+      - name: spiffe-helper-config
+        configMap:
+          name: spiffe-helper-federal-config
+      - name: offline-registry
+        persistentVolumeClaim:
+          claimName: offline-registry-storage
+      - name: audit-logs
+        persistentVolumeClaim:
+          claimName: federal-audit-storage
+      - name: break-glass
+        persistentVolumeClaim:
+          claimName: break-glass-storage
+      - name: aws-credentials-federal
+        secret:
+          secretName: aws-credentials-federal
+      # Pod placement and isolation for classified workloads
+      nodeSelector:
+        classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+        fips-validated: "true"
+        {{- if .Values.federal.airGap.enabled }}
+        air-gap: "true"
+        {{- end }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - conductor
+              - key: deployment
+                operator: NotIn
+                values:
+                - federal
+            topologyKey: kubernetes.io/hostname
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: fips-validated
+                operator: In
+                values:
+                - "true"
+              {{- if .Values.federal.airGap.enabled }}
+              - key: air-gap
+                operator: In
+                values:
+                - "true"
+              {{- end }}
+      tolerations:
+      - key: "classification"
+        operator: "Equal"
+        value: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+        effect: "NoSchedule"
+      {{- if .Values.federal.airGap.enabled }}
+      - key: "air-gap"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      {{- end }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: conductor-federal
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+  annotations:
+    spiffe.io/spiffe-id: "spiffe://{{ .Values.spire.trustDomain | default "intelgraph.local" }}/ns/{{ .Values.namespace | default "intelgraph" }}/sa/conductor"
+    compliance.fips-140-2: "Level-{{ .Values.federal.fips.level | default 3 }}"
+---
+# Federal Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: conductor-federal-config
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+data:
+  config.json: |
+    {
+      "server": {
+        "port": 8000,
+        "host": "0.0.0.0",
+        "https": {
+          "enabled": true,
+          "cert": "/app/certs/svid.pem",
+          "key": "/app/certs/svid_key.pem",
+          "ca": "/app/certs/svid_bundle.pem",
+          "fipsValidated": true
+        }
+      },
+      "federal": {
+        "enabled": true,
+        "classification": "{{ .Values.federal.classification | default "UNCLASSIFIED" }}",
+        "fips": {
+          "enabled": {{ .Values.federal.fips.enabled | default true }},
+          "level": {{ .Values.federal.fips.level | default 3 }},
+          "hsm": {
+            "provider": "{{ .Values.federal.hsm.provider | default "AWS_CloudHSM" }}",
+            "endpoint": "{{ .Values.federal.hsm.endpoint }}",
+            "partition": "{{ .Values.federal.hsm.partition }}"
+          }
+        },
+        "airGap": {
+          "enabled": {{ .Values.federal.airGap.enabled | default false }},
+          "mode": "{{ .Values.federal.airGap.mode | default "STRICT" }}",
+          "offlineRegistry": "/opt/intelgraph/registry"
+        },
+        "breakGlass": {
+          "enabled": {{ .Values.federal.breakGlass.enabled | default true }},
+          "maxDuration": {{ .Values.federal.breakGlass.maxDuration | default 4 }},
+          "requiredApprovers": {{ .Values.federal.breakGlass.requiredApprovers | default 2 }}
+        }
+      },
+      "audit": {
+        "wormEnabled": true,
+        "bucket": "{{ .Values.audit.bucket }}",
+        "retentionDays": {{ .Values.audit.retentionDays | default 7300 }},
+        "classification": "{{ .Values.federal.classification | default "UNCLASSIFIED" }}"
+      }
+    }
+---
+# SPIFFE Helper Federal Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spiffe-helper-federal-config
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+data:
+  helper.conf: |
+    agent_address = "/run/spire/sockets/agent.sock"
+    cmd = "/usr/bin/supervisorctl"
+    cmd_args = "restart conductor"
+    cert_dir = "/run/spire/certs"
+    renew_signal = "SIGHUP"
+    svid_file_name = "svid.pem"
+    svid_key_file_name = "svid_key.pem"
+    svid_bundle_file_name = "svid_bundle.pem"
+    # FIPS validation
+    fips_mode = true
+    key_type = "EC"
+    ecdsa_curve = "P-384"
+---
+# Storage for FIPS crypto operations
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: fips-crypto-storage
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.federal.storage.fipsCrypto | default "1Gi" }}
+  {{- if .Values.storageClass }}
+  storageClassName: {{ .Values.storageClass }}
+  {{- end }}
+---
+# Offline Registry Storage for Air-Gap
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: offline-registry-storage
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.federal.storage.offlineRegistry | default "50Gi" }}
+  {{- if .Values.storageClass }}
+  storageClassName: {{ .Values.storageClass }}
+  {{- end }}
+---
+# Federal Audit Storage
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: federal-audit-storage
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.federal.storage.audit | default "100Gi" }}
+  {{- if .Values.storageClass }}
+  storageClassName: {{ .Values.storageClass }}
+  {{- end }}
+---
+# Break-Glass Storage
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: break-glass-storage
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.federal.storage.breakGlass | default "5Gi" }}
+  {{- if .Values.storageClass }}
+  storageClassName: {{ .Values.storageClass }}
+  {{- end }}
