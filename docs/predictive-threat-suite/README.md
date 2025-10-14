@@ -7,21 +7,13 @@ analysing threat activity on the IntelGraph platform.
 
 1. **Predictive Timeline Generator** (`graph-service/timeline_prediction`)
    - FastAPI service that forecasts future graph activity.
-   - Demo model returns stub data for the next _N_ days.
+   - Demo model returns stub data for the next *N* days.
 2. **Causal GNN Explainer** (`ml/causal_explanations`)
    - Wraps a graph neural network explainer to highlight influential nodes and
      edges. The current implementation is a placeholder awaiting a trained
      model.
 3. **Counterfactual Simulator** (`cognitive_insights_engine/counterfactual_sim`)
    - Allows "what-if" analysis by removing edges and re-running inference.
-4. **Temporal Intelligence Layer (TIL)**
-   - Adds temporal reasoning and change tracking.
-   - Tracks how nodes and edges evolve over time (e.g., infrastructure reuse,
-     campaign phase shifts).
-   - Provides timeline-based views on the frontend with filterable events.
-   - Uses Postgres temporal tables or Neo4j's temporal primitives.
-   - Enables analysts to visualize campaigns longitudinally, revealing patterns
-     and predictions.
 
 ## Running tests
 

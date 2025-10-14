@@ -6,7 +6,6 @@
  */
 import logger from '../utils/logger.js';
 export class CypherSandbox {
-    config;
     constructor(config) {
         this.config = {
             maxExecutionTime: 30000, // 30 seconds
@@ -280,3 +279,4 @@ export default {
     CypherSandbox,
     cypherSandboxMiddleware,
 };
+//# sourceMappingURL=cypher-sandbox.js.map

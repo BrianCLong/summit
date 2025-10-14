@@ -1,2 +1,0 @@
-"""IntelGraph package."""
-
