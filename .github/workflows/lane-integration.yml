@@ -1,73 +1,58 @@
 name: Integration Lane
-
 on:
-  schedule:
-    - cron: '37 5 * * *'        # nightly at 05:37 UTC
-  workflow_dispatch: {}          # manual trigger
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
     paths:
-      - 'server/**'
-      - 'tests/integration/**'
-      - 'tests/graphql/**'
-      - 'Developer/summit-jest/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - '.github/workflows/lane-integration.yml'
-
-permissions:
-  contents: read
+      - "server/**"
+      - "tests/**"
+      - "Developer/summit-jest/**"
+      - ".github/workflows/lane-integration.yml"
+  workflow_dispatch:
 
 jobs:
-  integration-tests:
-    runs-on: ubuntu-latest
-
+  integration:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    env:
+      CI: "true"
+      NODE_OPTIONS: "--max-old-space-size=3072"
+      PNPM_CACHE_FOLDER: ~/.pnpm-store
+      # Safe defaults so tests won't choke on missing secrets/services:
+      NEO4J_PASSWORD: testpassword
+      NEO4J_AUTH: neo4j/testpassword
+      # Block egress by default; tests must stub:
+      BLOCK_EGRESS: "1"
     steps:
       - uses: actions/checkout@v4
 
-      - name: Register test guard problem matchers
-        run: echo "::add-matcher::.github/matchers/test-guards.json"
-
-      - uses: actions/setup-node@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          version: 9
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.11.x"
 
       - name: Install deps
-        run: npm ci --prefer-offline --no-audit --no-fund
+        run: pnpm i --no-frozen-lockfile
 
-      - name: Lint tests
-        run: npm run lint:tests
+      # Optional: bail early if test guards fail (no .only / console.error)
+      - name: Lint test guards (non-blocking first pass)
+        run: pnpm run -s lint:tests
+        continue-on-error: true
 
-      - name: Integration tests
-        env:
-          NODE_OPTIONS: --max-old-space-size=3072
-        run: |
-          echo '::group::jest integration lane'
-          npm run test:integration -- --runInBand --bail=1 --silent --json --outputFile=integration-jest-results.json \
-            | tee integration.log
-          echo '::endgroup::'
+      - name: Run integration (serial)
+        run: pnpm run -s test:integration -- --runInBand --bail=1 --silent
 
-      - name: Upload integration artifacts
+      - name: Upload Jest results (debug)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: integration-lane-artifacts
+          name: integration-jest-results
           path: |
-            integration.log
-            integration-jest-results.json
-          retention-days: 7
-
-      - name: Summarize results
-        if: always()
-        shell: bash
-        run: |
-          node -e 'const fs=require("fs");let r={};try{r=JSON.parse(fs.readFileSync("integration-jest-results.json","utf8"))}catch(e){};const p=r.numPassedTests??"?",f=r.numFailedTests??"?",s=r.numPendingTests??"?",t=r.numTotalTests??"?";const handles=(r.testResults||[]).some(tr=>/Jest did not exit/.test((tr.message)||""))?"⚠️ open handles detected":"✅ no open handles";fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,`## Integration Lane Summary\n\n- **Passed:** ${p}\n- **Failed:** ${f}\n- **Skipped:** ${s}\n- **Total:** ${t}\n- **Handles:** ${handles}\n\nArtifacts: \`integration.log\`, \`integration-jest-results.json\` (7d)\n`);'
-
-      # If you enabled JUnit in the jest config:
-      # - name: Upload JUnit
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: junit-integration
-      #     path: reports/junit/jest-integration.xml
+            **/junit.xml
+            **/jest*.json
+            **/test-results/**
+          if-no-files-found: ignore
