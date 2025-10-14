@@ -1,0 +1,20 @@
+type Drop {
+  id: ID!
+  status: DropStatus!
+  reason: String
+}
+
+enum DropStatus {
+  QUARANTINED
+  VERIFIED
+  DENIED
+}
+
+input DropInput {
+  payload: String! # Base64 encoded content
+  metadata: String # JSON string of metadata
+}
+
+extend type Mutation {
+  submitDrop(input: DropInput!): Drop!
+}

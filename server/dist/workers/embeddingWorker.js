@@ -102,3 +102,4 @@ function startEmbeddingWorker(options = {}) {
     };
 }
 module.exports = { startEmbeddingWorker };
+//# sourceMappingURL=embeddingWorker.js.map

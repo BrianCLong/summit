@@ -13,9 +13,7 @@ class MLController {
       // Try Python pipeline if available
       try {
         const { spawnSync } = require('child_process');
-        const py = spawnSync('python3', ['-m', 'intelgraph_py.ml.pipeline'], {
-          cwd: path.join(process.cwd(), 'python'),
-        });
+        const py = spawnSync('python3', ['-m', 'intelgraph_py.ml.pipeline'], { cwd: path.join(process.cwd(), 'python') });
         if (py.status === 0 && py.stdout) {
           const out = JSON.parse(py.stdout.toString('utf-8'));
           if (out && out.success && out.metrics) {
@@ -28,10 +26,7 @@ class MLController {
       const outDir = path.join(process.cwd(), 'uploads', 'models');
       fs.mkdirSync(outDir, { recursive: true });
       const artifactPath = path.join(outDir, `${id}.json`);
-      fs.writeFileSync(
-        artifactPath,
-        JSON.stringify({ id, name, metrics, createdAt: new Date().toISOString() }, null, 2),
-      );
+      fs.writeFileSync(artifactPath, JSON.stringify({ id, name, metrics, createdAt: new Date().toISOString() }, null, 2));
 
       await pool.query(
         `CREATE TABLE IF NOT EXISTS ml_models (
@@ -42,15 +37,13 @@ class MLController {
           artifact_path TEXT,
           notes TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`,
+        )`
       );
       await pool.query(
         'INSERT INTO ml_models (id, name, metrics, artifact_path, notes) VALUES ($1,$2,$3,$4,$5)',
-        [id, name, metrics, artifactPath, notes || null],
+        [id, name, metrics, artifactPath, notes || null]
       );
-      return res
-        .status(201)
-        .json({ success: true, modelId: id, metrics, artifact: `/uploads/models/${id}.json` });
+      return res.status(201).json({ success: true, modelId: id, metrics, artifact: `/uploads/models/${id}.json` });
     } catch (e) {
       return res.status(500).json({ success: false, error: e.message });
     }
@@ -69,11 +62,8 @@ class MLController {
                            RETURN a.id AS source, b.id AS target`;
         const nodesRes = await session.run(nodeQuery, { id: investigationId });
         const edgesRes = await session.run(edgeQuery, { id: investigationId });
-        const nodes = nodesRes.records.map((r) => r.get('id'));
-        const edges = edgesRes.records.map((r) => ({
-          source: r.get('source'),
-          target: r.get('target'),
-        }));
+        const nodes = nodesRes.records.map(r => r.get('id'));
+        const edges = edgesRes.records.map(r => ({ source: r.get('source'), target: r.get('target') }));
 
         // Common neighbors heuristic in-memory
         const nbrs = new Map();
@@ -83,22 +73,18 @@ class MLController {
           nbrs.get(e.source).add(e.target);
           nbrs.get(e.target).add(e.source);
         }
-        const existing = new Set(edges.map((e) => `${e.source}->${e.target}`));
-        const existingUndir = new Set([
-          ...existing,
-          ...edges.map((e) => `${e.target}->${e.source}`),
-        ]);
+        const existing = new Set(edges.map(e => `${e.source}->${e.target}`));
+        const existingUndir = new Set([...existing, ...edges.map(e => `${e.target}->${e.source}`)]);
         const scores = [];
         for (let i = 0; i < nodes.length; i++) {
           for (let j = i + 1; j < nodes.length; j++) {
-            const u = nodes[i],
-              v = nodes[j];
+            const u = nodes[i], v = nodes[j];
             if (existingUndir.has(`${u}->${v}`)) continue;
             const a = nbrs.get(u) || new Set();
             const b = nbrs.get(v) || new Set();
-            const common = [...a].filter((x) => b.has(x)).length;
+            const common = [...a].filter(x => b.has(x)).length;
             if (common > 0) {
-              const denom = a.size + b.size || 1;
+              const denom = (a.size + b.size) || 1;
               const score = common / denom;
               scores.push({ source: u, target: v, score });
             }
