@@ -1,2 +1,0 @@
-"""Entity Resolution service package."""
-
