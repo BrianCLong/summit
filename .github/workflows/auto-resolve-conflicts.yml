@@ -104,7 +104,9 @@ Regenerated lockfile from package.json to resolve merge conflicts." || true
       - name: Skip auto-resolve for fork PRs
         if: steps.check_conflicts.outputs.lockfile_conflict == 'true' && env.IS_SAME_REPO != 'true'
         run: |
-          echo "Lockfile conflicts detected but PR originates from a fork; skipping auto-resolve step."
+          echo "⚠️ Lockfile conflicts detected but PR originates from a fork."
+          echo "Auto-resolve requires write permissions to the head repository."
+          echo "Please manually resolve conflicts by rebasing locally and force-pushing."
 
       - name: Comment on PR
         if: steps.check_conflicts.outputs.lockfile_conflict == 'true' && env.IS_SAME_REPO == 'true'

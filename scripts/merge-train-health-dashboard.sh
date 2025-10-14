@@ -81,9 +81,14 @@ fi
 # 2. Age Analysis
 log_section "Age Analysis"
 
-AVG_AGE=$(gh pr list --state open --limit 500 --json createdAt,number | \
-    jq 'if length == 0 then 0 else (map((now - (.createdAt | fromdateiso8601)) / 86400) | add / length) end' | \
-    awk '{printf "%.1f", $1}')
+# Guard against zero PRs - jq handles this internally but make it explicit
+if [ "$TOTAL_OPEN" -eq 0 ]; then
+    AVG_AGE="0.0"
+else
+    AVG_AGE=$(gh pr list --state open --limit 500 --json createdAt,number | \
+        jq 'if length == 0 then 0 else (map((now - (.createdAt | fromdateiso8601)) / 86400) | add / length) end' | \
+        awk '{printf "%.1f", $1}')
+fi
 
 OLD_PRS=$(gh pr list --state open --limit 500 --json number,createdAt | \
     jq '[.[] | select(((now - (.createdAt | fromdateiso8601)) / 86400) > 90)] | length')
