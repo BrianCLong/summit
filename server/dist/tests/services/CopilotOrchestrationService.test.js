@@ -97,3 +97,4 @@ describe('CopilotOrchestrationService', () => {
     // Add more tests for other methods like analyzeQuery, generateExecutionPlan, executePlan, etc.
     // Test different query types and edge cases.
 });
+//# sourceMappingURL=CopilotOrchestrationService.test.js.map

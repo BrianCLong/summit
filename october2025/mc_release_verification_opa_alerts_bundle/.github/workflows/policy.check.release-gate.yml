@@ -1,0 +1,49 @@
+name: policy.check.release-gate
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download SBOM artifact (if from same run)
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom
+          path: .
+        continue-on-error: true
+
+      - name: Build OPA input (detect evidence)
+        id: build_input
+        run: |
+          SBOM_PRESENT=false
+          [ -s sbom.json ] && SBOM_PRESENT=true
+
+          # Placeholder for provenance detection; customize if you store attestations in release assets
+          PROV_PRESENT=false
+          # For OCI-based pipelines, you may verify via cosign and set PROV_PRESENT=true on success
+
+          echo "{"sbom_present": ${SBOM_PRESENT}, "provenance_present": ${PROV_PRESENT}}" > input.json
+          cat input.json
+
+      - name: Install OPA
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa
+          ./opa version
+
+      - name: Evaluate policy
+        run: |
+          ./opa eval -i input.json -d policies/release_gate.rego "data.policy.release"
+          ./opa eval -i input.json -d policies/release_gate.rego "data.policy.release.allow" | tee allow.out
+          ALLOW=$(cat allow.out | tr -dc 'truefalsen')
+          echo "ALLOW=${ALLOW}"
+          if [ "$ALLOW" != "true" ]; then
+            echo "Release gate failed per OPA policy."
+            exit 1
+          fi
