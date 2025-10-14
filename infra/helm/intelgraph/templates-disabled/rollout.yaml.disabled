@@ -1,0 +1,419 @@
+# Argo Rollouts Blue/Green Deployment for Zero-Downtime Upgrades
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: conductor-rollout
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    app: conductor
+    component: orchestration
+spec:
+  replicas: {{ .Values.conductor.replicas | default 3 }}
+  strategy:
+    blueGreen:
+      activeService: conductor-active
+      previewService: conductor-preview
+      autoPromotionEnabled: {{ .Values.rollout.autoPromotionEnabled | default false }}
+      scaleDownDelaySeconds: {{ .Values.rollout.scaleDownDelaySeconds | default 30 }}
+      prePromotionAnalysis:
+        templates:
+        - templateName: success-rate
+        args:
+        - name: service-name
+          value: conductor-preview
+        - name: prometheus-server
+          value: {{ .Values.monitoring.prometheus.server | default "prometheus-server.monitoring.svc.cluster.local" }}
+      postPromotionAnalysis:
+        templates:
+        - templateName: success-rate
+        args:
+        - name: service-name
+          value: conductor-active
+        - name: prometheus-server
+          value: {{ .Values.monitoring.prometheus.server | default "prometheus-server.monitoring.svc.cluster.local" }}
+      previewReplicaCount: {{ .Values.conductor.previewReplicas | default 1 }}
+      {{- if .Values.rollout.tests.enabled }}
+      prePromotionAnalysis:
+        templates:
+        - templateName: smoke-tests
+        args:
+        - name: service-name
+          value: conductor-preview
+      {{- end }}
+  selector:
+    matchLabels:
+      app: conductor
+  template:
+    metadata:
+      labels:
+        app: conductor
+        component: orchestration
+        version: {{ .Values.image.tag | default "latest" }}
+      annotations:
+        spiffe.io/spiffe-id: "spiffe://{{ .Values.spire.trustDomain | default "intelgraph.local" }}/ns/{{ .Values.namespace | default "intelgraph" }}/sa/conductor"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: conductor
+      containers:
+      - name: conductor
+        image: {{ .Values.image.repository }}/conductor:{{ .Values.image.tag | default "latest" }}
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        - containerPort: 9090
+          name: metrics
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "8000"
+        - name: METRICS_PORT
+          value: "9090"
+        - name: DEPLOYMENT_VERSION
+          value: {{ .Values.image.tag | default "latest" | quote }}
+        - name: POSTGRES_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-credentials
+              key: url
+        - name: SPIFFE_ENDPOINT_SOCKET
+          value: "unix:///run/spire/sockets/agent.sock"
+        - name: SPIRE_TRUST_DOMAIN
+          value: {{ .Values.spire.trustDomain | default "intelgraph.local" }}
+        - name: ZERO_TRUST_ENABLED
+          value: "{{ .Values.zeroTrust.enabled | default true }}"
+        - name: AUDIT_WORM_ENABLED
+          value: "{{ .Values.audit.wormEnabled | default true }}"
+        - name: AUDIT_BUCKET
+          value: {{ .Values.audit.bucket }}
+        - name: ROLLOUT_CANARY_ENABLED
+          value: "true"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+            scheme: {{ if .Values.mtls.enabled }}HTTPS{{ else }}HTTP{{ end }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+            scheme: {{ if .Values.mtls.enabled }}HTTPS{{ else }}HTTP{{ end }}
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 2
+          failureThreshold: 3
+        volumeMounts:
+        - name: spire-agent-socket
+          mountPath: /run/spire/sockets
+          readOnly: true
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        - name: worm-audit-storage
+          mountPath: /app/audit
+        {{- if .Values.mtls.enabled }}
+        - name: tls-certs
+          mountPath: /app/certs
+          readOnly: true
+        {{- end }}
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      {{- if .Values.mtls.enabled }}
+      # SPIFFE Helper Sidecar for automatic certificate rotation
+      - name: spiffe-helper
+        image: {{ .Values.spire.helper.image | default "ghcr.io/spiffe/spiffe-helper:0.6.0" }}
+        args:
+        - -config
+        - /run/spire/config/helper.conf
+        volumeMounts:
+        - name: spire-agent-socket
+          mountPath: /run/spire/sockets
+          readOnly: true
+        - name: spiffe-helper-config
+          mountPath: /run/spire/config
+          readOnly: true
+        - name: tls-certs
+          mountPath: /run/spire/certs
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "25m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+      {{- end }}
+      # WORM Audit Sidecar for immutable audit logging
+      - name: worm-audit
+        image: {{ .Values.audit.worm.image | default "amazon/aws-cli:2.13.32" }}
+        command: 
+        - /bin/sh
+        - -c
+        - |
+          while true; do
+            # Sync audit logs to WORM storage with Object Lock
+            if [ -f /app/audit/pending/*.json ]; then
+              for audit_file in /app/audit/pending/*.json; do
+                if [ -f "$audit_file" ]; then
+                  filename=$(basename "$audit_file")
+                  aws s3 cp "$audit_file" "s3://{{ .Values.audit.bucket }}/audit-logs/$(date +%Y/%m/%d)/${filename}" \
+                    --object-lock-mode COMPLIANCE \
+                    --object-lock-retain-until-date "$(date -d '+{{ .Values.audit.retentionDays | default 2555 }} days' -Iseconds)" \
+                    --metadata deployment-version="{{ .Values.image.tag | default "latest" }}",rollout-phase="${ARGO_ROLLOUTS_POD_TEMPLATE_HASH:-unknown}"
+                  
+                  if [ $? -eq 0 ]; then
+                    mv "$audit_file" "/app/audit/synced/"
+                    echo "$(date): Synced $filename to WORM storage"
+                  fi
+                fi
+              done
+            fi
+            sleep 10
+          done
+        env:
+        - name: AWS_REGION
+          value: {{ .Values.aws.region | default "us-east-1" }}
+        - name: AWS_DEFAULT_REGION
+          value: {{ .Values.aws.region | default "us-east-1" }}
+        volumeMounts:
+        - name: worm-audit-storage
+          mountPath: /app/audit
+        - name: aws-credentials
+          mountPath: /root/.aws
+          readOnly: true
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "100m"
+      volumes:
+      - name: spire-agent-socket
+        hostPath:
+          path: /run/spire/sockets
+          type: Directory
+      - name: config
+        configMap:
+          name: conductor-config
+      - name: worm-audit-storage
+        persistentVolumeClaim:
+          claimName: worm-audit-storage
+      - name: aws-credentials
+        secret:
+          secretName: aws-credentials
+      {{- if .Values.mtls.enabled }}
+      - name: tls-certs
+        emptyDir: {}
+      - name: spiffe-helper-config
+        configMap:
+          name: spiffe-helper-config
+      {{- end }}
+      securityContext:
+        fsGroup: 1001
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - conductor
+              topologyKey: kubernetes.io/hostname
+---
+# Blue/Green Services
+apiVersion: v1
+kind: Service
+metadata:
+  name: conductor-active
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    app: conductor
+    service: active
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: conductor
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: conductor-preview
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    app: conductor
+    service: preview
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: conductor
+---
+# Analysis Templates for Rollout Gates
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+spec:
+  args:
+  - name: service-name
+  - name: prometheus-server
+  metrics:
+  - name: success-rate
+    interval: 30s
+    count: 5
+    successCondition: result[0] >= 0.95
+    failureCondition: result[0] < 0.90
+    provider:
+      prometheus:
+        address: "http://{{`{{.args.prometheus-server}}`}}:9090"
+        query: |
+          sum(
+            rate(http_requests_total{service="{{`{{.args.service-name}}`}}", code!~"5.."}[2m])
+          ) / 
+          sum(
+            rate(http_requests_total{service="{{`{{.args.service-name}}`}}"}[2m])
+          )
+  - name: error-rate
+    interval: 30s
+    count: 5
+    successCondition: result[0] <= 0.05
+    failureCondition: result[0] > 0.10
+    provider:
+      prometheus:
+        address: "http://{{`{{.args.prometheus-server}}`}}:9090"
+        query: |
+          sum(
+            rate(http_requests_total{service="{{`{{.args.service-name}}`}}", code=~"5.."}[2m])
+          ) / 
+          sum(
+            rate(http_requests_total{service="{{`{{.args.service-name}}`}}"}[2m])
+          )
+  - name: response-time-p95
+    interval: 30s
+    count: 5
+    successCondition: result[0] <= 2000
+    failureCondition: result[0] > 5000
+    provider:
+      prometheus:
+        address: "http://{{`{{.args.prometheus-server}}`}}:9090"
+        query: |
+          histogram_quantile(0.95, 
+            sum(
+              rate(http_request_duration_seconds_bucket{service="{{`{{.args.service-name}}`}}"}[2m])
+            ) by (le)
+          ) * 1000
+---
+{{- if .Values.rollout.tests.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: smoke-tests
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+spec:
+  args:
+  - name: service-name
+  metrics:
+  - name: smoke-test-health
+    interval: 10s
+    count: 3
+    successCondition: result == "1"
+    failureCondition: result != "1"
+    provider:
+      job:
+        spec:
+          template:
+            spec:
+              containers:
+              - name: smoke-test
+                image: {{ .Values.rollout.tests.image | default "curlimages/curl:8.4.0" }}
+                command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  echo "Running smoke tests against {{`{{.args.service-name}}`}}"
+                  
+                  # Health check
+                  curl -f "http://{{`{{.args.service-name}}`}}:8000/health" || exit 1
+                  
+                  # API availability check
+                  curl -f "http://{{`{{.args.service-name}}`}}:8000/api/health" || exit 1
+                  
+                  # Metrics endpoint check  
+                  curl -f "http://{{`{{.args.service-name}}`}}:9090/metrics" || exit 1
+                  
+                  echo "All smoke tests passed"
+                  echo "1"
+              restartPolicy: Never
+{{- end }}
+---
+# WORM Audit Storage PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: worm-audit-storage
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.audit.storageSize | default "10Gi" }}
+  {{- if .Values.storageClass }}
+  storageClassName: {{ .Values.storageClass }}
+  {{- end }}
