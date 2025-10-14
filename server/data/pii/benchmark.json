@@ -1,0 +1,121 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Reference dataset for semantic PII mapping engine regression tests.",
+    "piiTypes": 72,
+    "source": "Synthetic dataset curated for Summit platform"
+  },
+  "records": [
+    {
+      "id": "customer-001",
+      "table": "customers",
+      "schema": {
+        "name": "customers",
+        "fields": [
+          { "fieldName": "full_name", "piiHints": ["fullName"], "riskLevel": "high" },
+          { "fieldName": "email", "piiHints": ["email"], "riskLevel": "high" },
+          { "fieldName": "phone", "piiHints": ["mobileNumber", "phoneNumber"], "riskLevel": "high" },
+          { "fieldName": "home_address", "piiHints": ["homeAddress"], "riskLevel": "critical" },
+          { "fieldName": "dob", "piiHints": ["dateOfBirth"], "riskLevel": "medium" },
+          { "fieldName": "ssn", "piiHints": ["socialSecurityNumber"], "riskLevel": "critical" }
+        ]
+      },
+      "data": {
+        "full_name": "Ava Martinez",
+        "email": "ava.martinez@example.com",
+        "phone": "+1 (312) 555-0176",
+        "home_address": "742 Evergreen Terrace, Springfield, IL 62704",
+        "dob": "1986-02-17",
+        "ssn": "123-45-6789"
+      }
+    },
+    {
+      "id": "customer-002",
+      "table": "customers",
+      "schema": {
+        "name": "customers",
+        "fields": [
+          { "fieldName": "preferred_name", "piiHints": ["preferredName"], "riskLevel": "medium" },
+          { "fieldName": "passport", "piiHints": ["passportNumber"], "riskLevel": "critical" },
+          { "fieldName": "billing_address", "piiHints": ["billingAddress"], "riskLevel": "high" },
+          { "fieldName": "credit_card", "piiHints": ["creditCardNumber"], "riskLevel": "critical" },
+          { "fieldName": "card_expiration", "piiHints": ["cardExpiration"], "riskLevel": "high" },
+          { "fieldName": "card_cvv", "piiHints": ["cardSecurityCode"], "riskLevel": "critical" }
+        ]
+      },
+      "data": {
+        "preferred_name": "Liam",
+        "passport": "XG4521987",
+        "billing_address": "500 Market St, San Francisco, CA 94105",
+        "credit_card": "4111 1111 1111 1111",
+        "card_expiration": "11/27",
+        "card_cvv": "915"
+      }
+    },
+    {
+      "id": "patient-104",
+      "table": "patients",
+      "schema": {
+        "name": "patients",
+        "fields": [
+          { "fieldName": "patient_id", "piiHints": ["patientId"], "riskLevel": "critical" },
+          { "fieldName": "insurance_policy", "piiHints": ["insurancePolicyNumber"], "riskLevel": "critical" },
+          { "fieldName": "diagnosis", "piiHints": ["medicalDiagnosis"], "riskLevel": "critical" },
+          { "fieldName": "prescription", "piiHints": ["prescription"], "riskLevel": "critical" },
+          { "fieldName": "allergy", "piiHints": ["allergy"], "riskLevel": "high" },
+          { "fieldName": "genetic_marker", "piiHints": ["geneticMarker"], "riskLevel": "critical" }
+        ]
+      },
+      "data": {
+        "patient_id": "MRN-884233",
+        "insurance_policy": "HC-778899",
+        "diagnosis": "Diagnosis: Type 2 Diabetes",
+        "prescription": "Prescription: Metformin 500mg",
+        "allergy": "Allergy: Penicillin",
+        "genetic_marker": "Marker: BRCA1"
+      }
+    },
+    {
+      "id": "device-22",
+      "table": "iot_devices",
+      "schema": {
+        "name": "iot_devices",
+        "fields": [
+          { "fieldName": "device_id", "piiHints": ["deviceId"], "riskLevel": "high" },
+          { "fieldName": "imei", "piiHints": ["imei"], "riskLevel": "high" },
+          { "fieldName": "ip_address", "piiHints": ["ipAddress"], "riskLevel": "high" },
+          { "fieldName": "mac_address", "piiHints": ["macAddress"], "riskLevel": "high" },
+          { "fieldName": "latitude", "piiHints": ["latitude"], "riskLevel": "medium" },
+          { "fieldName": "longitude", "piiHints": ["longitude"], "riskLevel": "medium" }
+        ]
+      },
+      "data": {
+        "device_id": "DEV-9988",
+        "imei": "490154203237518",
+        "ip_address": "2001:0db8:85a3::8a2e:0370:7334",
+        "mac_address": "00:1A:2B:3C:4D:5E",
+        "latitude": "Lat: 37.7749",
+        "longitude": "Lon: -122.4194"
+      }
+    },
+    {
+      "id": "biometric-09",
+      "table": "biometrics",
+      "schema": {
+        "name": "biometrics",
+        "fields": [
+          { "fieldName": "fingerprint_hash", "piiHints": ["biometricFingerprint"], "riskLevel": "critical" },
+          { "fieldName": "voice_print", "piiHints": ["biometricVoice"], "riskLevel": "critical" },
+          { "fieldName": "face_embedding", "piiHints": ["biometricFace"], "riskLevel": "critical" },
+          { "fieldName": "dna_sequence", "piiHints": ["biometricDNA"], "riskLevel": "critical" }
+        ]
+      },
+      "data": {
+        "fingerprint_hash": "Fingerprint Hash: A1B2C3D4E5F6A7B8C9D0E1F2A3B4C5D6",
+        "voice_print": "Voice Print: qwertyUIOPasdfghJKL==",
+        "face_embedding": "Face Template: 9J8kLmN7OpQrStUvWxYz==",
+        "dna_sequence": "DNA: ACTGACTGACTG"
+      }
+    }
+  ]
+}

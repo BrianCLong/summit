@@ -160,6 +160,9 @@ out/
 
 # Data / DBs / caches
 data/
+!server/data/
+!server/data/pii/
+!server/data/pii/benchmark.json
 datasets/
 cache/
 caches/
