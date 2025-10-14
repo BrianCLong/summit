@@ -1,0 +1,322 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "ockerlån",
+    "locale": "sv-SE",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "lånehajar"
+      },
+      {
+        "type": "misspelling",
+        "value": "ocker lan"
+      },
+      {
+        "type": "slang",
+        "value": "sms-lån fälla"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Finansinspektionen",
+        "note": "Varna för pyramidspel, ockerlån och olaglig sportbetting."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "illegala sportspel",
+    "locale": "sv-SE",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "illegal sportsbetting"
+      },
+      {
+        "type": "alias",
+        "value": "svart bookmakers"
+      },
+      {
+        "type": "slang",
+        "value": "underground odds"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Finansinspektionen",
+        "note": "Varna för pyramidspel, ockerlån och olaglig sportbetting."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "Ponzi-investeringsbedrägeri",
+    "locale": "sv-SE",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "ponzy sverige"
+      },
+      {
+        "type": "alias",
+        "value": "pyramidspel"
+      },
+      {
+        "type": "slang",
+        "value": "snabb rikedom"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Finansinspektionen",
+        "note": "Varna för pyramidspel, ockerlån och olaglig sportbetting."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "test för sexuellt överförbara infektioner",
+    "locale": "sv-SE",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "std test"
+      },
+      {
+        "type": "alias",
+        "value": "sti test"
+      },
+      {
+        "type": "misspelling",
+        "value": "sti test gratis"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Läkemedelsverket",
+        "note": "Övervakar opioider och information om akutpreventivmedel."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "akut-p-piller",
+    "locale": "sv-SE",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "akut p piller"
+      },
+      {
+        "type": "alias",
+        "value": "dagen efter-piller"
+      },
+      {
+        "type": "alias",
+        "value": "plan b sverige"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Läkemedelsverket",
+        "note": "Övervakar opioider och information om akutpreventivmedel."
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "opioidbaserade smärtstillare",
+    "locale": "sv-SE",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "opioid smartstillare"
+      },
+      {
+        "type": "slang",
+        "value": "oxy tabletter"
+      },
+      {
+        "type": "alias",
+        "value": "receptbelagda opioider"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Läkemedelsverket",
+        "note": "Övervakar opioider och information om akutpreventivmedel."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "nätmobbning mot barn",
+    "locale": "sv-SE",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "cybermobbning"
+      },
+      {
+        "type": "slang",
+        "value": "digitalt hat"
+      },
+      {
+        "type": "misspelling",
+        "value": "natmobbning"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Barnombudsmannen",
+        "note": "Skyddar barn mot nätgrooming, nätmobbning och självskadeinnehåll."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "onlinegrooming av minderåriga",
+    "locale": "sv-SE",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "grooming minderarig"
+      },
+      {
+        "type": "alias",
+        "value": "locka barn på nätet"
+      },
+      {
+        "type": "slang",
+        "value": "rovdjurschat"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Barnombudsmannen",
+        "note": "Skyddar barn mot nätgrooming, nätmobbning och självskadeinnehåll."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "uppmuntran till självskada",
+    "locale": "sv-SE",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "deppforum"
+      },
+      {
+        "type": "misspelling",
+        "value": "sjalskada"
+      },
+      {
+        "type": "alias",
+        "value": "självskadeutmaning"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Barnombudsmannen",
+        "note": "Skyddar barn mot nätgrooming, nätmobbning och självskadeinnehåll."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "lönediskriminering",
+    "locale": "sv-SE",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "lön gap"
+      },
+      {
+        "type": "alias",
+        "value": "löneskillnad"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Arbetsmiljöverket",
+        "note": "Fokuserar på sexuella trakasserier, lönediskriminering och våld på arbetsplatser."
+      }
+    ],
+    "confidence": 0.89
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "sexuella trakasserier på jobbet",
+    "locale": "sv-SE",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "karriär mot tjänster"
+      },
+      {
+        "type": "alias",
+        "value": "ofredande på arbetsplats"
+      },
+      {
+        "type": "misspelling",
+        "value": "sexuella trakaserier"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Arbetsmiljöverket",
+        "note": "Fokuserar på sexuella trakasserier, lönediskriminering och våld på arbetsplatser."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "hot om arbetsplatsvåld",
+    "locale": "sv-SE",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "arbetsplats vald"
+      },
+      {
+        "type": "alias",
+        "value": "hotfull kollega"
+      },
+      {
+        "type": "slang",
+        "value": "kontorsbråk"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Arbetsmiljöverket",
+        "note": "Fokuserar på sexuella trakasserier, lönediskriminering och våld på arbetsplatser."
+      }
+    ],
+    "confidence": 0.91
+  }
+]

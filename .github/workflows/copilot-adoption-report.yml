@@ -1,0 +1,182 @@
+name: Weekly Copilot Adoption Report
+
+on:
+  schedule:
+    - cron: '0 15 * * MON'   # 09:00 America/Denver (UTC-7/6). Adjust if needed.
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate report via GitHub API
+        id: gen
+        uses: actions/github-script@v7
+        env:
+          ORG: ${{ secrets.COPILOT_REPORT_ORG || github.repository_owner }}
+          TOKEN: ${{ secrets.COPILOT_REPORT_TOKEN || github.token }}
+        with:
+          script: |
+            const org = process.env.ORG;
+            const token = process.env.TOKEN;
+
+            async function fetchAll(path) {
+              const results = [];
+              let page = 1;
+              while (true) {
+                try {
+                  const res = await github.request(`GET ${path}`, {
+                    headers: { authorization: `token ${token}` },
+                    per_page: 100,
+                    page
+                  });
+                  if (!res.data || (Array.isArray(res.data.items) && res.data.items.length === 0)) break;
+                  results.push(res.data);
+                  if (!(res.headers && res.headers.link && res.headers.link.includes('rel="next"'))) break;
+                  page++;
+                } catch (e) {
+                  core.warning(`Metrics API error on ${path}: ${e.message}`);
+                  return null;
+                }
+              }
+              return results;
+            }
+
+            // Copilot org usage (beta endpoints; may change by plan/permissions)
+            const usage = await fetchAll(`/orgs/${org}/copilot/metrics/usage`);
+            if (!usage) {
+              core.setOutput('ok', 'false');
+              core.setOutput('body', `# Copilot Adoption Report
+
+Metrics API unavailable for org **${org}**.
+
+- Ensure Copilot Enterprise is enabled
+- Provide 
+`COPILOT_REPORT_TOKEN` with 
+`read:org` scope
+`);
+              return;
+            }
+
+            // Flatten items[]
+            const items = usage.flatMap(u => u.items ?? []);
+
+            // Aggregate by user for the last 4 weeks if present
+            const byUser = {};
+            for (const it of items) {
+              const user = it.user?.login || 'unknown';
+              byUser[user] = byUser[user] || { chat: 0, suggestionsAccepted: 0, suggestionsShown: 0 };
+              byUser[user].chat += (it.chat_requests ?? 0);
+              byUser[user].suggestionsAccepted += (it.code_suggestions_accepted ?? 0);
+              byUser[user].suggestionsShown += (it.code_suggestions_shown ?? 0);
+            }
+
+            // Build markdown
+            const now = new Date().toISOString().slice(0,10);
+            let md = `# Copilot Adoption Report
+
+Org: **${org}**  
+Generated: **${now} (UTC)**
+
+`;
+            const totalUsers = Object.keys(byUser).length;
+            const sum = Object.values(byUser).reduce((a,b)=>{
+              chat:a.chat+b.chat,
+              accepted:a.accepted+(b.suggestionsAccepted||0),
+              shown:a.shown+(b.suggestionsShown||0)
+            }, {chat:0,accepted:0,shown:0});
+            const acceptRate = sum.shown ? (sum.accepted/sum.shown*100).toFixed(1) : 'n/a';
+
+            md += `**Active users:** ${totalUsers}
+
+`;
+            md += `**Total chat requests:** ${sum.chat}
+
+`;
+            md += `**Suggestions shown:** ${sum.shown}
+
+`;
+            md += `**Suggestions accepted:** ${sum.accepted} (**${acceptRate}%** acceptance)
+
+`;
+
+            // Leaderboard (top 10 by accepted)
+            const rows = Object.entries(byUser)
+              .map(([u,v]) => ({u, a:v.suggestionsAccepted||0, s:v.suggestionsShown||0, c:v.chat||0}))
+              .sort((x,y)=>y.a-x.a)
+              .slice(0,10);
+
+            md += `## Top Contributors (by accepted suggestions)
+
+`;
+            if (rows.length === 0) {
+              md += `_No data available_
+`;
+            } else {
+              md += `| User | Accepted | Shown | Accept % | Chat |
+|---|---:|---:|---:|---:|
+`;
+              for (const r of rows) {
+                const pct = r.s ? (r.a/r.s*100).toFixed(1) : 'n/a';
+                md += `| @${r.u} | ${r.a} | ${r.s} | ${pct}% | ${r.c} |
+`;
+              }
+            }
+
+            // Guidance
+            md += `
+## Guidance & Next Steps
+- Capture “golden prompts” wins in 
+`docs/Copilot-Playbook.md`
+- Nudge low-usage teams to try PR commands: 
+`/explain-changes`
+`/generate-tests`
+- Tie Edits to CI gates (lint/test/opa/k6) for instant feedback
+`;
+
+            const fs = require('fs');
+            const path = `reports/copilot/${now}-adoption-report.md`;
+            fs.mkdirSync('reports/copilot', { recursive: true });
+            fs.writeFileSync(path, md, 'utf8');
+
+            core.setOutput('ok', 'true');
+            core.setOutput('path', path);
+            core.setOutput('body', md);
+
+      - name: Commit report
+        if: ${{ steps.gen.outputs.ok == 'true' }}
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: weekly Copilot adoption report"
+          file_pattern: "reports/copilot/*.md"
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: copilot-weekly-report
+          path: ${{ steps.gen.outputs.path || 'reports/copilot' }}
+          retention-days: 30
+
+      - name: Fallback note (no metrics)
+        if: ${{ steps.gen.outputs.ok != 'true' }}
+        run: |
+          echo "${{ steps.gen.outputs.body }}" > copilot-metrics-unavailable.md
+          echo "::notice:: Copilot metrics not available. See artifact."
+
+      - name: Optional Slack post
+        if: ${{ env.SLACK_WEBHOOK_URL != '' }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          TITLE="Weekly Copilot Adoption Report"
+          BODY=$(cat "${{ steps.gen.outputs.path || 'copilot-metrics-unavailable.md' }}" | sed ':a;N;$!ba;s/
+/\n/g')
+          curl -s -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"*${TITLE}*\\n${BODY}\"}" \
+            "$SLACK_WEBHOOK_URL" || true

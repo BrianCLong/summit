@@ -1,0 +1,325 @@
+name: Validate v0.3.5 Configuration
+
+on:
+  push:
+    branches: [ main, release/v0.3.5 ]
+    paths:
+      - 'controllers/adaptive-canary.py'
+      - 'services/guard/budgets_v2.py'
+      - 'evidence/v0.3.5/**'
+      - '.github/workflows/validate-v035-config.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'controllers/adaptive-canary.py'
+      - 'services/guard/budgets_v2.py'
+      - 'evidence/v0.3.5/**'
+
+jobs:
+  validate-adaptive-canary-weights:
+    runs-on: ubuntu-latest
+    name: Validate Adaptive Canary Score Weights
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest
+
+    - name: Validate canary score weights configuration
+      run: |
+        python3 -c "
+        import sys
+        import re
+
+        # Read adaptive canary controller
+        with open('controllers/adaptive-canary.py', 'r') as f:
+            content = f.read()
+
+        # Extract default metric weights
+        weight_pattern = r'\"weight\":\s*([0-9.]+)'
+        weights = re.findall(weight_pattern, content)
+
+        if len(weights) >= 4:
+            p95_weight = float(weights[0])
+            error_weight = float(weights[1])
+            cost_weight = float(weights[2])
+            p99_weight = float(weights[3])
+
+            total_weight = p95_weight + error_weight + cost_weight + p99_weight
+
+            print(f'🔍 Detected canary weights:')
+            print(f'  • p95_latency: {p95_weight} (40% expected)')
+            print(f'  • error_rate: {error_weight} (30% expected)')
+            print(f'  • cost_per_1k: {cost_weight} (20% expected)')
+            print(f'  • tail_p99: {p99_weight} (10% expected)')
+            print(f'  • Total: {total_weight} (1.0 expected)')
+
+            # Validate weights match expected configuration
+            expected_weights = [0.4, 0.3, 0.2, 0.1]
+            actual_weights = [p95_weight, error_weight, cost_weight, p99_weight]
+
+            tolerance = 0.01
+            for i, (expected, actual) in enumerate(zip(expected_weights, actual_weights)):
+                if abs(expected - actual) > tolerance:
+                    print(f'❌ Weight mismatch at index {i}: expected {expected}, got {actual}')
+                    sys.exit(1)
+
+            if abs(total_weight - 1.0) > tolerance:
+                print(f'❌ Total weight mismatch: expected 1.0, got {total_weight}')
+                sys.exit(1)
+
+            print('✅ All canary score weights match expected configuration')
+        else:
+            print('❌ Could not extract expected number of weights')
+            sys.exit(1)
+        "
+
+    - name: Validate budget v2 thresholds
+      run: |
+        python3 -c "
+        import sys
+        import re
+
+        # Read budget guard v2
+        with open('services/guard/budgets_v2.py', 'r') as f:
+            content = f.read()
+
+        # Check for key thresholds
+        checks = [
+            ('daily_limit.*50\.0', 'TENANT_001 daily limit'),
+            ('hourly_limit.*5\.0', 'TENANT_001 hourly limit'),
+            ('enforcement_time_ms.*120000', 'Sub-120s enforcement target'),
+            ('z_score_threshold.*2\.5', 'Anomaly detection threshold')
+        ]
+
+        print('🔍 Validating budget v2 thresholds:')
+        for pattern, description in checks:
+            if re.search(pattern, content):
+                print(f'  ✅ {description}: found')
+            else:
+                print(f'  ❌ {description}: missing or incorrect')
+                sys.exit(1)
+
+        print('✅ All budget v2 thresholds validated')
+        "
+
+  validate-evidence-structure:
+    runs-on: ubuntu-latest
+    name: Validate Evidence Structure
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Validate evidence directory structure
+      run: |
+        echo "🔍 Validating v0.3.5 evidence structure..."
+
+        # Check required directories exist
+        required_dirs=(
+          "evidence/v0.3.5/attest"
+          "evidence/v0.3.5/adapt"
+          "evidence/v0.3.5/accelerate"
+          "evidence/v0.3.5/autonomy"
+        )
+
+        for dir in "${required_dirs[@]}"; do
+          if [ -d "$dir" ]; then
+            echo "  ✅ $dir: exists"
+          else
+            echo "  ❌ $dir: missing"
+            exit 1
+          fi
+        done
+
+        # Check for key evidence files
+        if [ -f "evidence/v0.3.5/EVIDENCE_SUMMARY.json" ]; then
+          echo "  ✅ Evidence summary: exists"
+        else
+          echo "  ❌ Evidence summary: missing"
+          exit 1
+        fi
+
+        echo "✅ Evidence structure validated"
+
+    - name: Validate evidence summary content
+      run: |
+        if [ -f "evidence/v0.3.5/EVIDENCE_SUMMARY.json" ]; then
+          python3 -c "
+          import json
+          import sys
+
+          with open('evidence/v0.3.5/EVIDENCE_SUMMARY.json', 'r') as f:
+              evidence = json.load(f)
+
+          # Check required sections
+          required_sections = ['evidence_bundle_v035', 'epic_achievements', 'technical_excellence']
+          for section in required_sections:
+              if section not in evidence:
+                  print(f'❌ Missing section: {section}')
+                  sys.exit(1)
+
+          # Check epic statuses
+          epics = evidence['epic_achievements']
+          if epics['e1_attest_verifiable_responses']['status'] != 'IMPLEMENTED':
+              print('❌ E1 Attest not marked as implemented')
+              sys.exit(1)
+
+          if epics['e2_adapt_self_tuning']['status'] != 'IMPLEMENTED':
+              print('❌ E2 Adapt not marked as implemented')
+              sys.exit(1)
+
+          print('✅ Evidence summary content validated')
+          "
+        else
+          echo "❌ Evidence summary file not found"
+          exit 1
+
+  validate-deployment-readiness:
+    runs-on: ubuntu-latest
+    name: Validate Deployment Readiness
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Check deployment script exists and is executable
+      run: |
+        if [ -f "scripts/execute-v035-go-live.sh" ]; then
+          echo "✅ Deployment script exists"
+          if [ -x "scripts/execute-v035-go-live.sh" ]; then
+            echo "✅ Deployment script is executable"
+          else
+            echo "❌ Deployment script is not executable"
+            exit 1
+          fi
+        else
+          echo "❌ Deployment script missing"
+          exit 1
+        fi
+
+    - name: Validate deployment script phases
+      run: |
+        echo "🔍 Validating deployment script phases..."
+
+        # Check for required functions
+        required_functions=(
+          "check_prerequisites"
+          "run_preflight_gates"
+          "deploy_adaptive_canary"
+          "enable_feature_toggles"
+          "post_cutover_validation"
+          "finalize_evidence"
+        )
+
+        for func in "${required_functions[@]}"; do
+          if grep -q "^${func}()" scripts/execute-v035-go-live.sh; then
+            echo "  ✅ Function $func: found"
+          else
+            echo "  ❌ Function $func: missing"
+            exit 1
+          fi
+        done
+
+        echo "✅ All deployment phases validated"
+
+    - name: Validate adaptive canary integration
+      run: |
+        echo "🔍 Validating adaptive canary integration in deployment..."
+
+        # Check deployment script calls adaptive canary with correct weights
+        if grep -q "score-weights.*p95=0.4,error=0.3,cost=0.2" scripts/execute-v035-go-live.sh; then
+          echo "✅ Adaptive canary weights correctly configured in deployment"
+        else
+          echo "❌ Adaptive canary weights missing or incorrect in deployment"
+          exit 1
+        fi
+
+        # Check for composite score validation
+        if grep -q "COMPOSITE_SCORE" scripts/execute-v035-go-live.sh; then
+          echo "✅ Composite score validation included"
+        else
+          echo "❌ Composite score validation missing"
+          exit 1
+        fi
+
+  integration-test:
+    runs-on: ubuntu-latest
+    name: Integration Test v0.3.5 Components
+    needs: [validate-adaptive-canary-weights, validate-evidence-structure, validate-deployment-readiness]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Test adaptive canary controller
+      run: |
+        echo "🧪 Testing adaptive canary controller..."
+        python3 controllers/adaptive-canary.py \
+          --baseline https://test-baseline.example.com \
+          --candidate https://test-candidate.example.com \
+          --window 1 \
+          --out /tmp/test-canary-decisions.json
+
+        # Validate output structure
+        python3 -c "
+        import json
+        with open('/tmp/test-canary-decisions.json', 'r') as f:
+            data = json.load(f)
+
+        required_keys = ['decision_summary', 'metric_analysis', 'all_scores']
+        for key in required_keys:
+            assert key in data, f'Missing key: {key}'
+
+        assert 'final_decision' in data['decision_summary']
+        print('✅ Adaptive canary controller test passed')
+        "
+
+    - name: Test budget guard v2
+      run: |
+        echo "🧪 Testing budget guard v2..."
+        python3 services/guard/budgets_v2.py \
+          --simulate \
+          --tenant TENANT_TEST \
+          --scenario normal \
+          --report /tmp/test-budget-report.json
+
+        # Validate output structure
+        python3 -c "
+        import json
+        with open('/tmp/test-budget-report.json', 'r') as f:
+            data = json.load(f)
+
+        required_keys = ['enforcement_summary', 'performance_metrics', 'budget_analysis']
+        for key in required_keys:
+            assert key in data, f'Missing key: {key}'
+
+        # Check performance target
+        assert data['performance_metrics']['sub_120s_target_met'] == True
+        print('✅ Budget guard v2 test passed')
+        "
+
+    - name: Integration test summary
+      run: |
+        echo "🏆 v0.3.5 Integration Test Results:"
+        echo "  ✅ Adaptive canary controller: PASSED"
+        echo "  ✅ Budget guard v2: PASSED"
+        echo "  ✅ Evidence structure: VALIDATED"
+        echo "  ✅ Deployment readiness: CONFIRMED"
+        echo ""
+        echo "🚀 MC Platform v0.3.5 ready for deployment!"
