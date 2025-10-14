@@ -24,3 +24,15 @@ repos:
   - repo: https://github.com/okonet/lint-staged
     rev: v14.0.1
     hooks: [{ id: lint-staged }]
+  - repo: local
+    hooks:
+      - id: forbid-focused-tests
+        name: forbid .only in tests
+        entry: bash -c 'if git grep -nE "(it|test|describe)\\.only\\(" -- "*.ts" "*.tsx" "*.js" | grep -v node_modules; then echo "::error::.only found — remove focused tests"; exit 1; fi'
+        language: system
+        pass_filenames: false
+      - id: forbid-console-error-in-tests
+        name: forbid console.error in tests
+        entry: bash -c 'if git grep -n "console\\.error(" -- tests server/src/tests | grep -v node_modules; then echo "::error::console.error found in tests — use assertions/throws"; exit 1; fi'
+        language: system
+        pass_filenames: false

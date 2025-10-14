@@ -1,9 +1,7 @@
 name: IntelGraph Python CI
-
 on:
   push:
   pull_request:
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -16,13 +14,12 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-      - name: Install
+      - name: Install (editable with extras)
         run: |
-          python -m pip install -U pip
-          pip install -e .[dev]
+          python -m pip install -U pip setuptools wheel
+          pip install -e ".[dev,test]"
       - name: Tests
         run: pytest -q
-
   data-pipelines:
     runs-on: ubuntu-latest
     defaults:
