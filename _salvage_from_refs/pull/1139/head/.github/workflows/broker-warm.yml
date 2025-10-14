@@ -1,8 +1,0 @@
-name: Broker Warm
-on: pull_request_target
-jobs:
-  warm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: node services/fabric/dist/entry.js build  # spins spot runners in cheapest region

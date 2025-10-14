@@ -2,8 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 export default class InvestigativeThreadQualityAgent {
-    neo4j;
-    weights;
     constructor(neo4j) {
         this.neo4j = neo4j;
         this.weights = this.loadWeights();
@@ -25,7 +23,7 @@ export default class InvestigativeThreadQualityAgent {
     jaccard(a, b) {
         const setA = new Set(a.toLowerCase().split(/\W+/).filter(Boolean));
         const setB = new Set(b.toLowerCase().split(/\W+/).filter(Boolean));
-        const intersection = new Set([...setA].filter((x) => setB.has(x)));
+        const intersection = new Set([...setA].filter(x => setB.has(x)));
         const union = new Set([...setA, ...setB]);
         return union.size ? intersection.size / union.size : 0;
     }
@@ -43,13 +41,13 @@ export default class InvestigativeThreadQualityAgent {
     scoreEvidence(messages) {
         if (!messages.length)
             return 0;
-        const supported = messages.filter((m) => (m.evidence && m.evidence.length > 0) || /\bhttps?:\/\//.test(m.text)).length;
+        const supported = messages.filter(m => (m.evidence && m.evidence.length > 0) || /\bhttps?:\/\//.test(m.text)).length;
         return supported / messages.length;
     }
     scoreRedundancy(messages) {
         if (!messages.length)
             return 0;
-        const texts = messages.map((m) => m.text.trim().toLowerCase());
+        const texts = messages.map(m => m.text.trim().toLowerCase());
         const unique = new Set(texts);
         return 1 - unique.size / texts.length;
     }
@@ -82,3 +80,4 @@ export default class InvestigativeThreadQualityAgent {
         return scores;
     }
 }
+//# sourceMappingURL=investigative-thread-quality-agent.js.map

@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import * as d3 from 'd3';
+import React, { useEffect, useRef, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import * as d3 from "d3";
 import {
   Box,
   FormControl,
@@ -11,14 +11,14 @@ import {
   OutlinedInput,
   Button,
   Stack,
-} from '@mui/material';
+} from "@mui/material";
 import {
   fetchTimelineEvents,
   setFilterTypes,
   setFilterTags,
   selectEvent,
-} from '../../store/slices/timelineSlice';
-import { setSelectedNode } from '../../store/slices/graphSlice';
+} from "../../store/slices/timelineSlice";
+import { setSelectedNode } from "../../store/slices/graphSlice";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -49,13 +49,18 @@ const TimelineView = () => {
     }
   }, [selectedNode, selectedEventId, dispatch]);
 
-  const allTags = useMemo(() => Array.from(new Set(events.flatMap((e) => e.tags || []))), [events]);
+  const allTags = useMemo(
+    () => Array.from(new Set(events.flatMap((e) => e.tags || []))),
+    [events],
+  );
 
   const filteredEvents = useMemo(() => {
     return events.filter((e) => {
-      const typeMatch = filterTypes.length === 0 || filterTypes.includes(e.type);
+      const typeMatch =
+        filterTypes.length === 0 || filterTypes.includes(e.type);
       const tagMatch =
-        filterTags.length === 0 || (e.tags || []).some((t) => filterTags.includes(t));
+        filterTags.length === 0 ||
+        (e.tags || []).some((t) => filterTags.includes(t));
       return typeMatch && tagMatch;
     });
   }, [events, filterTypes, filterTags]);
@@ -63,7 +68,7 @@ const TimelineView = () => {
   useEffect(() => {
     if (!events.length) return;
     const svg = d3.select(svgRef.current);
-    svg.selectAll('*').remove();
+    svg.selectAll("*").remove();
 
     const width = svgRef.current.clientWidth || 600;
     const height = svgRef.current.clientHeight || 200;
@@ -75,44 +80,50 @@ const TimelineView = () => {
       .range([margin.left, width - margin.right]);
 
     const categories = Array.from(new Set(events.map((e) => e.type)));
-    const color = d3.scaleOrdinal().domain(categories).range(d3.schemeCategory10);
+    const color = d3
+      .scaleOrdinal()
+      .domain(categories)
+      .range(d3.schemeCategory10);
 
     const axis = svg
-      .append('g')
-      .attr('transform', `translate(0,${height - margin.bottom})`)
-      .attr('class', 'axis')
+      .append("g")
+      .attr("transform", `translate(0,${height - margin.bottom})`)
+      .attr("class", "axis")
       .call(d3.axisBottom(x));
 
-    const content = svg.append('g').attr('class', 'content');
+    const content = svg.append("g").attr("class", "content");
 
     const circles = content
-      .selectAll('circle')
+      .selectAll("circle")
       .data(filteredEvents)
-      .join('circle')
-      .attr('cx', (d) => x(new Date(d.timestamp)))
-      .attr('cy', height / 2)
-      .attr('r', 6)
-      .attr('fill', (d) => color(d.type))
-      .attr('stroke', (d) => (d.id === selectedEventId ? '#000' : 'none'))
-      .on('click', (_, d) => {
+      .join("circle")
+      .attr("cx", (d) => x(new Date(d.timestamp)))
+      .attr("cy", height / 2)
+      .attr("r", 6)
+      .attr("fill", (d) => color(d.type))
+      .attr("stroke", (d) => (d.id === selectedEventId ? "#000" : "none"))
+      .on("click", (_, d) => {
         dispatch(selectEvent(d.id));
         dispatch(setSelectedNode(d.id));
       });
 
-    const legend = svg.append('g').attr('transform', 'translate(10,10)');
+    const legend = svg.append("g").attr("transform", "translate(10,10)");
     categories.forEach((cat, i) => {
-      const g = legend.append('g').attr('transform', `translate(0,${i * 20})`);
-      g.append('rect').attr('width', 10).attr('height', 10).attr('fill', color(cat));
-      g.append('text').attr('x', 15).attr('y', 10).text(cat);
+      const g = legend.append("g").attr("transform", `translate(0,${i * 20})`);
+      g.append("rect")
+        .attr("width", 10)
+        .attr("height", 10)
+        .attr("fill", color(cat));
+      g.append("text").attr("x", 15).attr("y", 10).text(cat);
     });
 
     const zoomed = (event) => {
       const newX = event.transform.rescaleX(x);
       axis.call(d3.axisBottom(newX));
-      circles.attr('cx', (d) => newX(new Date(d.timestamp)));
+      circles.attr("cx", (d) => newX(new Date(d.timestamp)));
     };
 
-    svg.call(d3.zoom().scaleExtent([0.5, 10]).on('zoom', zoomed));
+    svg.call(d3.zoom().scaleExtent([0.5, 10]).on("zoom", zoomed));
   }, [filteredEvents, events, selectedEventId, dispatch]);
 
   const handleExportPNG = () => {
@@ -120,32 +131,35 @@ const TimelineView = () => {
     if (!svgElement) return;
     const serializer = new XMLSerializer();
     const svgString = serializer.serializeToString(svgElement);
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = svgElement.clientWidth;
     canvas.height = svgElement.clientHeight;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     const img = new Image();
     img.onload = () => {
       ctx.drawImage(img, 0, 0);
-      const a = document.createElement('a');
-      a.download = 'timeline.png';
-      a.href = canvas.toDataURL('image/png');
+      const a = document.createElement("a");
+      a.download = "timeline.png";
+      a.href = canvas.toDataURL("image/png");
       a.click();
     };
-    img.src = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svgString)));
+    img.src =
+      "data:image/svg+xml;base64," +
+      window.btoa(unescape(encodeURIComponent(svgString)));
   };
 
   const handleExportJSON = () => {
     const dataStr =
-      'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(events, null, 2));
-    const a = document.createElement('a');
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(events, null, 2));
+    const a = document.createElement("a");
     a.href = dataStr;
-    a.download = 'timeline.json';
+    a.download = "timeline.json";
     a.click();
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <Stack direction="row" spacing={1} sx={{ m: 1 }}>
         <FormControl size="small" sx={{ minWidth: 120 }}>
           <InputLabel id="type-filter-label">Type</InputLabel>
@@ -156,7 +170,7 @@ const TimelineView = () => {
             onChange={(e) => dispatch(setFilterTypes(e.target.value))}
             input={<OutlinedInput label="Type" />}
             renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                 {selected.map((value) => (
                   <Chip key={value} label={value} />
                 ))}
@@ -180,7 +194,7 @@ const TimelineView = () => {
             onChange={(e) => dispatch(setFilterTags(e.target.value))}
             input={<OutlinedInput label="Tag" />}
             renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                 {selected.map((value) => (
                   <Chip key={value} label={value} />
                 ))}
