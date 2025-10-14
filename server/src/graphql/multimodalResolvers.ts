@@ -167,377 +167,337 @@ export const multimodalResolvers = {
     // Media Sources
     mediaSources: async (parent: any, args: MediaSourceArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.getMediaSources(args);
     },
 
     mediaSource: async (parent: any, args: { id: string }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.getMediaSource(args.id);
     },
 
     // Multimodal Entities
     multimodalEntities: async (parent: any, args: EntityArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.getMultimodalEntities(args);
     },
 
     multimodalEntity: async (parent: any, args: { id: string }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.getMultimodalEntity(args.id);
     },
 
     // Cross-modal Matching
     findCrossModalMatches: async (parent: any, args: CrossModalMatchArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
-      return await multimodalService.findCrossModalMatches(args.entityId, args.targetMediaTypes);
+      
+      return await multimodalService.findCrossModalMatches(
+        args.entityId,
+        args.targetMediaTypes
+      );
     },
 
     // Extraction Jobs
     extractionJobs: async (parent: any, args: ExtractionJobArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.getExtractionJobs(args);
     },
 
     extractionJob: async (parent: any, args: { id: string }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.getExtractionJob(args.id);
     },
 
     // Search and Analytics
     multimodalSearch: async (parent: any, args: { input: SearchInput }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.multimodalSearch(args.input);
     },
 
     semanticSearch: async (parent: any, args: { input: SemanticSearchInput }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.semanticSearch(args.input);
     },
 
-    multimodalAnalytics: async (
-      parent: any,
-      args: { investigationId: string },
-      context: Context,
-    ) => {
+    multimodalAnalytics: async (parent: any, args: { investigationId: string }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.getMultimodalAnalytics(args.investigationId);
     },
 
     // Quality and Verification
     unverifiedEntities: async (parent: any, args: EntityArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.getUnverifiedEntities(args);
     },
 
-    duplicateEntities: async (
-      parent: any,
-      args: { investigationId?: string; similarity?: number; limit?: number },
-      context: Context,
-    ) => {
+    duplicateEntities: async (parent: any, args: { investigationId?: string; similarity?: number; limit?: number }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.findDuplicateEntities(args);
-    },
+    }
   },
 
   Mutation: {
     // Media Upload and Management
     uploadMedia: async (parent: any, args: { input: MediaSourceInput }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.uploadMediaSource(args.input, context.user.id);
     },
 
     deleteMediaSource: async (parent: any, args: { id: string }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.deleteMediaSource(args.id, context.user.id);
     },
 
     updateMediaMetadata: async (parent: any, args: UpdateMediaMetadataArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.updateMediaMetadata(args.id, args.metadata, context.user.id);
     },
 
     // Entity Creation and Management
-    createMultimodalEntity: async (
-      parent: any,
-      args: { input: CreateMultimodalEntityInput },
-      context: Context,
-    ) => {
+    createMultimodalEntity: async (parent: any, args: { input: CreateMultimodalEntityInput }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.createMultimodalEntity(args.input, context.user.id);
     },
 
-    updateMultimodalEntity: async (
-      parent: any,
-      args: { id: string; input: CreateMultimodalEntityInput },
-      context: Context,
-    ) => {
+    updateMultimodalEntity: async (parent: any, args: { id: string; input: CreateMultimodalEntityInput }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.updateMultimodalEntity(args.id, args.input, context.user.id);
     },
 
     verifyMultimodalEntity: async (parent: any, args: VerifyEntityArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
-      return await multimodalService.verifyMultimodalEntity(
-        args.id,
-        args.verified,
-        context.user.id,
-      );
+      
+      return await multimodalService.verifyMultimodalEntity(args.id, args.verified, context.user.id);
     },
 
     mergeMultimodalEntities: async (parent: any, args: MergeEntitiesArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.mergeMultimodalEntities(
-        args.primaryId,
-        args.secondaryIds,
-        context.user.id,
+        args.primaryId, 
+        args.secondaryIds, 
+        context.user.id
       );
     },
 
     // Relationship Management
-    createMultimodalRelationship: async (
-      parent: any,
-      args: { input: CreateMultimodalRelationshipInput },
-      context: Context,
-    ) => {
+    createMultimodalRelationship: async (parent: any, args: { input: CreateMultimodalRelationshipInput }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.createMultimodalRelationship(args.input, context.user.id);
     },
 
-    updateMultimodalRelationship: async (
-      parent: any,
-      args: { id: string; input: CreateMultimodalRelationshipInput },
-      context: Context,
-    ) => {
+    updateMultimodalRelationship: async (parent: any, args: { id: string; input: CreateMultimodalRelationshipInput }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
-      return await multimodalService.updateMultimodalRelationship(
-        args.id,
-        args.input,
-        context.user.id,
-      );
+      
+      return await multimodalService.updateMultimodalRelationship(args.id, args.input, context.user.id);
     },
 
     verifyMultimodalRelationship: async (parent: any, args: VerifyEntityArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
-      return await multimodalService.verifyMultimodalRelationship(
-        args.id,
-        args.verified,
-        context.user.id,
-      );
+      
+      return await multimodalService.verifyMultimodalRelationship(args.id, args.verified, context.user.id);
     },
 
     // Processing Pipeline
-    startExtractionJob: async (
-      parent: any,
-      args: { input: ExtractionJobInput },
-      context: Context,
-    ) => {
+    startExtractionJob: async (parent: any, args: { input: ExtractionJobInput }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.startExtractionJob(args.input, context.user.id);
     },
 
     cancelExtractionJob: async (parent: any, args: { id: string }, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.cancelExtractionJob(args.id, context.user.id);
     },
 
     reprocessMedia: async (parent: any, args: ReprocessMediaArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
-      return await multimodalService.startExtractionJob(
-        {
-          mediaSourceId: args.mediaSourceId,
-          extractionMethods: args.extractionMethods,
-          investigationId: args.investigationId,
-          processingParams: { reprocess: true },
-        },
-        context.user.id,
-      );
+      
+      return await multimodalService.startExtractionJob({
+        mediaSourceId: args.mediaSourceId,
+        extractionMethods: args.extractionMethods,
+        investigationId: args.investigationId,
+        processingParams: { reprocess: true }
+      }, context.user.id);
     },
 
     // Batch Operations
     batchUploadMedia: async (parent: any, args: BatchUploadArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       const results = [];
       for (const input of args.inputs) {
         try {
@@ -548,110 +508,91 @@ export const multimodalResolvers = {
           // Continue with other uploads
         }
       }
-
+      
       return results;
     },
 
     batchExtractEntities: async (parent: any, args: BatchExtractArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       const jobs = [];
       for (const mediaSourceId of args.mediaSourceIds) {
         try {
-          const job = await multimodalService.startExtractionJob(
-            {
-              mediaSourceId,
-              extractionMethods: args.extractionMethods,
-              investigationId: args.investigationId,
-            },
-            context.user.id,
-          );
+          const job = await multimodalService.startExtractionJob({
+            mediaSourceId,
+            extractionMethods: args.extractionMethods,
+            investigationId: args.investigationId
+          }, context.user.id);
           jobs.push(job);
         } catch (error) {
           context.logger.error('Batch extraction error:', error);
           // Continue with other extractions
         }
       }
-
+      
       return jobs;
     },
 
     // Cross-modal Operations
-    generateCrossModalMatches: async (
-      parent: any,
-      args: GenerateCrossModalMatchesArgs,
-      context: Context,
-    ) => {
+    generateCrossModalMatches: async (parent: any, args: GenerateCrossModalMatchesArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.findCrossModalMatches(args.entityId, args.targetMediaTypes);
     },
 
-    computeSemanticClusters: async (
-      parent: any,
-      args: ComputeSemanticClustersArgs,
-      context: Context,
-    ) => {
+    computeSemanticClusters: async (parent: any, args: ComputeSemanticClustersArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.computeSemanticClusters(args.investigationId, args.algorithm);
     },
 
     // Quality and Cleanup
-    validateExtractionResults: async (
-      parent: any,
-      args: ValidateExtractionResultsArgs,
-      context: Context,
-    ) => {
+    validateExtractionResults: async (parent: any, args: ValidateExtractionResultsArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.validateExtractionResults(args.jobId);
     },
 
-    cleanupDuplicateEntities: async (
-      parent: any,
-      args: CleanupDuplicateEntitiesArgs,
-      context: Context,
-    ) => {
+    cleanupDuplicateEntities: async (parent: any, args: CleanupDuplicateEntitiesArgs, context: Context) => {
       if (!context.user) throw new Error('Authentication required');
-
+      
       const multimodalService = new MultimodalDataService(
-        context.neo4jDriver,
+        context.neo4jDriver, 
         context.authService,
-        context.storageService,
+        context.storageService
       );
-
+      
       return await multimodalService.cleanupDuplicateEntities(
         args.investigationId,
         args.similarity || 0.95,
         args.autoMerge || false,
-        context.user.id,
+        context.user.id
       );
-    },
+    }
   },
 
   Subscription: {
@@ -663,7 +604,7 @@ export const multimodalResolvers = {
         // Return subscription for job updates
         return context.pubsub.asyncIterator([`EXTRACTION_JOB_UPDATED_${args.jobId}`]);
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: any) => event.payload
     },
 
     extractionJobCompleted: {
@@ -673,7 +614,7 @@ export const multimodalResolvers = {
         // Return subscription for completed jobs in investigation
         return context.pubsub.asyncIterator([`EXTRACTION_JOB_COMPLETED_${args.investigationId}`]);
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: any) => event.payload
     },
 
     // Entity Updates
@@ -683,7 +624,7 @@ export const multimodalResolvers = {
 
         return context.pubsub.asyncIterator([`MULTIMODAL_ENTITY_ADDED_${args.investigationId}`]);
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: any) => event.payload
     },
 
     multimodalEntityUpdated: {
@@ -692,7 +633,7 @@ export const multimodalResolvers = {
 
         return context.pubsub.asyncIterator([`MULTIMODAL_ENTITY_UPDATED_${args.investigationId}`]);
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: any) => event.payload
     },
 
     multimodalEntityVerified: {
@@ -701,7 +642,7 @@ export const multimodalResolvers = {
 
         return context.pubsub.asyncIterator([`MULTIMODAL_ENTITY_VERIFIED_${args.investigationId}`]);
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: any) => event.payload
     },
 
     // Cross-modal Events
@@ -711,8 +652,8 @@ export const multimodalResolvers = {
 
         return context.pubsub.asyncIterator([`CROSS_MODAL_MATCH_FOUND_${args.investigationId}`]);
       },
-      resolve: (event: any) => event.payload,
-    },
+      resolve: (event: any) => event.payload
+    }
   },
 
   // Type Resolvers
@@ -720,17 +661,14 @@ export const multimodalResolvers = {
     extractedFrom: async (parent: any, args: any, context: Context) => {
       // Resolve media sources for this entity
       const session = context.neo4jDriver.session();
-
+      
       try {
-        const result = await session.run(
-          `
+        const result = await session.run(`
           MATCH (e:MultimodalEntity {id: $entityId})-[:EXTRACTED_FROM]->(m:MediaSource)
           RETURN m
-        `,
-          { entityId: parent.id },
-        );
-
-        return result.records.map((record) => record.get('m').properties);
+        `, { entityId: parent.id });
+        
+        return result.records.map(record => record.get('m').properties);
       } finally {
         await session.close();
       }
@@ -739,17 +677,14 @@ export const multimodalResolvers = {
     crossModalMatches: async (parent: any, args: any, context: Context) => {
       // Resolve cross-modal matches for this entity
       const session = context.neo4jDriver.session();
-
+      
       try {
-        const result = await session.run(
-          `
+        const result = await session.run(`
           MATCH (e:MultimodalEntity {id: $entityId})-[:HAS_CROSS_MODAL_MATCH]->(c:CrossModalMatch)
           RETURN c
-        `,
-          { entityId: parent.id },
-        );
-
-        return result.records.map((record) => record.get('c').properties);
+        `, { entityId: parent.id });
+        
+        return result.records.map(record => record.get('c').properties);
       } finally {
         await session.close();
       }
@@ -758,46 +693,40 @@ export const multimodalResolvers = {
     relationships: async (parent: any, args: any, context: Context) => {
       // Resolve multimodal relationships for this entity
       const session = context.neo4jDriver.session();
-
+      
       try {
-        const result = await session.run(
-          `
+        const result = await session.run(`
           MATCH (e:MultimodalEntity {id: $entityId})-[r:MultimodalRelationship]-(other:MultimodalEntity)
           RETURN r, other
-        `,
-          { entityId: parent.id },
-        );
-
-        return result.records.map((record) => ({
+        `, { entityId: parent.id });
+        
+        return result.records.map(record => ({
           ...record.get('r').properties,
           sourceEntity: parent,
-          targetEntity: record.get('other').properties,
+          targetEntity: record.get('other').properties
         }));
       } finally {
         await session.close();
       }
-    },
+    }
   },
 
   ExtractionJob: {
     results: async (parent: any, args: any, context: Context) => {
       if (parent.status !== 'COMPLETED') return null;
-
+      
       // Resolve extraction results
       const session = context.neo4jDriver.session();
-
+      
       try {
-        const result = await session.run(
-          `
+        const result = await session.run(`
           MATCH (j:ExtractionJob {id: $jobId})-[:EXTRACTED]->(e:MultimodalEntity)
           OPTIONAL MATCH (j)-[:EXTRACTED]->(r:MultimodalRelationship)
           RETURN collect(DISTINCT e) as entities, collect(DISTINCT r) as relationships
-        `,
-          { jobId: parent.id },
-        );
-
+        `, { jobId: parent.id });
+        
         if (result.records.length === 0) return null;
-
+        
         const record = result.records[0];
         return {
           entities: record.get('entities').map((e: any) => e.properties),
@@ -807,7 +736,7 @@ export const multimodalResolvers = {
             totalRelationships: parent.relationshipsExtracted,
             averageConfidence: 0.8, // Calculate from actual data
             processingTime: parent.duration,
-            dataQualityScore: 0.85,
+            dataQualityScore: 0.85
           },
           qualityMetrics: {
             overallScore: 0.85,
@@ -815,14 +744,14 @@ export const multimodalResolvers = {
             crossModalConsistency: 0.8,
             temporalConsistency: 0.85,
             duplicateRate: 0.05,
-            verificationRate: 0.1,
-          },
+            verificationRate: 0.1
+          }
         };
       } finally {
         await session.close();
       }
-    },
-  },
+    }
+  }
 };
 
 export default multimodalResolvers;

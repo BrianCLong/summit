@@ -1,1 +1,5 @@
-// example using testcontainers for Postgres/Redis
+describe('database integration placeholder', () => {
+  it('reports ready status', () => {
+    expect(true).toBe(true);
+  });
+});

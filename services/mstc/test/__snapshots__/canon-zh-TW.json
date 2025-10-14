@@ -1,0 +1,326 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "高利貸放款",
+    "locale": "zh-TW",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "gao li dai"
+      },
+      {
+        "type": "alias",
+        "value": "地下錢莊"
+      },
+      {
+        "type": "slang",
+        "value": "日收本利"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FSC",
+        "note": "防制龐氏詐騙、高利貸與地下運彩招攬。"
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "非法體育賭博",
+    "locale": "zh-TW",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "地下球版"
+      },
+      {
+        "type": "slang",
+        "value": "外圍盤口"
+      },
+      {
+        "type": "misspelling",
+        "value": "非法體育博弈"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FSC",
+        "note": "防制龐氏詐騙、高利貸與地下運彩招攬。"
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "龐氏投資詐騙",
+    "locale": "zh-TW",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "龐氏詐騙"
+      },
+      {
+        "type": "slang",
+        "value": "快速致富盤"
+      },
+      {
+        "type": "alias",
+        "value": "老鼠會"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FSC",
+        "note": "防制龐氏詐騙、高利貸與地下運彩招攬。"
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "性傳染病篩檢",
+    "locale": "zh-TW",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "sti 檢驗"
+      },
+      {
+        "type": "misspelling",
+        "value": "性傳染病檢查"
+      },
+      {
+        "type": "alias",
+        "value": "性病檢測"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "TFDA",
+        "note": "監管管制藥品與緊急避孕相關宣導。"
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "緊急避孕藥",
+    "locale": "zh-TW",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "plan b 台灣"
+      },
+      {
+        "type": "alias",
+        "value": "事後避孕藥"
+      },
+      {
+        "type": "misspelling",
+        "value": "緊急避孕藥品"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "TFDA",
+        "note": "監管管制藥品與緊急避孕相關宣導。"
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "鴉片類止痛藥",
+    "locale": "zh-TW",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "ya pian zhi tong yao"
+      },
+      {
+        "type": "slang",
+        "value": "羥考酮"
+      },
+      {
+        "type": "alias",
+        "value": "處方鴉片"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "TFDA",
+        "note": "監管管制藥品與緊急避孕相關宣導。"
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "網路霸凌兒少",
+    "locale": "zh-TW",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "網路公審"
+      },
+      {
+        "type": "misspelling",
+        "value": "網路霸凌兒童"
+      },
+      {
+        "type": "alias",
+        "value": "青少年網暴"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "NCC / 教育部",
+        "note": "保護兒少免於網路誘騙、霸凌與自傷訊息。"
+      }
+    ],
+    "confidence": 0.91
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "網路誘騙未成年人",
+    "locale": "zh-TW",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "wang luo you pian"
+      },
+      {
+        "type": "alias",
+        "value": "兒少網路引誘"
+      },
+      {
+        "type": "slang",
+        "value": "線上掠奪者"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "NCC / 教育部",
+        "note": "保護兒少免於網路誘騙、霸凌與自傷訊息。"
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "鼓動自傷內容",
+    "locale": "zh-TW",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "zi shang nei rong"
+      },
+      {
+        "type": "alias",
+        "value": "自殘挑戰"
+      },
+      {
+        "type": "slang",
+        "value": "輕生群組"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "NCC / 教育部",
+        "note": "保護兒少免於網路誘騙、霸凌與自傷訊息。"
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "同工不同酬",
+    "locale": "zh-TW",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "tong gong bu tong chou"
+      },
+      {
+        "type": "slang",
+        "value": "薪水差距"
+      },
+      {
+        "type": "alias",
+        "value": "薪資歧視"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MOL",
+        "note": "職安法規聚焦性騷擾、同工同酬與暴力事件。"
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "職場性騷擾",
+    "locale": "zh-TW",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "潛規則"
+      },
+      {
+        "type": "misspelling",
+        "value": "職場性騷擾案"
+      },
+      {
+        "type": "alias",
+        "value": "辦公室性騷擾"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MOL",
+        "note": "職安法規聚焦性騷擾、同工同酬與暴力事件。"
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "職場暴力威脅",
+    "locale": "zh-TW",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "職場暴力"
+      },
+      {
+        "type": "alias",
+        "value": "辦公室暴力"
+      },
+      {
+        "type": "slang",
+        "value": "鬧場"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MOL",
+        "note": "職安法規聚焦性騷擾、同工同酬與暴力事件。"
+      }
+    ],
+    "confidence": 0.93
+  }
+]
