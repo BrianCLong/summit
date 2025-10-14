@@ -19,23 +19,19 @@ const mockDepthLimit = (maxDepth = 10) => {
         },
         leave() {
           operationName = 'anonymous';
-        },
+        }
       },
       SelectionSet: {
         enter() {
           currentDepth++;
           if (currentDepth > maxDepth) {
-            context.reportError(
-              new Error(
-                `Query is too deep: depth ${currentDepth} > ${maxDepth} (operation: ${operationName})`,
-              ),
-            );
+            context.reportError(new Error(`Query is too deep: depth ${currentDepth} > ${maxDepth} (operation: ${operationName})`));
           }
         },
         leave() {
           currentDepth--;
-        },
-      },
+        }
+      }
     };
   };
 };
@@ -43,7 +39,7 @@ const mockDepthLimit = (maxDepth = 10) => {
 test('depth limit validation logic', () => {
   const errors = [];
   const mockContext = {
-    reportError: (error) => errors.push(error),
+    reportError: (error) => errors.push(error)
   };
 
   const validator = mockDepthLimit(3);
@@ -67,7 +63,7 @@ test('depth limit validation logic', () => {
 test('depth limit allows queries within limit', () => {
   const errors = [];
   const mockContext = {
-    reportError: (error) => errors.push(error),
+    reportError: (error) => errors.push(error)
   };
 
   const validator = mockDepthLimit(5);

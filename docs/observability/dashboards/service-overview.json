@@ -1,0 +1,78 @@
+{
+  "title": "Service Overview",
+  "description": "Golden dashboard summarizing service health and error budget status.",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Availability (Last 30d)",
+      "targets": [
+        {
+          "expr": "1 - (sum(rate(request_error_rate{service=\"$service\"}[30d])) / sum(rate(requests_total{service=\"$service\"}[30d])))",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 0.999 },
+              { "color": "green", "value": 0.9995 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Request Volume",
+      "targets": [
+        {
+          "expr": "sum(rate(requests_total{service=\"$service\"}[5m]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Budget Burn",
+      "targets": [
+        {
+          "expr": "sum(rate(request_error_rate{service=\"$service\"}[5m])) / (1 - $sloTarget)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "query": "label_values(service)",
+        "type": "query",
+        "datasource": "$datasource"
+      },
+      {
+        "name": "sloTarget",
+        "type": "constant",
+        "query": "0.999"
+      }
+    ]
+  }
+}
