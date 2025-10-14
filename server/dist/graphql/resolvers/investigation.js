@@ -1,6 +1,6 @@
-import baseLogger from '../../config/logger';
+import pino from 'pino';
 import { getPostgresPool } from '../../config/database.js';
-const logger = baseLogger.child({ name: 'investigationResolvers' });
+const logger = pino();
 const investigationResolvers = {
     Query: {
         investigation: async (_, { id }) => {
@@ -17,21 +17,11 @@ const investigationResolvers = {
             logger.info(`Fetching investigations (placeholder) limit: ${limit}, offset: ${offset}`);
             // Placeholder: In a real implementation, fetch investigations from PostgreSQL with pagination
             return [
-                {
-                    id: 'inv-1',
-                    name: 'Project Alpha',
-                    description: 'Initial investigation',
-                    createdAt: new Date().toISOString(),
-                },
-                {
-                    id: 'inv-2',
-                    name: 'Project Beta',
-                    description: 'Follow-up investigation',
-                    createdAt: new Date().toISOString(),
-                },
+                { id: 'inv-1', name: 'Project Alpha', description: 'Initial investigation', createdAt: new Date().toISOString() },
+                { id: 'inv-2', name: 'Project Beta', description: 'Follow-up investigation', createdAt: new Date().toISOString() },
             ];
         },
-        auditTrace: async (_, { investigationId, filter, }) => {
+        auditTrace: async (_, { investigationId, filter }) => {
             logger.info(`Fetching audit trace for investigation ${investigationId}`);
             const pool = getPostgresPool();
             const params = [investigationId];
@@ -92,3 +82,4 @@ const investigationResolvers = {
     },
 };
 export default investigationResolvers;
+//# sourceMappingURL=investigation.js.map

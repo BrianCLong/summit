@@ -1,7 +1,0 @@
-{
-  "title": "DP TopK",
-  "panels": [
-    { "type": "graph", "title": "k-anon denials" },
-    { "type": "graph", "title": "epsilon spend" }
-  ]
-}

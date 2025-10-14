@@ -1,0 +1,47 @@
+{
+  "title": "CI Overview",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Success Ratio (1h)",
+      "datasource": "${ds_prometheus}",
+      "targets": [
+        {
+          "expr": "sum(rate(github_actions_workflow_run_conclusion{conclusion=\"success\"}[1h])) / sum(rate(github_actions_workflow_run_conclusion[1h]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Workflow Duration p95 (mins)",
+      "datasource": "${ds_prometheus}",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(github_actions_workflow_run_duration_seconds_bucket[5m])) by (le)) / 60"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Failed Runs (per 15m)",
+      "datasource": "${ds_prometheus}",
+      "targets": [
+        {
+          "expr": "sum(increase(github_actions_workflow_run_conclusion{conclusion!=\"success\"}[15m]))"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "ds_prometheus",
+        "type": "datasource",
+        "query": "prometheus"
+      }
+    ]
+  },
+  "schemaVersion": 38,
+  "version": 1
+}
