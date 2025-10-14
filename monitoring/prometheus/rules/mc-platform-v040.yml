@@ -1,0 +1,303 @@
+# MC Platform v0.4.0 Transcendent Intelligence Monitoring Rules
+# Prometheus alerting and recording rules for policy-sandboxed evolution
+
+groups:
+  - name: mc_platform_v040_transcendent_intelligence
+    interval: 30s
+    rules:
+      # === TRANSCENDENT INTELLIGENCE METRICS ===
+
+      # Record transcendent performance multiplier
+      - record: mc_platform:transcendent_performance_multiplier
+        expr: |
+          (
+            mc_platform_quantum_advantage_ratio *
+            mc_platform_intelligence_amplification_factor *
+            mc_platform_reasoning_speed_improvement
+          ) / 3
+        labels:
+          version: "v0.4.0"
+          component: "transcendent_intelligence"
+
+      # Record evolution success rate
+      - record: mc_platform:evolution_success_rate_5m
+        expr: |
+          (
+            rate(mc_platform_evolution_proposals_applied_total[5m]) /
+            rate(mc_platform_evolution_proposals_submitted_total[5m])
+          ) * 100
+        labels:
+          version: "v0.4.0"
+          component: "evolution_system"
+
+      # Record quantum advantage achievement
+      - record: mc_platform:quantum_advantage_achievement_ratio
+        expr: |
+          mc_platform_quantum_operations_advantage_sum /
+          mc_platform_quantum_operations_total
+        labels:
+          version: "v0.4.0"
+          component: "quantum_cognition"
+
+      # === SAFETY AND CONTAINMENT ALERTS ===
+
+      # Critical: Safety score below threshold
+      - alert: TranscendentSafetyScoreLow
+        expr: mc_platform_safety_score < 0.95
+        for: 1m
+        labels:
+          severity: critical
+          version: v0.4.0
+          component: safety_monitoring
+        annotations:
+          summary: "Transcendent intelligence safety score below critical threshold"
+          description: "Safety score is {{ $value | humanize }}, below the required 0.95 threshold for tenant {{ $labels.tenant }}"
+          runbook_url: "https://docs.mc-platform.com/runbooks/safety-score-low"
+
+      # Critical: Emergency containment triggered
+      - alert: EmergencyContainmentActivated
+        expr: increase(mc_platform_emergency_containment_total[1m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.0
+          component: containment_system
+        annotations:
+          summary: "Emergency containment has been activated"
+          description: "Emergency containment of type {{ $labels.containment_type }} activated for tenant {{ $labels.tenant }}"
+          runbook_url: "https://docs.mc-platform.com/runbooks/emergency-containment"
+
+      # Warning: Human oversight disabled for high-risk operations
+      - alert: HumanOversightDisabledHighRisk
+        expr: |
+          mc_platform_human_oversight_enabled == 0
+          and mc_platform_autonomy_tier >= 3
+        for: 5m
+        labels:
+          severity: warning
+          version: v0.4.0
+          component: human_oversight
+        annotations:
+          summary: "Human oversight disabled for high-risk autonomous operations"
+          description: "Autonomy tier {{ $labels.autonomy_tier }} operations running without human oversight for tenant {{ $labels.tenant }}"
+
+      # === EVOLUTION SYSTEM ALERTS ===
+
+      # Warning: Evolution proposal sandbox validation failing
+      - alert: EvolutionSandboxValidationFailing
+        expr: |
+          (
+            rate(mc_platform_evolution_sandbox_validation_failures_total[10m]) /
+            rate(mc_platform_evolution_sandbox_validation_attempts_total[10m])
+          ) * 100 > 20
+        for: 5m
+        labels:
+          severity: warning
+          version: v0.4.0
+          component: evolution_sandbox
+        annotations:
+          summary: "Evolution sandbox validation failure rate high"
+          description: "Sandbox validation failing at {{ $value | humanize }}% for tenant {{ $labels.tenant }}"
+
+      # Critical: Evolution weight sum constraint violation
+      - alert: EvolutionWeightSumViolation
+        expr: mc_platform_evolution_weight_sum > 1.0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.0
+          component: evolution_policy
+        annotations:
+          summary: "Evolution proposal violates weight sum constraint"
+          description: "Evolution weight sum is {{ $value }}, exceeding maximum 1.0 for proposal {{ $labels.proposal_id }}"
+
+      # Warning: High-risk evolution without additional approvals
+      - alert: HighRiskEvolutionInsufficientApprovals
+        expr: |
+          mc_platform_evolution_risk_level{risk_level="HIGH"} == 1
+          and mc_platform_evolution_additional_approvals_count < 2
+        for: 0s
+        labels:
+          severity: warning
+          version: v0.4.0
+          component: evolution_approval
+        annotations:
+          summary: "High-risk evolution lacks required additional approvals"
+          description: "Proposal {{ $labels.proposal_id }} has risk level HIGH but only {{ $value }} additional approvals"
+
+      # === QUANTUM OPERATIONS ALERTS ===
+
+      # Warning: Quantum coherence time degraded
+      - alert: QuantumCoherenceTimeDegraded
+        expr: mc_platform_quantum_coherence_time_microseconds < 50.0
+        for: 2m
+        labels:
+          severity: warning
+          version: v0.4.0
+          component: quantum_operations
+        annotations:
+          summary: "Quantum coherence time below threshold"
+          description: "Coherence time is {{ $value }}μs, below minimum 50μs for tenant {{ $labels.tenant }}"
+
+      # Critical: Quantum error rate too high
+      - alert: QuantumErrorRateHigh
+        expr: mc_platform_quantum_error_rate > 0.01
+        for: 1m
+        labels:
+          severity: critical
+          version: v0.4.0
+          component: quantum_operations
+        annotations:
+          summary: "Quantum operation error rate exceeds threshold"
+          description: "Error rate is {{ $value | humanizePercentage }}, above maximum 1% for tenant {{ $labels.tenant }}"
+
+      # Warning: Quantum entanglement limit approached
+      - alert: QuantumEntanglementLimitApproached
+        expr: mc_platform_quantum_entangled_qubits > 800
+        for: 5m
+        labels:
+          severity: warning
+          version: v0.4.0
+          component: quantum_operations
+        annotations:
+          summary: "Quantum entanglement approaching safety limit"
+          description: "{{ $value }} qubits entangled, approaching limit of 1000 for tenant {{ $labels.tenant }}"
+
+      # === AUTONOMY TIER ALERTS ===
+
+      # Warning: Autonomy compensation rate high
+      - alert: AutonomyCompensationRateHigh
+        expr: mc_platform_autonomy_compensation_rate_24h > 0.003
+        for: 10m
+        labels:
+          severity: warning
+          version: v0.4.0
+          component: autonomy_monitoring
+        annotations:
+          summary: "Autonomy compensation rate approaching threshold"
+          description: "24h compensation rate is {{ $value | humanizePercentage }}, approaching 0.5% limit for tenant {{ $labels.tenant }}"
+
+      # Critical: Autonomy compensation rate exceeded
+      - alert: AutonomyCompensationRateExceeded
+        expr: mc_platform_autonomy_compensation_rate_24h > 0.005
+        for: 1m
+        labels:
+          severity: critical
+          version: v0.4.0
+          component: autonomy_monitoring
+        annotations:
+          summary: "Autonomy compensation rate exceeded safety threshold"
+          description: "24h compensation rate is {{ $value | humanizePercentage }}, above 0.5% safety limit for tenant {{ $labels.tenant }}"
+
+      # Warning: Autonomy tier time limit approached
+      - alert: AutonomyTierTimeLimitApproached
+        expr: |
+          mc_platform_autonomy_operation_duration_seconds > (
+            mc_platform_autonomy_tier_time_limit_seconds * 0.8
+          )
+        for: 0s
+        labels:
+          severity: warning
+          version: v0.4.0
+          component: autonomy_monitoring
+        annotations:
+          summary: "Autonomy operation approaching tier time limit"
+          description: "Operation running for {{ $value }}s, 80% of {{ $labels.autonomy_tier }} limit for tenant {{ $labels.tenant }}"
+
+      # === PERFORMANCE AND COMPLIANCE ALERTS ===
+
+      # Warning: Transcendent performance degraded
+      - alert: TranscendentPerformanceDegraded
+        expr: mc_platform:transcendent_performance_multiplier < 5.0
+        for: 5m
+        labels:
+          severity: warning
+          version: v0.4.0
+          component: performance_monitoring
+        annotations:
+          summary: "Transcendent intelligence performance below expectations"
+          description: "Performance multiplier is {{ $value }}, below expected 5.0x baseline for tenant {{ $labels.tenant }}"
+
+      # Critical: Transcendent operation timeout
+      - alert: TranscendentOperationTimeout
+        expr: mc_platform_transcendent_operation_duration_seconds > 300
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.0
+          component: performance_monitoring
+        annotations:
+          summary: "Transcendent operation exceeded timeout threshold"
+          description: "Operation {{ $labels.operation_name }} running for {{ $value }}s, exceeding 5min timeout for tenant {{ $labels.tenant }}"
+
+      # Warning: ZK fairness proof generation failing
+      - alert: ZKFairnessProofGenerationFailing
+        expr: |
+          (
+            rate(mc_platform_zk_fairness_proof_failures_total[15m]) /
+            rate(mc_platform_zk_fairness_proof_attempts_total[15m])
+          ) * 100 > 10
+        for: 5m
+        labels:
+          severity: warning
+          version: v0.4.0
+          component: fairness_validation
+        annotations:
+          summary: "ZK fairness proof generation failure rate high"
+          description: "Fairness proof failing at {{ $value | humanize }}% for tenant {{ $labels.tenant }}"
+
+      # === EVIDENCE AND AUDIT ALERTS ===
+
+      # Critical: Evidence generation failed
+      - alert: EvidenceGenerationFailed
+        expr: increase(mc_platform_evidence_generation_failures_total[5m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.0
+          component: evidence_system
+        annotations:
+          summary: "Transcendent operation evidence generation failed"
+          description: "Evidence generation failed for operation {{ $labels.operation_id }} in tenant {{ $labels.tenant }}"
+
+      # Warning: Post-quantum signature verification failing
+      - alert: PostQuantumSignatureVerificationFailing
+        expr: |
+          (
+            rate(mc_platform_pq_signature_verification_failures_total[10m]) /
+            rate(mc_platform_pq_signature_verification_attempts_total[10m])
+          ) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+          version: v0.4.0
+          component: post_quantum_security
+        annotations:
+          summary: "Post-quantum signature verification failure rate high"
+          description: "PQ signature verification failing at {{ $value | humanize }}% for tenant {{ $labels.tenant }}"
+
+      # === REGULATORY AND COMPLIANCE ALERTS ===
+
+      # Critical: Data residency violation detected
+      - alert: DataResidencyViolation
+        expr: mc_platform_data_residency_compliant == 0
+        for: 0s
+        labels:
+          severity: critical
+          version: v0.4.0
+          component: regulatory_compliance
+        annotations:
+          summary: "Data residency compliance violation detected"
+          description: "Operation {{ $labels.operation_name }} violates data residency for tenant {{ $labels.tenant }} in region {{ $labels.region }}"
+
+      # Warning: Purpose limitation validation failing
+      - alert: PurposeLimitationValidationFailing
+        expr: mc_platform_purpose_limitation_compliant == 0
+        for: 1m
+        labels:
+          severity: warning
+          version: v0.4.0
+          component: regulatory_compliance
+        annotations:
+          summary: "Purpose limitation compliance failing"
+          description: "Operation {{ $labels.operation_name }} fails purpose limitation check for tenant {{ $labels.tenant }}"

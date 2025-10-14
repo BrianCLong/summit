@@ -1,5 +1,5 @@
-import EmbeddingService from './EmbeddingService.js';
-import baseLogger from '../config/logger';
+import EmbeddingService from "./EmbeddingService.js";
+import pino from "pino";
 
 export interface IndexDocumentInput {
   id: string;
@@ -28,30 +28,30 @@ export default class SemanticSearchService {
   private client: any;
   private embeddingService: EmbeddingService;
   private indexName: string;
-  private logger = baseLogger.child({ name: 'SemanticSearchService' });
+  private logger = pino({ name: "SemanticSearchService" });
 
   constructor(client?: any, embeddingService?: EmbeddingService) {
     this.client = client || null;
     this.embeddingService = embeddingService || new EmbeddingService();
-    this.indexName = process.env.WEAVIATE_INDEX || 'IngestedDocument';
+    this.indexName = process.env.WEAVIATE_INDEX || "IngestedDocument";
   }
 
   private async getClient() {
     if (this.client) return this.client;
     try {
-      const weaviate = await import('weaviate-ts-client');
+      const weaviate = await import("weaviate-ts-client");
       const apiKey = process.env.WEAVIATE_API_KEY
         ? new weaviate.ApiKey(process.env.WEAVIATE_API_KEY)
         : undefined;
       this.client = weaviate.client({
-        scheme: process.env.WEAVIATE_SCHEME || 'http',
-        host: process.env.WEAVIATE_HOST || 'localhost:8080',
+        scheme: process.env.WEAVIATE_SCHEME || "http",
+        host: process.env.WEAVIATE_HOST || "localhost:8080",
         apiKey,
       });
       return this.client;
     } catch (err: any) {
-      this.logger.error({ err }, 'Failed to initialize Weaviate client');
-      throw new Error('Weaviate client not available');
+      this.logger.error({ err }, "Failed to initialize Weaviate client");
+      throw new Error("Weaviate client not available");
     }
   }
 
@@ -88,39 +88,42 @@ export default class SemanticSearchService {
     const operands: any[] = [];
     if (filters.source) {
       operands.push({
-        path: ['source'],
-        operator: 'Equal',
+        path: ["source"],
+        operator: "Equal",
         valueString: filters.source,
       });
     }
     if (filters.threatLevel !== undefined) {
       operands.push({
-        path: ['threatLevel'],
-        operator: 'Equal',
+        path: ["threatLevel"],
+        operator: "Equal",
         valueInt: filters.threatLevel,
       });
     }
     if (filters.dateFrom) {
       operands.push({
-        path: ['date'],
-        operator: 'GreaterThanEqual',
+        path: ["date"],
+        operator: "GreaterThanEqual",
         valueDate: filters.dateFrom,
       });
     }
     if (filters.dateTo) {
       operands.push({
-        path: ['date'],
-        operator: 'LessThanEqual',
+        path: ["date"],
+        operator: "LessThanEqual",
         valueDate: filters.dateTo,
       });
     }
 
-    const where = operands.length > 0 ? { operator: 'And', operands } : undefined;
+    const where =
+      operands.length > 0 ? { operator: "And", operands } : undefined;
 
     const result = await client.graphql
       .get()
       .withClassName(this.indexName)
-      .withFields('id text source date threatLevel graphId _additional { distance }')
+      .withFields(
+        "id text source date threatLevel graphId _additional { distance }",
+      )
       .withNearVector({ vector })
       .withWhere(where)
       .withLimit(limit)

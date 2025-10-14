@@ -38,22 +38,16 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
             const mockSocket1 = {
                 id: 'socket1',
                 emit: jest.fn(),
-                to: jest.fn(() => ({ emit: jest.fn() })),
+                to: jest.fn(() => ({ emit: jest.fn() }))
             };
             const mockSocket2 = {
                 id: 'socket2',
                 emit: jest.fn(),
-                to: jest.fn(() => ({ emit: jest.fn() })),
+                to: jest.fn(() => ({ emit: jest.fn() }))
             };
             // Join users to war room
-            await warRoomSync.joinWarRoom(mockSocket1, roomId, 'user1', {
-                name: 'User 1',
-                role: 'admin',
-            });
-            await warRoomSync.joinWarRoom(mockSocket2, roomId, 'user2', {
-                name: 'User 2',
-                role: 'analyst',
-            });
+            await warRoomSync.joinWarRoom(mockSocket1, roomId, 'user1', { name: 'User 1', role: 'admin' });
+            await warRoomSync.joinWarRoom(mockSocket2, roomId, 'user2', { name: 'User 2', role: 'analyst' });
             const operation = {
                 id: 'op-001',
                 type: 'add_node',
@@ -61,11 +55,11 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
                     nodeId: 'node-001',
                     properties: {
                         label: 'Test Entity',
-                        type: 'Person',
+                        type: 'Person'
                     },
-                    position: { x: 100, y: 100 },
+                    position: { x: 100, y: 100 }
                 },
-                userId: 'user1',
+                userId: 'user1'
             };
             const startTime = Date.now();
             await warRoomSync.handleGraphOperation(mockSocket1, roomId, 'user1', operation);
@@ -75,7 +69,7 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
             // Verify operation was applied
             expect(mockSocket1.emit).toHaveBeenCalledWith('war_room_operation_applied', expect.objectContaining({
                 operationId: 'op-001',
-                latency,
+                latency
             }));
         });
         test('should handle concurrent operations without conflicts', async () => {
@@ -84,7 +78,7 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
             const mockSocket = {
                 id: 'socket1',
                 emit: jest.fn(),
-                to: jest.fn(() => ({ emit: jest.fn() })),
+                to: jest.fn(() => ({ emit: jest.fn() }))
             };
             await warRoomSync.joinWarRoom(mockSocket, roomId, 'user1', { name: 'User 1', role: 'admin' });
             const operations = [
@@ -92,13 +86,13 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
                     id: 'op-concurrent-1',
                     type: 'add_node',
                     data: { nodeId: 'node-001', properties: { label: 'Node 1' } },
-                    userId: 'user1',
+                    userId: 'user1'
                 },
                 {
                     id: 'op-concurrent-2',
                     type: 'add_node',
                     data: { nodeId: 'node-002', properties: { label: 'Node 2' } },
-                    userId: 'user1',
+                    userId: 'user1'
                 },
                 {
                     id: 'op-concurrent-3',
@@ -107,14 +101,14 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
                         edgeId: 'edge-001',
                         source: 'node-001',
                         target: 'node-002',
-                        properties: { type: 'CONNECTS' },
+                        properties: { type: 'CONNECTS' }
                     },
-                    userId: 'user1',
-                },
+                    userId: 'user1'
+                }
             ];
             const startTime = Date.now();
             // Execute operations concurrently
-            const promises = operations.map((op) => warRoomSync.handleGraphOperation(mockSocket, roomId, 'user1', op));
+            const promises = operations.map(op => warRoomSync.handleGraphOperation(mockSocket, roomId, 'user1', op));
             await Promise.all(promises);
             const totalLatency = Date.now() - startTime;
             // Even with concurrent operations, should stay under latency requirement
@@ -128,46 +122,40 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
             const mockSocket1 = {
                 id: 'socket1',
                 emit: jest.fn(),
-                to: jest.fn(() => ({ emit: jest.fn() })),
+                to: jest.fn(() => ({ emit: jest.fn() }))
             };
             const mockSocket2 = {
                 id: 'socket2',
                 emit: jest.fn(),
-                to: jest.fn(() => ({ emit: jest.fn() })),
+                to: jest.fn(() => ({ emit: jest.fn() }))
             };
-            await warRoomSync.joinWarRoom(mockSocket1, roomId, 'user1', {
-                name: 'User 1',
-                role: 'admin',
-            });
-            await warRoomSync.joinWarRoom(mockSocket2, roomId, 'user2', {
-                name: 'User 2',
-                role: 'analyst',
-            });
+            await warRoomSync.joinWarRoom(mockSocket1, roomId, 'user1', { name: 'User 1', role: 'admin' });
+            await warRoomSync.joinWarRoom(mockSocket2, roomId, 'user2', { name: 'User 2', role: 'analyst' });
             // Create the node first
             await warRoomSync.handleGraphOperation(mockSocket1, roomId, 'user1', {
                 id: 'op-create',
                 type: 'add_node',
                 data: { nodeId: 'conflict-node', properties: { label: 'Original' } },
-                userId: 'user1',
+                userId: 'user1'
             });
             // Conflicting operations on same node
             const operation1 = {
                 id: 'op-conflict-1',
                 type: 'update_node',
                 data: { nodeId: 'conflict-node', properties: { label: 'Updated by User 1' } },
-                userId: 'user1',
+                userId: 'user1'
             };
             const operation2 = {
                 id: 'op-conflict-2',
                 type: 'update_node',
                 data: { nodeId: 'conflict-node', properties: { label: 'Updated by User 2' } },
-                userId: 'user2',
+                userId: 'user2'
             };
             const startTime = Date.now();
             // Execute conflicting operations
             await Promise.all([
                 warRoomSync.handleGraphOperation(mockSocket1, roomId, 'user1', operation1),
-                warRoomSync.handleGraphOperation(mockSocket2, roomId, 'user2', operation2),
+                warRoomSync.handleGraphOperation(mockSocket2, roomId, 'user2', operation2)
             ]);
             const conflictResolutionTime = Date.now() - startTime;
             // Conflict resolution should be fast
@@ -186,13 +174,13 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
                 id: 'ot-1',
                 type: 'update_node',
                 data: { nodeId: 'ot-node', properties: { prop1: 'value1' } },
-                userId: 'user1',
+                userId: 'user1'
             };
             const operation2 = {
                 id: 'ot-2',
                 type: 'update_node',
                 data: { nodeId: 'ot-node', properties: { prop2: 'value2' } },
-                userId: 'user2',
+                userId: 'user2'
             };
             // Add first operation to log
             room.operationLog.push(operation1);
@@ -210,14 +198,14 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
             const mockSocket = {
                 id: 'socket1',
                 emit: jest.fn(),
-                to: jest.fn(() => ({ emit: jest.fn() })),
+                to: jest.fn(() => ({ emit: jest.fn() }))
             };
             await warRoomSync.joinWarRoom(mockSocket, roomId, 'user1', { name: 'User 1', role: 'admin' });
             const operation = {
                 id: 'metrics-test',
                 type: 'add_node',
                 data: { nodeId: 'metrics-node', properties: { label: 'Metrics Test' } },
-                userId: 'user1',
+                userId: 'user1'
             };
             await warRoomSync.handleGraphOperation(mockSocket, roomId, 'user1', operation);
             expect(warRoomSync.metrics.operationsApplied).toBe(initialOperationsCount + 1);
@@ -242,7 +230,7 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
             const mockSocket = {
                 id: 'socket1',
                 emit: jest.fn(),
-                to: jest.fn(() => ({ emit: jest.fn() })),
+                to: jest.fn(() => ({ emit: jest.fn() }))
             };
             await warRoomSync.joinWarRoom(mockSocket, roomId, 'user1', { name: 'User 1', role: 'admin' });
             // Invalid operation - missing required data
@@ -250,13 +238,13 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
                 id: 'invalid-op',
                 type: 'add_node',
                 // Missing data field
-                userId: 'user1',
+                userId: 'user1'
             };
             await warRoomSync.handleGraphOperation(mockSocket, roomId, 'user1', invalidOperation);
             // Should emit operation rejected
             expect(mockSocket.emit).toHaveBeenCalledWith('war_room_operation_rejected', expect.objectContaining({
                 operationId: 'invalid-op',
-                reason: expect.any(String),
+                reason: expect.any(String)
             }));
         });
         test('should handle user permission violations', async () => {
@@ -265,25 +253,22 @@ describe('War Room Graph Sync - P0 Critical MVP1', () => {
             const mockSocket = {
                 id: 'socket1',
                 emit: jest.fn(),
-                to: jest.fn(() => ({ emit: jest.fn() })),
+                to: jest.fn(() => ({ emit: jest.fn() }))
             };
             // Join as viewer (limited permissions)
-            await warRoomSync.joinWarRoom(mockSocket, roomId, 'user1', {
-                name: 'User 1',
-                role: 'viewer',
-            });
+            await warRoomSync.joinWarRoom(mockSocket, roomId, 'user1', { name: 'User 1', role: 'viewer' });
             // Try to delete node (admin operation)
             const deleteOperation = {
                 id: 'delete-op',
                 type: 'delete_node',
                 data: { nodeId: 'some-node' },
-                userId: 'user1',
+                userId: 'user1'
             };
             await warRoomSync.handleGraphOperation(mockSocket, roomId, 'user1', deleteOperation);
             // Should be rejected due to insufficient permissions
             expect(mockSocket.emit).toHaveBeenCalledWith('war_room_operation_rejected', expect.objectContaining({
                 operationId: 'delete-op',
-                reason: 'Insufficient permissions',
+                reason: 'Insufficient permissions'
             }));
         });
     });
@@ -333,12 +318,12 @@ if (process.env.TEST_MODE === 'integration') {
             // Client 1 joins room and sends operation
             clientSocket1.emit('war_room_join', {
                 roomId,
-                userInfo: { name: 'Integration User 1', role: 'admin' },
+                userInfo: { name: 'Integration User 1', role: 'admin' }
             });
             // Client 2 joins room
             clientSocket2.emit('war_room_join', {
                 roomId,
-                userInfo: { name: 'Integration User 2', role: 'analyst' },
+                userInfo: { name: 'Integration User 2', role: 'analyst' }
             });
             // Send operation from client 1
             setTimeout(() => {
@@ -349,14 +334,15 @@ if (process.env.TEST_MODE === 'integration') {
                         type: 'add_node',
                         data: {
                             nodeId: 'integration-node',
-                            properties: { label: 'Integration Test Node' },
-                        },
-                    },
+                            properties: { label: 'Integration Test Node' }
+                        }
+                    }
                 });
             }, 100);
         });
     });
 }
 module.exports = {
-    WarRoomSyncService,
+    WarRoomSyncService
 };
+//# sourceMappingURL=warRoomSync.test.js.map

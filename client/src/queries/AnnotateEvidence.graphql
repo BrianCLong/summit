@@ -1,0 +1,3 @@
+mutation AnnotateEvidence($id: ID!, $range: String!, $note: String!) {
+  annotateEvidence(id: $id, range: $range, note: $note) { id ranges { start end } notes }
+}
