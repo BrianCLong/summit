@@ -7,7 +7,7 @@
   },
   "types": "./src/index.ts",
   "scripts": {
-    "test": "vitest run && node --test tests",
+    "test": "vitest run tests/sandbox.test.ts tests/policy-engine.test.ts tests/validator.test.ts",
     "test:validator": "node --loader ts-node/esm ./tests/validator.test.ts"
   },
   "dependencies": {

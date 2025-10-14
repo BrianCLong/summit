@@ -15,7 +15,15 @@ import type {
 
 type TestFn = () => void;
 
+type VitestContext = { test: (name: string, fn: TestFn) => void } | undefined;
+
+const vitestContext: VitestContext = (import.meta as { vitest?: VitestContext }).vitest;
+
 function runTest(name: string, fn: TestFn) {
+  if (vitestContext) {
+    vitestContext.test(name, fn);
+    return;
+  }
   try {
     fn();
     console.log(`✓ ${name}`);
