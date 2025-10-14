@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/json-schema",
+  "packId": "policy-pack-v0",
+  "version": "0.1.0",
+  "contentType": "application/vnd.intelgraph.policy+tar",
+  "issuedAt": "2025-01-01T00:00:00Z",
+  "policies": [
+    { "name": "cos.abac", "path": "opa/cos.abac.rego" },
+    { "name": "retention.defaults", "path": "data/retention.json" },
+    { "name": "purpose.tags", "path": "data/purpose-tags.json" }
+  ],
+  "manifest": {
+    "digest": {
+      "algorithm": "sha256",
+      "value": "TBD_FILLED_BY_PUBLISHER"
+    }
+  },
+  "signature": {
+    "type": "sigstore-cosign-bundle",
+    "bundlePath": "signing/cosign.bundle.json",
+    "identity": "maestro-conductor@intelgraph.example"
+  }
+}

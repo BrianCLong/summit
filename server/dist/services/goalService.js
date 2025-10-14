@@ -18,7 +18,7 @@ class GoalService {
             investigationId: goalData.investigationId,
             status: 'active',
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         };
         goals.set(goal.id, goal);
         return goal;
@@ -39,7 +39,7 @@ class GoalService {
     static getAllGoals(investigationId = null) {
         const allGoals = Array.from(goals.values());
         if (investigationId) {
-            return allGoals.filter((goal) => goal.investigationId === investigationId);
+            return allGoals.filter(goal => goal.investigationId === investigationId);
         }
         return allGoals;
     }
@@ -56,7 +56,7 @@ class GoalService {
         const updatedGoal = {
             ...goal,
             ...updateData,
-            updatedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         };
         goals.set(id, updatedGoal);
         return updatedGoal;
@@ -85,3 +85,4 @@ module.exports.createGoal = GoalService.createGoal.bind(GoalService);
 module.exports.getAllGoals = GoalService.getAllGoals.bind(GoalService);
 module.exports.updateGoal = GoalService.updateGoal.bind(GoalService);
 module.exports.deleteGoal = GoalService.deleteGoal.bind(GoalService);
+//# sourceMappingURL=goalService.js.map

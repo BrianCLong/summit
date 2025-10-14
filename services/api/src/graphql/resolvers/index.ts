@@ -12,6 +12,8 @@ import { investigationResolvers } from './investigation.js';
 import { analyticsResolvers } from './analytics.js';
 import { copilotResolvers } from './copilot.js';
 import { userResolvers } from './user.js';
+import { cetResolvers } from './case_evidence_triage.js';
+import { withABAC } from '../abac.js';
 
 export const resolvers = {
   // Scalar types
@@ -26,6 +28,16 @@ export const resolvers = {
     ...analyticsResolvers.Query,
     ...copilotResolvers.Query,
     ...userResolvers.Query,
+    ...cetResolvers.Query,
+
+    // ABAC-wrapped high-value resolvers
+    entity: withABAC(entityResolvers.Query?.entity || (async()=>null), 'read'),
+    investigation: withABAC(investigationResolvers.Query?.investigation || (async()=>null), 'read'),
+    investigations: withABAC(investigationResolvers.Query?.investigations || (async()=>[]), 'read'),
+    caseById: withABAC(cetResolvers.Query?.caseById || (async()=>null), 'read'),
+    caseExport: withABAC(cetResolvers.Query?.caseExport || (async()=>null), 'read'),
+    evidenceAnnotations: withABAC(cetResolvers.Query?.evidenceAnnotations || (async()=>[]), 'read'),
+    triageSuggestions: withABAC(cetResolvers.Query?.triageSuggestions || (async()=>[]), 'read'),
 
     // Global search across all types
     globalSearch: async (_, { query, types }, context) => {
@@ -91,6 +103,12 @@ export const resolvers = {
     ...relationshipResolvers.Mutation,
     ...investigationResolvers.Mutation,
     ...userResolvers.Mutation,
+    createCase: withABAC(cetResolvers.Mutation?.createCase || (async()=>null), 'create'),
+    approveCase: withABAC(cetResolvers.Mutation?.approveCase || (async()=>null), 'update'),
+    annotateEvidence: withABAC(cetResolvers.Mutation?.annotateEvidence || (async()=>null), 'update'),
+    triageSuggest: withABAC(cetResolvers.Mutation?.triageSuggest || (async()=>null), 'create'),
+    triageApprove: withABAC(cetResolvers.Mutation?.triageApprove || (async()=>null), 'update'),
+    triageMaterialize: withABAC(cetResolvers.Mutation?.triageMaterialize || (async()=>null), 'update'),
   },
 
   // Subscriptions for real-time updates
