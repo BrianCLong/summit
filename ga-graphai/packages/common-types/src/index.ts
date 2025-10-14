@@ -1017,6 +1017,201 @@ export interface LedgerRecord {
   tags?: string[];
 }
 
+export type WorkflowDependencyType =
+  | "service"
+  | "database"
+  | "package"
+  | "dataset"
+  | "queue"
+  | "policy"
+  | "infrastructure";
+
+export type WorkflowDependencyCriticality =
+  | "low"
+  | "medium"
+  | "high"
+  | "mission-critical";
+
+export type ComplianceDomain =
+  | "privacy"
+  | "security"
+  | "financial"
+  | "regulatory"
+  | "operational"
+  | "data";
+
+export type RiskSeverity = "info" | "low" | "medium" | "high" | "critical";
+
+export interface WorkflowDependencySnapshot {
+  id: string;
+  name: string;
+  type: WorkflowDependencyType;
+  version: string;
+  domain?: ComplianceDomain;
+  criticality?: WorkflowDependencyCriticality;
+  owner?: string;
+  attachedNodes?: string[];
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+export type ControlCoverage = "full" | "partial" | "none";
+
+export interface WorkflowPolicyBinding {
+  controlId: string;
+  domain: ComplianceDomain;
+  coverage: ControlCoverage;
+  description?: string;
+  impactedNodes?: string[];
+  owner?: string;
+  annotations?: Record<string, string>;
+}
+
+export interface WorkflowRuntimeIncident {
+  id: string;
+  severity: RiskSeverity;
+  summary: string;
+  nodes?: string[];
+  detectedAt?: string;
+  resolved?: boolean;
+}
+
+export interface WorkflowRuntimeResourceProfile {
+  nodeId: string;
+  latencyMs?: number;
+  costUSD?: number;
+  cpuMillis?: number;
+  memoryMb?: number;
+  throughputPerMin?: number;
+}
+
+export interface WorkflowRuntimeProfile {
+  stats: WorkflowRunStats;
+  resourceProfiles?: WorkflowRuntimeResourceProfile[];
+  incidents?: WorkflowRuntimeIncident[];
+}
+
+export interface WorkflowSnapshot {
+  snapshotId: string;
+  branch?: string;
+  recordedAt: string;
+  definition: WorkflowDefinition;
+  dependencies: WorkflowDependencySnapshot[];
+  policyBindings: WorkflowPolicyBinding[];
+  runtime?: WorkflowRuntimeProfile;
+  notes?: string;
+}
+
+export type DiffLayer = "functional" | "dependency" | "policy" | "runtime";
+
+export interface DiffGraphNode {
+  id: string;
+  label: string;
+  layer: DiffLayer;
+  signature: string;
+  attributes: Record<string, unknown>;
+}
+
+export interface DiffGraphEdge {
+  from: string;
+  to: string;
+  relation: string;
+  layer: DiffLayer;
+  weight?: number;
+}
+
+export interface DiffFieldDelta {
+  field: string;
+  before?: unknown;
+  after?: unknown;
+  weight: number;
+}
+
+export interface DiffGraphNodeChange {
+  id: string;
+  layer: DiffLayer;
+  beforeSignature: string;
+  afterSignature: string;
+  deltas: DiffFieldDelta[];
+  beforeAttributes: Record<string, unknown>;
+  afterAttributes: Record<string, unknown>;
+}
+
+export interface DiffEdgeReweight {
+  from: string;
+  to: string;
+  relation: string;
+  layer: DiffLayer;
+  beforeWeight?: number;
+  afterWeight?: number;
+}
+
+export interface GraphDelta {
+  baselineFingerprint: string;
+  targetFingerprint: string;
+  addedNodes: DiffGraphNode[];
+  removedNodes: DiffGraphNode[];
+  changedNodes: DiffGraphNodeChange[];
+  addedEdges: DiffGraphEdge[];
+  removedEdges: DiffGraphEdge[];
+  reweightedEdges: DiffEdgeReweight[];
+}
+
+export interface WorkflowChangeSummary {
+  description: string;
+  impactedNodes: string[];
+  severity: RiskSeverity;
+  domain: ComplianceDomain;
+  businessImpact?: string;
+}
+
+export interface WorkflowDiffRiskAnnotation {
+  domain: ComplianceDomain;
+  severity: RiskSeverity;
+  rationale: string;
+  impactedNodes: string[];
+  recommendedControls: string[];
+  businessImpact?: string;
+}
+
+export interface WorkflowMigrationStep {
+  title: string;
+  description: string;
+  commands: string[];
+}
+
+export interface WorkflowMigrationTestCase {
+  name: string;
+  description: string;
+  assertions: string[];
+}
+
+export interface WorkflowMigrationPlan {
+  steps: WorkflowMigrationStep[];
+  tests: WorkflowMigrationTestCase[];
+}
+
+export type ContinuousCheckTrigger = "pre-merge" | "post-merge" | "scheduled";
+
+export interface WorkflowContinuousCheck {
+  name: string;
+  description: string;
+  trigger: ContinuousCheckTrigger;
+}
+
+export interface WorkflowDiffResult {
+  baseline: WorkflowSnapshot;
+  target: WorkflowSnapshot;
+  graphDelta: GraphDelta;
+  functionalChanges: WorkflowChangeSummary[];
+  dependencyChanges: WorkflowChangeSummary[];
+  policyChanges: WorkflowChangeSummary[];
+  runtimeChanges: WorkflowChangeSummary[];
+  riskAnnotations: WorkflowDiffRiskAnnotation[];
+  migrationPlan: WorkflowMigrationPlan;
+  continuousChecks: WorkflowContinuousCheck[];
+}
+
 export interface WorkflowValidationIssue {
   severity: "error" | "warning" | "info";
   code: string;
