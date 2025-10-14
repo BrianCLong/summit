@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
 /**
  * IntelGraph Demo Seeder
- *
+ * 
  * Seeds deterministic demo data for Golden Path E2E testing
  * Usage: npm run seed:demo
  */
@@ -62,7 +62,7 @@ class DemoSeeder {
   constructor() {
     this.neo4j = getNeo4jDriver();
     this.postgres = getPostgresPool();
-
+    
     // Load demo data
     const dataPath = join(process.cwd(), 'seeds', 'demo-v1.json');
     this.data = JSON.parse(readFileSync(dataPath, 'utf8'));
@@ -78,12 +78,13 @@ class DemoSeeder {
       await this.seedEntities();
       await this.seedRelationships();
       await this.createConstraintsAndIndexes();
-
+      
       const duration = Date.now() - startTime;
       console.log(`✅ Demo seeding completed in ${duration}ms`);
       console.log(`   • ${this.data.investigations.length} investigations`);
       console.log(`   • ${this.data.entities.length} entities`);
       console.log(`   • ${this.data.relationships.length} relationships`);
+      
     } catch (error) {
       console.error('❌ Demo seeding failed:', error);
       throw error;
@@ -92,7 +93,7 @@ class DemoSeeder {
 
   private async clearExistingDemoData(): Promise<void> {
     console.log('🧹 Clearing existing demo data...');
-
+    
     const session = this.neo4j.session();
     try {
       // Clear relationships first to avoid constraint violations
@@ -118,6 +119,7 @@ class DemoSeeder {
       await this.postgres.query(`
         DELETE FROM investigations WHERE id = 'demo-investigation-001'
       `);
+
     } finally {
       await session.close();
     }
@@ -125,13 +127,12 @@ class DemoSeeder {
 
   private async seedInvestigations(): Promise<void> {
     console.log('🔍 Seeding investigations...');
-
+    
     for (const investigation of this.data.investigations) {
       // Neo4j
       const session = this.neo4j.session();
       try {
-        await session.run(
-          `
+        await session.run(`
           CREATE (i:Investigation {
             id: $id,
             title: $title,
@@ -142,16 +143,13 @@ class DemoSeeder {
             createdAt: $createdAt,
             updatedAt: $createdAt
           })
-        `,
-          investigation,
-        );
+        `, investigation);
       } finally {
         await session.close();
       }
 
       // PostgreSQL
-      await this.postgres.query(
-        `
+      await this.postgres.query(`
         INSERT INTO investigations (
           id, title, description, status, sensitivity, 
           created_by, created_at, updated_at
@@ -162,28 +160,25 @@ class DemoSeeder {
           status = EXCLUDED.status,
           sensitivity = EXCLUDED.sensitivity,
           updated_at = EXCLUDED.updated_at
-      `,
-        [
-          investigation.id,
-          investigation.title,
-          investigation.description,
-          investigation.status,
-          investigation.sensitivity,
-          investigation.createdBy,
-          investigation.createdAt,
-        ],
-      );
+      `, [
+        investigation.id,
+        investigation.title,
+        investigation.description,
+        investigation.status,
+        investigation.sensitivity,
+        investigation.createdBy,
+        investigation.createdAt
+      ]);
     }
   }
 
   private async seedEntities(): Promise<void> {
     console.log('🎯 Seeding entities...');
-
+    
     for (const entity of this.data.entities) {
       const session = this.neo4j.session();
       try {
-        await session.run(
-          `
+        await session.run(`
           CREATE (e:Entity {
             id: $id,
             investigationId: $investigationId,
@@ -197,25 +192,21 @@ class DemoSeeder {
             createdAt: datetime(),
             updatedAt: datetime()
           })
-        `,
-          {
-            ...entity,
-            properties: JSON.stringify(entity.properties),
-          },
-        );
+        `, {
+          ...entity,
+          properties: JSON.stringify(entity.properties)
+        });
 
         // Create relationship to investigation
-        await session.run(
-          `
+        await session.run(`
           MATCH (e:Entity {id: $entityId})
           MATCH (i:Investigation {id: $investigationId})
           CREATE (e)-[:BELONGS_TO]->(i)
-        `,
-          {
-            entityId: entity.id,
-            investigationId: entity.investigationId,
-          },
-        );
+        `, {
+          entityId: entity.id,
+          investigationId: entity.investigationId
+        });
+
       } finally {
         await session.close();
       }
@@ -224,12 +215,11 @@ class DemoSeeder {
 
   private async seedRelationships(): Promise<void> {
     console.log('🔗 Seeding relationships...');
-
+    
     for (const relationship of this.data.relationships) {
       const session = this.neo4j.session();
       try {
-        await session.run(
-          `
+        await session.run(`
           MATCH (from:Entity {id: $fromEntityId})
           MATCH (to:Entity {id: $toEntityId})
           CREATE (r:Relationship {
@@ -253,12 +243,11 @@ class DemoSeeder {
             label: $label,
             properties: $properties
           }]->(to)
-        `,
-          {
-            ...relationship,
-            properties: JSON.stringify(relationship.properties),
-          },
-        );
+        `, {
+          ...relationship,
+          properties: JSON.stringify(relationship.properties)
+        });
+
       } finally {
         await session.close();
       }
@@ -267,14 +256,14 @@ class DemoSeeder {
 
   private async createConstraintsAndIndexes(): Promise<void> {
     console.log('📊 Creating constraints and indexes...');
-
+    
     const session = this.neo4j.session();
     try {
       // Create constraints
       const constraints = [
         'CREATE CONSTRAINT entity_id_unique IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE',
         'CREATE CONSTRAINT investigation_id_unique IF NOT EXISTS FOR (i:Investigation) REQUIRE i.id IS UNIQUE',
-        'CREATE CONSTRAINT relationship_id_unique IF NOT EXISTS FOR (r:Relationship) REQUIRE r.id IS UNIQUE',
+        'CREATE CONSTRAINT relationship_id_unique IF NOT EXISTS FOR (r:Relationship) REQUIRE r.id IS UNIQUE'
       ];
 
       for (const constraint of constraints) {
@@ -293,7 +282,7 @@ class DemoSeeder {
         'CREATE INDEX entity_investigation_idx IF NOT EXISTS FOR (e:Entity) ON (e.investigationId)',
         'CREATE INDEX entity_type_idx IF NOT EXISTS FOR (e:Entity) ON (e.type)',
         'CREATE INDEX relationship_type_idx IF NOT EXISTS FOR (r:Relationship) ON (r.type)',
-        'CREATE INDEX relationship_investigation_idx IF NOT EXISTS FOR (r:Relationship) ON (r.investigationId)',
+        'CREATE INDEX relationship_investigation_idx IF NOT EXISTS FOR (r:Relationship) ON (r.investigationId)'
       ];
 
       for (const index of indexes) {
@@ -305,6 +294,7 @@ class DemoSeeder {
           }
         }
       }
+
     } finally {
       await session.close();
     }
@@ -319,7 +309,7 @@ class DemoSeeder {
 // CLI execution
 async function main() {
   const seeder = new DemoSeeder();
-
+  
   try {
     await seeder.seed();
     console.log('🎉 Demo data ready for Golden Path testing!');

@@ -1,70 +1,74 @@
-import baseLogger from '../config/logger';
-const logger = baseLogger.child({ name: 'aiAnalysisService' });
+import pino from 'pino';
+const logger = pino();
 /**
  * AI-powered text analysis for entity extraction and relationship detection
  * Uses pattern matching and NLP techniques for demonstration
  */
 export class AIAnalysisService {
-    entityPatterns = {
-        PERSON: [
-            /\b([A-Z][a-z]+ [A-Z][a-z]+)\b/g, // John Doe pattern
-            /\b(Mr\.?|Mrs\.?|Dr\.?|Prof\.?) ([A-Z][a-z]+)\b/g, // Title + Name
-            /\b([A-Z][a-z]+), ([A-Z][a-z]+)\b/g, // LastName, FirstName
-        ],
-        ORGANIZATION: [
-            /\b([A-Z][a-z]+ Inc\.?|Corp\.?|LLC|Ltd\.?)\b/g,
-            /\b([A-Z][A-Za-z\s]+ Company)\b/g,
-            /\b([A-Z][A-Za-z\s]+ Corporation)\b/g,
-            /\b(Microsoft|Apple|Google|Amazon|Meta|Tesla|OpenAI)\b/g,
-        ],
-        LOCATION: [
-            /\b([A-Z][a-z]+ City)\b/g,
-            /\b(New York|Los Angeles|Chicago|Houston|Phoenix|Philadelphia|San Antonio|San Diego|Dallas|San Jose|Austin|Jacksonville|Fort Worth|Columbus|Charlotte|San Francisco|Indianapolis|Seattle|Denver|Washington|Boston|El Paso|Nashville|Detroit|Oklahoma City|Portland|Las Vegas|Memphis|Louisville|Baltimore|Milwaukee|Albuquerque|Tucson|Fresno|Sacramento|Mesa|Kansas City|Atlanta|Long Beach|Colorado Springs|Raleigh|Miami|Virginia Beach|Omaha|Oakland|Minneapolis|Tulsa|Arlington|Tampa|New Orleans)\b/g,
-            /\b([A-Z][a-z]+, [A-Z]{2})\b/g, // City, State
-        ],
-        EVENT: [
-            /\b(meeting|conference|summit|workshop|seminar|presentation|training|interview)\b/gi,
-            /\b([A-Z][a-z]+ Meeting)\b/g,
-            /\b([0-9]{4} [A-Z][a-z]+ Conference)\b/g,
-        ],
-        DATE: [
-            /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/g,
-            /\b(\d{4}-\d{2}-\d{2})\b/g,
-            /\b(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}\b/g,
-        ],
-        EMAIL: [/\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/g],
-        PHONE: [
-            /\b(\(\d{3}\)\s?\d{3}-\d{4})\b/g,
-            /\b(\d{3}-\d{3}-\d{4})\b/g,
-            /\b(\+\d{1,3}\s?\d{3}\s?\d{3}\s?\d{4})\b/g,
-        ],
-    };
-    relationshipPatterns = [
-        {
-            pattern: /(\w+(?:\s+\w+)*)\s+(works\s+(?:at|for)|employed\s+(?:by|at))\s+(\w+(?:\s+\w+)*)/gi,
-            type: 'EMPLOYED_BY',
-        },
-        {
-            pattern: /(\w+(?:\s+\w+)*)\s+(is\s+(?:the\s+)?(?:CEO|CTO|CFO|President|Manager|Director))\s+(?:of\s+)?(\w+(?:\s+\w+)*)/gi,
-            type: 'LEADS',
-        },
-        {
-            pattern: /(\w+(?:\s+\w+)*)\s+(met\s+with|meeting\s+with|talked\s+to)\s+(\w+(?:\s+\w+)*)/gi,
-            type: 'MET_WITH',
-        },
-        {
-            pattern: /(\w+(?:\s+\w+)*)\s+(located\s+in|based\s+in|from)\s+(\w+(?:\s+\w+)*)/gi,
-            type: 'LOCATED_IN',
-        },
-        {
-            pattern: /(\w+(?:\s+\w+)*)\s+(owns|founded|created)\s+(\w+(?:\s+\w+)*)/gi,
-            type: 'OWNS',
-        },
-        {
-            pattern: /(\w+(?:\s+\w+)*)\s+and\s+(\w+(?:\s+\w+)*)\s+(are\s+)?(?:partners|collaborated|working\s+together)/gi,
-            type: 'COLLABORATES_WITH',
-        },
-    ];
+    constructor() {
+        this.entityPatterns = {
+            PERSON: [
+                /\b([A-Z][a-z]+ [A-Z][a-z]+)\b/g, // John Doe pattern
+                /\b(Mr\.?|Mrs\.?|Dr\.?|Prof\.?) ([A-Z][a-z]+)\b/g, // Title + Name
+                /\b([A-Z][a-z]+), ([A-Z][a-z]+)\b/g // LastName, FirstName
+            ],
+            ORGANIZATION: [
+                /\b([A-Z][a-z]+ Inc\.?|Corp\.?|LLC|Ltd\.?)\b/g,
+                /\b([A-Z][A-Za-z\s]+ Company)\b/g,
+                /\b([A-Z][A-Za-z\s]+ Corporation)\b/g,
+                /\b(Microsoft|Apple|Google|Amazon|Meta|Tesla|OpenAI)\b/g
+            ],
+            LOCATION: [
+                /\b([A-Z][a-z]+ City)\b/g,
+                /\b(New York|Los Angeles|Chicago|Houston|Phoenix|Philadelphia|San Antonio|San Diego|Dallas|San Jose|Austin|Jacksonville|Fort Worth|Columbus|Charlotte|San Francisco|Indianapolis|Seattle|Denver|Washington|Boston|El Paso|Nashville|Detroit|Oklahoma City|Portland|Las Vegas|Memphis|Louisville|Baltimore|Milwaukee|Albuquerque|Tucson|Fresno|Sacramento|Mesa|Kansas City|Atlanta|Long Beach|Colorado Springs|Raleigh|Miami|Virginia Beach|Omaha|Oakland|Minneapolis|Tulsa|Arlington|Tampa|New Orleans)\b/g,
+                /\b([A-Z][a-z]+, [A-Z]{2})\b/g // City, State
+            ],
+            EVENT: [
+                /\b(meeting|conference|summit|workshop|seminar|presentation|training|interview)\b/gi,
+                /\b([A-Z][a-z]+ Meeting)\b/g,
+                /\b([0-9]{4} [A-Z][a-z]+ Conference)\b/g
+            ],
+            DATE: [
+                /\b(\d{1,2}\/\d{1,2}\/\d{4})\b/g,
+                /\b(\d{4}-\d{2}-\d{2})\b/g,
+                /\b(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}\b/g
+            ],
+            EMAIL: [
+                /\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/g
+            ],
+            PHONE: [
+                /\b(\(\d{3}\)\s?\d{3}-\d{4})\b/g,
+                /\b(\d{3}-\d{3}-\d{4})\b/g,
+                /\b(\+\d{1,3}\s?\d{3}\s?\d{3}\s?\d{4})\b/g
+            ]
+        };
+        this.relationshipPatterns = [
+            {
+                pattern: /(\w+(?:\s+\w+)*)\s+(works\s+(?:at|for)|employed\s+(?:by|at))\s+(\w+(?:\s+\w+)*)/gi,
+                type: 'EMPLOYED_BY'
+            },
+            {
+                pattern: /(\w+(?:\s+\w+)*)\s+(is\s+(?:the\s+)?(?:CEO|CTO|CFO|President|Manager|Director))\s+(?:of\s+)?(\w+(?:\s+\w+)*)/gi,
+                type: 'LEADS'
+            },
+            {
+                pattern: /(\w+(?:\s+\w+)*)\s+(met\s+with|meeting\s+with|talked\s+to)\s+(\w+(?:\s+\w+)*)/gi,
+                type: 'MET_WITH'
+            },
+            {
+                pattern: /(\w+(?:\s+\w+)*)\s+(located\s+in|based\s+in|from)\s+(\w+(?:\s+\w+)*)/gi,
+                type: 'LOCATED_IN'
+            },
+            {
+                pattern: /(\w+(?:\s+\w+)*)\s+(owns|founded|created)\s+(\w+(?:\s+\w+)*)/gi,
+                type: 'OWNS'
+            },
+            {
+                pattern: /(\w+(?:\s+\w+)*)\s+and\s+(\w+(?:\s+\w+)*)\s+(are\s+)?(?:partners|collaborated|working\s+together)/gi,
+                type: 'COLLABORATES_WITH'
+            }
+        ];
+    }
     /**
      * Extract entities from text using pattern matching and NLP
      */
@@ -85,7 +89,7 @@ export class AIAnalysisService {
                                 label: entityType,
                                 confidence,
                                 start: match.index,
-                                end: match.index + match[0].length,
+                                end: match.index + match[0].length
                             });
                         }
                     }
@@ -103,7 +107,7 @@ export class AIAnalysisService {
                                 source,
                                 target,
                                 type: relationPattern.type,
-                                confidence: 0.8,
+                                confidence: 0.8
                             });
                         }
                     }
@@ -115,7 +119,7 @@ export class AIAnalysisService {
             logger.info(`AI Analysis completed. Entities Found: ${uniqueEntities.length}, Relationships Found: ${uniqueRelationships.length}, Text Length: ${text.length}`);
             return {
                 entities: uniqueEntities.sort((a, b) => b.confidence - a.confidence),
-                relationships: uniqueRelationships.sort((a, b) => b.confidence - a.confidence),
+                relationships: uniqueRelationships.sort((a, b) => b.confidence - a.confidence)
             };
         }
         catch (error) {
@@ -140,7 +144,7 @@ export class AIAnalysisService {
                         target: entity2,
                         type: 'RELATED_TO',
                         confidence: 0.6,
-                        context: cooccurrenceContext,
+                        context: cooccurrenceContext
                     });
                 }
             }
@@ -158,7 +162,7 @@ export class AIAnalysisService {
                         target,
                         type: relationPattern.type,
                         confidence: 0.85,
-                        context: match[0],
+                        context: match[0]
                     });
                 }
             }
@@ -180,7 +184,7 @@ export class AIAnalysisService {
                     riskFactors.push({
                         factor: 'Government Affiliation',
                         severity: 'medium',
-                        description: 'Subject may be bound by government regulations',
+                        description: 'Subject may be bound by government regulations'
                     });
                 }
                 if (properties.role?.toLowerCase().includes('ceo')) {
@@ -188,7 +192,7 @@ export class AIAnalysisService {
                     suggestedRelationships.push({
                         type: 'LEADS',
                         reason: 'CEO role suggests organizational leadership',
-                        confidence: 0.9,
+                        confidence: 0.9
                     });
                 }
                 break;
@@ -198,7 +202,7 @@ export class AIAnalysisService {
                     riskFactors.push({
                         factor: 'Financial Regulations',
                         severity: 'high',
-                        description: 'Subject to banking and financial compliance requirements',
+                        description: 'Subject to banking and financial compliance requirements'
                     });
                 }
                 break;
@@ -208,7 +212,7 @@ export class AIAnalysisService {
                     suggestedRelationships.push({
                         type: 'ATTENDED_BY',
                         reason: 'High-importance events typically have executive attendance',
-                        confidence: 0.8,
+                        confidence: 0.8
                     });
                 }
                 break;
@@ -220,26 +224,8 @@ export class AIAnalysisService {
      */
     async analyzeSentiment(text) {
         // Simple sentiment analysis using keyword matching
-        const positiveWords = [
-            'good',
-            'great',
-            'excellent',
-            'success',
-            'win',
-            'achieve',
-            'positive',
-            'benefit',
-        ];
-        const negativeWords = [
-            'bad',
-            'terrible',
-            'fail',
-            'loss',
-            'negative',
-            'problem',
-            'issue',
-            'concern',
-        ];
+        const positiveWords = ['good', 'great', 'excellent', 'success', 'win', 'achieve', 'positive', 'benefit'];
+        const negativeWords = ['bad', 'terrible', 'fail', 'loss', 'negative', 'problem', 'issue', 'concern'];
         const words = text.toLowerCase().split(/\W+/);
         let positiveScore = 0;
         let negativeScore = 0;
@@ -258,11 +244,11 @@ export class AIAnalysisService {
         let confidence = 0.5;
         if (positiveScore > negativeScore) {
             sentiment = 'positive';
-            confidence = Math.min(0.9, 0.5 + ((positiveScore - negativeScore) / words.length) * 2);
+            confidence = Math.min(0.9, 0.5 + (positiveScore - negativeScore) / words.length * 2);
         }
         else if (negativeScore > positiveScore) {
             sentiment = 'negative';
-            confidence = Math.min(0.9, 0.5 + ((negativeScore - positiveScore) / words.length) * 2);
+            confidence = Math.min(0.9, 0.5 + (negativeScore - positiveScore) / words.length * 2);
         }
         return { sentiment, confidence, keywords: foundKeywords };
     }
@@ -297,7 +283,7 @@ export class AIAnalysisService {
      */
     deduplicateEntities(entities) {
         const seen = new Set();
-        return entities.filter((entity) => {
+        return entities.filter(entity => {
             const key = `${entity.text.toLowerCase()}-${entity.label}`;
             if (seen.has(key))
                 return false;
@@ -310,7 +296,7 @@ export class AIAnalysisService {
      */
     deduplicateRelationships(relationships) {
         const seen = new Set();
-        return relationships.filter((rel) => {
+        return relationships.filter(rel => {
             const key = `${rel.source.toLowerCase()}-${rel.type}-${rel.target.toLowerCase()}`;
             if (seen.has(key))
                 return false;
@@ -356,3 +342,4 @@ export class AIAnalysisService {
 }
 // Export singleton instance
 export const aiAnalysisService = new AIAnalysisService();
+//# sourceMappingURL=aiAnalysis.js.map
