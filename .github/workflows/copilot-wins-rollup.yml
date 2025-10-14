@@ -1,0 +1,39 @@
+name: Copilot Wins Rollup
+on:
+  schedule: [{ cron: '30 15 * * MON' }]
+  workflow_dispatch: {}
+permissions: { contents: read, issues: write }
+jobs:
+  rollup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: latest
+        run: |
+          f=$(ls -1 reports/copilot/*-adoption-report.md | tail -n1 || true)
+          echo "path=$f" >> "$GITHUB_OUTPUT"
+      - uses: actions/github-script@v7
+        if: steps.latest.outputs.path != ''
+        with:
+          script: |
+            const fs = require('fs');
+            const path = process.env['PATH_FILE'] = `${{ steps.latest.outputs.path }}`;
+            const body = fs.readFileSync(path, 'utf8');
+            const issueTitle = 'Copilot Wins & Golden Prompts';
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state:'open'
+            });
+            let issue = issues.find(i => i.title === issueTitle);
+            if (!issue) {
+              issue = (await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo, title: issueTitle,
+                body: 'Use this thread to paste golden prompts and weekly wins.'
+              })).data;
+            }
+            const section = body.split('## Top Contributors')[0].trim();
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number,
+              body: `### Weekly rollup\n\n${section}\n\n_Reply with your best prompts this week:_\n- \
+- 
+- `
+            });

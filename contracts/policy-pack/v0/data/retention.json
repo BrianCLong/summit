@@ -1,0 +1,13 @@
+{
+  "tiers": {
+    "short": { "days": 30, "description": "PII default" },
+    "standard": { "days": 180 },
+    "long": { "days": 365 }
+  },
+  "defaults": {
+    "pii": "short",
+    "logs": "standard",
+    "audit": "long"
+  }
+}
+

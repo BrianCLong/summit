@@ -1,0 +1,130 @@
+{
+  "dag_metadata": {
+    "dag_id": "dag_1758929305137_TENANT_002",
+    "request_id": "req_1758929305137_complex_research",
+    "tenant_id": "TENANT_002",
+    "timestamp": "2025-09-26T23:28:25.137859Z",
+    "node_count": 5,
+    "edge_count": 3
+  },
+  "provenance_chain": [
+    {
+      "node_id": "node_1758929305137_research_engine_research_step_1",
+      "node_type": "source_access",
+      "timestamp": "2025-09-26T23:28:25.137864Z",
+      "component": "research_engine",
+      "action": "research_step_1",
+      "inputs": [
+        "df9b461b61e0b749"
+      ],
+      "outputs": [
+        "f43b2fbd9366a4f7"
+      ],
+      "metadata": {
+        "sources_queried": 5,
+        "findings": "research_findings_1"
+      },
+      "duration_ms": 0.05,
+      "success": true
+    },
+    {
+      "node_id": "node_1758929305137_research_engine_research_step_2",
+      "node_type": "source_access",
+      "timestamp": "2025-09-26T23:28:25.137868Z",
+      "component": "research_engine",
+      "action": "research_step_2",
+      "inputs": [
+        "f43b2fbd9366a4f7"
+      ],
+      "outputs": [
+        "845a2bd925a93aa2"
+      ],
+      "metadata": {
+        "sources_queried": 7,
+        "findings": "research_findings_2"
+      },
+      "duration_ms": 0.05,
+      "success": true
+    },
+    {
+      "node_id": "node_1758929305137_research_engine_research_step_3",
+      "node_type": "source_access",
+      "timestamp": "2025-09-26T23:28:25.137871Z",
+      "component": "research_engine",
+      "action": "research_step_3",
+      "inputs": [
+        "845a2bd925a93aa2"
+      ],
+      "outputs": [
+        "1c64a049aed91751"
+      ],
+      "metadata": {
+        "sources_queried": 9,
+        "findings": "research_findings_3"
+      },
+      "duration_ms": 0.05,
+      "success": true
+    },
+    {
+      "node_id": "node_1758929305137_response_formatter_format_response",
+      "node_type": "response_generation",
+      "timestamp": "2025-09-26T23:28:25.137882Z",
+      "component": "response_formatter",
+      "action": "format_response",
+      "inputs": [
+        "51b082355eeb5a10"
+      ],
+      "outputs": [
+        "8be2c36ccd27cca6"
+      ],
+      "metadata": {
+        "format": "markdown",
+        "attestation_included": true
+      },
+      "duration_ms": 0.023,
+      "success": true
+    },
+    {
+      "node_id": "node_1758929305137_attestation_service_sign_response",
+      "node_type": "response_generation",
+      "timestamp": "2025-09-26T23:28:25.137884Z",
+      "component": "attestation_service",
+      "action": "sign_response",
+      "inputs": [
+        "8be2c36ccd27cca6"
+      ],
+      "outputs": [
+        "32d5518c117872f7"
+      ],
+      "metadata": {
+        "signature_type": "ed25519",
+        "jwks_version": "v2025.09"
+      },
+      "duration_ms": 0.089,
+      "success": true
+    }
+  ],
+  "data_flow": [
+    {
+      "from_node": "node_1758929305137_research_engine_research_step_1",
+      "to_node": "node_1758929305137_research_engine_research_step_2",
+      "relationship": "data_flow"
+    },
+    {
+      "from_node": "node_1758929305137_research_engine_research_step_2",
+      "to_node": "node_1758929305137_research_engine_research_step_3",
+      "relationship": "data_flow"
+    },
+    {
+      "from_node": "node_1758929305137_response_formatter_format_response",
+      "to_node": "node_1758929305137_attestation_service_sign_response",
+      "relationship": "data_flow"
+    }
+  ],
+  "cryptographic_proof": {
+    "signature": "340b73a598393fb7df79d63ad708fda52b35b45e439ecdfdbea91fc44eee90b9",
+    "public_key": "03c524db24eb3f3b680f4da225d0b9b5",
+    "algorithm": "hmac-sha256"
+  },
+  "verification_api": "/api/v2/provenance/verify/dag_1758929305137_TENANT_002"
+}

@@ -14,7 +14,7 @@ describe('Mobile Service - P2 Priority', () => {
             setex: jest.fn(),
             get: jest.fn(),
             del: jest.fn(),
-            publish: jest.fn(),
+            publish: jest.fn()
         };
         mockNotificationService = {
             getUserNotifications: jest.fn().mockResolvedValue([]),
@@ -25,16 +25,16 @@ describe('Mobile Service - P2 Priority', () => {
             getInvestigationsSummary: jest.fn().mockResolvedValue([]),
             getLightweightEntities: jest.fn().mockResolvedValue([]),
             getMobileNotifications: jest.fn().mockResolvedValue([]),
-            handleOfflineQueue: jest.fn().mockResolvedValue({}),
+            handleOfflineQueue: jest.fn().mockResolvedValue({})
         };
         mockSecurityService = {
             checkPermission: jest.fn(),
-            verifySession: jest.fn(),
+            verifySession: jest.fn()
         };
         mockLogger = {
             info: jest.fn(),
             error: jest.fn(),
-            warn: jest.fn(),
+            warn: jest.fn()
         };
         mobileService = new MobileService(mockRedisClient, mockNotificationService, mockSecurityService, mockLogger);
     });
@@ -49,7 +49,7 @@ describe('Mobile Service - P2 Priority', () => {
                 appVersion: '1.0.0',
                 osVersion: '17.0',
                 deviceToken: 'token123',
-                userId: 'user123',
+                userId: 'user123'
             };
             mockRedisClient.setex.mockResolvedValue('OK');
             const client = await mobileService.registerMobileClient(clientInfo);
@@ -66,7 +66,7 @@ describe('Mobile Service - P2 Priority', () => {
             const clientInfo = {
                 deviceId: 'device123',
                 platform: 'android',
-                userId: 'user123',
+                userId: 'user123'
             };
             mockRedisClient.setex.mockResolvedValue('OK');
             const client = await mobileService.registerMobileClient(clientInfo);
@@ -78,7 +78,7 @@ describe('Mobile Service - P2 Priority', () => {
                 deviceId: 'device123',
                 platform: 'ios',
                 deviceToken: 'token123',
-                userId: 'user123',
+                userId: 'user123'
             };
             const client = await mobileService.registerMobileClient(clientInfo);
             expect(mobileService.deviceTokens.get('token123')).toBe(client.id);
@@ -115,16 +115,13 @@ describe('Mobile Service - P2 Priority', () => {
                     title: 'Test Notification',
                     body: 'Test body',
                     category: 'INVESTIGATION',
-                    createdAt: new Date(),
-                },
+                    createdAt: new Date()
+                }
             ];
             mockNotificationService.getUserNotifications.mockResolvedValue(mockNotifications);
             const notifications = await mobileService.getOfflineNotifications('user123', 10);
             expect(notifications).toEqual(mockNotifications);
-            expect(mockNotificationService.getUserNotifications).toHaveBeenCalledWith('user123', {
-                limit: 10,
-                unreadOnly: false,
-            });
+            expect(mockNotificationService.getUserNotifications).toHaveBeenCalledWith('user123', { limit: 10, unreadOnly: false });
         });
         test('should provide user settings', async () => {
             const settings = await mobileService.getUserSettings('user123');
@@ -140,12 +137,12 @@ describe('Mobile Service - P2 Priority', () => {
             const client = {
                 id: 'client123',
                 userId: 'user123',
-                syncState: { syncVersion: 0 },
+                syncState: { syncVersion: 0 }
             };
             mobileService.mobileClients.set('client123', client);
             const syncRequest = {
                 type: 'FULL',
-                lastSyncVersion: 0,
+                lastSyncVersion: 0
             };
             const syncResult = await mobileService.handleSync('client123', syncRequest);
             expect(syncResult.syncVersion).toBeDefined();
@@ -161,12 +158,12 @@ describe('Mobile Service - P2 Priority', () => {
             const client = {
                 id: 'client123',
                 userId: 'user123',
-                syncState: { syncVersion: 12345 },
+                syncState: { syncVersion: 12345 }
             };
             mobileService.mobileClients.set('client123', client);
             const syncRequest = {
                 type: 'INCREMENTAL',
-                lastSyncVersion: 12345,
+                lastSyncVersion: 12345
             };
             const syncResult = await mobileService.handleSync('client123', syncRequest);
             expect(syncResult.syncVersion).toBeGreaterThan(12345);
@@ -177,7 +174,7 @@ describe('Mobile Service - P2 Priority', () => {
             const client = {
                 id: 'client123',
                 userId: 'user123',
-                syncState: { syncVersion: 0 },
+                syncState: { syncVersion: 0 }
             };
             mobileService.mobileClients.set('client123', client);
             const syncRequest = {
@@ -186,14 +183,14 @@ describe('Mobile Service - P2 Priority', () => {
                     {
                         id: 'op1',
                         type: 'CREATE_ENTITY',
-                        data: { label: 'New Entity', type: 'PERSON' },
+                        data: { label: 'New Entity', type: 'PERSON' }
                     },
                     {
                         id: 'op2',
                         type: 'MARK_NOTIFICATION_READ',
-                        data: { notificationId: 'notif123' },
-                    },
-                ],
+                        data: { notificationId: 'notif123' }
+                    }
+                ]
             };
             const syncResult = await mobileService.handleSync('client123', syncRequest);
             expect(syncResult).toBeDefined();
@@ -210,8 +207,8 @@ describe('Mobile Service - P2 Priority', () => {
                         entityCount: 25,
                         lastUpdated: new Date(),
                         changeType: 'CREATED',
-                        extraData: 'should be removed',
-                    },
+                        extraData: 'should be removed'
+                    }
                 ],
                 entities: [
                     {
@@ -221,8 +218,8 @@ describe('Mobile Service - P2 Priority', () => {
                         investigationId: 'inv1',
                         connectionCount: 5,
                         changeType: 'UPDATED',
-                        heavyData: 'should be removed',
-                    },
+                        heavyData: 'should be removed'
+                    }
                 ],
                 notifications: [
                     {
@@ -232,10 +229,10 @@ describe('Mobile Service - P2 Priority', () => {
                         category: 'SECURITY',
                         priority: 'HIGH',
                         createdAt: new Date(),
-                        read: false,
-                    },
+                        read: false
+                    }
                 ],
-                settings: [{ theme: 'dark' }],
+                settings: [{ theme: 'dark' }]
             };
             const optimized = mobileService.optimizeChangesForMobile(changes);
             expect(optimized.investigations[0]).not.toHaveProperty('extraData');
@@ -247,18 +244,17 @@ describe('Mobile Service - P2 Priority', () => {
             const client = {
                 id: 'client123',
                 userId: 'user123',
-                syncState: { syncVersion: 0 },
+                syncState: { syncVersion: 0 }
             };
             mobileService.mobileClients.set('client123', client);
             // Mock a failure in offline operation processing
-            mobileService.processOfflineOperations = jest
-                .fn()
-                .mockRejectedValue(new Error('Offline processing failed'));
+            mobileService.processOfflineOperations = jest.fn().mockRejectedValue(new Error('Offline processing failed'));
             const syncRequest = {
                 type: 'FULL',
-                pendingOperations: [{ id: 'op1', type: 'INVALID_OP' }],
+                pendingOperations: [{ id: 'op1', type: 'INVALID_OP' }]
             };
-            await expect(mobileService.handleSync('client123', syncRequest)).rejects.toThrow('Offline processing failed');
+            await expect(mobileService.handleSync('client123', syncRequest))
+                .rejects.toThrow('Offline processing failed');
             expect(mockLogger.error).toHaveBeenCalled();
         });
     });
@@ -269,8 +265,8 @@ describe('Mobile Service - P2 Priority', () => {
                 {
                     id: 'op1',
                     type: 'CREATE_ENTITY',
-                    data: { label: 'New Entity', type: 'PERSON' },
-                },
+                    data: { label: 'New Entity', type: 'PERSON' }
+                }
             ];
             const results = await mobileService.processOfflineOperations('client123', operations);
             expect(results).toHaveLength(1);
@@ -284,8 +280,8 @@ describe('Mobile Service - P2 Priority', () => {
                 {
                     id: 'op1',
                     type: 'INVALID_OPERATION',
-                    data: {},
-                },
+                    data: {}
+                }
             ];
             const results = await mobileService.processOfflineOperations('client123', operations);
             expect(results).toHaveLength(1);
@@ -299,27 +295,27 @@ describe('Mobile Service - P2 Priority', () => {
                 {
                     id: 'op1',
                     type: 'CREATE_ENTITY',
-                    data: { label: 'Entity 1', type: 'PERSON' },
+                    data: { label: 'Entity 1', type: 'PERSON' }
                 },
                 {
                     id: 'op2',
                     type: 'UPDATE_ENTITY',
-                    data: { entityId: 'ent123', label: 'Updated Entity' },
+                    data: { entityId: 'ent123', label: 'Updated Entity' }
                 },
                 {
                     id: 'op3',
                     type: 'CREATE_RELATIONSHIP',
-                    data: { source: 'ent1', target: 'ent2', type: 'KNOWS' },
+                    data: { source: 'ent1', target: 'ent2', type: 'KNOWS' }
                 },
                 {
                     id: 'op4',
                     type: 'MARK_NOTIFICATION_READ',
-                    data: { notificationId: 'notif123' },
-                },
+                    data: { notificationId: 'notif123' }
+                }
             ];
             const results = await mobileService.processOfflineOperations('client123', operations);
             expect(results).toHaveLength(4);
-            expect(results.every((r) => r.status === 'SUCCESS')).toBe(true);
+            expect(results.every(r => r.status === 'SUCCESS')).toBe(true);
             expect(mobileService.metrics.offlineActions).toBe(4);
         });
     });
@@ -365,8 +361,8 @@ describe('Mobile Service - P2 Priority', () => {
                     priority: 'HIGH',
                     createdAt: new Date(),
                     read: false,
-                    actionUrl: '/investigation/inv123',
-                },
+                    actionUrl: '/investigation/inv123'
+                }
             ];
             mockNotificationService.getUserNotifications.mockResolvedValue(mockNotifications);
             const notifications = await mobileService.getMobileNotifications('user123', { limit: 20 });
@@ -381,7 +377,7 @@ describe('Mobile Service - P2 Priority', () => {
             const client = {
                 id: 'client123',
                 platform: 'ios',
-                deviceToken: 'token123',
+                deviceToken: 'token123'
             };
             mobileService.mobileClients.set('client123', client);
             mobileService.deviceTokens.set('token123', 'client123');
@@ -390,23 +386,23 @@ describe('Mobile Service - P2 Priority', () => {
                 body: 'New entities have been discovered',
                 badge: 1,
                 investigationId: 'inv123',
-                actionType: 'VIEW_INVESTIGATION',
+                actionType: 'VIEW_INVESTIGATION'
             };
             mockNotificationService.deliverPushNotification.mockResolvedValue({
                 success: true,
-                messageId: 'msg123',
+                messageId: 'msg123'
             });
             const result = await mobileService.sendPushNotification('token123', notification);
             expect(result.success).toBe(true);
             expect(mockNotificationService.deliverPushNotification).toHaveBeenCalledWith({ deviceToken: 'token123' }, expect.objectContaining({
                 notification: expect.objectContaining({
                     title: 'Investigation Update',
-                    body: 'New entities have been discovered',
+                    body: 'New entities have been discovered'
                 }),
                 data: expect.objectContaining({
                     investigationId: 'inv123',
-                    actionType: 'VIEW_INVESTIGATION',
-                }),
+                    actionType: 'VIEW_INVESTIGATION'
+                })
             }));
             expect(mobileService.metrics.pushNotifications).toBe(1);
         });
@@ -414,7 +410,7 @@ describe('Mobile Service - P2 Priority', () => {
             const client = {
                 id: 'client123',
                 platform: 'ios',
-                deviceToken: 'token123',
+                deviceToken: 'token123'
             };
             mobileService.mobileClients.set('client123', client);
             mobileService.deviceTokens.set('token123', 'client123');
@@ -422,7 +418,7 @@ describe('Mobile Service - P2 Priority', () => {
                 title: 'iOS Notification',
                 body: 'iOS specific notification',
                 badge: 5,
-                sound: 'alert.caf',
+                sound: 'alert.caf'
             };
             mockNotificationService.deliverPushNotification.mockResolvedValue({ success: true });
             await mobileService.sendPushNotification('token123', notification);
@@ -431,25 +427,25 @@ describe('Mobile Service - P2 Priority', () => {
                     aps: expect.objectContaining({
                         alert: {
                             title: 'iOS Notification',
-                            body: 'iOS specific notification',
+                            body: 'iOS specific notification'
                         },
                         badge: 5,
-                        sound: 'alert.caf',
-                    }),
-                }),
+                        sound: 'alert.caf'
+                    })
+                })
             }));
         });
         test('should customize notifications for Android platform', async () => {
             const client = {
                 id: 'client123',
                 platform: 'android',
-                deviceToken: 'token123',
+                deviceToken: 'token123'
             };
             mobileService.mobileClients.set('client123', client);
             mobileService.deviceTokens.set('token123', 'client123');
             const notification = {
                 title: 'Android Notification',
-                body: 'Android specific notification',
+                body: 'Android specific notification'
             };
             mockNotificationService.deliverPushNotification.mockResolvedValue({ success: true });
             await mobileService.sendPushNotification('token123', notification);
@@ -459,23 +455,24 @@ describe('Mobile Service - P2 Priority', () => {
                         notification: expect.objectContaining({
                             icon: 'ic_notification',
                             color: '#3498db',
-                            click_action: 'FLUTTER_NOTIFICATION_CLICK',
-                        }),
-                    }),
-                }),
+                            click_action: 'FLUTTER_NOTIFICATION_CLICK'
+                        })
+                    })
+                })
             }));
         });
         test('should handle push notification failures', async () => {
             const client = {
                 id: 'client123',
                 platform: 'ios',
-                deviceToken: 'token123',
+                deviceToken: 'token123'
             };
             mobileService.mobileClients.set('client123', client);
             mobileService.deviceTokens.set('token123', 'client123');
             mockNotificationService.deliverPushNotification.mockRejectedValue(new Error('Push service unavailable'));
             const notification = { title: 'Test', body: 'Test notification' };
-            await expect(mobileService.sendPushNotification('token123', notification)).rejects.toThrow('Push service unavailable');
+            await expect(mobileService.sendPushNotification('token123', notification))
+                .rejects.toThrow('Push service unavailable');
             expect(mockLogger.error).toHaveBeenCalled();
         });
     });
@@ -484,14 +481,14 @@ describe('Mobile Service - P2 Priority', () => {
             const client = {
                 id: 'client123',
                 deviceToken: 'old_token',
-                appVersion: '1.0.0',
+                appVersion: '1.0.0'
             };
             mobileService.mobileClients.set('client123', client);
             mobileService.deviceTokens.set('old_token', 'client123');
             const updates = {
                 deviceToken: 'new_token',
                 appVersion: '1.1.0',
-                osVersion: '18.0',
+                osVersion: '18.0'
             };
             const updatedClient = await mobileService.updateMobileClient('client123', updates);
             expect(updatedClient.deviceToken).toBe('new_token');
@@ -506,7 +503,7 @@ describe('Mobile Service - P2 Priority', () => {
             const client = {
                 id: 'client123',
                 deviceToken: 'token123',
-                userId: 'user123',
+                userId: 'user123'
             };
             mobileService.mobileClients.set('client123', client);
             mobileService.deviceTokens.set('token123', 'client123');
@@ -527,7 +524,7 @@ describe('Mobile Service - P2 Priority', () => {
                 id: 'client123',
                 deviceToken: 'token123',
                 preferences: { backgroundSync: true },
-                syncState: { syncVersion: 12345 },
+                syncState: { syncVersion: 12345 }
             };
             mobileService.mobileClients.set('client123', client);
             mobileService.deviceTokens.set('token123', 'client123');
@@ -535,14 +532,14 @@ describe('Mobile Service - P2 Priority', () => {
             mobileService.handleSync = jest.fn().mockResolvedValue({
                 changes: {
                     investigations: [{ id: 'inv1', priority: 'HIGH' }],
-                    notifications: [{ id: 'notif1', priority: 'HIGH', read: false }],
-                },
+                    notifications: [{ id: 'notif1', priority: 'HIGH', read: false }]
+                }
             });
             mockNotificationService.deliverPushNotification.mockResolvedValue({ success: true });
             await mobileService.performBackgroundSync('client123');
             expect(mobileService.handleSync).toHaveBeenCalledWith('client123', {
                 type: 'INCREMENTAL',
-                lastSyncVersion: 12345,
+                lastSyncVersion: 12345
             });
             // Should send push notification for important changes
             expect(mockNotificationService.deliverPushNotification).toHaveBeenCalled();
@@ -550,7 +547,7 @@ describe('Mobile Service - P2 Priority', () => {
         test('should skip background sync for disabled clients', async () => {
             const client = {
                 id: 'client123',
-                preferences: { backgroundSync: false },
+                preferences: { backgroundSync: false }
             };
             mobileService.mobileClients.set('client123', client);
             mobileService.handleSync = jest.fn();
@@ -561,10 +558,10 @@ describe('Mobile Service - P2 Priority', () => {
             const expiredTime = new Date(Date.now() - 25 * 60 * 60 * 1000); // 25 hours ago
             const recentTime = new Date(Date.now() - 1 * 60 * 60 * 1000); // 1 hour ago
             mobileService.offlineData.set('expired_client', {
-                lastUpdated: expiredTime,
+                lastUpdated: expiredTime
             });
             mobileService.offlineData.set('recent_client', {
-                lastUpdated: recentTime,
+                lastUpdated: recentTime
             });
             mockRedisClient.del.mockResolvedValue(1);
             await mobileService.cleanupExpiredSyncData();
@@ -592,15 +589,15 @@ describe('Mobile Service - P2 Priority', () => {
                 investigations: [{ id: 'inv1' }],
                 notifications: [
                     { priority: 'HIGH', read: false },
-                    { priority: 'LOW', read: false },
-                ],
+                    { priority: 'LOW', read: false }
+                ]
             };
             const unimportantChanges = {
                 investigations: [],
                 notifications: [
                     { priority: 'LOW', read: true },
-                    { priority: 'MEDIUM', read: false },
-                ],
+                    { priority: 'MEDIUM', read: false }
+                ]
             };
             expect(mobileService.hasImportantChanges(importantChanges)).toBe(true);
             expect(mobileService.hasImportantChanges(unimportantChanges)).toBe(false);
@@ -611,8 +608,8 @@ describe('Mobile Service - P2 Priority', () => {
                     { id: 'n1', read: false },
                     { id: 'n2', read: true },
                     { id: 'n3', read: false },
-                    { id: 'n4', read: false },
-                ],
+                    { id: 'n4', read: false }
+                ]
             };
             const unreadCount = mobileService.getUnreadCount(changes);
             expect(unreadCount).toBe(3);
@@ -645,13 +642,13 @@ describe('Mobile Service - P2 Priority', () => {
         test('should calculate average sync interval', () => {
             const now = Date.now();
             mobileService.mobileClients.set('client1', {
-                syncState: { lastSync: new Date(now - 5 * 60 * 1000) }, // 5 minutes ago
+                syncState: { lastSync: new Date(now - 5 * 60 * 1000) } // 5 minutes ago
             });
             mobileService.mobileClients.set('client2', {
-                syncState: { lastSync: new Date(now - 10 * 60 * 1000) }, // 10 minutes ago
+                syncState: { lastSync: new Date(now - 10 * 60 * 1000) } // 10 minutes ago
             });
             mobileService.mobileClients.set('client3', {
-                syncState: { lastSync: null }, // Never synced
+                syncState: { lastSync: null } // Never synced
             });
             const avgInterval = mobileService.getAverageSyncInterval();
             expect(avgInterval).toBeGreaterThan(0);
@@ -660,17 +657,20 @@ describe('Mobile Service - P2 Priority', () => {
     });
     describe('Error Handling', () => {
         test('should handle client not found errors', async () => {
-            await expect(mobileService.handleSync('non_existent_client', {})).rejects.toThrow('Mobile client not found');
-            await expect(mobileService.updateMobileClient('non_existent_client', {})).rejects.toThrow('Mobile client not found');
+            await expect(mobileService.handleSync('non_existent_client', {}))
+                .rejects.toThrow('Mobile client not found');
+            await expect(mobileService.updateMobileClient('non_existent_client', {}))
+                .rejects.toThrow('Mobile client not found');
         });
         test('should handle push notification errors gracefully', async () => {
-            await expect(mobileService.sendPushNotification('invalid_token', {})).rejects.toThrow('Mobile client not found for device token');
+            await expect(mobileService.sendPushNotification('invalid_token', {}))
+                .rejects.toThrow('Mobile client not found for device token');
         });
         test('should handle background sync failures', async () => {
             const client = {
                 id: 'client123',
                 preferences: { backgroundSync: true },
-                syncState: { syncVersion: 0 },
+                syncState: { syncVersion: 0 }
             };
             mobileService.mobileClients.set('client123', client);
             mobileService.handleSync = jest.fn().mockRejectedValue(new Error('Sync failed'));
@@ -688,49 +688,38 @@ describe('Mobile Service Performance', () => {
     });
     test('should handle many concurrent sync operations', async () => {
         // Register multiple clients
-        const clients = Array(100)
-            .fill()
-            .map((_, i) => ({
+        const clients = Array(100).fill().map((_, i) => ({
             id: `client${i}`,
             userId: `user${i}`,
-            syncState: { syncVersion: i * 1000 },
+            syncState: { syncVersion: i * 1000 }
         }));
-        clients.forEach((client) => {
+        clients.forEach(client => {
             mobileService.mobileClients.set(client.id, client);
         });
         const startTime = Date.now();
         // Simulate concurrent sync operations
-        const syncPromises = clients.map((client) => mobileService.handleSync(client.id, {
-            type: 'INCREMENTAL',
-            lastSyncVersion: client.syncState.syncVersion,
-        }));
+        const syncPromises = clients.map(client => mobileService.handleSync(client.id, { type: 'INCREMENTAL', lastSyncVersion: client.syncState.syncVersion }));
         const results = await Promise.all(syncPromises);
         const duration = Date.now() - startTime;
         expect(duration).toBeLessThan(10000); // Should complete within 10 seconds
         expect(results).toHaveLength(100);
-        expect(results.every((r) => r.syncVersion)).toBe(true);
+        expect(results.every(r => r.syncVersion)).toBe(true);
     });
     test('should efficiently manage large offline datasets', () => {
         const largeDataset = {
-            investigations: Array(1000)
-                .fill()
-                .map((_, i) => ({
+            investigations: Array(1000).fill().map((_, i) => ({
                 id: `inv${i}`,
-                title: `Investigation ${i}`,
+                title: `Investigation ${i}`
             })),
-            entities: Array(5000)
-                .fill()
-                .map((_, i) => ({
+            entities: Array(5000).fill().map((_, i) => ({
                 id: `ent${i}`,
-                label: `Entity ${i}`,
+                label: `Entity ${i}`
             })),
-            notifications: Array(500)
-                .fill()
-                .map((_, i) => ({
+            notifications: Array(500).fill().map((_, i) => ({
                 id: `notif${i}`,
                 title: `Notification ${i}`,
-                body: 'Notification body content'.repeat(10), // Longer content
-            })),
+                body: 'Notification body content'.repeat(10) // Longer content
+            }))
         };
         const startTime = Date.now();
         const optimized = mobileService.optimizeChangesForMobile(largeDataset);
@@ -740,8 +729,9 @@ describe('Mobile Service Performance', () => {
         expect(optimized.entities).toHaveLength(5000);
         expect(optimized.notifications).toHaveLength(500);
         // Verify optimization occurred
-        optimized.notifications.forEach((notif) => {
+        optimized.notifications.forEach(notif => {
             expect(notif.body.length).toBeLessThanOrEqual(200);
         });
     });
 });
+//# sourceMappingURL=mobileService.test.js.map

@@ -19,7 +19,8 @@ license_compatibility := {
     "EMBARGOED": {"commercial": false, "research": false, "export": false},
     "DISALLOW_EXPORT": {"commercial": false, "research": false, "export": false},
     "VIEW_ONLY": {"commercial": false, "research": false, "export": false},
-    "SEAL_ONLY": {"commercial": false, "research": false, "export": false}
+    "SEAL_ONLY": {"commercial": false, "research": false, "export": false},
+    "SELF_EDIT_SYNTHETIC": {"commercial": false, "research": true, "export": false}
 }
 
 # Risk levels for different export types
@@ -321,4 +322,19 @@ next_steps contains step if {
 next_steps contains step if {
     allow
     step := "Export approved - proceed with download"
+}
+deny contains violation if {
+    input.action == "export"
+    some i
+    source := input.dataset.sources[i]
+    source.license == "SELF_EDIT_SYNTHETIC"
+    not input.context.self_edit_reviewed
+    violation := {
+        "code": "SELF_EDIT_REVIEW_REQUIRED",
+        "message": "Self-edit synthetic data requires compliance review before export",
+        "source": source,
+        "appeal_code": "SEL001",
+        "appeal_url": "https://compliance.intelgraph.io/appeal/SEL001",
+        "severity": "blocking"
+    }
 }

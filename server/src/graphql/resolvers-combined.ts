@@ -4,8 +4,8 @@ const copilotResolvers = require('./resolvers.copilot.js');
 const graphResolvers = require('./resolvers.graphops.js');
 const aiResolvers = require('./resolvers.ai.js');
 const annotationsResolvers = require('./resolvers.annotations.js');
-import crystalResolvers from './resolvers.crystal.js';
-import { randomUUID as uuidv4 } from 'crypto';
+import { v040Resolvers } from './resolvers/v040/index';
+import { v4 as uuidv4 } from 'uuid';
 
 interface User {
   id: string;
@@ -56,32 +56,32 @@ let seq = 1;
 
 export const resolvers = {
   Query: {
-    ...(crystalResolvers.Query || {}),
     ...(copilotResolvers.Query || {}),
     ...(aiResolvers.Query || {}),
     ...(annotationsResolvers.Query || {}),
+    ...(v040Resolvers.Query || {}),
     me: async (_: any, __: any, { user }: Context): Promise<User> => {
       if (!user) throw new Error('Not authenticated');
       return user;
     },
     copilotGoals: async (_: any, { investigationId }: CopilotGoalsArgs) => {
       return investigationId
-        ? goals.filter((g) => g.investigationId === String(investigationId))
+        ? goals.filter(g => g.investigationId === String(investigationId))
         : goals;
-    },
+    }
   },
 
   Mutation: {
-    ...(crystalResolvers.Mutation || {}),
     ...(copilotResolvers.Mutation || {}),
     ...(graphResolvers.Mutation || {}),
     ...(aiResolvers.Mutation || {}),
     ...(annotationsResolvers.Mutation || {}),
+    ...(v040Resolvers.Mutation || {}),
     login: async (_: any, { input }: { input: LoginInput }, { req }: Context) => {
       const { email, password } = input;
       const ipAddress = req?.ip;
       const userAgent = req?.get('User-Agent');
-
+      
       return await authService.login(email, password, ipAddress, userAgent);
     },
 
@@ -105,25 +105,24 @@ export const resolvers = {
 
     logout: async () => {
       return true;
-    },
+    }
   },
 
   Subscription: {
-    ...(crystalResolvers.Subscription || {}),
     ...(copilotResolvers.Subscription || {}),
     ...(aiResolvers.Subscription || {}),
     ...(annotationsResolvers.Subscription || {}),
     investigationUpdated: {
-      subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED']),
+      subscribe: () => pubsub.asyncIterator(['INVESTIGATION_UPDATED'])
     },
-
+    
     entityAdded: {
-      subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED']),
-    },
+      subscribe: () => pubsub.asyncIterator(['ENTITY_ADDED'])
+    }
   },
 
   User: {
-    fullName: (user: User) => `${user.firstName} ${user.lastName}`,
+    fullName: (user: User) => `${user.firstName} ${user.lastName}`
   },
 
   Entity: {

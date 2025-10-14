@@ -1,3 +1,0 @@
-rateLimitPerMin: 30
-egress:
-  - misp.example.com

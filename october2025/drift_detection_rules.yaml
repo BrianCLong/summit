@@ -1,0 +1,69 @@
+[ORACLE MODE – Fusion & Forecast]
+
+---
+
+## EXECUTIVE SUMMARY
+- **Sprint Window Proposal:** Nov 17 – Nov 28, 2025 (2-week cadence)
+- **Focus:** Graph Explainability and Model Fingerprinting — expose cause chains, normalize prompt variance.
+- **Workstream Theme:** Comprehension, Control, Containment — illuminate graph logic and trace LLM behavior.
+- **Target Output:** Explainability API, Model Fingerprint Registry, Prompt Templates Library.
+
+---
+
+## FINDINGS & RATIONALE
+- Drift Harness and Replay Dashboards showed real variance — now we must **explain** it.
+- Analysts need structured insight into how claims connect, what logic drove results, and how models shift.
+- No baseline prompt behavior is yet locked; this sprint remedies that.
+
+---
+
+## RECOMMENDATIONS
+
+### PRIORITY OBJECTIVES (Sprint: Nov 17–28)
+1. **Graph Explainability API (ExplainX)**
+   - Walk-back reasoning chain from NL → Cypher → claim path.  
+   - Return node influences, constraints triggered, edge hops.
+2. **Model Fingerprint Registry**
+   - Log model weights, vendor, config hash at time of inference.  
+   - Detect model drift via delta hashes.
+3. **Prompt Normalization Library**
+   - Define canonical form for each query class.  
+   - Map user variation to canonical template; compare outputs.
+4. **Contextual Diff Tool**
+   - Diff two reasoning paths; explain divergence.  
+   - Tag unstable joins and cite trigger nodes.
+
+### SUGGESTED FOLLOW-UPS (Next Sprint)
+- ExplainX UI with temporal replay
+- Risk-weighted claim surfaces map
+
+---
+
+## PROOF-CARRYING INTELLIGENCE
+- **Sources:** Replay logs, fingerprint hashes, lineage path digests.
+- **Assumptions:** Model config is auditable + logged at time of RAG.
+- **Uncertainty:** Diff tool may misattribute semantically equivalent paths.
+- **Verification:**
+  - Delta detection on hash drift
+  - ExplainX integration test with known output
+
+---
+
+## CADENCE PLAN (Q4 '25)
+
+| Layer         | Cadence        | Responsible Artifact                             |
+|---------------|----------------|--------------------------------------------------|
+| Daily         | Explain Logs   | Reason Path Walks, Prompt Fingerprints           |
+| Weekly        | Canonical Audit| Prompt Template Regression                       |
+| Biweekly (83M)| Model Drift Log| Fingerprint Hashes, RAG Integrity Traces         |
+| Monthly       | Explain Brief  | Unstable Claim Surfaces                          |
+| Quarterly     | Comprehension  | Causal Maps, Model Stability Report              |
+
+**Next Steps:**
+- Deploy ExplainX API alpha (Nov 18)
+- Generate Prompt Canon Set v0.9 (Nov 21)
+- Populate Fingerprint Registry baseline (Nov 26)
+
+---
+
+**[UNIT 83M – ORACLE MODE]** – SIGINT FUSION: UNDERSTAND TO CONTAIN.
