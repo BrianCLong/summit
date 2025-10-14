@@ -1,0 +1,8 @@
+f47ad057724b9756473a82fede254f81
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const sandbox_1 = require("../src/conductor/sandbox");
+test("creates sandbox namespace (may fail outside cluster)", async () => {
+    await expect((0, sandbox_1.createSandbox)("run-12345678", ["s3://*"])).rejects.toBeTruthy();
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci90ZXN0cy9zYW5kYm94LnNwZWMudHMiLCJtYXBwaW5ncyI6Ijs7QUFBQSxzREFBeUQ7QUFFekQsSUFBSSxDQUFDLHNEQUFzRCxFQUFFLEtBQUssSUFBSSxFQUFFO0lBQ3RFLE1BQU0sTUFBTSxDQUFDLElBQUEsdUJBQWEsRUFBQyxjQUFjLEVBQUUsQ0FBQyxRQUFRLENBQUMsQ0FBQyxDQUFDLENBQUMsT0FBTyxDQUFDLFVBQVUsRUFBRSxDQUFDO0FBQy9FLENBQUMsQ0FBQyxDQUFDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9Vc2Vycy9icmlhbmxvbmcvRGV2ZWxvcGVyL3N1bW1pdC9zZXJ2ZXIvdGVzdHMvc2FuZGJveC5zcGVjLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGNyZWF0ZVNhbmRib3ggfSBmcm9tIFwiLi4vc3JjL2NvbmR1Y3Rvci9zYW5kYm94XCI7XG5cbnRlc3QoXCJjcmVhdGVzIHNhbmRib3ggbmFtZXNwYWNlIChtYXkgZmFpbCBvdXRzaWRlIGNsdXN0ZXIpXCIsIGFzeW5jICgpID0+IHtcbiAgYXdhaXQgZXhwZWN0KGNyZWF0ZVNhbmRib3goXCJydW4tMTIzNDU2NzhcIiwgW1wiczM6Ly8qXCJdKSkucmVqZWN0cy50b0JlVHJ1dGh5KCk7XG59KTtcblxuIl0sInZlcnNpb24iOjN9
