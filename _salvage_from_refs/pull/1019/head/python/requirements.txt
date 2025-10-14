@@ -1,7 +1,0 @@
-aiohttp
-asyncio
-python-dotenv
-fuzzywuzzy[speedup]
-neo4j
-# For embedding similarity (future)
-# sentence-transformers

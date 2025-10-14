@@ -6,8 +6,6 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 export class GAReleaseService {
-    packageJson;
-    serverPackageJson;
     constructor() {
         this.packageJson = this.loadPackageJson('package.json');
         this.serverPackageJson = this.loadPackageJson('server/package.json');
@@ -195,3 +193,4 @@ export class GAReleaseService {
         return fs.existsSync(path.join(process.cwd(), 'sbom.json'));
     }
 }
+//# sourceMappingURL=GAReleaseService.js.map

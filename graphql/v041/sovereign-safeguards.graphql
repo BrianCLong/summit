@@ -1,0 +1,596 @@
+# MC Platform v0.4.1 Sovereign Safeguards GraphQL Schema
+# Independent verification, containment, lawful interoperability, and reversible autonomy
+
+extend type Query {
+  # Sovereign safeguards status
+  sovereignSafeguardsStatus(tenant: Tenant!): SovereignSafeguardsStatus!
+
+  # Independent verification status
+  independentVerificationStatus(tenant: Tenant!): IndependentVerificationStatus!
+
+  # Containment readiness assessment
+  containmentReadiness(tenant: Tenant!): ContainmentReadinessStatus!
+
+  # Lawful interoperability status
+  lawfulInteroperabilityStatus(tenant: Tenant!): LawfulInteroperabilityStatus!
+
+  # Reversible autonomy status
+  reversibleAutonomyStatus(tenant: Tenant!): ReversibleAutonomyStatus!
+
+  # Compliance monitoring dashboard
+  complianceMonitoring(tenant: Tenant!, timeRange: Duration): ComplianceMonitoringData!
+
+  # Cross-border operation approvals
+  crossBorderApprovals(tenant: Tenant!): [CrossBorderApproval!]!
+
+  # Sovereign operation audit trail
+  sovereignAuditTrail(tenant: Tenant!, limit: Int = 100): [SovereignAuditEntry!]!
+}
+
+extend type Mutation {
+  # === SOVEREIGN OPERATION CONTROLS ===
+
+  # Request independent verification
+  requestIndependentVerification(
+    tenant: Tenant!,
+    operation: String!,
+    verificationSources: [String!]!
+  ): IndependentVerificationRequest!
+
+  # Configure sovereign safeguards
+  configureSovereignSafeguards(
+    tenant: Tenant!,
+    config: SovereignSafeguardsConfig!
+  ): MutationResult!
+
+  # Test containment readiness
+  testContainmentReadiness(
+    tenant: Tenant!,
+    testType: ContainmentTestType!
+  ): ContainmentTestResult!
+
+  # Verify lawful interoperability
+  verifyLawfulInteroperability(
+    tenant: Tenant!,
+    jurisdiction: String!,
+    operationType: String!
+  ): LawfulInteroperabilityResult!
+
+  # Configure reversible autonomy
+  configureReversibleAutonomy(
+    tenant: Tenant!,
+    config: ReversibleAutonomyConfig!
+  ): MutationResult!
+
+  # === EMERGENCY SOVEREIGN CONTROLS ===
+
+  # Emergency sovereign containment
+  emergencySovereignContainment(
+    tenant: Tenant!,
+    containmentType: SovereignContainmentType!,
+    reason: String!
+  ): MutationResult!
+
+  # Sovereign operation rollback
+  sovereignOperationRollback(
+    tenant: Tenant!,
+    operationId: String!,
+    rollbackReason: String!
+  ): MutationResult!
+
+  # Human override sovereign autonomy
+  humanOverrideSovereignAutonomy(
+    tenant: Tenant!,
+    overrideReason: String!,
+    emergencyLevel: EmergencyLevel!
+  ): MutationResult!
+
+  # === CROSS-BORDER OPERATIONS ===
+
+  # Request cross-border operation approval
+  requestCrossBorderApproval(
+    tenant: Tenant!,
+    request: CrossBorderApprovalRequest!
+  ): CrossBorderApprovalResult!
+
+  # Submit jurisdiction compliance report
+  submitJurisdictionCompliance(
+    tenant: Tenant!,
+    jurisdiction: String!,
+    report: ComplianceReport!
+  ): MutationResult!
+
+  # === TRANSCENDENT SAFEGUARDS ===
+
+  # Request transcendent operation approval
+  requestTranscendentApproval(
+    tenant: Tenant!,
+    operation: TranscendentOperation!,
+    ethicsReview: Boolean! = true
+  ): TranscendentApprovalResult!
+
+  # Configure transcendent safeguards
+  configureTranscendentSafeguards(
+    tenant: Tenant!,
+    config: TranscendentSafeguardsConfig!
+  ): MutationResult!
+}
+
+extend type Subscription {
+  # Real-time sovereign safeguards monitoring
+  sovereignSafeguardsUpdates(tenant: Tenant!): SovereignSafeguardsUpdate!
+
+  # Independent verification status changes
+  independentVerificationUpdates(tenant: Tenant!): IndependentVerificationUpdate!
+
+  # Containment readiness alerts
+  containmentReadinessAlerts(tenant: Tenant!): ContainmentAlert!
+
+  # Compliance violation notifications
+  complianceViolationAlerts(tenant: Tenant!): ComplianceViolationAlert!
+
+  # Emergency sovereign events
+  emergencySovereignEvents(tenant: Tenant!): EmergencySovereignEvent!
+}
+
+# === CORE TYPES ===
+
+type SovereignSafeguardsStatus {
+  overall: SafeguardsOverallStatus!
+  independentVerification: IndependentVerificationStatus!
+  containmentReadiness: ContainmentReadinessStatus!
+  lawfulInteroperability: LawfulInteroperabilityStatus!
+  reversibleAutonomy: ReversibleAutonomyStatus!
+  lastUpdated: DateTime!
+}
+
+type SafeguardsOverallStatus {
+  enabled: Boolean!
+  complianceScore: Float!
+  activeSafeguards: Int!
+  vulnerabilities: Int!
+  riskLevel: RiskLevel!
+  lastAssessment: DateTime!
+}
+
+# === INDEPENDENT VERIFICATION ===
+
+type IndependentVerificationStatus {
+  enabled: Boolean!
+  activeVerifications: Int!
+  verificationSources: [VerificationSource!]!
+  lastVerification: DateTime
+  averageVerificationTime: Float!
+  verificationSuccessRate: Float!
+}
+
+type VerificationSource {
+  sourceId: String!
+  entity: String!
+  type: VerificationSourceType!
+  status: VerificationStatus!
+  lastVerification: DateTime
+  reliability: Float!
+  responseTime: Float!
+}
+
+enum VerificationSourceType {
+  GOVERNMENT_AGENCY
+  INDEPENDENT_AUDITOR
+  CERTIFICATION_BODY
+  PEER_REVIEW
+  TECHNICAL_VALIDATOR
+  ETHICS_COMMITTEE
+}
+
+enum VerificationStatus {
+  ACTIVE
+  PENDING
+  FAILED
+  EXPIRED
+  SUSPENDED
+}
+
+type IndependentVerificationRequest {
+  requestId: String!
+  operation: String!
+  verificationSources: [String!]!
+  status: RequestStatus!
+  estimatedCompletion: DateTime
+  createdAt: DateTime!
+}
+
+enum RequestStatus {
+  SUBMITTED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+# === CONTAINMENT READINESS ===
+
+type ContainmentReadinessStatus {
+  emergencyStopReady: Boolean!
+  rollbackReady: Boolean!
+  isolationReady: Boolean!
+  humanOverrideReady: Boolean!
+  responseTime: Float!
+  lastTest: DateTime
+  testSuccessRate: Float!
+}
+
+enum ContainmentTestType {
+  EMERGENCY_STOP
+  ROLLBACK_TEST
+  ISOLATION_TEST
+  HUMAN_OVERRIDE_TEST
+  FULL_CONTAINMENT_DRILL
+}
+
+type ContainmentTestResult {
+  testId: String!
+  testType: ContainmentTestType!
+  success: Boolean!
+  responseTime: Float!
+  issues: [String!]!
+  recommendations: [String!]!
+  testedAt: DateTime!
+}
+
+# === LAWFUL INTEROPERABILITY ===
+
+type LawfulInteroperabilityStatus {
+  jurisdictionsCompliant: Int!
+  totalJurisdictions: Int!
+  dataSovereigntyCompliant: Boolean!
+  crossBorderApprovalsValid: Int!
+  regulatoryReportingActive: Boolean!
+  complianceScore: Float!
+  lastAssessment: DateTime!
+}
+
+type LawfulInteroperabilityResult {
+  jurisdiction: String!
+  operationType: String!
+  compliant: Boolean!
+  issues: [ComplianceIssue!]!
+  recommendations: [String!]!
+  validUntil: DateTime
+  verifiedAt: DateTime!
+}
+
+type ComplianceIssue {
+  issueId: String!
+  severity: IssueSeverity!
+  description: String!
+  regulation: String!
+  remediation: String!
+  deadline: DateTime
+}
+
+enum IssueSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+# === REVERSIBLE AUTONOMY ===
+
+type ReversibleAutonomyStatus {
+  reversibilityGuaranteed: Boolean!
+  humanControlActive: Boolean!
+  scopeLimited: Boolean!
+  continuousMonitoring: Boolean!
+  maxReversalTime: Float!
+  snapshotFrequency: Float!
+  lastSnapshot: DateTime
+  reversalSuccess: Float!
+}
+
+input ReversibleAutonomyConfig {
+  maxReversalTimeSeconds: Int!
+  snapshotFrequencySeconds: Int!
+  humanControlMandatory: Boolean!
+  scopeBoundaries: AutonomyScopeBoundaries!
+  monitoringConfig: AutonomyMonitoringConfig!
+}
+
+input AutonomyScopeBoundaries {
+  maxResourceUtilization: Float!
+  allowedCapabilities: [String!]!
+  restrictedOperations: [String!]!
+  boundaryViolationAction: BoundaryViolationAction!
+}
+
+enum BoundaryViolationAction {
+  ALERT_ONLY
+  PAUSE_OPERATION
+  ROLLBACK_AUTOMATIC
+  HUMAN_INTERVENTION_REQUIRED
+}
+
+input AutonomyMonitoringConfig {
+  heartbeatInterval: Int!
+  anomalyDetectionEnabled: Boolean!
+  performanceMetricsEnabled: Boolean!
+  alertThresholds: MonitoringThresholds!
+}
+
+input MonitoringThresholds {
+  responseTimeMax: Float!
+  errorRateMax: Float!
+  resourceUtilizationMax: Float!
+  anomalyScoreMax: Float!
+}
+
+# === COMPLIANCE MONITORING ===
+
+type ComplianceMonitoringData {
+  overallScore: Float!
+  jurisdictionScores: [JurisdictionScore!]!
+  recentViolations: [ComplianceViolation!]!
+  trendData: [ComplianceTrend!]!
+  activeReports: [ComplianceReport!]!
+}
+
+type JurisdictionScore {
+  jurisdiction: String!
+  score: Float!
+  status: ComplianceStatus!
+  lastAssessment: DateTime!
+  issues: [ComplianceIssue!]!
+}
+
+enum ComplianceStatus {
+  COMPLIANT
+  NON_COMPLIANT
+  UNDER_REVIEW
+  PENDING_APPROVAL
+  VIOLATION
+}
+
+type ComplianceViolation {
+  violationId: String!
+  severity: IssueSeverity!
+  description: String!
+  jurisdiction: String!
+  regulation: String!
+  detectedAt: DateTime!
+  status: ViolationStatus!
+  remediation: String
+}
+
+enum ViolationStatus {
+  DETECTED
+  ACKNOWLEDGED
+  REMEDIATION_IN_PROGRESS
+  RESOLVED
+  ESCALATED
+}
+
+type ComplianceTrend {
+  timestamp: DateTime!
+  score: Float!
+  violations: Int!
+  improvements: Int!
+}
+
+input ComplianceReport {
+  reportType: ComplianceReportType!
+  jurisdiction: String!
+  period: String!
+  data: JSON!
+  certifications: [String!]!
+}
+
+enum ComplianceReportType {
+  GDPR_COMPLIANCE
+  CCPA_COMPLIANCE
+  PIPEDA_COMPLIANCE
+  CUSTOM_JURISDICTION
+  CROSS_BORDER_TRANSFER
+  DATA_SOVEREIGNTY
+}
+
+# === CROSS-BORDER OPERATIONS ===
+
+type CrossBorderApproval {
+  approvalId: String!
+  operation: String!
+  sourceJurisdiction: String!
+  targetJurisdiction: String!
+  status: ApprovalStatus!
+  approvalType: ApprovalType!
+  validFrom: DateTime!
+  validUntil: DateTime!
+  conditions: [String!]!
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+  SUSPENDED
+  UNDER_REVIEW
+}
+
+enum ApprovalType {
+  EXPLICIT_CONSENT
+  ADEQUACY_DECISION
+  STANDARD_CONTRACTUAL_CLAUSES
+  BINDING_CORPORATE_RULES
+  DEROGATION
+}
+
+input CrossBorderApprovalRequest {
+  operation: String!
+  sourceJurisdiction: String!
+  targetJurisdiction: String!
+  dataTypes: [String!]!
+  purpose: String!
+  duration: String!
+  legalBasis: String!
+  safeguards: [String!]!
+}
+
+type CrossBorderApprovalResult {
+  requestId: String!
+  status: RequestStatus!
+  estimatedDecision: DateTime
+  requirements: [String!]!
+  submittedAt: DateTime!
+}
+
+# === TRANSCENDENT SAFEGUARDS ===
+
+input TranscendentOperation {
+  operationType: String!
+  transcendenceLevel: TranscendenceLevel!
+  expectedCapabilities: [String!]!
+  riskAssessment: TranscendentRiskAssessment!
+  safetyMeasures: [String!]!
+}
+
+input TranscendentRiskAssessment {
+  overallRisk: RiskLevel!
+  ethicalRisk: RiskLevel!
+  societalRisk: RiskLevel!
+  technicalRisk: RiskLevel!
+  mitigationStrategies: [String!]!
+}
+
+type TranscendentApprovalResult {
+  approvalId: String!
+  status: RequestStatus!
+  ethicsReviewRequired: Boolean!
+  safetyCommitteeReview: Boolean!
+  estimatedDecision: DateTime
+  conditions: [String!]!
+  submittedAt: DateTime!
+}
+
+input TranscendentSafeguardsConfig {
+  ethicsBoardApprovalRequired: Boolean!
+  safetyCommitteeReviewRequired: Boolean!
+  enhancedMonitoringEnabled: Boolean!
+  failSafeMechanisms: Int!
+  humanOversightMandatory: Boolean!
+  oversightCommitteeSize: Int!
+}
+
+# === SOVEREIGN OPERATIONS ===
+
+input SovereignSafeguardsConfig {
+  independentVerificationRequired: Boolean!
+  minimumVerificationSources: Int!
+  containmentReadinessRequired: Boolean!
+  lawfulInteroperabilityRequired: Boolean!
+  reversibleAutonomyRequired: Boolean!
+  enhancedAuditingEnabled: Boolean!
+}
+
+enum SovereignContainmentType {
+  SOVEREIGN_ISOLATION
+  JURISDICTIONAL_LIMIT
+  CROSS_BORDER_HALT
+  AUTONOMOUS_FREEZE
+  TRANSCENDENT_ROLLBACK
+  EMERGENCY_SHUTDOWN
+}
+
+enum EmergencyLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+  CATASTROPHIC
+}
+
+# === AUDIT AND MONITORING ===
+
+type SovereignAuditEntry {
+  entryId: String!
+  operation: String!
+  actor: String!
+  jurisdiction: String!
+  action: String!
+  result: String!
+  safeguardsVerified: [String!]!
+  timestamp: DateTime!
+  signature: String!
+}
+
+# === REAL-TIME UPDATES ===
+
+type SovereignSafeguardsUpdate {
+  updateType: UpdateType!
+  affectedSafeguard: String!
+  newStatus: String!
+  details: JSON
+  timestamp: DateTime!
+}
+
+type IndependentVerificationUpdate {
+  verificationId: String!
+  source: String!
+  status: VerificationStatus!
+  result: JSON
+  timestamp: DateTime!
+}
+
+type ContainmentAlert {
+  alertId: String!
+  alertType: ContainmentAlertType!
+  severity: AlertSeverity!
+  message: String!
+  affectedSystems: [String!]!
+  actionRequired: String!
+  timestamp: DateTime!
+}
+
+enum ContainmentAlertType {
+  CONTAINMENT_FAILURE
+  RESPONSE_TIME_EXCEEDED
+  ROLLBACK_FAILED
+  ISOLATION_BREACH
+  HUMAN_OVERRIDE_UNAVAILABLE
+}
+
+type ComplianceViolationAlert {
+  violationId: String!
+  jurisdiction: String!
+  severity: IssueSeverity!
+  description: String!
+  immediateAction: String!
+  timestamp: DateTime!
+}
+
+type EmergencySovereignEvent {
+  eventId: String!
+  eventType: EmergencyEventType!
+  severity: EmergencyLevel!
+  affectedSystems: [String!]!
+  responseActions: [String!]!
+  humanInterventionRequired: Boolean!
+  timestamp: DateTime!
+}
+
+enum EmergencyEventType {
+  SOVEREIGN_CONTAINMENT_ACTIVATED
+  CROSS_BORDER_VIOLATION
+  JURISDICTION_COMPLIANCE_FAILURE
+  TRANSCENDENT_SAFEGUARD_BREACH
+  AUTONOMOUS_BOUNDARY_VIOLATION
+  VERIFICATION_SYSTEM_FAILURE
+}
+
+enum UpdateType {
+  STATUS_CHANGE
+  CONFIGURATION_UPDATE
+  ALERT_TRIGGERED
+  VERIFICATION_COMPLETED
+  COMPLIANCE_UPDATED
+}

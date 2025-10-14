@@ -5,41 +5,40 @@ import * as d3 from 'd3';
  */
 export const d3ForceLayout = {
   name: 'd3-force',
-
-  run: function (cy) {
-    const nodes = cy.nodes().map((node) => ({
+  
+  run: function(cy) {
+    const nodes = cy.nodes().map(node => ({
       id: node.id(),
       x: node.position('x'),
       y: node.position('y'),
       node: node,
-      radius: Math.max(15, (node.data('importance') || 1) * 10),
+      radius: Math.max(15, (node.data('importance') || 1) * 10)
     }));
 
-    const edges = cy.edges().map((edge) => ({
+    const edges = cy.edges().map(edge => ({
       source: edge.source().id(),
       target: edge.target().id(),
-      strength: edge.data('weight') || 0.5,
+      strength: edge.data('weight') || 0.5
     }));
 
     // Create D3 simulation
-    const simulation = d3
-      .forceSimulation(nodes)
-      .force(
-        'link',
-        d3
-          .forceLink(edges)
-          .id((d) => d.id)
-          .distance((d) => 50 + (1 - d.strength) * 100)
-          .strength((d) => d.strength),
+    const simulation = d3.forceSimulation(nodes)
+      .force('link', d3.forceLink(edges)
+        .id(d => d.id)
+        .distance(d => 50 + (1 - d.strength) * 100)
+        .strength(d => d.strength)
       )
-      .force('charge', d3.forceManyBody().strength(-300).distanceMax(300))
-      .force('center', d3.forceCenter(cy.width() / 2, cy.height() / 2))
-      .force(
-        'collision',
-        d3
-          .forceCollide()
-          .radius((d) => d.radius + 5)
-          .strength(0.7),
+      .force('charge', d3.forceManyBody()
+        .strength(-300)
+        .distanceMax(300)
+      )
+      .force('center', d3.forceCenter(
+        cy.width() / 2,
+        cy.height() / 2
+      ))
+      .force('collision', d3.forceCollide()
+        .radius(d => d.radius + 5)
+        .strength(0.7)
       )
       .alpha(0.3)
       .alphaDecay(0.02)
@@ -48,11 +47,11 @@ export const d3ForceLayout = {
     // Animate the layout
     const animate = () => {
       simulation.tick();
-
-      nodes.forEach((d) => {
+      
+      nodes.forEach(d => {
         d.node.position({
           x: d.x,
-          y: d.y,
+          y: d.y
         });
       });
 
@@ -66,9 +65,9 @@ export const d3ForceLayout = {
     return this;
   },
 
-  stop: function () {
+  stop: function() {
     return this;
-  },
+  }
 };
 
 /**
@@ -76,38 +75,38 @@ export const d3ForceLayout = {
  */
 export const d3HierarchicalLayout = {
   name: 'd3-hierarchical',
-
-  run: function (cy) {
+  
+  run: function(cy) {
     // Find root nodes (nodes with no incoming edges)
-    const rootNodes = cy.nodes().filter((node) => node.indegree() === 0);
-
+    const rootNodes = cy.nodes().filter(node => node.indegree() === 0);
+    
     if (rootNodes.length === 0) {
       // If no root found, use highest degree node
-      const highestDegreeNode = cy.nodes().max((node) => node.degree()).ele;
+      const highestDegreeNode = cy.nodes().max(node => node.degree()).ele;
       return this.createHierarchy(cy, highestDegreeNode);
     }
 
     // Create hierarchy for each root
-    rootNodes.forEach((root) => {
+    rootNodes.forEach(root => {
       this.createHierarchy(cy, root);
     });
 
     return this;
   },
 
-  createHierarchy: function (cy, rootNode) {
+  createHierarchy: function(cy, rootNode) {
     const visited = new Set();
     const levels = [];
-
+    
     const traverse = (node, level) => {
       if (visited.has(node.id())) return;
       visited.add(node.id());
-
+      
       if (!levels[level]) levels[level] = [];
       levels[level].push(node);
-
+      
       // Traverse connected nodes
-      node.connectedNodes().forEach((connected) => {
+      node.connectedNodes().forEach(connected => {
         if (!visited.has(connected.id())) {
           traverse(connected, level + 1);
         }
@@ -123,19 +122,19 @@ export const d3HierarchicalLayout = {
 
     levels.forEach((levelNodes, level) => {
       const nodeWidth = containerWidth / (levelNodes.length || 1);
-
+      
       levelNodes.forEach((node, index) => {
         node.position({
           x: (index + 0.5) * nodeWidth,
-          y: (level + 0.5) * levelHeight,
+          y: (level + 0.5) * levelHeight
         });
       });
     });
   },
 
-  stop: function () {
+  stop: function() {
     return this;
-  },
+  }
 };
 
 /**
@@ -143,11 +142,11 @@ export const d3HierarchicalLayout = {
  */
 export const d3CircularClusterLayout = {
   name: 'd3-circular-cluster',
-
-  run: function (cy) {
+  
+  run: function(cy) {
     // Detect communities/clusters
     const clusters = this.detectClusters(cy);
-
+    
     const centerX = cy.width() / 2;
     const centerY = cy.height() / 2;
     const mainRadius = Math.min(cy.width(), cy.height()) * 0.3;
@@ -162,7 +161,7 @@ export const d3CircularClusterLayout = {
         const nodeAngle = (2 * Math.PI * nodeIndex) / cluster.length;
         const x = clusterCenterX + Math.cos(nodeAngle) * clusterRadius;
         const y = clusterCenterY + Math.sin(nodeAngle) * clusterRadius;
-
+        
         node.position({ x, y });
       });
     });
@@ -170,32 +169,29 @@ export const d3CircularClusterLayout = {
     return this;
   },
 
-  detectClusters: function (cy) {
+  detectClusters: function(cy) {
     const visited = new Set();
     const clusters = [];
 
-    cy.nodes().forEach((node) => {
+    cy.nodes().forEach(node => {
       if (!visited.has(node.id())) {
         const cluster = [];
         const queue = [node];
-
+        
         while (queue.length > 0) {
           const current = queue.shift();
           if (visited.has(current.id())) continue;
-
+          
           visited.add(current.id());
           cluster.push(current);
-
-          current
-            .neighbors()
-            .nodes()
-            .forEach((neighbor) => {
-              if (!visited.has(neighbor.id())) {
-                queue.push(neighbor);
-              }
-            });
+          
+          current.neighbors().nodes().forEach(neighbor => {
+            if (!visited.has(neighbor.id())) {
+              queue.push(neighbor);
+            }
+          });
         }
-
+        
         clusters.push(cluster);
       }
     });
@@ -203,9 +199,9 @@ export const d3CircularClusterLayout = {
     return clusters;
   },
 
-  stop: function () {
+  stop: function() {
     return this;
-  },
+  }
 };
 
 /**
@@ -213,23 +209,23 @@ export const d3CircularClusterLayout = {
  */
 export const d3TimelineLayout = {
   name: 'd3-timeline',
-
-  run: function (cy) {
+  
+  run: function(cy) {
     // Extract temporal information from nodes
-    const nodesWithTime = cy.nodes().map((node) => {
+    const nodesWithTime = cy.nodes().map(node => {
       const data = node.data();
       let timestamp = null;
-
+      
       // Try to extract timestamp from various properties
       if (data.timestamp) timestamp = new Date(data.timestamp);
       else if (data.created_at) timestamp = new Date(data.created_at);
       else if (data.date) timestamp = new Date(data.date);
       else if (data.properties && data.properties.date) timestamp = new Date(data.properties.date);
-
+      
       return {
         node,
         timestamp: timestamp || new Date(),
-        data,
+        data
       };
     });
 
@@ -237,16 +233,14 @@ export const d3TimelineLayout = {
     nodesWithTime.sort((a, b) => a.timestamp - b.timestamp);
 
     // Create timeline scale
-    const timeExtent = d3.extent(nodesWithTime, (d) => d.timestamp);
-    const xScale = d3
-      .scaleTime()
+    const timeExtent = d3.extent(nodesWithTime, d => d.timestamp);
+    const xScale = d3.scaleTime()
       .domain(timeExtent)
       .range([50, cy.width() - 50]);
 
     // Group nodes by type for y-positioning
-    const typeGroups = d3.group(nodesWithTime, (d) => d.data.type);
-    const yScale = d3
-      .scaleBand()
+    const typeGroups = d3.group(nodesWithTime, d => d.data.type);
+    const yScale = d3.scaleBand()
       .domain(Array.from(typeGroups.keys()))
       .range([50, cy.height() - 50])
       .padding(0.1);
@@ -255,19 +249,19 @@ export const d3TimelineLayout = {
     nodesWithTime.forEach(({ node, timestamp, data }) => {
       const x = xScale(timestamp);
       const baseY = yScale(data.type) || cy.height() / 2;
-
+      
       // Add some random offset to avoid overlapping
       const y = baseY + (Math.random() - 0.5) * yScale.bandwidth() * 0.8;
-
+      
       node.position({ x, y });
     });
 
     return this;
   },
 
-  stop: function () {
+  stop: function() {
     return this;
-  },
+  }
 };
 
 /**
@@ -275,17 +269,16 @@ export const d3TimelineLayout = {
  */
 export const d3GeographicLayout = {
   name: 'd3-geographic',
-
-  run: function (cy) {
+  
+  run: function(cy) {
     const nodes = cy.nodes();
     const containerWidth = cy.width();
     const containerHeight = cy.height();
 
     // Extract geographic coordinates
-    const nodesWithCoords = nodes.map((node) => {
+    const nodesWithCoords = nodes.map(node => {
       const data = node.data();
-      let lat = null,
-        lng = null;
+      let lat = null, lng = null;
 
       // Try to extract coordinates from various properties
       if (data.latitude && data.longitude) {
@@ -306,26 +299,24 @@ export const d3GeographicLayout = {
         node,
         lat,
         lng,
-        hasCoords: lat !== null && lng !== null,
+        hasCoords: lat !== null && lng !== null
       };
     });
 
     // Separate nodes with and without coordinates
-    const withCoords = nodesWithCoords.filter((n) => n.hasCoords);
-    const withoutCoords = nodesWithCoords.filter((n) => !n.hasCoords);
+    const withCoords = nodesWithCoords.filter(n => n.hasCoords);
+    const withoutCoords = nodesWithCoords.filter(n => !n.hasCoords);
 
     if (withCoords.length > 0) {
       // Create projection for nodes with coordinates
-      const latExtent = d3.extent(withCoords, (d) => d.lat);
-      const lngExtent = d3.extent(withCoords, (d) => d.lng);
+      const latExtent = d3.extent(withCoords, d => d.lat);
+      const lngExtent = d3.extent(withCoords, d => d.lng);
 
-      const xScale = d3
-        .scaleLinear()
+      const xScale = d3.scaleLinear()
         .domain(lngExtent)
         .range([50, containerWidth - 50]);
 
-      const yScale = d3
-        .scaleLinear()
+      const yScale = d3.scaleLinear()
         .domain(latExtent)
         .range([containerHeight - 50, 50]); // Inverted for map coordinates
 
@@ -333,7 +324,7 @@ export const d3GeographicLayout = {
       withCoords.forEach(({ node, lat, lng }) => {
         node.position({
           x: xScale(lng),
-          y: yScale(lat),
+          y: yScale(lat)
         });
       });
     }
@@ -346,16 +337,16 @@ export const d3GeographicLayout = {
     withoutCoords.forEach(({ node }, index) => {
       node.position({
         x: sidebarX,
-        y: 50 + index * sidebarSpacing,
+        y: 50 + index * sidebarSpacing
       });
     });
 
     return this;
   },
 
-  stop: function () {
+  stop: function() {
     return this;
-  },
+  }
 };
 
 /**
@@ -363,27 +354,27 @@ export const d3GeographicLayout = {
  */
 export const d3ArcLayout = {
   name: 'd3-arc',
-
-  run: function (cy) {
+  
+  run: function(cy) {
     const nodes = cy.nodes();
     const edges = cy.edges();
-
+    
     // Arrange nodes in a line
     const nodeSpacing = cy.width() / (nodes.length || 1);
-
+    
     nodes.forEach((node, index) => {
       node.position({
         x: (index + 0.5) * nodeSpacing,
-        y: cy.height() * 0.8,
+        y: cy.height() * 0.8
       });
     });
 
     // Create arcs for edges (visual representation would need custom rendering)
-    edges.forEach((edge) => {
+    edges.forEach(edge => {
       const source = edge.source().position();
       const target = edge.target().position();
       const distance = Math.abs(target.x - source.x);
-
+      
       // Store arc information for potential custom rendering
       edge.data('arcHeight', Math.min(200, distance * 0.5));
     });
@@ -391,9 +382,9 @@ export const d3ArcLayout = {
     return this;
   },
 
-  stop: function () {
+  stop: function() {
     return this;
-  },
+  }
 };
 
 /**
@@ -420,7 +411,7 @@ export class GraphExporter {
     // Create SVG element
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const bbox = this.cy.extent();
-
+    
     svg.setAttribute('width', bbox.w);
     svg.setAttribute('height', bbox.h);
     svg.setAttribute('viewBox', `${bbox.x1} ${bbox.y1} ${bbox.w} ${bbox.h}`);
@@ -437,10 +428,10 @@ export class GraphExporter {
     svg.appendChild(defs);
 
     // Draw edges
-    this.cy.edges().forEach((edge) => {
+    this.cy.edges().forEach(edge => {
       const source = edge.source().position();
       const target = edge.target().position();
-
+      
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       line.setAttribute('x1', source.x);
       line.setAttribute('y1', source.y);
@@ -449,16 +440,16 @@ export class GraphExporter {
       line.setAttribute('class', 'edge');
       line.setAttribute('stroke', edge.style('line-color'));
       line.setAttribute('stroke-width', edge.style('width'));
-
+      
       svg.appendChild(line);
     });
 
     // Draw nodes
-    this.cy.nodes().forEach((node) => {
+    this.cy.nodes().forEach(node => {
       const pos = node.position();
       const width = node.width();
       const height = node.height();
-
+      
       const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       rect.setAttribute('x', pos.x - width / 2);
       rect.setAttribute('y', pos.y - height / 2);
@@ -467,16 +458,16 @@ export class GraphExporter {
       rect.setAttribute('class', 'node');
       rect.setAttribute('fill', node.style('background-color'));
       rect.setAttribute('rx', 5);
-
+      
       svg.appendChild(rect);
-
+      
       // Add label
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       text.setAttribute('x', pos.x);
       text.setAttribute('y', pos.y + 4);
       text.setAttribute('class', 'node-label');
       text.textContent = node.data('label');
-
+      
       svg.appendChild(text);
     });
 
@@ -493,38 +484,28 @@ export class GraphExporter {
   </meta>
   <graph mode="static" defaultedgetype="directed">
     <nodes>
-      ${this.cy
-        .nodes()
-        .map(
-          (node) => `
+      ${this.cy.nodes().map(node => `
         <node id="${node.id()}" label="${node.data('label')}">
           <attvalues>
             <attvalue for="type" value="${node.data('type')}"/>
             <attvalue for="importance" value="${node.data('importance') || 1}"/>
           </attvalues>
         </node>
-      `,
-        )
-        .join('')}
+      `).join('')}
     </nodes>
     <edges>
-      ${this.cy
-        .edges()
-        .map(
-          (edge, index) => `
+      ${this.cy.edges().map((edge, index) => `
         <edge id="${index}" source="${edge.source().id()}" target="${edge.target().id()}" label="${edge.data('label')}">
           <attvalues>
             <attvalue for="type" value="${edge.data('type')}"/>
             <attvalue for="weight" value="${edge.data('weight') || 0.5}"/>
           </attvalues>
         </edge>
-      `,
-        )
-        .join('')}
+      `).join('')}
     </edges>
   </graph>
 </gexf>`;
-
+    
     return gexf;
   }
 
@@ -539,66 +520,56 @@ export class GraphExporter {
   <key id="weight" for="edge" attr.name="weight" attr.type="double"/>
   
   <graph id="IntelGraph" edgedefault="directed">
-    ${this.cy
-      .nodes()
-      .map(
-        (node) => `
+    ${this.cy.nodes().map(node => `
       <node id="${node.id()}">
         <data key="label">${node.data('label')}</data>
         <data key="type">${node.data('type')}</data>
         <data key="importance">${node.data('importance') || 1}</data>
       </node>
-    `,
-      )
-      .join('')}
+    `).join('')}
     
-    ${this.cy
-      .edges()
-      .map(
-        (edge, index) => `
+    ${this.cy.edges().map((edge, index) => `
       <edge id="e${index}" source="${edge.source().id()}" target="${edge.target().id()}">
         <data key="edge_type">${edge.data('type')}</data>
         <data key="weight">${edge.data('weight') || 0.5}</data>
       </edge>
-    `,
-      )
-      .join('')}
+    `).join('')}
   </graph>
 </graphml>`;
-
+    
     return graphml;
   }
 
   exportToCypher() {
     // Generate Cypher CREATE statements for Neo4j
-    const nodeStatements = this.cy.nodes().map((node) => {
+    const nodeStatements = this.cy.nodes().map(node => {
       const data = node.data();
       const properties = {
         id: data.id,
         label: data.label,
         type: data.type,
         importance: data.importance || 1,
-        ...data.properties,
+        ...data.properties
       };
-
+      
       const propsString = Object.entries(properties)
         .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
         .join(', ');
-
+      
       return `CREATE (n${data.id}:${data.type} {${propsString}})`;
     });
 
-    const edgeStatements = this.cy.edges().map((edge) => {
+    const edgeStatements = this.cy.edges().map(edge => {
       const data = edge.data();
       const properties = {
         weight: data.weight || 0.5,
-        ...data.properties,
+        ...data.properties
       };
-
+      
       const propsString = Object.entries(properties)
         .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
         .join(', ');
-
+      
       return `CREATE (n${data.source})-[:${data.type} {${propsString}}]->(n${data.target})`;
     });
 
@@ -614,5 +585,5 @@ export default {
   d3CircularClusterLayout,
   d3TimelineLayout,
   d3GeographicLayout,
-  d3ArcLayout,
+  d3ArcLayout
 };

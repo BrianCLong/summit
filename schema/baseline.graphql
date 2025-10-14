@@ -1,18 +1,966 @@
-# Placeholder: commit a known-good baseline schema here.
-# Update this through a dedicated PR when intentionally breaking.
+# Baseline GraphQL schema for Summit IntelGraph + Strategy Engines.
+# Update this through dedicated changes when intentionally evolving the contract.
 
-type Query { health: Health! user(id: ID!): User }
+scalar DateTime
+scalar JSON
 
-type Mutation { createNote(input: NoteInput!): Note! }
+enum Role {
+  CEO
+  CHAIR
+  EXEC
+  PM
+  IC
+  AUDITOR
+}
 
-type Health { ok: Boolean! }
+enum GraphEntityType {
+  MISSION
+  VISION
+  VALUE
+  PRINCIPLE
+  POLICY
+  STRATEGY
+  THEME
+  BET
+  OBJECTIVE
+  KEY_RESULT
+  INITIATIVE
+  DECISION
+  CLAIM
+  RISK
+  ARTIFACT
+  METRIC
+  FINANCIALS
+  CRM_OBJECT
+  DATASET
+  SYSTEM
+  PROJECTION
+  ASSUMPTION
+  METRIC_SERIES
+  OWNER
+}
 
-type User { id: ID! name: String! widgets: [Widget!]! alerts: [Alert!]! }
+enum ArtifactDistribution {
+  INTERNAL
+  EXTERNAL
+}
 
-type Widget { id: ID! type: String! }
+enum ArtifactModality {
+  TEXT
+  PRESENTATION
+  DASHBOARD
+  DATASET
+  VIDEO
+  AUDIO
+}
 
-type Alert { level: String! message: String! }
+enum InitiativeStatus {
+  DRAFT
+  PLANNED
+  ACTIVE
+  COMPLETE
+  PAUSED
+  CANCELLED
+}
 
-input NoteInput { text: String! }
+enum FinancialMetric {
+  REV
+  COGS
+  OPEX
+  EBITDA
+}
 
-type Note { id: ID! text: String! }
+enum ScenarioType {
+  ACTUAL
+  BASE
+  OPTIMISTIC
+  CONSERVATIVE
+}
+
+enum CRMObjectType {
+  ACCOUNT
+  OPPORTUNITY
+}
+
+enum MetricAggregation {
+  SUM
+  AVG
+  MAX
+  MIN
+  LAST
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskStatus {
+  OPEN
+  MITIGATED
+  ACCEPTED
+  CLOSED
+}
+
+enum DecisionStatus {
+  DRAFT
+  REVIEW
+  APPROVED
+  REJECTED
+  IMPLEMENTED
+}
+
+enum PolicyEnforcement {
+  ADVISORY
+  ENFORCED
+  BLOCKING
+}
+
+enum PolicyCheckStatus {
+  PASSED
+  WARN
+  BLOCKED
+}
+
+enum StrategyPeriod {
+  ANNUAL
+  QUARTERLY
+}
+
+enum ConstraintType {
+  FINANCIAL
+  RESOURCE
+  POLICY
+  MARKET
+}
+
+enum DependencyType {
+  BLOCKED_BY
+  BLOCKS
+  RELATED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ArtifactType {
+  CEO_DAILY_DISPATCH
+  PORTFOLIO_REVIEW
+  RISK_COMPLIANCE
+  STRATEGY_UPDATE
+  BOARD_ONE_PAGER
+  INVESTOR_DECK
+  CUSTOMER_VALUE_MEMO
+  EXECUTION_ORDERS
+  DISCLOSURE_PACK
+}
+
+enum SystemType {
+  ERP
+  CRM
+  FPA
+  ANALYTICS
+  HRIS
+  OTHER
+}
+
+enum PipelineType {
+  MVV_UPDATE
+  POLICY_CHECK
+  GRAPH_WRITE
+  ARTIFACT_GENERATION
+  PUBLISH
+}
+
+enum RunStatus {
+  SCHEDULED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  ROLLED_BACK
+}
+
+type Query {
+  health: Health!
+  user(id: ID!): User
+  missions: [Mission!]!
+  mission(id: ID!): Mission
+  visions: [Vision!]!
+  values: [Value!]!
+  strategy(id: ID!): Strategy
+  strategies(year: Int, period: StrategyPeriod): [Strategy!]!
+  objectives(filter: ObjectiveFilterInput): [Objective!]!
+  initiatives(filter: InitiativeFilterInput): [Initiative!]!
+  decisions(status: DecisionStatus, ownerId: ID): [Decision!]!
+  claims(authorId: ID): [Claim!]!
+  artifacts(filter: ArtifactFilterInput): [Artifact!]!
+  metrics(filter: MetricFilterInput): [Metric!]!
+  metric(id: ID!): Metric
+  financials(metric: FinancialMetric, scenario: ScenarioType): [Financials!]!
+  crmObjects(filter: CRMObjectFilterInput): [CRMObject!]!
+  systems: [System!]!
+  policies: [GovernancePolicy!]!
+  pipelineRuns(filter: PipelineRunFilterInput): [PipelineRun!]!
+  artifactTemplates: [ArtifactTemplate!]!
+  dashboards: [Dashboard!]!
+  projections(filter: ProjectionFilterInput): [Projection!]!
+}
+
+type Mutation {
+  createNote(input: NoteInput!): Note!
+  createMission(input: MissionInput!): Mission!
+  proposeVision(input: VisionInput!): Vision!
+  createValue(input: ValueInput!): Value!
+  createStrategy(input: StrategyInput!): Strategy!
+  createObjective(input: ObjectiveInput!): Objective!
+  createInitiative(input: InitiativeInput!): Initiative!
+  recordDecision(input: DecisionInput!): Decision!
+  recordClaim(input: ClaimInput!): Claim!
+  registerPolicy(input: PolicyInput!): GovernancePolicy!
+  recordArtifact(input: ArtifactInput!): Artifact!
+  upsertMetric(input: MetricInput!): Metric!
+  upsertFinancials(input: FinancialsInput!): Financials!
+  upsertCRMObject(input: CRMObjectInput!): CRMObject!
+  registerSystem(input: SystemInput!): System!
+  registerTemplate(input: ArtifactTemplateInput!): ArtifactTemplate!
+  recordPipelineRun(input: PipelineRunInput!): PipelineRun!
+  createProjection(input: ProjectionInput!): Projection!
+}
+
+type Health {
+  ok: Boolean!
+}
+
+type User {
+  id: ID!
+  name: String!
+  widgets: [Widget!]!
+  alerts: [Alert!]!
+}
+
+type Widget {
+  id: ID!
+  type: String!
+}
+
+type Alert {
+  level: String!
+  message: String!
+}
+
+input NoteInput {
+  text: String!
+}
+
+type Note {
+  id: ID!
+  text: String!
+}
+
+type Mission {
+  id: ID!
+  text: String!
+  scope: String
+  adoptedOn: DateTime!
+  approvers: [Owner!]!
+  version: Int!
+  hash: String!
+  governingDecision: Decision
+}
+
+type Vision {
+  id: ID!
+  outcomes: [String!]!
+  timeframe: Timebox!
+  measures: [VisionMeasure!]!
+  hypotheses: [Hypothesis!]!
+  tests: [VisionTest!]!
+  northStars: [Metric!]!
+}
+
+type VisionMeasure {
+  id: ID!
+  name: String!
+  metric: Metric!
+  target: Float
+  threshold: Float
+}
+
+type Hypothesis {
+  id: ID!
+  statement: String!
+  confidence: Float
+}
+
+type VisionTest {
+  id: ID!
+  description: String!
+  status: DecisionStatus!
+  relatedInitiatives: [Initiative!]!
+}
+
+type Value {
+  id: ID!
+  name: String!
+  behaviors: [Behavior!]!
+  antiPatterns: [String!]!
+  policyRefs: [PolicyReference!]!
+}
+
+type Behavior {
+  id: ID!
+  description: String!
+  signals: [InterviewSignal!]!
+  rubrics: [DecisionRubric!]!
+}
+
+type InterviewSignal {
+  id: ID!
+  description: String!
+  severity: String
+}
+
+type DecisionRubric {
+  id: ID!
+  criterion: String!
+  guidance: String!
+  weight: Float
+}
+
+type PolicyReference {
+  id: ID!
+  name: String!
+  uri: String!
+}
+
+type Strategy {
+  id: ID!
+  year: Int!
+  period: StrategyPeriod!
+  themes: [StrategyTheme!]!
+  bets: [StrategyBet!]!
+  constraints: [Constraint!]!
+  risks: [Risk!]!
+}
+
+type StrategyTheme {
+  id: ID!
+  name: String!
+  description: String!
+  principles: [String!]!
+}
+
+type StrategyBet {
+  id: ID!
+  hypothesis: String!
+  expectedMetrics: [MetricTarget!]!
+  costCap: Money
+  timebox: Timebox!
+  objectives: [Objective!]!
+  confidence: Float
+}
+
+type MetricTarget {
+  metric: Metric!
+  targetValue: Float!
+  threshold: Float
+}
+
+type Constraint {
+  id: ID!
+  description: String!
+  type: ConstraintType!
+}
+
+type Objective {
+  id: ID!
+  owner: Owner!
+  timeframe: Timebox!
+  alignmentRefs: [GraphRef!]!
+  targets: [MetricTarget!]!
+  confidence: Float!
+  keyResults: [KeyResult!]!
+}
+
+type KeyResult {
+  id: ID!
+  statement: String!
+  metric: Metric!
+  targetValue: Float!
+  currentValue: Float
+  confidence: Float
+}
+
+type Initiative {
+  id: ID!
+  owner: Owner!
+  definitionOfDone: [String!]!
+  start: DateTime
+  end: DateTime
+  budgetCap: Money
+  riskScore: Float
+  linkedMetrics: [Metric!]!
+  status: InitiativeStatus!
+  dependencies: [InitiativeDependency!]!
+}
+
+type InitiativeDependency {
+  id: ID!
+  type: DependencyType!
+  initiative: Initiative!
+  notes: String
+}
+
+type Decision {
+  id: ID!
+  context: String!
+  options: [DecisionOption!]!
+  decision: String
+  reversible: Boolean!
+  risks: [Risk!]!
+  owners: [Owner!]!
+  checks: [PolicyCheckResult!]!
+  approvals: [Approval!]!
+  runId: ID!
+  status: DecisionStatus!
+}
+
+type DecisionOption {
+  id: ID!
+  description: String!
+  rationale: String
+  expectedImpact: [MetricTarget!]!
+}
+
+type PolicyCheckResult {
+  id: ID!
+  policy: GovernancePolicy!
+  status: PolicyCheckStatus!
+  violations: [PolicyViolation!]!
+  evaluatedAt: DateTime!
+}
+
+type GovernancePolicy {
+  id: ID!
+  name: String!
+  description: String
+  enforcement: PolicyEnforcement!
+  appliesTo: [GraphEntityType!]!
+  rules: [PolicyRule!]!
+  approvalsRequired: [RoleRequirement!]!
+}
+
+type PolicyRule {
+  id: ID!
+  expression: String!
+  rationale: String
+}
+
+type RoleRequirement {
+  role: Role!
+  minimumApprovers: Int!
+}
+
+type PolicyViolation {
+  id: ID!
+  message: String!
+  severity: RiskLevel!
+  entity: GraphRef!
+}
+
+type Approval {
+  id: ID!
+  approver: Owner!
+  status: ApprovalStatus!
+  decidedAt: DateTime
+}
+
+type Claim {
+  id: ID!
+  statement: String!
+  sources: [EvidenceSource!]!
+  timestamp: DateTime!
+  author: Owner!
+  confidence: Float!
+}
+
+type EvidenceSource {
+  uri: String!
+  hash: String!
+  title: String
+  accessedAt: DateTime
+}
+
+type Risk {
+  id: ID!
+  summary: String!
+  level: RiskLevel!
+  mitigations: [String!]!
+  owners: [Owner!]!
+  status: RiskStatus!
+  claimRefs: [Claim!]!
+}
+
+type Artifact {
+  id: ID!
+  type: ArtifactType!
+  runId: ID!
+  graphRefs: [GraphRef!]!
+  disclosurePackUri: String
+  distribution: ArtifactDistribution!
+  modality: ArtifactModality!
+  generatedAt: DateTime!
+  claimRefs: [Claim!]!
+  metadata: JSON
+}
+
+type Metric {
+  id: ID!
+  name: String!
+  unit: String!
+  target: Float
+  sourceSystem: System!
+  aggregation: MetricAggregation!
+  actuals: [MetricPoint!]!
+  forecast: [MetricPoint!]!
+}
+
+type MetricPoint {
+  timestamp: DateTime!
+  value: Float!
+  confidence: Float
+  scenario: ScenarioType
+}
+
+type Financials {
+  id: ID!
+  metric: FinancialMetric!
+  actuals: [MetricPoint!]!
+  forecast: [MetricPoint!]!
+  scenario: ScenarioType!
+}
+
+type CRMObject {
+  id: ID!
+  type: CRMObjectType!
+  name: String
+  stage: String!
+  forecastCategory: String!
+  amount: Float!
+  owner: Owner!
+  expectedCloseDate: DateTime
+}
+
+type System {
+  id: ID!
+  name: String!
+  type: SystemType!
+  vendor: String
+  environment: String
+  owner: Owner
+}
+
+type ArtifactTemplate {
+  id: ID!
+  name: String!
+  artifactType: ArtifactType!
+  description: String!
+  policyLabels: [String!]!
+  layout: JSON
+}
+
+type PipelineRun {
+  id: ID!
+  pipeline: PipelineType!
+  startedAt: DateTime!
+  completedAt: DateTime
+  status: RunStatus!
+  cost: Money
+  budgets: [Budget!]!
+  artifacts: [Artifact!]!
+}
+
+type Budget {
+  id: ID!
+  name: String!
+  cap: Money!
+  spent: Money!
+}
+
+type Dashboard {
+  id: ID!
+  name: String!
+  cards: [DashboardCard!]!
+}
+
+type DashboardCard {
+  id: ID!
+  title: String!
+  metric: Metric!
+  visualization: String!
+  runId: ID
+  policyLabels: [String!]!
+}
+
+type Projection {
+  id: ID!
+  metric: Metric!
+  scenario: ScenarioType!
+  horizon: Timebox!
+  assumptions: [Assumption!]!
+}
+
+type Assumption {
+  id: ID!
+  statement: String!
+  claim: Claim
+}
+
+type Dataset {
+  id: ID!
+  name: String!
+  description: String
+  system: System!
+  schema: String
+}
+
+type Owner {
+  id: ID!
+  name: String!
+  role: Role!
+  team: String
+  metadata: JSON
+}
+
+type GraphRef {
+  entityType: GraphEntityType!
+  id: ID!
+}
+
+type Timebox {
+  start: DateTime
+  end: DateTime
+}
+
+type Money {
+  currency: String!
+  amount: Float!
+}
+
+type ArtifactRunLink {
+  run: PipelineRun!
+  artifact: Artifact!
+}
+
+input MissionInput {
+  text: String!
+  scope: String
+  adoptedOn: DateTime!
+  approverIds: [ID!]!
+  rationale: String
+  governingDecisionId: ID
+}
+
+input VisionInput {
+  outcomes: [String!]!
+  timeframe: TimeboxInput!
+  measures: [VisionMeasureInput!]!
+  hypotheses: [HypothesisInput!]!
+  testIds: [ID!]
+  northStarMetricIds: [ID!]
+}
+
+input VisionMeasureInput {
+  name: String!
+  metricId: ID!
+  target: Float
+  threshold: Float
+}
+
+input HypothesisInput {
+  statement: String!
+  confidence: Float
+}
+
+input ValueInput {
+  name: String!
+  behaviors: [BehaviorInput!]!
+  antiPatterns: [String!]!
+  policyRefIds: [ID!]!
+}
+
+input BehaviorInput {
+  description: String!
+  signals: [InterviewSignalInput!]!
+  rubrics: [DecisionRubricInput!]!
+}
+
+input InterviewSignalInput {
+  description: String!
+  severity: String
+}
+
+input DecisionRubricInput {
+  criterion: String!
+  guidance: String!
+  weight: Float
+}
+
+input StrategyInput {
+  year: Int!
+  period: StrategyPeriod!
+  themeIds: [ID!]!
+  betInputs: [StrategyBetInput!]!
+  constraintInputs: [ConstraintInput!]!
+  riskIds: [ID!]!
+}
+
+input StrategyBetInput {
+  hypothesis: String!
+  expectedMetrics: [MetricTargetInput!]!
+  costCap: MoneyInput
+  timebox: TimeboxInput!
+  objectiveIds: [ID!]!
+  confidence: Float
+}
+
+input MetricTargetInput {
+  metricId: ID!
+  targetValue: Float!
+  threshold: Float
+}
+
+input ConstraintInput {
+  description: String!
+  type: ConstraintType!
+}
+
+input ObjectiveInput {
+  ownerId: ID!
+  timeframe: TimeboxInput!
+  alignmentRefs: [GraphRefInput!]!
+  targets: [MetricTargetInput!]!
+  confidence: Float!
+  keyResultInputs: [KeyResultInput!]!
+}
+
+input KeyResultInput {
+  statement: String!
+  metricId: ID!
+  targetValue: Float!
+  currentValue: Float
+  confidence: Float
+}
+
+input InitiativeInput {
+  ownerId: ID!
+  definitionOfDone: [String!]!
+  start: DateTime
+  end: DateTime
+  budgetCap: MoneyInput
+  riskScore: Float
+  linkedMetricIds: [ID!]!
+  status: InitiativeStatus!
+  dependencyIds: [ID!]
+}
+
+input DecisionInput {
+  context: String!
+  optionInputs: [DecisionOptionInput!]!
+  decision: String
+  reversible: Boolean!
+  riskIds: [ID!]!
+  ownerIds: [ID!]!
+  checkIds: [ID!]!
+  approvalIds: [ID!]
+  runId: ID!
+  status: DecisionStatus!
+}
+
+input DecisionOptionInput {
+  description: String!
+  rationale: String
+  expectedImpact: [MetricTargetInput!]!
+}
+
+input ClaimInput {
+  statement: String!
+  sourceInputs: [EvidenceSourceInput!]!
+  timestamp: DateTime!
+  authorId: ID!
+  confidence: Float!
+}
+
+input EvidenceSourceInput {
+  uri: String!
+  hash: String!
+  title: String
+  accessedAt: DateTime
+}
+
+input PolicyInput {
+  name: String!
+  description: String
+  enforcement: PolicyEnforcement!
+  appliesTo: [GraphEntityType!]!
+  ruleInputs: [PolicyRuleInput!]!
+  approvalRequirements: [RoleRequirementInput!]!
+}
+
+input PolicyRuleInput {
+  expression: String!
+  rationale: String
+}
+
+input RoleRequirementInput {
+  role: Role!
+  minimumApprovers: Int!
+}
+
+input ArtifactInput {
+  type: ArtifactType!
+  runId: ID!
+  graphRefs: [GraphRefInput!]!
+  disclosurePackUri: String
+  distribution: ArtifactDistribution!
+  modality: ArtifactModality!
+  claimIds: [ID!]!
+  metadata: JSON
+}
+
+input MetricInput {
+  name: String!
+  unit: String!
+  target: Float
+  sourceSystemId: ID!
+  aggregation: MetricAggregation!
+}
+
+input FinancialsInput {
+  metric: FinancialMetric!
+  actuals: [MetricPointInput!]!
+  forecast: [MetricPointInput!]!
+  scenario: ScenarioType!
+}
+
+input MetricPointInput {
+  timestamp: DateTime!
+  value: Float!
+  confidence: Float
+  scenario: ScenarioType
+}
+
+input CRMObjectInput {
+  type: CRMObjectType!
+  name: String
+  stage: String!
+  forecastCategory: String!
+  amount: Float!
+  ownerId: ID!
+  expectedCloseDate: DateTime
+}
+
+input SystemInput {
+  name: String!
+  type: SystemType!
+  vendor: String
+  environment: String
+  ownerId: ID
+}
+
+input ArtifactTemplateInput {
+  name: String!
+  artifactType: ArtifactType!
+  description: String!
+  policyLabels: [String!]!
+  layout: JSON
+}
+
+input PipelineRunInput {
+  pipeline: PipelineType!
+  startedAt: DateTime!
+  completedAt: DateTime
+  status: RunStatus!
+  cost: MoneyInput
+  budgetInputs: [BudgetInput!]!
+  artifactIds: [ID!]!
+}
+
+input BudgetInput {
+  name: String!
+  cap: MoneyInput!
+  spent: MoneyInput!
+}
+
+input ProjectionInput {
+  metricId: ID!
+  scenario: ScenarioType!
+  horizon: TimeboxInput!
+  assumptionIds: [ID!]!
+}
+
+input TimeboxInput {
+  start: DateTime
+  end: DateTime
+}
+
+input MoneyInput {
+  currency: String!
+  amount: Float!
+}
+
+input GraphRefInput {
+  entityType: GraphEntityType!
+  id: ID!
+}
+
+input ObjectiveFilterInput {
+  ownerId: ID
+  alignmentTypes: [GraphEntityType!]
+  startAfter: DateTime
+  endBefore: DateTime
+}
+
+input InitiativeFilterInput {
+  status: [InitiativeStatus!]
+  ownerId: ID
+  riskScoreGte: Float
+  metricIds: [ID!]
+}
+
+input ArtifactFilterInput {
+  type: ArtifactType
+  distribution: ArtifactDistribution
+  runId: ID
+}
+
+input MetricFilterInput {
+  systemId: ID
+  nameContains: String
+}
+
+input CRMObjectFilterInput {
+  type: CRMObjectType
+  stage: String
+  ownerId: ID
+  forecastCategory: String
+}
+
+input PipelineRunFilterInput {
+  pipeline: PipelineType
+  status: RunStatus
+  startedAfter: DateTime
+  startedBefore: DateTime
+}
+
+input ProjectionFilterInput {
+  metricId: ID
+  scenario: ScenarioType
+  horizonStart: DateTime
+  horizonEnd: DateTime
+}

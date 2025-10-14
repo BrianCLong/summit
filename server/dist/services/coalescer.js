@@ -71,3 +71,4 @@ async function writeCites(cites) {
     `, { rows: documentCites.map((c) => ({ answerId: c.answerId, id: c.id })) });
     }
 }
+//# sourceMappingURL=coalescer.js.map

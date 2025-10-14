@@ -1,20 +1,14 @@
-const { getPostgresPool } = require('../config/database');
+const { getPostgresPool } = require("../config/database");
 class KeyVaultService {
     constructor() {
-        this.pool = null;
-    }
-    getPool() {
-        if (!this.pool) {
-            this.pool = getPostgresPool();
-        }
-        return this.pool;
+        this.pool = getPostgresPool();
     }
     async addKey(provider, key, expiresAt = null) {
-        const res = await this.getPool().query(`INSERT INTO api_keys (provider, key, expires_at) VALUES ($1,$2,$3) RETURNING id`, [provider, key, expiresAt]);
+        const res = await this.pool.query(`INSERT INTO api_keys (provider, key, expires_at) VALUES ($1,$2,$3) RETURNING id`, [provider, key, expiresAt]);
         return res.rows[0].id;
     }
     async getActiveKey(provider) {
-        const res = await this.getPool().query(`SELECT id, key, expires_at FROM api_keys WHERE provider = $1 AND status = 'active' ORDER BY created_at DESC LIMIT 1`, [provider]);
+        const res = await this.pool.query(`SELECT id, key, expires_at FROM api_keys WHERE provider = $1 AND status = 'active' ORDER BY created_at DESC LIMIT 1`, [provider]);
         return res.rows[0] || null;
     }
     async rotateKey(provider, newKey, expiresAt = null) {
@@ -23,3 +17,4 @@ class KeyVaultService {
     }
 }
 module.exports = KeyVaultService;
+//# sourceMappingURL=KeyVaultService.js.map

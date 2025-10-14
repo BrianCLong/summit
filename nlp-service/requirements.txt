@@ -1,2 +1,2 @@
-kafka-python==2.2.15
-spacy==3.8.7
+kafka-python==2.0.2
+spacy==3.7.2
