@@ -14,6 +14,26 @@ module.exports = {
     'prettier'
   ],
   settings: { react: { version: '18.0' } },
+  overrides: [
+    {
+      files: ['**/__tests__/**/*.*', '**/*.test.*', 'tests/**/*.*', 'server/src/tests/**/*.*'],
+      env: { jest: true, node: true },
+      plugins: ['jest'],
+      extends: ['plugin:jest/recommended'],
+      rules: {
+        'jest/no-focused-tests': 'error',
+        'jest/no-disabled-tests': 'warn',
+        'no-restricted-properties': [
+          'error',
+          {
+            object: 'console',
+            property: 'error',
+            message: 'Use assertions or throw errors instead of console.error in tests',
+          },
+        ],
+      },
+    },
+  ],
   rules: {
     'import/order': ['error', { 'newlines-between': 'always', alphabetize: { order: 'asc' } }],
     'react/prop-types': 'off',
