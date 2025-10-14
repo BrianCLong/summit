@@ -9,3 +9,4 @@ export const riskRecomputeLatency = new client.Histogram({
     help: 'Latency of risk recompute',
     buckets: [10, 50, 100, 500, 1000]
 });
+//# sourceMappingURL=risk_metrics.js.map

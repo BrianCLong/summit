@@ -1,0 +1,36 @@
+name: 🔐 ABAC Policy Gate
+
+on:
+  pull_request:
+    paths:
+      - 'policy/abac/**'
+      - 'policy/tests/**'
+      - 'services/authz-gateway/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'policy/abac/**'
+      - 'policy/tests/**'
+
+jobs:
+  opa:
+    name: Validate ABAC Policies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install OPA
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/v0.64.1/opa_linux_amd64_static
+          chmod +x opa
+          sudo mv opa /usr/local/bin/opa
+      - name: Check formatting
+        run: opa fmt policy/abac/abac.rego --diff
+      - name: Run policy unit tests with coverage
+        run: |
+          opa test policy/abac policy/tests -v --coverage --format json > opa-coverage.json
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opa-abac-coverage
+          path: opa-coverage.json

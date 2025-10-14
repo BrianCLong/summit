@@ -10,3 +10,4 @@ export async function mountGraphQL(app) {
     await server.start();
     server.applyMiddleware({ app, path: '/graphql' });
 }
+//# sourceMappingURL=index.js.map

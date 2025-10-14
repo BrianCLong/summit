@@ -1,5 +1,0 @@
-type,title,description
-Epic,Subscriptions Backpressure,Implement BackpressureGate and metrics
-Epic,Clean Rooms v1,Manifest and guard with residency/DLP
-Story,Cache Coherency,Subgraph cache with invalidation bus
-Bug,Remove duckdb placeholder,Ensure pre-commit guard

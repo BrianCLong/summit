@@ -1,13 +1,13 @@
-import { GraphQLError } from 'graphql';
-import { evaluate } from '../services/AccessControl.js';
+import { GraphQLError } from "graphql";
+import { evaluate } from "../services/AccessControl.js";
 export function withPolicy(action, resolver) {
     return async (parent, args, context, info) => {
         const decision = await evaluate(action, context.user, { args, parent }, { tenant: context?.tenant });
         if (!decision.allow) {
-            throw new GraphQLError('Forbidden', {
+            throw new GraphQLError("Forbidden", {
                 extensions: {
-                    code: 'FORBIDDEN',
-                    reason: decision.reason || 'policy_denied',
+                    code: "FORBIDDEN",
+                    reason: decision.reason || "policy_denied",
                 },
             });
         }
@@ -24,7 +24,8 @@ export function wrapResolversWithPolicy(namespace, resolvers) {
     };
     return {
         ...resolvers,
-        Query: wrap('Query'),
-        Mutation: wrap('Mutation'),
+        Query: wrap("Query"),
+        Mutation: wrap("Mutation"),
     };
 }
+//# sourceMappingURL=policyWrapper.js.map
