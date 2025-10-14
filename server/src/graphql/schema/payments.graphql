@@ -1,20 +1,4 @@
-type Invoice {
-  id: ID!
-  orderId: ID!
-  amount: String!
-  currency: String!
-  createdAt: String!
-  piiOff: Boolean!
-}
-type PaymentStatus {
-  orderId: ID!
-  status: String!
-  updatedAt: String!
-}
-extend type Query {
-  invoices(tenantId: String!): [Invoice!]!
-  paymentStatus(orderId: ID!): PaymentStatus!
-}
-extend type Mutation {
-  createCheckout(orderId: ID!): JSON!
-}
+type Invoice { id:ID!, orderId:ID!, amount:String!, currency:String!, createdAt:String!, piiOff:Boolean! }
+type PaymentStatus { orderId:ID!, status:String!, updatedAt:String! }
+extend type Query { invoices(tenantId:String!):[Invoice!]!, paymentStatus(orderId:ID!):PaymentStatus! }
+extend type Mutation { createCheckout(orderId:ID!): JSON! }

@@ -1,7 +1,0 @@
-{
-  "title": "Connector Metrics",
-  "panels": [
-    {"title": "Fetch Success", "type": "graph", "targets": []},
-    {"title": "Fetch Errors", "type": "graph", "targets": []}
-  ]
-}
