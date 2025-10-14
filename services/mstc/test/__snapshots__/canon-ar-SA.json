@@ -1,0 +1,204 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "إقراض مرابي",
+    "locale": "ar-SA",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "iqrad murabi"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "SAMA",
+        "note": "تنظم أنشطة الاحتيال الهرمي والإقراض الجائر والمراهنات الرياضية غير النظامية."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "مراهنات رياضية غير نظامية",
+    "locale": "ar-SA",
+    "vertical": "finance",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "SAMA",
+        "note": "تنظم أنشطة الاحتيال الهرمي والإقراض الجائر والمراهنات الرياضية غير النظامية."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "احتيال بونزي الاستثماري",
+    "locale": "ar-SA",
+    "vertical": "finance",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "SAMA",
+        "note": "تنظم أنشطة الاحتيال الهرمي والإقراض الجائر والمراهنات الرياضية غير النظامية."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "فحص العدوى المنقولة جنسيًا",
+    "locale": "ar-SA",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "fahs amrad jinsiya"
+      },
+      {
+        "type": "alias",
+        "value": "اختبار STI"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "SFDA",
+        "note": "مراقبة الأدوية الخاضعة للرقابة والتوعية بالصحة الإنجابية."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "حبوب منع الحمل الطارئة",
+    "locale": "ar-SA",
+    "vertical": "health",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "SFDA",
+        "note": "مراقبة الأدوية الخاضعة للرقابة والتوعية بالصحة الإنجابية."
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "مسكنات أفيونية",
+    "locale": "ar-SA",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "muskinaat afyoniya"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "SFDA",
+        "note": "مراقبة الأدوية الخاضعة للرقابة والتوعية بالصحة الإنجابية."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "تنمر إلكتروني على القُصّر",
+    "locale": "ar-SA",
+    "vertical": "minors",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "CITC",
+        "note": "إطار حماية القُصّر من الاستدراج، التنمر الإلكتروني، ومحتوى إيذاء النفس."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "استدراج قاصرين عبر الإنترنت",
+    "locale": "ar-SA",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "istidraj qasirin"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CITC",
+        "note": "إطار حماية القُصّر من الاستدراج، التنمر الإلكتروني، ومحتوى إيذاء النفس."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "تشجيع على إيذاء النفس",
+    "locale": "ar-SA",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "tashjie eidha alnafs"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CITC",
+        "note": "إطار حماية القُصّر من الاستدراج، التنمر الإلكتروني، ومحتوى إيذاء النفس."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "تمييز في الأجور",
+    "locale": "ar-SA",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "tamyeez fil ujoor"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "HRSD",
+        "note": "إرشادات منع التحرش، التمييز في الأجور، والعنف في أماكن العمل."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "تحرش جنسي في العمل",
+    "locale": "ar-SA",
+    "vertical": "workplace",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "HRSD",
+        "note": "إرشادات منع التحرش، التمييز في الأجور، والعنف في أماكن العمل."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "تهديد بعنف وظيفي",
+    "locale": "ar-SA",
+    "vertical": "workplace",
+    "variants": [],
+    "regulatorNotes": [
+      {
+        "regulator": "HRSD",
+        "note": "إرشادات منع التحرش، التمييز في الأجور، والعنف في أماكن العمل."
+      }
+    ],
+    "confidence": 0.91
+  }
+]

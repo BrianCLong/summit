@@ -1,5 +1,0 @@
-show all paths from a to z with unlimited depth
-find every connection between all entities
-expand graph breadth to maximum
-return the entire network
-

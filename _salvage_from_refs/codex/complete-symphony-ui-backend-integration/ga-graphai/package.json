@@ -1,8 +1,0 @@
-{
-  "name": "ga-graphai-root",
-  "private": true,
-  "workspaces": ["packages/*"],
-  "scripts": {
-    "test": "npm run -ws --if-present test"
-  }
-}

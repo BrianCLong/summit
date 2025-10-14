@@ -220,3 +220,4 @@ describe('MoERouter', () => {
         });
     });
 });
+//# sourceMappingURL=router.test.js.map
