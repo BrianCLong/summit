@@ -57,13 +57,13 @@ receivers:
         subject: '[CRITICAL] IntelGraph Alert: {{ .GroupLabels.alertname }}'
         body: |
           🚨 CRITICAL ALERT 🚨
-
+          
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Description: {{ .Annotations.description }}
           Instance: {{ .Labels.instance }}
           Time: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
-
+          
           This requires immediate attention!
           {{ end }}
     slack_configs:
@@ -89,13 +89,13 @@ receivers:
         subject: '[URGENT] IntelGraph Application Down'
         body: |
           ⚠️ URGENT: IntelGraph application is down!
-
+          
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Description: {{ .Annotations.description }}
           Time: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
           {{ end }}
-
+          
           Please investigate immediately.
     slack_configs:
       - api_url: '${SLACK_WEBHOOK_URL}'
@@ -111,7 +111,7 @@ receivers:
         subject: '[DATABASE] IntelGraph Database Alert: {{ .GroupLabels.alertname }}'
         body: |
           Database Alert for IntelGraph
-
+          
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Description: {{ .Annotations.description }}
@@ -137,7 +137,7 @@ receivers:
         subject: '[PERFORMANCE] IntelGraph Performance Alert'
         body: |
           Performance Alert for IntelGraph
-
+          
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Description: {{ .Annotations.description }}
