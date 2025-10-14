@@ -1,3 +1,0 @@
-schema: 'server/src/**/*.{graphql,gql}'
-documents:
-  - 'client/src/graphql/**/*.{graphql,gql,js}'

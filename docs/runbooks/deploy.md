@@ -1,7 +1,6 @@
 # Runbook: Production Deployment
 
 ## Docker Compose (Simple)
-
 ```bash
 # Copy and configure environment
 cp .env.example .env
@@ -12,7 +11,6 @@ docker compose up -d
 ```
 
 ## Kubernetes (Helm)
-
 ```bash
 # Install with Helm
 helm upgrade --install intelgraph deploy/helm/intelgraph \
@@ -22,7 +20,6 @@ helm upgrade --install intelgraph deploy/helm/intelgraph \
 ```
 
 ## AWS EKS + Terraform
-
 ```bash
 cd deploy/terraform/environments/production
 terraform init
@@ -34,7 +31,6 @@ kubectl apply -k deploy/kubernetes/overlays/production
 ```
 
 ## Post-deployment
-
 - Verify health endpoints: `/api/health`, `/ml/health`
 - Run database migrations
 - Configure monitoring and alerting

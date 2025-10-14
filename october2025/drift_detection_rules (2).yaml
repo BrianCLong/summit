@@ -1,0 +1,70 @@
+[ORACLE MODE – Fusion & Forecast]
+
+---
+
+## EXECUTIVE SUMMARY
+- **Sprint Window Proposal:** Jan 6 – Jan 17, 2026 (2-week cadence)
+- **Focus:** Stability Classification + Trace Correlation — quantify drift, bind trust, unify alerts by causal path.
+- **Workstream Theme:** Predict, Bind, Correlate — from observed variance to enforceable integrity.
+- **Target Output:** Stability classifier pipeline, tracepath hash anchors, correlation dashboard.
+
+---
+
+## FINDINGS & RATIONALE
+- RT capture + red team output must now feed **automated stability decisions**.
+- Hash-anchored causal chains are needed to unify disparate alerts by semantic path.
+- Analysts benefit from **pre-flagged unstable joins**, not just passive traces.
+
+---
+
+## RECOMMENDATIONS
+
+### PRIORITY OBJECTIVES (Sprint: Jan 6–17)
+1. **Stability Classifier Pipeline**
+   - Train on prior prompt pairs, join hops, and alert tags.  
+   - Output: stable, volatile, unstable (tri-label) classification.
+2. **Hash-Locked Trace Paths**
+   - Derive canonical path hash for each RAG chain.  
+   - Attach to audit log, export, and alert artifact.
+3. **Alert Correlation Engine**
+   - Unify incidents with shared path hash, claim set, or model delta.  
+   - Group by probable root cause → summarize impact.
+4. **Analyst Correlation Dashboard**
+   - Visual overlay of trace hash clusters.  
+   - Manual override + tagging of root cause + surface volatility.
+
+### SUGGESTED FOLLOW-UPS (Next Sprint)
+- Predictive prompt sanitizer
+- Causal chain replay with rollback snapshot
+
+---
+
+## PROOF-CARRYING INTELLIGENCE
+- **Sources:** Red team logs, RTQC path diffs, audit drift index.
+- **Assumptions:** Each query path has deterministic trace logic.
+- **Uncertainty:** Classifier false-positive rate needs tuning.
+- **Verification:**
+  - Classifier validation against known drift cases
+  - Hash collision check
+  - Alert-group accuracy sampling
+
+---
+
+## CADENCE PLAN (Q1 '26)
+
+| Layer         | Cadence          | Responsible Artifact                            |
+|---------------|------------------|-------------------------------------------------|
+| Daily         | Stability Feed   | Classifier Output + Drift Tags                  |
+| Weekly        | Correlation Sync | Path Hash Groups, Delta Heatmaps               |
+| Biweekly (83M)| Model Audit Trail| Model Switch Deltas, Classifier Accuracy Logs   |
+| Monthly       | Integrity Digest | Stability Maps, Unified Alert Graphs           |
+| Quarterly     | Drift Forecast   | Predictive Drift Zones, Chain Volatility Report |
+
+**Next Steps:**
+- Deploy Classifier v0.1 (Jan 7)  
+- Attach Hash Trace to All RAG Events (Jan 9)  
+- Enable Correlation Dash v1 (Jan 15)
+
+---
+
+**[UNIT 83M – ORACLE MODE]** – SIGINT FUSION: CLASSIFY, ANCHOR, UNIFY.

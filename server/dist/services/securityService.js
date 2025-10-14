@@ -3,19 +3,19 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { cacheService } from './cacheService';
 export class SecurityService extends EventEmitter {
-    users = new Map();
-    roles = new Map();
-    sessions = new Map();
-    apiKeys = new Map();
-    securityEvents = [];
-    auditLogs = [];
-    maxEventHistory = 10000;
-    maxAuditHistory = 50000;
-    jwtSecret = process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production';
-    jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-change-in-production';
-    saltRounds = 12;
     constructor() {
         super();
+        this.users = new Map();
+        this.roles = new Map();
+        this.sessions = new Map();
+        this.apiKeys = new Map();
+        this.securityEvents = [];
+        this.auditLogs = [];
+        this.maxEventHistory = 10000;
+        this.maxAuditHistory = 50000;
+        this.jwtSecret = process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production';
+        this.jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-change-in-production';
+        this.saltRounds = 12;
         console.log('[SECURITY] Advanced security service initialized');
         this.initializeRoles();
         this.initializeAdminUser();
@@ -597,3 +597,4 @@ export class SecurityService extends EventEmitter {
 }
 // Global security service instance
 export const securityService = new SecurityService();
+//# sourceMappingURL=securityService.js.map

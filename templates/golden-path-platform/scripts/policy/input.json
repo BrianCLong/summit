@@ -1,0 +1,14 @@
+{
+  "artifacts": ["signed", "verified"],
+  "sboms": [
+    { "name": "hello-service", "format": "SPDX" },
+    { "name": "hello-job", "format": "SPDX" }
+  ],
+  "vulnerabilities": {
+    "critical": 0,
+    "high": 0
+  },
+  "provenance": {
+    "slsaLevel": 3
+  }
+}

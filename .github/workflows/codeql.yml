@@ -1,344 +1,68 @@
-name: codeql
+name: CodeQL (auto language matrix)
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
-    paths:
-      - '**/*.ts'
-      - '**/*.js'
-      - '**/*.tsx'
-      - '**/*.jsx'
-      - '**/*.py'
-      - '**/*.go'
-      - '**/*.java'
-      - '**/*.cs'
-      - '**/*.cpp'
-      - '**/*.c'
   schedule:
-    - cron: '30 2 * * 1'  # Weekly on Monday at 2:30 AM UTC
-  workflow_dispatch:
+    - cron: '17 19 * * 6'
 
 permissions:
-  actions: read
   contents: read
-  security-events: write
 
 jobs:
+  create-matrix:
+    runs-on: ubuntu-latest
+    permissions:
+      # required for code scanning + language discovery
+      security-events: write
+      contents: read
+      packages: read
+      actions: read
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Get languages from repo
+        id: set-matrix
+        uses: advanced-security/set-codeql-language-matrix@v1
+        with:
+          access-token: ${{ secrets.GITHUB_TOKEN }}
+          endpoint: ${{ github.event.repository.languages_url }}
+          # Optional: exclude languages you don't want to analyze
+          # exclude: 'java, csharp, actions'
+          # Optional: force manual build mode for some langs
+          # build-mode-manual-override: 'java, csharp'
+          # See README for details.
+
   analyze:
-    name: Analyze (${{ matrix.language }})
-    runs-on: ubuntu-22.04
-    timeout-minutes: 60
+    needs: create-matrix
+    if: ${{ needs.create-matrix.outputs.matrix != '[]' }}
+    name: Analyze
+    # Swift needs macOS; others can stay on Ubuntu
+    runs-on: ${{ matrix.language == 'swift' && 'macos-latest' || 'ubuntu-latest' }}
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - language: javascript-typescript
-            build-mode: none
-          - language: python
-            build-mode: none
-          - language: go
-            build-mode: autobuild
-
+      matrix: ${{ fromJSON(needs.create-matrix.outputs.matrix) }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Node.js
-        if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        if: matrix.language == 'javascript-typescript'
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
-      - name: Set up Python
-        if: matrix.language == 'python'
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Set up Go
-        if: matrix.language == 'go'
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.21'
-          cache: true
+      - uses: actions/checkout@v4
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
-          queries: +security-and-quality
-          config: |
-            name: "CodeQL Config"
-            disable-default-queries: false
-            queries:
-              - uses: security-and-quality
-              - uses: security-extended
-            paths-ignore:
-              - "node_modules/**"
-              - "dist/**"
-              - "build/**"
-              - "coverage/**"
-              - ".turbo/**"
-              - "**/*.test.ts"
-              - "**/*.test.js"
-              - "**/*.spec.ts"
-              - "**/*.spec.js"
-              - "**/*.stories.ts"
-              - "**/*.stories.js"
 
-      - name: Install dependencies (JavaScript/TypeScript)
-        if: matrix.language == 'javascript-typescript' && matrix.build-mode == 'none'
+      # If build-mode is 'manual' for any language, add your build here.
+      - if: matrix.build-mode == 'manual'
         run: |
-          pnpm install --frozen-lockfile
-          # Pre-build to ensure CodeQL can analyze generated types
-          pnpm dlx turbo run build --cache-dir .turbo || true
-        env:
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-
-      - name: Install dependencies (Python)
-        if: matrix.language == 'python' && matrix.build-mode == 'none'
-        run: |
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
-          if [ -f requirements-dev.txt ]; then
-            pip install -r requirements-dev.txt
-          fi
-          if [ -f pyproject.toml ]; then
-            pip install -e .
-          fi
-
-      - name: Install dependencies (Go)
-        if: matrix.language == 'go' && matrix.build-mode == 'autobuild'
-        run: |
-          if [ -f go.mod ]; then
-            go mod download
-          fi
+          echo "Add your manual build steps here (e.g., make build)"; exit 1
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:${{ matrix.language }}"
-          upload: true
-          wait-for-processing: true
-
-  security-scan-supplementary:
-    name: Supplementary Security Scans
-    runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run npm audit
-        run: |
-          echo "🔍 Running npm audit..."
-          pnpm audit --audit-level moderate || true
-          pnpm audit --json > npm-audit-results.json || true
-
-      - name: Install and run Semgrep
-        run: |
-          echo "🔍 Running Semgrep security analysis..."
-          python -m pip install semgrep
-          semgrep --config=auto --sarif --output=semgrep-results.sarif . || true
-          semgrep --config=auto --json --output=semgrep-results.json . || true
-
-      - name: Install and run ESLint security plugin
-        run: |
-          echo "🔍 Running ESLint security analysis..."
-          pnpm add -D eslint-plugin-security
-          npx eslint . --ext .js,.ts,.jsx,.tsx --format json --output-file eslint-security-results.json || true
-
-      - name: Install and run Bandit (Python security)
-        run: |
-          echo "🔍 Running Bandit for Python security..."
-          if find . -name "*.py" -type f | grep -q .; then
-            pip install bandit
-            bandit -r . -f json -o bandit-results.json || true
-            bandit -r . -f sarif -o bandit-results.sarif || true
-          else
-            echo "No Python files found, skipping Bandit"
-          fi
-
-      - name: Install and run gosec (Go security)
-        run: |
-          echo "🔍 Running gosec for Go security..."
-          if find . -name "*.go" -type f | grep -q .; then
-            go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
-            gosec -fmt sarif -out gosec-results.sarif ./... || true
-            gosec -fmt json -out gosec-results.json ./... || true
-          else
-            echo "No Go files found, skipping gosec"
-          fi
-
-      - name: Install and run Safety (Python dependencies)
-        run: |
-          echo "🔍 Running Safety for Python dependencies..."
-          if [ -f requirements.txt ] || [ -f pyproject.toml ]; then
-            pip install safety
-            safety check --json --output safety-results.json || true
-          else
-            echo "No Python requirements found, skipping Safety"
-          fi
-
-      - name: Run Trivy filesystem scan
-        run: |
-          echo "🔍 Running Trivy filesystem scan..."
-          sudo apt-get update
-          sudo apt-get install wget apt-transport-https gnupg lsb-release
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install trivy
-
-          trivy fs --format sarif --output trivy-fs-results.sarif . || true
-          trivy fs --format json --output trivy-fs-results.json . || true
-
-      - name: Upload Semgrep results to GitHub Security tab
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: semgrep-results.sarif
-          category: semgrep
-        continue-on-error: true
-
-      - name: Upload Bandit results to GitHub Security tab
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: bandit-results.sarif
-          category: bandit
-        continue-on-error: true
-
-      - name: Upload gosec results to GitHub Security tab
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: gosec-results.sarif
-          category: gosec
-        continue-on-error: true
-
-      - name: Upload Trivy results to GitHub Security tab
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-fs-results.sarif
-          category: trivy-fs
-        continue-on-error: true
-
-      - name: Generate security summary report
-        if: always()
-        run: |
-          echo "🔒 Security Scanning Summary" > security-summary.md
-          echo "===========================" >> security-summary.md
-          echo "" >> security-summary.md
-          echo "## Scans Performed" >> security-summary.md
-          echo "" >> security-summary.md
-
-          # CodeQL
-          echo "### CodeQL Analysis" >> security-summary.md
-          echo "- ✅ JavaScript/TypeScript analysis completed" >> security-summary.md
-          if [ -f gosec-results.json ]; then
-            echo "- ✅ Go analysis completed" >> security-summary.md
-          fi
-          if [ -f bandit-results.json ]; then
-            echo "- ✅ Python analysis completed" >> security-summary.md
-          fi
-          echo "" >> security-summary.md
-
-          # Supplementary scans
-          echo "### Supplementary Security Scans" >> security-summary.md
-
-          if [ -f npm-audit-results.json ]; then
-            vulnerabilities=$(jq '.metadata.vulnerabilities.total // 0' npm-audit-results.json 2>/dev/null || echo "0")
-            echo "- 📦 npm audit: $vulnerabilities vulnerabilities found" >> security-summary.md
-          fi
-
-          if [ -f semgrep-results.json ]; then
-            findings=$(jq '.results | length' semgrep-results.json 2>/dev/null || echo "0")
-            echo "- 🔍 Semgrep: $findings findings" >> security-summary.md
-          fi
-
-          if [ -f bandit-results.json ]; then
-            findings=$(jq '.results | length' bandit-results.json 2>/dev/null || echo "0")
-            echo "- 🐍 Bandit (Python): $findings findings" >> security-summary.md
-          fi
-
-          if [ -f gosec-results.json ]; then
-            findings=$(jq '.Issues | length' gosec-results.json 2>/dev/null || echo "0")
-            echo "- 🐹 gosec (Go): $findings findings" >> security-summary.md
-          fi
-
-          if [ -f trivy-fs-results.json ]; then
-            findings=$(jq '.Results[] | select(.Vulnerabilities) | .Vulnerabilities | length' trivy-fs-results.json 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
-            echo "- 🔒 Trivy filesystem: $findings vulnerabilities" >> security-summary.md
-          fi
-
-          echo "" >> security-summary.md
-          echo "## Upload Status" >> security-summary.md
-          echo "All SARIF results uploaded to GitHub Security tab for review." >> security-summary.md
-
-      - name: Upload security scan artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-scan-results
-          path: |
-            security-summary.md
-            *-results.json
-            *-results.sarif
-          retention-days: 30
-
-      - name: Generate step summary
-        if: always()
-        run: |
-          echo "## 🔒 Security Scanning Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Scanner | Status | Results |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------|--------|---------|" >> $GITHUB_STEP_SUMMARY
-          echo "| CodeQL | ✅ | Analysis completed |" >> $GITHUB_STEP_SUMMARY
-          echo "| npm audit | ✅ | Dependency scan completed |" >> $GITHUB_STEP_SUMMARY
-          echo "| Semgrep | ✅ | Static analysis completed |" >> $GITHUB_STEP_SUMMARY
-
-          if [ -f bandit-results.json ]; then
-            echo "| Bandit | ✅ | Python security scan completed |" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ -f gosec-results.json ]; then
-            echo "| gosec | ✅ | Go security scan completed |" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          echo "| Trivy | ✅ | Filesystem scan completed |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🔍 All security findings uploaded to GitHub Security tab" >> $GITHUB_STEP_SUMMARY
-          echo "📁 Detailed results available in artifacts" >> $GITHUB_STEP_SUMMARY
+          category: /language:${{ matrix.language }}

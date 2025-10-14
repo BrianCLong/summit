@@ -1,0 +1,33 @@
+groups:
+- name: ci-baselines
+  interval: 1m
+  rules:
+  - alert: CIWorkflowP95TooHigh
+    expr: histogram_quantile(0.95, sum(rate(github_actions_workflow_run_duration_seconds_bucket[5m])) by (le)) > 15*60
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: CI workflow p95 duration too high
+      description: "p95 CI workflow duration > 15m for 10m"
+
+  - alert: CIFailureRateHigh
+    expr: (sum(rate(github_actions_workflow_run_conclusion{conclusion!="success"}[10m])) / sum(rate(github_actions_workflow_run_conclusion[10m]))) > 0.2
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: CI failure rate high
+      description: "Non-success conclusions > 20% over 10 minutes"
+
+- name: ci-flaky
+  interval: 1m
+  rules:
+  - alert: FlakyTestsSpike
+    expr: sum(count_over_time({job="ci"} |= "FLAKY" [15m])) > 10
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: Flaky tests spiking
+      description: "Detected >10 FLAKY occurrences in 15m window"
