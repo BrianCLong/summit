@@ -1,0 +1,74 @@
+name: Deploy Dev (AWS)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+      DEV_HOST: dev.topicality.co
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Configure AWS creds (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/intelgraph-gh-deployer
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build & push API
+        run: |
+          docker buildx build -f deploy/docker/Dockerfile.api \
+            --platform linux/amd64 -t ${{ steps.ecr.outputs.registry }}/intelgraph/app:latest \
+            --push .
+      - name: Build & push Web
+        run: |
+          docker buildx build -f deploy/docker/Dockerfile.web \
+            --platform linux/amd64 -t ${{ steps.ecr.outputs.registry }}/intelgraph/web:latest \
+            --push .
+      - name: Install kubectl/helm
+        uses: azure/setup-helm@v4
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name intelgraph-dev --region $AWS_REGION
+
+      - name: Ensure intelgraph-dev namespace + labels
+        run: |
+          kubectl create namespace intelgraph-dev --dry-run=client -o yaml | kubectl apply -f -
+          kubectl label ns intelgraph-dev istio-injection=disabled --overwrite
+      - name: Secrets
+        run: |
+          kubectl -n intelgraph-dev create secret generic neo4j-auth --from-literal=password="${NEO4J_PASSWORD}" --dry-run=client -o yaml | kubectl apply -f -
+          kubectl -n intelgraph-dev create secret generic pg-uri --from-literal=uri="${POSTGRES_URI}" --dry-run=client -o yaml | kubectl apply -f -
+          kubectl -n intelgraph-dev create secret generic redis-uri --from-literal=uri="${REDIS_URI}" --dry-run=client -o yaml | kubectl apply -f -
+        env:
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          POSTGRES_URI:  ${{ secrets.POSTGRES_URI }}
+          REDIS_URI:     ${{ secrets.REDIS_URI }}
+      - name: Helm upgrade
+        run: |
+          helm upgrade --install intelgraph ./helm/intelgraph \
+            --namespace intelgraph-dev --create-namespace \
+            --set image.app.repository=${{ steps.ecr.outputs.registry }}/intelgraph/app \
+            --set image.web.repository=${{ steps.ecr.outputs.registry }}/intelgraph/web \
+            --set image.app.tag=latest --set image.web.tag=latest
+
+      - name: Show ALB hostname
+        run: |
+          kubectl get ingress -n intelgraph-dev -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}'; echo || true
+      - name: Smoke test
+        run: |
+          kubectl -n intelgraph-dev rollout status deploy/api --timeout=180s
+          kubectl -n intelgraph-dev rollout status deploy/web --timeout=180s
+          kubectl -n intelgraph-dev run curl --image=curlimages/curl:8.10.1 -i --rm -q --restart=Never -- \
+            sh -c "curl -sS http://api.intelgraph-dev.svc.cluster.local/healthz && curl -sS http://web.intelgraph-dev.svc.cluster.local/"

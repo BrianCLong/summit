@@ -1,0 +1,2 @@
+- Query copilot package.
+- Run `npm test` in this directory after changes.
