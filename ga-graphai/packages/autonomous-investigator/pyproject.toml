@@ -1,0 +1,16 @@
+[project]
+name = "autonomous-investigator"
+version = "0.1.0"
+dependencies = [
+    "fastapi",
+    "networkx",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+pythonpath = ["src"]

@@ -1,0 +1,119 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Session Start Latency (p95)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(mcp_session_start_latency_ms_bucket[5m])) by (le))",
+          "legendFormat": "{{tenant}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      },
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Cold Start Latency (p95)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(mcp_cold_start_latency_ms_bucket[5m])) by (le,tool_class))",
+          "legendFormat": "{{tool_class}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      },
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Pool Hit Ratio",
+      "targets": [
+        {
+          "expr": "sum(rate(mcp_pool_hits_total[5m])) / (sum(rate(mcp_pool_hits_total[5m])) + sum(rate(mcp_pool_miss_total[5m])))",
+          "legendFormat": "hit ratio"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 1
+        }
+      },
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "SSE Stream Latency (p95)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(mcp_sse_latency_ms_bucket[5m])) by (le,tool_class))",
+          "legendFormat": "{{tool_class}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      },
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Budget Burn (Monthly)",
+      "targets": [
+        {
+          "expr": "sum(rate(mcp_tenant_spend_usd_total[1h])) by (tenant)",
+          "legendFormat": "{{tenant}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "usd"
+        }
+      },
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Replay Success Rate",
+      "targets": [
+        {
+          "expr": "sum(rate(mcp_replay_success_total[5m])) / (sum(rate(mcp_replay_success_total[5m])) + sum(rate(mcp_replay_failure_total[5m])))",
+          "legendFormat": "success"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 1
+        }
+      },
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 }
+    }
+  ],
+  "schemaVersion": 38,
+  "title": "IntelGraph MCP Overview"
+}
