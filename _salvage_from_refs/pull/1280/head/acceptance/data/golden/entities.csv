@@ -1,5 +1,0 @@
-id,type,name,tags,license,purpose,retention
-G100,Company,ACME Corp,"core;vendor","Open-Data-OK","investigation","standard-365d"
-G200,Person,Jane Smith,"pii;employee","Restricted-TOS","investigation","short-30d"
-G300,Person,John Doe,"pii;contractor","MIT-OK","t&s","short-30d"
-G400,Company,Beta LLC,"partner","Proprietary-Client","fraud-risk","standard-365d"

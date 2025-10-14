@@ -1,0 +1,47 @@
+291ddb8764121f4a3e83fa7a47b8f2a0
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GDR = void 0;
+const neo4j_driver_1 = __importDefault(require("neo4j-driver"));
+class GDR {
+    driver;
+    constructor(neo4jUrl = process.env.NEO4J_URI || 'bolt://localhost:7687', neo4jUser = 'neo4j', neo4jPass = 'password') {
+        this.driver = neo4j_driver_1.default.driver(neo4jUrl, neo4j_driver_1.default.auth.basic(neo4jUser, neo4jPass));
+    }
+    async detectProvenanceAnomalies() {
+        const session = this.driver.session();
+        const anomalies = [];
+        try {
+            // Example: Nodes without expected provenance edges
+            const result = await session.run(`MATCH (n) WHERE NOT (n)-[:HAS_PROVENANCE]->() RETURN n.id AS nodeId`);
+            result.records.forEach(record => {
+                anomalies.push({
+                    nodeId: record.get('nodeId'),
+                    reason: "Node lacks provenance information.",
+                    severity: "medium",
+                });
+            });
+            // Example: High-degree nodes with no witness paths (simplified)
+            const highDegreeNodes = await session.run(`MATCH (n) WHERE size((n)--()) > 10 AND NOT (n)-[:WITNESSED_BY]->() RETURN n.id AS nodeId`);
+            highDegreeNodes.records.forEach(record => {
+                anomalies.push({
+                    nodeId: record.get('nodeId'),
+                    reason: "High-degree node without witness paths.",
+                    severity: "high",
+                });
+            });
+        }
+        finally {
+            await session.close();
+        }
+        return anomalies;
+    }
+    async close() {
+        await this.driver.close();
+    }
+}
+exports.GDR = GDR;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3BhY2thZ2VzL2dkci9zcmMvaW5kZXgudHMiLCJtYXBwaW5ncyI6Ijs7Ozs7O0FBQUEsZ0VBQTZDO0FBUzdDLE1BQWEsR0FBRztJQUNOLE1BQU0sQ0FBUztJQUV2QixZQUFZLFFBQVEsR0FBRyxPQUFPLENBQUMsR0FBRyxDQUFDLFNBQVMsSUFBSSx1QkFBdUIsRUFBRSxTQUFTLEdBQUcsT0FBTyxFQUFFLFNBQVMsR0FBRyxVQUFVO1FBQ2xILElBQUksQ0FBQyxNQUFNLEdBQUcsc0JBQUssQ0FBQyxNQUFNLENBQUMsUUFBUSxFQUFFLHNCQUFLLENBQUMsSUFBSSxDQUFDLEtBQUssQ0FBQyxTQUFTLEVBQUUsU0FBUyxDQUFDLENBQUMsQ0FBQztJQUMvRSxDQUFDO0lBRUQsS0FBSyxDQUFDLHlCQUF5QjtRQUM3QixNQUFNLE9BQU8sR0FBRyxJQUFJLENBQUMsTUFBTSxDQUFDLE9BQU8sRUFBRSxDQUFDO1FBQ3RDLE1BQU0sU0FBUyxHQUFtQixFQUFFLENBQUM7UUFDckMsSUFBSSxDQUFDO1lBQ0gsbURBQW1EO1lBQ25ELE1BQU0sTUFBTSxHQUFHLE1BQU0sT0FBTyxDQUFDLEdBQUcsQ0FDOUIscUVBQXFFLENBQ3RFLENBQUM7WUFDRixNQUFNLENBQUMsT0FBTyxDQUFDLE9BQU8sQ0FBQyxNQUFNLENBQUMsRUFBRTtnQkFDOUIsU0FBUyxDQUFDLElBQUksQ0FBQztvQkFDYixNQUFNLEVBQUUsTUFBTSxDQUFDLEdBQUcsQ0FBQyxRQUFRLENBQUM7b0JBQzVCLE1BQU0sRUFBRSxvQ0FBb0M7b0JBQzVDLFFBQVEsRUFBRSxRQUFRO2lCQUNuQixDQUFDLENBQUM7WUFDTCxDQUFDLENBQUMsQ0FBQztZQUVILGdFQUFnRTtZQUNoRSxNQUFNLGVBQWUsR0FBRyxNQUFNLE9BQU8sQ0FBQyxHQUFHLENBQ3ZDLDBGQUEwRixDQUMzRixDQUFDO1lBQ0YsZUFBZSxDQUFDLE9BQU8sQ0FBQyxPQUFPLENBQUMsTUFBTSxDQUFDLEVBQUU7Z0JBQ3ZDLFNBQVMsQ0FBQyxJQUFJLENBQUM7b0JBQ2IsTUFBTSxFQUFFLE1BQU0sQ0FBQyxHQUFHLENBQUMsUUFBUSxDQUFDO29CQUM1QixNQUFNLEVBQUUseUNBQXlDO29CQUNqRCxRQUFRLEVBQUUsTUFBTTtpQkFDakIsQ0FBQyxDQUFDO1lBQ0wsQ0FBQyxDQUFDLENBQUM7UUFFTCxDQUFDO2dCQUFTLENBQUM7WUFDVCxNQUFNLE9BQU8sQ0FBQyxLQUFLLEVBQUUsQ0FBQztRQUN4QixDQUFDO1FBQ0QsT0FBTyxTQUFTLENBQUM7SUFDbkIsQ0FBQztJQUVELEtBQUssQ0FBQyxLQUFLO1FBQ1QsTUFBTSxJQUFJLENBQUMsTUFBTSxDQUFDLEtBQUssRUFBRSxDQUFDO0lBQzVCLENBQUM7Q0FDRjtBQTVDRCxrQkE0Q0MiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3BhY2thZ2VzL2dkci9zcmMvaW5kZXgudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IG5lbzRqLCB7IERyaXZlciB9IGZyb20gJ25lbzRqLWRyaXZlcic7XG5cbmV4cG9ydCBpbnRlcmZhY2UgR3JhcGhBbm9tYWx5IHtcbiAgbm9kZUlkPzogc3RyaW5nO1xuICBlZGdlSWQ/OiBzdHJpbmc7XG4gIHJlYXNvbjogc3RyaW5nO1xuICBzZXZlcml0eTogJ2xvdycgfCAnbWVkaXVtJyB8ICdoaWdoJztcbn1cblxuZXhwb3J0IGNsYXNzIEdEUiB7XG4gIHByaXZhdGUgZHJpdmVyOiBEcml2ZXI7XG5cbiAgY29uc3RydWN0b3IobmVvNGpVcmwgPSBwcm9jZXNzLmVudi5ORU80Sl9VUkkgfHwgJ2JvbHQ6Ly9sb2NhbGhvc3Q6NzY4NycsIG5lbzRqVXNlciA9ICduZW80aicsIG5lbzRqUGFzcyA9ICdwYXNzd29yZCcpIHtcbiAgICB0aGlzLmRyaXZlciA9IG5lbzRqLmRyaXZlcihuZW80alVybCwgbmVvNGouYXV0aC5iYXNpYyhuZW80alVzZXIsIG5lbzRqUGFzcykpO1xuICB9XG5cbiAgYXN5bmMgZGV0ZWN0UHJvdmVuYW5jZUFub21hbGllcygpOiBQcm9taXNlPEdyYXBoQW5vbWFseVtdPiB7XG4gICAgY29uc3Qgc2Vzc2lvbiA9IHRoaXMuZHJpdmVyLnNlc3Npb24oKTtcbiAgICBjb25zdCBhbm9tYWxpZXM6IEdyYXBoQW5vbWFseVtdID0gW107XG4gICAgdHJ5IHtcbiAgICAgIC8vIEV4YW1wbGU6IE5vZGVzIHdpdGhvdXQgZXhwZWN0ZWQgcHJvdmVuYW5jZSBlZGdlc1xuICAgICAgY29uc3QgcmVzdWx0ID0gYXdhaXQgc2Vzc2lvbi5ydW4oXG4gICAgICAgIGBNQVRDSCAobikgV0hFUkUgTk9UIChuKS1bOkhBU19QUk9WRU5BTkNFXS0+KCkgUkVUVVJOIG4uaWQgQVMgbm9kZUlkYFxuICAgICAgKTtcbiAgICAgIHJlc3VsdC5yZWNvcmRzLmZvckVhY2gocmVjb3JkID0+IHtcbiAgICAgICAgYW5vbWFsaWVzLnB1c2goe1xuICAgICAgICAgIG5vZGVJZDogcmVjb3JkLmdldCgnbm9kZUlkJyksXG4gICAgICAgICAgcmVhc29uOiBcIk5vZGUgbGFja3MgcHJvdmVuYW5jZSBpbmZvcm1hdGlvbi5cIixcbiAgICAgICAgICBzZXZlcml0eTogXCJtZWRpdW1cIixcbiAgICAgICAgfSk7XG4gICAgICB9KTtcblxuICAgICAgLy8gRXhhbXBsZTogSGlnaC1kZWdyZWUgbm9kZXMgd2l0aCBubyB3aXRuZXNzIHBhdGhzIChzaW1wbGlmaWVkKVxuICAgICAgY29uc3QgaGlnaERlZ3JlZU5vZGVzID0gYXdhaXQgc2Vzc2lvbi5ydW4oXG4gICAgICAgIGBNQVRDSCAobikgV0hFUkUgc2l6ZSgobiktLSgpKSA+IDEwIEFORCBOT1QgKG4pLVs6V0lUTkVTU0VEX0JZXS0+KCkgUkVUVVJOIG4uaWQgQVMgbm9kZUlkYFxuICAgICAgKTtcbiAgICAgIGhpZ2hEZWdyZWVOb2Rlcy5yZWNvcmRzLmZvckVhY2gocmVjb3JkID0+IHtcbiAgICAgICAgYW5vbWFsaWVzLnB1c2goe1xuICAgICAgICAgIG5vZGVJZDogcmVjb3JkLmdldCgnbm9kZUlkJyksXG4gICAgICAgICAgcmVhc29uOiBcIkhpZ2gtZGVncmVlIG5vZGUgd2l0aG91dCB3aXRuZXNzIHBhdGhzLlwiLFxuICAgICAgICAgIHNldmVyaXR5OiBcImhpZ2hcIixcbiAgICAgICAgfSk7XG4gICAgICB9KTtcblxuICAgIH0gZmluYWxseSB7XG4gICAgICBhd2FpdCBzZXNzaW9uLmNsb3NlKCk7XG4gICAgfVxuICAgIHJldHVybiBhbm9tYWxpZXM7XG4gIH1cblxuICBhc3luYyBjbG9zZSgpOiBQcm9taXNlPHZvaWQ+IHtcbiAgICBhd2FpdCB0aGlzLmRyaXZlci5jbG9zZSgpO1xuICB9XG59Il0sInZlcnNpb24iOjN9

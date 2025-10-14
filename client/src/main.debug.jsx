@@ -18,8 +18,7 @@ console.log('📝 Step 2: Root element check');
 const root = document.getElementById('root');
 if (root) {
   console.log('✅ Root element found:', root);
-  root.innerHTML =
-    '<div style="padding: 20px; background: #ffeb3b; border: 2px solid #f57f17;"><h1>🔍 Debug Mode Active</h1><p>Root element found and accessible!</p></div>';
+  root.innerHTML = '<div style="padding: 20px; background: #ffeb3b; border: 2px solid #f57f17;"><h1>🔍 Debug Mode Active</h1><p>Root element found and accessible!</p></div>';
 } else {
   console.error('❌ Root element not found!');
 }
@@ -27,57 +26,53 @@ if (root) {
 // Test 3: Try to import React
 console.log('📝 Step 3: React import test');
 try {
-  import('react')
-    .then((React) => {
-      console.log('✅ React imported successfully:', React);
-
-      // Test 4: Try to import ReactDOM
-      console.log('📝 Step 4: ReactDOM import test');
-      import('react-dom/client')
-        .then((ReactDOM) => {
-          console.log('✅ ReactDOM imported successfully:', ReactDOM);
-
-          // Test 5: Try to create React root
-          console.log('📝 Step 5: React root creation test');
-          try {
-            const reactRoot = ReactDOM.createRoot(root);
-            console.log('✅ React root created successfully:', reactRoot);
-
-            // Test 6: Try to render simple component
-            console.log('📝 Step 6: Simple component render test');
-            const TestComponent = React.createElement(
-              'div',
-              {
-                style: {
-                  padding: '20px',
-                  background: '#4caf50',
-                  color: 'white',
-                  border: '2px solid #2e7d32',
-                },
-              },
-              [
-                React.createElement('h1', { key: 'title' }, '🎉 React Mounted Successfully!'),
-                React.createElement('p', { key: 'desc' }, 'This means React is working correctly.'),
-                React.createElement('p', { key: 'time' }, `Timestamp: ${new Date().toISOString()}`),
-              ],
-            );
-
-            reactRoot.render(TestComponent);
-            console.log('✅ Component rendered successfully!');
-          } catch (renderError) {
-            console.error('❌ React render failed:', renderError);
-            root.innerHTML = `<div style="padding: 20px; background: #f44336; color: white;"><h1>❌ React Render Failed</h1><pre>${renderError.message}</pre></div>`;
+  import('react').then((React) => {
+    console.log('✅ React imported successfully:', React);
+    
+    // Test 4: Try to import ReactDOM
+    console.log('📝 Step 4: ReactDOM import test');
+    import('react-dom/client').then((ReactDOM) => {
+      console.log('✅ ReactDOM imported successfully:', ReactDOM);
+      
+      // Test 5: Try to create React root
+      console.log('📝 Step 5: React root creation test');
+      try {
+        const reactRoot = ReactDOM.createRoot(root);
+        console.log('✅ React root created successfully:', reactRoot);
+        
+        // Test 6: Try to render simple component
+        console.log('📝 Step 6: Simple component render test');
+        const TestComponent = React.createElement('div', {
+          style: { 
+            padding: '20px', 
+            background: '#4caf50', 
+            color: 'white',
+            border: '2px solid #2e7d32'
           }
-        })
-        .catch((reactDOMError) => {
-          console.error('❌ ReactDOM import failed:', reactDOMError);
-          root.innerHTML = `<div style="padding: 20px; background: #ff9800; color: white;"><h1>❌ ReactDOM Import Failed</h1><pre>${reactDOMError.message}</pre></div>`;
-        });
-    })
-    .catch((reactError) => {
-      console.error('❌ React import failed:', reactError);
-      root.innerHTML = `<div style="padding: 20px; background: #e91e63; color: white;"><h1>❌ React Import Failed</h1><pre>${reactError.message}</pre></div>`;
+        }, [
+          React.createElement('h1', { key: 'title' }, '🎉 React Mounted Successfully!'),
+          React.createElement('p', { key: 'desc' }, 'This means React is working correctly.'),
+          React.createElement('p', { key: 'time' }, `Timestamp: ${new Date().toISOString()}`)
+        ]);
+        
+        reactRoot.render(TestComponent);
+        console.log('✅ Component rendered successfully!');
+        
+      } catch (renderError) {
+        console.error('❌ React render failed:', renderError);
+        root.innerHTML = `<div style="padding: 20px; background: #f44336; color: white;"><h1>❌ React Render Failed</h1><pre>${renderError.message}</pre></div>`;
+      }
+      
+    }).catch((reactDOMError) => {
+      console.error('❌ ReactDOM import failed:', reactDOMError);
+      root.innerHTML = `<div style="padding: 20px; background: #ff9800; color: white;"><h1>❌ ReactDOM Import Failed</h1><pre>${reactDOMError.message}</pre></div>`;
     });
+    
+  }).catch((reactError) => {
+    console.error('❌ React import failed:', reactError);
+    root.innerHTML = `<div style="padding: 20px; background: #e91e63; color: white;"><h1>❌ React Import Failed</h1><pre>${reactError.message}</pre></div>`;
+  });
+  
 } catch (importError) {
   console.error('❌ Dynamic import not supported:', importError);
   root.innerHTML = `<div style="padding: 20px; background: #9c27b0; color: white;"><h1>❌ Dynamic Import Failed</h1><pre>${importError.message}</pre></div>`;
