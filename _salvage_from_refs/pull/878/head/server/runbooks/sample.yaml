@@ -1,7 +1,0 @@
-icops:
-  enabled: true
-name: sample
-steps:
-  - action: notify on-call
-  - action: gather diagnostics
-  - action: mitigate issue

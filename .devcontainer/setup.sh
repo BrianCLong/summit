@@ -28,6 +28,16 @@ log_warning() {
 log_info "Installing Node.js dependencies..."
 npm ci
 
+log_info "Installing server dependencies..."
+pushd server >/dev/null
+npm install
+popd >/dev/null
+
+log_info "Installing client dependencies..."
+pushd client >/dev/null
+npm install
+popd >/dev/null
+
 # Install global development tools
 log_info "Installing global development tools..."
 npm install -g \
@@ -114,6 +124,13 @@ fi
 if [ -f ".prettierrc" ] || [ -f "prettier.config.js" ]; then
     log_info "Running Prettier format..."
     npx prettier --write "**/*.{ts,tsx,js,jsx,json,md,yml,yaml}" || true
+fi
+
+if command -v docker >/dev/null 2>&1; then
+    log_info "Validating compose parity..."
+    if ! node scripts/devkit/check-parity.js >/dev/null 2>&1; then
+        log_warning "Compose parity check reported drift; run npm run devkit:parity after Docker finishes starting."
+    fi
 fi
 
 # Install browser dependencies for Playwright if configured
@@ -203,9 +220,14 @@ function env-info() {
     echo "🚀 Services:"
     echo "  - Web App: http://localhost:3000"
     echo "  - API Gateway: http://localhost:4000"
+    echo "  - Mock Services: http://localhost:4010"
+    echo "  - Worker Health: http://localhost:4100/health"
     echo "  - Neo4j Browser: http://localhost:7474"
     echo "  - Grafana: http://localhost:8080"
     echo "  - Prometheus: http://localhost:9090"
+    echo "  - OPA: http://localhost:8181"
+    echo "  - OTEL Collector: grpc://localhost:4317"
+    echo "  - Jaeger UI: http://localhost:16686"
 }
 
 EOF
@@ -224,6 +246,11 @@ echo "  - Redis: redis:6379"
 echo "  - Neo4j: neo4j:7474/7687 (user: neo4j, password: dev_password)"
 echo "  - Prometheus: prometheus:9090"
 echo "  - Grafana: grafana:3000 (admin/dev_password)"
+echo "  - OPA: opa:8181"
+echo "  - OTEL Collector: otel-collector:4317/4318"
+echo "  - Jaeger UI: jaeger:16686"
+echo "  - Mock Services: mock-services:4010"
+echo "  - Worker Health: worker:4100"
 echo
 echo "Quick start:"
 echo "  npm run dev      # Start development server"
@@ -235,4 +262,8 @@ echo "Database connections:"
 echo "  psql-dev         # Connect to PostgreSQL"
 echo "  redis-dev        # Connect to Redis"
 echo "  neo4j-dev        # Connect to Neo4j"
+
+echo
+log_success "Happy hacking!"
+
 echo
