@@ -7,7 +7,54 @@ const EventEmitter = require("events");
 const { v4: uuidv4 } = require("uuid");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const argon2 = require("argon2");
+
+let argon2;
+try {
+  // Prefer native argon2 implementation when available
+  // eslint-disable-next-line global-require
+  argon2 = require("argon2");
+} catch (error) {
+  const deriveKey = async (input, salt) =>
+    new Promise((resolve, reject) => {
+      crypto.scrypt(input, salt, 32, (err, derivedKey) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(derivedKey.toString("hex"));
+        }
+      });
+    });
+
+  argon2 = {
+    async hash(input) {
+      const salt = crypto.randomBytes(16).toString("hex");
+      const key = await deriveKey(input, salt);
+      return `scrypt$${salt}$${key}`;
+    },
+    async verify(hash, input) {
+      if (typeof hash !== "string" || !hash.startsWith("scrypt$")) {
+        return false;
+      }
+
+      const [, salt, expectedKey] = hash.split("$");
+      if (!salt || !expectedKey) {
+        return false;
+      }
+
+      const key = await deriveKey(input, salt);
+      return crypto.timingSafeEqual(
+        Buffer.from(key, "hex"),
+        Buffer.from(expectedKey, "hex"),
+      );
+    },
+  };
+
+  if (error?.code !== "MODULE_NOT_FOUND") {
+    // Surface unexpected resolution failures for observability
+    // eslint-disable-next-line no-console
+    console.warn("argon2 module unavailable, using scrypt fallback", error);
+  }
+}
 
 class EnterpriseSecurityService extends EventEmitter {
   constructor(postgresPool, redisClient, logger) {

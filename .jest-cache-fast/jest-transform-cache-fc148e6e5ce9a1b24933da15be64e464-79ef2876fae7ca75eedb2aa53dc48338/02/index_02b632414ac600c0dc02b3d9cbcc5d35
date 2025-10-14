@@ -1,0 +1,4 @@
+f84c6a7520c54fe5ace9e0adcd0753ff
+const { generateGraph } = require('./generator');
+
+module.exports = { generateGraph };
