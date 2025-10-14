@@ -11,6 +11,9 @@ module.exports = {
       './src/**/*.tsx',
       './src/**/*.graphql',
     ],
-    excludes: ['**/node_modules/**', '**/__tests__/**'],
+    excludes: [
+      '**/node_modules/**',
+      '**/__tests__/**',
+    ],
   },
 };

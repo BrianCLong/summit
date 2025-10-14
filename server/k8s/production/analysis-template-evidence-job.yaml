@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: at-evidence-gql-job
+  namespace: intelgraph-production
+spec:
+  args:
+    - name: mcUrl
+    - name: service
+    - name: releaseId
+  metrics:
+    - name: evidence-ok
+      successCondition: asInt(result) == 1
+      failureLimit: 1
+      provider:
+        job:
+          spec:
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: check
+                    image: curlimages/curl:8.10.1
+                    command: ["/bin/sh","-c"]
+                    env:
+                      - name: MC_URL
+                        value: "{{args.mcUrl}}"
+                      - name: SERVICE
+                        value: "{{args.service}}"
+                      - name: RELEASE_ID
+                        value: "{{args.releaseId}}"
+                      - name: TOKEN
+                        valueFrom:
+                          secretKeyRef: { name: mc-api-token, key: token }
+                    args:
+                      - >-
+                        curl -sS -H "Authorization: $TOKEN" -H 'Content-Type: application/json' \
+                        -d '{"query":"query($service:String!,$releaseId:ID!){evidenceOk(service:$service,releaseId:$releaseId){ok}}","variables":{"service":"'$SERVICE'","releaseId":"'$RELEASE_ID'"}}' \
+                        $MC_URL/graphql | jq -r '.data.evidenceOk.ok | if . then 1 else 0 end'
+

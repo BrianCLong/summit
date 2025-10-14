@@ -1,0 +1,25 @@
+name: Release Readiness
+description: Checklist to confirm evidence & docs before tagging
+title: "Release {{VERSION}} readiness"
+labels: ["release"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Confirm evidence present and dashboards green before tagging.
+  - type: checkboxes
+    id: evidence
+    attributes:
+      label: Evidence
+      options:
+        - label: SBOM generated and attached
+        - label: SLSA provenance present
+        - label: Cosign verification performed or configured
+        - label: OPA release gate green
+  - type: checkboxes
+    id: docs
+    attributes:
+      label: Docs
+      options:
+        - label: Release notes drafted from template
+        - label: Runbooks updated if needed
