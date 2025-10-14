@@ -7,6 +7,7 @@
 ## Checklist
 
 - [ ] Conventional Commit title
+- [ ] `npm run lint:tests` passes (no `.only`, no `console.error` in tests)
 - [ ] Linked issue(s): #
 - [ ] Tests added/updated
 - [ ] Telemetry added (logs/metrics/traces)

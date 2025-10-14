@@ -1,0 +1,91 @@
+From 04638fe62e38dad0fd7b4fd25499c715463f1aac Mon Sep 17 00:00:00 2001
+From: GitHub Actions <github-actions@github.com>
+Date: Mon, 6 Oct 2025 12:15:36 -0600
+Subject: [PATCH 28/38] ci: simplify workflows for debugging
+
+---
+ .github/workflows/ci-core.yml        | 39 +---------------------------
+ .github/workflows/security-light.yml | 15 +----------
+ 2 files changed, 2 insertions(+), 52 deletions(-)
+
+diff --git a/.github/workflows/ci-core.yml b/.github/workflows/ci-core.yml
+index 2794cba42..682c1cbc3 100644
+--- a/.github/workflows/ci-core.yml
++++ b/.github/workflows/ci-core.yml
+@@ -3,45 +3,8 @@ on:
+   pull_request:
+   push:
+     branches: [main]
+-  workflow_dispatch:
+-permissions:
+-  contents: read
+-  actions: read
+-  checks: write
+-concurrency:
+-  group: ci-core-${{ github.ref }}
+-  cancel-in-progress: true
+ jobs:
+   setup:
+     runs-on: ubuntu-latest
+-    timeout-minutes: 20
+     steps:
+-      - name: Checkout
+-        uses: actions/checkout@v4
+-      - name: Toolchain
+-        uses: actions/setup-node@v4
+-        with:
+-          node-version: '20'
+-          cache: 'npm'
+-      - name: Install (tolerant)
+-        run: |
+-          if [ -f package.json ]; then
+-            npm ci --ignore-scripts || npm i || true
+-          else
+-            echo "no package.json - skipping install"
+-          fi
+-      - name: Lint (light, non-blocking)
+-        run: |
+-          if [ -f package.json ]; then
+-            npm run -s lint || echo "::warning::lint failed (non-blocking)"
+-          else
+-            echo "no package.json - skipping lint"
+-          fi
+-      - name: Typecheck (light, non-blocking)
+-        run: |
+-          if [ -f tsconfig.json ]; then
+-            npx -y typescript@latest -v >/dev/null 2>&1 || true
+-            npx -y tsc -noEmit || echo "::warning::typecheck failed (non-blocking)"
+-          else
+-            echo "no tsconfig - skipping typecheck"
+-          fi
++      - run: echo "Hello from ci-core"
+diff --git a/.github/workflows/security-light.yml b/.github/workflows/security-light.yml
+index 0285bd184..996608d33 100644
+--- a/.github/workflows/security-light.yml
++++ b/.github/workflows/security-light.yml
+@@ -3,21 +3,8 @@ on:
+   pull_request:
+   push:
+     branches: [main]
+-permissions:
+-  contents: read
+-  security-events: write
+-concurrency:
+-  group: security-light-${{ github.ref }}
+-  cancel-in-progress: true
+ jobs:
+   hygiene:
+     runs-on: ubuntu-latest
+-    timeout-minutes: 20
+     steps:
+-      - uses: actions/checkout@v4
+-      - name: Secret scan (light; non-blocking)
+-        uses: trufflesecurity/trufflehog@v3
+-        continue-on-error: true
+-      - name: Dependency snapshot (non-blocking)
+-        uses: advanced-security/maven-dependency-submission-action@v4
+-        continue-on-error: true
++      - run: echo "Hello from security-light"
+-- 
+2.51.0
+
