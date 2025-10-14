@@ -1,8 +1,8 @@
 import { getPostgresClient } from '../db/postgres';
 import { getNeo4jDriver } from '../db/neo4j';
 import { isFeatureEnabled } from '../config/mvp1-features';
-import baseLogger from '../config/logger';
-const logger = baseLogger.child({ name: 'MVP1RBACService' });
+import pino from 'pino';
+const logger = pino();
 // Fine-grained permissions for MVP-1+
 export var Permission;
 (function (Permission) {
@@ -73,74 +73,64 @@ export var Role;
     Role["EDITOR"] = "editor";
     Role["INVESTIGATOR"] = "investigator";
     Role["ADMIN"] = "admin";
-    Role["SUPER_ADMIN"] = "super_admin";
+    Role["SUPER_ADMIN"] = "super_admin"; // Cross-tenant admin
 })(Role || (Role = {}));
 export class MVP1RBACService {
-    postgresClient = null;
-    neo4jDriver = null;
-    getPostgresClient() {
-        if (!this.postgresClient) {
-            this.postgresClient = getPostgresClient();
-        }
-        return this.postgresClient;
+    constructor() {
+        this.postgresClient = getPostgresClient();
+        this.neo4jDriver = getNeo4jDriver();
+        // Role-based permission mapping
+        this.rolePermissions = {
+            [Role.VIEWER]: [
+                Permission.ENTITY_READ,
+                Permission.INVESTIGATION_READ,
+                Permission.RELATIONSHIP_READ,
+                Permission.ANALYTICS_READ,
+                Permission.EXPORT_CSV
+            ],
+            [Role.ANALYST]: [
+                ...this.rolePermissions[Role.VIEWER],
+                Permission.ANALYTICS_RUN,
+                Permission.ANALYTICS_EXPORT,
+                Permission.AI_QUERY,
+                Permission.EXPORT_JSON
+            ],
+            [Role.EDITOR]: [
+                ...this.rolePermissions[Role.ANALYST],
+                Permission.ENTITY_CREATE,
+                Permission.ENTITY_UPDATE,
+                Permission.RELATIONSHIP_CREATE,
+                Permission.RELATIONSHIP_UPDATE,
+                Permission.INVESTIGATION_CREATE,
+                Permission.INVESTIGATION_UPDATE,
+                Permission.AI_SUGGEST
+            ],
+            [Role.INVESTIGATOR]: [
+                ...this.rolePermissions[Role.EDITOR],
+                Permission.ENTITY_DELETE,
+                Permission.RELATIONSHIP_DELETE,
+                Permission.INVESTIGATION_DELETE,
+                Permission.INVESTIGATION_SHARE,
+                Permission.INVESTIGATION_ARCHIVE,
+                Permission.ENTITY_BULK_IMPORT,
+                Permission.EXPORT_PDF,
+                Permission.AI_ADMIN
+            ],
+            [Role.ADMIN]: [
+                ...this.rolePermissions[Role.INVESTIGATOR],
+                Permission.USER_READ,
+                Permission.USER_CREATE,
+                Permission.USER_UPDATE,
+                Permission.TENANT_READ,
+                Permission.TENANT_UPDATE,
+                Permission.AUDIT_READ,
+                Permission.SYSTEM_MONITOR
+            ],
+            [Role.SUPER_ADMIN]: [
+                ...Object.values(Permission) // All permissions
+            ]
+        };
     }
-    getNeo4jDriver() {
-        if (!this.neo4jDriver) {
-            this.neo4jDriver = getNeo4jDriver();
-        }
-        return this.neo4jDriver;
-    }
-    // Role-based permission mapping
-    rolePermissions = {
-        [Role.VIEWER]: [
-            Permission.ENTITY_READ,
-            Permission.INVESTIGATION_READ,
-            Permission.RELATIONSHIP_READ,
-            Permission.ANALYTICS_READ,
-            Permission.EXPORT_CSV,
-        ],
-        [Role.ANALYST]: [
-            ...this.rolePermissions[Role.VIEWER],
-            Permission.ANALYTICS_RUN,
-            Permission.ANALYTICS_EXPORT,
-            Permission.AI_QUERY,
-            Permission.EXPORT_JSON,
-        ],
-        [Role.EDITOR]: [
-            ...this.rolePermissions[Role.ANALYST],
-            Permission.ENTITY_CREATE,
-            Permission.ENTITY_UPDATE,
-            Permission.RELATIONSHIP_CREATE,
-            Permission.RELATIONSHIP_UPDATE,
-            Permission.INVESTIGATION_CREATE,
-            Permission.INVESTIGATION_UPDATE,
-            Permission.AI_SUGGEST,
-        ],
-        [Role.INVESTIGATOR]: [
-            ...this.rolePermissions[Role.EDITOR],
-            Permission.ENTITY_DELETE,
-            Permission.RELATIONSHIP_DELETE,
-            Permission.INVESTIGATION_DELETE,
-            Permission.INVESTIGATION_SHARE,
-            Permission.INVESTIGATION_ARCHIVE,
-            Permission.ENTITY_BULK_IMPORT,
-            Permission.EXPORT_PDF,
-            Permission.AI_ADMIN,
-        ],
-        [Role.ADMIN]: [
-            ...this.rolePermissions[Role.INVESTIGATOR],
-            Permission.USER_READ,
-            Permission.USER_CREATE,
-            Permission.USER_UPDATE,
-            Permission.TENANT_READ,
-            Permission.TENANT_UPDATE,
-            Permission.AUDIT_READ,
-            Permission.SYSTEM_MONITOR,
-        ],
-        [Role.SUPER_ADMIN]: [
-            ...Object.values(Permission), // All permissions
-        ],
-    };
     /**
      * Check if user has permission for a specific action on a resource
      */
@@ -192,9 +182,7 @@ export class MVP1RBACService {
         if (!resource)
             return true;
         // Tenant isolation check (except for super admin)
-        if (user.role !== Role.SUPER_ADMIN &&
-            resource.tenantId &&
-            resource.tenantId !== user.tenantId) {
+        if (user.role !== Role.SUPER_ADMIN && resource.tenantId && resource.tenantId !== user.tenantId) {
             return false;
         }
         // Resource ownership checks
@@ -225,7 +213,7 @@ export class MVP1RBACService {
         FROM investigations 
         WHERE id = $1 AND tenant_id = $2
       `;
-            const result = await this.getPostgresClient().query(query, [resource.id, user.tenantId]);
+            const result = await this.postgresClient.query(query, [resource.id, user.tenantId]);
             if (result.rows.length === 0) {
                 return false; // Investigation not found or not in user's tenant
             }
@@ -242,11 +230,7 @@ export class MVP1RBACService {
             // Shared users have read access only
             const sharedUsers = investigation.shared_with || [];
             if (sharedUsers.includes(user.id)) {
-                return [
-                    Permission.INVESTIGATION_READ,
-                    Permission.ENTITY_READ,
-                    Permission.RELATIONSHIP_READ,
-                ].includes(action);
+                return [Permission.INVESTIGATION_READ, Permission.ENTITY_READ, Permission.RELATIONSHIP_READ].includes(action);
             }
             // Admins can access all investigations in their tenant
             return [Role.ADMIN, Role.SUPER_ADMIN].includes(user.role);
@@ -265,7 +249,7 @@ export class MVP1RBACService {
             return await this.checkInvestigationPermission(user, {
                 type: ResourceType.INVESTIGATION,
                 id: resource.investigationId,
-                tenantId: resource.tenantId,
+                tenantId: resource.tenantId
             }, action);
         }
         return true;
@@ -295,7 +279,7 @@ export class MVP1RBACService {
         try {
             const auditEvent = {
                 ...event,
-                timestamp: new Date(),
+                timestamp: new Date()
             };
             // Store in PostgreSQL (primary audit store)
             await this.storeAuditEventPostgres(auditEvent);
@@ -318,7 +302,7 @@ export class MVP1RBACService {
         ip_address, user_agent, investigation_id, session_id, timestamp
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
     `;
-        await this.getPostgresClient().query(query, [
+        await this.postgresClient.query(query, [
             event.userId,
             event.userEmail,
             event.tenantId,
@@ -334,14 +318,14 @@ export class MVP1RBACService {
             event.userAgent,
             event.investigationId,
             event.sessionId,
-            event.timestamp,
+            event.timestamp
         ]);
     }
     /**
      * Mirror audit event to Neo4j for relationship analysis
      */
     async mirrorAuditEventNeo4j(event) {
-        const session = this.getNeo4jDriver().session();
+        const session = this.neo4jDriver.session();
         try {
             const query = `
         MERGE (u:User {id: $userId, tenantId: $tenantId})
@@ -373,7 +357,7 @@ export class MVP1RBACService {
                 resourceId: event.resourceId,
                 success: event.success,
                 timestamp: event.timestamp.toISOString(),
-                investigationId: event.investigationId,
+                investigationId: event.investigationId
             });
         }
         finally {
@@ -427,7 +411,7 @@ export class MVP1RBACService {
             query += ` OFFSET $${paramIndex++}`;
             params.push(filters.offset);
         }
-        const result = await this.getPostgresClient().query(query, params);
+        const result = await this.postgresClient.query(query, params);
         return result.rows;
     }
     /**
@@ -440,10 +424,11 @@ export class MVP1RBACService {
             results[key] = await this.hasPermission({
                 user,
                 action: perm.action,
-                resource: perm.resource,
+                resource: perm.resource
             });
         }
         return results;
     }
 }
 export default MVP1RBACService;
+//# sourceMappingURL=MVP1RBACService.js.map

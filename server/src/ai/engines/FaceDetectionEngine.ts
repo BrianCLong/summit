@@ -1,9 +1,9 @@
 import { spawn } from 'child_process';
 import path from 'path';
-import baseLogger from '../../config/logger';
+import pino from 'pino';
 import { ExtractionEngineConfig } from '../ExtractionEngine.js';
 
-const logger = baseLogger.child({ name: 'FaceDetectionEngine' });
+const logger = pino({ name: 'FaceDetectionEngine' });
 
 export interface FaceDetection {
   boundingBox: {
@@ -72,10 +72,7 @@ export interface VideoFaceDetectionOptions extends FaceDetectionOptions {
 export interface IdentityDatabase {
   addIdentity(name: string, faceVector: number[]): Promise<void>;
   removeIdentity(name: string): Promise<void>;
-  searchIdentity(
-    faceVector: number[],
-    threshold?: number,
-  ): Promise<{ name: string; confidence: number } | null>;
+  searchIdentity(faceVector: number[], threshold?: number): Promise<{ name: string; confidence: number } | null>;
   listIdentities(): Promise<string[]>;
 }
 
@@ -95,13 +92,13 @@ export class FaceDetectionEngine {
     try {
       // Verify dependencies
       await this.verifyDependencies();
-
+      
       // Load pre-trained models
       await this.loadModels();
-
+      
       // Initialize identity database
       await this.initializeIdentityDatabase();
-
+      
       this.isInitialized = true;
       logger.info('Face Detection Engine initialized successfully');
     } catch (error) {
@@ -115,7 +112,7 @@ export class FaceDetectionEngine {
    */
   async detectFaces(
     imagePath: string,
-    options: FaceDetectionOptions = {},
+    options: FaceDetectionOptions = {}
   ): Promise<FaceDetection[]> {
     if (!this.isInitialized) {
       await this.initialize();
@@ -129,14 +126,18 @@ export class FaceDetectionEngine {
       analyzeEmotions = true,
       estimateAge = true,
       estimateGender = true,
-      enableQualityCheck = true,
+      enableQualityCheck = true
     } = options;
 
     logger.info(`Starting face detection for: ${imagePath}`);
 
     try {
       // Run primary face detection
-      const detections = await this.runFaceDetection(imagePath, minFaceSize, confidenceThreshold);
+      const detections = await this.runFaceDetection(
+        imagePath,
+        minFaceSize,
+        confidenceThreshold
+      );
 
       // Process each detected face
       for (const detection of detections) {
@@ -152,7 +153,7 @@ export class FaceDetectionEngine {
         if (extractFeatures || recognizeIdentities) {
           detection.featureVector = await this.extractFaceFeatures(
             imagePath,
-            detection.boundingBox,
+            detection.boundingBox
           );
         }
 
@@ -184,11 +185,12 @@ export class FaceDetectionEngine {
 
       // Filter by quality if quality check is enabled
       const qualifiedDetections = enableQualityCheck
-        ? detections.filter((d) => d.qualityScore && d.qualityScore > 0.5)
+        ? detections.filter(d => d.qualityScore && d.qualityScore > 0.5)
         : detections;
 
       logger.info(`Face detection completed: ${qualifiedDetections.length} faces detected`);
       return qualifiedDetections;
+
     } catch (error) {
       logger.error('Face detection failed:', error);
       throw error;
@@ -200,7 +202,7 @@ export class FaceDetectionEngine {
    */
   async detectFacesInVideo(
     videoPath: string,
-    options: VideoFaceDetectionOptions = {},
+    options: VideoFaceDetectionOptions = {}
   ): Promise<{ frame: number; timestamp: number; faces: FaceDetection[] }[]> {
     if (!this.isInitialized) {
       await this.initialize();
@@ -223,7 +225,7 @@ export class FaceDetectionEngine {
         frameRate,
         startTime,
         endTime,
-        faceOptions,
+        faceOptions
       );
 
       // Apply tracking across frames
@@ -238,6 +240,7 @@ export class FaceDetectionEngine {
 
       logger.info(`Video face detection completed: ${results.length} frames processed`);
       return results;
+
     } catch (error) {
       logger.error('Video face detection failed:', error);
       throw error;
@@ -250,19 +253,16 @@ export class FaceDetectionEngine {
   private async runFaceDetection(
     imagePath: string,
     minFaceSize: number,
-    confidenceThreshold: number,
+    confidenceThreshold: number
   ): Promise<FaceDetection[]> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'mtcnn_detection.py');
-
+      
       const args = [
         pythonScript,
-        '--image',
-        imagePath,
-        '--min-face-size',
-        minFaceSize.toString(),
-        '--confidence',
-        confidenceThreshold.toString(),
+        '--image', imagePath,
+        '--min-face-size', minFaceSize.toString(),
+        '--confidence', confidenceThreshold.toString()
       ];
 
       if (this.config.enableGPU) {
@@ -310,23 +310,18 @@ export class FaceDetectionEngine {
     frameRate: number,
     startTime: number,
     endTime: number | undefined,
-    faceOptions: FaceDetectionOptions,
+    faceOptions: FaceDetectionOptions
   ): Promise<{ frame: number; timestamp: number; faces: FaceDetection[] }[]> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'video_face_detection.py');
-
+      
       const args = [
         pythonScript,
-        '--video',
-        videoPath,
-        '--frame-rate',
-        frameRate.toString(),
-        '--start-time',
-        startTime.toString(),
-        '--min-face-size',
-        (faceOptions.minFaceSize || 20).toString(),
-        '--confidence',
-        (faceOptions.confidenceThreshold || 0.7).toString(),
+        '--video', videoPath,
+        '--frame-rate', frameRate.toString(),
+        '--start-time', startTime.toString(),
+        '--min-face-size', (faceOptions.minFaceSize || 20).toString(),
+        '--confidence', (faceOptions.confidenceThreshold || 0.7).toString()
       ];
 
       if (endTime !== undefined) {
@@ -390,13 +385,11 @@ export class FaceDetectionEngine {
   private async runLandmarkExtraction(imagePath: string, boundingBox: any): Promise<FaceLandmarks> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'face_landmarks.py');
-
+      
       const args = [
         pythonScript,
-        '--image',
-        imagePath,
-        '--bbox',
-        `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`,
+        '--image', imagePath,
+        '--bbox', `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -436,13 +429,11 @@ export class FaceDetectionEngine {
   private async extractFaceFeatures(imagePath: string, boundingBox: any): Promise<number[]> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'face_features.py');
-
+      
       const args = [
         pythonScript,
-        '--image',
-        imagePath,
-        '--bbox',
-        `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`,
+        '--image', imagePath,
+        '--bbox', `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -482,13 +473,11 @@ export class FaceDetectionEngine {
   private async analyzeEmotions(imagePath: string, boundingBox: any): Promise<EmotionScores> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'emotion_analysis.py');
-
+      
       const args = [
         pythonScript,
-        '--image',
-        imagePath,
-        '--bbox',
-        `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`,
+        '--image', imagePath,
+        '--bbox', `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -530,13 +519,11 @@ export class FaceDetectionEngine {
   private async estimateAge(imagePath: string, boundingBox: any): Promise<number> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'age_estimation.py');
-
+      
       const args = [
         pythonScript,
-        '--image',
-        imagePath,
-        '--bbox',
-        `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`,
+        '--image', imagePath,
+        '--bbox', `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -576,13 +563,11 @@ export class FaceDetectionEngine {
   private async estimateGender(imagePath: string, boundingBox: any): Promise<string> {
     return new Promise((resolve, reject) => {
       const pythonScript = path.join(this.config.modelsPath, 'gender_estimation.py');
-
+      
       const args = [
         pythonScript,
-        '--image',
-        imagePath,
-        '--bbox',
-        `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`,
+        '--image', imagePath,
+        '--bbox', `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -629,15 +614,15 @@ export class FaceDetectionEngine {
           y: Math.round(face.bbox[1]),
           width: Math.round(face.bbox[2]),
           height: Math.round(face.bbox[3]),
-          confidence: face.confidence,
+          confidence: face.confidence
         },
         confidence: face.confidence,
         landmarks: this.getDefaultLandmarks({
           x: face.bbox[0],
           y: face.bbox[1],
           width: face.bbox[2],
-          height: face.bbox[3],
-        }),
+          height: face.bbox[3]
+        })
       });
     }
 
@@ -648,17 +633,17 @@ export class FaceDetectionEngine {
    * Parse video face detection results
    */
   private parseVideoFaceDetectionResults(
-    results: any,
+    results: any
   ): { frame: number; timestamp: number; faces: FaceDetection[] }[] {
     const frameResults: { frame: number; timestamp: number; faces: FaceDetection[] }[] = [];
 
     for (const frameResult of results.frames || []) {
       const faces = this.parseFaceDetectionResults(frameResult);
-
+      
       frameResults.push({
         frame: frameResult.frame_number,
         timestamp: frameResult.timestamp,
-        faces,
+        faces
       });
     }
 
@@ -669,7 +654,7 @@ export class FaceDetectionEngine {
    * Apply face tracking across video frames
    */
   private applyVideoFaceTracking(
-    frameResults: { frame: number; timestamp: number; faces: FaceDetection[] }[],
+    frameResults: { frame: number; timestamp: number; faces: FaceDetection[] }[]
   ): void {
     const tracks = new Map<string, FaceDetection[]>();
     let nextTrackId = 0;
@@ -681,30 +666,30 @@ export class FaceDetectionEngine {
       // Try to match faces with existing tracks
       for (const [trackId, trackHistory] of tracks.entries()) {
         const lastFace = trackHistory[trackHistory.length - 1];
-
+        
         let bestMatch: FaceDetection | null = null;
         let bestSimilarity = 0;
         let bestIndex = -1;
 
         for (let i = 0; i < unmatchedFaces.length; i++) {
           const face = unmatchedFaces[i];
-
+          
           // Calculate similarity based on bounding box overlap and features
           const boxSimilarity = this.calculateBoundingBoxSimilarity(
             face.boundingBox,
-            lastFace.boundingBox,
+            lastFace.boundingBox
           );
-
+          
           let featureSimilarity = 0;
           if (face.featureVector && lastFace.featureVector) {
             featureSimilarity = this.calculateFeatureSimilarity(
               face.featureVector,
-              lastFace.featureVector,
+              lastFace.featureVector
             );
           }
-
+          
           const overallSimilarity = (boxSimilarity + featureSimilarity) / 2;
-
+          
           if (overallSimilarity > bestSimilarity && overallSimilarity > 0.5) {
             bestMatch = face;
             bestSimilarity = overallSimilarity;
@@ -731,9 +716,8 @@ export class FaceDetectionEngine {
       for (const [trackId, trackHistory] of tracks.entries()) {
         if (!activeTrackIds.has(trackId)) {
           const frameGap = frameResult.frame - this.getLastFrameNumber(trackHistory);
-
-          if (frameGap > 5) {
-            // Remove if not seen for 5 frames
+          
+          if (frameGap > 5) { // Remove if not seen for 5 frames
             tracks.delete(trackId);
           }
         }
@@ -745,7 +729,7 @@ export class FaceDetectionEngine {
    * Apply temporal smoothing to face attributes
    */
   private applyTemporalSmoothing(
-    frameResults: { frame: number; timestamp: number; faces: FaceDetection[] }[],
+    frameResults: { frame: number; timestamp: number; faces: FaceDetection[] }[]
   ): void {
     // This would smooth attributes like emotions, age estimates across frames
     // Implementation would track faces and apply moving averages
@@ -757,29 +741,28 @@ export class FaceDetectionEngine {
    */
   private calculateFaceQuality(detection: FaceDetection): number {
     let qualityScore = detection.confidence;
-
+    
     // Factor in face size (larger faces are typically higher quality)
     const faceSize = detection.boundingBox.width * detection.boundingBox.height;
     const sizeScore = Math.min(faceSize / (100 * 100), 1.0); // Normalize to 100x100 minimum
-
+    
     // Factor in landmark confidence if available
     let landmarkScore = 1.0;
     if (detection.landmarks?.leftEye?.confidence) {
-      const avgLandmarkConfidence =
-        [
-          detection.landmarks.leftEye.confidence,
-          detection.landmarks.rightEye.confidence,
-          detection.landmarks.nose.confidence,
-          detection.landmarks.leftMouth.confidence,
-          detection.landmarks.rightMouth.confidence,
-        ].reduce((sum, conf) => sum + (conf || 0), 0) / 5;
-
+      const avgLandmarkConfidence = [
+        detection.landmarks.leftEye.confidence,
+        detection.landmarks.rightEye.confidence,
+        detection.landmarks.nose.confidence,
+        detection.landmarks.leftMouth.confidence,
+        detection.landmarks.rightMouth.confidence
+      ].reduce((sum, conf) => sum + (conf || 0), 0) / 5;
+      
       landmarkScore = avgLandmarkConfidence;
     }
-
+    
     // Combined quality score
     qualityScore = (qualityScore + sizeScore + landmarkScore) / 3;
-
+    
     return Math.max(0, Math.min(1, qualityScore));
   }
 
@@ -788,14 +771,14 @@ export class FaceDetectionEngine {
    */
   private async recognizeIdentity(
     faceVector: number[],
-    threshold: number = 0.6,
+    threshold: number = 0.6
   ): Promise<{ name: string; confidence: number } | null> {
     let bestMatch: { name: string; confidence: number } | null = null;
     let bestSimilarity = 0;
 
     for (const [name, knownVector] of this.identityDatabase.entries()) {
       const similarity = this.calculateFeatureSimilarity(faceVector, knownVector);
-
+      
       if (similarity > bestSimilarity && similarity > threshold) {
         bestSimilarity = similarity;
         bestMatch = { name, confidence: similarity };
@@ -848,11 +831,11 @@ export class FaceDetectionEngine {
    */
   private getDominantEmotion(emotions: EmotionScores): string {
     const entries = Object.entries(emotions);
-    const dominant = entries.reduce(
-      (max, [emotion, score]) => (score > max.score ? { emotion, score } : max),
-      { emotion: 'neutral', score: 0 },
+    const dominant = entries.reduce((max, [emotion, score]) => 
+      score > max.score ? { emotion, score } : max,
+      { emotion: 'neutral', score: 0 }
     );
-
+    
     return dominant.emotion;
   }
 
@@ -862,13 +845,13 @@ export class FaceDetectionEngine {
   private getDefaultLandmarks(boundingBox: any): FaceLandmarks {
     const centerX = boundingBox.x + boundingBox.width / 2;
     const centerY = boundingBox.y + boundingBox.height / 2;
-
+    
     return {
       leftEye: { x: centerX - boundingBox.width * 0.2, y: centerY - boundingBox.height * 0.1 },
       rightEye: { x: centerX + boundingBox.width * 0.2, y: centerY - boundingBox.height * 0.1 },
       nose: { x: centerX, y: centerY },
       leftMouth: { x: centerX - boundingBox.width * 0.15, y: centerY + boundingBox.height * 0.2 },
-      rightMouth: { x: centerX + boundingBox.width * 0.15, y: centerY + boundingBox.height * 0.2 },
+      rightMouth: { x: centerX + boundingBox.width * 0.15, y: centerY + boundingBox.height * 0.2 }
     };
   }
 
@@ -883,7 +866,7 @@ export class FaceDetectionEngine {
       surprised: 0.1,
       fearful: 0.1,
       disgusted: 0.1,
-      neutral: 0.4,
+      neutral: 0.4
     };
   }
 
@@ -918,22 +901,18 @@ export class FaceDetectionEngine {
   private async verifyDependencies(): Promise<void> {
     return new Promise((resolve, reject) => {
       const python = spawn(this.config.pythonPath, [
-        '-c',
-        'import mtcnn, facenet_pytorch, cv2; print("Dependencies OK")',
+        '-c', 
+        'import mtcnn, facenet_pytorch, cv2; print("Dependencies OK")'
       ]);
-
+      
       python.on('close', (code) => {
         if (code === 0) {
           resolve();
         } else {
-          reject(
-            new Error(
-              'Required dependencies not found. Please install mtcnn, facenet-pytorch, opencv-python.',
-            ),
-          );
+          reject(new Error('Required dependencies not found. Please install mtcnn, facenet-pytorch, opencv-python.'));
         }
       });
-
+      
       python.on('error', () => {
         reject(new Error('Python not found or dependencies missing.'));
       });
