@@ -1,0 +1,140 @@
+{
+  "version": 6,
+  "documents": [
+    {
+      "id": "doc-001",
+      "tokens": [
+        "privacy",
+        "policy",
+        "rtbf"
+      ],
+      "vector": [
+        0.12,
+        0.34,
+        0.56
+      ],
+      "updatedAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "doc-002",
+      "tokens": [
+        "user",
+        "request"
+      ],
+      "vector": [
+        0.91,
+        0.17,
+        0.38
+      ],
+      "updatedAt": "2024-01-01T01:00:00Z"
+    }
+  ],
+  "inverted": [
+    {
+      "term": "policy",
+      "documents": [
+        "doc-001"
+      ]
+    },
+    {
+      "term": "privacy",
+      "documents": [
+        "doc-001"
+      ]
+    },
+    {
+      "term": "request",
+      "documents": [
+        "doc-002"
+      ]
+    },
+    {
+      "term": "rtbf",
+      "documents": [
+        "doc-001"
+      ]
+    },
+    {
+      "term": "user",
+      "documents": [
+        "doc-002"
+      ]
+    }
+  ],
+  "vectors": [
+    {
+      "documentId": "doc-001",
+      "vector": [
+        0.12,
+        0.34,
+        0.56
+      ]
+    },
+    {
+      "documentId": "doc-002",
+      "vector": [
+        0.91,
+        0.17,
+        0.38
+      ]
+    }
+  ],
+  "documentTombstones": [
+    {
+      "documentId": "doc-003",
+      "reason": "rtbf-erase",
+      "sequence": 2,
+      "timestamp": "2024-01-01T04:00:00Z",
+      "digest": "9669b9cf5ed7cd9818f5954eaf7be008bc6c61e2539da50d5ffd6c6d208343a0",
+      "version": 5
+    }
+  ],
+  "termTombstones": [
+    {
+      "term": "erasure",
+      "tombstones": [
+        {
+          "term": "erasure",
+          "documentId": "doc-002",
+          "reason": "rtbf-accepted",
+          "sequence": 1,
+          "timestamp": "2024-01-01T03:00:00Z",
+          "digest": "e991fd0664501f2a848542aa33cf5c0961f8b38b8811991d8c75e3bad1845bbb",
+          "version": 4
+        }
+      ]
+    }
+  ],
+  "proofs": [
+    {
+      "kind": "document",
+      "documentId": "doc-003",
+      "query": "doc-003",
+      "tombstone": {
+        "documentId": "doc-003",
+        "reason": "rtbf-erase",
+        "sequence": 2,
+        "timestamp": "2024-01-01T04:00:00Z",
+        "digest": "9669b9cf5ed7cd9818f5954eaf7be008bc6c61e2539da50d5ffd6c6d208343a0",
+        "version": 5
+      },
+      "version": 6
+    },
+    {
+      "kind": "term",
+      "term": "erasure",
+      "documentId": "doc-002",
+      "query": "erasure#doc-002",
+      "tombstone": {
+        "term": "erasure",
+        "documentId": "doc-002",
+        "reason": "rtbf-accepted",
+        "sequence": 1,
+        "timestamp": "2024-01-01T03:00:00Z",
+        "digest": "e991fd0664501f2a848542aa33cf5c0961f8b38b8811991d8c75e3bad1845bbb",
+        "version": 4
+      },
+      "version": 6
+    }
+  ]
+}
