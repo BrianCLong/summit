@@ -28,10 +28,6 @@ _ABSOLUTIST = {
     "forever",
 }
 
-_AVAILABILITY = {"recent", "news", "headline", "famous", "viral"}
-_ANCHORING = {"initial", "first", "original", "baseline", "anchor"}
-_BANDWAGON = {"popular", "trend", "trending", "majority", "bandwagon", "everybody"}
-
 
 class HuggingFaceBackend(BaseNLPBackend):
     """Deterministic rule-based backend used for tests."""
@@ -81,18 +77,9 @@ class HuggingFaceBackend(BaseNLPBackend):
             toxicity = {"toxic": tox, "non_toxic": 1 - tox}
 
             abs_count = sum(w in _ABSOLUTIST for w in words)
-            availability_count = sum(w in _AVAILABILITY for w in words)
-            anchoring_count = sum(w in _ANCHORING for w in words)
-            bandwagon_count = sum(w in _BANDWAGON for w in words)
             cues = {"absolutist_terms": abs_count / total}
             if "true" in words:
                 cues["confirmation_bias"] = 0.8
-            if availability_count:
-                cues["availability_bias"] = availability_count / total
-            if anchoring_count:
-                cues["anchoring_bias"] = anchoring_count / total
-            if bandwagon_count:
-                cues["bandwagon_bias"] = bandwagon_count / total
             results.append(
                 NLPResult(
                     language=language,

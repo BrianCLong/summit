@@ -1,0 +1,326 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "ヤミ金融",
+    "locale": "ja-JP",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "yami kin yu"
+      },
+      {
+        "type": "slang",
+        "value": "闇金"
+      },
+      {
+        "type": "alias",
+        "value": "高利貸し"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FSA",
+        "note": "投資詐欺、ヤミ金、違法賭博の勧誘を監視。"
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "違法スポーツ賭博",
+    "locale": "ja-JP",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "違法スポーツ賭け"
+      },
+      {
+        "type": "slang",
+        "value": "闇ブックメーカー"
+      },
+      {
+        "type": "alias",
+        "value": "闇賭け屋"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FSA",
+        "note": "投資詐欺、ヤミ金、違法賭博の勧誘を監視。"
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "ポンジ投資詐欺",
+    "locale": "ja-JP",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "ねずみ講"
+      },
+      {
+        "type": "misspelling",
+        "value": "ポンジ詐欺"
+      },
+      {
+        "type": "slang",
+        "value": "楽して儲け話"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "FSA",
+        "note": "投資詐欺、ヤミ金、違法賭博の勧誘を監視。"
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "性感染症検査",
+    "locale": "ja-JP",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "STI検査"
+      },
+      {
+        "type": "misspelling",
+        "value": "性感染症 檢査"
+      },
+      {
+        "type": "alias",
+        "value": "性病検査"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MHLW / PMDA",
+        "note": "医薬品の乱用防止と緊急避妊薬情報の適正提供を監督。"
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "緊急避妊薬",
+    "locale": "ja-JP",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "アフターピル"
+      },
+      {
+        "type": "alias",
+        "value": "プランB 日本"
+      },
+      {
+        "type": "misspelling",
+        "value": "緊急避妊藥"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MHLW / PMDA",
+        "note": "医薬品の乱用防止と緊急避妊薬情報の適正提供を監督。"
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "オピオイド鎮痛薬",
+    "locale": "ja-JP",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "transliteration",
+        "value": "opioido chin tsuu yaku"
+      },
+      {
+        "type": "slang",
+        "value": "オキシ"
+      },
+      {
+        "type": "alias",
+        "value": "処方オピオイド"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MHLW / PMDA",
+        "note": "医薬品の乱用防止と緊急避妊薬情報の適正提供を監督。"
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "未成年へのネットいじめ",
+    "locale": "ja-JP",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "サイバーいじめ"
+      },
+      {
+        "type": "misspelling",
+        "value": "サイバー虐め"
+      },
+      {
+        "type": "slang",
+        "value": "晒し投稿"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "こども家庭庁",
+        "note": "子どものネット上の誘拐、いじめ、自傷誘引を監視。"
+      }
+    ],
+    "confidence": 0.91
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "未成年へのオンライングルーミング",
+    "locale": "ja-JP",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "グルーミング未成年"
+      },
+      {
+        "type": "alias",
+        "value": "子どもネット誘引"
+      },
+      {
+        "type": "slang",
+        "value": "年の差チャット"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "こども家庭庁",
+        "note": "子どものネット上の誘拐、いじめ、自傷誘引を監視。"
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "自傷行為を煽る内容",
+    "locale": "ja-JP",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "死にたい掲示板"
+      },
+      {
+        "type": "alias",
+        "value": "自傷チャレンジ"
+      },
+      {
+        "type": "misspelling",
+        "value": "自傷煽り"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "こども家庭庁",
+        "note": "子どものネット上の誘拐、いじめ、自傷誘引を監視。"
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "賃金差別",
+    "locale": "ja-JP",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "同一賃金違反"
+      },
+      {
+        "type": "slang",
+        "value": "給料ギャップ"
+      },
+      {
+        "type": "misspelling",
+        "value": "賃金差別 日本"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MHLW",
+        "note": "職場でのセクハラ、賃金差別、暴力対策を指導。"
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "職場でのセクハラ",
+    "locale": "ja-JP",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "セクシャルハラスメント"
+      },
+      {
+        "type": "misspelling",
+        "value": "セクハラ 仕事"
+      },
+      {
+        "type": "slang",
+        "value": "昇進の見返り"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MHLW",
+        "note": "職場でのセクハラ、賃金差別、暴力対策を指導。"
+      }
+    ],
+    "confidence": 0.96
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "職場の暴力脅迫",
+    "locale": "ja-JP",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "殴るぞ発言"
+      },
+      {
+        "type": "misspelling",
+        "value": "職場 暴力脅し"
+      },
+      {
+        "type": "alias",
+        "value": "職場暴力"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "MHLW",
+        "note": "職場でのセクハラ、賃金差別、暴力対策を指導。"
+      }
+    ],
+    "confidence": 0.93
+  }
+]

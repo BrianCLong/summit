@@ -18,3 +18,4 @@ describe('sandbox execution', () => {
         expect(rows[0].n).toBe(1);
     });
 });
+//# sourceMappingURL=sandbox.test.js.map
