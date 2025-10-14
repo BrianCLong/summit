@@ -1,34 +1,38 @@
 import axios from 'axios';
+import pino from 'pino';
+import type { AuthorizationDecision, AuthorizationInput } from './types';
+
+const logger = pino({ name: 'authz-policy' });
 
 function opaUrl() {
-  return process.env.OPA_URL || 'http://localhost:8181/v1/data/authz/allow';
-}
-
-export interface UserContext {
-  tenantId: string;
-  roles: string[];
-}
-
-export interface ResourceContext {
-  tenantId: string;
-  needToKnow?: string;
+  return process.env.OPA_URL || 'http://localhost:8181/v1/data/summit/abac/decision';
 }
 
 export async function authorize(
-  user: UserContext,
-  resource: ResourceContext,
-  action: string,
-): Promise<{ allowed: boolean; reason: string }> {
+  input: AuthorizationInput,
+): Promise<AuthorizationDecision> {
   try {
-    const res = await axios.post(opaUrl(), {
-      input: { user, resource, action },
-    });
+    const res = await axios.post(opaUrl(), { input });
     const result = res.data?.result;
-    if (typeof result === 'boolean') {
-      return { allowed: result, reason: result ? 'allow' : 'deny' };
+    if (!result) {
+      return { allowed: false, reason: 'opa_no_result', obligations: [] };
     }
-    return { allowed: !!result?.allow, reason: result?.reason || 'deny' };
-  } catch {
-    return { allowed: false, reason: 'opa_error' };
+    if (typeof result === 'boolean') {
+      return {
+        allowed: result,
+        reason: result ? 'allow' : 'deny',
+        obligations: [],
+      };
+    }
+    return {
+      allowed: Boolean(result.allow),
+      reason: String(result.reason || (result.allow ? 'allow' : 'deny')),
+      obligations: Array.isArray(result.obligations) ? result.obligations : [],
+    };
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'test') {
+      logger.error({ err: error }, 'OPA evaluation failed');
+    }
+    return { allowed: false, reason: 'opa_error', obligations: [] };
   }
 }

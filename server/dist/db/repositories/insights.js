@@ -1,5 +1,4 @@
 export class InsightsRepo {
-    pool;
     constructor(pool) {
         this.pool = pool;
     }
@@ -32,3 +31,4 @@ export class InsightsRepo {
         await this.pool.query(`UPDATE ai_insights SET applied_at = NOW() WHERE id=$1`, [id]);
     }
 }
+//# sourceMappingURL=insights.js.map
