@@ -1,0 +1,13 @@
+8d58bd7038adb91eddad060d0e3da456
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.add = add;
+exports.multiply = multiply;
+// Simple util function for testing
+function add(a, b) {
+    return a + b;
+}
+function multiply(a, b) {
+    return a * b;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci9zcmMvdGVzdHMvdXRpbHMvbWF0aFV0aWxzLnRzIiwibWFwcGluZ3MiOiI7O0FBQ0Esa0JBRUM7QUFFRCw0QkFFQztBQVBELG1DQUFtQztBQUNuQyxTQUFnQixHQUFHLENBQUMsQ0FBUyxFQUFFLENBQVM7SUFDdEMsT0FBTyxDQUFDLEdBQUcsQ0FBQyxDQUFDO0FBQ2YsQ0FBQztBQUVELFNBQWdCLFFBQVEsQ0FBQyxDQUFTLEVBQUUsQ0FBUztJQUMzQyxPQUFPLENBQUMsR0FBRyxDQUFDLENBQUM7QUFDZixDQUFDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9Vc2Vycy9icmlhbmxvbmcvRGV2ZWxvcGVyL3N1bW1pdC9zZXJ2ZXIvc3JjL3Rlc3RzL3V0aWxzL21hdGhVdGlscy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvLyBTaW1wbGUgdXRpbCBmdW5jdGlvbiBmb3IgdGVzdGluZ1xuZXhwb3J0IGZ1bmN0aW9uIGFkZChhOiBudW1iZXIsIGI6IG51bWJlcik6IG51bWJlciB7XG4gIHJldHVybiBhICsgYjtcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIG11bHRpcGx5KGE6IG51bWJlciwgYjogbnVtYmVyKTogbnVtYmVyIHtcbiAgcmV0dXJuIGEgKiBiO1xufSJdLCJ2ZXJzaW9uIjozfQ==
