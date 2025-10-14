@@ -1,5 +1,5 @@
-const { getNeo4jDriver } = require('../config/database');
-const logger = require('../utils/logger');
+const { getNeo4jDriver } = require("../config/database");
+const logger = require("../utils/logger");
 class RelationshipService {
     constructor() {
         this.logger = logger;
@@ -7,218 +7,251 @@ class RelationshipService {
         this.relationshipTypes = {
             // Personal relationships
             FAMILY: {
-                name: 'FAMILY',
-                category: 'PERSONAL',
-                description: 'Family relationship',
-                properties: ['relationship_type', 'since', 'degree'],
-                constraints: ['Person->Person'],
+                name: "FAMILY",
+                category: "PERSONAL",
+                description: "Family relationship",
+                properties: ["relationship_type", "since", "degree"],
+                constraints: ["Person->Person"],
                 weight: 0.9,
             },
             FRIEND: {
-                name: 'FRIEND',
-                category: 'PERSONAL',
-                description: 'Friendship relationship',
-                properties: ['since', 'closeness', 'frequency'],
-                constraints: ['Person->Person'],
+                name: "FRIEND",
+                category: "PERSONAL",
+                description: "Friendship relationship",
+                properties: ["since", "closeness", "frequency"],
+                constraints: ["Person->Person"],
                 weight: 0.7,
             },
             ROMANTIC: {
-                name: 'ROMANTIC',
-                category: 'PERSONAL',
-                description: 'Romantic relationship',
-                properties: ['status', 'since', 'until'],
-                constraints: ['Person->Person'],
+                name: "ROMANTIC",
+                category: "PERSONAL",
+                description: "Romantic relationship",
+                properties: ["status", "since", "until"],
+                constraints: ["Person->Person"],
                 weight: 0.9,
             },
             // Professional relationships
             EMPLOYMENT: {
-                name: 'EMPLOYMENT',
-                category: 'PROFESSIONAL',
-                description: 'Employment relationship',
-                properties: ['position', 'department', 'since', 'until', 'salary'],
-                constraints: ['Person->Organization'],
+                name: "EMPLOYMENT",
+                category: "PROFESSIONAL",
+                description: "Employment relationship",
+                properties: ["position", "department", "since", "until", "salary"],
+                constraints: ["Person->Organization"],
                 weight: 0.8,
             },
             PARTNERSHIP: {
-                name: 'PARTNERSHIP',
-                category: 'PROFESSIONAL',
-                description: 'Business partnership',
-                properties: ['type', 'since', 'equity_share', 'role'],
-                constraints: ['Person->Organization', 'Organization->Organization'],
+                name: "PARTNERSHIP",
+                category: "PROFESSIONAL",
+                description: "Business partnership",
+                properties: ["type", "since", "equity_share", "role"],
+                constraints: ["Person->Organization", "Organization->Organization"],
                 weight: 0.8,
             },
             LEADERSHIP: {
-                name: 'LEADERSHIP',
-                category: 'PROFESSIONAL',
-                description: 'Leadership or management relationship',
-                properties: ['title', 'since', 'reports_count'],
-                constraints: ['Person->Organization', 'Person->Person'],
+                name: "LEADERSHIP",
+                category: "PROFESSIONAL",
+                description: "Leadership or management relationship",
+                properties: ["title", "since", "reports_count"],
+                constraints: ["Person->Organization", "Person->Person"],
                 weight: 0.9,
             },
             BOARD_MEMBER: {
-                name: 'BOARD_MEMBER',
-                category: 'PROFESSIONAL',
-                description: 'Board membership',
-                properties: ['since', 'committee', 'compensation'],
-                constraints: ['Person->Organization'],
+                name: "BOARD_MEMBER",
+                category: "PROFESSIONAL",
+                description: "Board membership",
+                properties: ["since", "committee", "compensation"],
+                constraints: ["Person->Organization"],
                 weight: 0.7,
             },
             // Financial relationships
             OWNERSHIP: {
-                name: 'OWNERSHIP',
-                category: 'FINANCIAL',
-                description: 'Ownership relationship',
-                properties: ['percentage', 'since', 'type', 'value'],
-                constraints: ['Person->Organization', 'Person->Asset', 'Organization->Asset'],
+                name: "OWNERSHIP",
+                category: "FINANCIAL",
+                description: "Ownership relationship",
+                properties: ["percentage", "since", "type", "value"],
+                constraints: [
+                    "Person->Organization",
+                    "Person->Asset",
+                    "Organization->Asset",
+                ],
                 weight: 0.9,
             },
             INVESTMENT: {
-                name: 'INVESTMENT',
-                category: 'FINANCIAL',
-                description: 'Investment relationship',
-                properties: ['amount', 'date', 'type', 'return_rate'],
-                constraints: ['Person->Organization', 'Organization->Organization'],
+                name: "INVESTMENT",
+                category: "FINANCIAL",
+                description: "Investment relationship",
+                properties: ["amount", "date", "type", "return_rate"],
+                constraints: ["Person->Organization", "Organization->Organization"],
                 weight: 0.6,
             },
             LOAN: {
-                name: 'LOAN',
-                category: 'FINANCIAL',
-                description: 'Loan relationship',
-                properties: ['amount', 'interest_rate', 'term', 'status'],
-                constraints: ['Person->Person', 'Person->Organization', 'Organization->Organization'],
+                name: "LOAN",
+                category: "FINANCIAL",
+                description: "Loan relationship",
+                properties: ["amount", "interest_rate", "term", "status"],
+                constraints: [
+                    "Person->Person",
+                    "Person->Organization",
+                    "Organization->Organization",
+                ],
                 weight: 0.7,
             },
             TRANSACTION: {
-                name: 'TRANSACTION',
-                category: 'FINANCIAL',
-                description: 'Financial transaction',
-                properties: ['amount', 'date', 'currency', 'purpose'],
-                constraints: ['Person->Person', 'Person->Organization', 'Organization->Organization'],
+                name: "TRANSACTION",
+                category: "FINANCIAL",
+                description: "Financial transaction",
+                properties: ["amount", "date", "currency", "purpose"],
+                constraints: [
+                    "Person->Person",
+                    "Person->Organization",
+                    "Organization->Organization",
+                ],
                 weight: 0.5,
             },
             // Communication relationships
             COMMUNICATION: {
-                name: 'COMMUNICATION',
-                category: 'COMMUNICATION',
-                description: 'Communication relationship',
-                properties: ['method', 'frequency', 'last_contact', 'duration'],
-                constraints: ['Person->Person', 'Person->Organization'],
+                name: "COMMUNICATION",
+                category: "COMMUNICATION",
+                description: "Communication relationship",
+                properties: ["method", "frequency", "last_contact", "duration"],
+                constraints: ["Person->Person", "Person->Organization"],
                 weight: 0.4,
             },
             EMAIL: {
-                name: 'EMAIL',
-                category: 'COMMUNICATION',
-                description: 'Email communication',
-                properties: ['subject', 'date', 'direction', 'attachment_count'],
-                constraints: ['Person->Person', 'Person->Organization'],
+                name: "EMAIL",
+                category: "COMMUNICATION",
+                description: "Email communication",
+                properties: ["subject", "date", "direction", "attachment_count"],
+                constraints: ["Person->Person", "Person->Organization"],
                 weight: 0.3,
             },
             PHONE_CALL: {
-                name: 'PHONE_CALL',
-                category: 'COMMUNICATION',
-                description: 'Phone communication',
-                properties: ['duration', 'date', 'direction', 'call_type'],
-                constraints: ['Person->Person'],
+                name: "PHONE_CALL",
+                category: "COMMUNICATION",
+                description: "Phone communication",
+                properties: ["duration", "date", "direction", "call_type"],
+                constraints: ["Person->Person"],
                 weight: 0.4,
             },
             MEETING: {
-                name: 'MEETING',
-                category: 'COMMUNICATION',
-                description: 'Meeting or encounter',
-                properties: ['date', 'location', 'duration', 'purpose'],
-                constraints: ['Person->Person', 'Person->Organization'],
+                name: "MEETING",
+                category: "COMMUNICATION",
+                description: "Meeting or encounter",
+                properties: ["date", "location", "duration", "purpose"],
+                constraints: ["Person->Person", "Person->Organization"],
                 weight: 0.6,
             },
             // Location relationships
             LOCATED_AT: {
-                name: 'LOCATED_AT',
-                category: 'LOCATION',
-                description: 'Location relationship',
-                properties: ['since', 'until', 'address', 'type'],
-                constraints: ['Person->Location', 'Organization->Location', 'Asset->Location'],
+                name: "LOCATED_AT",
+                category: "LOCATION",
+                description: "Location relationship",
+                properties: ["since", "until", "address", "type"],
+                constraints: [
+                    "Person->Location",
+                    "Organization->Location",
+                    "Asset->Location",
+                ],
                 weight: 0.5,
             },
             TRAVEL: {
-                name: 'TRAVEL',
-                category: 'LOCATION',
-                description: 'Travel relationship',
-                properties: ['departure_date', 'return_date', 'purpose', 'transportation'],
-                constraints: ['Person->Location'],
+                name: "TRAVEL",
+                category: "LOCATION",
+                description: "Travel relationship",
+                properties: [
+                    "departure_date",
+                    "return_date",
+                    "purpose",
+                    "transportation",
+                ],
+                constraints: ["Person->Location"],
                 weight: 0.4,
             },
             ORIGIN: {
-                name: 'ORIGIN',
-                category: 'LOCATION',
-                description: 'Place of origin',
-                properties: ['birth_date', 'citizenship', 'duration'],
-                constraints: ['Person->Location'],
+                name: "ORIGIN",
+                category: "LOCATION",
+                description: "Place of origin",
+                properties: ["birth_date", "citizenship", "duration"],
+                constraints: ["Person->Location"],
                 weight: 0.8,
             },
             // Legal relationships
             LEGAL_CASE: {
-                name: 'LEGAL_CASE',
-                category: 'LEGAL',
-                description: 'Legal case involvement',
-                properties: ['case_number', 'role', 'status', 'date'],
-                constraints: ['Person->LegalCase', 'Organization->LegalCase'],
+                name: "LEGAL_CASE",
+                category: "LEGAL",
+                description: "Legal case involvement",
+                properties: ["case_number", "role", "status", "date"],
+                constraints: ["Person->LegalCase", "Organization->LegalCase"],
                 weight: 0.7,
             },
             CONTRACT: {
-                name: 'CONTRACT',
-                category: 'LEGAL',
-                description: 'Contractual relationship',
-                properties: ['contract_type', 'date', 'value', 'status'],
-                constraints: ['Person->Person', 'Person->Organization', 'Organization->Organization'],
+                name: "CONTRACT",
+                category: "LEGAL",
+                description: "Contractual relationship",
+                properties: ["contract_type", "date", "value", "status"],
+                constraints: [
+                    "Person->Person",
+                    "Person->Organization",
+                    "Organization->Organization",
+                ],
                 weight: 0.8,
             },
             LICENSE: {
-                name: 'LICENSE',
-                category: 'LEGAL',
-                description: 'License or permit relationship',
-                properties: ['license_type', 'issue_date', 'expiry_date', 'status'],
-                constraints: ['Person->Organization', 'Organization->Organization'],
+                name: "LICENSE",
+                category: "LEGAL",
+                description: "License or permit relationship",
+                properties: ["license_type", "issue_date", "expiry_date", "status"],
+                constraints: ["Person->Organization", "Organization->Organization"],
                 weight: 0.6,
             },
             // Digital relationships
             ACCOUNT: {
-                name: 'ACCOUNT',
-                category: 'DIGITAL',
-                description: 'Digital account relationship',
-                properties: ['platform', 'username', 'created_date', 'status'],
-                constraints: ['Person->Organization'],
+                name: "ACCOUNT",
+                category: "DIGITAL",
+                description: "Digital account relationship",
+                properties: ["platform", "username", "created_date", "status"],
+                constraints: ["Person->Organization"],
                 weight: 0.3,
             },
             DIGITAL_TRACE: {
-                name: 'DIGITAL_TRACE',
-                category: 'DIGITAL',
-                description: 'Digital footprint or trace',
-                properties: ['ip_address', 'timestamp', 'device', 'action'],
-                constraints: ['Person->DigitalAsset', 'Person->Location'],
+                name: "DIGITAL_TRACE",
+                category: "DIGITAL",
+                description: "Digital footprint or trace",
+                properties: ["ip_address", "timestamp", "device", "action"],
+                constraints: ["Person->DigitalAsset", "Person->Location"],
                 weight: 0.4,
             },
             // Intelligence specific
             SURVEILLANCE: {
-                name: 'SURVEILLANCE',
-                category: 'INTELLIGENCE',
-                description: 'Surveillance relationship',
-                properties: ['method', 'since', 'until', 'frequency', 'classification'],
-                constraints: ['Person->Person', 'Person->Location', 'Person->Organization'],
+                name: "SURVEILLANCE",
+                category: "INTELLIGENCE",
+                description: "Surveillance relationship",
+                properties: ["method", "since", "until", "frequency", "classification"],
+                constraints: [
+                    "Person->Person",
+                    "Person->Location",
+                    "Person->Organization",
+                ],
                 weight: 0.8,
             },
             SUSPECT: {
-                name: 'SUSPECT',
-                category: 'INTELLIGENCE',
-                description: 'Suspicion relationship',
-                properties: ['suspicion_level', 'since', 'reason', 'status'],
-                constraints: ['Person->Event', 'Person->Organization'],
+                name: "SUSPECT",
+                category: "INTELLIGENCE",
+                description: "Suspicion relationship",
+                properties: ["suspicion_level", "since", "reason", "status"],
+                constraints: ["Person->Event", "Person->Organization"],
                 weight: 0.9,
             },
             THREAT: {
-                name: 'THREAT',
-                category: 'INTELLIGENCE',
-                description: 'Threat relationship',
-                properties: ['threat_level', 'type', 'since', 'credibility'],
-                constraints: ['Person->Person', 'Person->Organization', 'Organization->Organization'],
+                name: "THREAT",
+                category: "INTELLIGENCE",
+                description: "Threat relationship",
+                properties: ["threat_level", "type", "since", "credibility"],
+                constraints: [
+                    "Person->Person",
+                    "Person->Organization",
+                    "Organization->Organization",
+                ],
                 weight: 1.0,
             },
         };
@@ -254,9 +287,9 @@ class RelationshipService {
                 }
             }
             // Validate required properties
-            const missingProperties = relType.properties.filter((prop) => prop.endsWith('*') && !(prop.slice(0, -1) in properties));
+            const missingProperties = relType.properties.filter((prop) => prop.endsWith("*") && !(prop.slice(0, -1) in properties));
             if (missingProperties.length > 0) {
-                throw new Error(`Missing required properties: ${missingProperties.join(', ')}`);
+                throw new Error(`Missing required properties: ${missingProperties.join(", ")}`);
             }
             return {
                 valid: true,
@@ -265,7 +298,7 @@ class RelationshipService {
             };
         }
         catch (error) {
-            this.logger.error('Relationship validation error:', error);
+            this.logger.error("Relationship validation error:", error);
             return { valid: false, error: error.message };
         }
     }
@@ -284,7 +317,7 @@ class RelationshipService {
         }
         // Validate date properties
         relationshipType.properties.forEach((prop) => {
-            if (prop.includes('date') && normalized[prop]) {
+            if (prop.includes("date") && normalized[prop]) {
                 try {
                     normalized[prop] = new Date(normalized[prop]).toISOString();
                 }
@@ -302,7 +335,7 @@ class RelationshipService {
         const session = this.driver.session();
         try {
             // Validate relationship first
-            const validation = this.validateRelationship(options.sourceType || 'Entity', relationshipType, options.targetType || 'Entity', properties);
+            const validation = this.validateRelationship(options.sourceType || "Entity", relationshipType, options.targetType || "Entity", properties);
             if (!validation.valid) {
                 throw new Error(validation.error);
             }
@@ -319,10 +352,10 @@ class RelationshipService {
                 properties: normalizedProps,
             });
             if (result.records.length === 0) {
-                throw new Error('Failed to create relationship - nodes not found');
+                throw new Error("Failed to create relationship - nodes not found");
             }
             const record = result.records[0];
-            const relationship = record.get('r');
+            const relationship = record.get("r");
             this.logger.info(`Created relationship: ${sourceId} -[${relationshipType}]-> ${targetId}`);
             return {
                 id: relationship.identity.toString(),
@@ -334,7 +367,7 @@ class RelationshipService {
             };
         }
         catch (error) {
-            this.logger.error('Error creating relationship:', error);
+            this.logger.error("Error creating relationship:", error);
             throw error;
         }
         finally {
@@ -359,9 +392,9 @@ class RelationshipService {
                 properties,
             });
             if (result.records.length === 0) {
-                throw new Error('Relationship not found');
+                throw new Error("Relationship not found");
             }
-            const relationship = result.records[0].get('r');
+            const relationship = result.records[0].get("r");
             this.logger.info(`Updated relationship: ${relationshipId}`);
             return {
                 id: relationshipId,
@@ -370,7 +403,7 @@ class RelationshipService {
             };
         }
         catch (error) {
-            this.logger.error('Error updating relationship:', error);
+            this.logger.error("Error updating relationship:", error);
             throw error;
         }
         finally {
@@ -392,15 +425,15 @@ class RelationshipService {
             const result = await session.run(query, {
                 relationshipId: parseInt(relationshipId),
             });
-            const deleted = result.records[0].get('deleted').toNumber();
+            const deleted = result.records[0].get("deleted").toNumber();
             if (deleted === 0) {
-                throw new Error('Relationship not found');
+                throw new Error("Relationship not found");
             }
             this.logger.info(`Deleted relationship: ${relationshipId}`);
             return { deleted: true, count: deleted };
         }
         catch (error) {
-            this.logger.error('Error deleting relationship:', error);
+            this.logger.error("Error deleting relationship:", error);
             throw error;
         }
         finally {
@@ -420,23 +453,23 @@ class RelationshipService {
       `;
             const result = await session.run(query, { limit });
             return result.records.map((record) => ({
-                id: record.get('r').identity.toString(),
+                id: record.get("r").identity.toString(),
                 type: relationshipType,
-                properties: record.get('r').properties,
+                properties: record.get("r").properties,
                 source: {
-                    id: record.get('source').properties.id,
-                    labels: record.get('source').labels,
-                    properties: record.get('source').properties,
+                    id: record.get("source").properties.id,
+                    labels: record.get("source").labels,
+                    properties: record.get("source").properties,
                 },
                 target: {
-                    id: record.get('target').properties.id,
-                    labels: record.get('target').labels,
-                    properties: record.get('target').properties,
+                    id: record.get("target").properties.id,
+                    labels: record.get("target").labels,
+                    properties: record.get("target").properties,
                 },
             }));
         }
         catch (error) {
-            this.logger.error('Error finding relationships by type:', error);
+            this.logger.error("Error finding relationships by type:", error);
             throw error;
         }
         finally {
@@ -455,15 +488,15 @@ class RelationshipService {
       `;
             const result = await session.run(query, { sourceId, targetId });
             return result.records.map((record) => ({
-                id: record.get('r').identity.toString(),
-                type: record.get('relType'),
-                properties: record.get('r').properties,
+                id: record.get("r").identity.toString(),
+                type: record.get("relType"),
+                properties: record.get("r").properties,
                 source: sourceId,
                 target: targetId,
             }));
         }
         catch (error) {
-            this.logger.error('Error finding relationships between entities:', error);
+            this.logger.error("Error finding relationships between entities:", error);
             throw error;
         }
         finally {
@@ -486,9 +519,9 @@ class RelationshipService {
       `;
             const result = await session.run(query, { entityId });
             const patterns = result.records.map((record) => ({
-                relationshipType: record.get('relType'),
-                frequency: record.get('frequency').toNumber(),
-                category: this.relationshipTypes[record.get('relType')]?.category || 'UNKNOWN',
+                relationshipType: record.get("relType"),
+                frequency: record.get("frequency").toNumber(),
+                category: this.relationshipTypes[record.get("relType")]?.category || "UNKNOWN",
             }));
             // Group by category
             const categoryAnalysis = {};
@@ -511,7 +544,7 @@ class RelationshipService {
             };
         }
         catch (error) {
-            this.logger.error('Error analyzing relationship patterns:', error);
+            this.logger.error("Error analyzing relationship patterns:", error);
             throw error;
         }
         finally {
@@ -586,3 +619,4 @@ class RelationshipService {
     }
 }
 module.exports = RelationshipService;
+//# sourceMappingURL=RelationshipService.js.map

@@ -20,19 +20,19 @@ export default [
       parser: tseslint.parser,
       globals: { ...globals.browser },
       parserOptions: {
-        ecmaFeatures: { jsx: true },
-      },
+        ecmaFeatures: { jsx: true }
+      }
     },
     settings: {
-      react: { version: 'detect' },
+      react: { version: 'detect' }
     },
     rules: {
       'react/jsx-uses-react': 'off', // new JSX transform
       'react/react-in-jsx-scope': 'off',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-    },
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }]
+    }
   },
   {
     files: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
@@ -40,8 +40,8 @@ export default [
     languageOptions: { globals: { ...globals.browser, jest: true } },
     rules: {
       'jest/no-disabled-tests': 'warn',
-      'jest/no-identical-title': 'error',
-    },
+      'jest/no-identical-title': 'error'
+    }
   },
-  prettier,
+  prettier
 ];

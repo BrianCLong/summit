@@ -14,13 +14,13 @@ class FederationController {
      */
     async registerInstance(req, res) {
         try {
-            const { id, name, endpoint, apiKey, publicKey, capabilities, accessLevel, maxConcurrentQueries, timeout, } = req.body;
+            const { id, name, endpoint, apiKey, publicKey, capabilities, accessLevel, maxConcurrentQueries, timeout } = req.body;
             const userId = req.user.id;
             // Check admin permissions
             const hasPermission = await this.auth.hasRole(userId, 'admin');
             if (!hasPermission) {
                 return res.status(403).json({
-                    error: 'Admin permissions required to register instances',
+                    error: 'Admin permissions required to register instances'
                 });
             }
             const instance = await this.federatedSearch.registerInstance({
@@ -32,7 +32,7 @@ class FederationController {
                 capabilities: capabilities || [],
                 accessLevel: accessLevel || 'public',
                 maxConcurrentQueries: maxConcurrentQueries || 5,
-                timeout: timeout || 30000,
+                timeout: timeout || 30000
             });
             res.status(201).json({
                 success: true,
@@ -44,16 +44,16 @@ class FederationController {
                     accessLevel: instance.accessLevel,
                     registeredAt: instance.registeredAt,
                     version: instance.version,
-                    features: instance.features,
+                    features: instance.features
                 },
-                message: 'Instance registered successfully',
+                message: 'Instance registered successfully'
             });
         }
         catch (error) {
             console.error('Error registering instance:', error);
             res.status(400).json({
                 error: 'Failed to register instance',
-                details: error.message,
+                details: error.message
             });
         }
     }
@@ -69,7 +69,7 @@ class FederationController {
             // Filter instances based on user access level
             let visibleInstances = stats.instances;
             if (userRole !== 'admin') {
-                visibleInstances = stats.instances.filter((instance) => instance.accessLevel === 'public' ||
+                visibleInstances = stats.instances.filter(instance => instance.accessLevel === 'public' ||
                     (instance.accessLevel === 'restricted' && ['lead', 'analyst'].includes(userRole)));
             }
             res.json({
@@ -77,15 +77,15 @@ class FederationController {
                 summary: {
                     total: stats.connectedInstances,
                     healthy: stats.healthyInstances,
-                    visible: visibleInstances.length,
+                    visible: visibleInstances.length
                 },
-                metrics: userRole === 'admin' ? stats.metrics : null,
+                metrics: userRole === 'admin' ? stats.metrics : null
             });
         }
         catch (error) {
             console.error('Error listing instances:', error);
             res.status(500).json({
-                error: 'Failed to list instances',
+                error: 'Failed to list instances'
             });
         }
     }
@@ -99,32 +99,32 @@ class FederationController {
             const userId = req.user.id;
             const userRole = await this.auth.getUserRole(userId);
             const stats = this.federatedSearch.getFederationStats();
-            const instance = stats.instances.find((i) => i.id === id);
+            const instance = stats.instances.find(i => i.id === id);
             if (!instance) {
                 return res.status(404).json({
-                    error: 'Instance not found',
+                    error: 'Instance not found'
                 });
             }
             // Check access permissions
             if (userRole !== 'admin' && instance.accessLevel === 'private') {
                 return res.status(403).json({
-                    error: 'Access denied to this instance',
+                    error: 'Access denied to this instance'
                 });
             }
             if (userRole === 'viewer' && instance.accessLevel === 'restricted') {
                 return res.status(403).json({
-                    error: 'Insufficient permissions to view this instance',
+                    error: 'Insufficient permissions to view this instance'
                 });
             }
             res.json({
                 instance,
-                connectionStatus: this.federatedSearch.connectionStatus.get(id),
+                connectionStatus: this.federatedSearch.connectionStatus.get(id)
             });
         }
         catch (error) {
             console.error('Error getting instance:', error);
             res.status(500).json({
-                error: 'Failed to get instance details',
+                error: 'Failed to get instance details'
             });
         }
     }
@@ -141,23 +141,20 @@ class FederationController {
             const hasPermission = await this.auth.hasRole(userId, 'admin');
             if (!hasPermission) {
                 return res.status(403).json({
-                    error: 'Admin permissions required to update instances',
+                    error: 'Admin permissions required to update instances'
                 });
             }
             // Get current instance
             const connectedInstance = this.federatedSearch.connectedInstances.get(id);
             if (!connectedInstance) {
                 return res.status(404).json({
-                    error: 'Instance not found',
+                    error: 'Instance not found'
                 });
             }
             // Apply allowed updates
             const allowedUpdates = [
-                'name',
-                'capabilities',
-                'accessLevel',
-                'maxConcurrentQueries',
-                'timeout',
+                'name', 'capabilities', 'accessLevel',
+                'maxConcurrentQueries', 'timeout'
             ];
             for (const [key, value] of Object.entries(updates)) {
                 if (allowedUpdates.includes(key)) {
@@ -177,15 +174,15 @@ class FederationController {
                     capabilities: Array.from(connectedInstance.capabilities),
                     accessLevel: connectedInstance.accessLevel,
                     maxConcurrentQueries: connectedInstance.maxConcurrentQueries,
-                    timeout: connectedInstance.timeout,
+                    timeout: connectedInstance.timeout
                 },
-                message: 'Instance updated successfully',
+                message: 'Instance updated successfully'
             });
         }
         catch (error) {
             console.error('Error updating instance:', error);
             res.status(500).json({
-                error: 'Failed to update instance',
+                error: 'Failed to update instance'
             });
         }
     }
@@ -201,20 +198,20 @@ class FederationController {
             const hasPermission = await this.auth.hasRole(userId, 'admin');
             if (!hasPermission) {
                 return res.status(403).json({
-                    error: 'Admin permissions required to unregister instances',
+                    error: 'Admin permissions required to unregister instances'
                 });
             }
             await this.federatedSearch.unregisterInstance(id);
             res.json({
                 success: true,
-                message: 'Instance unregistered successfully',
+                message: 'Instance unregistered successfully'
             });
         }
         catch (error) {
             console.error('Error unregistering instance:', error);
             res.status(400).json({
                 error: 'Failed to unregister instance',
-                details: error.message,
+                details: error.message
             });
         }
     }
@@ -224,13 +221,13 @@ class FederationController {
      */
     async federatedSearch(req, res) {
         try {
-            const { query, instances, maxResults, timeout, aggregateResults = true, respectACL = true, cacheResults = true, } = req.body;
+            const { query, instances, maxResults, timeout, aggregateResults = true, respectACL = true, cacheResults = true } = req.body;
             const userId = req.user.id;
             const userRole = await this.auth.getUserRole(userId);
             // Validate query
             if (!query || !query.graphql) {
                 return res.status(400).json({
-                    error: 'GraphQL query is required',
+                    error: 'GraphQL query is required'
                 });
             }
             const options = {
@@ -241,7 +238,7 @@ class FederationController {
                 respectACL,
                 cacheResults,
                 userId,
-                userRole,
+                userRole
             };
             const startTime = Date.now();
             const results = await this.federatedSearch.federatedSearch(query, options);
@@ -249,14 +246,14 @@ class FederationController {
                 success: true,
                 results,
                 executionTime: Date.now() - startTime,
-                timestamp: new Date().toISOString(),
+                timestamp: new Date().toISOString()
             });
         }
         catch (error) {
             console.error('Federated search error:', error);
             res.status(400).json({
                 error: 'Federated search failed',
-                details: error.message,
+                details: error.message
             });
         }
     }
@@ -272,13 +269,13 @@ class FederationController {
             const userRole = await this.auth.getUserRole(userId);
             if (!['admin', 'lead'].includes(userRole)) {
                 return res.status(403).json({
-                    error: 'Insufficient permissions to test instances',
+                    error: 'Insufficient permissions to test instances'
                 });
             }
             const instance = this.federatedSearch.connectedInstances.get(id);
             if (!instance) {
                 return res.status(404).json({
-                    error: 'Instance not found',
+                    error: 'Instance not found'
                 });
             }
             const startTime = Date.now();
@@ -292,7 +289,7 @@ class FederationController {
               }
             }
           }
-        `,
+        `
             };
             let queryResult = null;
             try {
@@ -301,7 +298,7 @@ class FederationController {
             catch (error) {
                 queryResult = {
                     success: false,
-                    error: error.message,
+                    error: error.message
                 };
             }
             res.json({
@@ -309,17 +306,17 @@ class FederationController {
                 instance: {
                     id: instance.id,
                     name: instance.name,
-                    endpoint: instance.endpoint,
+                    endpoint: instance.endpoint
                 },
                 healthCheck,
                 queryTest: queryResult,
-                totalTestTime: Date.now() - startTime,
+                totalTestTime: Date.now() - startTime
             });
         }
         catch (error) {
             console.error('Error testing instance:', error);
             res.status(500).json({
-                error: 'Failed to test instance',
+                error: 'Failed to test instance'
             });
         }
     }
@@ -334,19 +331,19 @@ class FederationController {
             // Only admins can see detailed statistics
             if (userRole !== 'admin') {
                 return res.status(403).json({
-                    error: 'Admin permissions required for federation statistics',
+                    error: 'Admin permissions required for federation statistics'
                 });
             }
             const stats = this.federatedSearch.getFederationStats();
             res.json({
                 ...stats,
-                timestamp: new Date().toISOString(),
+                timestamp: new Date().toISOString()
             });
         }
         catch (error) {
             console.error('Error getting federation stats:', error);
             res.status(500).json({
-                error: 'Failed to get federation statistics',
+                error: 'Failed to get federation statistics'
             });
         }
     }
@@ -361,7 +358,7 @@ class FederationController {
             const hasPermission = await this.auth.hasRole(userId, 'admin');
             if (!hasPermission) {
                 return res.status(403).json({
-                    error: 'Admin permissions required to clear cache',
+                    error: 'Admin permissions required to clear cache'
                 });
             }
             const cacheSize = this.federatedSearch.queryCache.size;
@@ -369,13 +366,13 @@ class FederationController {
             res.json({
                 success: true,
                 message: `Cleared ${cacheSize} cached queries`,
-                clearedEntries: cacheSize,
+                clearedEntries: cacheSize
             });
         }
         catch (error) {
             console.error('Error clearing cache:', error);
             res.status(500).json({
-                error: 'Failed to clear cache',
+                error: 'Failed to clear cache'
             });
         }
     }
@@ -391,18 +388,17 @@ class FederationController {
             // Aggregate capabilities from accessible instances
             const capabilities = new Set();
             const instanceCapabilities = {};
-            stats.instances.forEach((instance) => {
+            stats.instances.forEach(instance => {
                 // Check if user can access this instance
                 const canAccess = instance.accessLevel === 'public' ||
-                    (instance.accessLevel === 'restricted' &&
-                        ['admin', 'lead', 'analyst'].includes(userRole)) ||
+                    (instance.accessLevel === 'restricted' && ['admin', 'lead', 'analyst'].includes(userRole)) ||
                     (instance.accessLevel === 'private' && userRole === 'admin');
                 if (canAccess) {
-                    instance.capabilities.forEach((cap) => capabilities.add(cap));
+                    instance.capabilities.forEach(cap => capabilities.add(cap));
                     instanceCapabilities[instance.id] = {
                         name: instance.name,
                         capabilities: instance.capabilities,
-                        healthy: instance.healthy,
+                        healthy: instance.healthy
                     };
                 }
             });
@@ -411,16 +407,17 @@ class FederationController {
                 instanceCapabilities,
                 summary: {
                     totalCapabilities: capabilities.size,
-                    accessibleInstances: Object.keys(instanceCapabilities).length,
-                },
+                    accessibleInstances: Object.keys(instanceCapabilities).length
+                }
             });
         }
         catch (error) {
             console.error('Error getting capabilities:', error);
             res.status(500).json({
-                error: 'Failed to get capabilities',
+                error: 'Failed to get capabilities'
             });
         }
     }
 }
 module.exports = FederationController;
+//# sourceMappingURL=FederationController.js.map
