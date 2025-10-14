@@ -5,7 +5,7 @@ on:
       test-command:
         required: false
         type: string
-        default: "npm run test:fast -- --runInBand --bail=1 --silent"
+        default: "pnpm run test:fast -- --runInBand --bail=1 --silent"
 
 jobs:
   fast:
