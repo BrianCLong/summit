@@ -301,6 +301,12 @@ export class ProvenanceLedger {
   }
 }
 
+export { SelfEditRegistry } from './selfEditRegistry';
+export type {
+  ScorecardOptions as SelfEditScorecardOptions,
+  SelfEditRegistryOptions,
+} from './selfEditRegistry';
+
 // ============================================================================
 // WORKFLOW LEDGER RECORDING - From codex/create-drag-and-drop-workflow-workflow-creator
 // ============================================================================
