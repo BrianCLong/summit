@@ -15,3 +15,4 @@ describe('cost estimator', () => {
         })).toBe(2);
     });
 });
+//# sourceMappingURL=costEstimator.test.js.map

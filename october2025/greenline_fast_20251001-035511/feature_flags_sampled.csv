@@ -1,0 +1,9 @@
+bundle,relative_path,lineno,snippet
+summit-2025.10.01.0015,summit-2025.10.01.0015/INTELGRAPH_ENGINEERING_STANDARD_V4.md,58,feature_request.yml
+summit-2025.10.01.0015,summit-2025.10.01.0015/RELEASE_NOTES_v24.0.0.md,19,* Feature flag: `v24.coherence`.
+summit-2025.10.01.0015,summit-2025.10.01.0015/ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md,34,feature_flags.yml
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_mc_frontend_sprint_13_plan_sep_29_oct_10_2025.md,10,"**Assumptions:** Gateway provides `/runs/:id/graph`, `/runs/:id/logs` (WS/SSE), `/evidence/:runId/bundle`, `/opa/decide`, `/flags`; SLO history available. SSE stable; mocks exist behind `FEATURE_FAKE_"
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_mc_frontend_sprint_plan_sprint_12_sep_15_26_2025.md,64,- Uses `maestroApi.getSummary()`; no mock when `FEATURE_FAKE_DATA=false`.
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_mc_frontend_sprint_plan_sprint_12_sep_15_26_2025.md,78,- QA can inject mock IdP; feature flag `FEATURE_AUTH_MOCK` toggles.
+summit-2025.10.01.0015,summit-2025.10.01.0015/next_ui_sprint_plan_ig_mc_sep_15_26_2025.md,51,**IG‑101 — Graph Minimap & Pan/Zoom Controls (flag: `ig_minimap`) — 5 pts**
+summit-2025.10.01.0015,summit-2025.10.01.0015/pagerduty-change.json,14,"""feature_flag"": ""v24.coherence"","

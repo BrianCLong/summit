@@ -1,0 +1,70 @@
+[ORACLE MODE – Fusion & Forecast]
+
+---
+
+## EXECUTIVE SUMMARY
+- **Sprint Window Proposal:** Feb 3 – Feb 14, 2026 (2-week cadence)
+- **Focus:** Inline Explainability Agent + Auto-Diff Builder — interpret prompts on entry, expose output divergence on exit.
+- **Workstream Theme:** Explain at Source, Trace to Sink — every transformation must be auditable.
+- **Target Output:** Embedded explainer, semantic diff tool, override feedback loop.
+
+---
+
+## FINDINGS & RATIONALE
+- Prompt sanitization now blocks known risks, but ambiguity still enters — inline guidance increases analyst leverage.
+- Divergent outputs from similar prompts require **semantic comparison**, not just syntax or logs.
+- Feedback loop closes the pipeline: human-in-the-loop override feeds the classifier retrain set.
+
+---
+
+## RECOMMENDATIONS
+
+### PRIORITY OBJECTIVES (Sprint: Feb 3–14)
+1. **Inline Explainer Agent**
+   - Renders prompt risks, variant predictions, intent classification at edit time.  
+   - Offers canonical alternatives or explains blocked terms.
+2. **Replay Auto-Diff Engine**
+   - Compare causal chains across two prompts or two runs.  
+   - Highlight semantically critical divergences (claim shift, node omission).
+3. **Explainer Feedback Loop**
+   - Capture analyst acceptance, override, correction.  
+   - Retrain prompt scorer with feedback batch.
+4. **Override Audit Register**
+   - Log all user-bypassed warnings, accepted risks.  
+   - Emit alerts if override hits known-volatile path.
+
+### SUGGESTED FOLLOW-UPS (Next Sprint)
+- Visual explanation tracer per edge/node  
+- Adaptive prompt shaping based on task context
+
+---
+
+## PROOF-CARRYING INTELLIGENCE
+- **Sources:** Prompt interface logs, replay traces, classifier deltas.
+- **Assumptions:** Live prompt editor integration supports synchronous inference.
+- **Uncertainty:** Analyst override accuracy not yet validated.
+- **Verification:**
+  - Diff trace validation across identical graph segments
+  - Override review sampling
+  - Explainer usage telemetry
+
+---
+
+## CADENCE PLAN (Q1 '26)
+
+| Layer         | Cadence           | Responsible Artifact                            |
+|---------------|-------------------|-------------------------------------------------|
+| Daily         | Explainer Logs    | Prompt Risks, Intent Predictions                |
+| Weekly        | Diff Delta Digest | Divergence Classes, Risk Impact Heatmaps        |
+| Biweekly (83M)| Feedback Sync     | Accepted/Rejected Override Stats               |
+| Monthly       | Override Audit    | Risk Tolerance Tracking, Escalation Rates       |
+| Quarterly     | Explanation QA    | Accuracy of Inline Agent, Precision of Diffs    |
+
+**Next Steps:**
+- Explainer agent deployed (Feb 5)  
+- Diff Engine activated with seed set (Feb 8)  
+- Feedback pipeline tuned + online (Feb 12)
+
+---
+
+**[UNIT 83M – ORACLE MODE]** – SIGINT FUSION: EXPLAIN, DIFFERENTIATE, EVOLVE.

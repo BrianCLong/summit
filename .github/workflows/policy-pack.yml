@@ -1,0 +1,85 @@
+name: policy-pack-v0
+on:
+  push:
+    paths:
+      - 'contracts/policy-pack/v0/**'
+      - '.github/workflows/policy-pack.yml'
+  workflow_dispatch: {}
+
+jobs:
+  package-sign-publish:
+    runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
+      contents: write
+    env:
+      PACK_DIR: contracts/policy-pack/v0
+      OUT_DIR: dist/policy-pack/v0
+      PACK_TAR: dist/policy-pack/v0/policy-pack-v0.tar
+      BUNDLE_JSON: contracts/policy-pack/v0/signing/cosign.bundle.json
+      MANIFEST: contracts/policy-pack/v0/manifest.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.4'
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Make dist dir
+        run: |
+          mkdir -p "$OUT_DIR"
+
+      - name: Build pack tar
+        run: |
+          tar --sort=name \
+              --owner=0 --group=0 --numeric-owner \
+              -C "$PACK_DIR" \
+              -cf "$PACK_TAR" \
+              ./opa ./data ./README.md ./signing
+
+      - name: Compute sha256
+        id: digest
+        run: |
+          DIGEST=$(sha256sum "$PACK_TAR" | awk '{print $1}')
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+
+      - name: Update manifest.digest.value
+        run: |
+          jq '.manifest.digest.algorithm = "sha256" | .manifest.digest.value = "'${{ steps.digest.outputs.digest }}'"' "$MANIFEST" > tmp.manifest.json
+          mv tmp.manifest.json "$MANIFEST"
+
+      - name: Cosign sign (keyless)
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          cosign sign-blob --yes --bundle "$BUNDLE_JSON" "$PACK_TAR"
+
+      - name: Verify (self-check)
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          cosign verify-blob --bundle "$BUNDLE_JSON" "$PACK_TAR"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: policy-pack-v0
+          path: |
+            ${{ env.PACK_TAR }}
+            ${{ env.BUNDLE_JSON }}
+            ${{ env.MANIFEST }}
+
+      - name: Commit manifest/bundle (optional)
+        if: github.ref != 'refs/heads/main'
+        run: |
+          git config user.email "ci@intelgraph.local"
+          git config user.name "intelgraph-ci"
+          git add "$BUNDLE_JSON" "$MANIFEST"
+          git commit -m "ci(policy-pack): update digest + cosign bundle" || true
+          git push || true
+

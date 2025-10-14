@@ -1,7 +1,4 @@
 export class RiskEngine {
-    weights;
-    bias;
-    version;
     constructor(weights, bias, version = 'v1') {
         this.weights = weights;
         this.bias = bias;
@@ -21,3 +18,4 @@ export class RiskEngine {
         return { score: s, band, contributions, window, computedAt: new Date().toISOString(), modelVersion: this.version };
     }
 }
+//# sourceMappingURL=RiskEngine.js.map

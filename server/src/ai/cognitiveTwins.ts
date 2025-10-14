@@ -1,9 +1,9 @@
-import { randomUUID as uuid } from 'crypto';
+import { v4 as uuid } from 'uuid';
 import type { Driver } from 'neo4j-driver';
 import type { Pool } from 'pg';
 
 import { getPostgresPool } from '../db/postgres';
-import { getNeo4jDriver } from '../config/database.js';
+import { getNeo4jDriver } from '../db/neo4j';
 
 export interface RealEntity {
   id: string;
@@ -66,14 +66,14 @@ export class CognitiveTwinService {
         name TEXT,
         behaviors JSONB,
         created_at TIMESTAMP DEFAULT NOW()
-      )`,
+      )`
     );
 
     await this.pg.query(
       `INSERT INTO cognitive_twins (id, entity_id, name, behaviors)
        VALUES ($1, $2, $3, $4)
        ON CONFLICT (id) DO NOTHING`,
-      [twin.id, twin.entityId, twin.name, JSON.stringify(twin.behaviors)],
+      [twin.id, twin.entityId, twin.name, JSON.stringify(twin.behaviors)]
     );
   }
 
@@ -91,7 +91,7 @@ export class CognitiveTwinService {
           entityId: twin.entityId,
           name: twin.name,
           behaviors: twin.behaviors,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -101,12 +101,13 @@ export class CognitiveTwinService {
 
 export async function simulateCognitiveTwins(
   entities: RealEntity[],
-  environment = 'default',
+  environment = 'default'
 ): Promise<CognitiveTwin[]> {
   const pg = getPostgresPool();
   const neo4j = getNeo4jDriver();
   const service = new CognitiveTwinService(pg, neo4j);
   const twins = await service.simulate(entities);
-  await Promise.all(twins.map((twin) => service.deployTwin(twin, environment)));
+  await Promise.all(twins.map(twin => service.deployTwin(twin, environment)));
   return twins;
 }
+

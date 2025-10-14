@@ -9,13 +9,10 @@ describe('GraphQL resolvers (auth-gated)', () => {
   });
 
   it('investigations returns mock data when authenticated', async () => {
-    const list = await resolvers.Query.investigations(
-      null,
-      { page: 1, limit: 10 },
-      { user: fakeUser },
-    );
+    const list = await resolvers.Query.investigations(null, { page: 1, limit: 10 }, { user: fakeUser });
     expect(Array.isArray(list)).toBe(true);
     expect(list[0]).toHaveProperty('title');
     expect(list[0]).toHaveProperty('status');
   });
 });
+
