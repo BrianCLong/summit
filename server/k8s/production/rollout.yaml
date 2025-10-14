@@ -1,0 +1,109 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: intelgraph-app
+  namespace: intelgraph-production
+  labels:
+    app: intelgraph
+    component: backend
+spec:
+  replicas: 3
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: intelgraph
+      component: backend
+  strategy:
+    canary:
+      canaryService: intelgraph-app-canary
+      stableService: intelgraph-app-stable
+      trafficRouting:
+        nginx: {}
+      steps:
+        - setWeight: 20
+        - analysis:
+            templates:
+              - templateName: at-evidence-gql-web
+                args:
+                  - name: mcUrl
+                    value: https://mc.prod.example.com
+                  - name: service
+                    value: companyos
+                  - name: releaseId
+                    valueFrom:
+                      fieldRef: { fieldPath: metadata.labels['release-id'] }
+        - pause: { duration: 60 }
+        - setWeight: 50
+        - analysis:
+            templates:
+              - templateName: at-evidence-gql-web
+                args:
+                  - name: mcUrl
+                    value: https://mc.prod.example.com
+                  - name: service
+                    value: companyos
+                  - name: releaseId
+                    valueFrom:
+                      fieldRef: { fieldPath: metadata.labels['release-id'] }
+        - setWeight: 100
+  template:
+    metadata:
+      labels:
+        app: intelgraph
+        component: backend
+    spec:
+      containers:
+        - name: intelgraph-app
+          image: ghcr.io/intelgraph/intelgraph-app:REPLACE_WITH_DIGEST
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 4000
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: slo-check
+  namespace: intelgraph-production
+spec:
+  args:
+    - name: target_p95_ms
+    - name: max_error_rate
+  metrics:
+    - name: http-latency-p95
+      interval: 1m
+      count: 3
+      successCondition: asFloat(result) <= asFloat(args.target_p95_ms)
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="intelgraph-app",status!~"5.."}[5m])) by (le)) * 1000
+    - name: error-rate
+      interval: 1m
+      count: 3
+      successCondition: asFloat(result) <= asFloat(args.max_error_rate)
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            sum(rate(http_requests_total{service="intelgraph-app",status=~"5.."}[5m]))
+              /
+            sum(rate(http_requests_total{service="intelgraph-app"}[5m]))
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: cost-check
+  namespace: intelgraph-production
+spec:
+  metrics:
+    - name: graphql-unit-cost
+      interval: 1m
+      count: 3
+      successCondition: asFloat(result) <= 2.0
+      provider:
+        prometheus:
+          address: http://prometheus-server.monitoring.svc.cluster.local
+          query: |
+            avg_over_time(graphql_cost_per_million_usd[5m])

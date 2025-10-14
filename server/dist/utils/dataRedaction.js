@@ -1,5 +1,5 @@
-import baseLogger from '../config/logger';
-const logger = baseLogger.child({ name: 'dataRedaction' });
+import pino from 'pino';
+const logger = pino();
 // Define PII types and their associated properties/paths
 // This should ideally be driven by a central schema or configuration
 const PII_DEFINITIONS = {
@@ -137,3 +137,4 @@ function hashValue(value) {
     const crypto = require('crypto');
     return crypto.createHash('sha256').update(value).digest('hex');
 }
+//# sourceMappingURL=dataRedaction.js.map
