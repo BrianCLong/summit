@@ -1,5 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import { Box, Typography, CircularProgress, Alert, Paper } from '@mui/material';
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Alert,
+  Paper,
+} from '@mui/material';
 import { useQuery, gql } from '@apollo/client';
 import cytoscape from 'cytoscape';
 import cola from 'cytoscape-cola'; // Assuming cola layout is available or can be added
@@ -44,20 +50,20 @@ const NarrativeHeatmap: React.FC<NarrativeHeatmapProps> = ({ scenarioId }) => {
             selector: 'node',
             style: {
               'background-color': '#666',
-              label: 'data(narrative)',
+              'label': 'data(narrative)',
               'text-valign': 'center',
-              color: 'white',
+              'color': 'white',
               'text-outline-width': 2,
               'text-outline-color': '#333',
-              width: 'mapData(intensity, 0, 10, 20, 80)', // Scale node size by intensity
-              height: 'mapData(intensity, 0, 10, 20, 80)',
+              'width': 'mapData(intensity, 0, 10, 20, 80)', // Scale node size by intensity
+              'height': 'mapData(intensity, 0, 10, 20, 80)',
               'font-size': 'mapData(intensity, 0, 10, 8, 24)',
             },
           },
           {
             selector: 'edge',
             style: {
-              width: 3,
+              'width': 3,
               'line-color': '#ccc',
               'target-arrow-color': '#ccc',
               'target-arrow-shape': 'triangle',
@@ -125,14 +131,12 @@ const NarrativeHeatmap: React.FC<NarrativeHeatmapProps> = ({ scenarioId }) => {
         Narrative Heatmaps
       </Typography>
       <Alert severity="info" sx={{ mb: 2 }}>
-        WAR-GAMED SIMULATION - Visualizations are based on simulated data and for decision support
-        only.
+        WAR-GAMED SIMULATION - Visualizations are based on simulated data and for decision support only.
       </Alert>
 
       {heatmapData.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
-          No narrative heatmap data available for this scenario yet. Run a simulation to generate
-          data.
+          No narrative heatmap data available for this scenario yet. Run a simulation to generate data.
         </Typography>
       ) : (
         <Paper elevation={3} sx={{ p: 2, height: 600, width: '100%' }}>

@@ -1,3 +1,0 @@
-# Example: ignore noisy dev CVEs; keep CRITICAL/HIGH on main
-CVE-20xx-xxxx
-

@@ -21,21 +21,15 @@ const AuditDashboard: React.FC = () => {
       <h2>Audit Dashboard</h2>
       <section>
         <h3>Recent Ingest Logs</h3>
-        <ul>
-          {logs.map((l, i) => (
-            <li key={i}>{l}</li>
-          ))}
-        </ul>
+        <ul>{logs.map((l, i) => (
+          <li key={i}>{l}</li>
+        ))}</ul>
       </section>
       <section>
         <h3>Entity Resolutions</h3>
-        <ul>
-          {resolutions.map((r) => (
-            <li key={r.id}>
-              {r.source} → {r.canonicalId}
-            </li>
-          ))}
-        </ul>
+        <ul>{resolutions.map(r => (
+          <li key={r.id}>{r.source} → {r.canonicalId}</li>
+        ))}</ul>
       </section>
     </div>
   );
