@@ -6,9 +6,8 @@ const modelsDir = path.join(__dirname, '..', '..', 'models');
 const weightsPath = path.join(modelsDir, 'weights.json');
 const checksums = require(path.join(modelsDir, 'checksums.json'));
 export class RiskService {
-    engine;
-    store = new FeatureStore();
     constructor() {
+        this.store = new FeatureStore();
         const data = verifyWeights(weightsPath, checksums['weights.json']);
         this.engine = new RiskEngine(data.weights, data.bias, data.version || 'v1');
     }
@@ -24,3 +23,4 @@ export class RiskService {
         return results;
     }
 }
+//# sourceMappingURL=RiskService.js.map

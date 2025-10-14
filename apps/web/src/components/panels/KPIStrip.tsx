@@ -1,12 +1,5 @@
 import * as React from 'react'
-import {
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  Activity,
-  Shield,
-  Target,
-} from 'lucide-react'
+import { TrendingUp, TrendingDown, AlertTriangle, Activity, Shield, Target } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { cn } from '@/lib/utils'
@@ -26,16 +19,11 @@ export function KPIStrip({
 }: KPIStripProps) {
   const getMetricIcon = (id: string) => {
     switch (id) {
-      case 'threats':
-        return AlertTriangle
-      case 'activity':
-        return Activity
-      case 'security':
-        return Shield
-      case 'targets':
-        return Target
-      default:
-        return Activity
+      case 'threats': return AlertTriangle
+      case 'activity': return Activity
+      case 'security': return Shield
+      case 'targets': return Target
+      default: return Activity
     }
   }
 
@@ -63,25 +51,18 @@ export function KPIStrip({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'success':
-        return 'border-green-500 bg-green-50 dark:bg-green-900/20'
-      case 'warning':
-        return 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
-      case 'error':
-        return 'border-red-500 bg-red-50 dark:bg-red-900/20'
-      default:
-        return 'border-gray-200 bg-gray-50 dark:bg-gray-900/20'
+      case 'success': return 'border-green-500 bg-green-50 dark:bg-green-900/20'
+      case 'warning': return 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
+      case 'error': return 'border-red-500 bg-red-50 dark:bg-red-900/20'
+      default: return 'border-gray-200 bg-gray-50 dark:bg-gray-900/20'
     }
   }
 
   const getChangeColor = (direction: string) => {
     switch (direction) {
-      case 'up':
-        return 'text-green-600'
-      case 'down':
-        return 'text-red-600'
-      default:
-        return 'text-muted-foreground'
+      case 'up': return 'text-green-600'
+      case 'down': return 'text-red-600'
+      default: return 'text-muted-foreground'
     }
   }
 
@@ -123,9 +104,9 @@ export function KPIStrip({
 
   return (
     <div className={cn('grid gap-4', `grid-cols-${columns}`, className)}>
-      {metrics.map(metric => {
+      {metrics.map((metric) => {
         const Icon = getMetricIcon(metric.id)
-
+        
         return (
           <Card
             key={metric.id}
@@ -145,23 +126,17 @@ export function KPIStrip({
                     {formatValue(metric.value, metric.format)}
                   </p>
                 </div>
-                <div
-                  className={cn(
-                    'h-8 w-8 rounded-lg flex items-center justify-center',
-                    metric.status === 'success' &&
-                      'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400',
-                    metric.status === 'warning' &&
-                      'bg-yellow-100 text-yellow-600 dark:bg-yellow-900 dark:text-yellow-400',
-                    metric.status === 'error' &&
-                      'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400',
-                    metric.status === 'neutral' &&
-                      'bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-400'
-                  )}
-                >
+                <div className={cn(
+                  'h-8 w-8 rounded-lg flex items-center justify-center',
+                  metric.status === 'success' && 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400',
+                  metric.status === 'warning' && 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900 dark:text-yellow-400',
+                  metric.status === 'error' && 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400',
+                  metric.status === 'neutral' && 'bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-400'
+                )}>
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
-
+              
               {metric.change && (
                 <div className="mt-4 flex items-center text-xs">
                   {metric.change.direction === 'up' ? (
@@ -184,3 +159,4 @@ export function KPIStrip({
     </div>
   )
 }
+

@@ -1,0 +1,212 @@
+bundle,relative_path,lineno,snippet
+summit-2025.10.01.0015,summit-2025.10.01.0015/1.0_LAUNCH_ANNOUNCEMENT.md,14,- **An AI-powered scheduler** and **generative co-pilot** to optimize builds and assist developers.
+summit-2025.10.01.0015,summit-2025.10.01.0015/BATCH_MERGE_IMPLEMENTATION.md,28,"- **Label-based exclusion**: Skips `do-not-merge`, `blocked`, `WIP`, `hold`, `logical`, `workflow`, `contextual`"
+summit-2025.10.01.0015,summit-2025.10.01.0015/BUG_BASH_REPORT_20250922.md,18,| R1 | Authentication & Authorization | ✅ TESTED | TBD | TBD |
+summit-2025.10.01.0015,summit-2025.10.01.0015/BUG_BASH_REPORT_20250922.md,19,| R2 | Data Ingestion & Processing | ✅ TESTED | TBD | TBD |
+summit-2025.10.01.0015,summit-2025.10.01.0015/BUG_BASH_REPORT_20250922.md,20,| R3 | Graph Visualization & Navigation | ✅ TESTED | TBD | TBD |
+summit-2025.10.01.0015,summit-2025.10.01.0015/BUG_BASH_REPORT_20250922.md,21,| R4 | Search & Discovery | ✅ TESTED | TBD | TBD |
+summit-2025.10.01.0015,summit-2025.10.01.0015/BUG_BASH_REPORT_20250922.md,22,| R5 | Analytics & Reporting | ✅ TESTED | TBD | TBD |
+summit-2025.10.01.0015,summit-2025.10.01.0015/BUG_BASH_REPORT_20250922.md,23,| R6 | System Administration | ✅ TESTED | TBD | TBD |
+summit-2025.10.01.0015,summit-2025.10.01.0015/CHANGELOG-mc-v0.4.5.md,26,- **CI/CD enforcement**: PQ Dual-Sig Gate in GitHub Actions workflow
+summit-2025.10.01.0015,summit-2025.10.01.0015/COMPLETION_REPORT.md,22,- ✅ `composer-vnext+11.csv`: The DevEx Platform & AI Co-pilot
+summit-2025.10.01.0015,summit-2025.10.01.0015/COMPLETION_REPORT.md,35,- ✅ `ai-copilot-fix-suggestion.json`: API example for the AI Co-pilot.
+summit-2025.10.01.0015,summit-2025.10.01.0015/CleanRepo.md,66,- Wire provenance checks as a gate prior to `publish:stable`.
+summit-2025.10.01.0015,summit-2025.10.01.0015/EXECUTIVE_BRIEF_v2.5.md,39,- Multi-gate model promotion with bias detection
+summit-2025.10.01.0015,summit-2025.10.01.0015/FINAL_MISSION_SUMMARY.md,57,- **Feature flag gating** for safe gradual rollout
+summit-2025.10.01.0015,summit-2025.10.01.0015/GA_CORE_IMPLEMENTATION_COMPLETE.md,34,| Gate | Current | Target | Status |
+summit-2025.10.01.0015,summit-2025.10.01.0015/GA_CORE_IMPLEMENTATION_COMPLETE.md,56,- `.github/workflows/er-precision-gate.yml`
+summit-2025.10.01.0015,summit-2025.10.01.0015/GA_DASHBOARD.md,5,| **ER Precision@k**                   | >95%   | TBD     | 🔴     |       |
+summit-2025.10.01.0015,summit-2025.10.01.0015/GA_DASHBOARD.md,6,| **ER Explainability Coverage**       | >98%   | TBD     | 🔴     |       |
+summit-2025.10.01.0015,summit-2025.10.01.0015/GA_DASHBOARD.md,7,| **RAG Citation Hit-Rate**            | >90%   | TBD     | 🔴     |       |
+summit-2025.10.01.0015,summit-2025.10.01.0015/GA_DASHBOARD.md,8,| **Audit Coverage**                   | 100%   | TBD     | 🔴     |       |
+summit-2025.10.01.0015,summit-2025.10.01.0015/GA_DASHBOARD.md,9,| **Policy-Block Explainability Rate** | >99%   | TBD     | 🔴     |       |
+summit-2025.10.01.0015,summit-2025.10.01.0015/GO_LIVE_APPROVAL.md,61,### Traffic Ramp (20% → 100%)
+summit-2025.10.01.0015,summit-2025.10.01.0015/GO_LIVE_APPROVAL.md,67,### Post-Ramp Validation
+summit-2025.10.01.0015,summit-2025.10.01.0015/GREEN_LOCK_COMPLETE_GUIDE.md,67,### Solution: Minimal Stabilization Gate
+summit-2025.10.01.0015,summit-2025.10.01.0015/IMPLEMENTATION_SUMMARY.md,16,- **Mobile staged rollouts** with feature flag integration
+summit-2025.10.01.0015,summit-2025.10.01.0015/IMPLEMENTATION_SUMMARY.md,18,- **Feature flag lifecycle management** with automated sunset auditing
+summit-2025.10.01.0015,summit-2025.10.01.0015/IMPLEMENTATION_SUMMARY.md,56,- **Model card templates** and deployment gate framework
+summit-2025.10.01.0015,summit-2025.10.01.0015/IMPLEMENTATION_SUMMARY.md,57,- **Offline evaluation harness** with quality gate thresholds
+summit-2025.10.01.0015,summit-2025.10.01.0015/LAUNCH_SEQUENCE_T0.md,7,### **1) Final Gate Sanity Check (Idempotent)**
+summit-2025.10.01.0015,summit-2025.10.01.0015/LAUNCH_SEQUENCE_T0.md,9,# Validate gate consistency
+summit-2025.10.01.0015,summit-2025.10.01.0015/LAUNCH_SEQUENCE_v035.md,22,# Quick CI gate check
+summit-2025.10.01.0015,summit-2025.10.01.0015/MAESTRO_PRD_ADDENDA.md,70,"### 9. Multi-Format, Immutable SBOM + Vulnerability Gate Service"
+summit-2025.10.01.0015,summit-2025.10.01.0015/MAESTRO_V03_SPRINT_SUMMARY.md,10,- **Governance**: Provenance manifests and policy enforcement at every gate
+summit-2025.10.01.0015,summit-2025.10.01.0015/MVP1_EXECUTION_PROMPT.md,26,- [ ] **Zero** `TODO/FIXME` left in production code paths
+summit-2025.10.01.0015,summit-2025.10.01.0015/MVP1_EXECUTION_PROMPT.md,44,- [ ] **GraphQL integration** with RBAC enforcement and feature flag protection
+summit-2025.10.01.0015,summit-2025.10.01.0015/PHASE4_CONTROL_BOARD.md,15,5. Enable **Elastic SIEM** (GA) with **Splunk HEC behind feature flag**.
+summit-2025.10.01.0015,summit-2025.10.01.0015/PHASE4_CONTROL_BOARD.md,30,"- UI collisions: prefer **feature-flag path** (`FF_INTELGRAPH_V2`), dark-ship behind `% rollout`."
+summit-2025.10.01.0015,summit-2025.10.01.0015/PRODUCTION_GO_EVIDENCE.md,5,**Validation Framework:** Evidence-based gate system
+summit-2025.10.01.0015,summit-2025.10.01.0015/PRODUCTION_GO_EVIDENCE.md,25,## Hard Gate Evidence
+summit-2025.10.01.0015,summit-2025.10.01.0015/PRODUCTION_GO_EVIDENCE.md,27,### Gate 1: Supply Chain Immutability ✅ PASS
+summit-2025.10.01.0015,summit-2025.10.01.0015/PRODUCTION_GO_EVIDENCE.md,57,### Gate 2: Deployability / Rollout ✅ PASS
+summit-2025.10.01.0015,summit-2025.10.01.0015/PR_BODY_v24.0.0.md,37,* Toggle `v24.coherence=false`.
+summit-2025.10.01.0015,summit-2025.10.01.0015/PR_BODY_v24.1.md,16,- Feature flag off `v24.coherence=false`; Helm rollback; disable cache layer.
+summit-2025.10.01.0015,summit-2025.10.01.0015/RELEASE_NOTES_1.0.0-RC1.md,39,- Feature flag controlled rollout
+summit-2025.10.01.0015,summit-2025.10.01.0015/RELEASE_NOTES_v0.4.0.md,36,- **Feature flag gating** for safe gradual rollout
+summit-2025.10.01.0015,summit-2025.10.01.0015/RELEASE_NOTES_v0.4.0.md,74,- **Chaos experiment validation** in staging environments
+summit-2025.10.01.0015,summit-2025.10.01.0015/RELEASE_NOTES_v2.1.0.md,8,- **Chaos Engineering Framework**: Introduced LitmusChaos for proactive resilience testing. A sample `pod-delete` experiment has been added to `tests/chaos/` along with a workflow to trigger it agains
+summit-2025.10.01.0015,summit-2025.10.01.0015/RELEASE_NOTES_v2.1.0.md,12,"- **Technical Debt Resolution**: Addressed several `TODO` markers in the codebase by replacing them with functional, mock implementations in core services like `gateway/src/index.ts` and `server/serve"
+summit-2025.10.01.0015,summit-2025.10.01.0015/RELEASE_NOTES_v2.5.md,23,"Multi-gate pipeline (accuracy/F1/regression/security/bias), drift detection, A/B with safe rollback, registry+lineage; all with model-card style explainability."
+summit-2025.10.01.0015,summit-2025.10.01.0015/RELEASE_NOTES_v24.0.0.md,19,* Feature flag: `v24.coherence`.
+summit-2025.10.01.0015,summit-2025.10.01.0015/SPRINT_CLEARANCE_LATTICE.md,30,- Alerts pass through **Policy Gate**: require legal basis + reason; generate a **reason‑for‑alert** note.
+summit-2025.10.01.0015,summit-2025.10.01.0015/SPRINT_FRAUD_SCAM_INTEL.md,12,"Add a “Watchlists & Detectors” drawer in Link Analysis: toggle rules, see alert count, click-through to Explain with evidence cites."
+summit-2025.10.01.0015,summit-2025.10.01.0015/SPRINT_MAESTRO_UI_V0.1.md,29,4. **Budgets & Policy**: real‑time cost ladder/burndown; LOA/Policy gate UI with human‑readable denials.
+summit-2025.10.01.0015,summit-2025.10.01.0015/SPRINT_MAESTRO_UI_V0.1.md,74,3. Route + nav entry + feature flag `MAESTRO_ENABLED`.
+summit-2025.10.01.0015,summit-2025.10.01.0015/SPRINT_PROBABLE_CAUSE.md,68,- Review queue supports approve/deny/defer; 4‑eyes toggle enforces reviewer requirement; audit logs who/what/why with score + features.
+summit-2025.10.01.0015,summit-2025.10.01.0015/SPRINT_TRIAD_MERGE.md,31,"- Case Spaces: tasks, @mentions, immutable comments with audit; 4‑eyes toggle for sensitive actions."
+summit-2025.10.01.0015,summit-2025.10.01.0015/SUMMIT_MAESTRO_DELIVERY_PLAN.md,17,"- **MVP (by 2025‑10‑15):** Control Plane, Runners (K8s/Container/Local), TS/Py SDK (alpha), 10 reference tasks, 8 runbooks, Policy Gate (allow/deny), Provenance (alpha), Operator Console (runs/logs/re"
+summit-2025.10.01.0015,summit-2025.10.01.0015/SUMMIT_MAESTRO_DELIVERY_PLAN.md,30,| EPIC‑SM‑POL  | Policy Gate (PDP)              | OPA/ABAC evaluation at execution                     | `mvp`      |
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,4,This document lists all `TODO` and `FIXME` markers found in the repository as of 2025-09-13. It serves as a backlog for future cleanup and refinement sprints.
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,8,- **File:** `.github/ISSUE_TEMPLATE/release-checklist.md` (L30): `- [ ] Placeholder tenancy test wired into CI (`test.todo` or explicit TODO assert)`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,9,- **File:** `.github/workflows/arborist.yml` (L15): `// TODO: implement query for merged + age; log only in dry-run`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,11,- **File:** `MVP1_EXECUTION_PROMPT.md` (L26): `- [ ] **Zero** `TODO/FIXME` left in production code paths`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,12,- **File:** `SPRINT_FRAUD_SCAM_INTEL.md` (L187): `// TODO: call GraphQL mutation server.mutations.upsertAlert(alerts)`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,13,"- **File:** `api/search.js` (L6): `// TODO: call Typesense search; for now, return empty`"
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,14,- **File:** `apps/analytics-engine/src/server.ts` (L339): `// TODO: Implement PDF export`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,15,- **File:** `apps/gateway/src/rbac/scim.ts` (L2): `// TODO: Implement SCIM sync using your IdP API.`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,16,- **File:** `client/src/components/ErrorBoundary.tsx` (L14): `// TODO: wire to your telemetry`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,17,"- **File:** `client/src/components/IntelGraphWorkbench.tsx` (L307): `// TODO: Implement layout logic here (dagre, radial)`"
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,18,- **File:** `client/src/components/dashboard/LiveActivityFeed.tsx` (L24): `// TODO: Re-enable GraphQL subscription when schema is available`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,19,- **File:** `client/src/hooks/usePrefetch.ts` (L3): `// TODO: Re-enable when GraphQL schema is available`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,20,- **File:** `client/src/pages/Hunting/HuntList.tsx` (L441): `// TODO: Navigate to hunt detail page`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,21,- **File:** `client/src/pages/IOC/IOCList.tsx` (L520): `// TODO: Navigate to IOC detail page`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,22,- **File:** `client/src/routes/ActionDetailsRoute.tsx` (L40): `{* TODO: render the rest of the action details here *}`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,23,- **File:** `client/tests/e2e/collab-delta-sync.spec.ts` (L5): `// TODO: implement simulation of 50 clients editing the same document`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,24,- **File:** `conductor-ui/frontend/src/maestro/main-maestro.js` (L7): `// TODO: Add proper OpenTelemetry configuration when exporter packages are available`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,25,- **File:** `dangerfile.js` (L29): `// Fail if TODO left`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,26,- **File:** `deploy/external-secrets/maestro-secrets.yaml` (L9): `name: terraform-secret-store # TODO: set your SecretStore name`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,27,- **File:** `gateway/src/index.ts` (L87): `// TODO: Implement admin-only check`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,28,"- **File:** `infra/k8s/auth/oidc-auth.yaml` (L16): `""issuer"": ""https://auth.intelgraph.io"", # TODO: Replace with your OIDC issuer URL`"
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,29,- **File:** `k8s/cron/purge-processor.yaml` (L19): `# TODO: replace with actual processing logic`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,30,- **File:** `ml/ttp_train.py` (L44): `# TODO: implement actual fine-tuning logic`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,31,- **File:** `packages/maestro-cli/src/commands/dsar.ts` (L15): `// TODO: Implement actual data export logic`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,32,- **File:** `scripts/incident-playbook.sh` (L464): `TODO: Add prevention measures based on root cause analysis`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,33,- **File:** `server/server.ts` (L21): `// TODO: ping DB/queue`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,34,- **File:** `server/src/claims/sign.ts` (L18): `// TODO: reuse MerkleLog to recompute root; placeholder returns true`
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,35,"- **File:** `server/src/conductor/admission/budget-control.ts` (L179): `requests: 0, // TODO: Track per-expert request counts if needed`"
+summit-2025.10.01.0015,summit-2025.10.01.0015/TECH_DEBT_TRACKER.md,36,- **File:** `tests/unit/dlp.test.ts` (L337): `test.todo('should scan GraphQL variables for violations');`
+summit-2025.10.01.0015,summit-2025.10.01.0015/acceptance-test-results.md,62,- **Quality Gate Execution**: < 10 min (Target) | ~5 min (Actual) ✅
+summit-2025.10.01.0015,summit-2025.10.01.0015/acceptance-test-results.md,67,- **Quality Gate Pass Rate**: >90% (Target) | 95% (Simulated) ✅
+summit-2025.10.01.0015,summit-2025.10.01.0015/adversary_optimization_forecast_→_defensive_counter_optimization_pack_v_1_wolf.md,59,- **Co‑Sponsorship Gate:** Require verifiable novelty/value‑add before events.
+summit-2025.10.01.0015,summit-2025.10.01.0015/build_platform_command_center_pack_go_no_go_backout_on_call_runbooks_evidence.md,11,**Gate A — CI Hygiene**
+summit-2025.10.01.0015,summit-2025.10.01.0015/build_platform_command_center_pack_go_no_go_backout_on_call_runbooks_evidence.md,16,**Gate B — Drift/Policy**
+summit-2025.10.01.0015,summit-2025.10.01.0015/build_platform_command_center_pack_go_no_go_backout_on_call_runbooks_evidence.md,20,**Gate C — Perf Budgets**
+summit-2025.10.01.0015,summit-2025.10.01.0015/build_platform_command_center_pack_go_no_go_backout_on_call_runbooks_evidence.md,24,"**Decision:** If any gate fails without an approved exception (see §6), call **No‑Go** and remediate."
+summit-2025.10.01.0015,summit-2025.10.01.0015/build_platform_deploy_evidence_bundle_cosign_verify_digest_injection_k_6_slo_gate_release_notes.md,4,"# helm digest injection, k6 SLO canary gate, OPA policy wiring, release notes template."
+summit-2025.10.01.0015,summit-2025.10.01.0015/build_platform_remediation_sprint_plan_tickets_next_phase.md,47,### Epic C — Dev/Prod Parity & Drift (COULD → Pilot)
+summit-2025.10.01.0015,summit-2025.10.01.0015/build_platform_remediation_sprint_plan_tickets_next_phase.md,48,- **Story C1:** Compose ↔ Helm single source pilot
+summit-2025.10.01.0015,summit-2025.10.01.0015/build_platform_remediation_sprint_plan_tickets_next_phase.md,53,- **Verify:** Compare env diffs → zero drift on pilot service(s).
+summit-2025.10.01.0015,summit-2025.10.01.0015/capability_maturity_model_jira_epics_build_platform_fabric.md,31,| **L1** | RBAC at app level | Roles gate feature access |
+summit-2025.10.01.0015,summit-2025.10.01.0015/cd.yml,7,- name: Freeze window gate
+summit-2025.10.01.0015,summit-2025.10.01.0015/ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md,1,"Below is a **drop‑in bundle** you can commit at repo root. It wires reusable CI, security gates, SBOM + signing, preview envs, canary deploy, migration gates, OPA policies, and repo hygiene. Replace p"
+summit-2025.10.01.0015,summit-2025.10.01.0015/ci_cd_hardening_ready_to_commit_bundle_maestro_aware.md,19,ci-migration-gate.yml
+summit-2025.10.01.0015,summit-2025.10.01.0015/commit_rollout_plan_ci_cd_hardening_maestro_order_of_operations.md,66,## Phase 5 — Migration Gate (DB)
+summit-2025.10.01.0015,summit-2025.10.01.0015/commit_rollout_plan_ci_cd_hardening_maestro_order_of_operations.md,67,1) Commit `migration-gate.yml` and Postgres dry-run scripts.
+summit-2025.10.01.0015,summit-2025.10.01.0015/commit_rollout_plan_ci_cd_hardening_maestro_order_of_operations.md,74,**Rollback**: Limit gate to `paths-ignore` or make it non-blocking for 24h.
+summit-2025.10.01.0015,summit-2025.10.01.0015/council_wishbooks_backlog_cut_executive_roadmap_mo_sco_w_redlines.md,51,| ZK‑TX Deconfliction | Multi‑party redaction sets; adversarial cases | `verify zk-tx` accepts third‑party attestations; revocation works | Close 2 pilot deals; zero raw PII movement |
+summit-2025.10.01.0015,summit-2025.10.01.0015/council_wishbooks_backlog_cut_executive_roadmap_mo_sco_w_redlines.md,64,- Partner MoUs for ZK‑TX pilot; designate two lighthouse customers.
+summit-2025.10.01.0015,summit-2025.10.01.0015/council_wishbooks_backlog_cut_executive_roadmap_mo_sco_w_redlines.md,67,**Release 1 (Day 0): Pilot‑Ready Core**
+summit-2025.10.01.0015,summit-2025.10.01.0015/council_wishbooks_backlog_cut_executive_roadmap_mo_sco_w_redlines.md,72,**Release 2 (Day 30): Federation + ZK‑TX Pilot**
+summit-2025.10.01.0015,summit-2025.10.01.0015/dangerfile.js,29,// Fail if TODO left
+summit-2025.10.01.0015,summit-2025.10.01.0015/dangerfile.js,36,return diff && diff.includes('TODO');
+summit-2025.10.01.0015,summit-2025.10.01.0015/dangerfile.js,40,fail('Remove TODO comments before merging.');
+summit-2025.10.01.0015,summit-2025.10.01.0015/docs_phase_13_14_external_launch_docs_as_data_personalization.md,20,"## A1) Legal, Privacy, and Branding Gate"
+summit-2025.10.01.0015,summit-2025.10.01.0015/docs_phase_13_14_external_launch_docs_as_data_personalization.md,39,## A3) External Launch Checklist (gate)
+summit-2025.10.01.0015,summit-2025.10.01.0015/docs_phase_13_14_external_launch_docs_as_data_personalization.md,41,- Workflow `docs-launch-gate.yml` blocks `main` deploy if checklist unchecked.
+summit-2025.10.01.0015,summit-2025.10.01.0015/docs_phase_17_18_learning_paths_reuse_engine_golden_tests.md,62,const toggle = (m:string)=>{
+summit-2025.10.01.0015,summit-2025.10.01.0015/docs_phase_17_18_learning_paths_reuse_engine_golden_tests.md,73,"<input type=""checkbox"" checked={done.includes(m)} onChange={()=>toggle(m)} aria-label={`Mark ${m} complete`} />{' '}"
+summit-2025.10.01.0015,summit-2025.10.01.0015/docs_phase_37_38_enterprise_search_sso_audit_trust_center_data_governance.md,11,- **Access**: Gate partner/internal builds with **SSO (OIDC)**; record **audit logs** of access.
+summit-2025.10.01.0015,summit-2025.10.01.0015/docs_phase_39_40_docs_api_webhooks_remote_flags_pwa_offline_compliance_evidence.md,12,- **Control**: **Remote feature flags** to toggle beta widgets without redeploys.
+summit-2025.10.01.0015,summit-2025.10.01.0015/docs_phase_45_46_multi_cdn_blue_green_deploys_pr_previews_index_coverage_carbon_budgets.md,48,## A2) Gate with checks
+summit-2025.10.01.0015,summit-2025.10.01.0015/docs_phase_49_50_ui_drift_detector_doc_packages_sem_ver_and_live_author_lint.md,14,- **Governance**: Two‑person review gate for sensitive sections.
+summit-2025.10.01.0015,summit-2025.10.01.0015/docs_roadmap_sprint_2_3_plan.md,13,"- **Governance**: Versioning, release notes, and a docs freeze gate integrated with CI."
+summit-2025.10.01.0015,summit-2025.10.01.0015/docs_roadmap_sprint_2_3_plan.md,14,"- **Quality**: A11y checks, alt text linting, and diagram render tests added to the Docs Quality gate."
+summit-2025.10.01.0015,summit-2025.10.01.0015/integrated_countermeasures_bundle_case_derived_recommendations_v_1_wolf (1).md,66,- **Co‑Sponsorship Gate:** Require novelty microfact or value‑add beyond access optics before co‑branding events.
+summit-2025.10.01.0015,summit-2025.10.01.0015/integrated_countermeasures_bundle_case_derived_recommendations_v_1_wolf.md,66,- **Co‑Sponsorship Gate:** Require novelty microfact or value‑add beyond access optics before co‑branding events.
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_incr_0001_kickstart_pack_draft_maestro_conductor.md,3,"> **Purpose:** Create a shippable end‑to‑end slice with evidence, guardrails, and quality gates. Update all `TBD` fields with your specifics — Maestro will treat them as authoritative."
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_incr_0001_kickstart_pack_draft_maestro_conductor.md,29,- **Outcome & metric (3 sentences):** `TBD`
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_incr_0001_kickstart_pack_draft_maestro_conductor.md,30,"- **Tenancy & region:** tenants in scope, residency constraints: `TBD`"
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_incr_0001_kickstart_pack_draft_maestro_conductor.md,31,"- **Sources:** S3 path(s) or sample CSV(s) (≤10k rows each), expected volumes & cadence: `TBD`"
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_incr_0001_kickstart_pack_draft_maestro_conductor.md,32,- **SLO/cost overrides:** use defaults or specify: `TBD`
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_incr_0001_kickstart_pack_draft_maestro_conductor.md,33,- **Release window:** date + any freeze/conflicts: `TBD`
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_incr_0001_kickstart_pack_draft_maestro_conductor.md,57,**Owner:** Eng (TBD) · **Approver:** MC · **Risk:** Medium
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_incr_0001_kickstart_pack_draft_maestro_conductor.md,63,**Owner:** Eng (TBD) · **Risk:** Medium
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_incr_0001_kickstart_pack_draft_maestro_conductor.md,69,**Owner:** Eng (TBD) · **Risk:** Medium
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_incr_0001_kickstart_pack_draft_maestro_conductor.md,75,**Owner:** Sec (TBD) · **Risk:** Medium
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_incr_0001_kickstart_pack_draft_maestro_conductor.md,81,**Owner:** SRE (TBD) · **Risk:** Medium
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_mc_frontend_sprint_13_plan_sep_29_oct_10_2025.md,55,| FE‑209 | **Admin Flags** read view; toggle UI guarded; audit event stub | Could | 2 | FE‑Eng / FE‑Lead | PM / QA | FE‑104 |
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_mc_frontend_sprint_14_plan_oct_13_24_2025.md,16,- Admin Feature Flags screen supports toggle with audit stub/events and OPA‑aware capability gating.
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_mc_frontend_sprint_14_plan_oct_13_24_2025.md,22,- **Flags mis‑toggle** → confirm dialog + optimistic UI rollback + audit event with reason.
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_mc_frontend_sprint_14_plan_oct_13_24_2025.md,30,"3) **Admin Feature Flags** (RW): list, search, toggle, reason, audit log emission."
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_mc_frontend_sprint_14_plan_oct_13_24_2025.md,73,- Lists flags with search; toggle shows confirm modal with reason text.
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_mc_frontend_sprint_plan_sprint_12_sep_15_26_2025.md,18,- Release notes + rollback plan merged; feature flag default **on** in staging.
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_mc_frontend_sprint_plan_sprint_12_sep_15_26_2025.md,32,5) Perf & a11y budgets enforced in CI; bundlesize gate.
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_mc_frontend_sprint_plan_sprint_12_sep_15_26_2025.md,78,- QA can inject mock IdP; feature flag `FEATURE_AUTH_MOCK` toggles.
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_full_dev_ops_ci_cd_release_audit_action_plan.md,70,"2) **Promotion policy via OPA**: Admission control that checks **cosign signature**, **SLSA provenance**, **vuln budget**, and **SBOM presence**. Block deploy if any gate fails. Add ""reason-for-access"
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_full_dev_ops_ci_cd_release_audit_action_plan.md,80,"2) **Unified incident automation**: Runbook automation (Maestro) to execute rollback, scale-down, feature-flag kill switch, and smoke after action."
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_004_migrations_db_gates_dr_access_audits_runbook_bot.md,7,## PR 35 — Migration Gate & Checklist (expand/contract)
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_004_migrations_db_gates_dr_access_audits_runbook_bot.md,40,**`.github/workflows/migration-gate.yml`**
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_004_migrations_db_gates_dr_access_audits_runbook_bot.md,42,name: migration-gate
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_004_migrations_db_gates_dr_access_audits_runbook_bot.md,71,**Rollback:** Remove `migration-gate` required check.
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_007_service_mesh_m_tls_multi_cluster_dora_notes_sbom_secretless.md,22,"pilot: { k8s: { resources: { requests: { cpu: 200m, memory: 256Mi } } } }"
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_009_ml_governance_vector_index_a_b_testing_safety.md,44,## PR 96 — Model Card template + Deployment Gate
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_009_ml_governance_vector_index_a_b_testing_safety.md,60,**`scripts/modelcard-gate.js`**
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_009_ml_governance_vector_index_a_b_testing_safety.md,66,**`.github/workflows/modelcard-gate.yml`** — required on PRs touching `ML/` or `inference/`.
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_009_ml_governance_vector_index_a_b_testing_safety.md,72,## PR 97 — Offline Eval Harness & Quality Gate
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_010_observability_adaptive_slos_synthetics_2.md,80,## PR 109 — Adaptive SLOs (multi‑window burn) + promotion gate
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_013_api_perf_budgets_caching_config_rollouts_golden_path_tracing.md,7,## PR 144 — Per‑route API performance budgets (SLOs + gate)
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_013_api_perf_budgets_caching_config_rollouts_golden_path_tracing.md,8,**Purpose:** Enforce p95 latency & error rate per endpoint with a CI gate.
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_013_api_perf_budgets_caching_config_rollouts_golden_path_tracing.md,41,**`.github/workflows/route-slo-gate.yml`**
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_013_api_perf_budgets_caching_config_rollouts_golden_path_tracing.md,43,name: route-slo-gate
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_013_api_perf_budgets_caching_config_rollouts_golden_path_tracing.md,46,gate:
+summit-2025.10.01.0015,summit-2025.10.01.0015/intel_graph_summit_pr_pack_013_api_perf_budgets_caching_config_rollouts_golden_path_tracing.md,55,**Rollback:** Remove gate from promotion workflow; budgets remain visible.
+summit-2025.10.01.0015,summit-2025.10.01.0015/launch-maestro.sh,18,"AUTO_PROMOTE=""${AUTO_PROMOTE:-0}""                                   # 1 = auto promote, 0 = interactive gate"
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_04_sprint_plan.md,41,**Acceptance:** All release images signed; provenance+SBOM attached; CI gate enforces.
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_04_sprint_plan.md,69,"**Epic:** Multi‑agent reflection, cached reasoning, and an evidence‑first gate."
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_05_sprint_plan.md,6,**Baseline (from v0.4 targets):** CI p95 ≤10.6m · LLM $/PR ≤$2.24 · Flake <0.5% · 20 auto‑PRs/wk · Risk gate live
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_05_sprint_plan.md,57,- name: Health Gate
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_05_sprint_plan.md,58,run: ./scripts/health-gate.sh --min-score 0.85 --timeout 5m
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_05_sprint_plan.md,61,- name: Health Gate 2
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_05_sprint_plan.md,62,run: ./scripts/health-gate.sh --min-score 0.85 --timeout 5m
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_05_sprint_plan.md,67,**Health gate (combines SLO + eval score):**
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_05_sprint_plan.md,69,# scripts/health-gate.sh
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_06_sprint_plan.md,22,| Reliability | Risk gate FP < **12%**; SLO burn rate < **1** |
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_07_sprint_plan.md,20,| Reliability | Risk gate FP < **10%**; incident MTTR ≤ **30 min** |
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_08_sprint_plan.md,6,**Baseline (from v0.7 targets):** Org CI minutes −30% · LLM $/PR ≤ $1.05 · Eval p95 ≥ 0.88 · 55 auto‑PRs/wk · Risk gate FP < 10%
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_09_sprint_plan.md,21,| Reliability | Incident MTTR ≤ **20 min**; Risk gate FP < **9%** |
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_09_sprint_plan.md,34,- **V2. Model‑Checking Gate (TLA+/Alloy lite)**
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_09_sprint_plan.md,36,**Acceptance:** Specs exist for 3 modules; CI gate blocks on violations; evidence attached to PR.
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_09_sprint_plan.md,68,**TLA+ CI gate (script stub)**
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_13_sprint_plan.md,66,*Run the full plan against shadow environment; diff telemetry & evals; auto‑gate risky deltas.*
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_14_sprint_plan.md,21,| Governance | 100% releases pass **Policy‑Simulation Gate**; overrides fully audited |
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_15_sprint_plan.md,2,## “Autonomous Program Director” — Optimize • Experiment • Self‑Heal
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_15_sprint_plan.md,6,**Baseline (from v1.4):** 180 auto‑PRs/wk · LLM $/PR ≤ $0.33 · Eval p95 ≥ 0.947 · Policy Simulator Gate live · Program OKR budgeting · TraceMesh (spec→test→evidence)
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_15_sprint_plan.md,58,- **E1. Sequential Probability Ratio Test (SPRT) Gate**
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_15_sprint_plan.md,63,*Trace mirroring + diff; attach to Decision Card; gate on significant deltas.*
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_15_sprint_plan.md,66,**SPRT gate (Node script)**
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_16_sprint_plan.md,6,**Baseline (from v1.5):** 200 auto‑PRs/wk · LLM $/PR ≤ $0.28 · Eval p95 ≥ 0.950 · SpecLive ≥98% critical coverage · SPRT gate · Pareto optimizer
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_16_sprint_plan.md,79,**Acceptance:** FP risk gate < 8%; reviewer satisfaction ≥ 4.6/5.
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_18_sprint_plan.md,51,**Epic:** Every PR ships **machine‑checkable proof obligations** that the gate verifies before merge.
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_18_sprint_plan.md,57,- **P2. PCPR Verifier Gate**
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_19_sprint_plan.md,6,**Baseline (from v1.8):** 260 auto‑PRs/wk · LLM $/PR ≤ $0.18 · Eval p95 ≥ 0.957 · PCPR gate · CodeGraph‑360 · GPU bin‑packing · Transparency log
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_19_sprint_plan.md,37,**Acceptance:** pilot on 3 obligations; verifier passes locally.
+summit-2025.10.01.0015,summit-2025.10.01.0015/maestro_v_20_sprint_plan.md,6,**Baseline (from v1.9):** 280 auto‑PRs/wk · LLM $/PR ≤ $0.16 · Eval p95 ≥ 0.958 · CE manifests + proofs · OCO price signals · Symbolic/Taint safety · OCI‑CAS + persistent Bloom · Hazard gate
+summit-2025.10.01.0015,summit-2025.10.01.0015/mc_v_0_3.md,22,- **W4:** TENANT_003 Tier‑3 pilot (read‑only + computed); budgets → Slack
+summit-2025.10.01.0015,summit-2025.10.01.0015/mc_v_0_3.md,50,2. Gate in CI on config drift
+summit-2025.10.01.0015,summit-2025.10.01.0015/mc_v_0_3.yaml,26,"2. **Prod Canary 20% (60m bake)** → SLO gate (p95 ≤ +5%, errors non‑worse)"
+summit-2025.10.01.0015,summit-2025.10.01.0015/mc_v_0_3.yaml,27,3. **Prod Canary 50% (60m bake)** → SLO gate
+summit-2025.10.01.0015,summit-2025.10.01.0015/mc_v_0_4.yaml,19,"step ""Truth gate checks"""
+summit-2025.10.01.0015,summit-2025.10.01.0015/next_ui_sprint_plan_ig_mc_sep_15_26_2025.md,10,- Ship shareable *Saved Views* behind a feature flag.
+summit-2025.10.01.0015,summit-2025.10.01.0015/org_governance_protections_as_code_templates_ready_to_ship.md,45,- workflow: migration-gate (job=verify)
+summit-2025.10.01.0015,summit-2025.10.01.0015/org_governance_protections_as_code_templates_ready_to_ship.md,61,require: ['migration-gate']
+summit-2025.10.01.0015,summit-2025.10.01.0015/pagerduty-change.json,14,"""feature_flag"": ""v24.coherence"","
+summit-2025.10.01.0015,summit-2025.10.01.0015/pr-open.json,1,"[{""author"":{""id"":""MDQ6VXNlcjY0MDQwMzU="",""is_bot"":false,""login"":""BrianCLong"",""name"":""""},""isDraft"":false,""labels"":[{""id"":""LA_kwDOPaNncM8AAAACH2zz8g"",""name"":""codex"",""description"":"""",""color"":""ededed""}],""n"
+summit-2025.10.01.0015,summit-2025.10.01.0015/production-canary-plan.md,45,- **Gateway Feature Flag**: `canary.enable=false` (instant rollback to 0%)
+summit-2025.10.01.0015,summit-2025.10.01.0015/release_train_migration_gate_defaults_wired_to_maestro.md,1,"This package adds a **DB migration gate** and a **stage→prod release train** with canary + auto‑rollback, wired for Maestro Conductor. It is stack‑agnostic with sane defaults and Postgres examples."
+summit-2025.10.01.0015,summit-2025.10.01.0015/release_train_migration_gate_defaults_wired_to_maestro.md,10,migration-gate.yml
+summit-2025.10.01.0015,summit-2025.10.01.0015/release_train_migration_gate_defaults_wired_to_maestro.md,66,## Migration Gate Workflow
+summit-2025.10.01.0015,summit-2025.10.01.0015/release_train_migration_gate_defaults_wired_to_maestro.md,68,### `.github/workflows/migration-gate.yml`
+summit-2025.10.01.0015,summit-2025.10.01.0015/release_train_migration_gate_defaults_wired_to_maestro.md,70,name: migration-gate
+summit-2025.10.01.0015,summit-2025.10.01.0015/release_train_plan_now_next_later_with_exact_git_hub_branch_protection_toggles.md,11,- **Gate order:** PR checks → Preview env → Stage (smoke + k6 + rollout gate) → **manual promote** → Prod (blue‑green) with auto‑rollback on SLO burn.
+summit-2025.10.01.0015,summit-2025.10.01.0015/release_train_plan_now_next_later_with_exact_git_hub_branch_protection_toggles.md,52,"""rollout-gate (staging)"","

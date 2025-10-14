@@ -1,0 +1,19 @@
+name: Release Verify
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify manifest at tag (strict)
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          node scripts/verify-release-manifest.mjs --tag="$TAG" --strict --expect-sha="$GITHUB_SHA"
