@@ -1,4 +1,9 @@
-{{- $service := .Values.services.apiGateway -}}
+{{- $service := deepCopy .Values.services.apiGateway -}}
+{{- if not $service.name }}
+  {{- $_ := set $service "name" "api-gateway" }}
+{{- end }}
+{{- $ctx := dict "service" $service "root" . }}
+{{- $serviceAccountConfig := (include "intelgraph.serviceAccountConfig" $ctx | fromYaml) -}}
 {{- if $service.enabled }}
 apiVersion: apps/v1
 kind: Deployment
@@ -26,7 +31,8 @@ spec:
         {{- include "intelgraph.configChecksum" . | nindent 8 }}
         {{- include "intelgraph.podAnnotations" (dict "service" $service "root" .) | nindent 8 }}
     spec:
-      automountServiceAccountToken: false
+      serviceAccountName: {{ include "intelgraph.serviceAccountName" $ctx }}
+      automountServiceAccountToken: {{ $serviceAccountConfig.automount | default false }}
       securityContext:
         {{- include "intelgraph.podSecurityContext" . | nindent 8 }}
       containers:
@@ -41,8 +47,24 @@ spec:
               containerPort: {{ .Values.global.prometheus.port }}
               protocol: TCP
           env:
-            {{- include "intelgraph.commonEnv" . | nindent 12 }}
-            {{- include "intelgraph.serviceEnv" (dict "service" $service "root" .) | nindent 12 }}
+            {{- range $env := .Values.common.env }}
+            - name: {{ $env.name }}
+              {{- if $env.value }}
+              value: {{ $env.value | quote }}
+              {{- else if $env.valueFrom }}
+              valueFrom:
+                {{- toYaml $env.valueFrom | nindent 16 }}
+              {{- end }}
+            {{- end }}
+            {{- range $env := $service.env }}
+            - name: {{ $env.name }}
+              {{- if $env.value }}
+              value: {{ $env.value | quote }}
+              {{- else if $env.valueFrom }}
+              valueFrom:
+                {{- toYaml $env.valueFrom | nindent 16 }}
+              {{- end }}
+            {{- end }}
           livenessProbe:
             {{- include "intelgraph.livenessProbe" (dict "service" $service "root" .) | nindent 12 }}
           readinessProbe:

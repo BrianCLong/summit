@@ -91,6 +91,14 @@ jobs:
           chmod +x ./kind
           sudo mv ./kind /usr/local/bin/
 
+      - name: Install kube-linter
+        if: steps.chart-check.outputs.exists == 'true'
+        run: |
+          curl -sSL https://github.com/stackrox/kube-linter/releases/download/v0.6.8/kube-linter-linux.tar.gz -o kube-linter.tar.gz
+          tar -xzf kube-linter.tar.gz kube-linter
+          sudo mv kube-linter /usr/local/bin/
+          kube-linter version
+
       - name: Check if chart exists
         id: chart-check
         run: |
@@ -185,6 +193,25 @@ jobs:
               echo "✅ Valid YAML: $file"
             fi
           done
+
+      - name: Run kube-linter security scan
+        if: steps.chart-check.outputs.exists == 'true'
+        run: |
+          echo "🛡️  Running kube-linter static analysis..."
+          lint_dirs=""
+          for dir in default prod dev; do
+            path="./rendered/${{ matrix.chart.name }}/$dir"
+            if [ -d "$path" ]; then
+              lint_dirs="$lint_dirs $path"
+            fi
+          done
+
+          if [ -z "$lint_dirs" ]; then
+            echo "No rendered manifests found for kube-linter"
+            exit 0
+          fi
+
+          kube-linter lint $lint_dirs --config .github/kube-linter-config.yaml
 
           # Validate Kubernetes resources with kubectl
           find "./rendered/${{ matrix.chart.name }}" -name "*.yaml" -type f | while read file; do

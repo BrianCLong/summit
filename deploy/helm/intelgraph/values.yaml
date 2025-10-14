@@ -22,6 +22,15 @@ global:
     tls:
       enabled: true
       secretName: intelgraph-tls
+      certManager:
+        enabled: true
+        issuerRef:
+          kind: ClusterIssuer
+          name: letsencrypt-prod
+        dnsNames:
+          - intelgraph.example.com
+        duration: 2160h
+        renewBefore: 360h
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
       nginx.ingress.kubernetes.io/proxy-body-size: 50m
@@ -54,6 +63,13 @@ global:
     capabilities:
       drop:
         - ALL
+
+# Pod Security Standards configuration for namespace labelling
+podSecurityStandards:
+  enabled: true
+  enforce: restricted
+  audit: restricted
+  warn: restricted
 
 # External dependencies configuration
 external:
@@ -90,9 +106,38 @@ external:
     clientIdSecretRef: oidc-client
     scope: 'openid profile email groups'
 
+# Secret management via External Secrets Operator
+secretManagement:
+  externalSecrets:
+    enabled: false
+    refreshInterval: 1h
+    secretStoreRef:
+      kind: ClusterSecretStore
+      name: ''
+    creationPolicy: Owner
+    secrets: []
+
 # Common configuration for all services
 common:
   replicaCount: 2
+
+  serviceAccount:
+    create: true
+    name: ''
+    annotations: {}
+    automount: false
+    rbac:
+      create: true
+      clusterRole: false
+      name: ''
+      bindingName: ''
+      rules:
+        - apiGroups: ['']
+          resources: ['configmaps']
+          verbs: ['get', 'list']
+        - apiGroups: ['']
+          resources: ['endpoints']
+          verbs: ['get']
 
   resources:
     limits:
@@ -130,11 +175,11 @@ common:
     - name: LOG_FORMAT
       value: json
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: '{{ .Values.global.otel.exporterOtlpEndpoint }}'
+      value: 'http://otel-collector.observability:4317'
     - name: OTEL_SERVICE_NAME
-      value: '{{ .Values.global.otel.serviceName }}'
+      value: intelgraph
     - name: OTEL_RESOURCE_ATTRIBUTES
-      value: 'service.namespace=intelgraph,service.version={{ .Values.global.tag }}'
+      value: 'service.namespace=intelgraph,service.version=2025.08.21'
 
   # Volume mounts for tmp and cache
   volumeMounts:
@@ -160,6 +205,87 @@ common:
     prometheus.io/port: '{{ .Values.global.prometheus.port }}'
     prometheus.io/path: '{{ .Values.global.prometheus.path }}'
 
+# Network policy defaults
+networkPolicy:
+  enabled: true
+  ingressControllers:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+  interService:
+    enabled: true
+    additionalPorts: []
+  dns:
+    enabled: true
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: kube-system
+    podSelector:
+      matchLabels:
+        k8s-app: kube-dns
+  externalDestinations:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: database
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: database
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: neo4j
+      ports:
+        - protocol: TCP
+          port: 7687
+        - protocol: TCP
+          port: 7474
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: database
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: search
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: opensearch
+      ports:
+        - protocol: TCP
+          port: 9200
+        - protocol: TCP
+          port: 9300
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: otel-collector
+      ports:
+        - protocol: TCP
+          port: 4317
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+  externalCidrs: []
+
 # Service-specific configurations
 services:
   apiGateway:
@@ -173,6 +299,14 @@ services:
       type: ClusterIP
       port: 80
       targetPort: 8080
+
+    networkPolicy:
+      ingress:
+        enabled: true
+        allowIngressControllers: true
+        allowSameNamespace: true
+        includeMetrics: true
+        additionalFrom: []
 
     resources:
       limits:
@@ -375,6 +509,14 @@ services:
     image: mobile-interface
     port: 8087
     replicaCount: 2
+
+    networkPolicy:
+      ingress:
+        enabled: true
+        allowIngressControllers: true
+        allowSameNamespace: true
+        includeMetrics: false
+        additionalFrom: []
 
     env:
       - name: PORT

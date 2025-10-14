@@ -95,36 +95,6 @@ Image name helper
 {{- end }}
 
 {{/*
-Common environment variables
-*/}}
-{{- define "intelgraph.commonEnv" -}}
-{{- range .Values.common.env }}
-- name: {{ .name }}
-  {{- if .value }}
-  value: {{ tpl .value . | quote }}
-  {{- else if .valueFrom }}
-  valueFrom: {{- toYaml .valueFrom | nindent 4 }}
-  {{- end }}
-{{- end }}
-{{- end }}
-
-{{/*
-Service-specific environment variables
-*/}}
-{{- define "intelgraph.serviceEnv" -}}
-{{- $service := .service -}}
-{{- $root := .root -}}
-{{- range $service.env }}
-- name: {{ .name }}
-  {{- if .value }}
-  value: {{ tpl .value $root | quote }}
-  {{- else if .valueFrom }}
-  valueFrom: {{- toYaml .valueFrom | nindent 4 }}
-  {{- end }}
-{{- end }}
-{{- end }}
-
-{{/*
 Security context
 */}}
 {{- define "intelgraph.securityContext" -}}
@@ -136,6 +106,32 @@ Pod security context
 */}}
 {{- define "intelgraph.podSecurityContext" -}}
 {{- toYaml .Values.global.podSecurityContext }}
+{{- end }}
+
+{{/*
+ Service account configuration helper merges chart defaults with service overrides
+*/}}
+{{- define "intelgraph.serviceAccountConfig" -}}
+{{- $root := .root -}}
+{{- $service := .service -}}
+{{- $defaults := dict "create" true "name" "" "annotations" (dict) "automount" false "rbac" (dict "create" true "clusterRole" false "name" "" "bindingName" "" "rules" (list (dict "apiGroups" (list "") "resources" (list "configmaps") "verbs" (list "get" "list"))))) -}}
+{{- $config := merge (deepCopy $defaults) ($root.Values.common.serviceAccount | default (dict)) -}}
+{{- if $service.serviceAccount }}
+  {{- $_ := merge $config $service.serviceAccount -}}
+{{- end }}
+{{- toYaml $config -}}
+{{- end }}
+
+{{/*
+ Resolve service account name for a service
+*/}}
+{{- define "intelgraph.serviceAccountName" -}}
+{{- $config := (include "intelgraph.serviceAccountConfig" . | fromYaml) -}}
+{{- if $config.name -}}
+{{- $config.name -}}
+{{- else -}}
+{{- printf "%s-%s" (include "intelgraph.fullname" .root) .service.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end }}
 
 {{/*

@@ -1,7 +1,7 @@
 apiVersion: v2
 name: intelgraph
 description: IntelGraph MLFP – production deployment
-version: 0.1.0
+version: 0.2.0
 appVersion: '2025.08.21'
 type: application
 keywords:

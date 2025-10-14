@@ -1,9 +1,10 @@
-{{- if .Values.networkPolicy.enabled }}
-# Default deny all ingress and egress
+{{- $np := .Values.networkPolicy -}}
+{{- if $np.enabled }}
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: default-deny-all
+  name: {{ include "intelgraph.fullname" . }}-default-deny
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "intelgraph.labels" . | nindent 4 }}
@@ -12,70 +13,86 @@ spec:
   policyTypes:
     - Ingress
     - Egress
+{{- $root := . -}}
+{{- range $serviceKey, $serviceVal := .Values.services }}
+  {{- if $serviceVal.enabled }}
+    {{- $service := deepCopy $serviceVal }}
+    {{- if not $service.name }}
+      {{- $_ := set $service "name" $serviceKey }}
+    {{- end }}
+    {{- $svcNP := $service.networkPolicy | default dict }}
+    {{- $ingress := $svcNP.ingress | default dict }}
+    {{- if $ingress.enabled | default false }}
+      {{- $fromScratch := dict "entries" (list) }}
+      {{- if $ingress.allowIngressControllers | default true }}
+        {{- range $np.ingressControllers | default (list (dict "namespaceSelector" (dict "matchLabels" (dict "name" "ingress-nginx")))) }}
+          {{- $rendered := tpl (toYaml .) $root | fromYaml }}
+          {{- $_ := set $fromScratch "entries" (append ($fromScratch.entries) $rendered) }}
+        {{- end }}
+      {{- end }}
+      {{- if $ingress.allowSameNamespace | default true }}
+        {{- $_ := set $fromScratch "entries" (append ($fromScratch.entries) (dict "podSelector" (dict "matchLabels" (dict "app.kubernetes.io/part-of" "intelgraph")))) }}
+      {{- end }}
+      {{- range $ingress.additionalFrom | default list }}
+        {{- $rendered := tpl (toYaml .) $root | fromYaml }}
+        {{- $_ := set $fromScratch "entries" (append ($fromScratch.entries) $rendered) }}
+      {{- end }}
+      {{- $portsScratch := dict "entries" (list) }}
+      {{- if $ingress.ports }}
+        {{- range $ingress.ports }}
+          {{- $rendered := tpl (toYaml .) $root | fromYaml }}
+          {{- $_ := set $portsScratch "entries" (append ($portsScratch.entries) $rendered) }}
+        {{- end }}
+      {{- else }}
+        {{- if $service.port }}
+          {{- $_ := set $portsScratch "entries" (append ($portsScratch.entries) (dict "protocol" "TCP" "port" $service.port)) }}
+        {{- end }}
+        {{- if or ($ingress.includeMetrics | default true) (and (not $service.port) ($root.Values.global.prometheus.port)) }}
+          {{- $_ := set $portsScratch "entries" (append ($portsScratch.entries) (dict "protocol" "TCP" "port" ($root.Values.global.prometheus.port | default 9090))) }}
+        {{- end }}
+      {{- end }}
 ---
-# Allow ingress from ingress controller to API gateway
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-ingress-to-api-gateway
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "intelgraph.fullname" . }}-allow-{{ $service.name }}
+  namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "intelgraph.labels" . | nindent 4 }}
+    {{- include "intelgraph.serviceLabels" (dict "serviceName" $service.name "root" $root) | nindent 4 }}
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: {{ .Values.services.apiGateway.name }}
+      app.kubernetes.io/name: {{ $service.name }}
   policyTypes:
     - Ingress
   ingress:
     - from:
-        # Allow from ingress controller namespace
-        - namespaceSelector:
-            matchLabels:
-              name: ingress-nginx
-        # Allow from same namespace (service mesh)
-        - namespaceSelector:
-            matchLabels:
-              name: {{ .Release.Namespace }}
+        {{- range $fromScratch.entries }}
+        - {{- toYaml . | nindent 10 }}
+        {{- end }}
       ports:
-        - protocol: TCP
-          port: {{ .Values.services.apiGateway.port }}
-        - protocol: TCP
-          port: {{ .Values.global.prometheus.port }}
+        {{- range $portsScratch.entries }}
+        - {{- toYaml . | nindent 10 }}
+        {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- if $np.interService.enabled | default true }}
+  {{- $portScratch := dict "entries" (list) }}
+  {{- range $serviceKey, $serviceVal := .Values.services }}
+    {{- if and $serviceVal.enabled $serviceVal.port }}
+      {{- $_ := set $portScratch "entries" (append ($portScratch.entries) (dict "protocol" "TCP" "port" $serviceVal.port)) }}
+    {{- end }}
+  {{- end }}
+  {{- range $np.interService.additionalPorts | default list }}
+    {{- $rendered := tpl (toYaml .) $root | fromYaml }}
+    {{- $_ := set $portScratch "entries" (append ($portScratch.entries) $rendered) }}
+  {{- end }}
 ---
-# Allow ingress to mobile interface
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-ingress-to-mobile
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "intelgraph.labels" . | nindent 4 }}
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: {{ .Values.services.mobile.name }}
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        # Allow from ingress controller namespace
-        - namespaceSelector:
-            matchLabels:
-              name: ingress-nginx
-        # Allow from same namespace
-        - namespaceSelector:
-            matchLabels:
-              name: {{ .Release.Namespace }}
-      ports:
-        - protocol: TCP
-          port: {{ .Values.services.mobile.port }}
----
-# Allow inter-service communication
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-inter-service
+  name: {{ include "intelgraph.fullname" . }}-inter-service
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "intelgraph.labels" . | nindent 4 }}
@@ -88,58 +105,45 @@ spec:
     - Egress
   ingress:
     - from:
-        # Allow from same namespace
         - podSelector:
             matchLabels:
               app.kubernetes.io/part-of: intelgraph
       ports:
-        - protocol: TCP
-          port: 8080
-        - protocol: TCP
-          port: 8081
-        - protocol: TCP
-          port: 8082
-        - protocol: TCP
-          port: 8083
-        - protocol: TCP
-          port: 8084
-        - protocol: TCP
-          port: 8085
-        - protocol: TCP
-          port: 8086
-        - protocol: TCP
-          port: 8087
-        - protocol: TCP
-          port: {{ .Values.global.prometheus.port }}
+        {{- range $portScratch.entries }}
+        - {{- toYaml . | nindent 10 }}
+        {{- end }}
   egress:
-    # Allow communication to other services in same namespace
     - to:
         - podSelector:
             matchLabels:
               app.kubernetes.io/part-of: intelgraph
       ports:
-        - protocol: TCP
-          port: 8080
-        - protocol: TCP
-          port: 8081
-        - protocol: TCP
-          port: 8082
-        - protocol: TCP
-          port: 8083
-        - protocol: TCP
-          port: 8084
-        - protocol: TCP
-          port: 8085
-        - protocol: TCP
-          port: 8086
-        - protocol: TCP
-          port: 8087
+        {{- range $portScratch.entries }}
+        - {{- toYaml . | nindent 10 }}
+        {{- end }}
+{{- end }}
+  {{- $egressEntries := dict "list" (list) }}
+  {{- range $np.externalDestinations | default list }}
+    {{- $rendered := tpl (toYaml .) $root | fromYaml }}
+    {{- $_ := set $egressEntries "list" (append ($egressEntries.list) $rendered) }}
+  {{- end }}
+  {{- if $np.dns.enabled | default true }}
+    {{- $dnsNamespaceSelector := $np.dns.namespaceSelector | default (dict "matchLabels" (dict "kubernetes.io/metadata.name" "kube-system")) }}
+    {{- $dnsPodSelector := $np.dns.podSelector | default (dict "matchLabels" (dict "k8s-app" "kube-dns")) }}
+    {{- $dnsPeer := dict "namespaceSelector" $dnsNamespaceSelector "podSelector" $dnsPodSelector }}
+    {{- $dnsPorts := list (dict "protocol" "UDP" "port" 53) (dict "protocol" "TCP" "port" 53) }}
+    {{- $dnsRule := dict "to" (list $dnsPeer) "ports" $dnsPorts }}
+    {{- $_ := set $egressEntries "list" (append ($egressEntries.list) $dnsRule) }}
+  {{- end }}
+  {{- range $np.externalCidrs | default list }}
+    {{- $_ := set $egressEntries "list" (append ($egressEntries.list) (dict "to" (list (dict "ipBlock" .)))) }}
+  {{- end }}
+  {{- if gt (len $egressEntries.list) 0 }}
 ---
-# Allow egress to external databases
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-database-egress
+  name: {{ include "intelgraph.fullname" . }}-egress-controlled
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "intelgraph.labels" . | nindent 4 }}
@@ -150,97 +154,19 @@ spec:
   policyTypes:
     - Egress
   egress:
-    # PostgreSQL
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              name: database
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: postgresql
-      ports:
-        - protocol: TCP
-          port: 5432
-    # Neo4j
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              name: database
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: neo4j
-      ports:
-        - protocol: TCP
-          port: 7687
-        - protocol: TCP
-          port: 7474
-    # Redis
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              name: database
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: redis
-      ports:
-        - protocol: TCP
-          port: 6379
-    # Elasticsearch/OpenSearch
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              name: search
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: opensearch
-      ports:
-        - protocol: TCP
-          port: 9200
-        - protocol: TCP
-          port: 9300
----
-# Allow DNS resolution
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "intelgraph.labels" . | nindent 4 }}
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/part-of: intelgraph
-  policyTypes:
-    - Egress
-  egress:
-    - to: []
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
----
-# Allow OIDC and external API calls
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-external-apis
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "intelgraph.labels" . | nindent 4 }}
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/part-of: intelgraph
-  policyTypes:
-    - Egress
-  egress:
-    # HTTPS for OIDC and external APIs
-    - to: []
-      ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 80
+    {{- range $egressEntries.list }}
+    - {{- if .to }}
+        to:
+          {{- range .to }}
+          - {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- end }}
+      {{- if .ports }}
+        ports:
+          {{- range .ports }}
+          - {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
 {{- end }}
