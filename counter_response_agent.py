@@ -250,19 +250,19 @@ class CounterResponseAgent:
     def summarize_history(self) -> dict[str, dict[str, int] | int]:
         """Return aggregate counts by playbook and target."""
 
-        summary: dict[str, dict[str, int] | int] = {
-            "total_actions": len(self.history),
-            "by_playbook": {},
-            "by_target": {},
-        }
-        by_playbook = summary["by_playbook"]
-        by_target = summary["by_target"]
+        by_playbook: dict[str, int] = {}
+        by_target: dict[str, int] = {}
         for entry in self.history:
             playbook = entry["playbook"]
             target = entry["target"]
             by_playbook[playbook] = by_playbook.get(playbook, 0) + 1
             by_target[target] = by_target.get(target, 0) + 1
-        return summary
+
+        return {
+            "total_actions": len(self.history),
+            "by_playbook": by_playbook,
+            "by_target": by_target,
+        }
 
     def reset(self) -> None:
         """Clear the recorded action history and reset the action counter."""
