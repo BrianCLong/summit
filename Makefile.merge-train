@@ -77,8 +77,15 @@ mt-metrics: ## Show detailed merge train metrics
 	CONFLICTS=$$(gh pr list --state open --limit 500 --json number,mergeable | jq '[.[] | select(.mergeable == "CONFLICTING")] | length'); \
 	MERGEABLE=$$(gh pr list --state open --limit 500 --json number,mergeable | jq '[.[] | select(.mergeable == "MERGEABLE")] | length'); \
 	echo "  Total open: $$TOTAL"; \
-	echo "  Conflicting: $$CONFLICTS ($$(($$CONFLICTS * 100 / $$TOTAL))%)"; \
-	echo "  Mergeable: $$MERGEABLE ($$(($$MERGEABLE * 100 / $$TOTAL))%)"
+	if [ "$$TOTAL" -gt 0 ]; then \
+	  CONFLICT_PCT=$$(awk -v c="$$CONFLICTS" -v t="$$TOTAL" 'BEGIN { printf "%.1f", (c*100)/t }'); \
+	  MERGEABLE_PCT=$$(awk -v m="$$MERGEABLE" -v t="$$TOTAL" 'BEGIN { printf "%.1f", (m*100)/t }'); \
+	else \
+	  CONFLICT_PCT=0; \
+	  MERGEABLE_PCT=0; \
+	fi; \
+	echo "  Conflicting: $$CONFLICTS ($$CONFLICT_PCT%)"; \
+	echo "  Mergeable: $$MERGEABLE ($$MERGEABLE_PCT%)"
 	@echo ""
 	@echo "$(GREEN)CI Status:$(RESET)"
 	@gh run list --limit 10 --json status,conclusion,name | \

@@ -11,6 +11,8 @@ permissions:
 jobs:
   resolve:
     runs-on: ubuntu-latest
+    env:
+      IS_SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
 
     steps:
       - name: Checkout PR
@@ -57,7 +59,7 @@ jobs:
           fi
 
       - name: Auto-resolve lockfile conflicts
-        if: steps.check_conflicts.outputs.lockfile_conflict == 'true'
+        if: steps.check_conflicts.outputs.lockfile_conflict == 'true' && env.IS_SAME_REPO == 'true'
         run: |
           echo "Attempting to auto-resolve lockfile conflicts..."
 
@@ -99,8 +101,13 @@ Regenerated lockfile from package.json to resolve merge conflicts." || true
             git merge --abort || true
           fi
 
+      - name: Skip auto-resolve for fork PRs
+        if: steps.check_conflicts.outputs.lockfile_conflict == 'true' && env.IS_SAME_REPO != 'true'
+        run: |
+          echo "Lockfile conflicts detected but PR originates from a fork; skipping auto-resolve step."
+
       - name: Comment on PR
-        if: steps.check_conflicts.outputs.lockfile_conflict == 'true'
+        if: steps.check_conflicts.outputs.lockfile_conflict == 'true' && env.IS_SAME_REPO == 'true'
         uses: actions/github-script@v7
         with:
           script: |

@@ -59,7 +59,11 @@ TOTAL_MERGEABLE=$(gh pr list --state open --limit 500 --json number,mergeable | 
     jq '[.[] | select(.mergeable == "MERGEABLE")] | length')
 TOTAL_DRAFT=$(gh pr list --state open --draft --limit 500 --json number | jq 'length')
 
-CONFLICT_RATE=$(echo "scale=1; $TOTAL_CONFLICTING * 100 / $TOTAL_OPEN" | bc)
+if [ "$TOTAL_OPEN" -eq 0 ]; then
+    CONFLICT_RATE=0
+else
+    CONFLICT_RATE=$(echo "scale=1; $TOTAL_CONFLICTING * 100 / $TOTAL_OPEN" | bc)
+fi
 
 log_metric "Total Open PRs" "$TOTAL_OPEN"
 log_metric "Conflicting PRs" "$TOTAL_CONFLICTING ($CONFLICT_RATE%)" "$RED"
@@ -78,7 +82,7 @@ fi
 log_section "Age Analysis"
 
 AVG_AGE=$(gh pr list --state open --limit 500 --json createdAt,number | \
-    jq 'map((now - (.createdAt | fromdateiso8601)) / 86400) | add / length' | \
+    jq 'if length == 0 then 0 else (map((now - (.createdAt | fromdateiso8601)) / 86400) | add / length) end' | \
     awk '{printf "%.1f", $1}')
 
 OLD_PRS=$(gh pr list --state open --limit 500 --json number,createdAt | \

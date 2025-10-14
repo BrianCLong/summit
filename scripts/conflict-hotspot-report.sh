@@ -22,19 +22,24 @@ TOTAL_COMMITS=$(git log --all --oneline --since="$RANGE" | wc -l | tr -d ' ')
 echo "Total commits in period: ${TOTAL_COMMITS}" >&2
 echo "" >&2
 
-git log --all --oneline --since="$RANGE" --name-only \
- | grep -v '^[a-f0-9]' \
- | sed '/^$/d' \
- | sort \
- | uniq -c \
- | sort -rn \
- | head -"$LIMIT" \
- | while read -r count file; do
-    # Calculate percentage
-    pct=$(awk "BEGIN {printf \"%.1f\", ($count / $TOTAL_COMMITS) * 100}")
-    echo "${file},${count},${pct}%" >> /tmp/hotspot-report.csv
-    printf "%4d  %-6s  %s\n" "$count" "(${pct}%)" "$file"
-  done
+if [ "$TOTAL_COMMITS" -eq 0 ]; then
+    echo "No commits found in the selected window; skipping hotspot analysis." >&2
+    echo "No data,0,0%" >> /tmp/hotspot-report.csv
+else
+    git log --all --oneline --since="$RANGE" --name-only \
+     | grep -v '^[a-f0-9]' \
+     | sed '/^$/d' \
+     | sort \
+     | uniq -c \
+     | sort -rn \
+     | head -"$LIMIT" \
+     | while read -r count file; do
+        # Calculate percentage
+        pct=$(awk -v c="$count" -v total="$TOTAL_COMMITS" 'BEGIN { printf "%.1f", (c / total) * 100 }')
+        echo "${file},${count},${pct}%" >> /tmp/hotspot-report.csv
+        printf "%4d  %-6s  %s\n" "$count" "(${pct}%)" "$file"
+      done
+fi
 
 echo "" >&2
 echo "Detailed CSV saved to: /tmp/hotspot-report.csv" >&2

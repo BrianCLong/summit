@@ -1,0 +1,127 @@
+diff --git a/.github/workflows/auto-resolve-conflicts.yml b/.github/workflows/auto-resolve-conflicts.yml
+index 3e73b49e7..6fcf12386 100644
+--- a/.github/workflows/auto-resolve-conflicts.yml
++++ b/.github/workflows/auto-resolve-conflicts.yml
+@@ -11,6 +11,8 @@ permissions:
+ jobs:
+   resolve:
+     runs-on: ubuntu-latest
++    env:
++      IS_SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+ 
+     steps:
+       - name: Checkout PR
+@@ -57,7 +59,7 @@ jobs:
+           fi
+ 
+       - name: Auto-resolve lockfile conflicts
+-        if: steps.check_conflicts.outputs.lockfile_conflict == 'true'
++        if: steps.check_conflicts.outputs.lockfile_conflict == 'true' && env.IS_SAME_REPO == 'true'
+         run: |
+           echo "Attempting to auto-resolve lockfile conflicts..."
+ 
+@@ -99,8 +101,13 @@ Regenerated lockfile from package.json to resolve merge conflicts." || true
+             git merge --abort || true
+           fi
+ 
++      - name: Skip auto-resolve for fork PRs
++        if: steps.check_conflicts.outputs.lockfile_conflict == 'true' && env.IS_SAME_REPO != 'true'
++        run: |
++          echo "Lockfile conflicts detected but PR originates from a fork; skipping auto-resolve step."
++
+       - name: Comment on PR
+-        if: steps.check_conflicts.outputs.lockfile_conflict == 'true'
++        if: steps.check_conflicts.outputs.lockfile_conflict == 'true' && env.IS_SAME_REPO == 'true'
+         uses: actions/github-script@v7
+         with:
+           script: |
+diff --git a/Makefile.merge-train b/Makefile.merge-train
+index 70f7b2395..94e6f60d3 100644
+--- a/Makefile.merge-train
++++ b/Makefile.merge-train
+@@ -77,8 +77,15 @@ mt-metrics: ## Show detailed merge train metrics
+ 	CONFLICTS=$$(gh pr list --state open --limit 500 --json number,mergeable | jq '[.[] | select(.mergeable == "CONFLICTING")] | length'); \
+ 	MERGEABLE=$$(gh pr list --state open --limit 500 --json number,mergeable | jq '[.[] | select(.mergeable == "MERGEABLE")] | length'); \
+ 	echo "  Total open: $$TOTAL"; \
+-	echo "  Conflicting: $$CONFLICTS ($$(($$CONFLICTS * 100 / $$TOTAL))%)"; \
+-	echo "  Mergeable: $$MERGEABLE ($$(($$MERGEABLE * 100 / $$TOTAL))%)"
++	if [ "$$TOTAL" -gt 0 ]; then \
++	  CONFLICT_PCT=$$(awk -v c="$$CONFLICTS" -v t="$$TOTAL" 'BEGIN { printf "%.1f", (c*100)/t }'); \
++	  MERGEABLE_PCT=$$(awk -v m="$$MERGEABLE" -v t="$$TOTAL" 'BEGIN { printf "%.1f", (m*100)/t }'); \
++	else \
++	  CONFLICT_PCT=0; \
++	  MERGEABLE_PCT=0; \
++	fi; \
++	echo "  Conflicting: $$CONFLICTS ($$CONFLICT_PCT%)"; \
++	echo "  Mergeable: $$MERGEABLE ($$MERGEABLE_PCT%)"
+ 	@echo ""
+ 	@echo "$(GREEN)CI Status:$(RESET)"
+ 	@gh run list --limit 10 --json status,conclusion,name | \
+diff --git a/scripts/conflict-hotspot-report.sh b/scripts/conflict-hotspot-report.sh
+index ac9cc2a02..b7fa48112 100755
+--- a/scripts/conflict-hotspot-report.sh
++++ b/scripts/conflict-hotspot-report.sh
+@@ -22,19 +22,24 @@ TOTAL_COMMITS=$(git log --all --oneline --since="$RANGE" | wc -l | tr -d ' ')
+ echo "Total commits in period: ${TOTAL_COMMITS}" >&2
+ echo "" >&2
+ 
+-git log --all --oneline --since="$RANGE" --name-only \
+- | grep -v '^[a-f0-9]' \
+- | sed '/^$/d' \
+- | sort \
+- | uniq -c \
+- | sort -rn \
+- | head -"$LIMIT" \
+- | while read -r count file; do
+-    # Calculate percentage
+-    pct=$(awk "BEGIN {printf \"%.1f\", ($count / $TOTAL_COMMITS) * 100}")
+-    echo "${file},${count},${pct}%" >> /tmp/hotspot-report.csv
+-    printf "%4d  %-6s  %s\n" "$count" "(${pct}%)" "$file"
+-  done
++if [ "$TOTAL_COMMITS" -eq 0 ]; then
++    echo "No commits found in the selected window; skipping hotspot analysis." >&2
++    echo "No data,0,0%" >> /tmp/hotspot-report.csv
++else
++    git log --all --oneline --since="$RANGE" --name-only \
++     | grep -v '^[a-f0-9]' \
++     | sed '/^$/d' \
++     | sort \
++     | uniq -c \
++     | sort -rn \
++     | head -"$LIMIT" \
++     | while read -r count file; do
++        # Calculate percentage
++        pct=$(awk -v c="$count" -v total="$TOTAL_COMMITS" 'BEGIN { printf "%.1f", (c / total) * 100 }')
++        echo "${file},${count},${pct}%" >> /tmp/hotspot-report.csv
++        printf "%4d  %-6s  %s\n" "$count" "(${pct}%)" "$file"
++      done
++fi
+ 
+ echo "" >&2
+ echo "Detailed CSV saved to: /tmp/hotspot-report.csv" >&2
+diff --git a/scripts/merge-train-health-dashboard.sh b/scripts/merge-train-health-dashboard.sh
+index b7343d2d5..f9d181206 100755
+--- a/scripts/merge-train-health-dashboard.sh
++++ b/scripts/merge-train-health-dashboard.sh
+@@ -59,7 +59,11 @@ TOTAL_MERGEABLE=$(gh pr list --state open --limit 500 --json number,mergeable |
+     jq '[.[] | select(.mergeable == "MERGEABLE")] | length')
+ TOTAL_DRAFT=$(gh pr list --state open --draft --limit 500 --json number | jq 'length')
+ 
+-CONFLICT_RATE=$(echo "scale=1; $TOTAL_CONFLICTING * 100 / $TOTAL_OPEN" | bc)
++if [ "$TOTAL_OPEN" -eq 0 ]; then
++    CONFLICT_RATE=0
++else
++    CONFLICT_RATE=$(echo "scale=1; $TOTAL_CONFLICTING * 100 / $TOTAL_OPEN" | bc)
++fi
+ 
+ log_metric "Total Open PRs" "$TOTAL_OPEN"
+ log_metric "Conflicting PRs" "$TOTAL_CONFLICTING ($CONFLICT_RATE%)" "$RED"
+@@ -78,7 +82,7 @@ fi
+ log_section "Age Analysis"
+ 
+ AVG_AGE=$(gh pr list --state open --limit 500 --json createdAt,number | \
+-    jq 'map((now - (.createdAt | fromdateiso8601)) / 86400) | add / length' | \
++    jq 'if length == 0 then 0 else (map((now - (.createdAt | fromdateiso8601)) / 86400) | add / length) end' | \
+     awk '{printf "%.1f", $1}')
+ 
+ OLD_PRS=$(gh pr list --state open --limit 500 --json number,createdAt | \
