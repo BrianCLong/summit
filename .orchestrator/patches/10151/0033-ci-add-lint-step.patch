@@ -1,0 +1,27 @@
+From d6ca1110ffc50a216eb67b480ac7c0098b958c7d Mon Sep 17 00:00:00 2001
+From: GitHub Actions <github-actions@github.com>
+Date: Mon, 6 Oct 2025 12:30:34 -0600
+Subject: [PATCH 33/38] ci: add lint step
+
+---
+ .github/workflows/my-ci-core.yml | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/.github/workflows/my-ci-core.yml b/.github/workflows/my-ci-core.yml
+index 89bc05f31..bc2d94704 100644
+--- a/.github/workflows/my-ci-core.yml
++++ b/.github/workflows/my-ci-core.yml
+@@ -22,3 +22,10 @@ jobs:
+           else
+             echo "no package.json - skipping install"
+           fi
++      - name: Lint (light, non-blocking)
++        run: |
++          if [ -f package.json ]; then
++            npm run -s lint || echo "::warning::lint failed (non-blocking)"
++          else
++            echo "no package.json - skipping lint"
++          fi
+-- 
+2.51.0
+

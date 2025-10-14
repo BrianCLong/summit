@@ -1,23 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  CircularProgress,
-  Snackbar,
+  Box, Typography, TextField, Button, Card, CardContent,
+  List, ListItem, ListItemText, Divider, Grid,
+  FormControl, InputLabel, Select, MenuItem, CircularProgress, Snackbar
 } from '@mui/material';
 import CopilotRunPanel from './CopilotRunPanel';
 
@@ -33,10 +19,7 @@ const GET_GOALS = gql`
 
 const GET_INVESTIGATIONS = gql`
   query Investigations {
-    investigations {
-      id
-      title
-    }
+    investigations { id title }
   }
 `;
 
@@ -57,7 +40,7 @@ export default function CopilotGoals() {
   const [selectedGoalId, setSelectedGoalId] = useState(null);
 
   const { data, loading, error, refetch } = useQuery(GET_GOALS, {
-    variables: { investigationId: investigationId || null },
+    variables: { investigationId: investigationId || null }
   });
   const invQuery = useQuery(GET_INVESTIGATIONS);
 
@@ -67,23 +50,19 @@ export default function CopilotGoals() {
       refetch();
       setToast({ open: true, msg: 'Goal created' });
     },
-    onError: (e) => setToast({ open: true, msg: e.message || 'Failed to create goal' }),
+    onError: (e) => setToast({ open: true, msg: e.message || 'Failed to create goal' })
   });
 
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
-    await createGoal({
-      variables: { text: text.trim(), investigationId: investigationId || null },
-    });
+    await createGoal({ variables: { text: text.trim(), investigationId: investigationId || null } });
   };
 
   return (
     <Box sx={{ display: 'flex' }}>
       <Box sx={{ flexGrow: 1, p: 2 }}>
-        <Typography variant="h4" gutterBottom>
-          Copilot Goals
-        </Typography>
+        <Typography variant="h4" gutterBottom>Copilot Goals</Typography>
 
         <Card sx={{ mb: 3 }}>
           <CardContent>
@@ -101,13 +80,9 @@ export default function CopilotGoals() {
                     value={investigationId}
                     onChange={(e) => setInvestigationId(e.target.value)}
                   >
-                    <MenuItem value="">
-                      <em>(None)</em>
-                    </MenuItem>
-                    {(invQuery.data?.investigations || []).map((i) => (
-                      <MenuItem key={i.id} value={i.id}>
-                        {i.title}
-                      </MenuItem>
+                    <MenuItem value=""><em>(None)</em></MenuItem>
+                    {(invQuery.data?.investigations || []).map(i => (
+                      <MenuItem key={i.id} value={i.id}>{i.title}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -131,14 +106,12 @@ export default function CopilotGoals() {
           </CardContent>
         </Card>
 
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          Recent Goals
-        </Typography>
+        <Typography variant="h6" sx={{ mb: 1 }}>Recent Goals</Typography>
         {loading && <CircularProgress size={24} />}
         {error && <Typography color="error">Error loading goals</Typography>}
 
         <List>
-          {(data?.copilotGoals || []).map((g) => (
+          {(data?.copilotGoals || []).map(g => (
             <React.Fragment key={g.id}>
               <ListItem
                 secondaryAction={
@@ -147,7 +120,10 @@ export default function CopilotGoals() {
                   </Button>
                 }
               >
-                <ListItemText primary={g.text} secondary={new Date(g.createdAt).toLocaleString()} />
+                <ListItemText
+                  primary={g.text}
+                  secondary={new Date(g.createdAt).toLocaleString()}
+                />
               </ListItem>
               <Divider component="li" />
             </React.Fragment>

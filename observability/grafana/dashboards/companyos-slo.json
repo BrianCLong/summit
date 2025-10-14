@@ -1,0 +1,9 @@
+{ "title": "CompanyOS SLOs", "panels": [
+  { "type": "timeseries", "title": "GraphQL p95 (ms)",
+    "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(graphql_request_duration_ms_bucket{service=\"companyos\"}[5m])) by (le))" }] },
+  { "type": "timeseries", "title": "Error Rate",
+    "targets": [{ "expr": "sum(rate(graphql_requests_errors_total{service=\"companyos\"}[5m])) / sum(rate(graphql_requests_total{service=\"companyos\"}[5m]))" }] },
+  { "type": "stat", "title": "Unit Cost $/1M calls",
+    "targets": [{ "expr": "companyos_graphql_cost_per_million_usd" }] }
+] }
+
