@@ -1,0 +1,20 @@
+0bed7c326b99963ee0523f0ba0ac6cd0
+import { describe, expect, it } from '@jest/globals';
+import { envelopeSchema } from './types.js';
+describe('envelopeSchema', () => {
+    it('validates a basic envelope', () => {
+        const result = envelopeSchema.parse({
+            tenantId: 't1',
+            source: { name: 'test' },
+            kind: 'ENTITY',
+            type: 'Person',
+            payload: {},
+            observedAt: new Date().toISOString(),
+            hash: 'abc',
+            policyLabels: [],
+            provenance: { chain: [] },
+        });
+        expect(result.tenantId).toBe('t1');
+    });
+});
+//# sourceMappingURL=envelope.test.js.map
