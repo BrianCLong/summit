@@ -1,0 +1,322 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "empréstimo usurário",
+    "locale": "pt-PT",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "agiota portugal"
+      },
+      {
+        "type": "slang",
+        "value": "dinheiro rápido juros"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CMVM",
+        "note": "Fiscaliza esquemas Ponzi, crédito usurário e apostas ilegais."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "apostas desportivas ilegais",
+    "locale": "pt-PT",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "aposta negra"
+      },
+      {
+        "type": "misspelling",
+        "value": "apostas ilegais"
+      },
+      {
+        "type": "alias",
+        "value": "casa de apostas clandestina"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CMVM",
+        "note": "Fiscaliza esquemas Ponzi, crédito usurário e apostas ilegais."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "esquema Ponzi",
+    "locale": "pt-PT",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "esquema piramidal"
+      },
+      {
+        "type": "slang",
+        "value": "investimento milagroso"
+      },
+      {
+        "type": "misspelling",
+        "value": "ponzi pt"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CMVM",
+        "note": "Fiscaliza esquemas Ponzi, crédito usurário e apostas ilegais."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "rastreiode infeções sexualmente transmissíveis",
+    "locale": "pt-PT",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "rastreo ist"
+      },
+      {
+        "type": "alias",
+        "value": "teste ist"
+      },
+      {
+        "type": "alias",
+        "value": "teste mst"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "INFARMED",
+        "note": "Regula opióides controlados e comunicação sobre contraceção de emergência."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "pílula contracetiva de emergência",
+    "locale": "pt-PT",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "pilula dia seguinte pt"
+      },
+      {
+        "type": "alias",
+        "value": "pílula do dia seguinte"
+      },
+      {
+        "type": "alias",
+        "value": "plan b portugal"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "INFARMED",
+        "note": "Regula opióides controlados e comunicação sobre contraceção de emergência."
+      }
+    ],
+    "confidence": 0.92
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "analgésicos opióides",
+    "locale": "pt-PT",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "analgesicos opioides pt"
+      },
+      {
+        "type": "alias",
+        "value": "opióides sujeitos a receita"
+      },
+      {
+        "type": "slang",
+        "value": "oxicodona pt"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "INFARMED",
+        "note": "Regula opióides controlados e comunicação sobre contraceção de emergência."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "ciberbullying infantil",
+    "locale": "pt-PT",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "bullying online"
+      },
+      {
+        "type": "misspelling",
+        "value": "ciber bulling"
+      },
+      {
+        "type": "slang",
+        "value": "linchamento digital"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNPD",
+        "note": "Orientações sobre aliciamento online, cyberbullying e autolesão."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "grooming online de menores",
+    "locale": "pt-PT",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "aliciamento sexual"
+      },
+      {
+        "type": "misspelling",
+        "value": "grooming menores"
+      },
+      {
+        "type": "slang",
+        "value": "predador digital pt"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNPD",
+        "note": "Orientações sobre aliciamento online, cyberbullying e autolesão."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "incitação à automutilação",
+    "locale": "pt-PT",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "automutilacao pt"
+      },
+      {
+        "type": "alias",
+        "value": "desafio autolesivo"
+      },
+      {
+        "type": "slang",
+        "value": "forum suicidio pt"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNPD",
+        "note": "Orientações sobre aliciamento online, cyberbullying e autolesão."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "disparidade salarial",
+    "locale": "pt-PT",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "desigualdade salarial"
+      },
+      {
+        "type": "misspelling",
+        "value": "disparidade salarial pt"
+      },
+      {
+        "type": "slang",
+        "value": "salario injusto"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "ACT",
+        "note": "Inspeções sobre assédio, igualdade salarial e violência laboral."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "assédio sexual no trabalho",
+    "locale": "pt-PT",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "assedio sexual pt"
+      },
+      {
+        "type": "alias",
+        "value": "chantagem sexual trabalho"
+      },
+      {
+        "type": "slang",
+        "value": "favores por emprego"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "ACT",
+        "note": "Inspeções sobre assédio, igualdade salarial e violência laboral."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "ameaça de violência laboral",
+    "locale": "pt-PT",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "ameaça no emprego"
+      },
+      {
+        "type": "slang",
+        "value": "briga no escritório"
+      },
+      {
+        "type": "misspelling",
+        "value": "violencia laboral pt"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "ACT",
+        "note": "Inspeções sobre assédio, igualdade salarial e violência laboral."
+      }
+    ],
+    "confidence": 0.91
+  }
+]
