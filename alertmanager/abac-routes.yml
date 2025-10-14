@@ -1,0 +1,18 @@
+route:
+  receiver: abac-oncall
+  group_by: ['service']
+  match:
+    service: authz-gateway
+  routes:
+    - match:
+        alertname: ABACDecisionLatencyBurn
+      receiver: abac-oncall
+    - match:
+        alertname: ABACStepUpFailure
+      receiver: abac-oncall
+
+receivers:
+  - name: abac-oncall
+    webhook_configs:
+      - url: https://hooks.example.com/abac-oncall
+        send_resolved: true

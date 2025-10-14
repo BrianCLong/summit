@@ -7,26 +7,23 @@ import reducer from '../../../store/slices/graphInteractionSlice';
 import GraphContextMenu from '../GraphContextMenu';
 
 test('shows menu items when open', () => {
-  const store = configureStore({
-    reducer: { graphInteraction: reducer },
-    preloadedState: {
-      graphInteraction: {
-        selectedNodeId: null,
-        selectedEdgeId: null,
-        contextMenu: { open: true, x: 100, y: 100, targetType: 'node', targetId: 'n1' },
-        aiInsights: {},
-      },
-    },
-  });
+  const store = configureStore({ reducer: { graphInteraction: reducer }, preloadedState: {
+    graphInteraction: {
+      selectedNodeId: null, selectedEdgeId: null,
+      contextMenu: { open: true, x: 100, y: 100, targetType: 'node', targetId: 'n1' },
+      aiInsights: {}
+    }
+  }});
 
   render(
     <MockedProvider>
       <Provider store={store}>
         <GraphContextMenu />
       </Provider>
-    </MockedProvider>,
+    </MockedProvider>
   );
   expect(screen.getByText(/Expand Neighbors/i)).toBeInTheDocument();
   expect(screen.getByText(/Tag Entity/i)).toBeInTheDocument();
   expect(screen.getByText(/Explore Subgraph/i)).toBeInTheDocument();
 });
+

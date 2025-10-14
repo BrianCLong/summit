@@ -1,137 +1,41 @@
-# Default values for IntelGraph
-replicaCount: 1
+namespace: intelgraph-dev
 
 image:
-  server:
-    repository: ghcr.io/brianlong/intelgraph/server
-    tag: "dev"
-    pullPolicy: IfNotPresent
-  client:
-    repository: ghcr.io/brianlong/intelgraph/client
-    tag: "dev"
-    pullPolicy: IfNotPresent
-
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
-serviceAccount:
-  create: true
-  annotations: {}
-  name: ""
-
-podAnnotations: {}
-
-podSecurityContext:
-  runAsNonRoot: true
-  runAsUser: 65532
-  runAsGroup: 65532
-  fsGroup: 65532
-
-securityContext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop:
-    - ALL
-  readOnlyRootFilesystem: true
-  runAsNonRoot: true
-  runAsUser: 65532
-
-service:
-  server:
-    type: ClusterIP
-    port: 4000
-    targetPort: 4000
-  client:
-    type: ClusterIP
-    port: 80
-    targetPort: 80
+  app:
+    repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/app
+    tag: "latest"
+  web:
+    repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/web
+    tag: "latest"
 
 ingress:
   enabled: true
-  className: "nginx"
+  className: alb
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-  host: intelgraph-dev.example.com
-  path: /
-  pathType: Prefix
-  tls:
-    enabled: true
-    secretName: intelgraph-tls
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:<ACCOUNT_ID>:certificate/<CERT_ID>
+    alb.ingress.kubernetes.io/group.name: intelgraph-dev
+  hosts:
+    - host: dev.topicality.co
+      paths:
+        - path: /
+          pathType: Prefix
 
-resources:
-  server:
-    limits:
-      cpu: 500m
-      memory: 1Gi
-    requests:
-      cpu: 200m
-      memory: 512Mi
-  client:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+env:
+  NODE_ENV: production
+  GRAPH_URI: bolt://neo4j.intelgraph-dev.svc.cluster.local:7687
+  GRAPH_USER: neo4j
+  GRAPH_PASSWORD_SECRET: neo4j-auth
+  POSTGRES_URI_SECRET: pg-uri
+  REDIS_URI_SECRET: redis-uri
+  S3_BUCKET: intelgraph-dev-artifacts
 
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
-# Environment configuration
-environment: development
-
-# Database configuration
-database:
-  postgresql:
-    enabled: true
-    host: postgresql
-    port: 5432
-    name: intelgraph
-    username: intelgraph
-    existingSecret: postgresql-credentials
+neo4j:
+  acceptLicenseAgreement: "yes"
   neo4j:
-    enabled: true
-    host: neo4j
-    port: 7687
-    username: neo4j
-    existingSecret: neo4j-credentials
-  redis:
-    enabled: true
-    host: redis
-    port: 6379
-    existingSecret: redis-credentials
-
-# Monitoring
-monitoring:
-  enabled: true
-  serviceMonitor:
-    enabled: true
-    interval: 30s
-    path: /metrics
-
-# Health checks
-healthCheck:
-  enabled: true
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-
-# Preview environment specific settings
-preview:
-  enabled: false
-  ttl: "24h"
-  cleanup: true
+    password: "please-reset-in-secret"  # overridden by secret
+  resources:
+    cpu: "1"
+    memory: "2Gi"

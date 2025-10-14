@@ -1,64 +1,46 @@
+// ESLint v9 flat-config root
+// Applies base JS/TS rules across the monorepo; package-level configs refine further.
 import js from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import reactPlugin from 'eslint-plugin-react';
+import * as tseslint from 'typescript-eslint';
+import prettier from 'eslint-config-prettier';
+import path from 'node:path';
 
-const base = [
-  {
-    ignores: ['**/dist/**', '**/build/**', '**/coverage/**', '**/node_modules/**', 'docs-site/**', '.github/workflows/compliance-automation.yml'],
-  },
-  js.configs.recommended,
+const IGNORE = [
+  '**/node_modules/**',
+  '**/dist/**',
+  '**/build/**',
+  '**/coverage/**',
+  '**/.vite/**',
+  '**/.next/**',
+  '**/.cache/**',
+  '**/generated/**',
+  'frontend/.vite/**' // legacy build artifacts
 ];
 
-const typed = tseslint.config({
-  files: ['**/*.{ts,tsx,js,jsx}'],
-  extends: [
-    ...tseslint.configs.recommended,
-    ...tseslint.configs.stylistic,
-  ],
-  plugins: {
-    react: reactPlugin
-  },
-  languageOptions: {
-    parserOptions: {
-      project: null,
-      ecmaFeatures: {
-        jsx: true,
-      },
+export default [
+  { ignores: IGNORE },
+  js.configs.recommended,
+  ...tseslint.configs.recommended, // type-agnostic rules; package configs can opt into type-aware if desired
+  {
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      parserOptions: {
+        // Avoid project-based type checking here to keep root fast
+        ecmaFeatures: { jsx: true }
+      }
     },
+    settings: {
+      react: { version: 'detect' },
+    },
+    rules: {
+      'no-console': 'warn',
+      'no-debugger': 'error',
+      'no-unused-vars': 'off', // handled by @typescript-eslint/no-unused-vars
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      'no-undef': 'off'
+    }
   },
-  rules: {
-    '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/no-require-imports': 'warn',
-    'no-console': 'warn',
-    ...reactPlugin.configs.recommended.rules,
-    ...reactPlugin.configs['jsx-runtime'].rules,
-  },
-});
-
-// Loosen only for CLI package (allow console/require/any)
-const cli = {
-  files: ['packages/maestro-cli/**'],
-  rules: {
-    'no-console': 'off',
-    '@typescript-eslint/no-require-imports': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
-  },
-};
-
-// Tests: loosen a bit
-const tests = {
-  files: ['**/*.test.{ts,tsx,js,jsx}', '**/__tests__/**'],
-  rules: {
-    'no-console': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
-  },
-};
-
-const conductorUi = {
-  files: ['conductor-ui/**'],
-  rules: {
-    'no-console': 'off',
-  },
-};
-
-export default [...base, ...typed, cli, tests, conductorUi];
+  // Disable formatting-related rules in favor of Prettier
+  prettier
+];

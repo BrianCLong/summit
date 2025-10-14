@@ -1,5 +1,8 @@
 import express from 'express';
 import request from 'supertest';
+import path from 'path';
+import crypto from 'crypto';
+import { readFileSync } from 'fs';
 import { createApp } from '../src/index';
 import { stopObservability } from '../src/observability';
 import { SignJWT } from 'jose';
@@ -10,6 +13,31 @@ import type { AddressInfo } from 'net';
 let opaServer: Server;
 let upstreamServer: Server;
 
+function signChallenge(challenge: string) {
+  const privateKeyPath = path.join(__dirname, 'fixtures', 'webauthn-private.pem');
+  const privateKey = readFileSync(privateKeyPath, 'utf8');
+  const signer = crypto.createSign('SHA256');
+  signer.update(Buffer.from(challenge, 'utf8'));
+  signer.end();
+  return signer.sign(privateKey).toString('base64url');
+}
+
+async function performStepUp(app: express.Express, token: string) {
+  const challengeRes = await request(app)
+    .post('/auth/webauthn/challenge')
+    .set('Authorization', `Bearer ${token}`);
+  const signature = signChallenge(challengeRes.body.challenge);
+  const step = await request(app)
+    .post('/auth/step-up')
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      credentialId: challengeRes.body.allowCredentials[0].id,
+      challenge: challengeRes.body.challenge,
+      signature,
+    });
+  return step.body.token;
+}
+
 beforeAll((done) => {
   const upstream = express();
   upstream.get('/resource', (_req, res) => res.json({ data: 'ok' }));
@@ -18,19 +46,39 @@ beforeAll((done) => {
     process.env.UPSTREAM = `http://localhost:${port}`;
     const opa = express();
     opa.use(express.json());
-    opa.post('/v1/data/authz/allow', (req, res) => {
-      const { user, resource } = req.body.input;
-      if (user.tenantId !== resource.tenantId) {
-        return res.json({ result: false });
+    opa.post('/v1/data/summit/abac/decision', (req, res) => {
+      const { subject, resource, context } = req.body.input;
+      if (subject.tenantId !== resource.tenantId) {
+        return res.json({
+          result: { allow: false, reason: 'tenant_mismatch', obligations: [] },
+        });
       }
-      if (resource.needToKnow && !user.roles.includes(resource.needToKnow)) {
-        return res.json({ result: false });
+      if (subject.residency !== resource.residency) {
+        return res.json({
+          result: { allow: false, reason: 'residency_mismatch', obligations: [] },
+        });
       }
-      return res.json({ result: true });
+      if (resource.tags && resource.tags.includes('admin-only')) {
+        return res.json({
+          result: { allow: false, reason: 'least_privilege_violation', obligations: [] },
+        });
+      }
+      if (resource.classification !== 'public' && context.currentAcr !== 'loa2') {
+        return res.json({
+          result: {
+            allow: false,
+            reason: 'step_up_required',
+            obligations: [
+              { type: 'step_up', mechanism: 'webauthn', required_acr: 'loa2' },
+            ],
+          },
+        });
+      }
+      return res.json({ result: { allow: true, reason: 'allow', obligations: [] } });
     });
     opaServer = opa.listen(0, () => {
       const opaPort = (opaServer.address() as AddressInfo).port;
-      process.env.OPA_URL = `http://localhost:${opaPort}/v1/data/authz/allow`;
+      process.env.OPA_URL = `http://localhost:${opaPort}/v1/data/summit/abac/decision`;
       done();
     });
   });
@@ -48,11 +96,12 @@ describe('security', () => {
     const loginRes = await request(app)
       .post('/auth/login')
       .send({ username: 'alice', password: 'password123' });
-    const token = loginRes.body.token + 'tampered';
+    const token = `${loginRes.body.token}tampered`;
     const res = await request(app)
       .get('/protected/resource')
       .set('Authorization', `Bearer ${token}`)
-      .set('x-tenant-id', 'tenantA');
+      .set('x-tenant-id', 'tenantA')
+      .set('x-resource-id', 'dataset-alpha');
     expect(res.status).toBe(401);
   });
 
@@ -70,21 +119,25 @@ describe('security', () => {
     const res = await request(app)
       .get('/protected/resource')
       .set('Authorization', `Bearer ${token}`)
-      .set('x-tenant-id', 'tenantA');
+      .set('x-tenant-id', 'tenantA')
+      .set('x-resource-id', 'dataset-alpha');
     expect(res.status).toBe(401);
   });
 
-  it('prevents role escalation', async () => {
+  it('enforces least privilege via policy deny', async () => {
     const app = await createApp();
     const loginRes = await request(app)
       .post('/auth/login')
       .send({ username: 'alice', password: 'password123' });
     const token = loginRes.body.token;
+    const elevatedToken = await performStepUp(app, token);
     const res = await request(app)
       .get('/protected/resource')
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${elevatedToken}`)
       .set('x-tenant-id', 'tenantA')
-      .set('x-needtoknow', 'admin');
+      .set('x-resource-residency', 'us')
+      .set('x-resource-classification', 'public')
+      .set('x-resource-tags', 'admin-only');
     expect(res.status).toBe(403);
   });
 });

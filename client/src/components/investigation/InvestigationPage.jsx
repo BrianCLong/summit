@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -13,93 +13,100 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-} from '@mui/material';
-import { Add as AddIcon, Search as SearchIcon, AccountTree, Schema } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import CustomSchemaModal from './CustomSchemaModal';
-import InvestigationTimeline from '../timeline/InvestigationTimeline';
-import FacetsPanel from './FacetsPanel';
-import SavedViewsPanel from './SavedViewsPanel';
-import WhyPathExplainer from './WhyPathExplainer';
+} from "@mui/material";
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  AccountTree,
+  Schema,
+} from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import CustomSchemaModal from "./CustomSchemaModal";
+import InvestigationTimeline from "../timeline/InvestigationTimeline";
+import FacetsPanel from "./FacetsPanel";
+import SavedViewsPanel from "./SavedViewsPanel";
+import WhyPathExplainer from "./WhyPathExplainer";
 
 function InvestigationPage() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [schemaDialogOpen, setSchemaDialogOpen] = useState(false);
   const [currentInvestigation, setCurrentInvestigation] = useState(null);
   const [newInvestigation, setNewInvestigation] = useState({
-    title: '',
-    description: '',
-    priority: 'medium',
+    title: "",
+    description: "",
+    priority: "medium",
   });
 
   const investigations = [
     {
       id: 1,
-      title: 'Financial Network Analysis',
-      description: 'Investigating suspicious financial transactions across multiple entities',
-      status: 'active',
-      priority: 'high',
+      title: "Financial Network Analysis",
+      description:
+        "Investigating suspicious financial transactions across multiple entities",
+      status: "active",
+      priority: "high",
       entities: 45,
       relationships: 67,
-      created: '2024-01-15',
-      updated: '2 hours ago',
+      created: "2024-01-15",
+      updated: "2 hours ago",
     },
     {
       id: 2,
-      title: 'Supply Chain Investigation',
-      description: 'Analyzing supply chain connections and potential fraud indicators',
-      status: 'pending',
-      priority: 'medium',
+      title: "Supply Chain Investigation",
+      description:
+        "Analyzing supply chain connections and potential fraud indicators",
+      status: "pending",
+      priority: "medium",
       entities: 78,
       relationships: 123,
-      created: '2024-01-12',
-      updated: '5 hours ago',
+      created: "2024-01-12",
+      updated: "5 hours ago",
     },
     {
       id: 3,
-      title: 'Communication Pattern Analysis',
-      description: 'Mapping communication networks and identifying key players',
-      status: 'completed',
-      priority: 'low',
+      title: "Communication Pattern Analysis",
+      description: "Mapping communication networks and identifying key players",
+      status: "completed",
+      priority: "low",
       entities: 123,
       relationships: 234,
-      created: '2024-01-08',
-      updated: '1 day ago',
+      created: "2024-01-08",
+      updated: "1 day ago",
     },
   ];
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active':
-        return 'success';
-      case 'pending':
-        return 'warning';
-      case 'completed':
-        return 'info';
+      case "active":
+        return "success";
+      case "pending":
+        return "warning";
+      case "completed":
+        return "info";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high':
-        return 'error';
-      case 'medium':
-        return 'warning';
-      case 'low':
-        return 'info';
+      case "high":
+        return "error";
+      case "medium":
+        return "warning";
+      case "low":
+        return "info";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const handleCreateInvestigation = () => {
-    console.log('Creating investigation:', newInvestigation);
+    console.log("Creating investigation:", newInvestigation);
     setOpenDialog(false);
-    setNewInvestigation({ title: '', description: '', priority: 'medium' });
+    setNewInvestigation({ title: "", description: "", priority: "medium" });
   };
 
   const filteredInvestigations = investigations.filter(
@@ -112,9 +119,9 @@ function InvestigationPage() {
     <Box>
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           mb: 4,
         }}
       >
@@ -149,20 +156,22 @@ function InvestigationPage() {
       <Grid container spacing={3}>
         {filteredInvestigations.map((investigation) => (
           <Grid item xs={12} md={6} lg={4} key={investigation.id}>
-            <Card sx={{ height: '100%' }}>
+            <Card sx={{ height: "100%" }}>
               <CardContent>
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
                     mb: 2,
                   }}
                 >
                   <Typography variant="h6" fontWeight="bold" sx={{ flex: 1 }}>
                     {investigation.title}
                   </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+                  >
                     <Chip
                       label={investigation.status}
                       color={getStatusColor(investigation.status)}
@@ -176,14 +185,18 @@ function InvestigationPage() {
                   </Box>
                 </Box>
 
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
                   {investigation.description}
                 </Typography>
 
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
+                    display: "flex",
+                    justifyContent: "space-between",
                     mb: 2,
                   }}
                 >
@@ -198,12 +211,12 @@ function InvestigationPage() {
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ mb: 2, display: 'block' }}
+                  sx={{ mb: 2, display: "block" }}
                 >
                   Updated {investigation.updated}
                 </Typography>
 
-                <Box sx={{ display: 'flex', gap: 1 }}>
+                <Box sx={{ display: "flex", gap: 1 }}>
                   <Button
                     size="small"
                     startIcon={<AccountTree />}
@@ -244,7 +257,12 @@ function InvestigationPage() {
         </Grid>
       </Grid>
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Create New Investigation</DialogTitle>
         <DialogContent>
           <TextField
