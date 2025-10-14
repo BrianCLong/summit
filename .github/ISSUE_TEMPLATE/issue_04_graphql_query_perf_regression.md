@@ -1,9 +1,9 @@
 ---
-name: 'Issue #4: Backend GraphQL Query Performance Regression'
+name: "Issue #4: Backend GraphQL Query Performance Regression"
 about: Optimize GraphQL query times for multi-hop neighbor retrieval
-title: 'Issue #4: Backend GraphQL Query Performance Regression'
-labels: 'bug, performance, backend, graphql'
-assignees: ''
+title: "Issue #4: Backend GraphQL Query Performance Regression"
+labels: "bug, performance, backend, graphql"
+assignees: ""
 ---
 
 **Branch**: `fix/graphql-query-perf`
@@ -139,7 +139,7 @@ def query_cache(ttl_seconds: int = 300):
 +-------------------+
 |  GraphQL Client   |
 | (Frontend UI)     |
-+-------------------+
++-------------------+ 
         | GraphQL Query
         v
 +-------------------+
@@ -176,7 +176,6 @@ def query_cache(ttl_seconds: int = 300):
 ```
 
 **Sub-tasks:**
-
 - [ ] **Identify Regression Cause:** Analyze recent backend changes (code commits, dependency updates) to pinpoint the exact cause of the performance degradation. Use profiling tools if necessary.
 - [ ] **Optimize Cypher Queries:** Review and optimize the Cypher queries used for multi-hop neighbor retrieval in `node_resolver.py` to ensure they are efficient and leverage graph database capabilities.
 - [ ] **Address N+1 Problems:** Refactor resolvers to avoid N+1 query patterns by using batching or pre-fetching mechanisms (e.g., DataLoader pattern in GraphQL).

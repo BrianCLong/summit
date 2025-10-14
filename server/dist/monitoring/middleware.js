@@ -1,7 +1,7 @@
 /**
  * Monitoring middleware for Express and GraphQL
  */
-import { metrics } from './metrics.js';
+const { metrics } = require('./metrics');
 /**
  * Express middleware to track HTTP request metrics
  */
@@ -58,7 +58,7 @@ function graphqlMetricsMiddleware() {
                 },
                 didEncounterErrors(requestContext) {
                     const { operationName } = requestContext.metrics || {};
-                    requestContext.errors.forEach((error) => {
+                    requestContext.errors.forEach(error => {
                         metrics.graphqlErrors.inc({
                             operation: operationName || 'unknown',
                             error_type: error.constructor.name || 'GraphQLError',
@@ -211,4 +211,14 @@ function updateInvestigationMetrics(investigationId, operation, userId) {
         user_id: userId,
     });
 }
-export { httpMetricsMiddleware, graphqlMetricsMiddleware, trackDbQuery, trackAiJob, trackGraphOperation, trackWebSocketConnection, trackError, updateInvestigationMetrics, };
+module.exports = {
+    httpMetricsMiddleware,
+    graphqlMetricsMiddleware,
+    trackDbQuery,
+    trackAiJob,
+    trackGraphOperation,
+    trackWebSocketConnection,
+    trackError,
+    updateInvestigationMetrics,
+};
+//# sourceMappingURL=middleware.js.map

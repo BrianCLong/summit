@@ -1,0 +1,63 @@
+{
+  "report_metadata": {
+    "tenant_id": "TENANT_001",
+    "report_timestamp": "2025-09-26T23:57:11.174336Z",
+    "events_analyzed": 100,
+    "time_window": "simulation"
+  },
+  "enforcement_summary": {
+    "total_events": 100,
+    "throttle_events": 33,
+    "alert_events": 26,
+    "pass_events": 41,
+    "throttle_rate_percent": 33.0,
+    "false_positive_estimate": 28.000000000000004
+  },
+  "performance_metrics": {
+    "total_cost": 178.536,
+    "avg_enforcement_time_ms": 2.22,
+    "max_enforcement_time_ms": 44.771,
+    "sub_120s_target_met": true,
+    "avg_confidence": 0.805
+  },
+  "budget_analysis": {
+    "current_limits": {
+      "daily_limit": 50.0,
+      "hourly_limit": 5.0,
+      "route_limits": {
+        "/api/chat": 2.0,
+        "/api/research": 15.0,
+        "/api/analyze": 8.0
+      }
+    },
+    "auto_tune_suggestions": {
+      "daily_limit": 55.00000000000001,
+      "hourly_limit": 5.5
+    },
+    "cost_efficiency": {
+      "blocked_cost": 80.645,
+      "allowed_cost": 97.891,
+      "efficiency_ratio": 0.548
+    },
+    "utilization_patterns": {
+      "avg_utilization": 0.862,
+      "max_utilization": 1.369,
+      "utilization_variance": 0.232,
+      "over_limit_events": 27
+    }
+  },
+  "route_breakdown": {
+    "/api/research": {
+      "total_events": 100,
+      "total_cost": 178.536,
+      "throttle_events": 33,
+      "throttle_rate": 0.33,
+      "avg_cost_per_request": 1.785
+    }
+  },
+  "ml_insights": {
+    "anomaly_detection_accuracy": 0.92,
+    "usage_prediction_accuracy": 0.85,
+    "model_confidence": 0.88
+  }
+}
