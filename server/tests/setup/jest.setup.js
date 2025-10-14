@@ -3,8 +3,6 @@
  * Provides common test utilities and matchers
  */
 
-console.log('jest.setup.js loaded');
-
 // Extend Jest with additional matchers from jest-extended
 require('jest-extended');
 
@@ -13,6 +11,7 @@ jest.setTimeout(30000);
 
 // Mock console methods to reduce noise in tests unless debugging
 const originalConsole = { ...console };
+const originalConsoleError = console.error;
 
 beforeAll(() => {
   if (!process.env.DEBUG_TESTS) {
@@ -20,7 +19,11 @@ beforeAll(() => {
     console.info = jest.fn();
     console.warn = jest.fn();
     console.debug = jest.fn();
-    // Keep console.error for debugging test failures
+  }
+
+  console.error = (...args) => {
+    originalConsoleError(...args);
+    throw new Error('[console.error] used in server tests — replace with assertions or throw');
   }
 });
 
@@ -31,7 +34,16 @@ afterAll(() => {
     console.warn = originalConsole.warn;
     console.debug = originalConsole.debug;
   }
+  console.error = originalConsoleError;
 });
+
+// Prevent focused tests slipping through
+const blockFocus = (what) => {
+  throw new Error(`[no-only-tests] Detected ${what}. Remove '.only' to maintain coverage.`);
+};
+
+Object.defineProperty(global.it, 'only', { get: () => blockFocus('it.only') });
+Object.defineProperty(global.describe, 'only', { get: () => blockFocus('describe.only') });
 
 // Global test utilities
 global.testUtils = {
@@ -40,15 +52,14 @@ global.testUtils = {
     const start = Date.now();
     while (Date.now() - start < timeout) {
       if (await condition()) return true;
-      await new Promise((resolve) => setTimeout(resolve, interval));
+      await new Promise(resolve => setTimeout(resolve, interval));
     }
     throw new Error(`Condition not met within ${timeout}ms`);
   },
-
+  
   // Generate test IDs
-  generateId: (prefix = 'test') =>
-    `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-
+  generateId: (prefix = 'test') => `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+  
   // Mock data generators
   mockEntity: (overrides = {}) => ({
     id: global.testUtils.generateId('entity'),
@@ -57,9 +68,9 @@ global.testUtils = {
     props: { name: 'Test Entity', description: 'A test entity' },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    ...overrides,
+    ...overrides
   }),
-
+  
   mockRelationship: (overrides = {}) => ({
     id: global.testUtils.generateId('rel'),
     from: global.testUtils.generateId('from'),
@@ -67,17 +78,17 @@ global.testUtils = {
     type: 'TEST_RELATIONSHIP',
     props: { confidence: 0.8, source: 'test' },
     createdAt: new Date().toISOString(),
-    ...overrides,
+    ...overrides
   }),
-
+  
   mockUser: (overrides = {}) => ({
     id: global.testUtils.generateId('user'),
     email: `test_${Date.now()}@example.com`,
     name: 'Test User',
     role: 'analyst',
     createdAt: new Date().toISOString(),
-    ...overrides,
-  }),
+    ...overrides
+  })
 };
 
 // Error handling for unhandled rejections in tests

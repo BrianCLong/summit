@@ -22,202 +22,104 @@ jobs:
     name: Analyze Code
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     strategy:
       fail-fast: false
       matrix:
         language: ['javascript', 'typescript']
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
         queries: +security-and-quality
-
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20.11.1'
         cache: 'pnpm'
-
     - name: Setup pnpm
       uses: pnpm/action-setup@v2
       with:
-        version: '9.6.0'
-        run_install: false
-
+        version: latest
     - name: Install dependencies
-      run: |
-        corepack enable
-        pnpm install --frozen-lockfile
-
-    - name: Build for analysis
-      run: |
-        # Build TypeScript for analysis
-        pnpm run build || true
-
-        # Generate JavaScript from TypeScript for CodeQL
-        npx tsc --noEmit false --outDir /tmp/codeql-build
-
+      run: pnpm install --frozen-lockfile
+    - name: Build project
+      run: pnpm build
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
-        category: "/language:${{ matrix.language }}"
+        category: "/language:${{matrix.language}}"
+        output: sarif-results
         upload: true
+    # CodeQL automatically uploads SARIF and this already has built-in fork protection
 
   eslint-sarif:
-    name: ESLint SARIF
+    name: ESLint SARIF Analysis
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
+    timeout-minutes: 15
+    if: github.event.pull_request.head.repo.fork == false || github.event_name != 'pull_request'
     steps:
-    - uses: actions/checkout@v4
-
+    - name: Checkout repository
+      uses: actions/checkout@v4
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20.11.1'
         cache: 'pnpm'
-
     - name: Setup pnpm
       uses: pnpm/action-setup@v2
       with:
-        version: '9.6.0'
-        run_install: false
-
+        version: latest
     - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    - name: Run ESLint SARIF
       run: |
-        corepack enable
-        pnpm install --frozen-lockfile
-
-    - name: Run ESLint with SARIF output
-      run: |
-        npx eslint . \
-          --ext .js,.jsx,.ts,.tsx \
+        pnpm eslint . \
           --format @microsoft/eslint-formatter-sarif \
-          --output-file eslint-results.sarif || true
-
-    - name: Upload ESLint SARIF
-      if: always()
+          --output-file eslint-results.sarif \
+        || true
+    - name: Upload ESLint SARIF (fork-safe guard)
+      if: >
+        always() &&
+        github.event.pull_request.head.repo.fork == false &&
+        hashFiles('**/*.sarif') != ''
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: eslint-results.sarif
         category: eslint
 
   typescript-sarif:
-    name: TypeScript SARIF
+    name: TypeScript SARIF Analysis
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
+    timeout-minutes: 15
+    if: github.event.pull_request.head.repo.fork == false || github.event_name != 'pull_request'
     steps:
-    - uses: actions/checkout@v4
-
+    - name: Checkout repository
+      uses: actions/checkout@v4
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20.11.1'
         cache: 'pnpm'
-
     - name: Setup pnpm
       uses: pnpm/action-setup@v2
       with:
-        version: '9.6.0'
-        run_install: false
-
+        version: latest
     - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    - name: Generate TypeScript SARIF
       run: |
-        corepack enable
-        pnpm install --frozen-lockfile
-        npm install -g @microsoft/tslint-microsoft-contrib
-
-    - name: Run TypeScript compiler with diagnostics
-      run: |
-        # Create SARIF converter for TypeScript diagnostics
-        cat > convert-ts-sarif.js << 'EOF'
-        const fs = require('fs');
-        const { execSync } = require('child_process');
-
-        try {
-          // Run TypeScript compiler and capture diagnostics
-          const output = execSync('npx tsc --noEmit --pretty false', { encoding: 'utf8' });
-        } catch (error) {
-          const diagnostics = error.stdout || error.stderr || '';
-
-          // Convert to SARIF format
-          const sarif = {
-            version: "2.1.0",
-            $schema: "https://json.schemastore.org/sarif-2.1.0.json",
-            runs: [{
-              tool: {
-                driver: {
-                  name: "TypeScript",
-                  version: "5.0.0",
-                  informationUri: "https://www.typescriptlang.org/"
-                }
-              },
-              results: []
-            }]
-          };
-
-          // Parse TypeScript diagnostics
-          const lines = diagnostics.split('\n').filter(line => line.trim());
-
-          for (const line of lines) {
-            const match = line.match(/^(.+?)\((\d+),(\d+)\):\s+(error|warning)\s+TS(\d+):\s+(.+)$/);
-            if (match) {
-              const [, file, line, column, level, code, message] = match;
-
-              sarif.runs[0].results.push({
-                ruleId: `TS${code}`,
-                level: level === 'error' ? 'error' : 'warning',
-                message: { text: message },
-                locations: [{
-                  physicalLocation: {
-                    artifactLocation: { uri: file },
-                    region: {
-                      startLine: parseInt(line),
-                      startColumn: parseInt(column)
-                    }
-                  }
-                }]
-              });
-            }
-          }
-
-          fs.writeFileSync('typescript-results.sarif', JSON.stringify(sarif, null, 2));
-          console.log(`Generated SARIF with ${sarif.runs[0].results.length} results`);
-        }
-        EOF
-
-        node convert-ts-sarif.js
-
-    - name: Upload TypeScript SARIF
-      if: always()
+        # Convert TypeScript diagnostics to SARIF format
+        npx tsc --noEmit --pretty false 2>&1 | \
+        npx @microsoft/sarif-multitool convert --tool typescript --output typescript-results.sarif || true
+    - name: Upload TypeScript SARIF (fork-safe guard)
+      if: >
+        always() &&
+        github.event.pull_request.head.repo.fork == false &&
+        hashFiles('**/*.sarif') != ''
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: typescript-results.sarif
         category: typescript
-
-  security-summary:
-    name: Security Summary
-    needs: [analyze, eslint-sarif, typescript-sarif]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-    - name: Security Analysis Summary
-      run: |
-        echo "🔍 Security Analysis Complete"
-        echo "=========================="
-        echo ""
-        echo "✅ CodeQL Analysis: ${{ needs.analyze.result }}"
-        echo "✅ ESLint SARIF: ${{ needs.eslint-sarif.result }}"
-        echo "✅ TypeScript SARIF: ${{ needs.typescript-sarif.result }}"
-        echo ""
-        echo "📊 Results uploaded to GitHub Security tab"
-        echo "🔗 View: https://github.com/${{ github.repository }}/security/code-scanning"

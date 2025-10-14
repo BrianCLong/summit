@@ -1,0 +1,59 @@
+{
+  "type": "record",
+  "name": "TransactionEvents",
+  "namespace": "data.spine.transactionevents",
+  "fields": [
+    {
+      "name": "event_id",
+      "type": "string",
+      "doc": "Stable transaction identifier"
+    },
+    {
+      "name": "customer_id",
+      "type": "string",
+      "doc": "Link to customer profile"
+    },
+    {
+      "name": "amount",
+      "type": "double",
+      "doc": "Transaction amount"
+    },
+    {
+      "name": "currency",
+      "type": "string",
+      "doc": "ISO currency code"
+    }
+  ],
+  "x-data-spine": {
+    "version": "1.0.0",
+    "contract": "transaction-events",
+    "classification": ["Internal"],
+    "residency": {
+      "allowedRegions": ["us-east-1", "eu-west-1"],
+      "defaultRegion": "us-east-1"
+    },
+    "policies": {
+      "lowerEnvironmentHandling": "pass",
+      "fieldPolicies": [
+        {
+          "field": "event_id",
+          "action": "pass"
+        },
+        {
+          "field": "customer_id",
+          "action": "tokenize",
+          "environments": ["prod"]
+        }
+      ],
+      "transformations": {
+        "deterministic": true,
+        "reversible": true
+      }
+    },
+    "provenance": {
+      "createdBy": "data-spine-bootstrap",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "checksum": "initial"
+    }
+  }
+}
