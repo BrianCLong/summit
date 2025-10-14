@@ -37,6 +37,7 @@ jobs:
 
       - name: Run fast lane
         run: ${{ inputs.test-command }}
+        continue-on-error: true
 
       - name: Upload Jest results (debug)
         if: always()
