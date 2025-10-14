@@ -1,0 +1,395 @@
+{
+  "started_at": "2025-10-04T05:25:54.507555",
+  "finished_at": "2025-10-04T05:25:54.508060",
+  "evaluations": [
+    {
+      "adapter": "opa",
+      "coverage": 1.0,
+      "metrics": {
+        "policies_executed": 4
+      },
+      "findings": [
+        {
+          "control_id": "OPA-S3-ENCRYPTION",
+          "title": "S3 server-side encryption is disabled",
+          "description": "Terraform module is missing encryption settings for S3 buckets.",
+          "severity": "critical",
+          "impacted_assets": [
+            "terraform.modules.storage"
+          ],
+          "remediation": "Enable `server_side_encryption_configuration` with AWS KMS-managed keys.",
+          "evidences": [
+            "terraform/modules/storage.tf"
+          ],
+          "references": [
+            "GDPR Art. 32",
+            "PCI-DSS 3.4"
+          ]
+        },
+        {
+          "control_id": "OPA-COST-TAGGING",
+          "title": "Cost center tags missing",
+          "description": "Resources are missing `owner` and `cost_center` tags required for chargeback.",
+          "severity": "medium",
+          "impacted_assets": [
+            "terraform.modules.compute"
+          ],
+          "remediation": "Add mandatory tags through Terraform `default_tags`.",
+          "evidences": [
+            "terraform/modules/compute.tf"
+          ],
+          "references": [
+            "ISO 27001 A.8.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "adapter": "sentinel",
+      "coverage": 0.9,
+      "metrics": {
+        "policies_executed": 3
+      },
+      "findings": [
+        {
+          "control_id": "SENTINEL-AIM-LEAST-PRIVILEGE",
+          "title": "IAM policy grants wildcard permissions",
+          "description": "Sentinel detected IAM policy configured with `*` permissions.",
+          "severity": "high",
+          "impacted_assets": [
+            "iam.policy.admin"
+          ],
+          "remediation": "Split administrative duties into scoped roles and enforce MFA.",
+          "evidences": [
+            "terraform/iam/policies/admin.json"
+          ],
+          "references": [
+            "HIPAA 164.308(a)(3)",
+            "FedRAMP AC-6"
+          ]
+        }
+      ]
+    },
+    {
+      "adapter": "kyverno",
+      "coverage": 0.95,
+      "metrics": {
+        "policies_executed": 5
+      },
+      "findings": [
+        {
+          "control_id": "KYVERNO-NP-PROD",
+          "title": "Namespace prod missing network policy",
+          "description": "Kyverno detected missing default deny network policy for the namespace.",
+          "severity": "high",
+          "impacted_assets": [
+            "k8s.namespace.prod"
+          ],
+          "remediation": "Apply a Kyverno policy to enforce baseline network policies.",
+          "evidences": [
+            "manifests/prod/namespace.yaml"
+          ],
+          "references": [
+            "ISO 27001 A.13.1.1",
+            "FedRAMP SC-7"
+          ]
+        },
+        {
+          "control_id": "KYVERNO-IMAGE-PULL-PROD",
+          "title": "Namespace prod using non-Always image pull policy",
+          "description": "Non-Always policies risk stale container images bypassing security patches.",
+          "severity": "medium",
+          "impacted_assets": [
+            "k8s.namespace.prod"
+          ],
+          "remediation": "Set `imagePullPolicy: Always` on deployments handling regulated workloads.",
+          "evidences": [
+            "manifests/prod/deployment.yaml"
+          ],
+          "references": [
+            "HIPAA 164.312(c)(1)",
+            "GDPR Art. 25"
+          ]
+        },
+        {
+          "control_id": "KYVERNO-RUNTIME-SCAN",
+          "title": "Runtime scan detected critical vulnerabilities",
+          "description": "Container runtime scan surfaced critical CVEs requiring patching.",
+          "severity": "critical",
+          "impacted_assets": [
+            "k8s.cluster.prod"
+          ],
+          "remediation": "Initiate rolling patch workflow via Summit auto-patcher.",
+          "evidences": [
+            "trivy/reports/prod.json"
+          ],
+          "references": [
+            "PCI-DSS 6.3",
+            "HIPAA 164.308(a)(1)(ii)(D)"
+          ]
+        }
+      ]
+    },
+    {
+      "adapter": "homegrown",
+      "coverage": 1.0,
+      "metrics": {
+        "controls_evaluated": 2
+      },
+      "findings": [
+        {
+          "control_id": "MC-CUST-001",
+          "title": "Customer data isolation",
+          "description": "Ensure MC data is isolated from Summit tenants via network segmentation and IAM scoping.",
+          "severity": "critical",
+          "impacted_assets": [
+            "k8s.namespace.prod"
+          ],
+          "remediation": "Deploy Calico baseline deny-all with service mesh segmentation.",
+          "evidences": [
+            "kubernetes/namespaces/prod.yaml"
+          ],
+          "references": [
+            "GDPR Art. 32",
+            "HIPAA 164.308(a)(4)"
+          ]
+        },
+        {
+          "control_id": "SUM-OPS-014",
+          "title": "Economic auto-scaling guardrails",
+          "description": "Maintain auto-scaling budgets below 5% monthly variance with automated anomaly remediation.",
+          "severity": "high",
+          "impacted_assets": [
+            "aws.guardduty"
+          ],
+          "remediation": "Enable automated GuardDuty to Security Hub workflow with budget-aware remediation lambdas.",
+          "evidences": [
+            "runtime/guardduty.json"
+          ],
+          "references": [
+            "ISO 27001 A.12.1",
+            "FedRAMP CM-2"
+          ]
+        }
+      ]
+    }
+  ],
+  "auto_patches": [
+    {
+      "id": "patch-s3-encryption",
+      "description": "Apply Terraform patch to enforce SSE-KMS on MC and Summit buckets.",
+      "changes": {
+        "terraform/modules/storage.tf": "resource \"aws_s3_bucket_server_side_encryption_configuration\" ..."
+      },
+      "applies_to": [
+        "mc-storage",
+        "summit-storage"
+      ],
+      "estimated_savings": 4200.0,
+      "estimated_risk_reduction": 0.35
+    },
+    {
+      "id": "patch-iam-least-privilege",
+      "description": "Replace wildcard IAM policy with scoped roles and automated approval gates.",
+      "changes": {
+        "terraform/iam/policies/admin.json": "{\"Version\":\"2012-10-17\",...}"
+      },
+      "applies_to": [
+        "iam.policy.admin"
+      ],
+      "estimated_savings": 2700.0,
+      "estimated_risk_reduction": 0.28
+    },
+    {
+      "id": "patch-network-policy-prod",
+      "description": "Bootstrap zero-trust network policy set with Kyverno mutation policies.",
+      "changes": {
+        "manifests/prod/network-policy.yaml": "apiVersion: networking.k8s.io/v1 ..."
+      },
+      "applies_to": [
+        "k8s.namespace.prod"
+      ],
+      "estimated_savings": 1500.0,
+      "estimated_risk_reduction": 0.22
+    },
+    {
+      "id": "patch-runtime-cves",
+      "description": "Trigger Summit auto-patcher pipeline to rebuild vulnerable images and redeploy.",
+      "changes": {
+        "ci/pipeline.yaml": "include: patch-runtime-cves"
+      },
+      "applies_to": [
+        "k8s.cluster.prod"
+      ],
+      "estimated_savings": 5200.0,
+      "estimated_risk_reduction": 0.4
+    }
+  ],
+  "human_reviews": [
+    {
+      "control_id": "OPA-S3-ENCRYPTION",
+      "question": "Confirm enforcement timeline and business exception status?",
+      "suggested_decision": "Approve remediation",
+      "rationale": "High impact finding routed to legal, security, and finance for confirmation.",
+      "stakeholders": [
+        "CISO",
+        "GC",
+        "FinOps"
+      ]
+    },
+    {
+      "control_id": "SENTINEL-AIM-LEAST-PRIVILEGE",
+      "question": "Confirm enforcement timeline and business exception status?",
+      "suggested_decision": "Approve remediation",
+      "rationale": "High impact finding routed to legal, security, and finance for confirmation.",
+      "stakeholders": [
+        "CISO",
+        "GC",
+        "FinOps"
+      ]
+    },
+    {
+      "control_id": "KYVERNO-NP-PROD",
+      "question": "Confirm enforcement timeline and business exception status?",
+      "suggested_decision": "Approve remediation",
+      "rationale": "High impact finding routed to legal, security, and finance for confirmation.",
+      "stakeholders": [
+        "CISO",
+        "GC",
+        "FinOps"
+      ]
+    },
+    {
+      "control_id": "KYVERNO-RUNTIME-SCAN",
+      "question": "Confirm enforcement timeline and business exception status?",
+      "suggested_decision": "Approve remediation",
+      "rationale": "High impact finding routed to legal, security, and finance for confirmation.",
+      "stakeholders": [
+        "CISO",
+        "GC",
+        "FinOps"
+      ]
+    },
+    {
+      "control_id": "MC-CUST-001",
+      "question": "Confirm enforcement timeline and business exception status?",
+      "suggested_decision": "Approve remediation",
+      "rationale": "High impact finding routed to legal, security, and finance for confirmation.",
+      "stakeholders": [
+        "CISO",
+        "GC",
+        "FinOps"
+      ]
+    },
+    {
+      "control_id": "SUM-OPS-014",
+      "question": "Confirm enforcement timeline and business exception status?",
+      "suggested_decision": "Approve remediation",
+      "rationale": "High impact finding routed to legal, security, and finance for confirmation.",
+      "stakeholders": [
+        "CISO",
+        "GC",
+        "FinOps"
+      ]
+    }
+  ],
+  "multi_factor_score": {
+    "economic": 5,
+    "risk": 5,
+    "legal": 5
+  },
+  "multi_factor_score_rationale": "Scores derived from composite of drift severity, incident cost modeling, and regulatory posture.",
+  "regulatory_alignment": {
+    "OPA-S3-ENCRYPTION": [
+      {
+        "framework": "GDPR",
+        "citation": "Article 32",
+        "description": "Requires appropriate technical measures including encryption.",
+        "surpass_criteria": "Automated enforcement across 100% of storage buckets with tamper-proof audit logs."
+      },
+      {
+        "framework": "PCI-DSS",
+        "citation": "3.4",
+        "description": "Protect stored cardholder data with strong cryptography.",
+        "surpass_criteria": "Continuous verification with auto-remediation within 15 minutes of drift."
+      }
+    ],
+    "OPA-COST-TAGGING": [
+      {
+        "framework": "ISO 27001",
+        "citation": "A.8.1.1",
+        "description": "Requires identification of assets within the scope of the ISMS.",
+        "surpass_criteria": "Dynamic asset inventory with financial tagging integrated to FinOps dashboards."
+      }
+    ],
+    "SENTINEL-AIM-LEAST-PRIVILEGE": [
+      {
+        "framework": "HIPAA",
+        "citation": "164.308(a)(3)",
+        "description": "Workforce security standard requiring authorization and supervision.",
+        "surpass_criteria": "Automated detection with conditional access enforcement and auto-remediation."
+      },
+      {
+        "framework": "FedRAMP",
+        "citation": "AC-6",
+        "description": "Least privilege principle for federal systems.",
+        "surpass_criteria": "Continuous IAM posture scoring with rollback of privilege escalation in <10 minutes."
+      }
+    ],
+    "KYVERNO-RUNTIME-SCAN": [
+      {
+        "framework": "PCI-DSS",
+        "citation": "6.3",
+        "description": "Maintain secure systems and applications.",
+        "surpass_criteria": "Runtime blocking of exploitable workloads with automated patch rollouts in <30 minutes."
+      },
+      {
+        "framework": "HIPAA",
+        "citation": "164.308(a)(1)(ii)(D)",
+        "description": "Information system activity review including audit logs, access, and security incidents.",
+        "surpass_criteria": "Continuous runtime scanning with correlated SIEM alerts and auto-quarantine."
+      }
+    ],
+    "MC-CUST-001": [
+      {
+        "framework": "GDPR",
+        "citation": "Article 32",
+        "description": "Requires state of the art security to protect personal data.",
+        "surpass_criteria": "Microsegmented network mesh with automated drift detection and remediation <5 minutes."
+      },
+      {
+        "framework": "HIPAA",
+        "citation": "164.308(a)(4)",
+        "description": "Information access management with technical policies to protect ePHI.",
+        "surpass_criteria": "Zero-trust service mesh enforcement with continuous verification and cryptographic audit trail."
+      }
+    ],
+    "SUM-OPS-014": [
+      {
+        "framework": "ISO 27001",
+        "citation": "A.12.1",
+        "description": "Operational planning and control requirements.",
+        "surpass_criteria": "Autonomous budget-aware scaling with closed-loop guardrail enforcement."
+      },
+      {
+        "framework": "FedRAMP",
+        "citation": "CM-2",
+        "description": "Baseline configuration enforcement.",
+        "surpass_criteria": "Automated config baselines with drift auto-rollback and human-in-the-loop sign-off."
+      }
+    ]
+  },
+  "tested_artifacts": [
+    "cloudtrail/config.json",
+    "runtime/guardduty.json",
+    "terraform/modules/storage.tf"
+  ],
+  "validation_results": {
+    "OpenControl": {
+      "version": "2025.2",
+      "passed": 1,
+      "failed": 2,
+      "pass_rate": 0.33
+    }
+  }
+}
