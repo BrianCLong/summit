@@ -3,7 +3,7 @@
 # Production-hardened with minimal attack surface
 
 # Build stage
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache \
@@ -13,31 +13,27 @@ RUN apk add --no-cache \
     git \
     && ln -sf python3 /usr/bin/python
 
+RUN npm install -g pnpm
+
+COPY . /app
+
 WORKDIR /app
 
-# Copy package files for better layer caching
-COPY server/package*.json ./server/
-COPY conductor-ui/package*.json ./conductor-ui/
-
-# Install dependencies
-RUN cd server && npm install --omit=dev --no-audit --no-fund
-RUN cd conductor-ui && npm install --omit=dev --no-audit --no-fund
-
-# Copy source code (excluding node_modules)
-COPY server/src ./server/src
-COPY server/scripts ./server/scripts
-COPY server/package*.json ./server/
-COPY server/tsconfig.json ./server/
-COPY conductor-ui/src ./conductor-ui/src
-COPY conductor-ui/public ./conductor-ui/public
-COPY conductor-ui/package*.json ./conductor-ui/
+RUN rm -rf /app/node_modules
+RUN rm -rf /app/dist
+<<<<<<< Updated upstream
+=======
+RUN cd server && pnpm install
+RUN cd server && pnpm add -D @types/node
+RUN cd conductor-ui && pnpm install
 
 # Build applications
 RUN cd server && npm run build
 RUN cd conductor-ui && npm run build
+>>>>>>> Stashed changes
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 # Security: Create non-root user
 RUN addgroup -g 1001 -S maestro && \

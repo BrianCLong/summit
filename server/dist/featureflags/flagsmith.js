@@ -7,3 +7,4 @@ export async function isEnabled(flag) {
     const state = await flagsmith.getEnvironmentFlags();
     return state.isFeatureEnabled(flag);
 }
+//# sourceMappingURL=flagsmith.js.map
