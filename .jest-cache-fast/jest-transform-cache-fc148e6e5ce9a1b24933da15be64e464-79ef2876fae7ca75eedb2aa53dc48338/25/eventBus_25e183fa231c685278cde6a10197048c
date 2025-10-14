@@ -1,0 +1,6 @@
+c1e6ffc50033937b8b118805f5739618
+const { EventEmitter } = require("events");
+
+const eventBus = new EventEmitter();
+
+module.exports = eventBus;

@@ -17,7 +17,8 @@
     "packages/hit-protocol",
     "packages/canary-lattice",
     "packages/mcp-core",
-    "apps/server"
+    "apps/server",
+    "packages/afl-store"
   ],
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
@@ -40,7 +41,7 @@
     "test:smoke:backend": "cd server && npm run test:smoke",
     "test:smoke:frontend": "cd client && npm run test:smoke",
     "test:unit": "npm run test",
-    "test:integration": "cd server && npm run test:integration",
+    "test:integration": "jest -c Developer/summit-jest/jest.integration.config.cjs --runInBand --detectOpenHandles --bail=1 --silent",
     "test:api": "cd services/api && npx jest -c jest.config.cjs",
     "build": "npm run build:client && npm run build:server",
     "build:client": "cd client && npm run build",
@@ -50,6 +51,7 @@
     "deploy:prod": "scripts/deploy.sh prod",
     "backup": "scripts/backup.sh",
     "lint": "eslint . && ruff .",
+    "lint:tests": "node scripts/guard-tests.js",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
     "typecheck": "tsc -b --pretty false",
@@ -119,6 +121,7 @@
     "@typescript-eslint/eslint-plugin": "^8.15.0",
     "@typescript-eslint/parser": "^8.15.0",
     "concurrently": "^9.2.0",
+    "eslint-plugin-jest": "^27.9.0",
     "globals": "^15.12.0",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
@@ -129,7 +132,8 @@
     "prettier": "^3.6.2",
     "semantic-release": "^24.2.7",
     "ts-jest": "^29.2.6",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.46.1"
   },
   "husky": {
     "hooks": {

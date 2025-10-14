@@ -1,0 +1,1 @@
+{"version":3,"names":["require"],"sources":["setup-tests.ts"],"sourcesContent":["import '@testing-library/jest-dom';\nimport 'jest-canvas-mock';"],"mappings":";;AAAAA,OAAA;AACAA,OAAA","ignoreList":[]}

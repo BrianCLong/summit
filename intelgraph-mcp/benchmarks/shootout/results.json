@@ -1,0 +1,39 @@
+{
+  "$schema": "https://intelgraph.example/schemas/benchmark-results-1.json",
+  "benchmark_id": "shootout-2025-09-alpha",
+  "runs": [
+    {
+      "server": "github",
+      "platform": "intelgraph",
+      "metrics": {
+        "latency_ms": { "p50": 108, "p95": 198, "p99": 289 },
+        "cold_start_ms": { "p95": 276 },
+        "sse_latency_ms": { "p95": 214 },
+        "error_rate": 0.001,
+        "cost_per_1k_calls_usd": 0.071
+      }
+    },
+    {
+      "server": "github",
+      "platform": "metorial",
+      "metrics": {
+        "latency_ms": { "p50": 184, "p95": 347, "p99": 497 },
+        "cold_start_ms": { "p95": 612 },
+        "sse_latency_ms": { "p95": 311 },
+        "error_rate": 0.004,
+        "cost_per_1k_calls_usd": 0.105
+      }
+    }
+  ],
+  "signatures": [
+    {
+      "type": "ed25519",
+      "signer": "intelgraph-benchmarking",
+      "signature": "TODO-signature"
+    }
+  ],
+  "provenance": {
+    "ledger_root": "TODO-ledger-root",
+    "generated_at": "2025-09-30T00:00:00Z"
+  }
+}
