@@ -1,0 +1,129 @@
+# Merge Train Operations Makefile
+# Quick commands for daily merge train management
+
+.PHONY: help mt-triage mt-hotspots mt-health mt-close-stale mt-metrics mt-auto-update
+
+# Colors for output
+GREEN  := \033[0;32m
+YELLOW := \033[0;33m
+RED    := \033[0;31m
+RESET  := \033[0m
+
+help: ## Show this help message
+	@echo "$(GREEN)Merge Train Operations Commands$(RESET)"
+	@echo ""
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(YELLOW)%-20s$(RESET) %s\n", $$1, $$2}'
+	@echo ""
+
+mt-triage: ## Triage conflicting PRs (dry run first, then execute)
+	@echo "$(YELLOW)=== Merge Train: Conflict Triage ===$(RESET)"
+	@echo "$(GREEN)Running dry run first...$(RESET)"
+	@DRY_RUN=1 ./scripts/triage-conflicting-prs.sh
+	@echo ""
+	@read -p "Continue with actual triage? (y/N) " confirm && [ "$$confirm" = "y" ] || exit 0
+	@echo "$(GREEN)Executing triage...$(RESET)"
+	@./scripts/triage-conflicting-prs.sh
+	@echo "$(GREEN)✓ Triage complete$(RESET)"
+
+mt-hotspots: ## Generate conflict hotspot report
+	@echo "$(YELLOW)=== Merge Train: Hotspot Analysis ===$(RESET)"
+	@./scripts/conflict-hotspot-report.sh
+	@echo ""
+	@echo "$(GREEN)Report saved to /tmp/hotspot-report.csv$(RESET)"
+	@echo "$(YELLOW)Review the report and update .github/CODEOWNERS as needed$(RESET)"
+	@if [ -f /tmp/hotspot-report.csv ]; then \
+		echo ""; \
+		echo "$(GREEN)Top 5 hotspots:$(RESET)"; \
+		head -6 /tmp/hotspot-report.csv | tail -5; \
+	fi
+
+mt-health: ## Check merge train health metrics
+	@echo "$(YELLOW)=== Merge Train: Health Check ===$(RESET)"
+	@echo ""
+	@echo "$(GREEN)Open PRs:$(RESET)"
+	@gh pr list --state open --limit 500 --json number | jq 'length'
+	@echo ""
+	@echo "$(GREEN)Conflicting PRs:$(RESET)"
+	@gh pr list --state open --limit 500 --json number,mergeable | jq '[.[] | select(.mergeable == "CONFLICTING")] | length'
+	@echo ""
+	@echo "$(GREEN)Average PR age (days):$(RESET)"
+	@gh pr list --state open --limit 500 --json createdAt,number | jq 'map((now - (.createdAt | fromdateiso8601)) / 86400) | add / length' | awk '{printf "%.1f\n", $$1}'
+	@echo ""
+	@echo "$(GREEN)Merges this week:$(RESET)"
+	@gh pr list --state merged --search "merged:>=$$(date -d '7 days ago' +%Y-%m-%d 2>/dev/null || date -v-7d +%Y-%m-%d)" --limit 500 --json number | jq 'length'
+	@echo ""
+	@echo "$(GREEN)PRs ready to merge (green CI, no conflicts):$(RESET)"
+	@gh pr list --state open --limit 50 --json number,mergeable,statusCheckRollup | \
+		jq '[.[] | select(.mergeable == "MERGEABLE" and (.statusCheckRollup[]? | select(.name == "fast / fast" and .conclusion == "SUCCESS")))] | length'
+
+mt-close-stale: ## Close stale draft PRs (>30 days)
+	@echo "$(YELLOW)=== Merge Train: Close Stale Drafts ===$(RESET)"
+	@echo "$(GREEN)Finding drafts older than 30 days...$(RESET)"
+	@gh pr list --state open --draft --limit 500 --json number,createdAt,title | \
+		jq '.[] | select((.createdAt | fromdateiso8601) < (now - 2592000)) | {number, title, age_days: ((now - (.createdAt | fromdateiso8601)) / 86400 | floor)}'
+	@echo ""
+	@read -p "Close these stale drafts? (y/N) " confirm && [ "$$confirm" = "y" ] || exit 0
+	@echo "$(GREEN)Closing stale drafts...$(RESET)"
+	@gh pr list --state open --draft --limit 500 --json number,createdAt | \
+		jq -r '.[] | select((.createdAt | fromdateiso8601) < (now - 2592000)) | .number' | \
+		xargs -I {} gh pr close {} --comment "Closing stale draft PR (>30 days). Reopen if still needed."
+	@echo "$(GREEN)✓ Stale drafts closed$(RESET)"
+
+mt-metrics: ## Show detailed merge train metrics
+	@echo "$(YELLOW)=== Merge Train: Detailed Metrics ===$(RESET)"
+	@echo ""
+	@echo "$(GREEN)Queue Status:$(RESET)"
+	@TOTAL=$$(gh pr list --state open --limit 500 --json number | jq 'length'); \
+	CONFLICTS=$$(gh pr list --state open --limit 500 --json number,mergeable | jq '[.[] | select(.mergeable == "CONFLICTING")] | length'); \
+	MERGEABLE=$$(gh pr list --state open --limit 500 --json number,mergeable | jq '[.[] | select(.mergeable == "MERGEABLE")] | length'); \
+	echo "  Total open: $$TOTAL"; \
+	if [ "$$TOTAL" -gt 0 ]; then \
+	  CONFLICT_PCT=$$(awk -v c="$$CONFLICTS" -v t="$$TOTAL" 'BEGIN { printf "%.1f", (c*100)/t }'); \
+	  MERGEABLE_PCT=$$(awk -v m="$$MERGEABLE" -v t="$$TOTAL" 'BEGIN { printf "%.1f", (m*100)/t }'); \
+	else \
+	  CONFLICT_PCT=0; \
+	  MERGEABLE_PCT=0; \
+	fi; \
+	echo "  Conflicting: $$CONFLICTS ($$CONFLICT_PCT%)"; \
+	echo "  Mergeable: $$MERGEABLE ($$MERGEABLE_PCT%)"
+	@echo ""
+	@echo "$(GREEN)CI Status:$(RESET)"
+	@gh run list --limit 10 --json status,conclusion,name | \
+		jq -r '.[] | "\(.name): \(.status) (\(.conclusion // "in progress"))"' | head -5
+	@echo ""
+	@echo "$(GREEN)Recent Merges (last 24h):$(RESET)"
+	@gh pr list --state merged --search "merged:>=$$(date -d '1 day ago' +%Y-%m-%d 2>/dev/null || date -v-1d +%Y-%m-%d)" --limit 20 --json number,title | \
+		jq -r '.[] | "#\(.number) \(.title)"' | head -10
+
+mt-auto-update: ## Auto-update a batch of PRs with main
+	@echo "$(YELLOW)=== Merge Train: Auto-Update PRs ===$(RESET)"
+	@echo "$(RED)⚠️  This will update PRs with main branch$(RESET)"
+	@echo ""
+	@read -p "How many PRs to update? (default: 10) " count; \
+	count=$${count:-10}; \
+	echo "$(GREEN)Updating top $$count PRs...$(RESET)"; \
+	gh pr list --state open --limit $$count --json number --jq '.[].number' | \
+		while read pr; do \
+			echo "  Updating PR $$pr..."; \
+			gh api -X PUT "repos/$$(git remote get-url origin | sed 's/.*://;s/\.git$$//')/pulls/$$pr/update-branch" 2>&1 | \
+				grep -q "Updating" && echo "    ✓ Updated" || echo "    ✗ Failed (may have conflicts)"; \
+			sleep 0.5; \
+		done
+	@echo "$(GREEN)✓ Update complete$(RESET)"
+
+mt-express-lane: ## List PRs eligible for express lane (<100 LOC, green CI)
+	@echo "$(YELLOW)=== Merge Train: Express Lane Candidates ===$(RESET)"
+	@gh pr list --state open --limit 100 --json number,title,additions,deletions,mergeable,statusCheckRollup | \
+		jq '.[] | select(.mergeable == "MERGEABLE" and (.additions + .deletions) < 100 and (.statusCheckRollup[]? | select(.name == "fast / fast" and .conclusion == "SUCCESS"))) | "#\(.number) \(.title) (\(.additions + .deletions) LOC)"'
+
+mt-standard-lane: ## List PRs for standard lane (<500 LOC, green CI)
+	@echo "$(YELLOW)=== Merge Train: Standard Lane Candidates ===$(RESET)"
+	@gh pr list --state open --limit 100 --json number,title,additions,deletions,mergeable,statusCheckRollup | \
+		jq '.[] | select(.mergeable == "MERGEABLE" and (.additions + .deletions) >= 100 and (.additions + .deletions) < 500 and (.statusCheckRollup[]? | select(.name == "fast / fast" and .conclusion == "SUCCESS"))) | "#\(.number) \(.title) (\(.additions + .deletions) LOC)"'
+
+mt-manual-lane: ## List PRs requiring manual review (>500 LOC or failures)
+	@echo "$(YELLOW)=== Merge Train: Manual Lane ===$(RESET)"
+	@gh pr list --state open --limit 50 --json number,title,additions,deletions,mergeable | \
+		jq '.[] | select((.additions + .deletions) >= 500 or .mergeable != "MERGEABLE") | "#\(.number) \(.title) (\(.additions + .deletions) LOC, mergeable: \(.mergeable))"'
+
+.DEFAULT_GOAL := help
