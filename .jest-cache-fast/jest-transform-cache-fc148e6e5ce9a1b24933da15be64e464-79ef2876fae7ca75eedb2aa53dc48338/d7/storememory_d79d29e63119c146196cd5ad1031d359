@@ -1,0 +1,14 @@
+6eed21b76c021da62b9b1927a0b3b52e
+const runs = new Map();
+const events = new Map();
+
+module.exports = {
+  saveRun(run) { runs.set(run.id, run); },
+  getRun(id) { return runs.get(id) || null; },
+  pushEvent(runId, ev) {
+    if (!events.has(runId)) events.set(runId, []);
+    events.get(runId).push(ev);
+  },
+  listEvents(runId) { return events.get(runId) || []; },
+  updateRun(run) { runs.set(run.id, run); },
+};

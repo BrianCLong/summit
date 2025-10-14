@@ -1,7 +1,0 @@
-frontend: { - 'apps/frontend/**' }
-backend: { - 'apps/api/**' }
-analytics: { - 'apps/worker/**' }
-graphql: { - 'packages/graphql/**' }
-db: { - 'packages/db/**' }
-neo4j: { - 'packages/neo4j/**' }
-infra: { - 'infra/**' }

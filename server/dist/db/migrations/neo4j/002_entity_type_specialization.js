@@ -39,7 +39,7 @@ module.exports = {
         const specializedIndexes = [
             // Person-specific indexes
             'CREATE INDEX person_entity_idx IF NOT EXISTS FOR (e:Entity) ON (e.type) WHERE e.type = "PERSON"',
-            // Organization-specific indexes
+            // Organization-specific indexes  
             'CREATE INDEX org_entity_idx IF NOT EXISTS FOR (e:Entity) ON (e.type) WHERE e.type = "ORGANIZATION"',
             // Communication entities (EMAIL, PHONE)
             'CREATE INDEX comm_entity_idx IF NOT EXISTS FOR (e:Entity) ON (e.type) WHERE e.type IN ["EMAIL", "PHONE"]',
@@ -145,7 +145,7 @@ module.exports = {
             'DROP INDEX work_relationship_idx IF EXISTS',
             'DROP INDEX entity_source_idx IF EXISTS',
             'DROP INDEX high_confidence_entity_idx IF EXISTS',
-            'DROP INDEX high_degree_entity_idx IF EXISTS',
+            'DROP INDEX high_degree_entity_idx IF EXISTS'
         ];
         for (const dropIndex of indexesToDrop) {
             try {
@@ -159,7 +159,7 @@ module.exports = {
         const constraintsToDrop = [
             'DROP CONSTRAINT email_entity_format IF EXISTS',
             'DROP CONSTRAINT phone_entity_format IF EXISTS',
-            'DROP CONSTRAINT ip_entity_format IF EXISTS',
+            'DROP CONSTRAINT ip_entity_format IF EXISTS'
         ];
         for (const dropConstraint of constraintsToDrop) {
             try {
@@ -171,5 +171,6 @@ module.exports = {
             }
         }
         console.log('✅ Entity type specialization rollback completed');
-    },
+    }
 };
+//# sourceMappingURL=002_entity_type_specialization.js.map

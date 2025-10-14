@@ -172,3 +172,4 @@ export default {
     closePool,
     pool: timescalePool,
 };
+//# sourceMappingURL=timescale.js.map
