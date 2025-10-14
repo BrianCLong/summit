@@ -1,29 +1,20 @@
+import pino from 'pino';
 import path from 'path';
 import { createReadStream } from 'fs';
-import OCREngine from './engines/OCREngine.js';
-import ObjectDetectionEngine from './engines/ObjectDetectionEngine.js';
-import SpeechToTextEngine from './engines/SpeechToTextEngine.js';
-import FaceDetectionEngine from './engines/FaceDetectionEngine.js';
-import TextAnalysisEngine from './engines/TextAnalysisEngine.js';
-import EmbeddingService from './services/EmbeddingService.js';
-import { MediaType } from '../services/MediaUploadService.js'; // Import from single source
-import { VideoFrameExtractor, } from './engines/VideoFrameExtractor.js'; // WAR-GAMED SIMULATION - Import VideoFrameExtractor
+import { OCREngine } from './engines/OCREngine.js';
+import { ObjectDetectionEngine } from './engines/ObjectDetectionEngine.js';
+import { SpeechToTextEngine } from './engines/SpeechToTextEngine.js';
+import { FaceDetectionEngine } from './engines/FaceDetectionEngine.js';
+import { TextAnalysisEngine } from './engines/TextAnalysisEngine.js';
+import { EmbeddingService } from './services/EmbeddingService.js';
+import { MediaType } from '../services/MultimodalDataService.js';
+import { VideoFrameExtractor } from './engines/VideoFrameExtractor.js'; // WAR-GAMED SIMULATION - Import VideoFrameExtractor
 import ffmpegStatic from 'ffmpeg-static'; // WAR-GAMED SIMULATION - Import ffmpeg-static
 import ffprobeStatic from 'ffprobe-static'; // WAR-GAMED SIMULATION - Import ffprobe-static
-import baseLogger from '../config/logger';
-const logger = baseLogger.child({ name: 'ExtractionEngine' });
+const logger = pino({ name: 'ExtractionEngine' });
 export class ExtractionEngine {
-    config;
-    db;
-    ocrEngine;
-    objectDetectionEngine;
-    speechEngine;
-    faceEngine;
-    textEngine;
-    embeddingService;
-    videoFrameExtractor; // WAR-GAMED SIMULATION - VideoFrameExtractor instance
-    activeJobs = new Map();
     constructor(config, db) {
+        this.activeJobs = new Map();
         this.config = config;
         this.db = db;
         // Initialize AI/ML engines
@@ -126,7 +117,7 @@ export class ExtractionEngine {
             const ocrResults = await this.ocrEngine.extractText(mediaPath, {
                 language: options.language || 'eng',
                 enhanceImage: options.enhanceImage !== false,
-                confidenceThreshold: options.confidenceThreshold || 0.6,
+                confidenceThreshold: options.confidenceThreshold || 0.6
             });
             for (const result of ocrResults) {
                 entities.push({
@@ -140,8 +131,8 @@ export class ExtractionEngine {
                         language: result.language,
                         ocrEngine: result.engine,
                         wordCount: result.text.split(' ').length,
-                        characterCount: result.text.length,
-                    },
+                        characterCount: result.text.length
+                    }
                 });
             }
             const processingTime = Date.now() - startTime;
@@ -155,9 +146,9 @@ export class ExtractionEngine {
                     entitiesExtracted: entities.length,
                     averageConfidence: avgConfidence,
                     memoryUsage: process.memoryUsage().heapUsed,
-                    modelVersion: 'tesseract-5.3.0',
+                    modelVersion: 'tesseract-5.3.0'
                 },
-                errors,
+                errors
             };
         }
         catch (error) {
@@ -179,7 +170,7 @@ export class ExtractionEngine {
                 model: options.model || 'yolov8n',
                 confidenceThreshold: options.confidenceThreshold || 0.5,
                 nmsThreshold: options.nmsThreshold || 0.4,
-                maxDetections: options.maxDetections || 100,
+                maxDetections: options.maxDetections || 100
             });
             for (const detection of detections) {
                 entities.push({
@@ -191,8 +182,8 @@ export class ExtractionEngine {
                     metadata: {
                         model: detection.model,
                         classId: detection.classId,
-                        trackingId: detection.trackingId,
-                    },
+                        trackingId: detection.trackingId
+                    }
                 });
             }
             const processingTime = Date.now() - startTime;
@@ -206,9 +197,9 @@ export class ExtractionEngine {
                     entitiesExtracted: entities.length,
                     averageConfidence: avgConfidence,
                     memoryUsage: process.memoryUsage().heapUsed,
-                    modelVersion: 'yolov8n-1.0',
+                    modelVersion: 'yolov8n-1.0'
                 },
-                errors: [],
+                errors: []
             };
         }
         catch (error) {
@@ -229,7 +220,7 @@ export class ExtractionEngine {
                 minFaceSize: options.minFaceSize || 20,
                 confidenceThreshold: options.confidenceThreshold || 0.7,
                 extractFeatures: options.extractFeatures !== false,
-                recognizeIdentities: options.recognizeIdentities === true,
+                recognizeIdentities: options.recognizeIdentities === true
             });
             for (const face of faces) {
                 entities.push({
@@ -244,8 +235,8 @@ export class ExtractionEngine {
                         gender: face.estimatedGender,
                         emotion: face.dominantEmotion,
                         identity: face.recognizedIdentity,
-                        features: face.featureVector,
-                    },
+                        features: face.featureVector
+                    }
                 });
             }
             const processingTime = Date.now() - startTime;
@@ -259,9 +250,9 @@ export class ExtractionEngine {
                     entitiesExtracted: entities.length,
                     averageConfidence: avgConfidence,
                     memoryUsage: process.memoryUsage().heapUsed,
-                    modelVersion: 'mtcnn-pytorch-1.0',
+                    modelVersion: 'mtcnn-pytorch-1.0'
                 },
-                errors: [],
+                errors: []
             };
         }
         catch (error) {
@@ -283,7 +274,7 @@ export class ExtractionEngine {
                 model: options.model || 'whisper-base',
                 enableDiarization: options.enableDiarization === true,
                 enhanceAudio: options.enhanceAudio !== false,
-                timestamping: options.timestamping !== false,
+                timestamping: options.timestamping !== false
             });
             for (const segment of transcriptions) {
                 entities.push({
@@ -292,7 +283,7 @@ export class ExtractionEngine {
                     temporalRange: {
                         startTime: segment.startTime,
                         endTime: segment.endTime,
-                        confidence: segment.confidence,
+                        confidence: segment.confidence
                     },
                     confidence: segment.confidence,
                     extractionMethod: 'speech_to_text',
@@ -302,8 +293,8 @@ export class ExtractionEngine {
                         language: segment.detectedLanguage,
                         wordCount: segment.text.split(' ').length,
                         audioQuality: segment.audioQuality,
-                        noiseLevel: segment.noiseLevel,
-                    },
+                        noiseLevel: segment.noiseLevel
+                    }
                 });
             }
             const processingTime = Date.now() - startTime;
@@ -317,9 +308,9 @@ export class ExtractionEngine {
                     entitiesExtracted: entities.length,
                     averageConfidence: avgConfidence,
                     memoryUsage: process.memoryUsage().heapUsed,
-                    modelVersion: 'whisper-base-v20231117',
+                    modelVersion: 'whisper-base-v20231117'
                 },
-                errors: [],
+                errors: []
             };
         }
         catch (error) {
@@ -341,7 +332,7 @@ export class ExtractionEngine {
             else {
                 // Extract text from other media types first
                 const ocrResult = await this.performOCR(jobId, mediaPath, mediaType, options);
-                textContent = ocrResult.entities.map((e) => e.extractedText).join(' ');
+                textContent = ocrResult.entities.map(e => e.extractedText).join(' ');
             }
             if (!textContent.trim()) {
                 return {
@@ -353,16 +344,16 @@ export class ExtractionEngine {
                         entitiesExtracted: 0,
                         averageConfidence: 0,
                         memoryUsage: process.memoryUsage().heapUsed,
-                        modelVersion: 'spacy-en-3.7.0',
+                        modelVersion: 'spacy-en-3.7.0'
                     },
-                    errors: ['No text content found'],
+                    errors: ['No text content found']
                 };
             }
             const analysis = await this.textEngine.analyzeText(textContent, {
                 extractEntities: options.extractEntities !== false,
                 performSentiment: options.performSentiment !== false,
                 extractTopics: options.extractTopics === true,
-                detectLanguage: options.detectLanguage !== false,
+                detectLanguage: options.detectLanguage !== false
             });
             // Named entities
             for (const entity of analysis.entities) {
@@ -376,8 +367,8 @@ export class ExtractionEngine {
                         startOffset: entity.start,
                         endOffset: entity.end,
                         entityLabel: entity.label,
-                        description: entity.description,
-                    },
+                        description: entity.description
+                    }
                 });
             }
             // Topics as entities
@@ -391,8 +382,8 @@ export class ExtractionEngine {
                     metadata: {
                         topicId: topic.id,
                         keywords: topic.keywords,
-                        coherenceScore: topic.coherence,
-                    },
+                        coherenceScore: topic.coherence
+                    }
                 });
             }
             // Overall sentiment as entity
@@ -406,8 +397,8 @@ export class ExtractionEngine {
                     metadata: {
                         sentimentScore: analysis.sentiment.score,
                         sentimentLabel: analysis.sentiment.label,
-                        confidence: analysis.sentiment.confidence,
-                    },
+                        confidence: analysis.sentiment.confidence
+                    }
                 });
             }
             const processingTime = Date.now() - startTime;
@@ -421,9 +412,9 @@ export class ExtractionEngine {
                     entitiesExtracted: entities.length,
                     averageConfidence: avgConfidence,
                     memoryUsage: process.memoryUsage().heapUsed,
-                    modelVersion: 'spacy-en-core-web-lg-3.7.0',
+                    modelVersion: 'spacy-en-core-web-lg-3.7.0'
                 },
-                errors: [],
+                errors: []
             };
         }
         catch (error) {
@@ -446,7 +437,7 @@ export class ExtractionEngine {
                 detectObjects: true,
                 classifyScene: true,
                 extractColors: true,
-                analyzeComposition: true,
+                analyzeComposition: true
             });
             // Scene classification
             entities.push({
@@ -459,8 +450,8 @@ export class ExtractionEngine {
                     sceneCategories: sceneAnalysis.categories,
                     dominantColors: sceneAnalysis.colors,
                     lighting: sceneAnalysis.lighting,
-                    composition: sceneAnalysis.composition,
-                },
+                    composition: sceneAnalysis.composition
+                }
             });
             const processingTime = Date.now() - startTime;
             return {
@@ -472,9 +463,9 @@ export class ExtractionEngine {
                     entitiesExtracted: entities.length,
                     averageConfidence: entities[0]?.confidence || 0,
                     memoryUsage: process.memoryUsage().heapUsed,
-                    modelVersion: 'resnet50-places365',
+                    modelVersion: 'resnet50-places365'
                 },
-                errors: [],
+                errors: []
             };
         }
         catch (error) {
@@ -498,7 +489,7 @@ export class ExtractionEngine {
                         mediaPath,
                         mediaType,
                         extractionMethods: [method],
-                        options,
+                        options
                     });
                     if (result.length > 0) {
                         allEntities.push(...result[0].entities);
@@ -521,9 +512,9 @@ export class ExtractionEngine {
                     entitiesExtracted: mergedEntities.length,
                     averageConfidence: avgConfidence,
                     memoryUsage: process.memoryUsage().heapUsed,
-                    modelVersion: 'multi-modal-v2.0',
+                    modelVersion: 'multi-modal-v2.0'
                 },
-                errors: [],
+                errors: []
             };
         }
         catch (error) {
@@ -563,11 +554,7 @@ export class ExtractionEngine {
             // 2. Process each frame with image-based engines
             for (const frame of frames) {
                 const frameEntities = [];
-                const frameOptions = {
-                    ...options,
-                    frameTimestamp: frame.timestamp,
-                    frameNumber: frame.frameNumber,
-                };
+                const frameOptions = { ...options, frameTimestamp: frame.timestamp, frameNumber: frame.frameNumber };
                 // Run Face Detection
                 try {
                     const faceResult = await this.performFaceDetection(jobId, frame.framePath, MediaType.IMAGE, frameOptions);
@@ -596,7 +583,7 @@ export class ExtractionEngine {
                     errors.push(`OCR for frame ${frame.frameNumber} failed: ${ocrError.message}`);
                 }
                 // Add frame-specific metadata to entities
-                frameEntities.forEach((entity) => {
+                frameEntities.forEach(entity => {
                     entity.metadata = {
                         ...entity.metadata,
                         frameTimestamp: frame.timestamp,
@@ -625,9 +612,9 @@ export class ExtractionEngine {
                     entitiesExtracted: allEntities.length,
                     averageConfidence: avgConfidence,
                     memoryUsage: process.memoryUsage().heapUsed,
-                    modelVersion: 'multi-modal-video-v1.0',
+                    modelVersion: 'multi-modal-video-v1.0'
                 },
-                errors,
+                errors
             };
         }
         catch (error) {
@@ -654,8 +641,7 @@ export class ExtractionEngine {
                     entity.embeddings.text = await this.embeddingService.generateTextEmbedding(entity.extractedText);
                 }
                 // Add visual and audio embeddings based on entity type and available data
-                if (entity.boundingBox &&
-                    (entity.entityType === 'face' || entity.entityType === 'object')) {
+                if (entity.boundingBox && (entity.entityType === 'face' || entity.entityType === 'object')) {
                     // Generate visual embeddings from bounding box region
                     // entity.embeddings.visual = await this.embeddingService.generateVisualEmbedding(...);
                 }
@@ -696,7 +682,7 @@ export class ExtractionEngine {
         // Simple deduplication based on text similarity and spatial overlap
         const merged = [];
         for (const entity of entities) {
-            const similar = merged.find((existing) => this.areEntitiesSimilar(existing, entity));
+            const similar = merged.find(existing => this.areEntitiesSimilar(existing, entity));
             if (similar) {
                 // Merge entities by taking higher confidence values
                 if (entity.confidence > similar.confidence) {
@@ -743,7 +729,7 @@ export class ExtractionEngine {
     calculateTextSimilarity(text1, text2) {
         const tokens1 = new Set(text1.toLowerCase().split(/\s+/));
         const tokens2 = new Set(text2.toLowerCase().split(/\s+/));
-        const intersection = new Set([...tokens1].filter((x) => tokens2.has(x)));
+        const intersection = new Set([...tokens1].filter(x => tokens2.has(x)));
         const union = new Set([...tokens1, ...tokens2]);
         return intersection.size / union.size;
     }
@@ -784,7 +770,7 @@ export class ExtractionEngine {
         return new Promise((resolve, reject) => {
             const chunks = [];
             const stream = createReadStream(filePath);
-            stream.on('data', (chunk) => chunks.push(chunk));
+            stream.on('data', chunk => chunks.push(chunk));
             stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
             stream.on('error', reject);
         });
@@ -800,7 +786,7 @@ export class ExtractionEngine {
             categories: ['outdoor', 'natural', 'landscape'],
             colors: ['green', 'blue', 'brown'],
             lighting: 'daylight',
-            composition: 'rule_of_thirds',
+            composition: 'rule_of_thirds'
         };
     }
     /**
@@ -816,8 +802,8 @@ export class ExtractionEngine {
                 objectDetection: this.objectDetectionEngine.isReady(),
                 speech: this.speechEngine.isReady(),
                 face: this.faceEngine.isReady(),
-                text: this.textEngine.isReady(),
-            },
+                text: this.textEngine.isReady()
+            }
         };
     }
     /**
@@ -828,8 +814,8 @@ export class ExtractionEngine {
         // Wait for active jobs to complete or timeout
         const shutdownTimeout = 30000; // 30 seconds
         const startTime = Date.now();
-        while (this.activeJobs.size > 0 && Date.now() - startTime < shutdownTimeout) {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+        while (this.activeJobs.size > 0 && (Date.now() - startTime) < shutdownTimeout) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
         // Cleanup engines
         await Promise.all([
@@ -838,9 +824,10 @@ export class ExtractionEngine {
             this.speechEngine.shutdown(),
             this.faceEngine.shutdown(),
             this.textEngine.shutdown(),
-            this.embeddingService.shutdown(),
+            this.embeddingService.shutdown()
         ]);
         logger.info('ExtractionEngine shutdown complete');
     }
 }
 export default ExtractionEngine;
+//# sourceMappingURL=ExtractionEngine.js.map

@@ -1,0 +1,70 @@
+[ORACLE MODE – Fusion & Forecast]
+
+---
+
+## EXECUTIVE SUMMARY
+- **Sprint Window Proposal:** Mar 3 – Mar 14, 2026 (2-week cadence)
+- **Focus:** Natural Language Explainability API (ExplainWhy) + Multilingual Stability Inference — universal trust, any language.
+- **Workstream Theme:** Ask Why, Understand Always — human queries meet graph reasons in any language.
+- **Target Output:** ExplainWhy NL API, cross-lingual prompt classifier, clarity parity baseline.
+
+---
+
+## FINDINGS & RATIONALE
+- Graph explainers and prompt shaping work — but only in English.
+- Decision-makers increasingly need **plain-language answers** to “Why this?” in their own languages.
+- Stable interaction with IntelGraph must cross linguistic borders without semantic drift.
+
+---
+
+## RECOMMENDATIONS
+
+### PRIORITY OBJECTIVES (Sprint: Mar 3–14)
+1. **ExplainWhy API**
+   - Accepts natural language “why?” prompts (e.g., "Why was this claim connected?").  
+   - Returns traced logic path in plain, justified output.
+2. **Multilingual Prompt Classifier**
+   - Extend prompt risk classifier to at least 5 high-priority languages.  
+   - Flag translation-induced ambiguity, drift, or risk.
+3. **Semantic Drift Guardrails**
+   - Hash prompt intent pre/post translation → detect divergence.  
+   - Alert on high-drift mismatches.
+4. **Clarity Parity Metrics**
+   - Compare analyst comprehension & override rates across languages.  
+   - Identify underperforming translation zones.
+
+### SUGGESTED FOLLOW-UPS (Next Sprint)
+- Language-specific canonical prompt libraries  
+- Trust calibration UI per locale
+
+---
+
+## PROOF-CARRYING INTELLIGENCE
+- **Sources:** Prompt logs, translation APIs, ExplainX trace trees.
+- **Assumptions:** Translation layer supports round-trip hashing.
+- **Uncertainty:** Clarity scoring models may bias toward source language.
+- **Verification:**
+  - Multilingual test set  
+  - Prompt→intent hash consistency audit  
+  - ExplainWhy QA by native speakers
+
+---
+
+## CADENCE PLAN (Q1 '26)
+
+| Layer         | Cadence               | Responsible Artifact                             |
+|---------------|-----------------------|--------------------------------------------------|
+| Daily         | Why? API Logs         | Query types, Response Latency, Explain Clarity   |
+| Weekly        | Translation Drift Sync| Prompt Intent Hash Diff Stats                    |
+| Biweekly (83M)| Language QA Loop      | Native Review Findings, Clarity Deltas           |
+| Monthly       | Trust Parity Brief    | Drift Disparity, Override Hotspots               |
+| Quarterly     | Multilingual Coverage | Language Expansion Roadmap, Localized Explainers |
+
+**Next Steps:**
+- ExplainWhy API beta live (Mar 5)  
+- Classifier multilingual mode online (Mar 8)  
+- Clarity baseline across locales (Mar 13)
+
+---
+
+**[UNIT 83M – ORACLE MODE]** – SIGINT FUSION: JUSTIFY, TRANSLATE, TRUST.

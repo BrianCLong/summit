@@ -1,14 +1,13 @@
 import { EventEmitter } from 'events';
 import { RedisCache } from '../cache/redis';
 export class AdvancedSearchService extends EventEmitter {
-    searchHistory = new Map();
-    savedSearches = new Map();
-    searchIndices = new Map();
-    cache;
-    searchSuggestions = new Map();
-    popularQueries = [];
     constructor() {
         super();
+        this.searchHistory = new Map();
+        this.savedSearches = new Map();
+        this.searchIndices = new Map();
+        this.searchSuggestions = new Map();
+        this.popularQueries = [];
         this.cache = new RedisCache();
         this.initializeSearchIndices();
         this.buildSearchSuggestions();
@@ -880,3 +879,4 @@ export class AdvancedSearchService extends EventEmitter {
         return suggestions.filter((s) => s !== prefix).slice(0, 8);
     }
 }
+//# sourceMappingURL=advancedSearchService.js.map

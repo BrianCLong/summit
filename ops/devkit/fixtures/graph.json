@@ -1,0 +1,52 @@
+{
+  "nodes": [
+    {
+      "labels": ["DevkitDataset"],
+      "properties": {
+        "slug": "mission-snapshots",
+        "name": "Mission Snapshots",
+        "category": "ops-intel"
+      }
+    },
+    {
+      "labels": ["DevkitDataset"],
+      "properties": {
+        "slug": "policy-evaluations",
+        "name": "Policy Evaluation Ledger",
+        "category": "compliance"
+      }
+    },
+    {
+      "labels": ["DevkitPersona"],
+      "properties": {
+        "slug": "fusion-analyst",
+        "name": "Fusion Analyst"
+      }
+    },
+    {
+      "labels": ["DevkitPersona"],
+      "properties": {
+        "slug": "reliability-engineer",
+        "name": "Reliability Engineer"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "from": "mission-snapshots",
+      "to": "fusion-analyst",
+      "type": "EMPOWERS",
+      "properties": {
+        "priority": "p0"
+      }
+    },
+    {
+      "from": "policy-evaluations",
+      "to": "reliability-engineer",
+      "type": "ALERTS",
+      "properties": {
+        "priority": "p1"
+      }
+    }
+  ]
+}
