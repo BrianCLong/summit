@@ -1,0 +1,10 @@
+Summary,Issue Type,Description,Story Points,Components,Labels,Acceptance Criteria
+COS-ID-SCIM-ABAC — OIDC/SCIM + ABAC Enforcement,Story,"Enforce tenant-scoped ABAC; SSO + SCIM v2 group→role sync.",8,auth;policy,cos;abac;scim,"SCIM change in ≤60s; cross-tenant denied; audit logs have subject/tenant/purpose/decision"
+COS-POL-FETCH — Policy Pack Consumer + OPA Hot-Reload,Story,"Poll /v1/policy/packs/policy-pack-v0; verify SHA+Sigstore; hot-reload OPA.",5,policy,cos;policy-pack,"Reload ≤30s on new digest; refuse unsigned/mismatch; no >0.5% 5xx spike"
+COS-EVIDENCE-PUB — Publish Evidence (SLO+Cost) to MC,Story,"Emit Evidence per releaseId to MC GraphQL; attach SBOM/test hashes; SLO+cost.",5,observability,cos;evidence,"Evidence visible in MC ≤1m; idempotent retries"
+COS-OTEL-SLO — OTEL Telemetry + SLO Dashboards,Story,"Export traces/metrics/logs; ship SLO dashboards & alerts.",8,observability,cos;otel;grafana,"Dashboards render per tenant; alerts fire on synthetic breach"
+COS-ROLLOUT-GATE — Argo Evidence-Gated Promotion,Story,"Gate canaries at 20%/50% using MC evidenceOk.",5,delivery,cos;argo;gate,"Rollout halts with reasons when ok=false; auto-rollback <5m"
+COS-RET-RTBF — Retention & RTBF,Story,"Retention tiers + RTBF with audit + PITR restore-check.",13,data,cos;retention;rtbf,"Deletion/anonymization per tier; RTBF audited; restore does not resurrect erased data"
+COS-HELM-HARDEN — Charts, Limits, Secrets,Story,"Harden Helm charts; security contexts; digests; HPA/PDB; External Secrets.",8,platform,cos;helm;security,"Helm lint clean; CIS checks pass; chaos kill within error budget"
+COS-PACT-E2E — Contract + End-to-End Cold-Start,Story,"Pact tests for pack & attestation; E2E standalone+integrated; k6 load.",8,qa,cos;contract;e2e,"Pact fails on seam drift; E2E both modes pass; p95≤350ms reads, ≤700ms writes"
+

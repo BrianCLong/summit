@@ -35,3 +35,4 @@ export class CopilotNLQueryService {
         return !dangerous.some((op) => cypher.toUpperCase().includes(op));
     }
 }
+//# sourceMappingURL=CopilotNLQueryService.js.map

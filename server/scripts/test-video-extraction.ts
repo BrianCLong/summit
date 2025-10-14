@@ -36,10 +36,10 @@ async function testVideoExtraction() {
       },
       {
         headers: {
-          Authorization: `Bearer ${AUTH_TOKEN}`,
+          'Authorization': `Bearer ${AUTH_TOKEN}`,
           'Content-Type': 'application/json',
         },
-      },
+      }
     );
 
     const { jobId, message } = submitResponse.data;
@@ -53,12 +53,15 @@ async function testVideoExtraction() {
     let error: any = null;
 
     while (jobStatus !== 'completed' && jobStatus !== 'failed') {
-      await new Promise((resolve) => setTimeout(resolve, 5000)); // Poll every 5 seconds
-      const statusResponse = await axios.get(`${API_BASE_URL}/job-status/${jobId}`, {
-        headers: {
-          Authorization: `Bearer ${AUTH_TOKEN}`,
-        },
-      });
+      await new Promise(resolve => setTimeout(resolve, 5000)); // Poll every 5 seconds
+      const statusResponse = await axios.get(
+        `${API_BASE_URL}/job-status/${jobId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${AUTH_TOKEN}`,
+          },
+        }
+      );
       const data = statusResponse.data;
       jobStatus = data.status;
       progress = data.progress || 0;

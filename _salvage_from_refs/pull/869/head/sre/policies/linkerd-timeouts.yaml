@@ -1,6 +1,0 @@
-apiVersion: policy.linkerd.io/v1alpha1
-kind: Timeout
-metadata:
-  name: default-timeout
-spec:
-  timeout: 10s
