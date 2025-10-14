@@ -1,0 +1,31 @@
+name: Docs Screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      ui_url:
+        description: 'UI URL to capture (e.g., http://localhost:3000)'
+        required: true
+        default: 'http://localhost:3000'
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+      - name: Capture screenshots
+        env:
+          UI_URL: ${{ github.event.inputs.ui_url }}
+        run: npm run screenshots
+      - name: Upload screenshots artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cookbook-screenshots
+          path: docs/cookbook/screenshots

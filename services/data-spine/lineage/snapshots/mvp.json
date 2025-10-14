@@ -1,0 +1,58 @@
+{
+  "nodes": {
+    "contract:customer-profile:1.1.0": {
+      "id": "contract:customer-profile:1.1.0",
+      "type": "dataset",
+      "contract": "customer-profile",
+      "version": "1.1.0"
+    },
+    "actor:ingest-batch": {
+      "id": "actor:ingest-batch",
+      "type": "actor",
+      "name": "ingest-batch"
+    },
+    "system:s3://prod-us-east-1/customer-profile": {
+      "id": "system:s3://prod-us-east-1/customer-profile",
+      "type": "system",
+      "location": "s3://prod-us-east-1/customer-profile"
+    },
+    "contract:transaction-events:1.0.0": {
+      "id": "contract:transaction-events:1.0.0",
+      "type": "dataset",
+      "contract": "transaction-events",
+      "version": "1.0.0"
+    },
+    "actor:export-job": {
+      "id": "actor:export-job",
+      "type": "actor",
+      "name": "export-job"
+    },
+    "system:s3://eu-west-1/finance-feed": {
+      "id": "system:s3://eu-west-1/finance-feed",
+      "type": "system",
+      "location": "s3://eu-west-1/finance-feed"
+    }
+  },
+  "edges": [
+    {
+      "id": "edge:1",
+      "from": "actor:ingest-batch",
+      "to": "contract:customer-profile:1.1.0",
+      "via": "system:s3://prod-us-east-1/customer-profile",
+      "action": "ingest",
+      "why": "nightly-sync",
+      "timestamp": "2025-01-15T12:00:00.000Z",
+      "checksum": "checksum-1"
+    },
+    {
+      "id": "edge:2",
+      "from": "actor:export-job",
+      "to": "contract:transaction-events:1.0.0",
+      "via": "system:s3://eu-west-1/finance-feed",
+      "action": "egress",
+      "why": "reg-reporting",
+      "timestamp": "2025-01-15T12:05:00.000Z",
+      "checksum": "checksum-2"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: mc-platform-v041-sovereign-safeguards
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+namespace: mc-platform-v041
+
+resources:
+  - ../../base
+  - sovereign-safeguards-service.yaml
+  - verification-service.yaml
+  - sovereign-configmap.yaml
+  - sovereign-rbac.yaml
+  - sovereign-servicemonitor.yaml
+  - sovereign-prometheusrules.yaml
+
+patchesStrategicMerge:
+  - mc-platform-deployment-patch.yaml
+  - mc-platform-service-patch.yaml
+
+configMapGenerator:
+  - name: sovereign-safeguards-config
+    literals:
+      - SOVEREIGN_SAFEGUARDS_ENABLED=true
+      - INDEPENDENT_VERIFICATION_REQUIRED=true
+      - MINIMUM_VERIFICATION_SOURCES=2
+      - CONTAINMENT_READINESS_REQUIRED=true
+      - LAWFUL_INTEROPERABILITY_REQUIRED=true
+      - REVERSIBLE_AUTONOMY_REQUIRED=true
+      - ENHANCED_AUDITING_ENABLED=true
+      - MAX_REVERSAL_TIME_SECONDS=60
+      - SNAPSHOT_FREQUENCY_SECONDS=300
+      - ENHANCED_MONITORING_ENABLED=true
+      - ETHICS_BOARD_APPROVAL_REQUIRED=true
+      - SAFETY_COMMITTEE_REVIEW_REQUIRED=true
+
+secretGenerator:
+  - name: sovereign-verification-secrets
+    literals:
+      - VERIFICATION_SOURCE_1_API_KEY=placeholder-key-1
+      - VERIFICATION_SOURCE_2_API_KEY=placeholder-key-2
+      - ETHICS_BOARD_WEBHOOK_SECRET=placeholder-ethics-secret
+      - SAFETY_COMMITTEE_WEBHOOK_SECRET=placeholder-safety-secret
+      - AUDIT_SIGNING_KEY=placeholder-audit-key
+
+images:
+  - name: mc-platform
+    newTag: v0.4.1-sovereign-safeguards
+  - name: sovereign-safeguards-service
+    newName: mc-platform/sovereign-safeguards
+    newTag: v0.4.1
+  - name: verification-service
+    newName: mc-platform/verification-service
+    newTag: v0.4.1
+
+commonLabels:
+  app.kubernetes.io/version: v0.4.1
+  app.kubernetes.io/component: sovereign-safeguards
+  mc-platform.version: v0.4.1
+
+commonAnnotations:
+  mc-platform.io/version: v0.4.1
+  mc-platform.io/feature: sovereign-safeguards
+  mc-platform.io/compliance-level: enhanced
