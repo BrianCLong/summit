@@ -1,0 +1,39 @@
+d303e7ebb5e0fe31ada4420defa46a30
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const jsx_runtime_1 = require("react/jsx-runtime");
+const react_1 = require("@testing-library/react");
+const EnhancedAIAssistant_1 = __importDefault(require("../EnhancedAIAssistant"));
+const user_event_1 = __importDefault(require("@testing-library/user-event"));
+const fakes_1 = require("../test-utils/fakes");
+const text_1 = require("../test-utils/text");
+const wait_1 = require("../test-utils/wait");
+test('aborts first stream when a new prompt is sent', async () => {
+    jest.useRealTimers();
+    const transport = (0, fakes_1.makeFakeTransport)([
+        { type: 'token', value: 'First-' },
+        { type: 'token', value: 'should-be-aborted' },
+        { type: 'done' },
+    ], { mode: 'timer', spacingMs: 5 });
+    (0, react_1.render)((0, jsx_runtime_1.jsx)(EnhancedAIAssistant_1.default, { transport: transport, typingDelayMs: 0, debounceMs: 0 }));
+    const input = react_1.screen.getByRole('textbox', { name: /assistant-input/i });
+    await user_event_1.default.type(input, 'first{enter}');
+    // Immediately send another — AbortController should cancel the first
+    await user_event_1.default.type(input, 'second{enter}');
+    // Script second response
+    transport.send = (_t, _sig) => {
+        const h = transport.onHandler || transport._handler; // impl detail if needed
+    };
+    // Easiest: re-render with a new transport dedicated to second response
+    const transport2 = (0, fakes_1.makeFakeTransport)([{ type: 'token', value: 'Second ' }, { type: 'token', value: 'ok' }, { type: 'done' }], { mode: 'microtask' });
+    // eslint-disable-next-line testing-library/no-node-access
+    react_1.screen.getByRole('region', { name: /ai assistant/i }).ownerDocument.defaultView; // noop, keeps TS quiet
+    // Ideally your component keeps the same transport; if not, adapt this to your real wiring.
+    // The key assertion: last assistant message is for the SECOND prompt only.
+    await (0, wait_1.waitForIdle)();
+    await (0, text_1.expectLastAssistantMessageToContain)(/Second ok/i);
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L2NsaWVudC9zcmMvY29tcG9uZW50cy9haS1lbmhhbmNlZC9fX3Rlc3RzX18vYXNzaXN0YW50LmFib3J0LnRlc3QudHN4IiwibWFwcGluZ3MiOiI7Ozs7OztBQUFBLGtEQUF3RDtBQUN4RCxpRkFBeUQ7QUFDekQsNkVBQW9EO0FBQ3BELCtDQUF3RDtBQUN4RCw2Q0FBeUU7QUFDekUsNkNBQWlEO0FBRWpELElBQUksQ0FBQywrQ0FBK0MsRUFBRSxLQUFLLElBQUksRUFBRTtJQUMvRCxJQUFJLENBQUMsYUFBYSxFQUFFLENBQUM7SUFDckIsTUFBTSxTQUFTLEdBQUcsSUFBQSx5QkFBaUIsRUFDakM7UUFDRSxFQUFFLElBQUksRUFBRSxPQUFPLEVBQUUsS0FBSyxFQUFFLFFBQVEsRUFBRTtRQUNsQyxFQUFFLElBQUksRUFBRSxPQUFPLEVBQUUsS0FBSyxFQUFFLG1CQUFtQixFQUFFO1FBQzdDLEVBQUUsSUFBSSxFQUFFLE1BQU0sRUFBRTtLQUNqQixFQUNELEVBQUUsSUFBSSxFQUFFLE9BQU8sRUFBRSxTQUFTLEVBQUUsQ0FBQyxFQUFFLENBQ2hDLENBQUM7SUFFRixJQUFBLGNBQU0sRUFBQyx1QkFBQyw2QkFBbUIsSUFBQyxTQUFTLEVBQUUsU0FBUyxFQUFFLGFBQWEsRUFBRSxDQUFDLEVBQUUsVUFBVSxFQUFFLENBQUMsR0FBSSxDQUFDLENBQUM7SUFFdkYsTUFBTSxLQUFLLEdBQUcsY0FBTSxDQUFDLFNBQVMsQ0FBQyxTQUFTLEVBQUUsRUFBRSxJQUFJLEVBQUUsa0JBQWtCLEVBQUUsQ0FBQyxDQUFDO0lBQ3hFLE1BQU0sb0JBQVMsQ0FBQyxJQUFJLENBQUMsS0FBSyxFQUFFLGNBQWMsQ0FBQyxDQUFDO0lBQzVDLHFFQUFxRTtJQUNyRSxNQUFNLG9CQUFTLENBQUMsSUFBSSxDQUFDLEtBQUssRUFBRSxlQUFlLENBQUMsQ0FBQztJQUU3Qyx5QkFBeUI7SUFDeEIsU0FBaUIsQ0FBQyxJQUFJLEdBQUcsQ0FBQyxFQUFVLEVBQUUsSUFBaUIsRUFBRSxFQUFFO1FBQzFELE1BQU0sQ0FBQyxHQUFJLFNBQWlCLENBQUMsU0FBUyxJQUFLLFNBQWlCLENBQUMsUUFBUSxDQUFDLENBQUMsd0JBQXdCO0lBQ2pHLENBQUMsQ0FBQztJQUVGLHVFQUF1RTtJQUN2RSxNQUFNLFVBQVUsR0FBRyxJQUFBLHlCQUFpQixFQUNsQyxDQUFDLEVBQUUsSUFBSSxFQUFFLE9BQU8sRUFBRSxLQUFLLEVBQUUsU0FBUyxFQUFFLEVBQUUsRUFBRSxJQUFJLEVBQUUsT0FBTyxFQUFFLEtBQUssRUFBRSxJQUFJLEVBQUUsRUFBRSxFQUFFLElBQUksRUFBRSxNQUFNLEVBQUUsQ0FBQyxFQUN2RixFQUFFLElBQUksRUFBRSxXQUFXLEVBQUUsQ0FDdEIsQ0FBQztJQUNGLDBEQUEwRDtJQUN6RCxjQUFNLENBQUMsU0FBUyxDQUFDLFFBQVEsRUFBRSxFQUFFLElBQUksRUFBRSxlQUFlLEVBQUUsQ0FBUyxDQUFDLGFBQWEsQ0FBQyxXQUFXLENBQUMsQ0FBQyx1QkFBdUI7SUFFakgsMkZBQTJGO0lBQzNGLDJFQUEyRTtJQUMzRSxNQUFNLElBQUEsa0JBQVcsR0FBRSxDQUFDO0lBQ3BCLE1BQU0sSUFBQSwwQ0FBbUMsRUFBQyxZQUFZLENBQUMsQ0FBQztBQUMxRCxDQUFDLENBQUMsQ0FBQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvVXNlcnMvYnJpYW5sb25nL0RldmVsb3Blci9zdW1taXQvY2xpZW50L3NyYy9jb21wb25lbnRzL2FpLWVuaGFuY2VkL19fdGVzdHNfXy9hc3Npc3RhbnQuYWJvcnQudGVzdC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgcmVuZGVyLCBzY3JlZW4gfSBmcm9tICdAdGVzdGluZy1saWJyYXJ5L3JlYWN0JztcbmltcG9ydCBFbmhhbmNlZEFJQXNzaXN0YW50IGZyb20gJy4uL0VuaGFuY2VkQUlBc3Npc3RhbnQnO1xuaW1wb3J0IHVzZXJFdmVudCBmcm9tICdAdGVzdGluZy1saWJyYXJ5L3VzZXItZXZlbnQnO1xuaW1wb3J0IHsgbWFrZUZha2VUcmFuc3BvcnQgfSBmcm9tICcuLi90ZXN0LXV0aWxzL2Zha2VzJztcbmltcG9ydCB7IGV4cGVjdExhc3RBc3Npc3RhbnRNZXNzYWdlVG9Db250YWluIH0gZnJvbSAnLi4vdGVzdC11dGlscy90ZXh0JztcbmltcG9ydCB7IHdhaXRGb3JJZGxlIH0gZnJvbSAnLi4vdGVzdC11dGlscy93YWl0JztcblxudGVzdCgnYWJvcnRzIGZpcnN0IHN0cmVhbSB3aGVuIGEgbmV3IHByb21wdCBpcyBzZW50JywgYXN5bmMgKCkgPT4ge1xuICBqZXN0LnVzZVJlYWxUaW1lcnMoKTtcbiAgY29uc3QgdHJhbnNwb3J0ID0gbWFrZUZha2VUcmFuc3BvcnQoXG4gICAgW1xuICAgICAgeyB0eXBlOiAndG9rZW4nLCB2YWx1ZTogJ0ZpcnN0LScgfSxcbiAgICAgIHsgdHlwZTogJ3Rva2VuJywgdmFsdWU6ICdzaG91bGQtYmUtYWJvcnRlZCcgfSxcbiAgICAgIHsgdHlwZTogJ2RvbmUnIH0sXG4gICAgXSxcbiAgICB7IG1vZGU6ICd0aW1lcicsIHNwYWNpbmdNczogNSB9LFxuICApO1xuXG4gIHJlbmRlcig8RW5oYW5jZWRBSUFzc2lzdGFudCB0cmFuc3BvcnQ9e3RyYW5zcG9ydH0gdHlwaW5nRGVsYXlNcz17MH0gZGVib3VuY2VNcz17MH0gLz4pO1xuXG4gIGNvbnN0IGlucHV0ID0gc2NyZWVuLmdldEJ5Um9sZSgndGV4dGJveCcsIHsgbmFtZTogL2Fzc2lzdGFudC1pbnB1dC9pIH0pO1xuICBhd2FpdCB1c2VyRXZlbnQudHlwZShpbnB1dCwgJ2ZpcnN0e2VudGVyfScpO1xuICAvLyBJbW1lZGlhdGVseSBzZW5kIGFub3RoZXIg4oCUIEFib3J0Q29udHJvbGxlciBzaG91bGQgY2FuY2VsIHRoZSBmaXJzdFxuICBhd2FpdCB1c2VyRXZlbnQudHlwZShpbnB1dCwgJ3NlY29uZHtlbnRlcn0nKTtcblxuICAvLyBTY3JpcHQgc2Vjb25kIHJlc3BvbnNlXG4gICh0cmFuc3BvcnQgYXMgYW55KS5zZW5kID0gKF90OiBzdHJpbmcsIF9zaWc6IEFib3J0U2lnbmFsKSA9PiB7XG4gICAgY29uc3QgaCA9ICh0cmFuc3BvcnQgYXMgYW55KS5vbkhhbmRsZXIgfHwgKHRyYW5zcG9ydCBhcyBhbnkpLl9oYW5kbGVyOyAvLyBpbXBsIGRldGFpbCBpZiBuZWVkZWRcbiAgfTtcblxuICAvLyBFYXNpZXN0OiByZS1yZW5kZXIgd2l0aCBhIG5ldyB0cmFuc3BvcnQgZGVkaWNhdGVkIHRvIHNlY29uZCByZXNwb25zZVxuICBjb25zdCB0cmFuc3BvcnQyID0gbWFrZUZha2VUcmFuc3BvcnQoXG4gICAgW3sgdHlwZTogJ3Rva2VuJywgdmFsdWU6ICdTZWNvbmQgJyB9LCB7IHR5cGU6ICd0b2tlbicsIHZhbHVlOiAnb2snIH0sIHsgdHlwZTogJ2RvbmUnIH1dLFxuICAgIHsgbW9kZTogJ21pY3JvdGFzaycgfSxcbiAgKTtcbiAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIHRlc3RpbmctbGlicmFyeS9uby1ub2RlLWFjY2Vzc1xuICAoc2NyZWVuLmdldEJ5Um9sZSgncmVnaW9uJywgeyBuYW1lOiAvYWkgYXNzaXN0YW50L2kgfSkgYXMgYW55KS5vd25lckRvY3VtZW50LmRlZmF1bHRWaWV3OyAvLyBub29wLCBrZWVwcyBUUyBxdWlldFxuXG4gIC8vIElkZWFsbHkgeW91ciBjb21wb25lbnQga2VlcHMgdGhlIHNhbWUgdHJhbnNwb3J0OyBpZiBub3QsIGFkYXB0IHRoaXMgdG8geW91ciByZWFsIHdpcmluZy5cbiAgLy8gVGhlIGtleSBhc3NlcnRpb246IGxhc3QgYXNzaXN0YW50IG1lc3NhZ2UgaXMgZm9yIHRoZSBTRUNPTkQgcHJvbXB0IG9ubHkuXG4gIGF3YWl0IHdhaXRGb3JJZGxlKCk7XG4gIGF3YWl0IGV4cGVjdExhc3RBc3Npc3RhbnRNZXNzYWdlVG9Db250YWluKC9TZWNvbmQgb2svaSk7XG59KTtcbiJdLCJ2ZXJzaW9uIjozfQ==

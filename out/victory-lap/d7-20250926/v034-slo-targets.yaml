@@ -1,0 +1,26 @@
+# MC Platform v0.3.4 SLO Targets (Locked from v0.3.3 Victory Lap)
+# Aggressive but achievable targets based on operational excellence
+
+performance_slos:
+  graphql_p95_ms: 350          # Maintained (current: 142ms)
+  aa_lag_p95_seconds: 60       # Maintained (current: 23s)
+  auto_remediation_mttr_minutes: 10  # New aggressive target
+  budget_enforcement_seconds: 120    # New target for E3
+  provenance_query_ms: 200           # New target for E4
+
+safety_slos:
+  autonomy_compensation_24h_percent: 0.5  # Maintained across all tenants
+  privacy_block_rate_percent: 99.5        # Maintained (current: 96.88%)
+  grounding_pass_rate_percent: 95          # Maintained (current: 100%)
+  config_drift_mttr_minutes: 10           # New aggressive target
+
+business_slos:
+  siem_delivery_percent: 95               # Maintained (current: 97.8%)
+  budget_burn_monthly_percent: 80         # Maintained (current: 67.3%)
+  cost_optimization_percent: 15           # New target for E3
+  dp_privacy_budget_utilization: 80       # New target for E1
+
+operational_slos:
+  alert_false_positive_rate_percent: 5    # Target reduction from current 6.4%
+  automation_coverage_percent: 95         # Current excellence score
+  incident_mttr_minutes: 15               # Current performance baseline

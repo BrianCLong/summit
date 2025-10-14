@@ -1,6 +1,6 @@
 /**
  * Enhanced Copilot Orchestrator with Postgres Persistence and Resume
- *
+ * 
  * Features:
  * - Durable state persistence
  * - Resume capability for failed/paused runs
@@ -36,8 +36,8 @@ class CopilotOrchestrator {
     if (resume) {
       // Try to find an existing resumable run
       const resumableRuns = await this.store.findResumableRuns(investigationId);
-      run = resumableRuns.find((r) => r.goalText === goalText);
-
+      run = resumableRuns.find(r => r.goalText === goalText);
+      
       if (run) {
         await this.emit(run.id, null, 'info', 'Resuming existing run');
         return this.resumeRun(run);
@@ -47,7 +47,7 @@ class CopilotOrchestrator {
     // Create new run
     const runId = uuid();
     const plan = generatePlanForGoal(goalId, goalText);
-
+    
     run = {
       id: runId,
       goalId,
@@ -57,9 +57,9 @@ class CopilotOrchestrator {
       plan,
       metadata: {
         createdBy: options.userId || 'system',
-        version: '1.0',
+        version: '1.0'
       },
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     };
 
     await this.store.saveRun(run);
@@ -73,12 +73,13 @@ class CopilotOrchestrator {
         sequenceNumber: i,
         taskType: step.kind,
         inputParams: step.input,
-        status: 'pending',
+        status: 'pending'
       });
     }
 
-    // Start execution asynchronously
-    setImmediate(() => this.executeRun(run.id));
+    // Schedule execution asynchronously
+    this.activeRuns.set(run.id, { state: 'scheduled', startedAt: null });
+    setImmediate(() => this.executeRun(run.id, run));
 
     return run;
   }
@@ -96,8 +97,10 @@ class CopilotOrchestrator {
     run.startedAt = new Date().toISOString();
     await this.store.updateRun(run);
 
+    this.activeRuns.set(run.id, { state: 'scheduled', startedAt: run.startedAt });
+
     // Start execution from failed/pending tasks
-    setImmediate(() => this.executeRun(run.id));
+    setImmediate(() => this.executeRun(run.id, run));
 
     return run;
   }
@@ -105,39 +108,37 @@ class CopilotOrchestrator {
   /**
    * Execute a run with proper error handling and resume support
    */
-  async executeRun(runId) {
-    if (this.activeRuns.has(runId)) {
-      return; // Already executing
+  async executeRun(runId, prefetchedRun = null) {
+    const currentState = this.activeRuns.get(runId);
+    if (currentState && currentState.state === 'running') {
+      return;
     }
 
-    this.activeRuns.set(runId, true);
+    const runStartTimestamp = new Date().toISOString();
+    this.activeRuns.set(runId, { state: 'running', startedAt: runStartTimestamp });
 
     try {
-      const run = await this.store.getRun(runId);
+      const run = prefetchedRun
+        ? { ...prefetchedRun }
+        : await this.store.getRun(runId);
       if (!run) {
         throw new Error(`Run ${runId} not found`);
       }
 
       // Update run status
       run.status = 'running';
-      run.startedAt = run.startedAt || new Date().toISOString();
+      run.startedAt = run.startedAt || runStartTimestamp;
       await this.store.updateRun(run);
       await this.emit(runId, null, 'info', 'Run started');
 
       // Get tasks for this run
       const tasks = await this.store.getTasksForRun(runId);
-
+      
       // Execute tasks sequentially
       for (const task of tasks) {
         // Skip already completed tasks (for resume)
         if (task.status === 'succeeded') {
-          await this.emit(
-            runId,
-            task.id,
-            'info',
-            `Task ${task.taskType} already completed`,
-            task.output,
-          );
+          await this.emit(runId, task.id, 'info', `Task ${task.taskType} already completed`, task.output);
           continue;
         }
 
@@ -149,12 +150,7 @@ class CopilotOrchestrator {
           run.status = 'failed';
           run.finishedAt = new Date().toISOString();
           await this.store.updateRun(run);
-          await this.emit(
-            runId,
-            null,
-            'error',
-            `Run failed at task ${task.taskType}: ${task.error}`,
-          );
+          await this.emit(runId, null, 'error', `Run failed at task ${task.taskType}: ${task.error}`);
           return;
         }
       }
@@ -164,6 +160,7 @@ class CopilotOrchestrator {
       run.finishedAt = new Date().toISOString();
       await this.store.updateRun(run);
       await this.emit(runId, null, 'info', 'Run completed successfully');
+
     } catch (error) {
       const run = await this.store.getRun(runId);
       if (run) {
@@ -200,16 +197,12 @@ class CopilotOrchestrator {
       task.finishedAt = now();
       await this.store.updateTask(task);
       await this.emit(runId, task.id, 'info', `${task.taskType} completed`, output);
+
     } catch (error) {
       // Task failed - check if we should retry
       if (retryCount < maxRetries && this.isRetryableError(error)) {
-        await this.emit(
-          runId,
-          task.id,
-          'warning',
-          `${task.taskType} failed, retrying (${retryCount + 1}/${maxRetries}): ${error.message}`,
-        );
-        await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
+        await this.emit(runId, task.id, 'warning', `${task.taskType} failed, retrying (${retryCount + 1}/${maxRetries}): ${error.message}`);
+        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
         return this.executeTask(runId, task, retryCount + 1);
       }
 
@@ -226,8 +219,8 @@ class CopilotOrchestrator {
    * Execute the actual task logic (placeholder for real implementations)
    */
   async executeTaskLogic(task) {
-    // Simulate async work
-    await new Promise((resolve) => setTimeout(resolve, Math.random() * 2000 + 1000));
+    // Simulate async work with deterministic latency for testing
+    await new Promise(resolve => setTimeout(resolve, 50 + Math.floor(Math.random() * 50)));
 
     switch (task.taskType) {
       case 'NEO4J_QUERY':
@@ -236,24 +229,24 @@ class CopilotOrchestrator {
 
       case 'GRAPH_ANALYTICS':
         // TODO: Call actual graph analytics service
-        return {
+        return { 
           algorithm: task.inputParams,
           nodesProcessed: Math.floor(Math.random() * 1000),
-          completed: true,
+          completed: true 
         };
 
       case 'SUMMARIZE':
         // TODO: Call actual summarization service
-        return {
+        return { 
           summary: `Analysis complete: ${Math.floor(Math.random() * 10)} key findings identified`,
-          confidence: Math.random(),
+          confidence: Math.random() 
         };
 
       case 'ENRICH_DATA':
         // TODO: Call actual enrichment service
         return {
           enrichedEntities: Math.floor(Math.random() * 50),
-          sourcesUsed: ['OSINT', 'Public Records', 'Social Media'],
+          sourcesUsed: ['OSINT', 'Public Records', 'Social Media']
         };
 
       default:
@@ -270,11 +263,11 @@ class CopilotOrchestrator {
       'ETIMEDOUT',
       'ENOTFOUND',
       'Service temporarily unavailable',
-      'Rate limit exceeded',
+      'Rate limit exceeded'
     ];
 
-    return retryableErrors.some(
-      (retryable) => error.message.includes(retryable) || error.code === retryable,
+    return retryableErrors.some(retryable => 
+      error.message.includes(retryable) || error.code === retryable
     );
   }
 
@@ -288,7 +281,7 @@ class CopilotOrchestrator {
       level,
       message,
       payload,
-      ts: new Date().toISOString(),
+      ts: new Date().toISOString()
     };
 
     // Store in database
@@ -302,7 +295,11 @@ class CopilotOrchestrator {
     // Send to Redis Streams for other consumers
     if (this.redis) {
       try {
-        await this.redis.xadd(`copilot:run:${runId}`, '*', 'event', JSON.stringify(event));
+        await this.redis.xadd(
+          `copilot:run:${runId}`,
+          '*',
+          'event', JSON.stringify(event)
+        );
       } catch (error) {
         console.error('Failed to publish to Redis Stream:', error);
       }
@@ -318,14 +315,14 @@ class CopilotOrchestrator {
 
     const tasks = await this.store.getTasksForRun(runId);
     const events = await this.store.listEvents(runId, {
-      limit: options.eventLimit || 100,
+      limit: options.eventLimit || 100
     });
 
     return {
       ...run,
       tasks,
       events,
-      isActive: this.activeRuns.has(runId),
+      isActive: this.activeRuns.has(runId)
     };
   }
 

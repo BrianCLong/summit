@@ -10,7 +10,7 @@ export class KmsSigner implements Signer {
     private client: {
       sign: (id: string, data: Buffer) => Promise<Buffer>;
       verify: (id: string, data: Buffer, sig: Buffer) => Promise<boolean>;
-    },
+    }
   ) {}
   sign(p: Buffer) {
     return this.client.sign(this.keyId, p);
