@@ -1,0 +1,12 @@
+a149907b5b5f69c7257f52e13f5ff1ba
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createServer = createServer;
+const server_1 = __importDefault(require("../../server/server")); // Import the actual app instance
+async function createServer() {
+    return server_1.default; // Return the actual app instance
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3Rlc3RzL2UyZS90ZXN0SGFybmVzcy50cyIsIm1hcHBpbmdzIjoiOzs7OztBQUVBLG9DQUVDO0FBSkQsaUVBQXNDLENBQUMsaUNBQWlDO0FBRWpFLEtBQUssVUFBVSxZQUFZO0lBQ2hDLE9BQU8sZ0JBQUcsQ0FBQyxDQUFDLGlDQUFpQztBQUMvQyxDQUFDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9Vc2Vycy9icmlhbmxvbmcvRGV2ZWxvcGVyL3N1bW1pdC90ZXN0cy9lMmUvdGVzdEhhcm5lc3MudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IGFwcCBmcm9tICcuLi8uLi9zZXJ2ZXIvc2VydmVyJzsgLy8gSW1wb3J0IHRoZSBhY3R1YWwgYXBwIGluc3RhbmNlXG5cbmV4cG9ydCBhc3luYyBmdW5jdGlvbiBjcmVhdGVTZXJ2ZXIoKSB7XG4gIHJldHVybiBhcHA7IC8vIFJldHVybiB0aGUgYWN0dWFsIGFwcCBpbnN0YW5jZVxufSJdLCJ2ZXJzaW9uIjozfQ==
