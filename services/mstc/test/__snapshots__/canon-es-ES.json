@@ -1,0 +1,318 @@
+[
+  {
+    "tag": "finance.credit.loan_shark",
+    "canonical": "préstamos de usura",
+    "locale": "es-ES",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "crédito gota a gota"
+      },
+      {
+        "type": "alias",
+        "value": "prestamistas abusivos"
+      },
+      {
+        "type": "misspelling",
+        "value": "prestamo usurero"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNMV",
+        "note": "Supervisa fraudes piramidales y crédito abusivo en publicidad financiera."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "finance.gambling.sports_betting",
+    "canonical": "apuestas deportivas ilegales",
+    "locale": "es-ES",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "apuesta deportiva ilegal"
+      },
+      {
+        "type": "alias",
+        "value": "casa de apuestas clandestina"
+      },
+      {
+        "type": "slang",
+        "value": "quiniela negra"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNMV",
+        "note": "Supervisa fraudes piramidales y crédito abusivo en publicidad financiera."
+      }
+    ],
+    "confidence": 0.88
+  },
+  {
+    "tag": "finance.scams.ponzi",
+    "canonical": "esquema de inversión Ponzi",
+    "locale": "es-ES",
+    "vertical": "finance",
+    "variants": [
+      {
+        "type": "slang",
+        "value": "chiringuito financiero"
+      },
+      {
+        "type": "alias",
+        "value": "estafa piramidal"
+      },
+      {
+        "type": "misspelling",
+        "value": "ponzy"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "CNMV",
+        "note": "Supervisa fraudes piramidales y crédito abusivo en publicidad financiera."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "health.diseases.sti",
+    "canonical": "cribado de infecciones de transmisión sexual",
+    "locale": "es-ES",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "prueba its"
+      },
+      {
+        "type": "misspelling",
+        "value": "prueba its gratis"
+      },
+      {
+        "type": "alias",
+        "value": "test ets"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AEMPS",
+        "note": "Control de medicamentos sujetos a fiscalización y campañas de salud sexual."
+      }
+    ],
+    "confidence": 0.91
+  },
+  {
+    "tag": "health.meds.contraceptives",
+    "canonical": "píldora anticonceptiva de emergencia",
+    "locale": "es-ES",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "píldora del día después"
+      },
+      {
+        "type": "misspelling",
+        "value": "pildora dia despues"
+      },
+      {
+        "type": "alias",
+        "value": "plan b españa"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AEMPS",
+        "note": "Control de medicamentos sujetos a fiscalización y campañas de salud sexual."
+      }
+    ],
+    "confidence": 0.93
+  },
+  {
+    "tag": "health.meds.opioids",
+    "canonical": "analgésicos opioides",
+    "locale": "es-ES",
+    "vertical": "health",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "opioides recetados"
+      },
+      {
+        "type": "slang",
+        "value": "oxicodona"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AEMPS",
+        "note": "Control de medicamentos sujetos a fiscalización y campañas de salud sexual."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.abuse.cyberbullying",
+    "canonical": "ciberacoso a menores",
+    "locale": "es-ES",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "bullying digital"
+      },
+      {
+        "type": "misspelling",
+        "value": "ciberacoso infantil"
+      },
+      {
+        "type": "slang",
+        "value": "hate online"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AEPD / INCIBE",
+        "note": "Protocolos sobre grooming, ciberacoso y conductas autolesivas en línea."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "minors.exploitation.grooming",
+    "canonical": "grooming en línea a menores",
+    "locale": "es-ES",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "ciberacoso sexual menores"
+      },
+      {
+        "type": "slang",
+        "value": "enganche online"
+      },
+      {
+        "type": "misspelling",
+        "value": "grooming menores"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AEPD / INCIBE",
+        "note": "Protocolos sobre grooming, ciberacoso y conductas autolesivas en línea."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "minors.suicide.self_harm",
+    "canonical": "incitación a la autolesión",
+    "locale": "es-ES",
+    "vertical": "minors",
+    "variants": [
+      {
+        "type": "misspelling",
+        "value": "autolesion"
+      },
+      {
+        "type": "slang",
+        "value": "foro suicidio"
+      },
+      {
+        "type": "alias",
+        "value": "reto autolesivo"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "AEPD / INCIBE",
+        "note": "Protocolos sobre grooming, ciberacoso y conductas autolesivas en línea."
+      }
+    ],
+    "confidence": 0.94
+  },
+  {
+    "tag": "workplace.discrimination.equal_pay",
+    "canonical": "discriminación salarial",
+    "locale": "es-ES",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "brecha salarial"
+      },
+      {
+        "type": "slang",
+        "value": "igualdad retributiva"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Inspección de Trabajo",
+        "note": "Vigila acoso laboral, igualdad retributiva y violencia en centros de trabajo."
+      }
+    ],
+    "confidence": 0.9
+  },
+  {
+    "tag": "workplace.harassment.sexual",
+    "canonical": "acoso sexual laboral",
+    "locale": "es-ES",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "acoso en el trabajo"
+      },
+      {
+        "type": "misspelling",
+        "value": "acoso sexua"
+      },
+      {
+        "type": "slang",
+        "value": "chantaje sexual oficina"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Inspección de Trabajo",
+        "note": "Vigila acoso laboral, igualdad retributiva y violencia en centros de trabajo."
+      }
+    ],
+    "confidence": 0.95
+  },
+  {
+    "tag": "workplace.violence.threats",
+    "canonical": "amenaza de violencia laboral",
+    "locale": "es-ES",
+    "vertical": "workplace",
+    "variants": [
+      {
+        "type": "alias",
+        "value": "amenaza en el trabajo"
+      },
+      {
+        "type": "slang",
+        "value": "pelea oficina"
+      },
+      {
+        "type": "misspelling",
+        "value": "violencia laboral"
+      }
+    ],
+    "regulatorNotes": [
+      {
+        "regulator": "Inspección de Trabajo",
+        "note": "Vigila acoso laboral, igualdad retributiva y violencia en centros de trabajo."
+      }
+    ],
+    "confidence": 0.92
+  }
+]

@@ -5,9 +5,11 @@ on:
   workflow_run:
     workflows: ["🚢 Release Captain"]
     types: [completed]
-  schedule:
-    # Monitor health every 5 minutes after deployments
-    - cron: '*/5 * * * *'
+  workflow_dispatch:  # Allow manual runs during stabilization
+  # Disabled scheduled trigger until production environment is configured
+  # schedule:
+  #   # Monitor health every 5 minutes after deployments
+  #   - cron: '*/5 * * * *'
 
 # Prevent concurrent rollback operations
 concurrency:
@@ -99,7 +101,7 @@ jobs:
 
   health-monitor:
     name: 🏥 Health Monitor
-    if: github.event_name == 'schedule'
+    if: false  # Belt-and-suspenders guard during stabilization
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:

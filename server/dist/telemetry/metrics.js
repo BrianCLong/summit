@@ -8,44 +8,6 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
  * IntelGraph Metrics Manager
  */
 export class IntelGraphMetrics {
-    static instance;
-    meter;
-    prometheusExporter;
-    // Core Application Metrics
-    orchestrationRequests;
-    orchestrationDuration;
-    orchestrationErrors;
-    activeConnections;
-    activeSessions;
-    // AI Model Metrics
-    aiModelRequests;
-    aiModelDuration;
-    aiModelErrors;
-    aiModelCosts;
-    thompsonSamplingRewards;
-    // Graph Database Metrics
-    graphOperations;
-    graphQueryDuration;
-    graphConnections;
-    graphEntities;
-    graphRelations;
-    // Premium Routing Metrics
-    premiumRoutingDecisions;
-    premiumBudgetUtilization;
-    premiumCostSavings;
-    // Security Metrics
-    securityEvents;
-    complianceGateDecisions;
-    authenticationAttempts;
-    authorizationDecisions;
-    // Business Metrics
-    investigationsCreated;
-    dataSourcesActive;
-    webScrapingRequests;
-    synthesisOperations;
-    // System Metrics
-    memoryUsage;
-    cpuUsage;
     constructor() {
         this.setupMetrics();
     }
@@ -284,3 +246,4 @@ process.on('SIGTERM', async () => {
     await metricsInstance.shutdown();
 });
 export default metricsInstance;
+//# sourceMappingURL=metrics.js.map
