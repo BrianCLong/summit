@@ -1,0 +1,27 @@
+- tenant: acme
+  purpose: analytics
+  rules:
+    - field: ssn
+      method: tokenize
+      allowReveal: false
+    - field: email
+      method: hash
+      allowReveal: false
+- tenant: acme
+  purpose: support
+  rules:
+    - field: ticketId
+      method: tokenize
+      allowReveal: true
+    - field: internalNote
+      method: tokenize
+      allowReveal: false
+- tenant: omni
+  purpose: analytics
+  rules:
+    - field: accountNumber
+      method: tokenize
+      allowReveal: true
+    - field: segment
+      method: passthrough
+      allowReveal: true
