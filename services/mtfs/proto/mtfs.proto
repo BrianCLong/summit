@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package mtfs;
+
+message JobSubmission {
+  string tenant_id = 1;
+  string job_class = 2;
+  string policy_tier = 3;
+  uint64 resource_units = 4;
+  double weight = 5;
+}
+
+message JobSubmitResponse {
+  uint64 job_id = 1;
+}
+
+message NextAllocationRequest {}
+
+message Allocation {
+  uint64 job_id = 1;
+  string tenant_id = 2;
+  string job_class = 3;
+  string policy_tier = 4;
+  uint64 allocated_units = 5;
+  string snapshot_json = 6;
+  string signature = 7;
+  uint64 allocation_id = 8;
+  bool sla_breach = 9;
+  uint64 wait_rounds = 10;
+}
+
+message SnapshotStreamResponse {
+  repeated Allocation snapshots = 1;
+}
+
+message WeightOverride {
+  string tenant_id = 1;
+  double weight = 2;
+}
+
+message SimulationRequest {
+  repeated WeightOverride overrides = 1;
+  uint32 steps = 2;
+}
+
+message SimulationResponse {
+  repeated Allocation allocations = 1;
+}
+
+service MtfsService {
+  rpc SubmitJob(JobSubmission) returns (JobSubmitResponse);
+  rpc NextAllocation(NextAllocationRequest) returns (Allocation);
+  rpc StreamSnapshots(NextAllocationRequest) returns (SnapshotStreamResponse);
+  rpc Simulate(SimulationRequest) returns (SimulationResponse);
+}
