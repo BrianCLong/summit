@@ -1,4 +1,0 @@
-{
-  "title": "Multi-Region",
-  "panels": ["rto", "rpo", "replicationLag", "leaderState"]
-}
