@@ -9,7 +9,7 @@ function ensureRole(user, allowedRoles = []) {
   if (!user) throw new Error('Not authenticated');
   if (allowedRoles.length === 0) return true;
   const role = (user.role || '').toUpperCase();
-  if (!allowedRoles.map((r) => r.toUpperCase()).includes(role)) {
+  if (!allowedRoles.map(r => r.toUpperCase()).includes(role)) {
     const err = new Error('Forbidden');
     err.code = 'FORBIDDEN';
     throw err;
@@ -29,7 +29,7 @@ const resolvers = {
           ORDER BY a.createdAt DESC
         `;
         const result = await session.run(cypher, { entityId: parent.id });
-        const annotations = result.records.map((record) => record.get('annotation'));
+        const annotations = result.records.map(record => record.get('annotation'));
 
         // Filter annotations based on OPA policy
         const filteredAnnotations = [];
@@ -62,7 +62,7 @@ const resolvers = {
           ORDER BY a.createdAt DESC
         `;
         const result = await session.run(cypher, { edgeId: parent.id });
-        const annotations = result.records.map((record) => record.get('annotation'));
+        const annotations = result.records.map(record => record.get('annotation'));
 
         // Filter annotations based on OPA policy
         const filteredAnnotations = [];
@@ -132,13 +132,7 @@ const resolvers = {
         // Audit trail
         await pg.query(
           'INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5)',
-          [
-            user.id,
-            'CREATE_ANNOTATION',
-            'Annotation',
-            annotation.id,
-            { entityId, content: input.content, enclave: input.enclave },
-          ],
+          [user.id, 'CREATE_ANNOTATION', 'Annotation', annotation.id, { entityId, content: input.content, enclave: input.enclave }]
         );
 
         return annotation;
@@ -199,13 +193,7 @@ const resolvers = {
         // Audit trail
         await pg.query(
           'INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5)',
-          [
-            user.id,
-            'CREATE_ANNOTATION',
-            'Annotation',
-            annotation.id,
-            { edgeId, content: input.content, enclave: input.enclave },
-          ],
+          [user.id, 'CREATE_ANNOTATION', 'Annotation', annotation.id, { edgeId, content: input.content, enclave: input.enclave }]
         );
 
         return annotation;
@@ -240,12 +228,7 @@ const resolvers = {
         const targetEnclave = input.enclave !== undefined ? input.enclave : currentEnclave;
 
         // OPA check for update permission
-        const isAllowed = await evaluateOPA(
-          'update',
-          user,
-          { enclave: targetEnclave, createdBy: createdBy },
-          {},
-        );
+        const isAllowed = await evaluateOPA('update', user, { enclave: targetEnclave, createdBy: createdBy }, {});
         if (!isAllowed) {
           throw new Error('Forbidden: Not allowed to update this annotation or change its enclave');
         }
@@ -286,7 +269,7 @@ const resolvers = {
         // Audit trail
         await pg.query(
           'INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5)',
-          [user.id, 'UPDATE_ANNOTATION', 'Annotation', annotation.id, { updates: input }],
+          [user.id, 'UPDATE_ANNOTATION', 'Annotation', annotation.id, { updates: input }]
         );
 
         return annotation;
@@ -318,12 +301,7 @@ const resolvers = {
         const createdBy = fetchResult.records[0].get('createdBy');
 
         // OPA check for delete permission
-        const isAllowed = await evaluateOPA(
-          'delete',
-          user,
-          { enclave: currentEnclave, createdBy: createdBy },
-          {},
-        );
+        const isAllowed = await evaluateOPA('delete', user, { enclave: currentEnclave, createdBy: createdBy }, {});
         if (!isAllowed) {
           throw new Error('Forbidden: Not allowed to delete this annotation');
         }
@@ -343,7 +321,7 @@ const resolvers = {
         // Audit trail
         await pg.query(
           'INSERT INTO audit_events(actor_id, action, target_type, target_id, metadata) VALUES ($1,$2,$3,$4,$5)',
-          [user.id, 'DELETE_ANNOTATION', 'Annotation', id, {}],
+          [user.id, 'DELETE_ANNOTATION', 'Annotation', id, {}]
         );
 
         return deletedCount > 0;

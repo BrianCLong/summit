@@ -1,21 +1,10 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import babel from 'vite-plugin-babel'; // Added import
-import path from 'path';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
 
 export default defineConfig({
   plugins: [
     react(),
-    babel({
-      filter: /react-speech-recognition/, // Only apply to this module
-      babelConfig: {
-        presets: [
-          ['@babel/preset-env', { targets: { node: 'current' } }],
-          ['@babel/preset-react', { runtime: 'automatic' }],
-        ],
-        plugins: ['@babel/plugin-transform-runtime'],
-      },
-    }),
   ],
   resolve: {
     alias: {
@@ -50,4 +39,4 @@ export default defineConfig({
     setupFiles: './src/tests/setup.js',
     exclude: ['**/*.spec.ts', 'tests/e2e/**', '**/node_modules/**'],
   },
-});
+})

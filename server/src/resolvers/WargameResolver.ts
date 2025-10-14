@@ -8,7 +8,7 @@ import {
   StrategicResponsePlaybook,
 } from '../generated/graphql-types';
 import { getNeo4jDriver } from '../db/neo4j';
-import { randomUUID as uuidv4 } from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
 const PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:8001';
@@ -27,14 +27,9 @@ export class WargameResolver {
     console.log('Fetching telemetry for scenario:', scenarioId, 'from Neo4j');
     const session = this.driver.session();
     try {
-      const query =
-        'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_TELEMETRY]->(t:SocialMediaPost) RETURN t SKIP $offset LIMIT $limit';
-      const result = await session.run(query, {
-        scenarioId,
-        offset: offset || 0,
-        limit: limit || 1000,
-      });
-      return result.records.map((record) => record.get('t').properties as SocialMediaTelemetry);
+      const query = 'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_TELEMETRY]->(t:SocialMediaPost) RETURN t SKIP $offset LIMIT $limit';
+      const result = await session.run(query, { scenarioId, offset: offset || 0, limit: limit || 1000 });
+      return result.records.map(record => record.get('t').properties as SocialMediaTelemetry);
     } finally {
       await session.close();
     }
@@ -50,10 +45,9 @@ export class WargameResolver {
     console.log('Fetching adversary intent estimates for scenario:', scenarioId, 'from Neo4j');
     const session = this.driver.session();
     try {
-      const query =
-        'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_INTENT_ESTIMATE]->(i:AdversaryIntent) RETURN i';
+      const query = 'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_INTENT_ESTIMATE]->(i:AdversaryIntent) RETURN i';
       const result = await session.run(query, { scenarioId });
-      return result.records.map((record) => record.get('i').properties as AdversaryIntentEstimate);
+      return result.records.map(record => record.get('i').properties as AdversaryIntentEstimate);
     } finally {
       await session.close();
     }
@@ -69,10 +63,9 @@ export class WargameResolver {
     console.log('Fetching narrative heatmap data for scenario:', scenarioId, 'from Neo4j');
     const session = this.driver.session();
     try {
-      const query =
-        'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_HEATMAP_DATA]->(h:NarrativeHeatmap) RETURN h';
+      const query = 'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_HEATMAP_DATA]->(h:NarrativeHeatmap) RETURN h';
       const result = await session.run(query, { scenarioId });
-      return result.records.map((record) => record.get('h').properties as NarrativeHeatmapData);
+      return result.records.map(record => record.get('h').properties as NarrativeHeatmapData);
     } finally {
       await session.close();
     }
@@ -88,12 +81,9 @@ export class WargameResolver {
     console.log('Fetching strategic response playbooks for scenario:', scenarioId, 'from Neo4j');
     const session = this.driver.session();
     try {
-      const query =
-        'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_PLAYBOOK]->(p:StrategicPlaybook) RETURN p';
+      const query = 'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_PLAYBOOK]->(p:StrategicPlaybook) RETURN p';
       const result = await session.run(query, { scenarioId });
-      return result.records.map(
-        (record) => record.get('p').properties as StrategicResponsePlaybook,
-      );
+      return result.records.map(record => record.get('p').properties as StrategicResponsePlaybook);
     } finally {
       await session.close();
     }
@@ -130,7 +120,7 @@ export class WargameResolver {
     try {
       const query = 'MATCH (s:CrisisScenario) RETURN s ORDER BY s.createdAt DESC';
       const result = await session.run(query);
-      return result.records.map((record) => record.get('s').properties as CrisisScenario);
+      return result.records.map(record => record.get('s').properties as CrisisScenario);
     } finally {
       await session.close();
     }
@@ -165,44 +155,11 @@ export class WargameResolver {
           createdAt,
           updatedAt,
           simulationParameters: input.simulationParameters,
-        },
+        }
       );
-
+      
       const newScenario = createScenarioResult.records[0].get('s').properties as CrisisScenario;
       return newScenario;
-    } finally {
-      await session.close();
-    }
-  }
-
-  async updateCrisisScenario(
-    _parent: any,
-    { id, input }: { id: string; input: Partial<CrisisScenarioInput> },
-    _context: GraphQLContext,
-  ): Promise<CrisisScenario | undefined> {
-    // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-    console.log('Updating crisis scenario:', id, 'with input:', input);
-    const session = this.driver.session();
-    try {
-      const updatedAt = new Date().toISOString();
-      const updateQuery = `
-        MATCH (s:CrisisScenario {id: $id})
-        SET s.updatedAt = $updatedAt
-        ${input.crisisType ? ', s.crisisType = $crisisType' : ''}
-        ${input.simulationParameters ? ', s.simulationParameters = $simulationParameters' : ''}
-        RETURN s
-      `;
-      const result = await session.run(updateQuery, {
-        id,
-        updatedAt,
-        crisisType: input.crisisType,
-        simulationParameters: input.simulationParameters,
-      });
-
-      if (result.records.length > 0) {
-        return result.records[0].get('s').properties as CrisisScenario;
-      }
-      return undefined;
     } finally {
       await session.close();
     }
@@ -217,9 +174,10 @@ export class WargameResolver {
     console.log('Deleting crisis scenario:', id, 'from Neo4j');
     const session = this.driver.session();
     try {
-      const result = await session.run('MATCH (s:CrisisScenario {id: $id}) DETACH DELETE s', {
-        id,
-      });
+      const result = await session.run(
+        'MATCH (s:CrisisScenario {id: $id}) DETACH DELETE s',
+        { id }
+      );
       return result.summary.counters.nodesDeleted > 0;
     } finally {
       await session.close();

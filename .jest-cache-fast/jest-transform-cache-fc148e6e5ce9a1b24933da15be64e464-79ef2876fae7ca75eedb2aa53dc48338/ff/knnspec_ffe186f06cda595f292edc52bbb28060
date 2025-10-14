@@ -1,0 +1,9 @@
+3e3042e9be8e5d16ab7d0075e4e5c571
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const models_1 = require("../src/conductor/models");
+test("knn returns neighbors (empty without data)", async () => {
+    const r = await (0, models_1.knn)("acme", "entity-1", 5);
+    expect(Array.isArray(r)).toBe(true);
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci90ZXN0cy9rbm4uc3BlYy50cyIsIm1hcHBpbmdzIjoiOztBQUFBLG9EQUE4QztBQUU5QyxJQUFJLENBQUMsNENBQTRDLEVBQUUsS0FBSyxJQUFJLEVBQUU7SUFDNUQsTUFBTSxDQUFDLEdBQUcsTUFBTSxJQUFBLFlBQUcsRUFBQyxNQUFNLEVBQUUsVUFBVSxFQUFFLENBQUMsQ0FBQyxDQUFDO0lBQzNDLE1BQU0sQ0FBQyxLQUFLLENBQUMsT0FBTyxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDO0FBQ3RDLENBQUMsQ0FBQyxDQUFDIiwibmFtZXMiOltdLCJzb3VyY2VzIjpbIi9Vc2Vycy9icmlhbmxvbmcvRGV2ZWxvcGVyL3N1bW1pdC9zZXJ2ZXIvdGVzdHMva25uLnNwZWMudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsga25uIH0gZnJvbSBcIi4uL3NyYy9jb25kdWN0b3IvbW9kZWxzXCI7XG5cbnRlc3QoXCJrbm4gcmV0dXJucyBuZWlnaGJvcnMgKGVtcHR5IHdpdGhvdXQgZGF0YSlcIiwgYXN5bmMgKCkgPT4ge1xuICBjb25zdCByID0gYXdhaXQga25uKFwiYWNtZVwiLCBcImVudGl0eS0xXCIsIDUpO1xuICBleHBlY3QoQXJyYXkuaXNBcnJheShyKSkudG9CZSh0cnVlKTtcbn0pO1xuXG4iXSwidmVyc2lvbiI6M30=

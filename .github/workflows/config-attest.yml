@@ -1,0 +1,107 @@
+name: config-attestation
+on:
+  pull_request:
+    paths:
+      - 'charts/**'
+      - 'deploy/**'
+      - 'ops/**'
+  push:
+    branches: [main, 'release/**']
+  workflow_dispatch:
+    inputs:
+      change_approved:
+        description: 'Approve config changes (CHANGE_APPROVED=1)'
+        required: false
+        default: 'false'
+
+jobs:
+  config-attestation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Need previous commit for drift detection
+
+      - name: Install Python dependencies
+        run: pip3 install pyyaml
+
+      - name: Create baseline snapshot (if not exists)
+        run: |
+          BASELINE_PATH="evidence/v0.3.3/config/config-baseline.json"
+          if [[ ! -f "$BASELINE_PATH" ]]; then
+            echo "Creating baseline config snapshot..."
+            python3 ops/config-attest.py snapshot --out "$BASELINE_PATH"
+            echo "baseline_created=true" >> $GITHUB_ENV
+          else
+            echo "baseline_created=false" >> $GITHUB_ENV
+          fi
+
+      - name: Create current snapshot
+        run: |
+          python3 ops/config-attest.py snapshot --out "evidence/v0.3.3/config/config-current.json"
+
+      - name: Check for config drift
+        id: drift_check
+        run: |
+          BASELINE_PATH="evidence/v0.3.3/config/config-baseline.json"
+          CURRENT_PATH="evidence/v0.3.3/config/config-current.json"
+
+          if [[ "${{ env.baseline_created }}" == "true" ]]; then
+            echo "✅ Baseline created - no drift check needed"
+            echo "drift_detected=false" >> $GITHUB_OUTPUT
+          else
+            if python3 ops/config-attest.py verify "$BASELINE_PATH"; then
+              echo "✅ No config drift detected"
+              echo "drift_detected=false" >> $GITHUB_OUTPUT
+            else
+              echo "⚠️ Config drift detected"
+              echo "drift_detected=true" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Check change approval
+        if: steps.drift_check.outputs.drift_detected == 'true'
+        run: |
+          CHANGE_APPROVED="${{ github.event.inputs.change_approved }}"
+          if [[ "$CHANGE_APPROVED" != "true" && "$CHANGE_APPROVED" != "1" ]]; then
+            echo "❌ Config drift detected but not approved"
+            echo "To approve changes, re-run this workflow with CHANGE_APPROVED=1"
+            echo ""
+            echo "Detected changes:"
+            python3 ops/config-attest.py verify evidence/v0.3.3/config/config-baseline.json || true
+            exit 1
+          else
+            echo "✅ Config drift approved by operator"
+          fi
+
+      - name: Sign current config (on main/release)
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          python3 ops/config-attest.py sign "evidence/v0.3.3/config/config-current.json" \
+            --out "evidence/v0.3.3/config/config-signature.txt"
+
+      - name: Update baseline (on approved changes)
+        if: steps.drift_check.outputs.drift_detected == 'true' && (github.event.inputs.change_approved == 'true' || github.event.inputs.change_approved == '1')
+        run: |
+          cp "evidence/v0.3.3/config/config-current.json" "evidence/v0.3.3/config/config-baseline.json"
+          echo "✅ Baseline updated with approved changes"
+
+      - name: Upload config attestation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: config-attestation-${{ github.run_id }}
+          path: |
+            evidence/v0.3.3/config/*.json
+            evidence/v0.3.3/config/*.txt
+          retention-days: 30
+
+      - name: Summary
+        run: |
+          echo "🔐 Config Attestation Summary"
+          echo "============================="
+          echo "✅ Current snapshot: evidence/v0.3.3/config/config-current.json"
+          if [[ -f "evidence/v0.3.3/config/config-signature.txt" ]]; then
+            echo "✅ Signature: evidence/v0.3.3/config/config-signature.txt"
+          fi
+          echo "📊 Drift detected: ${{ steps.drift_check.outputs.drift_detected }}"
+          echo "🔧 Change approved: ${{ github.event.inputs.change_approved }}"

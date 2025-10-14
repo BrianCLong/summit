@@ -1,0 +1,120 @@
+- title: A-1: Implement /evidence/register
+  body: Implements POST /evidence/register in prov-ledger; includes hashing & metadata persistence.
+  labels: [feat]
+  assignees: [backend]
+  milestone: Proof-First Core GA
+- title: A-2: Transform recorder middleware
+  body: Middleware to log operation+model+config checksum for each transform.
+  labels: [feat]
+  assignees: [backend]
+  milestone: Proof-First Core GA
+- title: A-3: Export hash-manifest.json (Merkle)
+  body: Generate verifiable manifest tree for exports.
+  labels: [feat]
+  assignees: [backend]
+  milestone: Proof-First Core GA
+- title: A-4: prov-verify CLI
+  body: External verification tool with diffing and nonzero exit on tamper.
+  labels: [tools]
+  assignees: [tools]
+  milestone: Proof-First Core GA
+- title: A-5: Export blocker policy evaluation
+  body: OPA pass-through for export policy with readable block reasons.
+  labels: [security]
+  assignees: [backend]
+  milestone: Proof-First Core GA
+- title: B-1: nl_to_cypher module
+  body: TS lib to compose schema-aware prompts → Cypher + cost estimate.
+  labels: [ai]
+  assignees: [frontend]
+  milestone: Proof-First Core GA
+- title: B-2: Cost estimator & preview panel
+  body: UI panel to preview Cypher + cost before run.
+  labels: [ui]
+  assignees: [frontend]
+  milestone: Proof-First Core GA
+- title: B-3: Sandbox executor + undo/redo
+  body: Sandboxed exec with result preview and reversible ops.
+  labels: [ui]
+  assignees: [frontend]
+  milestone: Proof-First Core GA
+- title: B-4: NL→Cypher corpus + tests
+  body: Corpus and tests achieving ≥95% syntactic validity.
+  labels: [ai]
+  assignees: [qa]
+  milestone: Proof-First Core GA
+- title: C-1: ER candidate generation
+  body: Blocking + pairwise scoring endpoints.
+  labels: [feat]
+  assignees: [backend]
+  milestone: Proof-First Core GA
+- title: C-2: Reversible merges + audit
+  body: Implement /er/merge with rollback + audit trail.
+  labels: [feat]
+  assignees: [backend]
+  milestone: Proof-First Core GA
+- title: C-3: /er/explain endpoint
+  body: Return features and rationale JSON.
+  labels: [feat]
+  assignees: [backend]
+  milestone: Proof-First Core GA
+- title: C-4: ER golden fixtures
+  body: Author fixtures in er/golden/*.json.
+  labels: [data]
+  assignees: [qa]
+  milestone: Proof-First Core GA
+- title: D-1: OTEL + Prom emitters
+  body: Instrument services for traces/metrics.
+  labels: [ops]
+  assignees: [platform]
+  milestone: Proof-First Core GA
+- title: D-2: Dashboards JSON
+  body: Publish p95 latency, errors, CostGuard dashboards.
+  labels: [ops]
+  assignees: [platform]
+  milestone: Proof-First Core GA
+- title: D-3: Cost Guard budgeter + killer
+  body: Plan budget & kill APIs + metrics.
+  labels: [ops]
+  assignees: [platform]
+  milestone: Proof-First Core GA
+- title: D-4: k6 load + alerts
+  body: Load scripts and alert wiring.
+  labels: [ops]
+  assignees: [platform]
+  milestone: Proof-First Core GA
+- title: E-1: Tri-pane shell & routing
+  body: Build /case/:id/explore with panes.
+  labels: [ui]
+  assignees: [frontend]
+  milestone: Proof-First Core GA
+- title: E-2: Sync brushing
+  body: Linked interactions across panes.
+  labels: [ui]
+  assignees: [frontend]
+  milestone: Proof-First Core GA
+- title: E-3: Explain overlay + tooltips
+  body: Provenance + policy overlays and tooltips.
+  labels: [ui]
+  assignees: [frontend]
+  milestone: Proof-First Core GA
+- title: E-4: Cypress benchmarks + screenshots
+  body: Time-to-path benchmark + visual diffs.
+  labels: [qa]
+  assignees: [frontend]
+  milestone: Proof-First Core GA
+- title: F-1: RSS/News connector
+  body: Connector + manifest + tests.
+  labels: [integrations]
+  assignees: [integrations]
+  milestone: Proof-First Core GA
+- title: F-2: STIX/TAXII connector
+  body: Pull indicators → canonical schema.
+  labels: [integrations]
+  assignees: [integrations]
+  milestone: Proof-First Core GA
+- title: F-3: CSV ingest wizard
+  body: Mapping wizard + PII flags.
+  labels: [integrations]
+  assignees: [integrations]
+  milestone: Proof-First Core GA
