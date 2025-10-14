@@ -1,3 +1,0 @@
-schema: 'packages/graphql/schema.graphql'
-documents:
-  - 'apps/frontend/src/**/*.graphql'

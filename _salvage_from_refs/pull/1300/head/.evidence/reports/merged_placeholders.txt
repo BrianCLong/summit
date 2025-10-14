@@ -1,3 +1,0 @@
-./server/src/services/OSINTService.js.MERGED
-./docs/ARCHITECTURE.md.MERGED
-./docs/SECURITY.md.MERGED

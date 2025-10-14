@@ -1,3 +1,7 @@
 replicaCount: 3
 image:
   tag: latest
+
+provenance:
+  # Populate with production Ed25519 public keys for provenance verification
+  publicKeys: []

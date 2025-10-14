@@ -1,9 +1,10 @@
 name: Error Budget Monitoring
 
 on:
-  schedule:
-    # Every 15 minutes during business hours
-    - cron: '*/15 8-18 * * 1-5'
+  # Disabled scheduled trigger until production environment is configured
+  # schedule:
+  #   # Every 15 minutes during business hours
+  #   - cron: '*/15 8-18 * * 1-5'
   workflow_dispatch:
 
 permissions:
@@ -16,6 +17,7 @@ env:
 
 jobs:
   error-budget-check:
+    if: false  # Belt-and-suspenders guard during stabilization
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
