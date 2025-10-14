@@ -13,7 +13,12 @@ on:
         default: "main"
 
 jobs:
+  security-suite:
+    uses: ./.github/workflows/ci-security.yml
+    secrets: inherit
+
   deploy:
+    needs: security-suite
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     permissions:
