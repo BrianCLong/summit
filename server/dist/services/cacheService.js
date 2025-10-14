@@ -1,11 +1,11 @@
 import { createClient } from 'redis';
 import { recHit, recMiss, recSet, cacheLocalSize } from '../metrics/cacheMetrics.js';
 export class CacheService {
-    memoryCache = new Map();
-    redisClient = null;
-    namespace = process.env.CACHE_NAMESPACE || 'maestro';
-    defaultTTL = 300; // 5 minutes default TTL
     constructor() {
+        this.memoryCache = new Map();
+        this.redisClient = null;
+        this.namespace = process.env.CACHE_NAMESPACE || 'maestro';
+        this.defaultTTL = 300; // 5 minutes default TTL
         // Initialize Redis client if available
         try {
             const url = process.env.REDIS_URL || (process.env.REDIS_HOST ? `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT || '6379'}` : undefined);
@@ -187,3 +187,4 @@ export const cacheService = new CacheService();
 setInterval(() => {
     cacheService.cleanup();
 }, 5 * 60 * 1000);
+//# sourceMappingURL=CacheService.js.map

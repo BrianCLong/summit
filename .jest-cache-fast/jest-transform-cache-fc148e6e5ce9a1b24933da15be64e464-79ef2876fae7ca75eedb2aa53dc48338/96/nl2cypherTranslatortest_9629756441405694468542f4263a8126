@@ -1,0 +1,25 @@
+ba01579e8b0f3d826326a55ca4d363af
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const node_fs_1 = require("node:fs");
+const node_path_1 = require("node:path");
+const index_1 = require("../nl2cypher/index");
+describe('nl2cypher corpus', () => {
+    it('produces expected cypher and AST for corpus', () => {
+        const corpusPath = (0, node_path_1.join)(__dirname, '../../../contracts/nl2cypher/prompts.tsv');
+        const lines = (0, node_fs_1.readFileSync)(corpusPath, 'utf-8').trim().split('\n');
+        let success = 0;
+        for (const line of lines) {
+            const [promptPart, astJsonPart, cypherPart] = line.split('\t');
+            const prompt = promptPart.trim();
+            const astExpected = JSON.parse(astJsonPart.trim());
+            const cypherExpected = cypherPart.trim();
+            const result = (0, index_1.nl2cypher)(prompt);
+            expect(result.cypher.trim()).toBe(cypherExpected);
+            expect(result.ast).toEqual(astExpected);
+            success++;
+        }
+        expect(success / lines.length).toBeGreaterThanOrEqual(0.95);
+    });
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci9zcmMvdGVzdHMvbmwyY3lwaGVyVHJhbnNsYXRvci50ZXN0LnRzIiwibWFwcGluZ3MiOiI7O0FBQUEscUNBQXVDO0FBQ3ZDLHlDQUFpQztBQUNqQyw4Q0FBK0M7QUFFL0MsUUFBUSxDQUFDLGtCQUFrQixFQUFFLEdBQUcsRUFBRTtJQUNoQyxFQUFFLENBQUMsNkNBQTZDLEVBQUUsR0FBRyxFQUFFO1FBQ3JELE1BQU0sVUFBVSxHQUFHLElBQUEsZ0JBQUksRUFBQyxTQUFTLEVBQUUsMENBQTBDLENBQUMsQ0FBQztRQUMvRSxNQUFNLEtBQUssR0FBRyxJQUFBLHNCQUFZLEVBQUMsVUFBVSxFQUFFLE9BQU8sQ0FBQyxDQUFDLElBQUksRUFBRSxDQUFDLEtBQUssQ0FBQyxJQUFJLENBQUMsQ0FBQztRQUNuRSxJQUFJLE9BQU8sR0FBRyxDQUFDLENBQUM7UUFDaEIsS0FBSyxNQUFNLElBQUksSUFBSSxLQUFLLEVBQUUsQ0FBQztZQUN6QixNQUFNLENBQUMsVUFBVSxFQUFFLFdBQVcsRUFBRSxVQUFVLENBQUMsR0FBRyxJQUFJLENBQUMsS0FBSyxDQUFDLElBQUksQ0FBQyxDQUFDO1lBQy9ELE1BQU0sTUFBTSxHQUFHLFVBQVUsQ0FBQyxJQUFJLEVBQUUsQ0FBQztZQUNqQyxNQUFNLFdBQVcsR0FBRyxJQUFJLENBQUMsS0FBSyxDQUFDLFdBQVcsQ0FBQyxJQUFJLEVBQUUsQ0FBQyxDQUFDO1lBQ25ELE1BQU0sY0FBYyxHQUFHLFVBQVUsQ0FBQyxJQUFJLEVBQUUsQ0FBQztZQUN6QyxNQUFNLE1BQU0sR0FBRyxJQUFBLGlCQUFTLEVBQUMsTUFBTSxDQUFDLENBQUM7WUFDakMsTUFBTSxDQUFDLE1BQU0sQ0FBQyxNQUFNLENBQUMsSUFBSSxFQUFFLENBQUMsQ0FBQyxJQUFJLENBQUMsY0FBYyxDQUFDLENBQUM7WUFDbEQsTUFBTSxDQUFDLE1BQU0sQ0FBQyxHQUFHLENBQUMsQ0FBQyxPQUFPLENBQUMsV0FBVyxDQUFDLENBQUM7WUFDeEMsT0FBTyxFQUFFLENBQUM7UUFDWixDQUFDO1FBQ0QsTUFBTSxDQUFDLE9BQU8sR0FBRyxLQUFLLENBQUMsTUFBTSxDQUFDLENBQUMsc0JBQXNCLENBQUMsSUFBSSxDQUFDLENBQUM7SUFDOUQsQ0FBQyxDQUFDLENBQUM7QUFDTCxDQUFDLENBQUMsQ0FBQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvVXNlcnMvYnJpYW5sb25nL0RldmVsb3Blci9zdW1taXQvc2VydmVyL3NyYy90ZXN0cy9ubDJjeXBoZXJUcmFuc2xhdG9yLnRlc3QudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgcmVhZEZpbGVTeW5jIH0gZnJvbSAnbm9kZTpmcyc7XG5pbXBvcnQgeyBqb2luIH0gZnJvbSAnbm9kZTpwYXRoJztcbmltcG9ydCB7IG5sMmN5cGhlciB9IGZyb20gJy4uL25sMmN5cGhlci9pbmRleCc7XG5cbmRlc2NyaWJlKCdubDJjeXBoZXIgY29ycHVzJywgKCkgPT4ge1xuICBpdCgncHJvZHVjZXMgZXhwZWN0ZWQgY3lwaGVyIGFuZCBBU1QgZm9yIGNvcnB1cycsICgpID0+IHtcbiAgICBjb25zdCBjb3JwdXNQYXRoID0gam9pbihfX2Rpcm5hbWUsICcuLi8uLi8uLi9jb250cmFjdHMvbmwyY3lwaGVyL3Byb21wdHMudHN2Jyk7XG4gICAgY29uc3QgbGluZXMgPSByZWFkRmlsZVN5bmMoY29ycHVzUGF0aCwgJ3V0Zi04JykudHJpbSgpLnNwbGl0KCdcXG4nKTtcbiAgICBsZXQgc3VjY2VzcyA9IDA7XG4gICAgZm9yIChjb25zdCBsaW5lIG9mIGxpbmVzKSB7XG4gICAgICBjb25zdCBbcHJvbXB0UGFydCwgYXN0SnNvblBhcnQsIGN5cGhlclBhcnRdID0gbGluZS5zcGxpdCgnXFx0Jyk7XG4gICAgICBjb25zdCBwcm9tcHQgPSBwcm9tcHRQYXJ0LnRyaW0oKTtcbiAgICAgIGNvbnN0IGFzdEV4cGVjdGVkID0gSlNPTi5wYXJzZShhc3RKc29uUGFydC50cmltKCkpO1xuICAgICAgY29uc3QgY3lwaGVyRXhwZWN0ZWQgPSBjeXBoZXJQYXJ0LnRyaW0oKTtcbiAgICAgIGNvbnN0IHJlc3VsdCA9IG5sMmN5cGhlcihwcm9tcHQpO1xuICAgICAgZXhwZWN0KHJlc3VsdC5jeXBoZXIudHJpbSgpKS50b0JlKGN5cGhlckV4cGVjdGVkKTtcbiAgICAgIGV4cGVjdChyZXN1bHQuYXN0KS50b0VxdWFsKGFzdEV4cGVjdGVkKTtcbiAgICAgIHN1Y2Nlc3MrKztcbiAgICB9XG4gICAgZXhwZWN0KHN1Y2Nlc3MgLyBsaW5lcy5sZW5ndGgpLnRvQmVHcmVhdGVyVGhhbk9yRXF1YWwoMC45NSk7XG4gIH0pO1xufSk7XG4iXSwidmVyc2lvbiI6M30=

@@ -6,7 +6,6 @@
  */
 import logger from '../utils/logger.js';
 export class AuthorityGuard {
-    static instance;
     static getInstance() {
         if (!AuthorityGuard.instance) {
             AuthorityGuard.instance = new AuthorityGuard();
@@ -205,3 +204,4 @@ export default {
     requireAuthority,
     requireReasonForAccess,
 };
+//# sourceMappingURL=authority.js.map
