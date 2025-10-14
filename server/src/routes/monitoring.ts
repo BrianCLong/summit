@@ -2,6 +2,7 @@
  * Monitoring and observability endpoints
  */
 import express, { Request, Response } from 'express';
+import { z } from 'zod';
 import { register, webVitalValue } from '../monitoring/metrics.js';
 import {
   performHealthCheck,
@@ -14,6 +15,7 @@ import {
   checkMlService,
   checkSystemResources,
 } from '../monitoring/health.js';
+import { recordBusinessEvent, type BusinessMetricEvent } from '../monitoring/businessMetrics.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -202,6 +204,34 @@ router.get('/health/system', (req: Request, res: Response) => {
     res.status(503).json({
       status: 'unhealthy',
       error: error.message,
+    });
+  }
+});
+
+const businessMetricSchema = z.object({
+  type: z.enum(['user_signup', 'api_call', 'revenue']),
+  tenant: z.string().min(1).optional(),
+  plan: z.string().min(1).optional(),
+  service: z.string().min(1).optional(),
+  route: z.string().min(1).optional(),
+  statusCode: z.number().int().optional(),
+  amount: z.number().optional(),
+  currency: z.string().min(1).optional(),
+  metadata: z.record(z.any()).optional(),
+});
+
+router.post('/metrics/business', (req: Request, res: Response) => {
+  try {
+    const payload = businessMetricSchema.parse(req.body) as BusinessMetricEvent;
+    recordBusinessEvent(payload);
+    res.status(202).json({
+      status: 'accepted',
+      recordedAt: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      error: 'Invalid business metric payload',
+      details: error instanceof Error ? error.message : String(error),
     });
   }
 });

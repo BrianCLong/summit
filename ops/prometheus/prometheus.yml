@@ -1,6 +1,113 @@
 global:
   scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+
+rule_files:
+  - prometheus-rule-slo.yaml
+  - rules-business.yaml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
 scrape_configs:
   - job_name: otel-collector
+    honor_labels: true
     static_configs:
-      - targets: ['otel-collector:9464']
+      - targets:
+          - otel-collector:9464
+        labels:
+          service: telemetry
+          tier: control
+
+  - job_name: maestro-api
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - maestro-api:8080
+        labels:
+          service: maestro-api
+          tier: control
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '(.+):.*'
+        target_label: instance
+
+  - job_name: maestro-worker
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - maestro-worker:9400
+        labels:
+          service: maestro-worker
+          tier: data
+
+  - job_name: maestro-gateway
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - maestro-gateway:8081
+        labels:
+          service: maestro-gateway
+          tier: edge
+
+  - job_name: jaeger
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - jaeger:14269
+        labels:
+          service: jaeger
+          tier: telemetry
+
+  - job_name: node-exporter
+    static_configs:
+      - targets:
+          - node-exporter:9100
+        labels:
+          service: node
+          tier: platform
+
+  - job_name: loki
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - loki:3100
+        labels:
+          service: loki
+          tier: logging
+
+  - job_name: elasticsearch
+    metrics_path: /_prometheus/metrics
+    static_configs:
+      - targets:
+          - elasticsearch-apm:9200
+        labels:
+          service: elasticsearch
+          tier: logging
+
+  - job_name: kubernetes-pods
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: 'true'
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        target_label: __address__
+        regex: (.+):(?:[0-9]+);([0-9]+)
+        replacement: $1:$2
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod

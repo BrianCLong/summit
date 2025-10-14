@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: observability
+resources:
+  - monitoring-workloads.yaml
+configMapGenerator:
+  - name: prometheus-config
+    files:
+      - prometheus.yml=../../prometheus/prometheus.yml
+      - prometheus-rule-slo.yaml=../../prometheus/prometheus-rule-slo.yaml
+      - rules-business.yaml=../../prometheus/rules-business.yaml
+  - name: grafana-dashboards
+    files:
+      - monitoring-platform.json=../../grafana/dashboards/monitoring-platform.json
+      - dashboards.yaml=../../grafana/provisioning/dashboards/dashboards.yml
+  - name: alertmanager-config
+    files:
+      - alertmanager.yml=alertmanager.yml
+secretGenerator:
+  - name: grafana-admin
+    literals:
+      - admin-user=admin
+      - admin-password=admin
+generatorOptions:
+  disableNameSuffixHash: true

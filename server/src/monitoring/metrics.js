@@ -29,6 +29,25 @@ const httpRequestsTotal = new client.Counter({
   labelNames: ["method", "route", "status_code"],
 });
 
+// Business KPIs exposed as first-class metrics for the control plane
+const businessUserSignupsTotal = new client.Counter({
+  name: "business_user_signups_total",
+  help: "Total number of customer or workspace signups",
+  labelNames: ["tenant", "plan"],
+});
+
+const businessApiCallsTotal = new client.Counter({
+  name: "business_api_calls_total",
+  help: "API calls attributed to customer activity and billing",
+  labelNames: ["service", "route", "status_code", "tenant"],
+});
+
+const businessRevenueTotal = new client.Counter({
+  name: "business_revenue_total",
+  help: "Recognized revenue amounts in the system's reporting currency",
+  labelNames: ["tenant", "currency"],
+});
+
 // GraphQL metrics
 const graphqlRequestDuration = new client.Histogram({
   name: "graphql_request_duration_seconds",
@@ -299,6 +318,13 @@ const idempotentHitsTotal = new client.Counter({
   help: "Total number of idempotent mutation hits",
 });
 
+// Auto-remediation execution tracking
+const serviceAutoRemediationsTotal = new client.Counter({
+  name: "service_auto_remediations_total",
+  help: "Total number of automated remediation actions executed",
+  labelNames: ["service", "action", "result"],
+});
+
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
@@ -310,6 +336,10 @@ register.registerMetric(graphqlResolverCallsTotal);
 register.registerMetric(webVitalValue);
 register.registerMetric(realtimeConflictsTotal);
 register.registerMetric(idempotentHitsTotal);
+register.registerMetric(businessUserSignupsTotal);
+register.registerMetric(businessApiCallsTotal);
+register.registerMetric(businessRevenueTotal);
+register.registerMetric(serviceAutoRemediationsTotal);
 
 const metrics = {
   graphExpandRequestsTotal,
@@ -373,4 +403,8 @@ export {
   graphqlResolverCallsTotal,
   webVitalValue,
   metrics,
+  businessUserSignupsTotal,
+  businessApiCallsTotal,
+  businessRevenueTotal,
+  serviceAutoRemediationsTotal,
 };
