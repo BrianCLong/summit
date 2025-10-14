@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "sha256",
+  "operations": {
+    "setFeatureFlags": "{{sha256:setFeatureFlags.graphql}}",
+    "setCanaryWeights": "{{sha256:setCanaryWeights.graphql}}",
+    "setSloThresholds": "{{sha256:setSloThresholds.graphql}}",
+    "proposeRemediation": "{{sha256:proposeRemediation.graphql}}",
+    "canaryPromote": "{{sha256:canaryPromote.graphql}}",
+    "canaryHold": "{{sha256:canaryHold.graphql}}",
+    "evidencePack": "{{sha256:evidencePack.graphql}}",
+    "evidenceVerify": "{{sha256:evidenceVerify.graphql}}",
+    "regulatorExport": "{{sha256:regulatorExport.graphql}}",
+    "podrRun": "{{sha256:podrRun.graphql}}"
+  }
+}

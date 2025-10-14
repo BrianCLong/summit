@@ -13,15 +13,15 @@ const createWarRoomSchema = {
         type: 'string',
         required: true,
         minLength: 3,
-        maxLength: 100,
+        maxLength: 100
     },
     description: {
         type: 'string',
-        maxLength: 500,
+        maxLength: 500
     },
     investigationId: {
         type: 'string',
-        required: true,
+        required: true
     },
     participants: {
         type: 'array',
@@ -32,21 +32,21 @@ const createWarRoomSchema = {
                 role: {
                     type: 'string',
                     enum: ['admin', 'lead', 'analyst', 'viewer'],
-                    default: 'analyst',
-                },
-            },
-        },
-    },
+                    default: 'analyst'
+                }
+            }
+        }
+    }
 };
 const updateWarRoomSchema = {
     name: {
         type: 'string',
         minLength: 3,
-        maxLength: 100,
+        maxLength: 100
     },
     description: {
         type: 'string',
-        maxLength: 500,
+        maxLength: 500
     },
     settings: {
         type: 'object',
@@ -54,30 +54,30 @@ const updateWarRoomSchema = {
             maxParticipants: { type: 'number', min: 2, max: 50 },
             allowGuestAccess: { type: 'boolean' },
             recordSession: { type: 'boolean' },
-            autoArchiveAfterHours: { type: 'number', min: 1, max: 168 },
-        },
-    },
+            autoArchiveAfterHours: { type: 'number', min: 1, max: 168 }
+        }
+    }
 };
 const addParticipantSchema = {
     userId: {
         type: 'string',
-        required: true,
+        required: true
     },
     role: {
         type: 'string',
         enum: ['admin', 'lead', 'analyst', 'viewer'],
-        default: 'analyst',
-    },
+        default: 'analyst'
+    }
 };
 const resolveConflictSchema = {
     resolution: {
         type: 'string',
         enum: ['accept', 'reject', 'manual'],
-        required: true,
+        required: true
     },
     selectedOperation: {
-        type: 'object',
-    },
+        type: 'object'
+    }
 };
 const initializeRoutes = (warRoomSyncService, authService) => {
     const router = express.Router();
@@ -439,19 +439,18 @@ const initializeRoutes = (warRoomSyncService, authService) => {
     });
     // Health check for war room service
     router.get('/health', (req, res) => {
-        const activeRooms = warRoomController.warRoomSync
-            ? warRoomController.warRoomSync.warRooms.size
-            : 0;
+        const activeRooms = warRoomController.warRoomSync ? warRoomController.warRoomSync.warRooms.size : 0;
         res.json({
             status: 'healthy',
             timestamp: new Date().toISOString(),
             activeWarRooms: activeRooms,
             service: 'war-room-api',
-            version: '1.0.0',
+            version: '1.0.0'
         });
     });
     return router;
 };
 module.exports = {
-    initializeRoutes,
+    initializeRoutes
 };
+//# sourceMappingURL=warRoomRoutes.js.map

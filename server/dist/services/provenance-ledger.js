@@ -7,7 +7,6 @@ import crypto from 'crypto';
 import { query as timescaleQuery } from '../db/timescale.js';
 import logger from '../utils/logger.js';
 export class ProvenanceLedgerService {
-    static instance;
     static getInstance() {
         if (!ProvenanceLedgerService.instance) {
             ProvenanceLedgerService.instance = new ProvenanceLedgerService();
@@ -368,3 +367,4 @@ export class ProvenanceLedgerService {
     }
 }
 export default ProvenanceLedgerService;
+//# sourceMappingURL=provenance-ledger.js.map

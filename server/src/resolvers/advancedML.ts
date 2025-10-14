@@ -1,6 +1,6 @@
-import { advancedMLService } from '../services/AdvancedMLService';
-import logger from '../utils/logger';
-import { wrapResolversWithPolicy } from './policyWrapper';
+import { advancedMLService } from "../services/AdvancedMLService";
+import { logger } from "../logging";
+import { wrapResolversWithPolicy } from "./policyWrapper";
 
 /**
  * GraphQL resolvers for advanced ML capabilities
@@ -24,7 +24,7 @@ const resolvers = {
           timestamp: new Date().toISOString(),
         };
       } catch (error) {
-        logger.error('Failed to get ML system info', { error: error.message });
+        logger.error("Failed to get ML system info", { error: error.message });
         return {
           healthy: false,
           error: error.message,
@@ -48,7 +48,7 @@ const resolvers = {
           memoryUsage: model.memory_usage,
         }));
       } catch (error) {
-        logger.error('Failed to list ML models', { error: error.message });
+        logger.error("Failed to list ML models", { error: error.message });
         throw new Error(`Failed to list ML models: ${error.message}`);
       }
     },
@@ -69,7 +69,7 @@ const resolvers = {
           timestamp: new Date().toISOString(),
         };
       } catch (error) {
-        logger.error('Failed to get ML metrics', { error: error.message });
+        logger.error("Failed to get ML metrics", { error: error.message });
         throw new Error(`Failed to get ML metrics: ${error.message}`);
       }
     },
@@ -100,11 +100,11 @@ const resolvers = {
     createMLModel: async (_, { input }) => {
       try {
         const modelConfig = {
-          model_type: input.modelType || 'accelerated_gnn',
+          model_type: input.modelType || "accelerated_gnn",
           num_node_features: input.numNodeFeatures || 128,
           hidden_channels: input.hiddenChannels || 256,
           num_classes: input.numClasses || 10,
-          architecture: input.architecture || 'gcn',
+          architecture: input.architecture || "gcn",
           use_quantization: input.useQuantization || false,
           quantization_bits: input.quantizationBits || 8,
           use_quantum: input.useQuantum || false,
@@ -120,7 +120,7 @@ const resolvers = {
           config: modelConfig,
         };
       } catch (error) {
-        logger.error('Failed to create ML model', {
+        logger.error("Failed to create ML model", {
           error: error.message,
           input,
         });
@@ -148,11 +148,11 @@ const resolvers = {
         const message = await advancedMLService.trainModel({
           model_id: modelId,
           config: {
-            model_type: 'accelerated_gnn',
+            model_type: "accelerated_gnn",
             num_node_features: 128,
             hidden_channels: 256,
             num_classes: 10,
-            architecture: 'gcn',
+            architecture: "gcn",
           },
           training_config: config,
           use_distributed: config.use_distributed,
@@ -165,7 +165,7 @@ const resolvers = {
           trainingConfig: config,
         };
       } catch (error) {
-        logger.error('Failed to train ML model', {
+        logger.error("Failed to train ML model", {
           error: error.message,
           modelId,
         });
@@ -202,7 +202,7 @@ const resolvers = {
           device: result.device,
         };
       } catch (error) {
-        logger.error('ML inference failed', { error: error.message, modelId });
+        logger.error("ML inference failed", { error: error.message, modelId });
         return {
           success: false,
           error: error.message,
@@ -214,23 +214,26 @@ const resolvers = {
     /**
      * Optimize ML model for deployment
      */
-    optimizeMLModel: async (_, { modelId, optimizationType, targetPrecision }) => {
+    optimizeMLModel: async (
+      _,
+      { modelId, optimizationType, targetPrecision },
+    ) => {
       try {
         const message = await advancedMLService.optimizeModel(
           modelId,
-          optimizationType || 'torchscript',
-          targetPrecision || 'fp16',
+          optimizationType || "torchscript",
+          targetPrecision || "fp16",
         );
 
         return {
           success: true,
           message,
           modelId,
-          optimizationType: optimizationType || 'torchscript',
-          targetPrecision: targetPrecision || 'fp16',
+          optimizationType: optimizationType || "torchscript",
+          targetPrecision: targetPrecision || "fp16",
         };
       } catch (error) {
-        logger.error('ML model optimization failed', {
+        logger.error("ML model optimization failed", {
           error: error.message,
           modelId,
         });
@@ -248,7 +251,7 @@ const resolvers = {
     runQuantumOptimization: async (_, { input }) => {
       try {
         const result = await advancedMLService.quantumOptimize({
-          problem_type: input.problemType || 'combinatorial',
+          problem_type: input.problemType || "combinatorial",
           cost_function: input.costFunction || {},
           num_qubits: input.numQubits || 8,
           num_iterations: input.numIterations || 100,
@@ -263,7 +266,7 @@ const resolvers = {
           problemType: input.problemType,
         };
       } catch (error) {
-        logger.error('Quantum optimization failed', {
+        logger.error("Quantum optimization failed", {
           error: error.message,
           input,
         });
@@ -301,7 +304,7 @@ const resolvers = {
         const result = await advancedMLService.analyzeGraphWithML(
           nodeFeatures,
           edgeIndex,
-          analysisType || 'node_classification',
+          analysisType || "node_classification",
         );
 
         return {
@@ -315,7 +318,7 @@ const resolvers = {
           insights: generateInsights(result),
         };
       } catch (error) {
-        logger.error('Graph ML analysis failed', {
+        logger.error("Graph ML analysis failed", {
           error: error.message,
           graphId,
         });
@@ -330,7 +333,10 @@ const resolvers = {
     /**
      * Quantum-enhanced graph optimization
      */
-    optimizeGraphWithQuantum: async (_, { graphId, optimizationType, numQubits }) => {
+    optimizeGraphWithQuantum: async (
+      _,
+      { graphId, optimizationType, numQubits },
+    ) => {
       try {
         // Simulate graph data - in production this would come from Neo4j
         const graphData = {
@@ -347,7 +353,7 @@ const resolvers = {
 
         const result = await advancedMLService.optimizeGraphWithQuantum(
           graphData,
-          optimizationType || 'graph_coloring',
+          optimizationType || "graph_coloring",
           numQubits || 8,
         );
 
@@ -362,7 +368,7 @@ const resolvers = {
           recommendations: generateOptimizationRecommendations(result),
         };
       } catch (error) {
-        logger.error('Quantum graph optimization failed', {
+        logger.error("Quantum graph optimization failed", {
           error: error.message,
           graphId,
         });
@@ -387,7 +393,7 @@ const resolvers = {
           modelId,
         };
       } catch (error) {
-        logger.error('Failed to delete ML model', {
+        logger.error("Failed to delete ML model", {
           error: error.message,
           modelId,
         });
@@ -414,7 +420,10 @@ const resolvers = {
   },
 };
 
-export const advancedMLResolvers = wrapResolversWithPolicy('AdvancedML', resolvers);
+export const advancedMLResolvers = wrapResolversWithPolicy(
+  "AdvancedML",
+  resolvers,
+);
 
 /**
  * Generate insights from ML analysis results
@@ -426,25 +435,29 @@ function generateInsights(result: any): string[] {
     const avgConfidence =
       result.confidence_scores.reduce((a: number, b: number) => a + b, 0) /
       result.confidence_scores.length;
-    insights.push(`Average prediction confidence: ${(avgConfidence * 100).toFixed(1)}%`);
+    insights.push(
+      `Average prediction confidence: ${(avgConfidence * 100).toFixed(1)}%`,
+    );
 
     if (avgConfidence > 0.9) {
-      insights.push('High confidence predictions indicate strong model performance');
+      insights.push(
+        "High confidence predictions indicate strong model performance",
+      );
     } else if (avgConfidence < 0.7) {
-      insights.push('Low confidence predictions may require model retraining');
+      insights.push("Low confidence predictions may require model retraining");
     }
   }
 
   if (result.inference_time_ms) {
     if (result.inference_time_ms < 100) {
-      insights.push('Fast inference time suitable for real-time applications');
+      insights.push("Fast inference time suitable for real-time applications");
     } else if (result.inference_time_ms > 1000) {
-      insights.push('Consider model optimization for better performance');
+      insights.push("Consider model optimization for better performance");
     }
   }
 
   if (result.model_info?.quantized) {
-    insights.push('Model uses quantization for optimized memory usage');
+    insights.push("Model uses quantization for optimized memory usage");
   }
 
   return insights;
@@ -457,19 +470,27 @@ function generateOptimizationRecommendations(result: any): string[] {
   const recommendations = [];
 
   if (result.quantum_advantage) {
-    recommendations.push('Quantum optimization provides advantage for this problem size');
+    recommendations.push(
+      "Quantum optimization provides advantage for this problem size",
+    );
   } else {
-    recommendations.push('Consider classical optimization for smaller problems');
+    recommendations.push(
+      "Consider classical optimization for smaller problems",
+    );
   }
 
   if (result.final_cost < 0.1) {
-    recommendations.push('Excellent optimization result achieved');
+    recommendations.push("Excellent optimization result achieved");
   } else if (result.final_cost > 0.5) {
-    recommendations.push('Consider increasing quantum iterations for better results');
+    recommendations.push(
+      "Consider increasing quantum iterations for better results",
+    );
   }
 
   if (result.graph_info.nodes > 100) {
-    recommendations.push('Large graph detected - consider distributed quantum processing');
+    recommendations.push(
+      "Large graph detected - consider distributed quantum processing",
+    );
   }
 
   return recommendations;

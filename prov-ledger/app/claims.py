@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Dict
 import uuid
 
@@ -23,7 +23,7 @@ def create_claim(text: str) -> dict:
         "text": text,
         "normalized": norm,
         "embedding": emb,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.utcnow().isoformat(),
         "evidence": [],
     }
     _claims[cid] = claim

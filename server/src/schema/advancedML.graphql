@@ -346,10 +346,10 @@ type MLRetrainingJob {
 extend type Query {
   # System Information
   mlSystemInfo: MLSystemInfo!
-
+  
   # Model Management
   mlModels: [MLModel!]!
-
+  
   # Metrics and Monitoring
   mlMetrics: MLMetrics!
 
@@ -368,11 +368,14 @@ extend type Mutation {
     targetPrecision: MLTargetPrecision
   ): OptimizeMLModelResponse!
   deleteMLModel(modelId: String!): DeleteMLModelResponse!
-
+  
   # Inference and Analysis
   runMLInference(modelId: String!, graphData: MLGraphData!): MLInferenceResponse!
-  analyzeGraphWithML(graphId: String!, analysisType: MLAnalysisType): GraphMLAnalysisResponse!
-
+  analyzeGraphWithML(
+    graphId: String!
+    analysisType: MLAnalysisType
+  ): GraphMLAnalysisResponse!
+  
   # Quantum Computing
   runQuantumOptimization(input: QuantumOptimizationInput!): QuantumOptimizationResponse!
   optimizeGraphWithQuantum(
@@ -389,10 +392,10 @@ extend type Mutation {
 extend type Subscription {
   # Real-time metrics updates
   mlMetricsUpdates: MLMetrics!
-
+  
   # Model training progress
   modelTrainingProgress(modelId: String!): String!
-
+  
   # System health updates
   mlSystemHealthUpdates: MLSystemInfo!
 }
