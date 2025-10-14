@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IntelGraph Model Catalog",
+  "type": "object",
+  "properties": {
+    "catalog_version": { "type": "string" },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "vendor", "family", "last_verified", "defaults"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "vendor": { "type": "string" },
+          "family": { "type": "string" },
+          "last_verified": { "type": "string", "format": "date" },
+          "labels": { "type": "array", "items": { "type": "string" } },
+          "models": { "type": "array", "items": { "type": "object" } },
+          "open_weights": { "type": "array", "items": { "type": "object" } },
+          "access_and_pricing": { "type": "object" },
+          "capability_highlights": { "type": "array", "items": { "type": "string" } },
+          "defaults": { "type": "object" },
+          "risk_notes": { "type": "array", "items": { "type": "string" } },
+          "policy": {
+            "type": "object",
+            "properties": {
+              "license_class": { "type": "string", "enum": ["MIT-OK", "Open-Data-OK", "Restricted-TOS", "Proprietary-Client", "Embargoed"] },
+              "purpose_tags": { "type": "array", "items": { "type": "string" } },
+              "retention": { "type": "string", "enum": ["ephemeral-7d", "short-30d", "standard-365d", "long-1825d", "legal-hold"] }
+            }
+          },
+          "slo": {
+            "type": "object",
+            "properties": {
+              "api": { "type": "object" },
+              "cost_guardrails": { "type": "object" }
+            }
+          },
+          "sources": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  },
+  "required": ["catalog_version", "models"]
+}

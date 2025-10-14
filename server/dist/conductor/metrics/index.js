@@ -1,10 +1,10 @@
 // Metrics and Observability for MoE Conductor
 // Provides Prometheus metrics, health checks, and performance monitoring
 export class ConductorMetrics {
-    counters = new Map();
-    histograms = new Map();
-    gauges = new Map();
     constructor() {
+        this.counters = new Map();
+        this.histograms = new Map();
+        this.gauges = new Map();
         this.initializeMetrics();
     }
     initializeMetrics() {
@@ -191,7 +191,6 @@ export class ConductorMetrics {
 }
 // Health check utilities
 export class HealthChecker {
-    metrics;
     constructor(metrics) {
         this.metrics = metrics;
     }
@@ -342,3 +341,4 @@ export const healthChecker = new HealthChecker(conductorMetrics);
 export async function getConductorHealth() {
     return await healthChecker.checkHealth();
 }
+//# sourceMappingURL=index.js.map

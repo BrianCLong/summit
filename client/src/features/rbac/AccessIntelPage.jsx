@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { Box, Typography, Button, TextField, Stack } from '@mui/material';
+import React, { useState } from "react";
+import { Box, Typography, Button, TextField, Stack } from "@mui/material";
 
 export default function AccessIntelPage() {
   const [predicted] = useState({ Analyst: 0.8, Admin: 0.2 });
-  const [declared] = useState('Analyst');
-  const [action, setAction] = useState('view-report');
+  const [declared] = useState("Analyst");
+  const [action, setAction] = useState("view-report");
   const [result, setResult] = useState(null);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
 
   const simulate = async () => {
-    const res = await fetch('/rbac/simulate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch("/rbac/simulate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ roleVector: predicted, action }),
     });
     setResult(await res.json());
@@ -40,7 +40,8 @@ export default function AccessIntelPage() {
       {result && (
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2">
-            Would grant: {String(result.granted)} (confidence {result.confidence})
+            Would grant: {String(result.granted)} (confidence{" "}
+            {result.confidence})
           </Typography>
           <Typography variant="body2">Reason: {result.rationale}</Typography>
         </Box>

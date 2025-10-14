@@ -11,7 +11,7 @@ async function fetchExistingIds(pg, ids) {
   if (!ids.length) return new Set();
   const { rows } = await pg.query(
     'SELECT entity_id FROM entity_embeddings WHERE entity_id = ANY($1::text[])',
-    [ids],
+    [ids]
   );
   return new Set(rows.map((r) => r.entity_id));
 }
@@ -59,7 +59,7 @@ async function runOnce(batchSize = 50) {
        WITH e ORDER BY e.updatedAt DESC
        RETURN e.id as id, e.label as label, e.description as description, e.properties as properties
        LIMIT $limit`,
-      params,
+      params
     );
     const all = result.records.map((r) => ({
       id: r.get('id'),
@@ -67,10 +67,7 @@ async function runOnce(batchSize = 50) {
     }));
 
     // Filter to those missing in Postgres
-    const existing = await fetchExistingIds(
-      pg,
-      all.map((x) => x.id),
-    );
+    const existing = await fetchExistingIds(pg, all.map((x) => x.id));
     const todo = all.filter((x) => !existing.has(x.id)).slice(0, batchSize);
     if (todo.length === 0) return { processed: 0 };
 
