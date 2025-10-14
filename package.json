@@ -43,6 +43,7 @@
     "test:unit": "npm run test",
     "test:integration": "jest -c Developer/summit-jest/jest.integration.config.cjs --runInBand --detectOpenHandles --bail=1 --silent",
     "test:api": "cd services/api && npx jest -c jest.config.cjs",
+    "test:policy": "node scripts/ci/test-policy-runner.cjs",
     "build": "npm run build:client && npm run build:server",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
@@ -138,7 +139,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npx gitleaks protect --staged --verbose && lint-staged",
+      "pre-commit": "npx gitleaks protect --staged --verbose && npm run lint && npm run typecheck && lint-staged",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },

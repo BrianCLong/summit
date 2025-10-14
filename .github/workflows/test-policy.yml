@@ -1,0 +1,121 @@
+name: Test Policy Enforcement
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.record_status.outputs.status }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run automated test policy suite
+        id: policy
+        continue-on-error: true
+        env:
+          GITHUB_BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: npm run test:policy
+
+      - name: Capture policy status
+        id: record_status
+        if: always()
+        run: |
+          STATUS=$(node - <<'NODE'
+          const fs = require('fs');
+          let status = 'fail';
+          try {
+            const report = JSON.parse(fs.readFileSync('test-policy-report.json', 'utf8'));
+            if (report.summary?.passed) {
+              status = 'pass';
+            }
+          } catch (error) {
+            status = 'fail';
+          }
+          process.stdout.write(status);
+          NODE
+          )
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          echo "Policy status: $STATUS"
+
+      - name: Upload policy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-policy-report
+          path: test-policy-report.json
+          if-no-files-found: ignore
+
+      - name: Fail workflow on policy violation
+        if: steps.record_status.outputs.status == 'fail'
+        run: |
+          echo "Automated test policies failed."
+          exit 1
+
+  comment:
+    needs: enforce
+    if: needs.enforce.outputs.status == 'fail'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download policy report
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: test-policy-report
+          path: policy-report
+
+      - name: Comment on pull request
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const reportPath = path.join('policy-report', 'test-policy-report.json');
+            let body = '⚠️ Automated test policy violations detected.\n\n';
+            try {
+              const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              const failures = Array.isArray(report.summary?.failures) ? report.summary.failures : [];
+              if (failures.length > 0) {
+                body += failures
+                  .map((failure) => {
+                    const detailList = Array.isArray(failure.details) ? failure.details : [failure.details || 'No details provided.'];
+                    const remediation = failure.remediation || 'Review the workflow logs for remediation guidance.';
+                    const formattedDetails = detailList
+                      .filter(Boolean)
+                      .map((detail) => `  - Details: ${detail}`)
+                      .join('\n');
+                    return `- **${failure.name}**\n${formattedDetails}\n  - Remediation: ${remediation}`;
+                  })
+                  .join('\n');
+              } else {
+                body += 'The workflow failed but did not produce a failure summary. Review the logs for more information.';
+              }
+            } catch (error) {
+              body += 'The workflow failed and the policy report could not be read. Review the logs for more information.';
+            }
+            body += '\n\nPlease address these findings and push additional commits to re-run the checks.';
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
