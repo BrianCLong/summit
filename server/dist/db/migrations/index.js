@@ -43,7 +43,7 @@ class MigrationManager {
         const client = await pool.connect();
         try {
             const result = await client.query('SELECT version FROM neo4j_migrations ORDER BY version');
-            this.appliedMigrations = new Set(result.rows.map((r) => r.version));
+            this.appliedMigrations = new Set(result.rows.map(r => r.version));
             return this.appliedMigrations;
         }
         finally {
@@ -57,8 +57,8 @@ class MigrationManager {
         try {
             const files = await fs.readdir(this.migrationsPath);
             return files
-                .filter((f) => f.endsWith('.js'))
-                .map((f) => f.replace('.js', ''))
+                .filter(f => f.endsWith('.js'))
+                .map(f => f.replace('.js', ''))
                 .sort();
         }
         catch (error) {
@@ -74,7 +74,7 @@ class MigrationManager {
         await this.initialize();
         await this.getAppliedMigrations();
         const availableMigrations = await this.getAvailableMigrations();
-        const pendingMigrations = availableMigrations.filter((version) => !this.appliedMigrations.has(version));
+        const pendingMigrations = availableMigrations.filter(version => !this.appliedMigrations.has(version));
         if (pendingMigrations.length === 0) {
             logger.info('No pending migrations');
             return;
@@ -177,10 +177,10 @@ module.exports = {
     async status() {
         await this.getAppliedMigrations();
         const availableMigrations = await this.getAvailableMigrations();
-        const status = availableMigrations.map((version) => ({
+        const status = availableMigrations.map(version => ({
             version,
             applied: this.appliedMigrations.has(version),
-            status: this.appliedMigrations.has(version) ? '✅ Applied' : '⏳ Pending',
+            status: this.appliedMigrations.has(version) ? '✅ Applied' : '⏳ Pending'
         }));
         return status;
     }
@@ -189,5 +189,6 @@ module.exports = {
 const migrationManager = new MigrationManager();
 module.exports = {
     MigrationManager,
-    migrationManager,
+    migrationManager
 };
+//# sourceMappingURL=index.js.map

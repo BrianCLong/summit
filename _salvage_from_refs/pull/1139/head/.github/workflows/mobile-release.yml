@@ -1,9 +1,0 @@
-name: mobile-release
-on: workflow_dispatch
-jobs:
-  staged:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Create staged rollout
-        run: echo "Simulate 10% → 25% → 50% tracks" # integrate with store APIs if applicable

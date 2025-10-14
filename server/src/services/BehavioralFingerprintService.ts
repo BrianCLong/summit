@@ -30,7 +30,9 @@ export class BehavioralFingerprintService {
   }
 
   scoreFingerprint(fp: BehavioralFingerprint): number {
-    return fp.clicksPerMinute * 0.4 + fp.attentionSpan * 0.2 + fp.editRate * 0.4;
+    return (
+      fp.clicksPerMinute * 0.4 + fp.attentionSpan * 0.2 + fp.editRate * 0.4
+    );
   }
 
   clusterFingerprints(

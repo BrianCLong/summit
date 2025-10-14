@@ -55,7 +55,7 @@
       "minimum": 0
     },
     "favorite_count": {
-      "type": "integer",
+      "type": "integer", 
       "minimum": 0
     },
     "lang": {

@@ -24,3 +24,4 @@ export function generateReport(data) {
     const d = ksDistance(data[keys[0]], data[keys[1]]);
     return `KS distance between ${keys[0]} and ${keys[1]}: ${d.toFixed(3)}`;
 }
+//# sourceMappingURL=FairnessReport.js.map
