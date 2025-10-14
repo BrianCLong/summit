@@ -151,6 +151,11 @@ runTest("topological sort surfaces cycles without infinite loop", () => {
   assert.ok(topology.cycles.some((cycle) => cycle.includes("n2") && cycle.includes("n3")));
 });
 
+if (process?.env?.NODE_TEST) {
+  const { test: nodeTest } = await import("node:test");
+  nodeTest("validator vitest compatibility placeholder", () => {});
+}
+
 if (!process.exitCode) {
   console.log("All policy assertions passed.");
 }

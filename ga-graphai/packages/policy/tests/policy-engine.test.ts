@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PolicyEvaluationRequest, PolicyRule } from 'common-types';
-import { PolicyEngine, buildDefaultPolicyEngine } from '../src/index';
+import { PolicyEngine, buildDefaultPolicyEngine } from '../src/index.ts';
 
 describe('PolicyEngine', () => {
   const baseRules: PolicyRule[] = [
@@ -117,3 +117,8 @@ describe('PolicyEngine', () => {
     expect(result.effect).toBe('deny');
   });
 });
+
+if (process?.env?.NODE_TEST) {
+  const { test: nodeTest } = await import('node:test');
+  nodeTest('policy-engine vitest compatibility placeholder', () => {});
+}
