@@ -19,7 +19,7 @@ export default function TTPCorrelationOverlay({ cy, nodes, edges, open }) {
       if (!open) return;
 
       // Example: Highlight nodes with ATT&CK TTPs
-      nodes.forEach((node) => {
+      nodes.forEach(node => {
         if (node.attack_ttps && node.attack_ttps.length > 0) {
           const cyNode = cy.getElementById(node.id);
           if (cyNode && cyNode.isNode() && cyNode.visible()) {
@@ -36,7 +36,7 @@ export default function TTPCorrelationOverlay({ cy, nodes, edges, open }) {
       });
 
       // Example: Highlight edges with CAPEC TTPs
-      edges.forEach((edge) => {
+      edges.forEach(edge => {
         if (edge.capec_ttps && edge.capec_ttps.length > 0) {
           const cyEdge = cy.getElementById(edge.id);
           if (cyEdge && cyEdge.isEdge() && cyEdge.visible()) {
