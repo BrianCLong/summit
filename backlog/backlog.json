@@ -23,12 +23,320 @@
             "Evidence: fuzzer reports (HTML, text, reproducers), CI pipeline logs"
           ],
           "verification": [
-            {"type": "unit", "ref": "policy-fuzzer/tests/..."},
-            {"type": "fuzz", "ref": "policy-fuzzer/main.py --iterations 1000"}
+            {
+              "type": "unit",
+              "ref": "policy-fuzzer/tests/..."
+            },
+            {
+              "type": "fuzz",
+              "ref": "policy-fuzzer/main.py --iterations 1000"
+            }
           ],
           "evidence_hooks": [
-            {"metric": "fuzzer_coverage_percentage", "slo": 80},
-            {"metric": "fuzzer_critical_bugs_found", "slo": 0}
+            {
+              "metric": "fuzzer_coverage_percentage",
+              "slo": 80
+            },
+            {
+              "metric": "fuzzer_critical_bugs_found",
+              "slo": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E-010",
+      "title": "Firecracker Runtime & Pooler",
+      "priority": "Must",
+      "stories": [
+        {
+          "id": "S-010-01",
+          "title": "Implement Firecracker pooler with warm worker targets",
+          "owner": "Runtime Guild",
+          "depends_on": [],
+          "acceptance_criteria": [
+            "Given a configured tool class, the pooler maintains warm micro-VMs meeting target counts",
+            "When load spikes beyond warm capacity, autoscale events provision new micro-VMs within 300 ms",
+            "Then capability tokens are injected per tool invocation with least-privilege scopes",
+            "And cold start latency p95 is \u2264 300 ms in benchmark harness",
+            "Evidence: benchmark report, trace samples, pooler logs"
+          ],
+          "verification": [
+            {
+              "type": "benchmark",
+              "ref": "benchmarks/runtime/pooler-baseline.md"
+            },
+            {
+              "type": "trace",
+              "ref": "observability/traces/runtime.json"
+            }
+          ],
+          "evidence_hooks": [
+            {
+              "metric": "mcp_cold_start_p95_ms",
+              "slo": 300
+            },
+            {
+              "metric": "pooler_warm_hit_ratio",
+              "slo": 85
+            }
+          ]
+        },
+        {
+          "id": "S-010-02",
+          "title": "Deterministic sandboxing and attestation",
+          "owner": "Runtime Guild",
+          "depends_on": [
+            "S-010-01"
+          ],
+          "acceptance_criteria": [
+            "Given a tool bundle, the platform verifies SBOM signature before execution",
+            "When a worker boots, snapshot hashes and random seeds are captured",
+            "Then sandbox runs are reproducible with identical inputs across regions",
+            "And attestation records are written to the provenance ledger",
+            "Evidence: attestation logs, ledger entries, replay validation report"
+          ],
+          "verification": [
+            {
+              "type": "integration",
+              "ref": "tests/runtime/deterministic-sandbox.test.ts"
+            },
+            {
+              "type": "audit",
+              "ref": "docs/evidence/provenance-ledger.md"
+            }
+          ],
+          "evidence_hooks": [
+            {
+              "metric": "sandbox_replay_success_rate",
+              "slo": 95
+            },
+            {
+              "metric": "attestation_failures",
+              "slo": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E-011",
+      "title": "Deterministic Replay & Observability Spine",
+      "priority": "Must",
+      "stories": [
+        {
+          "id": "S-011-01",
+          "title": "OpenTelemetry spans across MCP protocol",
+          "owner": "Observability Guild",
+          "depends_on": [],
+          "acceptance_criteria": [
+            "Given an MCP session, spans exist for session start, router hops, and tool invocations",
+            "When traces are exported, sensitive fields are redacted at ingest",
+            "Then dashboards surface session start p95, cold start p95, and error budgets",
+            "Evidence: OTEL collector config, Grafana dashboard screenshots"
+          ],
+          "verification": [
+            {
+              "type": "unit",
+              "ref": "server/tests/telemetry/otel.test.ts"
+            },
+            {
+              "type": "dash",
+              "ref": "docs/generated/dashboards/mcp-overview.json"
+            }
+          ],
+          "evidence_hooks": [
+            {
+              "metric": "session_start_p95_ms",
+              "slo": 250
+            },
+            {
+              "metric": "error_budget_consumption",
+              "slo": 5
+            }
+          ]
+        },
+        {
+          "id": "S-011-02",
+          "title": "Deterministic replay engine v1",
+          "owner": "Observability Guild",
+          "depends_on": [
+            "S-011-01"
+          ],
+          "acceptance_criteria": [
+            "Given recorded MCP traffic, replay reproduces \u226595% sessions without divergence",
+            "When external calls occur, stubs capture and rehydrate responses deterministically",
+            "Then replay UI surfaces timeline, payloads, and policy decisions",
+            "Evidence: replay fidelity report, UI walkthrough, stub catalog"
+          ],
+          "verification": [
+            {
+              "type": "functional",
+              "ref": "tests/replay/replay-fidelity.spec.ts"
+            },
+            {
+              "type": "ui",
+              "ref": "docs/demos/replay-demo.md"
+            }
+          ],
+          "evidence_hooks": [
+            {
+              "metric": "replay_success_rate",
+              "slo": 95
+            },
+            {
+              "metric": "redaction_escape_events",
+              "slo": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E-012",
+      "title": "Marketplace Expansion & Developer Experience",
+      "priority": "Should",
+      "stories": [
+        {
+          "id": "S-012-01",
+          "title": "Marketplace ingestion crawler",
+          "owner": "Ecosystem Squad",
+          "depends_on": [],
+          "acceptance_criteria": [
+            "Given GitHub orgs and awesome lists, crawler discovers MCP servers nightly",
+            "When a server manifest is ingested, conformance suite runs automatically",
+            "Then quality badges (latency, sandboxing, auth scopes) publish to catalog",
+            "Evidence: crawler logs, conformance results, catalog diff"
+          ],
+          "verification": [
+            {
+              "type": "integration",
+              "ref": "tests/marketplace/crawler.spec.ts"
+            },
+            {
+              "type": "report",
+              "ref": "docs/reports/marketplace-quality.md"
+            }
+          ],
+          "evidence_hooks": [
+            {
+              "metric": "catalog_health_checked_percentage",
+              "slo": 90
+            },
+            {
+              "metric": "ingest_failures",
+              "slo": 0
+            }
+          ]
+        },
+        {
+          "id": "S-012-02",
+          "title": "SDK trio + local emulator Alpha",
+          "owner": "DX Guild",
+          "depends_on": [],
+          "acceptance_criteria": [
+            "Given TS/Py/Go clients, developers connect in \u22643 lines with type-safe contracts",
+            "When running locally, emulator mirrors production authZ + capability tokens",
+            "Then CLI scaffolds projects (init/test/deploy/replay) with fixtures",
+            "Evidence: SDK docs, CLI demo recording, sample apps"
+          ],
+          "verification": [
+            {
+              "type": "unit",
+              "ref": "clients/tests/sdk-alpha.spec.ts"
+            },
+            {
+              "type": "e2e",
+              "ref": "client/tests/emulator-e2e.spec.ts"
+            }
+          ],
+          "evidence_hooks": [
+            {
+              "metric": "sdk_onboarding_time_minutes",
+              "slo": 15
+            },
+            {
+              "metric": "cli_scaffold_failures",
+              "slo": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "E-013",
+      "title": "Compliance Pack & Benchmark Shootout",
+      "priority": "Must",
+      "stories": [
+        {
+          "id": "S-013-01",
+          "title": "Provenance ledger and retention workflows",
+          "owner": "Trust Guild",
+          "depends_on": [
+            "S-010-02",
+            "S-011-02"
+          ],
+          "acceptance_criteria": [
+            "Given session recordings, immutable ledger stores hashes, signatures, and retention tier",
+            "When RTBF requests arrive, workflows purge or sequester data within SLA",
+            "Then warrant-bound exports generate auditable manifests",
+            "Evidence: ledger UI screenshots, export manifests, RTBF run log"
+          ],
+          "verification": [
+            {
+              "type": "compliance",
+              "ref": "docs/compliance/provenance-ledger.md"
+            },
+            {
+              "type": "workflow",
+              "ref": "tests/compliance/rtbf-flow.spec.ts"
+            }
+          ],
+          "evidence_hooks": [
+            {
+              "metric": "rtbf_sla_minutes",
+              "slo": 30
+            },
+            {
+              "metric": "ledger_tamper_events",
+              "slo": 0
+            }
+          ]
+        },
+        {
+          "id": "S-013-02",
+          "title": "Public benchmark shootout",
+          "owner": "Performance Guild",
+          "depends_on": [
+            "S-010-01",
+            "S-011-01"
+          ],
+          "acceptance_criteria": [
+            "Given flagship servers (GitHub, Playwright, Exa, Cloudflare, Firecrawl), harness runs on Metorial and IntelGraph platforms",
+            "When benchmarks complete, we publish p50/p95/p99 latency, error burn, and cost/1k calls",
+            "Then dashboard and blog are public with downloadable raw data",
+            "Evidence: benchmark datasets, blog draft, dashboard link"
+          ],
+          "verification": [
+            {
+              "type": "benchmark",
+              "ref": "benchmarks/shootout/results.json"
+            },
+            {
+              "type": "publication",
+              "ref": "docs/blog/benchmark-shootout.md"
+            }
+          ],
+          "evidence_hooks": [
+            {
+              "metric": "benchmark_runs_per_week",
+              "slo": 3
+            },
+            {
+              "metric": "shootout_publication_status",
+              "slo": 1
+            }
           ]
         }
       ]

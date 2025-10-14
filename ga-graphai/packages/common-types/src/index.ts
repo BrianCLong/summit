@@ -201,6 +201,63 @@ export interface WorkOrderSubmission {
   metadata?: Record<string, unknown>;
 }
 
+export type SelfEditStatus =
+  | 'proposed'
+  | 'queued'
+  | 'approved'
+  | 'rejected'
+  | 'applied'
+  | 'expired';
+
+export interface SelfEditVerifierScore {
+  verifier: string;
+  score: number;
+  passed: boolean;
+  rationale?: string;
+  measuredAt: string;
+}
+
+export interface SelfEditApproval {
+  reviewer: string;
+  decision: 'approved' | 'rejected';
+  decidedAt: string;
+  notes?: string;
+}
+
+export interface SelfEditProposal {
+  instruction: string;
+  expectedOutput: string;
+  rationale?: string;
+  modelId: string;
+  baseCheckpoint: string;
+  domain?: string;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+  ttlMs?: number;
+}
+
+export interface SelfEditRecord extends SelfEditProposal {
+  id: string;
+  status: SelfEditStatus;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt?: string;
+  verifierScores: SelfEditVerifierScore[];
+  approval?: SelfEditApproval;
+  appliedCheckpoint?: string;
+}
+
+export interface SelfEditScorecard {
+  totalChecks: number;
+  passedChecks: number;
+  failedChecks: number;
+  averageScore: number | null;
+  failingVerifiers: readonly string[];
+  passedVerifiers: readonly string[];
+  ready: boolean;
+  status: SelfEditStatus;
+}
+
 export type WorkOrderStatus = 'completed' | 'partial' | 'rejected';
 
 export interface WorkOrderResult {
