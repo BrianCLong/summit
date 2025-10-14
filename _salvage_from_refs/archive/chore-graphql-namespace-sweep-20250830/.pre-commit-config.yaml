@@ -1,5 +1,0 @@
-repos:
-  # Pre-commit disabled in favor of Husky + lint-staged to avoid local hook instability.
-  # This minimal config keeps pre-commit from failing when installed locally.
-  - repo: local
-    hooks: []

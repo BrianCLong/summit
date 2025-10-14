@@ -1,6 +1,6 @@
-import React from 'react';
-import { gql, useSubscription } from '@apollo/client';
-import { Box, List, ListItem, Typography } from '@mui/material';
+import React from "react";
+import { gql, useSubscription } from "@apollo/client";
+import { Box, List, ListItem, Typography } from "@mui/material";
 
 const ENTITY_CREATED = gql`
   subscription EntityCreated {
@@ -29,16 +29,16 @@ const RELATIONSHIP_CREATED = gql`
 interface TickerItem {
   id: string;
   message: string;
-  type: 'entity' | 'relationship';
+  type: "entity" | "relationship";
   entityType?: string;
   timestamp: string;
   details?: string;
 }
 
 const typeIcon: Record<string, string> = {
-  person: '👤',
-  organization: '🏢',
-  location: '📍',
+  person: "👤",
+  organization: "🏢",
+  location: "📍",
 };
 
 export default function LiveTicker() {
@@ -52,7 +52,7 @@ export default function LiveTicker() {
         {
           id: entity.id,
           message: `${entity.label} created`,
-          type: 'entity',
+          type: "entity",
           entityType: entity.type,
           timestamp: entity.timestamp,
           details: JSON.stringify(entity.properties, null, 2),
@@ -70,7 +70,7 @@ export default function LiveTicker() {
         {
           id: rel.id,
           message: `Relationship ${rel.type} created`,
-          type: 'relationship',
+          type: "relationship",
           timestamp: rel.timestamp,
           details: JSON.stringify({ from: rel.from, to: rel.to }, null, 2),
         },
@@ -80,7 +80,9 @@ export default function LiveTicker() {
   });
 
   return (
-    <Box sx={{ width: 300, borderLeft: '1px solid #ccc', p: 1, overflowY: 'auto' }}>
+    <Box
+      sx={{ width: 300, borderLeft: "1px solid #ccc", p: 1, overflowY: "auto" }}
+    >
       <Typography variant="h6" sx={{ mb: 1 }}>
         Live Activity
       </Typography>
@@ -89,31 +91,31 @@ export default function LiveTicker() {
           <ListItem
             key={item.id}
             sx={{
-              borderBottom: '1px solid #eee',
-              position: 'relative',
-              '&:before': {
+              borderBottom: "1px solid #eee",
+              position: "relative",
+              "&:before": {
                 content: '""',
-                position: 'absolute',
+                position: "absolute",
                 left: 0,
-                top: '50%',
+                top: "50%",
                 width: 8,
                 height: 8,
-                bgcolor: item.type === 'entity' ? 'success.main' : 'info.main',
-                borderRadius: '50%',
-                transform: 'translate(-12px, -50%)',
-                animation: 'pulse 2s infinite',
+                bgcolor: item.type === "entity" ? "success.main" : "info.main",
+                borderRadius: "50%",
+                transform: "translate(-12px, -50%)",
+                animation: "pulse 2s infinite",
               },
-              '@keyframes pulse': {
-                '0%': {
-                  transform: 'translate(-12px, -50%) scale(0.8)',
+              "@keyframes pulse": {
+                "0%": {
+                  transform: "translate(-12px, -50%) scale(0.8)",
                   opacity: 0.8,
                 },
-                '50%': {
-                  transform: 'translate(-12px, -50%) scale(1.2)',
+                "50%": {
+                  transform: "translate(-12px, -50%) scale(1.2)",
                   opacity: 0.5,
                 },
-                '100%': {
-                  transform: 'translate(-12px, -50%) scale(0.8)',
+                "100%": {
+                  transform: "translate(-12px, -50%) scale(0.8)",
                   opacity: 0.8,
                 },
               },
@@ -121,7 +123,7 @@ export default function LiveTicker() {
             title={item.details}
           >
             <Typography variant="body2">
-              {item.entityType ? `${typeIcon[item.entityType] || '❓'} ` : ''}
+              {item.entityType ? `${typeIcon[item.entityType] || "❓"} ` : ""}
               {item.message}
             </Typography>
           </ListItem>

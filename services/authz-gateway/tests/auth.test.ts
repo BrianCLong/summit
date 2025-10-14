@@ -1,15 +1,28 @@
 import express from 'express';
 import request from 'supertest';
+import path from 'path';
+import { readFileSync } from 'fs';
+import crypto from 'crypto';
 import { createApp } from '../src/index';
 import { stopObservability } from '../src/observability';
 import type { AddressInfo } from 'net';
+
+function signChallenge(challenge: string) {
+  const privateKeyPath = path.join(__dirname, 'fixtures', 'webauthn-private.pem');
+  const privateKey = readFileSync(privateKeyPath, 'utf8');
+  const signer = crypto.createSign('SHA256');
+  signer.update(Buffer.from(challenge, 'utf8'));
+  signer.end();
+  return signer.sign(privateKey).toString('base64url');
+}
 
 describe('token lifecycle', () => {
   afterAll(async () => {
     await stopObservability();
   });
+
   it('logs in and introspects', async () => {
-    process.env.OPA_URL = 'http://localhost:8181/v1/data/authz/allow'; // unused in this test
+    process.env.OPA_URL = 'http://localhost:8181/v1/data/summit/abac/decision';
     const app = await createApp();
     const loginRes = await request(app)
       .post('/auth/login')
@@ -38,21 +51,37 @@ describe('token lifecycle', () => {
     expect(res.status).toBe(401);
   });
 
-  it('performs step-up authentication', async () => {
+  it('performs WebAuthn step-up authentication', async () => {
     const opa = express();
     opa.use(express.json());
-    opa.post('/v1/data/authz/allow', (_req, res) => res.json({ result: true }));
+    opa.post('/v1/data/summit/abac/decision', (_req, res) =>
+      res.json({ result: { allow: true, reason: 'allow', obligations: [] } }),
+    );
     const opaServer = opa.listen(0);
     const opaPort = (opaServer.address() as AddressInfo).port;
-    process.env.OPA_URL = `http://localhost:${opaPort}/v1/data/authz/allow`;
+    process.env.OPA_URL = `http://localhost:${opaPort}/v1/data/summit/abac/decision`;
     const app = await createApp();
     const loginRes = await request(app)
       .post('/auth/login')
       .send({ username: 'alice', password: 'password123' });
+    expect(loginRes.status).toBe(200);
     const token = loginRes.body.token;
+
+    const challengeRes = await request(app)
+      .post('/auth/webauthn/challenge')
+      .set('Authorization', `Bearer ${token}`);
+    expect(challengeRes.status).toBe(200);
+    expect(challengeRes.body.challenge).toBeDefined();
+    const signature = signChallenge(challengeRes.body.challenge);
+
     const step = await request(app)
       .post('/auth/step-up')
-      .set('Authorization', `Bearer ${token}`);
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        credentialId: challengeRes.body.allowCredentials[0].id,
+        challenge: challengeRes.body.challenge,
+        signature,
+      });
     expect(step.status).toBe(200);
     const introspectRes = await request(app)
       .post('/auth/introspect')

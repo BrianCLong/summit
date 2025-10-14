@@ -1,0 +1,1 @@
+{"file":"/Users/brianlong/Developer/summit/__mocks__/uuid.ts","mappings":";;;AAAO,MAAM,EAAE,GAAG,GAAG,EAAE,CAAC,sCAAsC,CAAC;AAAlD,QAAA,EAAE,MAAgD","names":[],"sources":["/Users/brianlong/Developer/summit/__mocks__/uuid.ts"],"sourcesContent":["export const v4 = () => \"00000000-0000-4000-8000-000000000000\";"],"version":3}
