@@ -27,3 +27,4 @@ export const statsTypeDefs = gql `
   }
 `;
 export default statsTypeDefs;
+//# sourceMappingURL=schema.stats.js.map

@@ -1,0 +1,185 @@
+groups:
+  - name: mc-v036-trustless-alerts
+    interval: 30s
+    rules:
+      # Zero-Trust Attestation alerts
+      - alert: ZTACoverageBelowThreshold
+        expr: mc_zta_coverage_percent < 99.5
+        for: 5m
+        labels:
+          severity: page
+          service: agent-workbench
+          slo: zta-coverage
+        annotations:
+          summary: "ZTA coverage below 99.5%"
+          description: |
+            Zero-trust attestation coverage is {{ $value | printf "%.2f" }}% (<99.5%).
+            Some agent actions are executing without proper attestation.
+            Check verifier API health and agent configuration.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.6-ops.md#zta-coverage
+          dashboard_url: https://grafana.example.com/d/mc-v036-trustless?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-1h&to=now
+
+      - alert: ZTAVerifierHighLatency
+        expr: mc_zta_verification_p95_ms > 200
+        for: 10m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: zta-performance
+        annotations:
+          summary: "ZTA verifier P95 latency above 200ms"
+          description: |
+            ZTA verification P95 latency is {{ $value | printf "%.1f" }}ms (>200ms SLA).
+            Attestation verification is degraded. Check verifier capacity and KMS connectivity.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.6-ops.md#zta-performance
+          dashboard_url: https://grafana.example.com/d/mc-v036-trustless?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-30m&to=now
+
+      # Policy Proof alerts
+      - alert: PolicyProofFailure
+        expr: mc_policy_proof_success_ratio < 1
+        for: 1m
+        labels:
+          severity: page
+          service: agent-workbench
+          slo: policy-proofs
+        annotations:
+          summary: "Policy proof verification failed"
+          description: |
+            Policy proof success ratio is {{ $value | printf "%.3f" }} (<1.0).
+            Critical policy violations detected. This will block deployments.
+            Review counterexamples and fix policy rules immediately.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.6-ops.md#policy-proofs
+          dashboard_url: https://grafana.example.com/d/mc-v036-trustless?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-15m&to=now
+
+      - alert: PolicyCounterexamplesDetected
+        expr: increase(mc_policy_counterexamples_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: policy-proofs
+        annotations:
+          summary: "Policy counterexamples detected"
+          description: |
+            {{ $value }} policy counterexamples found in the last 5 minutes.
+            Formal verification has identified potential policy violations.
+            Block all deployments until counterexamples are resolved.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.6-ops.md#counterexamples
+          dashboard_url: https://grafana.example.com/d/mc-v036-trustless?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-15m&to=now
+
+      # Remediation alerts
+      - alert: RemediationMTTRExceeded
+        expr: mc_remediation_mttr_p95_minutes > 7
+        for: 15m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: remediation-mttr
+        annotations:
+          summary: "Remediation MTTR exceeded 7 minutes"
+          description: |
+            Remediation P95 MTTR is {{ $value | printf "%.1f" }} minutes (>7min SLA).
+            Autonomous remediation is not meeting performance targets.
+            Review remediation playbooks and approval workflows.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.6-ops.md#remediation-mttr
+          dashboard_url: https://grafana.example.com/d/mc-v036-trustless?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-1h&to=now
+
+      - alert: RemediationApprovalRateLow
+        expr: mc_remediation_approval_rate < 80
+        for: 30m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: remediation-approval
+        annotations:
+          summary: "Low remediation approval rate"
+          description: |
+            Remediation approval rate is {{ $value | printf "%.1f" }}% (<80%).
+            Many proposed remediations are being denied. Review remediation quality
+            and policy compliance. Consider tuning confidence thresholds.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.6-ops.md#remediation-approval
+          dashboard_url: https://grafana.example.com/d/mc-v036-trustless?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-2h&to=now
+
+      # Confidential compute alerts
+      - alert: ConfidentialComputeHighOverhead
+        expr: mc_confidential_performance_overhead_percent > 7
+        for: 15m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: confidential-performance
+        annotations:
+          summary: "Confidential compute overhead exceeds 7%"
+          description: |
+            Confidential compute performance overhead is {{ $value | printf "%.1f" }}% (>7% SLA).
+            TEE processing is degraded. Check enclave health and KMS latency.
+            Consider scaling confidential compute resources.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.6-ops.md#confidential-performance
+          dashboard_url: https://grafana.example.com/d/mc-v036-trustless?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-30m&to=now
+
+      - alert: ResidencyEnforcementFailure
+        expr: mc_residency_enforcement_success_rate < 1
+        for: 1m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: residency-enforcement
+        annotations:
+          summary: "Data residency enforcement failure"
+          description: |
+            Residency enforcement success rate is {{ $value | printf "%.4f" }} (<100%).
+            CRITICAL: Data may have crossed residency boundaries.
+            Immediately investigate and ensure compliance team is notified.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.6-ops.md#residency-failure
+          dashboard_url: https://grafana.example.com/d/mc-v036-trustless?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-15m&to=now
+
+      # Comprehensive trustless velocity health
+      - alert: TrustlessVelocityHealthDegraded
+        expr: mc_trustless_velocity_health_score < 0.8
+        for: 10m
+        labels:
+          severity: page
+          service: agent-workbench
+          slo: trustless-velocity
+        annotations:
+          summary: "Trustless velocity health degraded"
+          description: |
+            Overall trustless velocity health score is {{ $value | printf "%.2f" }} (<0.8).
+            Multiple systems may be degraded. Check ZTA coverage, policy proofs,
+            remediation performance, and confidential compute overhead.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.6-ops.md#health-score
+          dashboard_url: https://grafana.example.com/d/mc-v036-trustless?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-30m&to=now
+
+      # Enclave security alerts
+      - alert: EnclaveAttestationFailure
+        expr: rate(mc_enclave_attestation_failures_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: agent-workbench
+          slo: enclave-security
+        annotations:
+          summary: "TEE enclave attestation failures detected"
+          description: |
+            {{ $value | printf "%.2f" }} enclave attestation failures per second.
+            CRITICAL: TEE security may be compromised. Investigate immediately.
+            Consider isolating affected enclaves and switching to standard processing.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.6-ops.md#enclave-attestation
+          dashboard_url: https://grafana.example.com/d/mc-v036-trustless?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-15m&to=now
+
+      # KMS access pattern alerts
+      - alert: UnusualKMSAccessPattern
+        expr: rate(mc_kms_unseal_operations_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warn
+          service: agent-workbench
+          slo: kms-security
+        annotations:
+          summary: "Unusual KMS key unseal rate"
+          description: |
+            KMS key unseal rate is {{ $value | printf "%.1f" }} operations/sec (>10/sec).
+            Potential security issue or misconfiguration. Review KMS access logs
+            and verify legitimate usage patterns.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.6-ops.md#kms-access
+          dashboard_url: https://grafana.example.com/d/mc-v036-trustless?var-tenant={{ $labels.tenant_id | urlquery }}&from=now-30m&to=now

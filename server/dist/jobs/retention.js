@@ -6,3 +6,4 @@ export async function purgeOldSuggestions(days = 90) {
     DETACH DELETE s
   `, { days });
 }
+//# sourceMappingURL=retention.js.map
