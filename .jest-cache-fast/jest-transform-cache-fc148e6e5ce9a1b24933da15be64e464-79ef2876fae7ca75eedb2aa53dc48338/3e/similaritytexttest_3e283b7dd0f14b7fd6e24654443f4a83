@@ -1,0 +1,16 @@
+009c9b40915dbef6ad4bb7b6d4d54102
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const supertest_1 = __importDefault(require("supertest"));
+test('similarEntities by text', async () => {
+    const q = `{ similarEntities(text:"banking fraud", topK:5){ id score } }`;
+    const r = await (0, supertest_1.default)(process.env.API_URL).post('/graphql')
+        .set('Authorization', 'Bearer test')
+        .send({ query: q });
+    expect(r.status).toBe(200);
+    expect(r.body.data.similarEntities.length).toBeLessThanOrEqual(5);
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci90ZXN0cy9zaW1pbGFyaXR5LnRleHQudGVzdC50cyIsIm1hcHBpbmdzIjoiOzs7OztBQUFBLDBEQUFnQztBQUNoQyxJQUFJLENBQUMseUJBQXlCLEVBQUUsS0FBSyxJQUFJLEVBQUU7SUFDekMsTUFBTSxDQUFDLEdBQUcsK0RBQStELENBQUM7SUFDMUUsTUFBTSxDQUFDLEdBQUcsTUFBTSxJQUFBLG1CQUFPLEVBQUMsT0FBTyxDQUFDLEdBQUcsQ0FBQyxPQUFPLENBQUMsQ0FBQyxJQUFJLENBQUMsVUFBVSxDQUFDO1NBQzFELEdBQUcsQ0FBQyxlQUFlLEVBQUMsYUFBYSxDQUFDO1NBQ2xDLElBQUksQ0FBQyxFQUFFLEtBQUssRUFBQyxDQUFDLEVBQUUsQ0FBQyxDQUFDO0lBQ3JCLE1BQU0sQ0FBQyxDQUFDLENBQUMsTUFBTSxDQUFDLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxDQUFDO0lBQzNCLE1BQU0sQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxlQUFlLENBQUMsTUFBTSxDQUFDLENBQUMsbUJBQW1CLENBQUMsQ0FBQyxDQUFDLENBQUM7QUFDcEUsQ0FBQyxDQUFDLENBQUMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci90ZXN0cy9zaW1pbGFyaXR5LnRleHQudGVzdC50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgcmVxdWVzdCBmcm9tICdzdXBlcnRlc3QnO1xudGVzdCgnc2ltaWxhckVudGl0aWVzIGJ5IHRleHQnLCBhc3luYyAoKSA9PiB7XG4gIGNvbnN0IHEgPSBgeyBzaW1pbGFyRW50aXRpZXModGV4dDpcImJhbmtpbmcgZnJhdWRcIiwgdG9wSzo1KXsgaWQgc2NvcmUgfSB9YDtcbiAgY29uc3QgciA9IGF3YWl0IHJlcXVlc3QocHJvY2Vzcy5lbnYuQVBJX1VSTCkucG9zdCgnL2dyYXBocWwnKVxuICAgIC5zZXQoJ0F1dGhvcml6YXRpb24nLCdCZWFyZXIgdGVzdCcpXG4gICAgLnNlbmQoeyBxdWVyeTpxIH0pO1xuICBleHBlY3Qoci5zdGF0dXMpLnRvQmUoMjAwKTtcbiAgZXhwZWN0KHIuYm9keS5kYXRhLnNpbWlsYXJFbnRpdGllcy5sZW5ndGgpLnRvQmVMZXNzVGhhbk9yRXF1YWwoNSk7XG59KTsiXSwidmVyc2lvbiI6M30=

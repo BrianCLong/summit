@@ -80,9 +80,7 @@ describe('AuthService', () => {
       mockClient.query
         .mockResolvedValueOnce({}) // For BEGIN
         .mockResolvedValueOnce({ rows: [] }) // For existing user check
-        .mockResolvedValueOnce({
-          rows: [{ id: 'user123', ...userData, is_active: true, created_at: new Date() }],
-        }) // For user insert
+        .mockResolvedValueOnce({ rows: [{ id: 'user123', ...userData, is_active: true, created_at: new Date() }] }) // For user insert
         .mockResolvedValueOnce({}); // For COMMIT
 
       argon2.hash.mockResolvedValue('hashedpassword');
@@ -93,10 +91,7 @@ describe('AuthService', () => {
 
       expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
       expect(argon2.hash).toHaveBeenCalledWith('password123');
-      expect(mockClient.query).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO users'),
-        expect.any(Array),
-      );
+      expect(mockClient.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO users'), expect.any(Array));
       expect(jwt.sign).toHaveBeenCalled();
       expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
       expect(result.user.email).toBe('test@example.com');
@@ -109,9 +104,7 @@ describe('AuthService', () => {
         .mockResolvedValueOnce({ rows: [{ id: 'user123' }] }) // Existing user
         .mockResolvedValueOnce({}); // For ROLLBACK
 
-      await expect(authService.register(userData)).rejects.toThrow(
-        'User with this email or username already exists',
-      );
+      await expect(authService.register(userData)).rejects.toThrow('User with this email or username already exists');
       expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
     });
   });
@@ -119,13 +112,7 @@ describe('AuthService', () => {
   describe('login', () => {
     const email = 'test@example.com';
     const password = 'password123';
-    const user = {
-      id: 'user123',
-      email,
-      password_hash: 'hashedpassword',
-      role: 'ANALYST',
-      is_active: true,
-    };
+    const user = { id: 'user123', email, password_hash: 'hashedpassword', role: 'ANALYST', is_active: true };
 
     it('should successfully log in a user', async () => {
       mockClient.query
@@ -146,33 +133,21 @@ describe('AuthService', () => {
     it('should throw error for invalid credentials', async () => {
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // User not found
 
-      await expect(authService.login(email, password, '127.0.0.1', 'test-agent')).rejects.toThrow(
-        'Invalid credentials',
-      );
+      await expect(authService.login(email, password, '127.0.0.1', 'test-agent')).rejects.toThrow('Invalid credentials');
     });
 
     it('should throw error for incorrect password', async () => {
       mockClient.query.mockResolvedValueOnce({ rows: [user] }); // User found
       argon2.verify.mockResolvedValue(false);
 
-      await expect(authService.login(email, password, '127.0.0.1', 'test-agent')).rejects.toThrow(
-        'Invalid credentials',
-      );
+      await expect(authService.login(email, password, '127.0.0.1', 'test-agent')).rejects.toThrow('Invalid credentials');
     });
   });
 
   describe('verifyToken', () => {
     const token = 'validToken';
     const decodedPayload = { userId: 'user123', email: 'test@example.com', role: 'ANALYST' };
-    const user = {
-      id: 'user123',
-      email: 'test@example.com',
-      username: 'testuser',
-      first_name: 'Test',
-      last_name: 'User',
-      role: 'ANALYST',
-      is_active: true,
-    };
+    const user = { id: 'user123', email: 'test@example.com', username: 'testuser', first_name: 'Test', last_name: 'User', role: 'ANALYST', is_active: true };
 
     it('should return user for a valid token', async () => {
       jwt.verify.mockReturnValue(decodedPayload);
@@ -185,9 +160,7 @@ describe('AuthService', () => {
     });
 
     it('should return null for an invalid token', async () => {
-      jwt.verify.mockImplementation(() => {
-        throw new Error('Invalid token');
-      });
+      jwt.verify.mockImplementation(() => { throw new Error('Invalid token'); });
 
       const result = await authService.verifyToken('invalidToken');
 

@@ -1,6 +1,6 @@
 export function analyzeContent(content) {
     const text = content.toLowerCase();
-    const suspiciousKeywords = ['deepfake', 'manipulated', 'fake'];
+    const suspiciousKeywords = ["deepfake", "manipulated", "fake"];
     const manipulationDetected = suspiciousKeywords.some((k) => text.includes(k));
     const targets = Array.from(new Set(content.match(/@([\w-]+)/g) || [])).map((t) => t.slice(1));
     return {
@@ -10,3 +10,4 @@ export function analyzeContent(content) {
         affectedTargets: targets,
     };
 }
+//# sourceMappingURL=deepfakeSentinel.js.map
