@@ -7,7 +7,8 @@ import {
   computeWorkflowDiff,
   constraintAwareAutoLayout,
   createCanvasState,
-  createObserverState
+  createObserverState,
+  buildDependencyGraphSnapshot
 } from '../src/index.js';
 
 vi.mock('policy', () => ({
@@ -110,15 +111,25 @@ describe('canvas utilities', () => {
         },
         {
           nodeId: 'build',
-          status: 'succeeded',
-          startedAt: '2024-01-01T00:02:00Z',
-          finishedAt: '2024-01-01T00:03:00Z'
+          status: 'running',
+          startedAt: '2024-01-01T00:02:00Z'
+        },
+        {
+          nodeId: 'test',
+          status: 'queued'
         }
       ]
     };
 
     const observer = createObserverState(run);
-    expect(observer.timeline.frames.length).toBeGreaterThanOrEqual(3);
+    expect(observer.timeline.frames.length).toBeGreaterThanOrEqual(4);
+    const [baseline, firstDelta] = observer.timeline.frames;
+    expect(baseline.progressPercent).toBe(0);
+    expect(firstDelta.delta).toEqual({ nodeId: 'source', status: 'running' });
+    expect(firstDelta.statusCounts.running).toBe(1);
+    const secondDelta = observer.timeline.frames[2];
+    expect(secondDelta.delta).toEqual({ nodeId: 'source', status: 'succeeded' });
+    expect(secondDelta.progressPercent).toBe(33);
     const advanced = advancePlayback(observer, { step: 2 });
     expect(advanced.currentIndex).toBe(2);
     const looped = advancePlayback(observer, { direction: 'backward', loop: true });
@@ -146,5 +157,59 @@ describe('canvas utilities', () => {
     const withRuntime = applyRunUpdate(state, run);
     expect(withRuntime.runtime.build.status).toBe('running');
     expect(withRuntime.runtime.test.status).toBe('queued');
+  });
+
+  it('builds dependency graph snapshot with progress summary', () => {
+    const workflow = buildWorkflow();
+    const initial = createCanvasState(workflow);
+    const run: WorkflowRunRecord = {
+      runId: 'run-graph',
+      workflowId: workflow.workflowId,
+      version: workflow.version,
+      status: 'running',
+      stats: {
+        latencyMs: 4000,
+        costUSD: 3.1,
+        criticalPath: ['source', 'build', 'test']
+      },
+      nodes: [
+        {
+          nodeId: 'source',
+          status: 'succeeded',
+          startedAt: '2024-01-01T00:00:00Z',
+          finishedAt: '2024-01-01T00:01:00Z'
+        },
+        {
+          nodeId: 'build',
+          status: 'running',
+          startedAt: '2024-01-01T00:01:00Z'
+        },
+        {
+          nodeId: 'test',
+          status: 'queued'
+        }
+      ]
+    };
+
+    const observer = createObserverState(run);
+    const stateWithRuntime = applyRunUpdate(initial, run);
+    const latestFrame = observer.timeline.frames.at(-1);
+    expect(latestFrame).toBeDefined();
+    const snapshot = buildDependencyGraphSnapshot(stateWithRuntime, latestFrame);
+
+    expect(snapshot.statusCounts.total).toBe(3);
+    expect(snapshot.statusCounts.succeeded).toBe(1);
+    expect(snapshot.statusCounts.running).toBe(1);
+    expect(snapshot.progressPercent).toBe(33);
+
+    const sourceNode = snapshot.nodes.find(node => node.id === 'source');
+    const testNode = snapshot.nodes.find(node => node.id === 'test');
+    expect(sourceNode?.isCritical).toBe(true);
+    expect(sourceNode?.isBlocked).toBe(false);
+    expect(testNode?.dependencies).toEqual(['build']);
+    expect(testNode?.isBlocked).toBe(true);
+
+    const satisfiedEdge = snapshot.edges.find(edge => edge.from === 'source' && edge.to === 'build');
+    expect(satisfiedEdge?.isSatisfied).toBe(true);
   });
 });
