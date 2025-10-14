@@ -1,10 +1,8 @@
 name: CI - Comprehensive Gates
 on:
-  pull_request:
-    branches: [main]
   push:
     branches: [main]
-  merge_group:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -84,16 +82,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ needs.setup.outputs.pnpm }}
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
           cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ needs.setup.outputs.pnpm }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -151,7 +149,7 @@ jobs:
       neo4j:
         image: neo4j:5-community
         env:
-          NEO4J_AUTH: neo4j/test
+          NEO4J_AUTH: neo4j/testpassword
           NEO4J_PLUGINS: '["apoc"]'
         ports: ['7474:7474', '7687:7687']
         options: >-
@@ -164,16 +162,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ needs.setup.outputs.pnpm }}
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
           cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ needs.setup.outputs.pnpm }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -184,7 +182,7 @@ jobs:
           echo "REDIS_URL=redis://localhost:6379" >> $GITHUB_ENV
           echo "NEO4J_URI=bolt://localhost:7687" >> $GITHUB_ENV
           echo "NEO4J_USER=neo4j" >> $GITHUB_ENV
-          echo "NEO4J_PASSWORD=test" >> $GITHUB_ENV
+          echo "NEO4J_PASSWORD=testpassword" >> $GITHUB_ENV
 
       - name: Run unit tests
         run: |
@@ -222,16 +220,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ needs.setup.outputs.pnpm }}
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
           cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ needs.setup.outputs.pnpm }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -331,16 +329,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ needs.setup.outputs.pnpm }}
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
           cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ needs.setup.outputs.pnpm }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
