@@ -1,8 +1,0 @@
-{
-  "title": "Neo4j Health Sprint7",
-  "panels": [
-    {"type": "graph", "title": "Bolt p95", "targets": []},
-    {"type": "graph", "title": "Transactions per Second", "targets": []},
-    {"type": "graph", "title": "Active Queries", "targets": []}
-  ]
-}

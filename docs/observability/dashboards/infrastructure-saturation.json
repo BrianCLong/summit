@@ -1,0 +1,76 @@
+{
+  "title": "Infrastructure & Saturation",
+  "schemaVersion": 38,
+  "refresh": "1m",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "CPU Utilization",
+      "targets": [
+        {
+          "expr": "avg(node_cpu_seconds_total{mode!='idle', service=\"$service\"}) by (instance) / avg(node_cpu_seconds_total{service=\"$service\"}) by (instance)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.75 },
+              { "color": "red", "value": 0.9 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory Utilization",
+      "targets": [
+        {
+          "expr": "1 - avg(node_memory_MemAvailable_bytes{service=\"$service\"}) / avg(node_memory_MemTotal_bytes{service=\"$service\"})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Worker Queue Depth",
+      "targets": [
+        {
+          "expr": "avg(worker_queue_depth{service=\"$service\", queue=~\"$queue\"})",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none"
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "type": "query",
+        "query": "label_values(worker_queue_depth, service)",
+        "datasource": "$datasource"
+      },
+      {
+        "name": "queue",
+        "type": "query",
+        "query": "label_values(worker_queue_depth{service=\"$service\"}, queue)",
+        "datasource": "$datasource"
+      }
+    ]
+  }
+}

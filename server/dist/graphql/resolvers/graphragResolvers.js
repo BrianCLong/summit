@@ -2,14 +2,14 @@
  * GraphRAG GraphQL Resolvers (TypeScript)
  * Provides GraphQL interface for explainable GraphRAG operations
  */
-import { GraphRAGService, } from '../../services/GraphRAGService.js';
-import EmbeddingService from '../../services/EmbeddingService.js';
-import LLMService from '../../services/LLMService.js';
-import { similarityService } from '../../services/SimilarityService.js';
-import { getNeo4jDriver, getRedisClient } from '../../config/database.js';
-import baseLogger from '../../config/logger';
-import { GraphQLError } from 'graphql';
-const logger = baseLogger.child({ name: 'graphragResolvers' });
+import { GraphRAGService, } from "../../services/GraphRAGService.js";
+import EmbeddingService from "../../services/EmbeddingService.js";
+import LLMService from "../../services/LLMService.js";
+import { similarityService, } from "../../services/SimilarityService.js";
+import { getNeo4jDriver, getRedisClient } from "../../config/database.js";
+import pino from "pino";
+import { GraphQLError } from "graphql";
+const logger = pino({ name: "graphragResolvers" });
 // Service initialization
 let graphRAGService = null;
 let embeddingService;
@@ -21,7 +21,7 @@ function initializeServices() {
         embeddingService = new EmbeddingService();
         llmService = new LLMService();
         graphRAGService = new GraphRAGService(neo4jDriver, llmService, embeddingService, redisClient);
-        logger.info('GraphRAG services initialized');
+        logger.info("GraphRAG services initialized");
     }
     return graphRAGService;
 }
@@ -32,12 +32,12 @@ export const graphragResolvers = {
          */
         graphRagAnswer: async (_, args, context) => {
             if (!context.user) {
-                throw new Error('Authentication required');
+                throw new Error("Authentication required");
             }
             const service = initializeServices();
             const { input } = args;
             try {
-                logger.info(`GraphRAG query received. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Question Length: ${input.question.length}, Use Case: ${input.useCase || 'default'}`);
+                logger.info(`GraphRAG query received. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Question Length: ${input.question.length}, Use Case: ${input.useCase || "default"}`);
                 const request = {
                     investigationId: input.investigationId,
                     question: input.question,
@@ -53,15 +53,16 @@ export const graphragResolvers = {
                 return response;
             }
             catch (error) {
-                logger.error(`GraphRAG query failed. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                if (error instanceof Error && error.message === 'LLM schema invalid after retry') {
-                    throw new GraphQLError('Invalid LLM response format', {
-                        extensions: { code: 'BAD_REQUEST' },
+                logger.error(`GraphRAG query failed. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+                if (error instanceof Error &&
+                    error.message === "LLM schema invalid after retry") {
+                    throw new GraphQLError("Invalid LLM response format", {
+                        extensions: { code: "BAD_REQUEST" },
                     });
                 }
                 throw new Error(error instanceof Error
                     ? `GraphRAG query failed: ${error.message}`
-                    : 'GraphRAG query failed: Unknown error');
+                    : "GraphRAG query failed: Unknown error");
             }
         },
         /**
@@ -69,7 +70,7 @@ export const graphragResolvers = {
          */
         similarEntities: async (_, args, context) => {
             if (!context.user) {
-                throw new Error('Authentication required');
+                throw new Error("Authentication required");
             }
             const { entityId, text, topK = 10, investigationId } = args;
             try {
@@ -88,9 +89,9 @@ export const graphragResolvers = {
                     entity: {
                         id: similar.entityId,
                         // These would be populated from actual entity lookup
-                        type: 'unknown',
-                        label: similar.text?.substring(0, 50) || 'Unknown',
-                        description: similar.text || '',
+                        type: "unknown",
+                        label: similar.text?.substring(0, 50) || "Unknown",
+                        description: similar.text || "",
                         properties: {},
                         confidence: similar.similarity,
                     },
@@ -100,8 +101,8 @@ export const graphragResolvers = {
                 return similarEntities;
             }
             catch (error) {
-                logger.error(`Similarity search failed. Entity ID: ${entityId}, Investigation ID: ${investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                throw new Error(`Similarity search failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                logger.error(`Similarity search failed. Entity ID: ${entityId}, Investigation ID: ${investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+                throw new Error(`Similarity search failed: ${error instanceof Error ? error.message : "Unknown error"}`);
             }
         },
     },
@@ -111,7 +112,7 @@ export const graphragResolvers = {
          */
         clearGraphRAGCache: async (_, args, context) => {
             if (!context.user) {
-                throw new Error('Authentication required');
+                throw new Error("Authentication required");
             }
             const service = initializeServices();
             const { investigationId } = args;
@@ -125,10 +126,10 @@ export const graphragResolvers = {
                 };
             }
             catch (error) {
-                logger.error(`Cache clear failed. Investigation ID: ${investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                logger.error(`Cache clear failed. Investigation ID: ${investigationId}, User ID: ${context.user.id}, Error: ${error instanceof Error ? error.message : "Unknown error"}`);
                 return {
                     success: false,
-                    message: 'Failed to clear cache',
+                    message: "Failed to clear cache",
                 };
             }
         },
@@ -161,12 +162,13 @@ export async function getGraphRAGHealth() {
         return await service.getHealth();
     }
     catch (error) {
-        logger.error(`GraphRAG health check failed. Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        logger.error(`GraphRAG health check failed. Error: ${error instanceof Error ? error.message : "Unknown error"}`);
         return {
-            status: 'unhealthy',
-            cacheStatus: 'unknown',
+            status: "unhealthy",
+            cacheStatus: "unknown",
             config: {},
         };
     }
 }
 export default graphragResolvers;
+//# sourceMappingURL=graphragResolvers.js.map

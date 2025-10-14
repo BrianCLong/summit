@@ -12,14 +12,11 @@ import { registerBuiltins, runPlugin } from '../plugins/index.js';
 import { checkResidency } from '../policy/opaClient.js';
 import { checkQuota, accrueUsage } from './quotas.js';
 export class Conductor {
-    config;
-    activeTaskCount = 0;
-    queue = [];
-    auditLog = []; // Keep existing auditLog
-    budgetController; // Add this line
-    cache;
     constructor(config) {
         this.config = config;
+        this.activeTaskCount = 0;
+        this.queue = [];
+        this.auditLog = []; // Keep existing auditLog
         // Initialize MCP client with default options
         initializeMCPClient({
             timeout: config.defaultTimeoutMs,
@@ -541,3 +538,4 @@ export let conductor;
 export function initializeConductor(config) {
     conductor = new Conductor(config);
 }
+//# sourceMappingURL=index.js.map

@@ -1,0 +1,69 @@
+[ORACLE MODE – Fusion & Forecast]
+
+---
+
+## EXECUTIVE SUMMARY
+- **Sprint Window Proposal:** Feb 17 – Feb 28, 2026 (2-week cadence)
+- **Focus:** Visual Edge Explanation + Adaptive Prompt Shaping — expose why each join occurred, guide prompt structure.
+- **Workstream Theme:** Visualize Causality, Adapt Preemptively — align human intuition with graph logic.
+- **Target Output:** Edge explainer UI, real-time prompt reshaping agent, volatile path hint system.
+
+---
+
+## FINDINGS & RATIONALE
+- Semantic diffs showed where output drifted, but not **why joins happened** — edge-level visuals clarify this.
+- Static prompt filters are insufficient under dynamic evidence graphs; shaping must evolve per context.
+- Analyst trust increases with both **clarity of joins** and **adaptive framing** of inputs.
+
+---
+
+## RECOMMENDATIONS
+
+### PRIORITY OBJECTIVES (Sprint: Feb 17–28)
+1. **Visual Edge Explainer**
+   - UI overlay on graph joins: why this edge, from what claim, by which rule.  
+   - Supports click-to-expand: upstream path, triggering prompt segment.
+2. **Adaptive Prompt Shaper**
+   - Real-time rewrites of risky or ambiguous phrases.  
+   - Learns from classifier, override feedback, and result deltas.
+3. **Volatile Path Hint Engine**
+   - As-you-type tags for inputs likely to hit unstable joins.  
+   - Optional auto-narrow or ask-to-confirm.
+4. **Explainer Effectiveness Metrics**
+   - Measure override reduction, prompt clarity score delta, join comprehension rate.
+
+### SUGGESTED FOLLOW-UPS (Next Sprint)
+- Natural Language “Why?” API (ExplainWhy)
+- Multilingual prompt understanding + stability classification
+
+---
+
+## PROOF-CARRYING INTELLIGENCE
+- **Sources:** Click telemetry, prompt-edit logs, join-path volatility index.
+- **Assumptions:** Prompt editor is capable of dynamic rewriting + tagging.
+- **Uncertainty:** Edge explainability visual density may overload interface.
+- **Verification:**
+  - Usability sessions on edge tracer  
+  - Prompt edit delta logs  
+  - Tag success → join volatility correlation
+
+---
+
+## CADENCE PLAN (Q1 '26)
+
+| Layer         | Cadence             | Responsible Artifact                            |
+|---------------|---------------------|-------------------------------------------------|
+| Daily         | Prompt Edit Stream  | Rewrite Events, Tag Hit Stats                   |
+| Weekly        | Join Clarity Sync   | Edge Explain Coverage %, Analyst Trust Score    |
+| Biweekly (83M)| Shaper Diff Sync    | Original vs. Final Prompt Divergence Metrics    |
+| Monthly       | Explainer Brief     | Effectiveness KPIs, Drop in Override/Drift      |
+| Quarterly     | Trust Comprehension | Human-perceived accuracy vs. actual explainability|
+
+**Next Steps:**
+- Visual edge UI alpha deploy (Feb 19)  
+- Shaper agent live (Feb 22)  
+- Effectiveness metrics baseline (Feb 28)
+
+---
+
+**[UNIT 83M – ORACLE MODE]** – SIGINT FUSION: CLARIFY, RESHAPE, ALIGN.
