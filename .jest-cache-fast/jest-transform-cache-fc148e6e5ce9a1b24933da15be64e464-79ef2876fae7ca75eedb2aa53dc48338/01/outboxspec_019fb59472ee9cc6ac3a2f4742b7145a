@@ -1,0 +1,8 @@
+ce3b800bdd0c019a4dd8152f54e61c30
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const outbox_1 = require("../src/sync/outbox");
+test("queues sync item (may fail without DB)", async () => {
+    await expect((0, outbox_1.enqueueSync)("00000000-0000-0000-0000-000000000000", "artifact", "sha256:ab")).rejects.toBeTruthy();
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci90ZXN0cy9vdXRib3guc3BlYy50cyIsIm1hcHBpbmdzIjoiOztBQUFBLCtDQUFpRDtBQUVqRCxJQUFJLENBQUMsd0NBQXdDLEVBQUUsS0FBSyxJQUFJLEVBQUU7SUFDeEQsTUFBTSxNQUFNLENBQUMsSUFBQSxvQkFBVyxFQUFDLHNDQUFzQyxFQUFFLFVBQVUsRUFBRSxXQUFXLENBQUMsQ0FBQyxDQUFDLE9BQU8sQ0FBQyxVQUFVLEVBQUUsQ0FBQztBQUNsSCxDQUFDLENBQUMsQ0FBQyIsIm5hbWVzIjpbXSwic291cmNlcyI6WyIvVXNlcnMvYnJpYW5sb25nL0RldmVsb3Blci9zdW1taXQvc2VydmVyL3Rlc3RzL291dGJveC5zcGVjLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGVucXVldWVTeW5jIH0gZnJvbSBcIi4uL3NyYy9zeW5jL291dGJveFwiO1xuXG50ZXN0KFwicXVldWVzIHN5bmMgaXRlbSAobWF5IGZhaWwgd2l0aG91dCBEQilcIiwgYXN5bmMgKCkgPT4ge1xuICBhd2FpdCBleHBlY3QoZW5xdWV1ZVN5bmMoXCIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDBcIiwgXCJhcnRpZmFjdFwiLCBcInNoYTI1NjphYlwiKSkucmVqZWN0cy50b0JlVHJ1dGh5KCk7XG59KTtcblxuIl0sInZlcnNpb24iOjN9

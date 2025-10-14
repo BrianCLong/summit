@@ -1,7 +1,0 @@
-addReviewers: true
-addAssignees: false
-reviewers:
-  - intelgraph/backend-leads
-  - intelgraph/frontend-leads
-  - intelgraph-architecture
-numberOfReviewers: 2

@@ -34,18 +34,10 @@ analytics.on('connect', () => {
   analytics.emit('join_job', { jobId: 'job-123' });
 });
 
-analytics.on('progress', (ev) => {
-  /* show in-progress */
-});
-analytics.on('result', (ev) => {
-  /* append partial result */
-});
-analytics.on('error', (ev) => {
-  /* display error */
-});
-analytics.on('complete', (ev) => {
-  /* finalize */
-});
+analytics.on('progress', (ev) => { /* show in-progress */ });
+analytics.on('result', (ev) => { /* append partial result */ });
+analytics.on('error', (ev) => { /* display error */ });
+analytics.on('complete', (ev) => { /* finalize */ });
 ```
 
 Tip: In local dev or tests, you can bypass Socket.IO JWT auth on the analytics namespace by setting `DISABLE_SOCKET_AUTH=1` on the server.
@@ -62,3 +54,4 @@ npm i
 E2E_WS_URL=http://localhost:4000 E2E_REDIS_URL=redis://localhost:6379/1 \
   npm run test:e2e -- tests/e2e/analytics-bridge.spec.ts
 ```
+

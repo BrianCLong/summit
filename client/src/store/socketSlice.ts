@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 export interface SocketState {
   connected: boolean;
@@ -9,7 +9,7 @@ const initialState: SocketState = {
 };
 
 const socketSlice = createSlice({
-  name: 'socket',
+  name: "socket",
   initialState,
   reducers: {
     connected(state) {
