@@ -1,0 +1,138 @@
+{
+  "uid": "supply-chain-risk-001",
+  "title": "Supply Chain Risk & Compliance",
+  "schemaVersion": 38,
+  "version": 1,
+  "tags": ["security", "supply-chain", "cve"],
+  "editable": true,
+  "timezone": "browser",
+  "time": { "from": "now-7d", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "prom",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {"text": "Prometheus", "value": "PROM_DS"},
+        "options": []
+      },
+      {
+        "name": "service",
+        "type": "query",
+        "datasource": "PROM_DS",
+        "refresh": 1,
+        "includeAll": false,
+        "query": "label_values(cve_budget_effective_total, service)"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeSeries",
+      "title": "CVE Burn-down vs Budget",
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (severity) (cve_budget_effective_total{service=\"$service\"})",
+          "legendFormat": "{{severity}} actual"
+        },
+        {
+          "refId": "B",
+          "expr": "sum by (severity) (cve_budget_allowed_total{service=\"$service\"})",
+          "legendFormat": "{{severity}} budget"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Open Waivers",
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+      "datasource": "PROM_DS",
+      "transformations": [
+        {
+          "id": "labelsToFields"
+        }
+      ],
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "cve_waiver_active_hours{service=\"$service\"}",
+          "legendFormat": "{{service}} — {{cve}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "h",
+          "custom": {"align": "center"}
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "% Signed Artifacts",
+      "gridPos": {"x": 0, "y": 8, "w": 8, "h": 4},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (supply_chain_signed_artifacts / supply_chain_total_artifacts)",
+          "legendFormat": "signed"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {"value": null, "color": "red"},
+              {"value": 95, "color": "yellow"},
+              {"value": 99, "color": "green"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Attestation Coverage",
+      "gridPos": {"x": 8, "y": 8, "w": 8, "h": 4},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (supply_chain_attested_artifacts / supply_chain_total_artifacts)",
+          "legendFormat": "attested"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {"value": null, "color": "red"},
+              {"value": 95, "color": "yellow"},
+              {"value": 99, "color": "green"}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "bargauge",
+      "title": "Waivers expiring <24h",
+      "gridPos": {"x": 16, "y": 8, "w": 8, "h": 4},
+      "datasource": "PROM_DS",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(cve_waiver_expiring_soon{service=\"$service\"})",
+          "legendFormat": "expiring (<24h)"
+        }
+      ]
+    }
+  ]
+}

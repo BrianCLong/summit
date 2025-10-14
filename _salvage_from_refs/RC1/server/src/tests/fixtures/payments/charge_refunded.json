@@ -1,7 +1,0 @@
-{
-  "id": "evt2",
-  "type": "charge.refunded",
-  "data": {
-    "object": {"metadata": {"orderId": "order123"}}
-  }
-}

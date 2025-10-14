@@ -26,7 +26,7 @@ export default function CommandCenterDashboard() {
       value: 7,
       format: 'number' as const,
       status: 'warning' as const,
-      change: { value: 25, direction: 'up' as const, period: 'last hour' },
+      change: { value: 25, direction: 'up' as const, period: 'last hour' }
     },
     {
       id: 'response_rate',
@@ -34,7 +34,7 @@ export default function CommandCenterDashboard() {
       value: 94,
       format: 'percentage' as const,
       status: 'success' as const,
-    },
+    }
   ]
 
   return (
@@ -42,9 +42,7 @@ export default function CommandCenterDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Command Center</h1>
-          <p className="text-muted-foreground">
-            Real-time intelligence operations dashboard
-          </p>
+          <p className="text-muted-foreground">Real-time intelligence operations dashboard</p>
         </div>
         <Badge variant="success" className="animate-pulse">
           🟢 LIVE

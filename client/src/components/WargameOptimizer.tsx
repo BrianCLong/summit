@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useMutation, gql } from '@apollo/client';
-import * as d3 from 'd3';
+import React, { useState, useEffect, useRef } from "react";
+import { useMutation, gql } from "@apollo/client";
+import * as d3 from "d3";
 
 const OPTIMIZE_WARGAME_MUTATION = gql`
   mutation OptimizeWargame($logsInput: JSON!) {
@@ -23,8 +23,10 @@ const OPTIMIZE_WARGAME_MUTATION = gql`
 `;
 
 const WargameOptimizer: React.FC = () => {
-  const [logsData, setLogsData] = useState('');
-  const [optimizeWargame, { data, loading, error }] = useMutation(OPTIMIZE_WARGAME_MUTATION);
+  const [logsData, setLogsData] = useState("");
+  const [optimizeWargame, { data, loading, error }] = useMutation(
+    OPTIMIZE_WARGAME_MUTATION,
+  );
   const chartRef = useRef<HTMLDivElement | null>(null);
 
   const handleSubmit = async () => {
@@ -32,7 +34,7 @@ const WargameOptimizer: React.FC = () => {
       const parsedLogsData = JSON.parse(logsData);
       await optimizeWargame({ variables: { logsInput: parsedLogsData } });
     } catch (e) {
-      alert('Invalid JSON input for logs data.');
+      alert("Invalid JSON input for logs data.");
       console.error(e);
     }
   };
@@ -41,18 +43,18 @@ const WargameOptimizer: React.FC = () => {
     if (data && chartRef.current) {
       const probs = data.optimizeWargame?.probabilities || {};
       const dataset = [
-        { label: 'win_rate', value: probs.simulated_win_rate || 0 },
-        { label: 'confidence', value: probs.confidence_interval || 0 },
+        { label: "win_rate", value: probs.simulated_win_rate || 0 },
+        { label: "confidence", value: probs.confidence_interval || 0 },
       ];
 
       const width = 300;
       const height = 200;
-      d3.select(chartRef.current).selectAll('*').remove();
+      d3.select(chartRef.current).selectAll("*").remove();
       const svg = d3
         .select(chartRef.current)
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height);
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
 
       const x = d3
         .scaleBand()
@@ -64,19 +66,22 @@ const WargameOptimizer: React.FC = () => {
         .domain([0, d3.max(dataset, (d) => d.value) || 1])
         .range([height, 0]);
 
-      svg.append('g').attr('transform', `translate(0,${height})`).call(d3.axisBottom(x));
-      svg.append('g').call(d3.axisLeft(y));
+      svg
+        .append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x));
+      svg.append("g").call(d3.axisLeft(y));
 
       svg
-        .selectAll('rect')
+        .selectAll("rect")
         .data(dataset)
         .enter()
-        .append('rect')
-        .attr('x', (d) => x(d.label) || 0)
-        .attr('y', (d) => y(d.value))
-        .attr('width', x.bandwidth())
-        .attr('height', (d) => height - y(d.value))
-        .attr('fill', '#3b82f6');
+        .append("rect")
+        .attr("x", (d) => x(d.label) || 0)
+        .attr("y", (d) => y(d.value))
+        .attr("width", x.bandwidth())
+        .attr("height", (d) => height - y(d.value))
+        .attr("fill", "#3b82f6");
     }
   }, [data]);
 
@@ -94,7 +99,7 @@ const WargameOptimizer: React.FC = () => {
         onClick={handleSubmit}
         disabled={loading}
       >
-        {loading ? 'Optimizing...' : 'Run Wargame Optimizer'}
+        {loading ? "Optimizing..." : "Run Wargame Optimizer"}
       </button>
 
       {error && <p className="text-red-500 mt-4">Error: {error.message}</p>}
