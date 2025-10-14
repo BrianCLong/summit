@@ -1,0 +1,16 @@
+{
+  "alice": {
+    "roles": ["reader"],
+    "entitlements": ["dataset:alpha:read"],
+    "manager": "manager-001",
+    "riskScore": 32,
+    "lastReviewed": "2025-01-03T08:00:00Z"
+  },
+  "bob": {
+    "roles": ["analyst"],
+    "entitlements": ["dataset:beta:read", "dataset:beta:write"],
+    "manager": "manager-004",
+    "riskScore": 45,
+    "lastReviewed": "2025-01-05T09:30:00Z"
+  }
+}

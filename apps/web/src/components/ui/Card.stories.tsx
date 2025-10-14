@@ -1,12 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from './Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './Card'
 import { Button } from './Button'
 import { Badge } from './Badge'
 
@@ -28,8 +21,7 @@ export const Default: Story = {
       <CardHeader>
         <CardTitle>Card Title</CardTitle>
         <CardDescription>
-          Card description. Lorem ipsum dolor sit amet, consectetur adipiscing
-          elit.
+          Card description. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -66,9 +58,7 @@ export const WithBadge: Story = {
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Priority:</span>
-            <Badge variant="warning" className="text-xs">
-              High
-            </Badge>
+            <Badge variant="warning" className="text-xs">High</Badge>
           </div>
         </div>
       </CardContent>
