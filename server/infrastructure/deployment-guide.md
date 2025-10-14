@@ -7,7 +7,6 @@ This guide provides step-by-step instructions for deploying IntelGraph to produc
 ## 📋 Prerequisites
 
 ### Required Software
-
 - Docker & Docker Compose
 - Kubernetes cluster (for production scaling)
 - Git
@@ -15,7 +14,6 @@ This guide provides step-by-step instructions for deploying IntelGraph to produc
 - curl, jq (for testing)
 
 ### Required Accounts/Services
-
 - Container registry access (GitHub Container Registry)
 - SSL certificate provider (Let's Encrypt recommended)
 - Monitoring service (optional: New Relic, DataDog)
@@ -24,14 +22,12 @@ This guide provides step-by-step instructions for deploying IntelGraph to produc
 ## 🔧 Step 1: Environment Setup
 
 ### 1.1 Clone Repository
-
 ```bash
 git clone https://github.com/your-org/intelgraph-server.git
 cd intelgraph-server
 ```
 
 ### 1.2 Generate Production Secrets
-
 ```bash
 # Generate secure secrets
 ./infrastructure/scripts/generate-secrets.sh
@@ -45,7 +41,6 @@ cp .env.production .env
 ```
 
 ### 1.3 Create SSL Certificates
-
 ```bash
 # Create SSL directory
 mkdir -p infrastructure/ssl
@@ -66,7 +61,6 @@ sudo cp /etc/letsencrypt/live/intelgraph.example.com/privkey.pem infrastructure/
 ## 🗄️ Step 2: Database Setup
 
 ### 2.1 Start Production Databases
-
 ```bash
 # Create external network
 docker network create intelgraph-network
@@ -82,7 +76,6 @@ docker-compose -f docker-compose.prod.yml logs redis
 ```
 
 ### 2.2 Initialize Databases
-
 ```bash
 # Wait for databases to be ready
 sleep 60
@@ -94,7 +87,6 @@ docker exec intelgraph-neo4j-prod cypher-shell -u neo4j -p your_password "RETURN
 ```
 
 ### 2.3 Setup Database Backups
-
 ```bash
 # Test backup system
 docker-compose -f docker-compose.prod.yml exec db-backup /scripts/backup.sh
@@ -106,7 +98,6 @@ ls -la infrastructure/backups/
 ## 📊 Step 3: Monitoring Setup
 
 ### 3.1 Start Monitoring Stack
-
 ```bash
 # Start monitoring services
 docker-compose -f docker-compose.monitoring.yml up -d
@@ -116,7 +107,6 @@ docker-compose -f docker-compose.monitoring.yml ps
 ```
 
 ### 3.2 Configure Grafana
-
 ```bash
 # Access Grafana at http://localhost:3001
 # Login: admin / your_grafana_password (from .env.secrets)
@@ -128,7 +118,6 @@ curl -X POST http://admin:your_password@localhost:3001/api/dashboards/db \
 ```
 
 ### 3.3 Test Alerting
-
 ```bash
 # Test Prometheus alerts
 curl http://localhost:9090/api/v1/alerts
@@ -140,7 +129,6 @@ curl http://localhost:9093/api/v1/alerts
 ## ⚖️ Step 4: Load Balancer and Scaling
 
 ### 4.1 Deploy Scaled Application
-
 ```bash
 # Build application image
 docker build -f Dockerfile.prod -t intelgraph-server:latest .
@@ -153,7 +141,6 @@ docker ps | grep intelgraph-app
 ```
 
 ### 4.2 Test Load Balancer
-
 ```bash
 # Test HTTP access
 curl -H "Host: intelgraph.example.com" http://localhost/health
@@ -172,7 +159,6 @@ curl http://localhost:8080/nginx_status
 ```
 
 ### 4.3 Test Auto-scaling
-
 ```bash
 # Monitor auto-scaler logs
 docker logs -f intelgraph-autoscaler
@@ -188,7 +174,6 @@ hey -z 5m -c 50 http://localhost/api/healthz
 ## 🚀 Step 5: CI/CD Pipeline Setup
 
 ### 5.1 GitHub Actions Setup
-
 ```bash
 # Add repository secrets in GitHub:
 # - GHCR_TOKEN: GitHub Container Registry token
@@ -204,7 +189,6 @@ git push origin main
 ```
 
 ### 5.2 Kubernetes Deployment (Production)
-
 ```bash
 # Apply Kubernetes manifests
 kubectl create namespace intelgraph-production
@@ -224,7 +208,6 @@ kubectl get ingress -n intelgraph-production
 ## 🔍 Step 6: Verification and Testing
 
 ### 6.1 Health Checks
-
 ```bash
 # Application health
 curl http://localhost/health
@@ -241,7 +224,6 @@ curl http://localhost/metrics
 ```
 
 ### 6.2 Functional Testing
-
 ```bash
 # Run end-to-end tests
 npm run test:e2e -- --baseUrl=http://localhost
@@ -256,7 +238,6 @@ curl -X POST http://localhost/graphql \
 ```
 
 ### 6.3 Security Testing
-
 ```bash
 # SSL/TLS testing
 testssl.sh https://intelgraph.example.com
@@ -271,7 +252,6 @@ for i in {1..100}; do curl -w "%{http_code}\n" -o /dev/null -s http://localhost/
 ## 📈 Step 7: Performance Optimization
 
 ### 7.1 Database Optimization
-
 ```bash
 # PostgreSQL performance tuning
 docker exec intelgraph-postgres-prod psql -U intelgraph -d intelgraph_prod \
@@ -287,7 +267,6 @@ docker exec intelgraph-neo4j-prod cypher-shell -u neo4j -p your_password \
 ```
 
 ### 7.2 Application Performance
-
 ```bash
 # Monitor application metrics
 curl http://localhost/metrics | grep -E "(http_requests|response_time|memory_usage)"
@@ -299,7 +278,6 @@ curl http://localhost/api/system/stats
 ## 🔒 Step 8: Security Hardening
 
 ### 8.1 Network Security
-
 ```bash
 # Configure firewall rules (example for Ubuntu)
 sudo ufw allow 22/tcp    # SSH
@@ -313,7 +291,6 @@ sudo ufw enable
 ```
 
 ### 8.2 Container Security
-
 ```bash
 # Scan container images for vulnerabilities
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
@@ -325,7 +302,6 @@ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
 ```
 
 ### 8.3 Backup and Recovery
-
 ```bash
 # Test backup restoration
 ./infrastructure/scripts/restore-backup.sh backup_20240101_120000.tar.gz
@@ -337,7 +313,6 @@ tar -tzf infrastructure/backups/intelgraph_backup_latest.tar.gz
 ## 📞 Step 9: Monitoring and Alerting
 
 ### 9.1 Configure Alerts
-
 ```bash
 # Test alert notifications
 curl -X POST "$SLACK_WEBHOOK_URL" \
@@ -349,7 +324,6 @@ curl http://localhost:9090/api/v1/targets
 ```
 
 ### 9.2 Dashboard Setup
-
 - **Grafana**: http://localhost:3001
 - **Prometheus**: http://localhost:9090
 - **AlertManager**: http://localhost:9093
@@ -359,7 +333,6 @@ curl http://localhost:9090/api/v1/targets
 ## 🔄 Step 10: Maintenance Procedures
 
 ### 10.1 Regular Maintenance
-
 ```bash
 # Update application
 docker-compose -f docker-compose.scale.yml pull
@@ -374,7 +347,6 @@ sudo certbot renew
 ```
 
 ### 10.2 Scaling Operations
-
 ```bash
 # Manual scaling
 docker-compose -f docker-compose.scale.yml up -d --scale intelgraph-app=5
@@ -388,7 +360,6 @@ kubectl scale deployment intelgraph-app --replicas=5 -n intelgraph-production
 ### Common Issues
 
 1. **Database Connection Errors**
-
    ```bash
    # Check database logs
    docker-compose -f docker-compose.prod.yml logs postgres
@@ -397,28 +368,25 @@ kubectl scale deployment intelgraph-app --replicas=5 -n intelgraph-production
    ```
 
 2. **SSL Certificate Issues**
-
    ```bash
    # Verify certificate
    openssl x509 -in infrastructure/ssl/intelgraph.crt -text -noout
    ```
 
 3. **High Memory Usage**
-
    ```bash
    # Check container stats
    docker stats
-
+   
    # Restart services if needed
    docker-compose -f docker-compose.scale.yml restart
    ```
 
 4. **Load Balancer Issues**
-
    ```bash
    # Check NGINX configuration
    docker exec intelgraph-nginx nginx -t
-
+   
    # Reload NGINX
    docker exec intelgraph-nginx nginx -s reload
    ```

@@ -1,0 +1,11 @@
+image:
+  repository: er-service
+  tag: latest
+  pullPolicy: IfNotPresent
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+service:
+  type: ClusterIP
+  port: 8080

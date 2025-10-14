@@ -1,9 +1,9 @@
 import { persistenceService } from './persistenceService';
 import { cacheService } from './cacheService';
 export class MLAnalysisService {
-    modelVersion = '1.2.3';
-    lastTraining = new Date().toISOString();
     constructor() {
+        this.modelVersion = '1.2.3';
+        this.lastTraining = new Date().toISOString();
         console.log('[ML] AI/ML Analysis Service initialized');
         console.log(`[ML] Model version: ${this.modelVersion}`);
     }
@@ -304,3 +304,4 @@ export class MLAnalysisService {
 }
 // Global ML analysis service instance
 export const mlAnalysisService = new MLAnalysisService();
+//# sourceMappingURL=mlAnalysisService.js.map

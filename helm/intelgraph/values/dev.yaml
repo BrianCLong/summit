@@ -8,7 +8,7 @@ image:
   repository: intelgraph/server
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 'latest'
+  tag: "latest"
 
 service:
   type: ClusterIP
@@ -29,11 +29,11 @@ ingress:
 env:
   NODE_ENV: development
   LOG_LEVEL: debug
-  FEATURE_FLAG_AI: 'true'
+  FEATURE_FLAG_AI: "true"
   # Database connection strings (usually managed by secrets)
-  NEO4J_URI: 'bolt://neo4j-dev:7687'
-  POSTGRES_HOST: 'postgres-dev'
-  REDIS_HOST: 'redis-dev'
+  NEO4J_URI: "bolt://neo4j-dev:7687"
+  POSTGRES_HOST: "postgres-dev"
+  REDIS_HOST: "redis-dev"
 
 # Resource limits for development
 resources:

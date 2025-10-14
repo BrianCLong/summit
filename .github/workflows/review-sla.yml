@@ -1,0 +1,35 @@
+name: Review SLA
+on:
+  schedule:
+    - cron: '0 * * * *' # Runs every hour
+
+jobs:
+  check-sla:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR review SLAs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr list --state open --limit 100 --json number,createdAt,reviewDecision,labels --jq '.[] | select(.isDraft | not) | select(.reviewDecision == "REVIEW_REQUIRED" or .reviewDecision == null)' | \
+            while read -r pr_json; do
+              pr_number=$(echo "$pr_json" | jq '.number')
+              created_at=$(echo "$pr_json" | jq -r '.createdAt')
+              now_ts=$(date +%s)
+              created_ts=$(date -d "$created_at" +%s)
+              hours_since_creation=$(( (now_ts - created_ts) / 3600 ))
+
+              has_sla_label=$(echo "$pr_json" | jq '.labels | any(.name | test("sla:"))')
+
+              if [ "$has_sla_label" = "false" ]; then
+                if [ "$hours_since_creation" -ge 72 ]; then
+                  echo "PR #${pr_number} is >72h old. Adding 'sla:72h' label."
+                  gh pr edit "$pr_number" --add-label "sla:72h"
+                  gh pr comment "$pr_number" -b "🔔 This PR has been waiting for review for over 72 hours."
+                elif [ "$hours_since_creation" -ge 24 ]; then
+                  echo "PR #${pr_number} is >24h old. Adding 'sla:24h' label."
+                  gh pr edit "$pr_number" --add-label "sla:24h"
+                  gh pr comment "$pr_number" -b "🔔 This PR has been waiting for review for over 24 hours."
+                fi
+              fi
+            done
