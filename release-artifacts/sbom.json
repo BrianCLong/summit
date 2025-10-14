@@ -1,0 +1,17 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2025-10-04T21:00:00Z",
+    "component": {
+      "type": "application",
+      "name": "intelgraph",
+      "version": "2025.10.HALLOWEEN"
+    }
+  },
+  "components": [
+    {"type": "library", "name": "@simplewebauthn/browser", "version": "9.0.1", "licenses": [{"license": {"id": "MIT"}}]},
+    {"type": "library", "name": "openpolicyagent/opa", "version": "0.60.0", "licenses": [{"license": {"id": "Apache-2.0"}}]}
+  ]
+}
