@@ -113,12 +113,12 @@ async function connectNeo4j() {
 
 async function connectPostgres() {
   mockPostgresPool = new MockPostgresPool();
-
+  
   // Mock table creation
   const client = await mockPostgresPool.connect();
   await client.query('CREATE TABLE IF NOT EXISTS users (id UUID PRIMARY KEY)');
   client.release();
-
+  
   console.log('✅ Connected to Mock PostgreSQL');
   return mockPostgresPool;
 }
@@ -167,5 +167,5 @@ module.exports = {
   getPostgresPool,
   getRedisClient,
   closeConnections,
-  isMockMode: true,
+  isMockMode: true
 };

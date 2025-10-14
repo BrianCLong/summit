@@ -1,6 +1,7 @@
 import {
   ObserverTimeline,
   ObserverTimelineFrame,
+  TimelineStatusCounts,
   WorkflowDefinition,
   WorkflowRunRecord,
   type NodeRunStatus
@@ -67,6 +68,37 @@ export interface WorkflowDiff {
   changedNodes: string[];
   addedEdges: string[];
   removedEdges: string[];
+}
+
+export interface DependencyGraphNodeState {
+  id: string;
+  label: string;
+  status: NodeRunStatus;
+  column: number;
+  lane: number;
+  position: CanvasNodePosition;
+  dependencies: string[];
+  dependents: string[];
+  isCritical: boolean;
+  isBlocked: boolean;
+  startedAt?: string;
+  finishedAt?: string;
+}
+
+export interface DependencyGraphEdgeState {
+  id: string;
+  from: string;
+  to: string;
+  condition: string;
+  isCritical: boolean;
+  isSatisfied: boolean;
+}
+
+export interface DependencyGraphSnapshot {
+  nodes: DependencyGraphNodeState[];
+  edges: DependencyGraphEdgeState[];
+  statusCounts: TimelineStatusCounts;
+  progressPercent: number;
 }
 
 const DEFAULT_NODE_WIDTH = 260;
@@ -202,46 +234,147 @@ export function createObserverState(run: WorkflowRunRecord): ObserverState {
 export function buildObserverTimeline(run: WorkflowRunRecord): ObserverTimeline {
   const frames: ObserverTimelineFrame[] = [];
   const nodeIds = new Set(run.nodes?.map((node) => node.nodeId));
+  for (const nodeId of run.stats.criticalPath ?? []) {
+    nodeIds.add(nodeId);
+  }
   const baselineStatuses: Record<string, NodeRunStatus> = {};
   for (const nodeId of nodeIds) {
     baselineStatuses[nodeId] = "queued";
   }
 
-  frames.push({
+  frames.push(attachTimelineMetadata({
     index: 0,
     timestamp: run.startedAt ?? new Date().toISOString(),
     nodeStatuses: { ...baselineStatuses },
     costUSD: 0,
     latencyMs: 0,
     criticalPath: []
-  });
+  }, nodeIds.size));
 
   const events = buildNodeEvents(run);
   let index = 1;
   for (const event of events) {
     const previous = { ...frames[frames.length - 1].nodeStatuses };
     previous[event.nodeId] = event.status;
-    frames.push({
+    frames.push(attachTimelineMetadata({
       index,
       timestamp: event.timestamp,
       nodeStatuses: previous,
       costUSD: interpolateCost(run.stats.costUSD, index, events.length),
       latencyMs: interpolateLatency(run.stats.latencyMs, index, events.length),
-      criticalPath: run.stats.criticalPath
-    });
+      criticalPath: run.stats.criticalPath,
+      delta: { nodeId: event.nodeId, status: event.status }
+    }, nodeIds.size));
     index += 1;
   }
 
-  frames.push({
+  frames.push(attachTimelineMetadata({
     index,
     timestamp: run.finishedAt ?? new Date().toISOString(),
     nodeStatuses: { ...frames[frames.length - 1].nodeStatuses },
     costUSD: run.stats.costUSD,
     latencyMs: run.stats.latencyMs,
     criticalPath: run.stats.criticalPath
-  });
+  }, nodeIds.size));
 
   return { frames };
+}
+
+export function buildDependencyGraphSnapshot(
+  state: CanvasState,
+  frame?: ObserverTimelineFrame
+): DependencyGraphSnapshot {
+  const nodeStatuses: Record<string, NodeRunStatus> = {};
+  for (const node of state.workflow.nodes) {
+    const runtimeStatus = state.runtime[node.id]?.status;
+    nodeStatuses[node.id] =
+      frame?.nodeStatuses[node.id] ?? runtimeStatus ?? "queued";
+  }
+
+  const { counts, progressPercent } = summarizeStatuses(
+    nodeStatuses,
+    state.workflow.nodes.length
+  );
+
+  const dependencies = new Map<string, string[]>();
+  const dependents = new Map<string, string[]>();
+  for (const edge of state.workflow.edges) {
+    if (!dependencies.has(edge.to)) {
+      dependencies.set(edge.to, []);
+    }
+    if (!dependents.has(edge.from)) {
+      dependents.set(edge.from, []);
+    }
+    dependencies.get(edge.to)!.push(edge.from);
+    dependents.get(edge.from)!.push(edge.to);
+  }
+
+  const criticalPath = frame?.criticalPath ?? state.criticalPath;
+  const criticalSet = new Set(criticalPath);
+  const criticalPairs = new Set<string>();
+  if (criticalPath) {
+    for (let i = 0; i < criticalPath.length - 1; i += 1) {
+      const from = criticalPath[i]!;
+      const to = criticalPath[i + 1]!;
+      criticalPairs.add(buildEdgePairKey(from, to));
+    }
+  }
+
+  const positions = Object.keys(state.positions).length
+    ? state.positions
+    : constraintAwareAutoLayout(state.workflow);
+
+  const nodes: DependencyGraphNodeState[] = state.workflow.nodes.map((node) => {
+    const status = nodeStatuses[node.id] ?? "queued";
+    const deps = dependencies.get(node.id) ?? [];
+    const nodePosition = positions[node.id] ?? {
+      x: 0,
+      y: 0,
+      column: 0,
+      lane: 0,
+      width: DEFAULT_NODE_WIDTH,
+      height: DEFAULT_NODE_HEIGHT
+    };
+    const completedDeps = deps.filter((dependencyId) =>
+      isCompletedStatus(nodeStatuses[dependencyId])
+    );
+    const isBlocked =
+      status === "queued" && completedDeps.length !== deps.length && deps.length > 0;
+    return {
+      id: node.id,
+      label: node.name ?? node.id,
+      status,
+      column: nodePosition.column,
+      lane: nodePosition.lane,
+      position: nodePosition,
+      dependencies: [...deps],
+      dependents: [...(dependents.get(node.id) ?? [])],
+      isCritical: criticalSet.has(node.id),
+      isBlocked,
+      startedAt: state.runtime[node.id]?.startedAt,
+      finishedAt: state.runtime[node.id]?.finishedAt
+    };
+  });
+
+  const edges: DependencyGraphEdgeState[] = state.workflow.edges.map((edge) => {
+    const id = serializeEdge(edge.from, edge.to, edge.on);
+    const sourceStatus = nodeStatuses[edge.from] ?? "queued";
+    return {
+      id,
+      from: edge.from,
+      to: edge.to,
+      condition: edge.on,
+      isCritical: criticalPairs.has(buildEdgePairKey(edge.from, edge.to)),
+      isSatisfied: isCompletedStatus(sourceStatus)
+    };
+  });
+
+  return {
+    nodes,
+    edges,
+    statusCounts: counts,
+    progressPercent
+  };
 }
 
 export function advancePlayback(
@@ -372,4 +505,70 @@ function interpolateLatency(total: number, index: number, totalEvents: number): 
     return total;
   }
   return Math.round((total * index) / totalEvents);
+}
+
+function attachTimelineMetadata(
+  frame: Omit<ObserverTimelineFrame, "statusCounts" | "progressPercent">,
+  totalNodes: number
+): ObserverTimelineFrame {
+  const { counts, progressPercent } = summarizeStatuses(frame.nodeStatuses, totalNodes);
+  return {
+    ...frame,
+    statusCounts: counts,
+    progressPercent
+  };
+}
+
+function summarizeStatuses(
+  nodeStatuses: Record<string, NodeRunStatus>,
+  totalNodes: number
+): { counts: TimelineStatusCounts; progressPercent: number } {
+  const counts: TimelineStatusCounts = {
+    total: totalNodes,
+    completed: 0,
+    succeeded: 0,
+    skipped: 0,
+    failed: 0,
+    running: 0,
+    queued: 0
+  };
+
+  for (const status of Object.values(nodeStatuses)) {
+    switch (status) {
+      case "succeeded":
+        counts.succeeded += 1;
+        counts.completed += 1;
+        break;
+      case "skipped":
+        counts.skipped += 1;
+        counts.completed += 1;
+        break;
+      case "failed":
+        counts.failed += 1;
+        counts.completed += 1;
+        break;
+      case "running":
+        counts.running += 1;
+        break;
+      case "queued":
+      default:
+        counts.queued += 1;
+        break;
+    }
+  }
+
+  const progressPercent =
+    totalNodes === 0
+      ? 100
+      : Math.round((counts.completed / Math.max(totalNodes, 1)) * 100);
+
+  return { counts, progressPercent };
+}
+
+function isCompletedStatus(status: NodeRunStatus | undefined): boolean {
+  return status === "succeeded" || status === "skipped" || status === "failed";
+}
+
+function buildEdgePairKey(from: string, to: string): string {
+  return `${from}->${to}`;
 }

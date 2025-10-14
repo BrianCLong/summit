@@ -1,8 +1,0 @@
-{
-  "name": "intelgraph-nix",
-  "build": { "dockerfile": "Dockerfile" },
-  "features": {},
-  "postCreateCommand": "pnpm i && pnpm build",
-  "customizations": { "vscode": { "settings": { "terminal.integrated.defaultProfile.linux": "bash" } } },
-  "forwardPorts": [3000,4000,4030]
-}

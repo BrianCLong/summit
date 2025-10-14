@@ -1,0 +1,32 @@
+name: Container Security
+
+on:
+  push: { branches: [ main, feature/dev-aws-green ] }
+  pull_request:
+
+jobs:
+  sbom-and-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        run: |
+          if [ -f deploy/docker/Dockerfile ]; then
+            docker buildx build --load -t intelgraph/app:${{ github.sha }} -f deploy/docker/Dockerfile .
+          elif [ -f deploy/docker/Dockerfile.api ]; then
+            docker buildx build --load -t intelgraph/app:${{ github.sha }} -f deploy/docker/Dockerfile.api .
+          else
+            echo "No Dockerfile found under deploy/docker; skipping" && exit 0
+          fi
+      - name: SBOM (syft)
+        uses: anchore/sbom-action@v0
+        with: { image: intelgraph/app:${{ github.sha }}, format: 'spdx-json', output-file: 'sbom.spdx.json' }
+      - name: Scan (grype)
+        uses: anchore/scan-action@v3
+        with:
+          image: intelgraph/app:${{ github.sha }}
+          fail-build: false
+          severity-cutoff: critical
+      - uses: actions/upload-artifact@v4
+        with: { name: sbom, path: sbom.spdx.json }
