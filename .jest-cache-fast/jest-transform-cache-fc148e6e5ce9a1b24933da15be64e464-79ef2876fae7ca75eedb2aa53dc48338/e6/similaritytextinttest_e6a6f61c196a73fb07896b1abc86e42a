@@ -1,0 +1,18 @@
+269d8dcb3ed42305550a5e26ddd62ecc
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const supertest_1 = __importDefault(require("supertest"));
+test('similarEntities by text (integration)', async () => {
+    const apiUrl = process.env.API_URL || 'http://localhost:4000';
+    const q = `{ similarEntities(text:"banking fraud", topK:5){ id score } }`;
+    const r = await (0, supertest_1.default)(apiUrl)
+        .post('/graphql')
+        .set('Authorization', 'Bearer test')
+        .send({ query: q });
+    expect(r.status).toBe(200);
+    expect(r.body.data.similarEntities.length).toBeLessThanOrEqual(5);
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJmaWxlIjoiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci90ZXN0cy9pbnRlZ3JhdGlvbi9zaW1pbGFyaXR5LnRleHQuaW50LnRlc3QudHMiLCJtYXBwaW5ncyI6Ijs7Ozs7QUFBQSwwREFBZ0M7QUFFaEMsSUFBSSxDQUFDLHVDQUF1QyxFQUFFLEtBQUssSUFBSSxFQUFFO0lBQ3ZELE1BQU0sTUFBTSxHQUFHLE9BQU8sQ0FBQyxHQUFHLENBQUMsT0FBTyxJQUFJLHVCQUF1QixDQUFDO0lBQzlELE1BQU0sQ0FBQyxHQUFHLCtEQUErRCxDQUFDO0lBQzFFLE1BQU0sQ0FBQyxHQUFHLE1BQU0sSUFBQSxtQkFBTyxFQUFDLE1BQU0sQ0FBQztTQUM1QixJQUFJLENBQUMsVUFBVSxDQUFDO1NBQ2hCLEdBQUcsQ0FBQyxlQUFlLEVBQUUsYUFBYSxDQUFDO1NBQ25DLElBQUksQ0FBQyxFQUFFLEtBQUssRUFBRSxDQUFDLEVBQUUsQ0FBQyxDQUFDO0lBQ3RCLE1BQU0sQ0FBQyxDQUFDLENBQUMsTUFBTSxDQUFDLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxDQUFDO0lBQzNCLE1BQU0sQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxlQUFlLENBQUMsTUFBTSxDQUFDLENBQUMsbUJBQW1CLENBQUMsQ0FBQyxDQUFDLENBQUM7QUFDcEUsQ0FBQyxDQUFDLENBQUMiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiL1VzZXJzL2JyaWFubG9uZy9EZXZlbG9wZXIvc3VtbWl0L3NlcnZlci90ZXN0cy9pbnRlZ3JhdGlvbi9zaW1pbGFyaXR5LnRleHQuaW50LnRlc3QudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHJlcXVlc3QgZnJvbSAnc3VwZXJ0ZXN0JztcblxudGVzdCgnc2ltaWxhckVudGl0aWVzIGJ5IHRleHQgKGludGVncmF0aW9uKScsIGFzeW5jICgpID0+IHtcbiAgY29uc3QgYXBpVXJsID0gcHJvY2Vzcy5lbnYuQVBJX1VSTCB8fCAnaHR0cDovL2xvY2FsaG9zdDo0MDAwJztcbiAgY29uc3QgcSA9IGB7IHNpbWlsYXJFbnRpdGllcyh0ZXh0OlwiYmFua2luZyBmcmF1ZFwiLCB0b3BLOjUpeyBpZCBzY29yZSB9IH1gO1xuICBjb25zdCByID0gYXdhaXQgcmVxdWVzdChhcGlVcmwpXG4gICAgLnBvc3QoJy9ncmFwaHFsJylcbiAgICAuc2V0KCdBdXRob3JpemF0aW9uJywgJ0JlYXJlciB0ZXN0JylcbiAgICAuc2VuZCh7IHF1ZXJ5OiBxIH0pO1xuICBleHBlY3Qoci5zdGF0dXMpLnRvQmUoMjAwKTtcbiAgZXhwZWN0KHIuYm9keS5kYXRhLnNpbWlsYXJFbnRpdGllcy5sZW5ndGgpLnRvQmVMZXNzVGhhbk9yRXF1YWwoNSk7XG59KTtcbiJdLCJ2ZXJzaW9uIjozfQ==
