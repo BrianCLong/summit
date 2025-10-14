@@ -2,11 +2,10 @@ import { randomUUID as uuidv4 } from 'crypto';
 import pino from 'pino';
 const logger = pino({ name: 'nl-to-cypher' });
 export class NlToCypherService {
-    adapter;
-    promptCache = new Map();
-    executionHistory = [];
     constructor(adapter) {
         this.adapter = adapter;
+        this.promptCache = new Map();
+        this.executionHistory = [];
     }
     async translateWithPreview(prompt, userId, tenantId) {
         const startTime = Date.now();
@@ -309,3 +308,4 @@ export class NlToCypherService {
         return result.generatedCypher;
     }
 }
+//# sourceMappingURL=nl-to-cypher.service.js.map

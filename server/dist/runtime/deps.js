@@ -1,5 +1,4 @@
 import { Pool } from 'pg';
-import { Redis } from 'ioredis';
 import { getDriver } from '../graph/neo4j';
 import { cfg, dbUrls } from '../config';
 import { breaker } from './breakers';
@@ -59,3 +58,4 @@ export async function closeDeps() {
 }
 // Export clients for use in other modules
 export { pgPool, neo4jDriver, redisClient };
+//# sourceMappingURL=deps.js.map

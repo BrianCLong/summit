@@ -1,4 +1,4 @@
-import { gql } from 'graphql-tag';
+import { gql } from "graphql-tag";
 export const crudTypeDefs = gql `
   scalar DateTime
   scalar JSON
@@ -380,7 +380,11 @@ export const crudTypeDefs = gql `
     # Entity mutations
     createEntity(input: EntityInput!): Entity!
     createEntities(inputs: [EntityInput!]!): [Entity!]!
-    updateEntity(id: ID!, input: EntityUpdateInput!, lastSeenTimestamp: DateTime!): Entity!
+    updateEntity(
+      id: ID!
+      input: EntityUpdateInput!
+      lastSeenTimestamp: DateTime!
+    ): Entity!
     deleteEntity(id: ID!): Boolean!
 
     # Relationship mutations
@@ -395,10 +399,16 @@ export const crudTypeDefs = gql `
 
     # Investigation mutations
     createInvestigation(input: InvestigationInput!): Investigation!
-    updateInvestigation(id: ID!, input: InvestigationUpdateInput!): Investigation!
+    updateInvestigation(
+      id: ID!
+      input: InvestigationUpdateInput!
+    ): Investigation!
     deleteInvestigation(id: ID!): Boolean!
     assignUserToInvestigation(investigationId: ID!, userId: ID!): Investigation!
-    unassignUserFromInvestigation(investigationId: ID!, userId: ID!): Investigation!
+    unassignUserFromInvestigation(
+      investigationId: ID!
+      userId: ID!
+    ): Investigation!
 
     # Authentication mutations (placeholder - handled separately)
     login(email: String!, password: String!): AuthPayload!
@@ -431,3 +441,4 @@ export const crudTypeDefs = gql `
     graphUpdated(investigationId: ID!): GraphData!
   }
 `;
+//# sourceMappingURL=crudSchema.js.map

@@ -6,7 +6,7 @@
  */
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
-import { createRateLimiter, strictRateLimiter, authRateLimiter, aiRateLimiter, securityHeaders, corsConfig, requestLogger, validateRequest, requestSizeLimiter, } from '../middleware/security.js';
+import { createRateLimiter, strictRateLimiter, authRateLimiter, aiRateLimiter, securityHeaders, corsConfig, requestLogger, validateRequest, requestSizeLimiter } from '../middleware/security.js';
 import logger from '../utils/logger.js';
 /**
  * Production JWT Authentication Middleware
@@ -19,7 +19,7 @@ export const productionAuthMiddleware = (req, res, next) => {
         logger.warn(`Authentication failed: No token provided. IP: ${req.ip}, Path: ${req.path}`);
         res.status(401).json({
             error: 'Authentication required',
-            message: 'No access token provided',
+            message: 'No access token provided'
         });
         return;
     }
@@ -36,7 +36,7 @@ export const productionAuthMiddleware = (req, res, next) => {
             logger.warn(`Authentication failed: Token expired. User: ${decoded.email}, IP: ${req.ip}`);
             res.status(401).json({
                 error: 'Token expired',
-                message: 'Access token has expired',
+                message: 'Access token has expired'
             });
             return;
         }
@@ -49,7 +49,7 @@ export const productionAuthMiddleware = (req, res, next) => {
         logger.warn(`Authentication failed: Invalid token. IP: ${req.ip}, Error: ${error instanceof Error ? error.message : 'Unknown'}`);
         res.status(401).json({
             error: 'Invalid token',
-            message: 'Access token is invalid or malformed',
+            message: 'Access token is invalid or malformed'
         });
         return;
     }
@@ -69,7 +69,7 @@ export const requireRole = (requiredRoles) => {
             logger.warn(`Authorization failed: Insufficient permissions. User: ${req.user.email}, Role: ${userRole}, Required: ${roles.join(', ')}, IP: ${req.ip}`);
             res.status(403).json({
                 error: 'Insufficient permissions',
-                message: `Required role: ${roles.join(' or ')}`,
+                message: `Required role: ${roles.join(' or ')}`
             });
             return;
         }
@@ -87,9 +87,7 @@ export const applyProductionSecurity = (app) => {
     const corsOptions = {
         ...corsConfig,
         origin: (origin, callback) => {
-            const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
-                'https://app.intelgraph.com',
-            ];
+            const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['https://app.intelgraph.com'];
             // In production, be stricter about origins
             if (process.env.NODE_ENV === 'production') {
                 if (!origin || !allowedOrigins.includes(origin)) {
@@ -98,7 +96,7 @@ export const applyProductionSecurity = (app) => {
                 }
             }
             callback(null, true);
-        },
+        }
     };
     app.use(cors(corsOptions));
     // 3. Request Logging
@@ -122,7 +120,7 @@ export const applyProductionSecurity = (app) => {
         // AI/ML endpoints
         ai: aiRateLimiter,
         // Admin endpoints
-        admin: strictRateLimiter,
+        admin: strictRateLimiter
     };
     // Apply rate limiting to specific routes
     app.use('/api/auth', rateLimitConfig.auth);
@@ -138,7 +136,7 @@ export const applyProductionSecurity = (app) => {
 export const graphqlSecurityConfig = {
     // Disable introspection in production
     introspection: process.env.NODE_ENV !== 'production',
-    // Disable playground in production
+    // Disable playground in production  
     playground: process.env.NODE_ENV !== 'production',
     // Query complexity analysis
     validationRules: [
@@ -149,8 +147,8 @@ export const graphqlSecurityConfig = {
     context: ({ req }) => ({
         user: req.user,
         ip: req.ip,
-        userAgent: req.get('User-Agent'),
-    }),
+        userAgent: req.get('User-Agent')
+    })
 };
 /**
  * Environment-specific security settings
@@ -164,36 +162,35 @@ export const getSecurityConfig = () => {
             secret: process.env.JWT_SECRET,
             refreshSecret: process.env.JWT_REFRESH_SECRET,
             expiresIn: isProd ? '15m' : '24h', // Shorter in production
-            refreshExpiresIn: isProd ? '7d' : '30d',
+            refreshExpiresIn: isProd ? '7d' : '30d'
         },
         // Rate Limiting
         rateLimits: {
             general: isProd ? 500 : 1000,
             graphql: isProd ? 30 : 100,
             auth: isProd ? 3 : 10,
-            ai: isProd ? 5 : 20,
+            ai: isProd ? 5 : 20
         },
         // CORS
         cors: {
             origins: isProd
-                ? process.env.ALLOWED_ORIGINS?.split(',') || ['https://app.intelgraph.com']
+                ? (process.env.ALLOWED_ORIGINS?.split(',') || ['https://app.intelgraph.com'])
                 : ['http://localhost:3000', 'http://localhost:5173'],
-            credentials: true,
+            credentials: true
         },
         // Security Headers
-        hsts: isProd
-            ? {
-                maxAge: 31536000, // 1 year
-                includeSubDomains: true,
-                preload: true,
-            }
-            : false,
+        hsts: isProd ? {
+            maxAge: 31536000, // 1 year
+            includeSubDomains: true,
+            preload: true
+        } : false,
         // Feature Flags
         features: {
             persistedQueries: isProd, // Only in production
             queryComplexityAnalysis: isProd,
             auditLogging: true,
-            ipWhitelisting: isProd,
-        },
+            ipWhitelisting: isProd
+        }
     };
 };
+//# sourceMappingURL=production-security.js.map

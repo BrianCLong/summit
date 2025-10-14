@@ -1,8 +1,0 @@
-{
-  "title": "Neo4j Health Sprint 8",
-  "panels": [
-    { "type": "graph", "title": "TPS", "targets": [{ "expr": "rate(db_queries_total[1m])" }] },
-    { "type": "graph", "title": "Errors", "targets": [{ "expr": "db_queries_total{status='error'}" }] },
-    { "type": "graph", "title": "p95 Latency", "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket[5m])) by (le))" }] }
-  ]
-}

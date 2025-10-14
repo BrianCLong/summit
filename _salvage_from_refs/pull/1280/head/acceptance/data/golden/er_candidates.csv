@@ -1,4 +1,0 @@
-idempotencyKey,externalId,candidateName,confidence
-k-1,ext-100,Acme Corporation,HIGH
-k-2,ext-101,Jane S.,MID
-k-3,ext-102,John D.,LOW

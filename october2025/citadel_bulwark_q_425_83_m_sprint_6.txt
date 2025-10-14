@@ -1,0 +1,112 @@
+# UNIT 83M [CITADEL][BULWARK] SPRINT — Q4'25 • S6 (Dec 15–28)
+
+## 🎯 Objectives
+- Enforce runtime ABAC and redaction at IntelGraph query edge.
+- Close telemetry → rollback loop with canary failure injection.
+- Add CI policy drift guard.
+- Extend Evidence Bundle to link DPIA, DLP, and risk tier.
+- Validate all critical controls with end-to-end tests.
+
+---
+
+## ✅ Backlog
+
+| ID | Title | Owner | Definition of Done |
+|----|-------|--------|---------------------|
+| CTL‑01 | IntelGraph ABAC Policy Enforcement | CITADEL | Query returns only if caller context passes ABAC check |
+| CTL‑02 | JIT Redaction on Export | CITADEL | PII-tagged fields are masked unless context allows |
+| DET‑03 | Rego Drift Guard | FOUNDRY | CI job fails if committed Rego differs from last known-good hash |
+| OBS‑04 | Canary Failure Inducer | BULWARK | Endpoint to simulate SLA breach; must rollback |
+| OBS‑05 | Dynamic SLO Gate | BULWARK | MC pipeline blocks on SLA delta ≥ threshold |
+| EVD‑06 | DPIA Extension in Evidence Bundle | WHITE | JSON includes `dpia_id`, `dlp_applied`, `pii_confidence` |
+
+---
+
+## 🧩 Artifacts
+
+### 1. ABAC + Redaction Rego (IntelGraph)
+```rego
+package intelgraph.export
+
+# allow export only if context has label match
+allow {
+  input.context.labels[_] == input.record.policy_labels[_]
+}
+
+# redact PII if not allowed
+redact[field] {
+  field := input.record.fields[_]
+  field.pii == true
+  not input.context.allow_pii
+}
+```
+
+### 2. CI Drift Checker (Bash)
+```bash
+#!/bin/bash
+set -e
+REPO_POLICIES=rego/
+KNOWN_GOOD_HASH=rego/.hash
+NEW_HASH=$(find $REPO_POLICIES -name '*.rego' | xargs sha256sum | sha256sum)
+if ! grep -q "$NEW_HASH" "$KNOWN_GOOD_HASH"; then
+  echo "[✗] Rego drift detected"
+  exit 1
+fi
+```
+
+### 3. Canary Failure Simulation (MC)
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: canary-simulation
+  labels:
+    fail-type: latency-spike
+    induce: true
+```
+
+### 4. Prometheus Alert Rule — Dynamic Breach
+```yaml
+- alert: SLOBreachRateSpike
+  expr: rate(api_latency_bucket{le="1"}[5m]) > 0.05
+  for: 2m
+  labels:
+    severity: high
+  annotations:
+    summary: "Latency spike >5% breaching budget"
+```
+
+### 5. Evidence Bundle Extension (v1.3→1.4)
+```json
+{
+  "dpia": {
+    "id": "dpia_2025_q4_summit",
+    "applied": true,
+    "pii_confidence": 0.94,
+    "dlp_passed": true
+  }
+}
+```
+
+---
+
+## 📅 Sprint Exit Criteria (S6)
+- ✅ Canary rollback works end-to-end
+- ✅ All exports enforce ABAC + redaction
+- ✅ CI fails on unauthorized policy change
+- ✅ Evidence Bundle reflects DPIA & PII scan result
+- ✅ Risk heatmap & Disclosure Pack updated
+
+---
+
+## 📎 References
+- `summit_q_4_25_cadence_locked_sprint_plan_company_os_maestro_conductor_intel_graph.md`
+- `intelgraph_sprint_2025_11_26_v_1.md`
+- `helm/charts/summit-policies/`
+- `prometheus/rules.yaml`
+- `grafana/alerts.json`
+- `rego/prompt_risk.rego`
+
+---
+
+# End of Sprint Plan — UNIT 83M Q4'25 S6
