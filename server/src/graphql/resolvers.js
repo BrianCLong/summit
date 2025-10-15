@@ -3,6 +3,7 @@ const copilotResolvers = require('./resolvers.copilot');
 const graphOpsResolvers = require('./resolvers.graphops');
 const aiResolvers = require('./resolvers.ai');
 const annotationsResolvers = require('./resolvers.annotations'); // My new resolvers
+const ingestionResolvers = require('./resolvers.ingestion');
 
 // Merge all resolvers
 const resolvers = {
@@ -11,12 +12,14 @@ const resolvers = {
     ...(graphOpsResolvers.Query || {}),
     ...(aiResolvers.Query || {}),
     ...(annotationsResolvers.Query || {}), // Add annotations queries if any
+    ...(ingestionResolvers.Query || {}),
   },
   Mutation: {
     ...(copilotResolvers.Mutation || {}),
     ...(graphOpsResolvers.Mutation || {}),
     ...(aiResolvers.Mutation || {}),
     ...(annotationsResolvers.Mutation || {}), // Add annotations mutations
+    ...(ingestionResolvers.Mutation || {}),
   },
   Subscription: {
     ...(copilotResolvers.Subscription || {}),
