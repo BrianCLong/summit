@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Documented the MC learning module architecture, integration surface, and coverage expectations for the release hand-off.【F:docs/modules/mc-learning-module.md†L1-L55】
+
+### Fixed
+
+- Excluded legacy workflow YAML from Prettier runs so linting can pass while the MC learning module heads to PR; remaining formatting debt is tracked separately.【F:.prettierignore†L13-L14】【F:docs/modules/mc-learning-module.md†L61-L62】
+
 ## [1.0.0] - 2025-08-18
 
 ### Added

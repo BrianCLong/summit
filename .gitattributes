@@ -2,8 +2,8 @@
 *.sh text eol=lf
 *.bat text eol=crlf
 
-# Lockfiles → no diff noise
-package-lock.json -diff
+# Lockfiles → default to text diffs so Codex UI can render PRs
+package-lock.json text diff
 yarn.lock -diff
 pnpm-lock.yaml -diff
 poetry.lock -diff
