@@ -28,6 +28,54 @@ const baseSnapshot: CompositeMarketSnapshot = {
       timestamp: '2025-03-01T00:00:00.000Z'
     }
   ],
+  consumer: [
+    {
+      marketplace: 'prime',
+      region: 'us-east-1',
+      category: 'gaming-laptops',
+      averagePrice: 1899,
+      volume24h: 320,
+      priceChangePercent: 6.2,
+      demandScore: 0.78,
+      sentimentScore: 0.7,
+      timestamp: '2025-03-01T00:00:00.000Z'
+    },
+    {
+      marketplace: 'azure-market',
+      region: 'eastus',
+      category: 'ai-workstations',
+      averagePrice: 2120,
+      volume24h: 210,
+      priceChangePercent: 4.5,
+      demandScore: 0.72,
+      sentimentScore: 0.68,
+      timestamp: '2025-03-01T00:00:00.000Z'
+    }
+  ],
+  collectibles: [
+    {
+      platform: 'mythic-auctions',
+      region: 'us-east-1',
+      collection: 'retro-gpu-lots',
+      floorPrice: 12800,
+      currency: 'USD',
+      scarcityScore: 0.81,
+      auctionClearRate: 0.64,
+      sentimentScore: 0.62,
+      timestamp: '2025-03-01T00:00:00.000Z'
+    },
+    {
+      platform: 'global-vault',
+      region: 'global',
+      collection: 'ai-chip-first-edition',
+      floorPrice: 15600,
+      currency: 'USD',
+      scarcityScore: 0.86,
+      auctionClearRate: 0.59,
+      sentimentScore: 0.67,
+      timestamp: '2025-03-01T00:00:00.000Z'
+    }
+  ],
   energy: [
     {
       region: 'us-east-1',
@@ -91,11 +139,27 @@ const workload: WorkloadProfile = {
 
 describe('CompositeDataFeed', () => {
   it('aggregates data across multiple sources', async () => {
-    const feedA = new InMemoryDataFeed(baseSnapshot.financial, [], [], []);
-    const feedB = new InMemoryDataFeed([], baseSnapshot.energy, baseSnapshot.demand, baseSnapshot.regulation);
+    const feedA = new InMemoryDataFeed(
+      baseSnapshot.financial,
+      baseSnapshot.consumer,
+      baseSnapshot.collectibles,
+      [],
+      [],
+      []
+    );
+    const feedB = new InMemoryDataFeed(
+      [],
+      [],
+      [],
+      baseSnapshot.energy,
+      baseSnapshot.demand,
+      baseSnapshot.regulation
+    );
     const composite = new CompositeDataFeed([feedA, feedB]);
     const snapshot = await composite.fetchSnapshot();
     expect(snapshot.financial).toHaveLength(2);
+    expect(snapshot.consumer).toHaveLength(2);
+    expect(snapshot.collectibles).toHaveLength(2);
     expect(snapshot.energy).toHaveLength(2);
     expect(snapshot.demand).toHaveLength(2);
     expect(snapshot.regulation).toHaveLength(2);
@@ -108,6 +172,8 @@ describe('ArbitrageAgent', () => {
     const portfolio = agent.recommendPortfolio(baseSnapshot, workload, { topN: 3 });
     expect(portfolio.length).toBeGreaterThan(0);
     expect(portfolio[0].estimatedSavings).toBeGreaterThan(0);
+    expect(portfolio[0].arbitrageOpportunityScore).toBeGreaterThan(0);
+    expect(portfolio[0].consumerSignalScore).toBeGreaterThan(0);
   });
 });
 

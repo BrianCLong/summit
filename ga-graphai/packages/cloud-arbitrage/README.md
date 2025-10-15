@@ -1,10 +1,10 @@
 # @ga-graphai/cloud-arbitrage
 
-Smart agent toolkit for multi-cloud compute/storage/network arbitrage. Provides:
+Smart agent toolkit for multi-cloud compute/storage/network arbitrage with cross-market extensions. Provides:
 
-- Data feed abstraction for ingesting live financial, energy, demand, and regulatory signals.
+- Data feed abstraction for ingesting live financial, energy, demand, consumer demand, and collectibles sentiment signals.
 - Strategy suite (serverless, burst, reserved, spot, federated) for ranking provider-region placements.
-- Arbitrage agent that synthesizes strategy outputs into deployable portfolios.
+- Arbitrage agent that synthesizes strategy outputs into deployable portfolios enriched with consumer/collectible hedge scores.
 - Head-to-head evaluator for benchmarking against AWS Compute Optimizer, Spot.io, and Google Recommender baselines.
 - Sample A/B experiment logs under `experiments/` to ground economic validation.
 
@@ -20,12 +20,37 @@ pnpm test
 import { ArbitrageAgent, CompositeDataFeed, InMemoryDataFeed } from '@ga-graphai/cloud-arbitrage';
 
 const feed = new CompositeDataFeed([
-  new InMemoryDataFeed(financialData, energyData, demandData, regulatoryData)
+  new InMemoryDataFeed(
+    financialData,
+    consumerMarketplaceSignals,
+    collectibleSignals,
+    energyData,
+    demandData,
+    regulatoryData
+  )
 ]);
 const snapshot = await feed.fetchSnapshot();
 const agent = new ArbitrageAgent();
 const portfolio = agent.recommendPortfolio(snapshot, workloadProfile, { topN: 5 });
+
+for (const entry of portfolio) {
+  console.log(
+    `${entry.strategy}@${entry.provider}:${entry.region}`,
+    'hedge=', entry.hedgeScore.toFixed(2),
+    'arbitrage=', entry.arbitrageOpportunityScore.toFixed(2)
+  );
+}
 ```
+
+### Data Requirements
+
+- **Financial**: Cloud provider price books (spot/reserved) with currency metadata.
+- **Demand Forecasts**: Utilization predictions per provider-region-resource triple.
+- **Energy & Regulation**: Regional carbon intensity and incentive/penalty structures.
+- **Consumer Marketplaces**: Marketplace price/volume trends, demand and sentiment scores for workload-adjacent categories.
+- **Collectibles & Auctions**: Scarcity indices, auction clear rates, floor prices, and sentiment from specialist venues (regional or global).
+
+The `CompositeDataFeed` merges heterogeneous feeds and normalizes timestamps so strategies can reason about blended arbitrage and hedge opportunities across financial, prediction, consumer, and collectibles venues.
 
 ## Testing
 - `pnpm test` runs the Vitest suite covering data aggregation, strategy scoring, and evaluator uplift calculations.

@@ -14,6 +14,30 @@ export interface FinancialMarketDatum {
   timestamp: string;
 }
 
+export interface ConsumerMarketDatum {
+  marketplace: string;
+  region: string;
+  category: string;
+  averagePrice: number;
+  volume24h: number;
+  priceChangePercent: number;
+  demandScore: number;
+  sentimentScore: number;
+  timestamp: string;
+}
+
+export interface CollectibleSignalDatum {
+  platform: string;
+  region: string;
+  collection: string;
+  floorPrice: number;
+  currency: string;
+  scarcityScore: number;
+  auctionClearRate: number;
+  sentimentScore: number;
+  timestamp: string;
+}
+
 export interface EnergyMarketDatum {
   region: string;
   carbonIntensityGramsPerKwh: number;
@@ -42,6 +66,8 @@ export interface RegulatoryDatum {
 export interface CompositeMarketSnapshot {
   generatedAt: string;
   financial: FinancialMarketDatum[];
+  consumer: ConsumerMarketDatum[];
+  collectibles: CollectibleSignalDatum[];
   energy: EnergyMarketDatum[];
   demand: DemandForecastDatum[];
   regulation: RegulatoryDatum[];
@@ -70,6 +96,10 @@ export interface StrategyRecommendation {
   expectedPerformanceScore: number;
   sustainabilityScore: number;
   regulatoryScore: number;
+  consumerSignalScore: number;
+  collectiblesSignalScore: number;
+  arbitrageOpportunityScore: number;
+  hedgeScore: number;
   totalScore: number;
 }
 
@@ -80,6 +110,10 @@ export interface StrategySummary {
   blendedUnitPrice: number;
   estimatedSavings: number;
   confidence: number;
+  consumerSignalScore: number;
+  collectiblesSignalScore: number;
+  arbitrageOpportunityScore: number;
+  hedgeScore: number;
 }
 
 export interface HeadToHeadResult {

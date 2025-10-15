@@ -30,11 +30,12 @@ export class ArbitrageAgent {
     const filtered = recommendations.filter(rec => rec.totalScore >= minScore);
 
     const ranked = [...filtered].sort((a, b) => {
-      const priceDelta = a.expectedUnitPrice - b.expectedUnitPrice;
-      if (Math.abs(priceDelta) > 0.001) {
-        return priceDelta;
+      const weightedB = this.scoreRecommendation(b);
+      const weightedA = this.scoreRecommendation(a);
+      if (weightedB === weightedA) {
+        return a.expectedUnitPrice - b.expectedUnitPrice;
       }
-      return b.totalScore - a.totalScore;
+      return weightedB - weightedA;
     });
 
     const top = options.topN ? ranked.slice(0, options.topN) : ranked;
@@ -45,12 +46,27 @@ export class ArbitrageAgent {
       region: recommendation.region,
       blendedUnitPrice: recommendation.expectedUnitPrice,
       estimatedSavings: this.estimateSavings(recommendation),
-      confidence: Math.min(0.95, recommendation.totalScore / 3)
+      confidence: Math.min(0.95, this.scoreRecommendation(recommendation) / 3.5),
+      consumerSignalScore: recommendation.consumerSignalScore,
+      collectiblesSignalScore: recommendation.collectiblesSignalScore,
+      arbitrageOpportunityScore: recommendation.arbitrageOpportunityScore,
+      hedgeScore: recommendation.hedgeScore
     }));
   }
 
   private estimateSavings(recommendation: StrategyRecommendation): number {
     const baseline = recommendation.expectedUnitPrice * 1.15;
     return baseline - recommendation.expectedUnitPrice;
+  }
+
+  private scoreRecommendation(recommendation: StrategyRecommendation): number {
+    const priceEfficiency = 1 / Math.max(0.01, recommendation.expectedUnitPrice);
+    return (
+      recommendation.totalScore * 0.5 +
+      recommendation.arbitrageOpportunityScore * 0.25 +
+      recommendation.hedgeScore * 0.2 +
+      (recommendation.consumerSignalScore + recommendation.collectiblesSignalScore) * 0.2 +
+      priceEfficiency * 0.05
+    );
   }
 }
