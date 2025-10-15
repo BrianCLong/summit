@@ -32,9 +32,11 @@ jobs:
         run: |
           echo "⚠️ **Backlog Guard Active**" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Queue depth exceeded threshold (${{ env.ACTIONS_QUEUE_THRESHOLD }}). Skipping scheduled run to preserve runner capacity." >> "$GITHUB_STEP_SUMMARY"
+          echo "**Queue Status:** ${{ steps.guard.outputs.queued }} queued runs (threshold: ${{ steps.guard.outputs.threshold }})" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Run \`gh workflow run auto-update-prs.yml\` to trigger manually (bypasses guard)." >> "$GITHUB_STEP_SUMMARY"
+          echo "Skipping scheduled run to preserve runner capacity." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Manual Override:** \`gh workflow run auto-update-prs.yml\` (bypasses guard)" >> "$GITHUB_STEP_SUMMARY"
 
   update:
     if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'
