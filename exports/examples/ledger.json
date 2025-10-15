@@ -1,0 +1,74 @@
+{
+  "version": "1.0",
+  "ledgerId": "example-ledger",
+  "publicKeys": [
+    {
+      "keyId": "ledger-signer",
+      "algorithm": "ed25519",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAVtRLzCy6b2fvhbElSXcCrgCgZap2tHs/NwexNPS0tdE=\n-----END PUBLIC KEY-----\n"
+    }
+  ],
+  "entries": [
+    {
+      "sequence": 1,
+      "claimId": "claim-001",
+      "entityId": "entity-123",
+      "evidenceId": "evidence-ingest",
+      "stage": "ingest",
+      "contentHash": "aab3238922bcc25a6f606eb525ffdc56d58f495dad7f9d95a0f8a3c99f9f0f48",
+      "actor": "collectors/ingest-gateway",
+      "timestamp": "2026-03-01T12:00:00.000Z",
+      "prevHash": null,
+      "signingKeyId": "ledger-signer",
+      "artifactUri": "s3://black-cell/raw/entity-123.json",
+      "metadata": {
+        "schema": "raw-signal-v1",
+        "checksum": "md5:6f5902ac237024bdd0c176cb93063dc4"
+      },
+      "hash": "0c5d0182526e90a167fb8c9ba9cb29553564cb885aaeac0daf645252a8dd8392",
+      "signature": "oxWAxnAXv/1SQnSyyKWQGhAYmLOJcq0NcE5rVPfhYxoSee56YQR4BL7cV1NnBxsKJHxvKfare1g4oDQCOBYmBQ=="
+    },
+    {
+      "sequence": 2,
+      "claimId": "claim-001",
+      "entityId": "entity-123",
+      "evidenceId": "evidence-transform",
+      "stage": "transform",
+      "contentHash": "0f343b0931126a20f133d67c2b018a3b2f8732d9cb01eb3a7ddc3a8a12ef1b52",
+      "actor": "pipelines/entity-fusion",
+      "timestamp": "2026-03-01T12:05:30.000Z",
+      "prevHash": "0c5d0182526e90a167fb8c9ba9cb29553564cb885aaeac0daf645252a8dd8392",
+      "signingKeyId": "ledger-signer",
+      "artifactUri": "s3://black-cell/stage/entity-123/graph.json",
+      "metadata": {
+        "transforms": [
+          "dedupe@1.4.2",
+          "graph-augment@2.0.0"
+        ],
+        "modelVersion": "sigint-linker:2026.02"
+      },
+      "hash": "8c4f59c52ddf611934f08ff7b6bc983681af7babe39cce41dafff449d9cbf607",
+      "signature": "t1UtMj/iL8dpR9eqZ8SDZHTqf1xLfaF4hWhcor88K8ztW2gTSWgWzx2WNf3HbhCoMS/Scib3rYEjJUuqubMrDw=="
+    },
+    {
+      "sequence": 3,
+      "claimId": "claim-001",
+      "entityId": "entity-123",
+      "evidenceId": "evidence-delivery",
+      "stage": "delivery",
+      "contentHash": "b4b147bc522828731f1a016bfa72c073cf0b3ad93c9d690c1ba4e06b5f8c2d0b",
+      "actor": "api/provenance-resolver",
+      "timestamp": "2026-03-01T12:06:10.000Z",
+      "prevHash": "8c4f59c52ddf611934f08ff7b6bc983681af7babe39cce41dafff449d9cbf607",
+      "signingKeyId": "ledger-signer",
+      "artifactUri": "intelgraph://entity/123",
+      "metadata": {
+        "responseFormat": "json:claim-v1",
+        "apiVersion": "2026-03-01"
+      },
+      "hash": "be2701ab88fbd543b64709d49308d3239e7cd9adbabb92fe698b1c49c4b86bf0",
+      "signature": "sz4ggHFNJlzxU5T/ggGQyQ4xN8HM7A0ElRSWe7Dg5MbEUlaU1mHQwbtFlHsFRwxp00QmFtiF7YfxCgfa807kCw=="
+    }
+  ],
+  "rootHash": "be2701ab88fbd543b64709d49308d3239e7cd9adbabb92fe698b1c49c4b86bf0"
+}

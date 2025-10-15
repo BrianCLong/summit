@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.intelgraph/provenance/schema.json",
+  "title": "Summit Provenance Export Manifest",
+  "type": "object",
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{64}$",
+      "description": "Lowercase hexadecimal SHA-256 digest"
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "evidenceId",
+        "stage",
+        "artifactHash",
+        "ledgerSequence"
+      ],
+      "properties": {
+        "evidenceId": {
+          "type": "string",
+          "description": "Stable identifier for the evidence record"
+        },
+        "stage": {
+          "type": "string",
+          "enum": ["ingest", "transform", "delivery"],
+          "description": "Lifecycle point where the evidence was captured"
+        },
+        "artifactHash": {
+          "$ref": "#/$defs/hash",
+          "description": "SHA-256 hash of the evidence artifact"
+        },
+        "ledgerSequence": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Sequence number of the corresponding ledger entry"
+        },
+        "artifactUri": {
+          "type": "string",
+          "format": "uri",
+          "description": "Location of the captured artifact"
+        },
+        "transformChain": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordered list of processors applied to derive this evidence"
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Additional analytic context for the evidence"
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "required": [
+        "claimId",
+        "entityId",
+        "type",
+        "disposition",
+        "summary",
+        "createdAt",
+        "confidence",
+        "evidence"
+      ],
+      "properties": {
+        "claimId": {
+          "type": "string",
+          "description": "Unique identifier for the claim"
+        },
+        "entityId": {
+          "type": "string",
+          "description": "Identifier of the entity this claim refers to"
+        },
+        "type": {
+          "type": "string",
+          "description": "Claim classification"
+        },
+        "disposition": {
+          "type": "string",
+          "description": "Analytic disposition (e.g., suspected, confirmed)"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Human readable summary of the claim"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "confidence": {
+          "type": "string",
+          "description": "Confidence rating or probability bucket"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "required": ["path", "hash"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Relative path inside the export bundle"
+        },
+        "hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "ledgerSequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "mimeType": {
+          "type": "string"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sourceStage": {
+          "type": "string"
+        }
+      }
+    },
+    "ledgerEntryRef": {
+      "type": "object",
+      "required": ["sequence", "hash"],
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "hash": {
+          "$ref": "#/$defs/hash"
+        }
+      }
+    },
+    "ledger": {
+      "type": "object",
+      "required": ["uri", "rootHash", "entries"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "Location of the ledger file included in the bundle"
+        },
+        "rootHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ledgerEntryRef"
+          }
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "required": ["algorithm", "keyId", "value"],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "const": "ed25519"
+        },
+        "keyId": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "contentEncoding": "base64"
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["manifestHash"],
+      "properties": {
+        "manifestHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "signature": {
+          "$ref": "#/$defs/signature"
+        }
+      }
+    },
+    "bundle": {
+      "type": "object",
+      "required": [
+        "id",
+        "generatedAt",
+        "sourceSystem",
+        "environment",
+        "exportType",
+        "itemCount"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sourceSystem": {
+          "type": "string"
+        },
+        "environment": {
+          "type": "string"
+        },
+        "exportType": {
+          "type": "string"
+        },
+        "itemCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "filters": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "required": [
+    "version",
+    "bundle",
+    "claims",
+    "artifacts",
+    "ledger",
+    "integrity"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "bundle": {
+      "$ref": "#/$defs/bundle"
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/claim"
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/artifact"
+      }
+    },
+    "ledger": {
+      "$ref": "#/$defs/ledger"
+    },
+    "integrity": {
+      "$ref": "#/$defs/integrity"
+    }
+  }
+}
