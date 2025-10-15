@@ -1,15 +1,59 @@
+{{- $fullName := include "intelgraph-api.fullname" . }}
+{{- $appName := include "intelgraph-api.name" . }}
+{{- $svcPort := .Values.service.port }}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: {{ include "intelgraph-api.fullname" . }}
+  name: {{ $fullName }}
 spec:
+  replicas: {{ .Values.replicaCount | default 2 }}
+  revisionHistoryLimit: {{ .Values.rollout.revisionHistoryLimit | default 5 }}
+  progressDeadlineSeconds: {{ .Values.rollout.progressDeadlineSeconds | default 600 }}
+  minReadySeconds: {{ .Values.rollout.minReadySeconds | default 30 }}
+  strategy:
+    blueGreen:
+      activeService: {{ $fullName }}
+      previewService: {{ printf "%s-preview" $fullName }}
+      autoPromotionEnabled: {{ .Values.rollout.blueGreen.autoPromotionEnabled | default false }}
+      autoPromotionSeconds: {{ .Values.rollout.blueGreen.autoPromotionSeconds | default 0 }}
+      scaleDownDelaySeconds: {{ .Values.rollout.blueGreen.scaleDownDelaySeconds | default 30 }}
+      abortScaleDownDelaySeconds: {{ .Values.rollout.blueGreen.abortScaleDownDelaySeconds | default 30 }}
+      previewReplicaCount: {{ .Values.rollout.blueGreen.previewReplicaCount | default 1 }}
+      {{- with .Values.rollout.blueGreen.prePromotionAnalysis }}
+      prePromotionAnalysis:
+        templates:
+          {{- range .templates }}
+          - templateName: {{ .templateName }}
+          {{- end }}
+        {{- if .args }}
+        args:
+          {{- range .args }}
+          - name: {{ .name }}
+            value: {{ tpl .value $ | quote }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.rollout.blueGreen.postPromotionAnalysis }}
+      postPromotionAnalysis:
+        templates:
+          {{- range .templates }}
+          - templateName: {{ .templateName }}
+          {{- end }}
+        {{- if .args }}
+        args:
+          {{- range .args }}
+          - name: {{ .name }}
+            value: {{ tpl .value $ | quote }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
   selector:
     matchLabels:
-      app: {{ include "intelgraph-api.name" . }}
+      app: {{ $appName }}
   template:
     metadata:
       labels:
-        app: {{ include "intelgraph-api.name" . }}
+        app: {{ $appName }}
     spec:
       serviceAccountName: {{ include "intelgraph-api.serviceAccountName" . }}
       containers:
@@ -17,7 +61,8 @@ spec:
           image: "{{ .Values.image.repository }}{{ if .Values.image.digest }}@{{ .Values.image.digest }}{{ else }}:{{ .Values.image.tag }}{{ end }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.service.port }}
+            - name: http
+              containerPort: {{ $svcPort }}
           env:
             - name: NEO4J_URI
               value: {{ .Values.env.NEO4J_URI | quote }}
@@ -35,31 +80,60 @@ spec:
                   key: pg_connection
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-  strategy:
-    {{- toYaml .Values.rollout.strategy | nindent 4 }}
+          {{- with .Values.probes.liveness }}
+          livenessProbe:
+{{ toYaml . | indent 12 }}
+          {{- end }}
+          {{- with .Values.probes.readiness }}
+          readinessProbe:
+{{ toYaml . | indent 12 }}
+          {{- end }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "intelgraph-api.fullname" . }}
+  name: {{ $fullName }}
+  {{- with .Values.service.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   selector:
-    app: {{ include "intelgraph-api.name" . }}
+    app: {{ $appName }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.port }}
+    - name: http
+      port: {{ $svcPort }}
+      targetPort: {{ $svcPort }}
       protocol: TCP
-      name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-preview" $fullName }}
+  {{- with .Values.service.previewAnnotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ $appName }}
+  ports:
+    - name: http
+      port: {{ $svcPort }}
+      targetPort: {{ $svcPort }}
+      protocol: TCP
+{{- if .Values.ingress.enabled }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "intelgraph-api.fullname" . }}
+  name: {{ $fullName }}
+  {{- with .Values.ingress.annotations }}
   annotations:
-    {{- with .Values.ingress.annotations }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+{{ toYaml . | indent 4 }}
+  {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   tls:
@@ -72,11 +146,12 @@ spec:
           - path: {{ (index .paths 0).path }}
             pathType: {{ (index .paths 0).pathType }}
             backend:
-              service: 
-                name: {{ include "intelgraph-api.fullname" $ }}
+              service:
+                name: {{ $fullName }}
                 port:
-                  number: {{ $.Values.service.port }}
+                  number: {{ $svcPort }}
     {{- end }}
+{{- end }}
 ---
 apiVersion: v1
 kind: Secret
