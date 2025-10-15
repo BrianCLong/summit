@@ -4,6 +4,13 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Why are you running Backbone manually?"
+        required: false
+        type: string
+run-name: "CI Backbone • ${{ github.event.inputs.reason || github.ref_name }}"
 permissions:
   contents: read
   checks: write
@@ -46,7 +53,7 @@ jobs:
       - name: Setup pnpm
         run: corepack enable && corepack prepare pnpm@latest --activate
       - name: Install deps (frozen)
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --prefer-offline
       - name: Lint (quick)
         run: pnpm -r -w run lint:quick || pnpm -r -w run lint
       - name: Types (quick)
