@@ -30,13 +30,16 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
-          queued=$(gh run list --status queued --limit 200 --json status | jq 'length')
+          queued=$(gh run list --repo "$REPO" --status queued --limit 200 --json status | jq 'length')
+          echo "::notice::Queue depth: $queued (threshold: 40)"
           if [ "$queued" -gt 40 ]; then
-            echo "Queue saturated ($queued). Throttling (skip backbone)."
+            echo "::warning::Queue saturated ($queued >40). Throttling Backbone."
             echo "proceed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+          echo "::notice::Capacity available ($queued ≤40). Proceeding with Backbone."
           echo "proceed=true" >> "$GITHUB_OUTPUT"
 
   lint-type-unit:
