@@ -38,9 +38,11 @@ runs:
 
         if [ "${COUNT:-0}" -ge "$THRESHOLD" ]; then
           echo "⚠️ Queue saturated ($COUNT >= $THRESHOLD). Standing down."
+          echo "::notice::Backlog guard active: queued=$COUNT threshold=$THRESHOLD. Workflow will skip."
           echo "saturated=true" >> "$GITHUB_OUTPUT"
         else
           echo "✅ Capacity available ($COUNT < $THRESHOLD). Proceeding."
+          echo "::notice::Backlog guard inactive: queued=$COUNT threshold=$THRESHOLD. Workflow will run."
           echo "saturated=false" >> "$GITHUB_OUTPUT"
         fi
 

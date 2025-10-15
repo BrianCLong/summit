@@ -32,8 +32,8 @@ permissions:
 env:
   STAGE_URL: https://stage.intelgraph.example
   DEV_URL: https://dev.intelgraph.example
-  ACTIONS_QUEUE_THRESHOLD: 15
-  START_JITTER_MAX_SEC: 240
+  ACTIONS_QUEUE_THRESHOLD: ${{ vars.ACTIONS_QUEUE_THRESHOLD || '15' }}
+  START_JITTER_MAX_SEC: ${{ vars.START_JITTER_MAX_SEC || '240' }}
 
 jobs:
   guard:
@@ -45,6 +45,15 @@ jobs:
       - uses: actions/checkout@v4
       - id: guard
         uses: ./.github/actions/backlog-guard
+
+      - name: Summarize guard decision
+        if: steps.guard.outputs.saturated == 'true'
+        run: |
+          echo "⚠️ **Backlog Guard Active**" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Queue depth exceeded threshold (${{ env.ACTIONS_QUEUE_THRESHOLD }}). Skipping nightly tests to preserve runner capacity." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Run \`gh workflow run nightly-testing.yml\` to trigger manually (bypasses guard)." >> "$GITHUB_STEP_SUMMARY"
 
   nightly-e2e:
     if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'
