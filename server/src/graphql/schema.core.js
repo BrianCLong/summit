@@ -152,6 +152,47 @@ export const coreTypeDefs = gql`
     offset: Int = 0
   }
 
+  input GraphNodeAnonymizationInput {
+    label: String!
+    properties: [String!]!
+    tenantProperty: String = "tenant_id"
+  }
+
+  input TableColumnAnonymizationInput {
+    table: String!
+    columns: [String!]!
+    primaryKey: String = "id"
+    tenantColumn: String = "tenant_id"
+  }
+
+  input GraphAnonymizationInput {
+    tenantId: String
+    dryRun: Boolean = false
+    nodeProperties: [GraphNodeAnonymizationInput!]!
+    tableColumns: [TableColumnAnonymizationInput!]!
+  }
+
+  type GraphNodeAnonymizationSummary {
+    label: String!
+    properties: [String!]!
+    nodesProcessed: Int!
+  }
+
+  type TableColumnAnonymizationSummary {
+    table: String!
+    columns: [String!]!
+    rowsProcessed: Int!
+  }
+
+  type GraphAnonymizationResult {
+    dryRun: Boolean!
+    tenantId: String
+    nodeSummary: [GraphNodeAnonymizationSummary!]!
+    tableSummary: [TableColumnAnonymizationSummary!]!
+    startedAt: DateTime!
+    completedAt: DateTime!
+  }
+
   # Graph traversal types
   type GraphNeighborhood {
     center: Entity!
@@ -214,6 +255,9 @@ export const coreTypeDefs = gql`
     # Bulk operations
     createEntitiesBatch(inputs: [EntityInput!]!, tenantId: String!): [Entity!]!
     createRelationshipsBatch(inputs: [RelationshipInput!]!, tenantId: String!): [Relationship!]!
+
+    # Data anonymization for lower environments
+    anonymizeGraphData(input: GraphAnonymizationInput!): GraphAnonymizationResult!
   }
 
   # Real-time subscriptions for graph changes
