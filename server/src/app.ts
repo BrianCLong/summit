@@ -7,7 +7,7 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import pino from "pino";
-import { pinoHttp } from "pino-http";
+import pinoHttp from "pino-http";
 import { auditLogger } from "./middleware/audit-logger.js";
 import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
@@ -31,7 +31,7 @@ export const createApp = async () => {
   const __dirname = path.dirname(__filename);
 
   const app = express();
-  const logger: pino.Logger = pino();
+  const logger = pino();
   app.use(helmet());
   app.use(
     cors({
@@ -120,7 +120,7 @@ export const createApp = async () => {
     }
   });
 
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  const schema = makeExecutableSchema({ typeDefs: typeDefs as any, resolvers: resolvers as any });
 
   // GraphQL over HTTP
   const { persistedQueriesPlugin } = await import(
@@ -155,7 +155,7 @@ export const createApp = async () => {
     formatError: (err) => {
       // Don't expose internal errors in production
       if (process.env.NODE_ENV === 'production') {
-        logger.error(`GraphQL Error: ${err.message}`, { stack: err.stack });
+        logger.error(`GraphQL Error: ${err.message}`, { stack: (err as any).stack });
         return new Error('Internal server error');
       }
       return err;

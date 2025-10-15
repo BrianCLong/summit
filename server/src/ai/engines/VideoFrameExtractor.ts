@@ -2,7 +2,7 @@ import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs/promises';
 import pino from 'pino';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 const logger = pino({ name: 'VideoFrameExtractor' });
 
@@ -54,7 +54,7 @@ export class VideoFrameExtractor {
     const {
       frameRate,
       interval,
-      outputDir = path.join(this.tempDir, `frames-${uuidv4()}`),
+      outputDir = path.join(this.tempDir, `frames-${randomUUID()}`),
       outputFormat = 'png',
       startTime,
       endTime,
@@ -135,7 +135,7 @@ export class VideoFrameExtractor {
     startTime?: number,
     endTime?: number
   ): Promise<ExtractedAudio> {
-    const audioFileName = `audio-${uuidv4()}.mp3`;
+    const audioFileName = `audio-${randomUUID()}.mp3`;
     const audioPath = path.join(outputDir, audioFileName);
 
     return new Promise((resolve, reject) => {
@@ -170,7 +170,7 @@ export class VideoFrameExtractor {
    * @param videoPath Absolute path to the video file.
    * @returns Video metadata.
    */
-  private async getVideoMetadata(videoPath: string): Promise<ffmpeg.FfprobeData> {
+  private async getVideoMetadata(videoPath: string): Promise<any> {
     return new Promise((resolve, reject) => {
       ffmpeg.ffprobe(videoPath, (err, metadata) => {
         if (err) {

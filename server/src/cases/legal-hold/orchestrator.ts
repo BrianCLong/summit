@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import logger from '../../config/logger';
 import { writeAudit } from '../../utils/audit';
 import {
@@ -58,7 +58,7 @@ export class LegalHoldOrchestrator {
   }
 
   async initiateHold(input: LegalHoldInitiationInput): Promise<LegalHoldRecord> {
-    const holdId = `hold_${uuidv4()}`;
+    const holdId = `hold_${randomUUID()}`;
     const createdAt = now();
     const normalizedCustodians = input.custodians.map((custodian) => ({
       ...custodian,
