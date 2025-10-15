@@ -14,8 +14,8 @@ permissions:
   actions: read
 
 env:
-  ACTIONS_QUEUE_THRESHOLD: 15
-  START_JITTER_MAX_SEC: 240
+  ACTIONS_QUEUE_THRESHOLD: ${{ vars.ACTIONS_QUEUE_THRESHOLD || '15' }}
+  START_JITTER_MAX_SEC: ${{ vars.START_JITTER_MAX_SEC || '240' }}
 
 jobs:
   guard:
@@ -27,6 +27,17 @@ jobs:
       - uses: actions/checkout@v4
       - id: guard
         uses: ./.github/actions/backlog-guard
+
+      - name: Summarize guard decision
+        if: steps.guard.outputs.saturated == 'true'
+        run: |
+          echo "⚠️ **Backlog Guard Active**" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Queue Status:** ${{ steps.guard.outputs.queued }} queued runs (threshold: ${{ steps.guard.outputs.threshold }})" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Skipping k6 tests to preserve runner capacity." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Manual Override:** \`gh workflow run ci-performance-k6.yml\` (bypasses guard)" >> "$GITHUB_STEP_SUMMARY"
 
   k6:
     if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'

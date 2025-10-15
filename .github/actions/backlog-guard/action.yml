@@ -38,13 +38,25 @@ runs:
 
         if [ "${COUNT:-0}" -ge "$THRESHOLD" ]; then
           echo "⚠️ Queue saturated ($COUNT >= $THRESHOLD). Standing down."
+          echo "::notice::Backlog guard active: queued=$COUNT threshold=$THRESHOLD. Workflow will skip."
           echo "saturated=true" >> "$GITHUB_OUTPUT"
+          echo "queued=$COUNT" >> "$GITHUB_OUTPUT"
+          echo "threshold=$THRESHOLD" >> "$GITHUB_OUTPUT"
         else
           echo "✅ Capacity available ($COUNT < $THRESHOLD). Proceeding."
+          echo "::notice::Backlog guard inactive: queued=$COUNT threshold=$THRESHOLD. Workflow will run."
           echo "saturated=false" >> "$GITHUB_OUTPUT"
+          echo "queued=$COUNT" >> "$GITHUB_OUTPUT"
+          echo "threshold=$THRESHOLD" >> "$GITHUB_OUTPUT"
         fi
 
 outputs:
   saturated:
     description: "true if queue depth >= threshold (default 15)"
     value: ${{ steps.detect.outputs.saturated }}
+  queued:
+    description: "Current queue depth at time of check"
+    value: ${{ steps.detect.outputs.queued }}
+  threshold:
+    description: "Threshold value used for saturation detection"
+    value: ${{ steps.detect.outputs.threshold }}
