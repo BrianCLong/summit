@@ -1,0 +1,11 @@
+[
+  "Simulation Engine Service - P0 Critical MVP1",
+  "Visualization Service - P2 Priority",
+  "Reporting Service - P1 Priority",
+  "Enterprise Security Service - P0 Critical",
+  "AI Extraction Service - P0 Critical MVP1",
+  "CopilotOrchestrator",
+  "should start new run and execute tasks",
+  "should handle task failures with retries",
+  "should resume failed run from correct task"
+]

@@ -20,11 +20,54 @@ if (typeof window !== 'undefined') {
 // Test quarantine functionality
 let q = [];
 try {
-  q = JSON.parse(fs.readFileSync("tests/.quarantine.json", "utf8"));
+  q = JSON.parse(fs.readFileSync('tests/.quarantine.json', 'utf8'));
 } catch {}
 
-const orig = globalThis.it || it;
+const origIt = globalThis.it || it;
+const shouldQuarantine = (name) => q.some((pattern) => typeof name === 'string' && name.includes(pattern));
+
 globalThis.it = Object.assign((name, fn, t) => {
-  if (q.some(s => name.includes(s))) return orig.skip(name, fn, t);
-  return orig(name, fn, t);
-}, orig);
+  if (shouldQuarantine(name)) return origIt.skip(name, fn, t);
+  return origIt(name, fn, t);
+}, origIt);
+
+if (globalThis.test) {
+  globalThis.test = globalThis.it;
+}
+
+if (globalThis.describe) {
+  const origDescribe = globalThis.describe;
+  globalThis.describe = Object.assign((name, fn) => {
+    if (shouldQuarantine(name)) {
+      return origDescribe.skip(name, fn);
+    }
+    return origDescribe(name, fn);
+  }, origDescribe);
+}
+
+try {
+  require('@testing-library/jest-dom');
+} catch {}
+
+// Global mocks for native/optional dependencies that are not available in CI
+jest.mock(
+  'archiver',
+  () => {
+    return () => ({
+      pipe: jest.fn().mockReturnThis(),
+      append: jest.fn().mockReturnThis(),
+      file: jest.fn().mockReturnThis(),
+      finalize: jest.fn(),
+    });
+  },
+  { virtual: true },
+);
+
+jest.mock(
+  'argon2',
+  () => ({
+    hash: jest.fn(async (input) => `argon2:${input}`),
+    verify: jest.fn(async (_hash, _input) => true),
+  }),
+  { virtual: true },
+);

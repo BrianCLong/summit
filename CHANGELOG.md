@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Documented the MC learning module architecture, API usage patterns, and targeted test coverage to accompany the new mission-control services.
+
+### Fixed
+
+- Aligned ESLint dependencies with the flat-config toolchain so `npm run lint` runs without the previous TypeError.
+
+### Known Issues
+
+- Legacy workflow and YAML assets remain excluded from automated Prettier formatting and will be normalized in a follow-up tech-debt task.
+
 ## [1.0.0] - 2025-08-18
 
 ### Added
