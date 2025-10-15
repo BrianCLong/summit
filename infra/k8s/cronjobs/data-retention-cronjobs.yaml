@@ -1,0 +1,151 @@
+apiVersion: v1
+kind: List
+metadata:
+  name: data-retention-cronjobs
+items:
+  - apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+      name: postgres-data-retention
+      labels:
+        app.kubernetes.io/name: data-retention
+        app.kubernetes.io/component: scheduler
+        summit.io/compliance-scope: gdpr-soc2
+      annotations:
+        summit.io/policy-version: v1
+        opa.summit.io/profile: data-retention
+    spec:
+      schedule: "0 2 * * *"
+      concurrencyPolicy: Forbid
+      successfulJobsHistoryLimit: 1
+      failedJobsHistoryLimit: 3
+      suspend: false
+      jobTemplate:
+        spec:
+          backoffLimit: 2
+          template:
+            metadata:
+              labels:
+                app.kubernetes.io/name: data-retention
+                summit.io/compliance-scope: gdpr-soc2
+              annotations:
+                checksum/config: $(CONFIG_CHECKSUM)
+            spec:
+              serviceAccountName: data-retention
+              restartPolicy: Never
+              securityContext:
+                runAsNonRoot: true
+              containers:
+                - name: apply-postgres-retention
+                  image: bitnami/postgresql:16.3.0
+                  imagePullPolicy: IfNotPresent
+                  command: ["/bin/sh", "-c"]
+                  args:
+                    - |
+                      psql \
+                        --host="$PGHOST" \
+                        --port="$PGPORT" \
+                        --username="$PGUSER" \
+                        --dbname="$PGDATABASE" \
+                        --file="/policies/postgres_data_retention.sql"
+                  envFrom:
+                    - secretRef:
+                        name: postgres-maintenance-credentials
+                  resources:
+                    requests:
+                      cpu: "100m"
+                      memory: "128Mi"
+                    limits:
+                      cpu: "500m"
+                      memory: "512Mi"
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: true
+                  volumeMounts:
+                    - name: retention-sql
+                      mountPath: /policies/postgres_data_retention.sql
+                      subPath: postgres_data_retention.sql
+              volumes:
+                - name: retention-sql
+                  configMap:
+                    name: data-retention-postgres
+                    defaultMode: 0400
+  - apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+      name: neo4j-data-retention
+      labels:
+        app.kubernetes.io/name: data-retention
+        app.kubernetes.io/component: scheduler
+        summit.io/compliance-scope: gdpr-soc2
+      annotations:
+        summit.io/policy-version: v1
+        opa.summit.io/profile: data-retention
+    spec:
+      schedule: "30 2 * * *"
+      concurrencyPolicy: Forbid
+      successfulJobsHistoryLimit: 1
+      failedJobsHistoryLimit: 3
+      suspend: false
+      jobTemplate:
+        spec:
+          backoffLimit: 2
+          template:
+            metadata:
+              labels:
+                app.kubernetes.io/name: data-retention
+                summit.io/compliance-scope: gdpr-soc2
+              annotations:
+                checksum/config: $(CONFIG_CHECKSUM)
+            spec:
+              serviceAccountName: data-retention
+              restartPolicy: Never
+              securityContext:
+                runAsNonRoot: true
+              containers:
+                - name: apply-neo4j-retention
+                  image: neo4j:5.20.0-community
+                  imagePullPolicy: IfNotPresent
+                  command: ["/bin/sh", "-c"]
+                  args:
+                    - |
+                      cypher-shell \
+                        --address "$NEO4J_URI" \
+                        --username "$NEO4J_USER" \
+                        --password "$NEO4J_PASSWORD" \
+                        --file "/policies/neo4j_data_retention.cypher"
+                  env:
+                    - name: NEO4J_URI
+                      valueFrom:
+                        secretKeyRef:
+                          name: neo4j-maintenance-credentials
+                          key: boltUri
+                    - name: NEO4J_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: neo4j-maintenance-credentials
+                          key: username
+                    - name: NEO4J_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: neo4j-maintenance-credentials
+                          key: password
+                  resources:
+                    requests:
+                      cpu: "100m"
+                      memory: "128Mi"
+                    limits:
+                      cpu: "500m"
+                      memory: "512Mi"
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: true
+                  volumeMounts:
+                    - name: retention-cypher
+                      mountPath: /policies/neo4j_data_retention.cypher
+                      subPath: neo4j_data_retention.cypher
+              volumes:
+                - name: retention-cypher
+                  configMap:
+                    name: data-retention-neo4j
+                    defaultMode: 0400
