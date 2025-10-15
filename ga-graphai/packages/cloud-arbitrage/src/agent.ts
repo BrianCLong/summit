@@ -28,8 +28,9 @@ export class ArbitrageAgent {
     const recommendations = this.evaluate(snapshot, profile);
     const minScore = options.minScore ?? 0.6;
     const filtered = recommendations.filter(rec => rec.totalScore >= minScore);
+    const rankingPool = filtered.length > 0 ? filtered : recommendations;
 
-    const ranked = [...filtered].sort((a, b) => {
+    const ranked = [...rankingPool].sort((a, b) => {
       const priceDelta = a.expectedUnitPrice - b.expectedUnitPrice;
       if (Math.abs(priceDelta) > 0.001) {
         return priceDelta;

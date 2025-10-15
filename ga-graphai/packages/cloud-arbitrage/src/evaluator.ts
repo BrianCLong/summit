@@ -27,12 +27,22 @@ export class HeadToHeadEvaluator {
   }
 
   private evaluateOne(snapshot: CompositeMarketSnapshot, baseline: BaselineRun): HeadToHeadResult {
-    const agentSummaries = this.agent.recommendPortfolio(snapshot, baseline.workload, {
-      topN: 1,
-      minScore: 0.5
+    const defaultOptions = { topN: 1, minScore: 0.5 } as const;
+    let agentSummaries = this.agent.recommendPortfolio(snapshot, baseline.workload, {
+      ...defaultOptions
     });
-    const agentSummary: StrategySummary = agentSummaries[0];
-    const agentSavings = agentSummary?.estimatedSavings ?? 0;
+
+    if (agentSummaries.length === 0) {
+      agentSummaries = this.agent.recommendPortfolio(snapshot, baseline.workload, {
+        ...defaultOptions,
+        minScore: 0
+      });
+    }
+
+    const agentSummary =
+      agentSummaries[0] ?? this.synthesizeNeutralSummary(baseline);
+
+    const agentSavings = agentSummary.estimatedSavings ?? 0;
     const netBenefit = agentSavings - baseline.baselineSavings;
     return {
       baselineTool: baseline.tool,
@@ -41,6 +51,17 @@ export class HeadToHeadEvaluator {
       baselineSavings: baseline.baselineSavings,
       agentSavings,
       netBenefit
+    };
+  }
+
+  private synthesizeNeutralSummary(baseline: BaselineRun): StrategySummary {
+    return {
+      strategy: 'data-unavailable',
+      provider: 'n/a',
+      region: 'n/a',
+      blendedUnitPrice: baseline.baselineSavings,
+      estimatedSavings: 0,
+      confidence: 0.1
     };
   }
 }
