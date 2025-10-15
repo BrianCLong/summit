@@ -7,6 +7,8 @@ from fastapi import FastAPI, HTTPException
 from features import build_degree_features
 from pydantic import BaseModel
 
+from privacy import noisy_degree_counts
+
 
 class FeatureBuildRequest(BaseModel):
     edges: list[tuple[str, str]]
@@ -81,6 +83,32 @@ class RouteDecision(BaseModel):
     reason: str
 
 
+class SecureDegreeQuery(BaseModel):
+    edges: list[tuple[str, str]]
+    targets: list[str] | None = None
+    epsilon: float
+    sensitivity: float = 1.0
+    seed: int | None = None
+
+
+class SanitizedDegree(BaseModel):
+    node: str
+    noisy_degree: float
+
+
+class PrivacyMetadata(BaseModel):
+    epsilon: float
+    sensitivity: float
+    noise_scale: float
+    composition_cost: float
+    audit_proof: str
+
+
+class SecureDegreeResponse(BaseModel):
+    results: list[SanitizedDegree]
+    metadata: PrivacyMetadata
+
+
 app = FastAPI()
 
 
@@ -142,3 +170,30 @@ def route_model(request: RouteRequest) -> RouteDecision:
         cost_per_1k_tokens=best.cost_per_1k_tokens,
         reason=reason,
     )
+
+
+@app.post("/query/privacy/degree", response_model=SecureDegreeResponse)
+def secure_degree_query(payload: SecureDegreeQuery) -> SecureDegreeResponse:
+    try:
+        sanitized, metadata = noisy_degree_counts(
+            edges=payload.edges,
+            epsilon=payload.epsilon,
+            sensitivity=payload.sensitivity,
+            targets=payload.targets,
+            seed=payload.seed,
+        )
+    except ValueError as exc:  # pragma: no cover - defensive guard
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    results = [
+        SanitizedDegree(node=node, noisy_degree=value)
+        for node, value in sanitized
+    ]
+    meta = PrivacyMetadata(
+        epsilon=payload.epsilon,
+        sensitivity=payload.sensitivity,
+        noise_scale=metadata["noise_scale"],
+        composition_cost=metadata["composition_cost"],
+        audit_proof=metadata["audit_proof"],
+    )
+    return SecureDegreeResponse(results=results, metadata=meta)
