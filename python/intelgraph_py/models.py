@@ -116,3 +116,19 @@ class LLMSettings(Base):
     is_active = Column(Boolean, default=False) # Only one can be active for a given provider/model_name combination
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
+
+
+class FederatedTrainingJob(Base):
+    __tablename__ = "federated_training_jobs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_name = Column(String, nullable=False)
+    status = Column(String, nullable=False, default="PENDING")
+    config = Column(JSON, nullable=False)
+    metrics = Column(JSON, nullable=True)
+    privacy_budget = Column(JSON, nullable=True)
+    error = Column(String, nullable=True)
+    rounds_completed = Column(Integer, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, onupdate=func.now())
+
