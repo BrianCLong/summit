@@ -149,6 +149,15 @@ export const coreResolvers = {
       });
     },
 
+    entitySentiment: async (_: any, { entityId, tenantId }: any, context: any) => {
+      const effectiveTenantId = tenantId || context.tenantId;
+      if (!effectiveTenantId) {
+        throw new Error('Tenant ID is required');
+      }
+
+      return await entityRepo.getSentimentForEntity(entityId, effectiveTenantId);
+    },
+
     // Graph traversal (temporarily disabled due to schema mismatch)
     // graphNeighborhood: async (_: any, { input }: any, context: any) => {
     //   const { startEntityId, tenantId, maxDepth = 2, relationshipTypes, entityKinds, limit = 100 } = input;
