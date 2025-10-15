@@ -22,6 +22,8 @@ cffi==2.0.0
     # via cryptography
 click==8.1.8
     # via uvicorn
+coverage==7.8.0
+    # via pytest-cov
 cryptography==46.0.2
     # via python-jose
 ecdsa==0.19.1
@@ -44,9 +46,13 @@ idna==3.10
     #   httpx
 jinja2==3.1.6
     # via -r requirements.in
+langchain-community
+    # via -r requirements.in
 markupsafe==3.0.3
     # via jinja2
 passlib[bcrypt]==1.7.4
+    # via -r requirements.in
+prometheus-client
     # via -r requirements.in
 pyasn1==0.6.1
     # via
@@ -62,6 +68,8 @@ pydantic-core==2.33.2
     # via pydantic
 pyjwt==2.10.1
     # via redis
+pytest-cov
+    # via -r requirements.in
 python-dotenv==1.1.1
     # via -r requirements.in
 python-jose[cryptography]==3.5.0
