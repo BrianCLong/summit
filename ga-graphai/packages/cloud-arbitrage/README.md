@@ -52,6 +52,12 @@ for (const entry of portfolio) {
 
 The `CompositeDataFeed` merges heterogeneous feeds and normalizes timestamps so strategies can reason about blended arbitrage and hedge opportunities across financial, prediction, consumer, and collectibles venues.
 
+### Snapshot Normalization
+
+- Incoming feeds are de-duplicated by provider/region (financial, demand, regulation), region (energy), and marketplace or collection keys (consumer, collectibles).
+- Pricing and utilization signals are blended using weighted averages (volume-weighted for consumer marketplaces, scarcity-weighted for collectibles) to smooth noisy venue updates.
+- Regulatory entries resolve to the most recent effective date so downstream strategies respect the latest incentives or penalties.
+
 ## Testing
 - `pnpm test` runs the Vitest suite covering data aggregation, strategy scoring, and evaluator uplift calculations.
 
