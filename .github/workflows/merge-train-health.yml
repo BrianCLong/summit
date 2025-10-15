@@ -2,17 +2,69 @@ name: Merge Train Health Check
 
 on:
   schedule:
-    # Run nightly at 2 AM UTC
-    - cron: '0 2 * * *'
+    # Run nightly at 2:07 AM UTC (jittered to avoid cron herd)
+    - cron: '7 2 * * *'
   workflow_dispatch: # Allow manual trigger
+
+concurrency:
+  group: health-nightly-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
   pull-requests: read
   issues: write # For creating health report issues
+  actions: read # For backlog detection
 
 jobs:
+  backlog-probe:
+    runs-on: ubuntu-latest
+    outputs:
+      saturated: ${{ steps.detect.outputs.saturated }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup GitHub CLI
+        run: |
+          type -p gh &>/dev/null || {
+            echo "Installing gh CLI..."
+            (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
+            && sudo mkdir -p -m 755 /etc/apt/keyrings \
+            && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+            && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+            && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+            && sudo apt update \
+            && sudo apt install gh -y
+          }
+
+      - name: Configure GitHub CLI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "$GH_TOKEN" | gh auth login --with-token
+
+      - id: detect
+        name: Detect runner backlog (best-effort)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          COUNT=$(gh run list --status queued --limit 50 --json status \
+            | jq 'map(select(.status=="queued")) | length' || echo 0)
+          echo "Queued runs detected: $COUNT"
+
+          if [ "${COUNT:-0}" -ge 15 ]; then
+            echo "⚠️ Runner capacity saturated ($COUNT queued runs). Standing down to avoid queue buildup."
+            echo "saturated=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "✅ Runner capacity available ($COUNT queued runs). Proceeding with health check."
+            echo "saturated=false" >> "$GITHUB_OUTPUT"
+          fi
+
   health-check:
+    if: needs.backlog-probe.outputs.saturated == 'false'
+    needs: [backlog-probe]
     runs-on: ubuntu-latest
 
     steps:
