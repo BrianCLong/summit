@@ -31,8 +31,31 @@ export class HeadToHeadEvaluator {
       topN: 1,
       minScore: 0.5
     });
-    const agentSummary: StrategySummary = agentSummaries[0];
-    const agentSavings = agentSummary?.estimatedSavings ?? 0;
+    const agentSummary: StrategySummary =
+      agentSummaries[0] ?? {
+        strategy: 'unavailable',
+        provider: 'n/a',
+        region: 'n/a',
+        blendedUnitPrice: 0,
+        estimatedSavings: 0,
+        consumerScore: 0,
+        collectibleScore: 0,
+        predictionScore: 0,
+        cryptoScore: 0,
+        forexScore: 0,
+        derivativesScore: 0,
+        commodityScore: 0,
+        sportsScore: 0,
+        exoticScore: 0,
+        metaSignalScore: 0,
+        cascadeScore: 0,
+        frontRunConfidence: 0,
+        crossMarketScore: 0,
+        arbitrageStrength: 0,
+        hedgeStrength: 0,
+        confidence: 0
+      };
+    const agentSavings = agentSummary.estimatedSavings;
     const netBenefit = agentSavings - baseline.baselineSavings;
     return {
       baselineTool: baseline.tool,

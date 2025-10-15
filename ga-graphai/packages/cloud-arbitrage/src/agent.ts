@@ -29,13 +29,7 @@ export class ArbitrageAgent {
     const minScore = options.minScore ?? 0.6;
     const filtered = recommendations.filter(rec => rec.totalScore >= minScore);
 
-    const ranked = [...filtered].sort((a, b) => {
-      const priceDelta = a.expectedUnitPrice - b.expectedUnitPrice;
-      if (Math.abs(priceDelta) > 0.001) {
-        return priceDelta;
-      }
-      return b.totalScore - a.totalScore;
-    });
+    const ranked = [...filtered].sort((a, b) => this.rankRecommendation(a) - this.rankRecommendation(b));
 
     const top = options.topN ? ranked.slice(0, options.topN) : ranked;
 
@@ -45,8 +39,46 @@ export class ArbitrageAgent {
       region: recommendation.region,
       blendedUnitPrice: recommendation.expectedUnitPrice,
       estimatedSavings: this.estimateSavings(recommendation),
-      confidence: Math.min(0.95, recommendation.totalScore / 3)
+      consumerScore: recommendation.consumerScore,
+      collectibleScore: recommendation.collectibleScore,
+      predictionScore: recommendation.predictionScore,
+      cryptoScore: recommendation.cryptoScore,
+      forexScore: recommendation.forexScore,
+      derivativesScore: recommendation.derivativesScore,
+      commodityScore: recommendation.commodityScore,
+      sportsScore: recommendation.sportsScore,
+      exoticScore: recommendation.exoticScore,
+      metaSignalScore: recommendation.metaSignalScore,
+      cascadeScore: recommendation.cascadeScore,
+      frontRunConfidence: recommendation.frontRunConfidence,
+      crossMarketScore: recommendation.crossMarketScore,
+      arbitrageStrength: recommendation.arbitrageSignalStrength,
+      hedgeStrength: recommendation.hedgeSignalStrength,
+      confidence: Math.min(
+        0.97,
+        (
+          recommendation.totalScore +
+          recommendation.crossMarketScore +
+          recommendation.metaSignalScore +
+          recommendation.frontRunConfidence +
+          recommendation.hedgeSignalStrength
+        ) /
+          5
+      )
     }));
+  }
+
+  private rankRecommendation(recommendation: StrategyRecommendation): number {
+    const arbitrageBias = 1 - Math.min(1, recommendation.arbitrageSignalStrength * 0.6);
+    const hedgeBias = 1 - Math.min(1, recommendation.hedgeSignalStrength * 0.5);
+    const metaBias = 1 - Math.min(1, (recommendation.metaSignalScore + recommendation.frontRunConfidence) * 0.4);
+    return (
+      recommendation.expectedUnitPrice * (1 - recommendation.crossMarketScore * 0.15) +
+      (3 - recommendation.totalScore) * 0.05 +
+      arbitrageBias * 0.02 +
+      hedgeBias * 0.02 +
+      metaBias * 0.02
+    );
   }
 
   private estimateSavings(recommendation: StrategyRecommendation): number {
