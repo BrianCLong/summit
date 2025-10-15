@@ -1,0 +1,57 @@
+name: CI Backbone
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+permissions:
+  contents: read
+  checks: write
+  statuses: write
+concurrency:
+  group: ci-backbone-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  queue-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      proceed: ${{ steps.check.outputs.proceed }}
+    steps:
+      - name: Check Actions queue (throttle if saturated)
+        id: check
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          queued=$(gh run list --status queued --limit 200 --json status | jq 'length')
+          if [ "$queued" -gt 40 ]; then
+            echo "Queue saturated ($queued). Throttling (skip backbone)."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "proceed=true" >> "$GITHUB_OUTPUT"
+
+  lint-type-unit:
+    needs: [queue-guard]
+    if: needs.queue-guard.outputs.proceed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        run: corepack enable && corepack prepare pnpm@latest --activate
+      - name: Install deps (frozen)
+        run: pnpm install --frozen-lockfile
+      - name: Lint (quick)
+        run: pnpm -r -w run lint:quick || pnpm -r -w run lint
+      - name: Types (quick)
+        run: pnpm -r -w run typecheck:quick || pnpm -r -w run typecheck
+      - name: Unit (short)
+        env:
+          SUMMIT_SKIP_FLAKY: "1"
+        run: pnpm -r -w run test:unit:short -- --ci --reporters=default --maxWorkers=50%
