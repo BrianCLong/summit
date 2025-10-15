@@ -1,16 +1,27 @@
 # Replit & Lovable Integration Codex Prompt Library
 
 ## Purpose
-This library converts the Replit and Lovable integration roadmap into ready-to-run Codex UI prompts. Each prompt calls out the Summit (IntelGraph) touchpoints, supporting services (e.g., Maestro Conductor, secrets sync), and the validation criteria we expect from an autonomous coding session.
+This library turns the Replit and Lovable integration roadmap into ready-to-run Codex UI prompts. Each phase now includes context, prerequisites, the prompt itself, and a validation checklist so autonomous coding sessions can land in a review-ready state.
 
-## How to Use
-- Pick the phase that matches your current integration milestone and paste the prompt into Codex UI.
-- Provide repository credentials or API tokens when the prompt requests placeholders such as `<REPLIT_OAUTH_TOKEN>`.
-- Capture generated diffs, run tests, and summarize outcomes back in Summit issue tracking for traceability.
+## Usage Workflow
+1. **Pick the phase** that matches your current milestone and skim the prerequisites to confirm the target repositories, secrets, and dashboards exist.
+2. **Paste the prompt** into Codex UI. Replace placeholders such as `<REPLIT_OAUTH_TOKEN>` or `<SUMMIT_BRANCH>` with real values before execution.
+3. **Capture the outcome**: commit hashes, generated diffs, screenshots, and test runs belong in the linked Summit ticket or Maestro task log.
+4. **Run the validation checklist** to ensure security, telemetry, and documentation requirements are satisfied prior to merge.
+
+> ℹ️ **Tip:** If Codex delivers partial output, rerun with the same prompt but prepend a short reminder describing the missing deliverables (e.g., "focus on the OpenAPI spec"). This keeps the agent aligned without rewriting the entire brief.
 
 ---
 
 ## Phase 1 – Cloud IDE Connector Service
+**Scope summary:** Build the Summit ↔ Replit connector microservice that mints secure IDE sessions and propagates secrets.
+
+**Prerequisites**
+- Summit Vault path `summit/replit/oauth` populated with client ID/secret.
+- Empty service scaffold under `services/cloud-ide-connector/` and a GitHub App or PAT with repo access.
+- Maestro Conductor topic `cloud-ide.events` provisioned in the event bus.
+
+**Prompt Template**
 ```
 You are building the "Summit ↔ Replit Connector" Node.js service.
 Objectives:
@@ -24,7 +35,23 @@ Objectives:
 Deliverables: TypeScript source under `services/cloud-ide-connector/`, OpenAPI spec, Dockerfile, and GitHub Actions workflow for CI.
 ```
 
+**Validation Checklist**
+- [ ] OAuth secrets are read through Vault helpers rather than plaintext config.
+- [ ] Webhook payloads persist in Maestro with correlation IDs for investigations.
+- [ ] Tests: `npm run test -- --filter cloud-ide-connector` and `npm run lint` succeed.
+- [ ] OpenAPI spec documents request/response bodies for both endpoints.
+
+---
+
 ## Phase 2 – In-Editor AI Coding Assistance
+**Scope summary:** Blend Replit AI autocomplete and Lovable agent chat into the Summit editor experience.
+
+**Prerequisites**
+- WebSocket gateway credentials for both AI providers stored in Summit secrets.
+- Feature flag `ai.multimodel.assistant` defined so rollout can be staged.
+- Graph editor analytics hooks ready to capture completion accept/reject metrics.
+
+**Prompt Template**
 ```
 You are extending the Summit web client to embed Replit AI autocomplete and Lovable agent chat.
 Tasks:
@@ -36,7 +63,23 @@ Tasks:
 Outcome: Developers can toggle between models, receive inline suggestions, and log accepted completions back to IntelGraph.
 ```
 
+**Validation Checklist**
+- [ ] Feature flag toggles the UI without requiring redeploy.
+- [ ] Rejected completions emit analytics events with model/provider metadata.
+- [ ] Tests: `npm --workspace client test -- MultiModelAssistantPanel` and `npm --workspace server test -- ai-proxy` pass.
+- [ ] Security review confirms JWT scope enforcement and request rate limits.
+
+---
+
 ## Phase 3 – Debugging & Automated Fix Pipelines
+**Scope summary:** Expand Maestro Conductor so it can hand regressions to AI debugging loops.
+
+**Prerequisites**
+- Maestro workflow templates accessible at `maestro/workflows/*.yaml` with extension points for `debug` and `fix` steps.
+- Grafana dashboard `AI-Automation` created with panels for step timings and success rate.
+- Provenance ledger credentials verified so artifacts can be stored.
+
+**Prompt Template**
 ```
 You are updating Maestro Conductor workflows to orchestrate AI-driven debugging.
 Goals:
@@ -48,7 +91,23 @@ Goals:
 Result: Maestro can hand off regressions to AI loops and record traceable outcomes for compliance.
 ```
 
+**Validation Checklist**
+- [ ] Workflow definitions include timeout and retry policies per step.
+- [ ] Provenance ledger entries link to investigation IDs for auditability.
+- [ ] Telemetry: traces appear in OpenTelemetry collector with service name `maestro.ai-debug`.
+- [ ] Tests: `npm --workspace maestro-conductor run test:smoke` completes successfully.
+
+---
+
 ## Phase 4 – Deployment & Secrets Federation
+**Scope summary:** Enable Maestro to deploy to Replit Autoscale and Lovable Supabase while synchronising secrets safely.
+
+**Prerequisites**
+- Deployment targets registered in Maestro inventory with environment metadata (region, scaling policies).
+- Secrets bridge module able to read Summit Vault paths and call external APIs.
+- `/docs/deployment/hybrid-cloud.md` skeleton page created for documentation updates.
+
+**Prompt Template**
 ```
 You are orchestrating hybrid deployments leveraging Replit Autoscale and Lovable Supabase.
 Steps:
@@ -59,7 +118,23 @@ Steps:
 Validation: Integration tests for secrets rotation, mocked API deployments, and documentation in `/docs/deployment/hybrid-cloud.md`.
 ```
 
+**Validation Checklist**
+- [ ] Secrets rotation logs redact values but retain version IDs.
+- [ ] Rollback hooks trigger when synthetic health checks fail.
+- [ ] Tests: `npm --workspace maestro-conductor run test:deploy` and `npm run docs:lint` succeed.
+- [ ] Hybrid cloud documentation lists supported regions and failover procedure.
+
+---
+
 ## Phase 5 – Real-Time Collaboration Layer
+**Scope summary:** Surface multiplayer IDE activity and AI participation inside IntelGraph investigations.
+
+**Prerequisites**
+- Summit presence service exposing WebSocket channel for user cursors.
+- Policy toggles defined in `policy/ai-participation.yaml` to gate AI access.
+- Audit log pipeline ready to ingest collaboration events.
+
+**Prompt Template**
 ```
 You are enhancing Summit's collaboration UX with embedded cloud IDE sessions.
 Actions:
@@ -70,7 +145,23 @@ Actions:
 Testing: Cypress E2E covering multi-user editing, plus contract tests for audit log emissions.
 ```
 
+**Validation Checklist**
+- [ ] Collaboration dock degrades gracefully when external providers are offline.
+- [ ] Consent prompts record `granted_by` and `scope` fields in audit logs.
+- [ ] Tests: `npm --workspace client run test:e2e -- --spec collaboration-dock.cy.ts` and contract tests succeed.
+- [ ] Accessibility audit (axe) shows no regressions in the editor screen.
+
+---
+
 ## Phase 6 – AI Model Governance & Cost Controls
+**Scope summary:** Deliver unified guardrails for AI provider usage, spend, and performance feedback.
+
+**Prerequisites**
+- `ai-governor` service deployed with feature flag toggles for new providers.
+- Cost guard package configured with budget thresholds per workspace/team.
+- Slack webhook for Maestro notifications validated in non-production.
+
+**Prompt Template**
 ```
 You are adding unified controls for AI model usage across Replit and Lovable integrations.
 Requirements:
@@ -82,9 +173,15 @@ Requirements:
 Deliverable: Updated governance docs and dashboards demonstrating end-to-end visibility.
 ```
 
+**Validation Checklist**
+- [ ] Quota enforcement returns clear error messaging and links to governance docs.
+- [ ] Spend charts align with cost guard anomaly alerts (<5% variance).
+- [ ] Tests: `npm --workspace ai-governor run test:quota` and integration suite for burst scenarios pass.
+- [ ] Governance dashboards highlight provider breakdown (Replit vs Lovable) and acceptance metrics.
+
 ---
 
 ## Follow-Up Backlog Ideas
-- Blueprints for chaos drills simulating IDE outages.
-- Prompt variants for red-team exercises validating AI guardrails.
-- Migration checklists when Replit or Lovable release API changes.
+- Blueprints for chaos drills simulating IDE outages and failover to local tooling.
+- Prompt variants tailored for red-team exercises validating AI guardrails and incident response.
+- Migration checklists and test plans when Replit or Lovable release major API version changes.
