@@ -10,3 +10,5 @@ node_modules
 **/*.snap
 **/generated/**
 **/.graphqlrc*
+docs/**/*.yml
+.github/workflows/*

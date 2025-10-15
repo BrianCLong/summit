@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+- Dedicated Jest project and test suite for the MC Learning traffic splitter and telemetry logger, enabling scoped `--scope=mc-learning` runs.【F:jest.projects.cjs†L1-L24】【F:services/learner/__tests__/traffic.test.ts†L1-L39】【F:services/learner/__tests__/logger.test.ts†L1-L30】
+- Documentation covering architecture, APIs, usage, and test coverage for the MC Learning module.【F:docs/modules/mc-learning-module.md†L1-L49】
+
+### Changed
+- Updated the flat ESLint config to use the shared `@typescript-eslint` plugin/parser stack and expanded Prettier ignores to exclude legacy YAML workflows that break formatting automation.【F:eslint.config.js†L1-L55】【F:package.json†L110-L135】【F:.prettierignore†L1-L14】
+
 ## [1.0.0] - 2025-08-18
 
 ### Added

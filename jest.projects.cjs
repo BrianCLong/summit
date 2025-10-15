@@ -16,4 +16,24 @@ const server = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };
 
-module.exports = { projects: [client, server] };
+const mcLearning = {
+  displayName: 'mc-learning',
+  ...base,
+  roots: ['<rootDir>/services/learner'],
+  testEnvironment: 'node',
+};
+
+const scopeArg = process.argv.find(arg => arg === '--scope' || arg.startsWith('--scope='));
+let projects = [client, server, mcLearning];
+
+if (scopeArg) {
+  const scopeValue = scopeArg.includes('=')
+    ? scopeArg.split('=')[1]
+    : process.argv[process.argv.indexOf(scopeArg) + 1];
+
+  if (scopeValue === 'mc-learning') {
+    projects = [mcLearning];
+  }
+}
+
+module.exports = { projects };

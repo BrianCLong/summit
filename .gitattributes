@@ -2,8 +2,9 @@
 *.sh text eol=lf
 *.bat text eol=crlf
 
-# Lockfiles → no diff noise
-package-lock.json -diff
+# Lockfiles
+# Allow JSON-aware diffs for npm while still suppressing the rest to avoid binary blocking the PR UI.
+package-lock.json text diff=json
 yarn.lock -diff
 pnpm-lock.yaml -diff
 poetry.lock -diff
