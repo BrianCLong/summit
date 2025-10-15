@@ -1,0 +1,50 @@
+name: backlog-guard
+description: Detects GitHub Actions queue saturation and outputs 'saturated' boolean
+runs:
+  using: "composite"
+  steps:
+    - name: Install GitHub CLI
+      shell: bash
+      run: |
+        type -p gh &>/dev/null || {
+          echo "Installing gh CLI..."
+          (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
+          && sudo mkdir -p -m 755 /etc/apt/keyrings \
+          && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+          && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+        }
+
+    - name: Configure GitHub CLI
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        echo "$GH_TOKEN" | gh auth login --with-token
+
+    - id: detect
+      name: Detect queue saturation
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        THRESHOLD="${ACTIONS_QUEUE_THRESHOLD:-15}"
+        COUNT=$(gh run list --status queued --limit 50 --json status \
+          | jq 'map(select(.status=="queued")) | length' || echo 0)
+        echo "Queued runs: $COUNT (threshold: $THRESHOLD)"
+
+        if [ "${COUNT:-0}" -ge "$THRESHOLD" ]; then
+          echo "⚠️ Queue saturated ($COUNT >= $THRESHOLD). Standing down."
+          echo "saturated=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "✅ Capacity available ($COUNT < $THRESHOLD). Proceeding."
+          echo "saturated=false" >> "$GITHUB_OUTPUT"
+        fi
+
+outputs:
+  saturated:
+    description: "true if queue depth >= threshold (default 15)"
+    value: ${{ steps.detect.outputs.saturated }}
