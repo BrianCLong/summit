@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test('load graph and select node', async ({ page }) => {
+  page.on('console', (msg) => console.log('browser console:', msg.text()));
+  page.on('pageerror', (err) => console.log('browser error:', err.message));
   await page.goto('http://localhost:5173/');
   await expect(page.getByLabel('toggle theme')).toBeVisible();
   // dispatch selection via exposed store
