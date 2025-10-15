@@ -1,0 +1,212 @@
+{{- $root := . }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "neo4j.fullname" . }}-rr
+  labels:
+    {{- include "neo4j.labels" . | nindent 4 }}
+    app.kubernetes.io/component: read-replica
+    summit.slo/region: {{ .Values.regions.primary.name | quote }}
+  annotations:
+    replication.summit.sh/role: read-replica
+spec:
+  serviceName: {{ include "neo4j.fullname" . }}-discovery
+  replicas: {{ .Values.regions.primary.readReplicas }}
+  selector:
+    matchLabels:
+      {{- include "neo4j.matchLabels" (dict "root" . "component" "read-replica") | nindent 6 }}
+      summit.slo/region: {{ .Values.regions.primary.name | quote }}
+  template:
+    metadata:
+      labels:
+        {{- include "neo4j.matchLabels" (dict "root" . "component" "read-replica") | nindent 8 }}
+        summit.slo/region: {{ .Values.regions.primary.name | quote }}
+      annotations:
+        replication.summit.sh/region: {{ .Values.regions.primary.name | quote }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - {{ .Values.regions.primary.name }}
+        {{- with .Values.extraAffinity }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+        {{- range .Values.tolerations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: neo4j
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: bolt
+              containerPort: {{ .Values.service.bolt.port }}
+            - name: http
+              containerPort: {{ .Values.service.http.port }}
+          env:
+            - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
+              value: "yes"
+            - name: NEO4J_CONF
+              value: /conf/neo4j.conf
+            - name: NEO4J_dbms_mode
+              value: READ_REPLICA
+            - name: NEO4J_causal__clustering_kubernetes_service__name
+              value: {{ include "neo4j.fullname" . }}-discovery
+            - name: NEO4J_causal__clustering_kubernetes_service__namespace
+              value: {{ .Release.Namespace }}
+            - name: NEO4J_causal__clustering_kubernetes_label__selector
+              value: app.kubernetes.io/component=core,app.kubernetes.io/instance={{ .Release.Name }}
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          {{- if .Values.auth.enabled }}
+          envFrom:
+            - secretRef:
+                name: {{ if .Values.auth.existingSecret }}{{ .Values.auth.existingSecret }}{{ else }}{{ include "neo4j.fullname" . }}-auth{{ end }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.readReplicaResources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "neo4j.fullname" . }}-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        annotations:
+          replication.summit.sh/tier: read-replica
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: {{ .Values.readReplicaStorage.className | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.readReplicaStorage.size | quote }}
+---
+{{- range $index, $region := .Values.regions.secondary }}
+{{- if gt (int $region.readReplicas) 0 }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "neo4j.fullname" $root }}-rr-{{ $region.name | lower | replace "_" "-" }}
+  labels:
+    {{- include "neo4j.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: read-replica
+    summit.slo/region: {{ $region.name | quote }}
+  annotations:
+    replication.summit.sh/role: read-replica
+    replication.summit.sh/region: {{ $region.name | quote }}
+spec:
+  serviceName: {{ include "neo4j.fullname" $root }}-discovery
+  replicas: {{ $region.readReplicas }}
+  selector:
+    matchLabels:
+      {{- include "neo4j.matchLabels" (dict "root" $root "component" "read-replica") | nindent 6 }}
+      summit.slo/region: {{ $region.name | quote }}
+  template:
+    metadata:
+      labels:
+        {{- include "neo4j.matchLabels" (dict "root" $root "component" "read-replica") | nindent 8 }}
+        summit.slo/region: {{ $region.name | quote }}
+      annotations:
+        replication.summit.sh/region: {{ $region.name | quote }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - {{ $region.name }}
+        {{- with $root.Values.extraAffinity }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- if $root.Values.tolerations }}
+      tolerations:
+        {{- range $root.Values.tolerations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: neo4j
+          image: {{ $root.Values.image.repository }}:{{ $root.Values.image.tag }}
+          imagePullPolicy: {{ $root.Values.image.pullPolicy }}
+          ports:
+            - name: bolt
+              containerPort: {{ $root.Values.service.bolt.port }}
+            - name: http
+              containerPort: {{ $root.Values.service.http.port }}
+          env:
+            - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
+              value: "yes"
+            - name: NEO4J_CONF
+              value: /conf/neo4j.conf
+            - name: NEO4J_dbms_mode
+              value: READ_REPLICA
+            - name: NEO4J_causal__clustering_kubernetes_service__name
+              value: {{ include "neo4j.fullname" $root }}-discovery
+            - name: NEO4J_causal__clustering_kubernetes_service__namespace
+              value: {{ $root.Release.Namespace }}
+            - name: NEO4J_causal__clustering_kubernetes_label__selector
+              value: app.kubernetes.io/component=core,app.kubernetes.io/instance={{ $root.Release.Name }}
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          {{- if $root.Values.auth.enabled }}
+          envFrom:
+            - secretRef:
+                name: {{ if $root.Values.auth.existingSecret }}{{ $root.Values.auth.existingSecret }}{{ else }}{{ include "neo4j.fullname" $root }}-auth{{ end }}
+          {{- end }}
+          resources:
+            {{- toYaml $root.Values.readReplicaResources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "neo4j.fullname" $root }}-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        annotations:
+          replication.summit.sh/tier: read-replica
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: {{ $root.Values.readReplicaStorage.className | quote }}
+        resources:
+          requests:
+            storage: {{ $root.Values.readReplicaStorage.size | quote }}
+---
+{{- end }}
+{{- end }}
