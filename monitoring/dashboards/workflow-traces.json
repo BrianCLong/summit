@@ -1,0 +1,71 @@
+{
+  "uid": "argo-workflow-traces",
+  "title": "Argo Workflow Tracing",
+  "schemaVersion": 39,
+  "version": 1,
+  "timezone": "browser",
+  "editable": true,
+  "panels": [
+    {
+      "type": "jaeger-trace",
+      "title": "Argo Workflow End-to-End Traces",
+      "id": 1,
+      "datasource": { "type": "jaeger", "uid": "Jaeger" },
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 10 },
+      "options": {
+        "query": {
+          "service": "argo-workflows",
+          "operation": "",
+          "lookback": "1h",
+          "limit": 20,
+          "tags": ["workflow.name", "workflow.status"]
+        },
+        "traceToLogs": { "datasourceUid": null }
+      }
+    },
+    {
+      "type": "jaeger-trace",
+      "title": "Feed Processor Microservice",
+      "id": 2,
+      "datasource": { "type": "jaeger", "uid": "Jaeger" },
+      "gridPos": { "x": 0, "y": 10, "w": 12, "h": 12 },
+      "options": {
+        "query": {
+          "service": "feed-processor",
+          "operation": "workflow.ingestion",
+          "lookback": "1h",
+          "limit": 25,
+          "tags": ["workflow.job_id", "workflow.run_id"]
+        },
+        "traceToLogs": { "datasourceUid": null }
+      }
+    },
+    {
+      "type": "jaeger-trace",
+      "title": "ML Engine Microservice",
+      "id": 3,
+      "datasource": { "type": "jaeger", "uid": "Jaeger" },
+      "gridPos": { "x": 12, "y": 10, "w": 12, "h": 12 },
+      "options": {
+        "query": {
+          "service": "ml-engine",
+          "operation": "",
+          "lookback": "1h",
+          "limit": 25,
+          "tags": ["workflow.job_id", "workflow.run_id"]
+        },
+        "traceToLogs": { "datasourceUid": null }
+      }
+    },
+    {
+      "type": "text",
+      "title": "Trace Context",
+      "id": 4,
+      "gridPos": { "x": 0, "y": 22, "w": 24, "h": 5 },
+      "options": {
+        "content": "### Workflow Trace Tips\n- Click any span to pivot to the Jaeger UI for full detail.\n- Filter by `workflow.run_id` to correlate queue and ML activity.\n- Combine with Prometheus latency panels to troubleshoot bottlenecks.",
+        "mode": "markdown"
+      }
+    }
+  ]
+}
