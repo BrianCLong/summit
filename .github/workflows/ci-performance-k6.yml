@@ -3,12 +3,38 @@ on:
   pull_request:
   workflow_dispatch:
   schedule:
-    - cron: '0 4 * * 1'  # weekly
+    - cron: '31 4 * * 1'  # weekly, jittered from :00
+
+concurrency:
+  group: k6-perf-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  ACTIONS_QUEUE_THRESHOLD: 15
+  START_JITTER_MAX_SEC: 240
 
 jobs:
+  guard:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    outputs:
+      saturated: ${{ steps.guard.outputs.saturated }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: guard
+        uses: ./.github/actions/backlog-guard
+
   k6:
+    if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'
+    needs: [guard]
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      max-parallel: 2
     services:
       postgres:
         image: postgres:14
@@ -22,6 +48,10 @@ jobs:
         image: redis:7-alpine
         ports: ['6379:6379']
     steps:
+      - name: Start jitter
+        if: github.event_name == 'schedule'
+        run: sleep $((RANDOM%${START_JITTER_MAX_SEC:-240}+30))
+
       - uses: actions/checkout@v4
 
       - name: Boot stack (server+client)

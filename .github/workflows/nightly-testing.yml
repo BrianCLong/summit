@@ -2,8 +2,8 @@ name: Nightly Testing
 
 on:
   schedule:
-    # Run nightly at 2 AM UTC (optimal for stage environment)
-    - cron: '0 2 * * *'
+    # Run nightly at 2:19 AM UTC (jittered from :00, avoids :07 health check)
+    - cron: '19 2 * * *'
   workflow_dispatch:
     inputs:
       environment:
@@ -20,6 +20,10 @@ on:
         default: false
         type: boolean
 
+concurrency:
+  group: nightly-testing-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   checks: write
@@ -28,19 +32,38 @@ permissions:
 env:
   STAGE_URL: https://stage.intelgraph.example
   DEV_URL: https://dev.intelgraph.example
+  ACTIONS_QUEUE_THRESHOLD: 15
+  START_JITTER_MAX_SEC: 240
 
 jobs:
+  guard:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    outputs:
+      saturated: ${{ steps.guard.outputs.saturated }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: guard
+        uses: ./.github/actions/backlog-guard
+
   nightly-e2e:
+    if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'
+    needs: [guard]
     runs-on: ubuntu-22.04
     timeout-minutes: 90
     strategy:
       fail-fast: false
+      max-parallel: 4  # Cap matrix fanout (was 12 parallel jobs)
       matrix:
         browser: [chromium, firefox, safari]
         shard: [1, 2, 3, 4]
     env:
       TARGET_ENV: ${{ inputs.environment || 'stage' }}
     steps:
+      - name: Start jitter
+        if: github.event_name == 'schedule'
+        run: sleep $((RANDOM%${START_JITTER_MAX_SEC:-240}+30))
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -108,11 +131,17 @@ jobs:
           reporter: java-junit
 
   nightly-integration:
+    if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'
+    needs: [guard]
     runs-on: ubuntu-22.04
     timeout-minutes: 45
     env:
       TARGET_ENV: ${{ inputs.environment || 'stage' }}
     steps:
+      - name: Start jitter
+        if: github.event_name == 'schedule'
+        run: sleep $((RANDOM%${START_JITTER_MAX_SEC:-240}+30))
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -161,12 +190,17 @@ jobs:
           reporter: java-junit
 
   nightly-performance:
+    if: ${{ !inputs.skip_soak && (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true') }}
+    needs: [guard]
     runs-on: ubuntu-22.04
     timeout-minutes: 300  # 5 hours for soak test
-    if: ${{ !inputs.skip_soak }}
     env:
       TARGET_ENV: ${{ inputs.environment || 'stage' }}
     steps:
+      - name: Start jitter
+        if: github.event_name == 'schedule'
+        run: sleep $((RANDOM%${START_JITTER_MAX_SEC:-240}+30))
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
