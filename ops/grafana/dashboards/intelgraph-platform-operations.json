@@ -1,0 +1,116 @@
+{
+  "title": "IntelGraph Platform SRE Overview",
+  "description": "Golden signals for API, ingest, database, and cost guardrails",
+  "tags": ["sre", "platform"],
+  "time": {"from": "now-6h", "to": "now"},
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "API Availability (99.9% target)",
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {"color": "red", "value": 0.998},
+              {"color": "orange", "value": 0.999},
+              {"color": "green", "value": null}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{service=\"intelgraph-api\",status!~\"5..\"}[5m])) / sum(rate(http_requests_total{service=\"intelgraph-api\"}[5m]))",
+          "legendFormat": "API Success"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Ingest Success (99.5% target)",
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {"color": "red", "value": 0.985},
+              {"color": "orange", "value": 0.995},
+              {"color": "green", "value": null}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(ingest_success_total[5m])) / sum(rate(ingest_attempts_total[5m]))",
+          "legendFormat": "Ingest Success"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Database p95 Latency",
+      "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 120},
+              {"color": "red", "value": 200}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket{cluster=\"aurora-prod\"}[5m])) by (le)) * 1000",
+          "legendFormat": "Aurora p95"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(redis_latency_seconds_bucket[5m])) by (le)) * 1000",
+          "legendFormat": "Redis p95"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Monthly Spend vs Budget",
+      "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 0.8},
+              {"color": "red", "value": 0.9}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "intelgraph_monthly_spend_usd / intelgraph_monthly_budget_usd",
+          "legendFormat": "Spend"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal"
+      }
+    }
+  ]
+}
