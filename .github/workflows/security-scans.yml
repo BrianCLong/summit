@@ -1,0 +1,141 @@
+name: Security Scans
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+
+jobs:
+  vulnerability-scans:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build application image
+        run: docker build -t summit-app:${{ github.sha }} .
+
+      - name: Run Trivy image scan
+        run: scripts/security/trivy-scan.sh summit-app:${{ github.sha }} security-reports/trivy-report.json
+
+      - name: Run OWASP ZAP baseline scan
+        env:
+          ZAP_TARGET_URL: ${{ secrets.ZAP_TARGET_URL }}
+        run: |
+          mkdir -p security-reports
+          scripts/security/zap-scan.sh "${ZAP_TARGET_URL:-}" security-reports/zap
+
+      - name: Summarize scan results
+        id: summarize
+        env:
+          ZAP_TARGET_URL: ${{ secrets.ZAP_TARGET_URL }}
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          set -euo pipefail
+
+          SUMMARY_FILE="security-reports/summary.md"
+          TRIVY_REPORT="security-reports/trivy-report.json"
+          ZAP_REPORT="security-reports/zap/zap-report.json"
+
+          TRIVY_HIGH=0
+          TRIVY_CRITICAL=0
+          if [[ -s "${TRIVY_REPORT}" ]]; then
+            TRIVY_HIGH=$(jq '[.Results[]? | .Vulnerabilities[]? | select(.Severity == "HIGH")] | length' "${TRIVY_REPORT}")
+            TRIVY_CRITICAL=$(jq '[.Results[]? | .Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' "${TRIVY_REPORT}")
+          fi
+
+          ZAP_MEDIUM=0
+          ZAP_HIGH=0
+          if [[ -s "${ZAP_REPORT}" ]]; then
+            ZAP_MEDIUM=$(jq '[.site[]? | .alerts[]? | select((.riskcode | tonumber) == 2)] | length' "${ZAP_REPORT}")
+            ZAP_HIGH=$(jq '[.site[]? | .alerts[]? | select((.riskcode | tonumber) >= 3)] | length' "${ZAP_REPORT}")
+          fi
+
+          HAS_FINDINGS=0
+          if [[ ${TRIVY_HIGH} -gt 0 || ${TRIVY_CRITICAL} -gt 0 || ${ZAP_MEDIUM} -gt 0 || ${ZAP_HIGH} -gt 0 ]]; then
+            HAS_FINDINGS=1
+          fi
+
+          ZAP_TARGET_DISPLAY="${ZAP_TARGET_URL:-Not configured (scan skipped)}"
+
+          mkdir -p "$(dirname "${SUMMARY_FILE}")"
+          cat > "${SUMMARY_FILE}" <<EOF
+## Trivy Image Scan
+- Critical: ${TRIVY_CRITICAL}
+- High: ${TRIVY_HIGH}
+
+## OWASP ZAP Baseline Scan
+- Target: ${ZAP_TARGET_DISPLAY}
+- High: ${ZAP_HIGH}
+- Medium: ${ZAP_MEDIUM}
+EOF
+
+          echo "trivy_high=${TRIVY_HIGH}" >> "$GITHUB_OUTPUT"
+          echo "trivy_critical=${TRIVY_CRITICAL}" >> "$GITHUB_OUTPUT"
+          echo "zap_high=${ZAP_HIGH}" >> "$GITHUB_OUTPUT"
+          echo "zap_medium=${ZAP_MEDIUM}" >> "$GITHUB_OUTPUT"
+          echo "has_findings=${HAS_FINDINGS}" >> "$GITHUB_OUTPUT"
+
+          cat <<EOB >> "$GITHUB_OUTPUT"
+issue_body<<'EOF'
+Security scans detected findings for PR #$PR_NUMBER.
+
+$(cat "$SUMMARY_FILE")
+
+Detailed artifacts are attached to this workflow run under the `security-reports` artifact.
+EOF
+EOB
+
+          echo "issue_title=Security Scan Findings for PR #$PR_NUMBER" >> "$GITHUB_OUTPUT"
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: security-reports
+
+      - name: Create or update security issue
+        if: steps.summarize.outputs.has_findings == '1'
+        uses: actions/github-script@v7
+        env:
+          ISSUE_TITLE: ${{ steps.summarize.outputs.issue_title }}
+          ISSUE_BODY: ${{ steps.summarize.outputs.issue_body }}
+        with:
+          script: |
+            const core = require('@actions/core');
+            const { github, context } = require('@actions/github');
+            const issueTitle = process.env.ISSUE_TITLE;
+            const issueBody = process.env.ISSUE_BODY;
+            if (!issueTitle || !issueBody) {
+              core.setFailed('Issue title or body is missing.');
+              return;
+            }
+            const { owner, repo } = context.repo;
+            const search = await github.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} is:issue "${issueTitle}" in:title`
+            });
+            const existing = search.data.items.find(item => item.title === issueTitle && item.state === 'open');
+            if (existing) {
+              await github.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                title: issueTitle,
+                body: issueBody
+              });
+            } else {
+              await github.issues.create({
+                owner,
+                repo,
+                title: issueTitle,
+                body: issueBody,
+                labels: ['security', 'automated-scan']
+              });
+            }
