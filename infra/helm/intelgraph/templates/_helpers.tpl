@@ -6,6 +6,32 @@ Expand the name of the chart.
 {{- end }}
 
 {{/*
+Build an image reference that enforces digest pinning.
+*/}}
+{{- define "intelgraph.imageWithDigest" -}}
+{{- $image := .image -}}
+{{- if not $image.repository }}
+{{- fail "image.repository is required" }}
+{{- end }}
+{{- if not $image.digest }}
+{{- fail (printf "image.digest is required for %s" (default "component" .name)) }}
+{{- end }}
+{{- printf "%s@%s" $image.repository $image.digest -}}
+{{- end }}
+
+{{/*
+Resolve service images and enforce digest pinning for optional components.
+*/}}
+{{- define "intelgraph.image" -}}
+{{- $service := .service -}}
+{{- $name := default "service" $service.name -}}
+{{- if not $service.image }}
+{{- fail (printf "image configuration is required for %s" $name) }}
+{{- end }}
+{{- include "intelgraph.imageWithDigest" (dict "image" $service.image "name" $name) -}}
+{{- end }}
+
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.

@@ -1,0 +1,23 @@
+{{- $root := . -}}
+{{- range $component, $config := dict "server" .Values.podDisruptionBudget.server "client" .Values.podDisruptionBudget.client }}
+{{- if and $config $config.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "intelgraph.fullname" $root }}-{{ $component }}
+  labels:
+    {{- include "intelgraph.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "intelgraph.selectorLabels" $root | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}
+  {{- if hasKey $config "minAvailable" }}
+  minAvailable: {{ $config.minAvailable }}
+  {{- else if hasKey $config "maxUnavailable" }}
+  maxUnavailable: {{ $config.maxUnavailable }}
+  {{- end }}
+{{- end }}
+{{- end }}

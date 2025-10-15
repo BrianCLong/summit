@@ -1,14 +1,13 @@
-# Staging environment overrides
+# Additional staging overrides
 global:
-  tag: '{{ .Chart.AppVersion }}-staging'
-
+  environment: staging
   ingress:
     host: staging.intelgraph.mycorp.com
     annotations:
-      nginx.ingress.kubernetes.io/auth-url: 'https://oauth2-proxy.auth.svc.cluster.local/oauth2/auth'
-      nginx.ingress.kubernetes.io/auth-signin: 'https://oauth2-proxy.auth.svc.cluster.local/oauth2/start?rd=https://$host$request_uri'
+      nginx.ingress.kubernetes.io/auth-url: "https://oauth2-proxy.auth.svc.cluster.local/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://oauth2-proxy.auth.svc.cluster.local/oauth2/start?rd=https://$host$request_uri"
+  podSecurityStandards: restricted
 
-# Staging scaling (smaller than production)
 services:
   apiGateway:
     replicaCount: 2
@@ -27,22 +26,22 @@ services:
   mobile:
     replicaCount: 1
 
-# Reduced autoscaling for staging
 autoscaling:
-  enabled: true
-  minReplicas: 1
-  maxReplicas: 5
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 85
+  server:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 5
+  client:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 5
 
-# Test data seeding
 testData:
   enabled: true
   job:
     image: seed-data
     restartPolicy: OnFailure
 
-# Debug logging
 common:
   env:
     - name: LOG_LEVEL

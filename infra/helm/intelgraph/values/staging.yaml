@@ -1,15 +1,48 @@
-# Default values for IntelGraph Helm chart in staging environment.
+# Staging environment overrides
+global:
+  environment: staging
+  cluster:
+    name: intelgraph-staging
+  podSecurityStandards: restricted
 
 replicaCount: 2
 
-image:
-  repository: intelgraph/server
-  pullPolicy: Always
-  tag: 'staging'
+autoscaling:
+  server:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+  client:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
 
-service:
-  type: ClusterIP
-  port: 80
+resources:
+  server:
+    requests:
+      cpu: 300m
+      memory: 512Mi
+    limits:
+      cpu: 800m
+      memory: 1.5Gi
+  client:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 400m
+      memory: 512Mi
+
+externalSecrets:
+  secretStoreRef:
+    name: summit-staging-secrets
+  refreshInterval: 30m
+
+podDisruptionBudget:
+  server:
+    minAvailable: 1
+  client:
+    minAvailable: 1
 
 ingress:
   enabled: true
@@ -21,26 +54,4 @@ ingress:
       paths:
         - path: /
           pathType: ImplementationSpecific
-
-# Environment-specific variables
-env:
-  NODE_ENV: staging
-  LOG_LEVEL: info
-  FEATURE_FLAG_AI: 'true'
-  # Database connection strings (usually managed by secrets)
-  NEO4J_URI: 'bolt://neo4j-staging:7687'
-  POSTGRES_HOST: 'postgres-staging'
-  REDIS_HOST: 'redis-staging'
-
-# Resource limits for staging
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 250m
-    memory: 256Mi
-
-# Staging specific configurations
-debug:
-  enabled: false
+  tls: []
