@@ -4,6 +4,7 @@
  */
 
 import express from 'express';
+import graphExportService from '../services/GraphExportService.js';
 
 const router = express.Router();
 
@@ -62,6 +63,32 @@ router.get('/graph', async (req, res) => {
       processingTime: Date.now() - startTime,
     });
   }
+});
+
+router.get('/graph/exports/:exportId', (req, res) => {
+  const { exportId } = req.params;
+  const entry = graphExportService.getExportStream(exportId);
+
+  if (!entry) {
+    return res.status(404).json({ error: 'Graph export not found or expired' });
+  }
+
+  res.setHeader('Content-Type', entry.contentType || 'application/octet-stream');
+  res.setHeader('Content-Disposition', `attachment; filename="${entry.filename}"`);
+  if (typeof entry.size === 'number') {
+    res.setHeader('Content-Length', entry.size);
+  }
+
+  entry.stream.on('error', (error) => {
+    console.error('[ERROR] graph export stream failed', { exportId, error: error.message });
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to stream graph export' });
+    } else {
+      res.destroy(error);
+    }
+  });
+
+  entry.stream.pipe(res);
 });
 
 /**
