@@ -1,6 +1,11 @@
 import type {
+  CollectibleMarketDatum,
   CompositeMarketSnapshot,
+  ConsumerMarketDatum,
+  CrossMarketAction,
   DemandForecastDatum,
+  HedgeInstrumentDatum,
+  PredictionMarketDatum,
   StrategyInput,
   StrategyRecommendation,
   WorkloadProfile
@@ -29,6 +34,133 @@ function getEnergyScore(snapshot: CompositeMarketSnapshot, region: string, weigh
   }
   const normalizedCarbon = Math.max(0, 1 - energy.carbonIntensityGramsPerKwh / 600);
   return normalizedCarbon * weight;
+}
+
+function scoreConsumerSignals(signals: ConsumerMarketDatum[]): {
+  actions: CrossMarketAction[];
+  score: number;
+} {
+  if (!signals.length) {
+    return { actions: [], score: 0 };
+  }
+  const sorted = [...signals].sort((a, b) => {
+    const aScore = a.arbitrageSpread + a.demandSurgeProbability + a.sentimentScore;
+    const bScore = b.arbitrageSpread + b.demandSurgeProbability + b.sentimentScore;
+    return bScore - aScore;
+  });
+  const top = sorted[0];
+  const expectedValue = top.arbitrageSpread * top.volume24h;
+  const confidence = Math.min(0.95, (top.demandSurgeProbability + top.sentimentScore) / 2);
+  const action: CrossMarketAction = {
+    domain: 'consumer',
+    description: `Exploit ${top.marketplace} ${top.category} spread on ${top.sku}`,
+    expectedValue,
+    confidence,
+    linkedAssets: [top.sku]
+  };
+  const score = Math.min(0.5, confidence * 0.4 + Math.max(0, top.arbitrageSpread) * 0.05);
+  return { actions: [action], score };
+}
+
+function scoreCollectibleSignals(signals: CollectibleMarketDatum[]): {
+  actions: CrossMarketAction[];
+  score: number;
+} {
+  if (!signals.length) {
+    return { actions: [], score: 0 };
+  }
+  const sorted = [...signals].sort((a, b) => {
+    const aScore = a.scarcityIndex + a.sentimentScore + a.liquidityScore;
+    const bScore = b.scarcityIndex + b.sentimentScore + b.liquidityScore;
+    return bScore - aScore;
+  });
+  const top = sorted[0];
+  const expectedValue = top.medianPrice * Math.max(0, top.priceChange7d) * 0.1;
+  const confidence = Math.min(0.9, (top.sentimentScore + top.liquidityScore) / 2);
+  const action: CrossMarketAction = {
+    domain: 'collectible',
+    description: `Market-make ${top.assetType} ${top.assetId} on ${top.platform}`,
+    expectedValue,
+    confidence,
+    linkedAssets: [top.assetId]
+  };
+  const score = Math.min(0.4, confidence * 0.3 + top.scarcityIndex * 0.05);
+  return { actions: [action], score };
+}
+
+function scorePredictionSignals(signals: PredictionMarketDatum[]): {
+  actions: CrossMarketAction[];
+  score: number;
+} {
+  if (!signals.length) {
+    return { actions: [], score: 0 };
+  }
+  const sorted = [...signals].sort((a, b) => {
+    const aScore = a.probability * a.crowdMomentum * Math.max(1, a.liquidity);
+    const bScore = b.probability * b.crowdMomentum * Math.max(1, b.liquidity);
+    return bScore - aScore;
+  });
+  const top = sorted[0];
+  const expectedValue = top.probability * top.liquidity * Math.max(0.1, Math.abs(top.impliedOddsChange24h));
+  const confidence = Math.min(0.95, (top.probability + top.crowdMomentum) / 2);
+  const action: CrossMarketAction = {
+    domain: 'prediction',
+    description: `Trade ${top.outcome} on ${top.market}`,
+    expectedValue,
+    confidence,
+    linkedAssets: top.linkedAssets ?? []
+  };
+  const score = Math.min(0.4, confidence * 0.35 + Math.abs(top.impliedOddsChange24h) * 0.05);
+  return { actions: [action], score };
+}
+
+function scoreHedges(signals: HedgeInstrumentDatum[]): {
+  actions: CrossMarketAction[];
+  hedgeEffectiveness: number;
+  score: number;
+} {
+  if (!signals.length) {
+    return { actions: [], hedgeEffectiveness: 0.25, score: 0.05 };
+  }
+  const aggregateConfidence =
+    signals.reduce((sum, signal) => sum + signal.confidence, 0) / signals.length;
+  const averageDelta =
+    signals.reduce((sum, signal) => sum + Math.abs(signal.delta), 0) / signals.length;
+  const hedgeEffectiveness = Math.min(0.95, aggregateConfidence * 0.6 + averageDelta * 0.4);
+  const action: CrossMarketAction = {
+    domain: 'hedge',
+    description: `Deploy ${signals[0].instrumentType} coverage (${signals.length} legs)`,
+    expectedValue:
+      signals.reduce((sum, signal) => sum + (signal.strike - signal.premium) * signal.confidence, 0) /
+      Math.max(1, signals.length),
+    confidence: aggregateConfidence,
+    linkedAssets: Array.from(new Set(signals.map(signal => signal.symbol)))
+  };
+  const score = Math.min(0.35, hedgeEffectiveness * 0.35);
+  return { actions: [action], hedgeEffectiveness, score };
+}
+
+function deriveCrossMarketSignals(
+  snapshot: CompositeMarketSnapshot,
+  provider: string,
+  region: string
+): { actions: CrossMarketAction[]; score: number; hedgeEffectiveness: number } {
+  const consumerSignals = snapshot.consumer.filter(entry => entry.region === region);
+  const collectibleSignals = snapshot.collectibles.filter(entry => entry.region === region);
+  const predictionSignals = snapshot.prediction.filter(entry => !entry.region || entry.region === region);
+  const hedgeSignals = snapshot.hedges.filter(
+    entry => entry.region === region && entry.provider === provider
+  );
+
+  const consumer = scoreConsumerSignals(consumerSignals);
+  const collectible = scoreCollectibleSignals(collectibleSignals);
+  const prediction = scorePredictionSignals(predictionSignals);
+  const hedge = scoreHedges(hedgeSignals);
+
+  const actions = [...consumer.actions, ...collectible.actions, ...prediction.actions, ...hedge.actions];
+  const score = consumer.score + collectible.score + prediction.score + hedge.score;
+
+  return { actions, score, hedgeEffectiveness: hedge.hedgeEffectiveness };
 }
 
 function getRegulatoryScore(
@@ -83,7 +215,8 @@ function buildRecommendations(
     const energyScore = getEnergyScore(snapshot, financial.region, profile.sustainabilityWeight);
     const regulatoryScore = getRegulatoryScore(snapshot, financial.provider, financial.region);
     const performanceScore = basePerformanceScore(demand, profile);
-    const totalScore = performanceScore + energyScore + regulatoryScore;
+    const crossMarket = deriveCrossMarketSignals(snapshot, financial.provider, financial.region);
+    const totalScore = performanceScore + energyScore + regulatoryScore + crossMarket.score;
 
     const recommendation: StrategyRecommendation = {
       strategy: label,
@@ -94,7 +227,9 @@ function buildRecommendations(
       expectedPerformanceScore: performanceScore,
       sustainabilityScore: energyScore,
       regulatoryScore,
-      totalScore
+      totalScore,
+      hedgeEffectiveness: crossMarket.hedgeEffectiveness,
+      crossMarketActions: crossMarket.actions
     };
 
     return [modifier(recommendation)];

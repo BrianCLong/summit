@@ -77,6 +77,65 @@ const baseSnapshot: CompositeMarketSnapshot = {
       notes: 'sustainability grant',
       effectiveDate: '2025-01-15'
     }
+  ],
+  consumer: [
+    {
+      marketplace: 'amazon',
+      region: 'us-east-1',
+      category: 'electronics',
+      sku: 'synth-lens-pro',
+      averagePrice: 1299,
+      priceChange24h: 0.06,
+      volume24h: 420,
+      arbitrageSpread: 0.12,
+      demandSurgeProbability: 0.78,
+      sentimentScore: 0.74,
+      timestamp: '2025-03-01T00:00:00.000Z'
+    }
+  ],
+  collectibles: [
+    {
+      platform: 'stockx',
+      region: 'us-east-1',
+      assetId: 'sneaker-legend-9',
+      assetType: 'sneaker',
+      grade: 'A',
+      medianPrice: 820,
+      priceChange7d: 0.09,
+      scarcityIndex: 0.88,
+      liquidityScore: 0.67,
+      sentimentScore: 0.71,
+      timestamp: '2025-03-01T00:00:00.000Z'
+    }
+  ],
+  prediction: [
+    {
+      market: 'polymarket',
+      contractId: 'event-aws-ai',
+      region: 'us-east-1',
+      category: 'tech-earnings',
+      outcome: 'aws-ai-launch',
+      probability: 0.64,
+      impliedOddsChange24h: 0.18,
+      liquidity: 210000,
+      crowdMomentum: 0.72,
+      linkedAssets: ['synth-lens-pro', 'sneaker-legend-9'],
+      timestamp: '2025-03-01T00:00:00.000Z'
+    }
+  ],
+  hedges: [
+    {
+      provider: 'aws',
+      region: 'us-east-1',
+      instrumentType: 'option',
+      symbol: 'AWS-Q2-CALL-150',
+      strike: 150,
+      expiry: '2025-06-01',
+      premium: 12,
+      delta: 0.58,
+      referenceMarket: 'options',
+      confidence: 0.69
+    }
   ]
 };
 
@@ -91,14 +150,36 @@ const workload: WorkloadProfile = {
 
 describe('CompositeDataFeed', () => {
   it('aggregates data across multiple sources', async () => {
-    const feedA = new InMemoryDataFeed(baseSnapshot.financial, [], [], []);
-    const feedB = new InMemoryDataFeed([], baseSnapshot.energy, baseSnapshot.demand, baseSnapshot.regulation);
+    const feedA = new InMemoryDataFeed(
+      baseSnapshot.financial,
+      [],
+      [],
+      [],
+      baseSnapshot.consumer,
+      [],
+      baseSnapshot.prediction,
+      baseSnapshot.hedges
+    );
+    const feedB = new InMemoryDataFeed(
+      [],
+      baseSnapshot.energy,
+      baseSnapshot.demand,
+      baseSnapshot.regulation,
+      [],
+      baseSnapshot.collectibles,
+      [],
+      []
+    );
     const composite = new CompositeDataFeed([feedA, feedB]);
     const snapshot = await composite.fetchSnapshot();
     expect(snapshot.financial).toHaveLength(2);
     expect(snapshot.energy).toHaveLength(2);
     expect(snapshot.demand).toHaveLength(2);
     expect(snapshot.regulation).toHaveLength(2);
+    expect(snapshot.consumer).toHaveLength(1);
+    expect(snapshot.collectibles).toHaveLength(1);
+    expect(snapshot.prediction).toHaveLength(1);
+    expect(snapshot.hedges).toHaveLength(1);
   });
 });
 
@@ -108,6 +189,17 @@ describe('ArbitrageAgent', () => {
     const portfolio = agent.recommendPortfolio(baseSnapshot, workload, { topN: 3 });
     expect(portfolio.length).toBeGreaterThan(0);
     expect(portfolio[0].estimatedSavings).toBeGreaterThan(0);
+    expect(portfolio[0].crossMarketActionCount).toBeGreaterThanOrEqual(1);
+    expect(portfolio[0].hedgeEffectiveness).toBeGreaterThan(0);
+  });
+
+  it('aggregates cross-market opportunities', () => {
+    const agent = new ArbitrageAgent();
+    const opportunities = agent.discoverCrossMarketOpportunities(baseSnapshot, workload);
+    expect(opportunities.length).toBeGreaterThan(0);
+    const domains = new Set(opportunities.map(item => item.domain));
+    expect(domains.has('consumer')).toBe(true);
+    expect(domains.has('hedge')).toBe(true);
   });
 });
 

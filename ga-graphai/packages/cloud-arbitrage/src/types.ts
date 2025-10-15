@@ -39,12 +39,79 @@ export interface RegulatoryDatum {
   effectiveDate: string;
 }
 
+export interface ConsumerMarketDatum {
+  marketplace: string;
+  region: string;
+  category: string;
+  sku: string;
+  averagePrice: number;
+  priceChange24h: number;
+  volume24h: number;
+  arbitrageSpread: number;
+  demandSurgeProbability: number;
+  sentimentScore: number;
+  timestamp: string;
+}
+
+export interface CollectibleMarketDatum {
+  platform: string;
+  region: string;
+  assetId: string;
+  assetType: string;
+  grade?: string;
+  medianPrice: number;
+  priceChange7d: number;
+  scarcityIndex: number;
+  liquidityScore: number;
+  sentimentScore: number;
+  timestamp: string;
+}
+
+export interface PredictionMarketDatum {
+  market: string;
+  contractId: string;
+  region?: string;
+  category: string;
+  outcome: string;
+  probability: number;
+  impliedOddsChange24h: number;
+  liquidity: number;
+  crowdMomentum: number;
+  linkedAssets?: string[];
+  timestamp: string;
+}
+
+export interface HedgeInstrumentDatum {
+  provider: string;
+  region: string;
+  instrumentType: 'option' | 'future' | 'swap' | 'binary' | 'structured-note';
+  symbol: string;
+  strike: number;
+  expiry: string;
+  premium: number;
+  delta: number;
+  referenceMarket: string;
+  confidence: number;
+}
+
+export interface CrossMarketAction {
+  domain: 'consumer' | 'collectible' | 'prediction' | 'hedge';
+  description: string;
+  expectedValue: number;
+  confidence: number;
+  linkedAssets: string[];
+}
+
 export interface CompositeMarketSnapshot {
   generatedAt: string;
   financial: FinancialMarketDatum[];
   energy: EnergyMarketDatum[];
   demand: DemandForecastDatum[];
   regulation: RegulatoryDatum[];
+  consumer: ConsumerMarketDatum[];
+  collectibles: CollectibleMarketDatum[];
+  prediction: PredictionMarketDatum[];
+  hedges: HedgeInstrumentDatum[];
 }
 
 export interface StrategyInput {
@@ -71,6 +138,8 @@ export interface StrategyRecommendation {
   sustainabilityScore: number;
   regulatoryScore: number;
   totalScore: number;
+  hedgeEffectiveness: number;
+  crossMarketActions: CrossMarketAction[];
 }
 
 export interface StrategySummary {
@@ -80,6 +149,8 @@ export interface StrategySummary {
   blendedUnitPrice: number;
   estimatedSavings: number;
   confidence: number;
+  hedgeEffectiveness: number;
+  crossMarketActionCount: number;
 }
 
 export interface HeadToHeadResult {
