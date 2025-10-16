@@ -1,0 +1,21 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chronos
+      POSTGRES_PASSWORD: chronos
+      POSTGRES_DB: chronos
+    ports:
+      - "5432:5432"
+  chronosd:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/runtime.Dockerfile
+    environment:
+      PG_DSN: postgres://chronos:chronos@postgres:5432/chronos?sslmode=disable
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"

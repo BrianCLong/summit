@@ -1,0 +1,35 @@
+name: Chronos Runtime CI
+
+on:
+  push:
+    paths:
+      - 'orchestration/runtime/**'
+      - 'orchestration/.github/workflows/ci-runtime.yml'
+  pull_request:
+    paths:
+      - 'orchestration/runtime/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Download dependencies
+        run: |
+          cd orchestration/runtime
+          go mod download
+      - name: Go fmt check
+        run: |
+          cd orchestration/runtime
+          test -z "$(gofmt -l $(git ls-files '*.go'))"
+      - name: Go vet
+        run: |
+          cd orchestration/runtime
+          go vet ./...
+      - name: Run tests
+        run: |
+          cd orchestration/runtime
+          go test ./...
