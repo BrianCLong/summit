@@ -8,6 +8,7 @@ import { createReadStream } from 'fs';
 import { parse } from 'csv-parse';
 import { z } from 'zod';
 import { BaseConnector } from './BaseConnector';
+import type { ListObjectsV2CommandOutput, GetObjectCommandOutput } from '@aws-sdk/client-s3';
 import type {
   ConnectorConfig,
   IngestRecord,
@@ -26,7 +27,7 @@ interface S3CSVConfig extends ConnectorConfig {
 
 export class S3CSVConnector extends BaseConnector {
   private s3Client: S3Client;
-  private config: S3CSVConfig;
+  protected config: S3CSVConfig;
 
   constructor(config: S3CSVConfig) {
     super(config);
@@ -130,7 +131,7 @@ export class S3CSVConnector extends BaseConnector {
       MaxKeys: 1000,
     });
 
-    const response = await this.s3Client.send(command);
+    const response = (await this.s3Client.send(command)) as ListObjectsV2CommandOutput;
     return response.Contents || [];
   }
 
@@ -164,7 +165,8 @@ export class S3CSVConnector extends BaseConnector {
         try {
           this.schema.parse(record);
         } catch (error) {
-          this.logger.warn('Schema validation failed for record', {
+          this.logger.warn({
+            msg: 'Schema validation failed for record',
             record_number: recordCount,
             key,
             error: (error as Error).message,
@@ -190,7 +192,8 @@ export class S3CSVConnector extends BaseConnector {
       };
     }
 
-    this.logger.info('Processed S3 CSV object', {
+    this.logger.info({
+      msg: 'Processed S3 CSV object',
       bucket,
       key,
       records_processed: recordCount,
@@ -255,7 +258,8 @@ export class S3CSVConnector extends BaseConnector {
       );
       return true;
     } catch (error) {
-      this.logger.error('S3 health check failed', {
+      this.logger.error({
+        msg: 'S3 health check failed',
         error: (error as Error).message,
       });
       return false;

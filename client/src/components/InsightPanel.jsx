@@ -16,6 +16,7 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
+  ListItemButton,
   Divider,
   LinearProgress,
   Alert,
@@ -241,37 +242,37 @@ const LinkPredictions = ({ predictions, loading, onLinkSelect }) => {
 
         <List dense>
           {predictions.map((prediction, index) => (
-            <ListItem
-              key={index}
-              button
-              onClick={() => onLinkSelect && onLinkSelect(prediction)}
-              sx={{ border: 1, borderColor: 'divider', borderRadius: 1, mb: 1 }}
-            >
-              <ListItemIcon>
-                <TrendingUpIcon color="primary" />
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Typography variant="body2">
-                      {prediction.sourceId} → {prediction.targetId}
+            <ListItem key={index} disablePadding>
+              <ListItemButton
+                onClick={() => onLinkSelect && onLinkSelect(prediction)}
+                sx={{ border: 1, borderColor: 'divider', borderRadius: 1, mb: 1 }}
+              >
+                <ListItemIcon>
+                  <TrendingUpIcon color="primary" />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Typography variant="body2">
+                        {prediction.sourceId} → {prediction.targetId}
+                      </Typography>
+                      <Chip
+                        size="small"
+                        label={`${(prediction.confidence * 100).toFixed(0)}%`}
+                        color={
+                          prediction.confidence > 0.8 ? 'success' : 'primary'
+                        }
+                        variant="outlined"
+                      />
+                    </Box>
+                  }
+                  secondary={
+                    <Typography variant="caption" color="text.secondary">
+                      Type: {prediction.predictedType} - {prediction.explanation}
                     </Typography>
-                    <Chip
-                      size="small"
-                      label={`${(prediction.confidence * 100).toFixed(0)}%`}
-                      color={
-                        prediction.confidence > 0.8 ? 'success' : 'primary'
-                      }
-                      variant="outlined"
-                    />
-                  </Box>
-                }
-                secondary={
-                  <Typography variant="caption" color="text.secondary">
-                    Type: {prediction.predictedType} - {prediction.explanation}
-                  </Typography>
-                }
-              />
+                  }
+                />
+              </ListItemButton>
             </ListItem>
           ))}
         </List>

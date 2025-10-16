@@ -115,14 +115,20 @@ export const businessMetrics = {
 // No-op tracer and enums
 export const SpanStatusCode = { OK: 'OK', ERROR: 'ERROR' } as const;
 export const SpanKind = { INTERNAL: 'INTERNAL', SERVER: 'SERVER', CLIENT: 'CLIENT', PRODUCER: 'PRODUCER', CONSUMER: 'CONSUMER' } as const;
-export const tracer = {
-  startActiveSpan: (_name: string, _opts: any, fn: (span: any) => any) => fn({
+function createNoopSpan() {
+  return {
     setAttributes: (_a?: any) => {},
+    setAttribute: (_k?: any, _v?: any) => {},
     setStatus: (_s?: any) => {},
     recordException: (_e?: any) => {},
     spanContext: () => ({ traceId: 'unknown', spanId: 'unknown' }),
     end: () => {},
-  }),
+  } as any;
+}
+
+export const tracer = {
+  startActiveSpan: (_name: string, _opts: any, fn: (span: any) => any) => fn(createNoopSpan()),
+  startSpan: (_name: string, _opts?: any) => createNoopSpan(),
 };
 
 export function createSpan<T>(

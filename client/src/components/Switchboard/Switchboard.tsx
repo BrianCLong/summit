@@ -12,6 +12,7 @@ import {
   Typography,
   List,
   ListItem,
+  ListItemButton,
   TextField,
   InputAdornment,
   IconButton,
@@ -251,12 +252,10 @@ export default function Switchboard() {
           />
           <List>
             {filteredCommands.map((cmd, index) => (
-              <ListItem
-                button
-                key={index}
-                onClick={() => handleCommandSelect(cmd)}
-              >
-                <Typography>{cmd}</Typography>
+              <ListItem key={index} disablePadding>
+                <ListItemButton onClick={() => handleCommandSelect(cmd)}>
+                  <Typography>{cmd}</Typography>
+                </ListItemButton>
               </ListItem>
             ))}
           </List>
