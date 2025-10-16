@@ -323,16 +323,16 @@ By signing below, both parties agree to the terms and conditions outlined in thi
 - Name: Brian Long
 - Title: CEO
 - Company: BrianCLong / IntelGraph
-- Signature: **********\_\_\_\_**********
-- Date: **********\_\_\_\_**********
+- Signature: ****\*\*****\_\_\_\_****\*\*****
+- Date: ****\*\*****\_\_\_\_****\*\*****
 
 **Customer**:
 
 - Name: [CUSTOMER_NAME]
 - Title: [CUSTOMER_TITLE]
 - Company: [CUSTOMER_COMPANY]
-- Signature: **********\_\_\_\_**********
-- Date: **********\_\_\_\_**********
+- Signature: ****\*\*****\_\_\_\_****\*\*****
+- Date: ****\*\*****\_\_\_\_****\*\*****
 
 ---
 
