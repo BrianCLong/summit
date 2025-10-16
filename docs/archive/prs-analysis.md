@@ -5,13 +5,15 @@
 ## Categorization by Subsystem:
 
 ### A: Infra/Tooling (5 PRs)
-- **377**: `chore: fix eslint setup` 
+
+- **377**: `chore: fix eslint setup`
 - **369**: `feat: add metrics endpoint and dev bootstrap`
 - **384**: `feat: initialize telemetry service and enhance dashboard responsiveness`
 - **379**: `test: add persisted query enforcement test and load workflow`
 - **375**: `Feature/analytics pipeline`
 
 ### B: Backend Core/GraphQL (8 PRs)
+
 - **526**: `feat: enforce tenant-aware graph resolvers`
 - **493**: `feat: harden GraphQL performance`
 - **465**: `refactor(graphql): modularize schema with federation`
@@ -22,6 +24,7 @@
 - **297**: `feat(security): enforce tenant scoping across API/DB/cache` [DRAFT]
 
 ### C: AI/ML Pipeline (11 PRs)
+
 - **538**: `feat: enhance graph services and sentiment volatility chart`
 - **506**: `feat: add micro alpha detector pipeline`
 - **478**: `feat(ml): optimize GNN inference with quantization and streaming`
@@ -35,6 +38,7 @@
 - **474**: `feat: log llm usage for analytics` [DUPLICATE with 472]
 
 ### D: Security/Auth/RBAC (7 PRs)
+
 - **499**: `feat(ops): per-tenant LLM budgets + retrieval-only degrade`
 - **481**: `feat: add tamper-evident audit trail`
 - **471**: `feat: add request sanitization middleware`
@@ -44,6 +48,7 @@
 - **297**: `feat(security): enforce tenant scoping across API/DB/cache` [DRAFT]
 
 ### E: Data/Analytics (9 PRs)
+
 - **492**: `feat: harden universal ingest with dlq`
 - **392**: `feat: add workspace and audit logging`
 - **403**: `feat: add entity change history`
@@ -55,6 +60,7 @@
 - **361**: `feat(server): add status endpoint for service info`
 
 ### F: Frontend/UI (8 PRs)
+
 - **508**: `feat: add dark mode and accessibility toggles`
 - **378**: `feat(client): add AI insights panel with community overlays`
 - **429**: `feat: add analyst dashboard mvp`
@@ -65,6 +71,7 @@
 - **367**: `fix: trim debug console logs from client bootstrap`
 
 ### G: Collaboration/Real-time (5 PRs)
+
 - **491**: `feat: add collaborative editing enhancements`
 - **408**: `feat: add collaborative workspace service`
 - **387**: `feat: expand insight panel controls and load testing`
@@ -72,6 +79,7 @@
 - **439**: `feat: notify anomalies in real time` [DUPLICATE with 438]
 
 ### H: Specialized Intelligence (14 PRs)
+
 - **507**: `feat: add tactical wargaming simulation engine`
 - **485**: `feat: add neural influence map dashboard`
 - **484**: `feat: automate roadmap updates`
@@ -88,21 +96,25 @@
 - **398**: `feat: add analyst assistant chat endpoint`
 
 ### I: Documentation/Architecture (4 PRs)
+
 - **483**: `docs: add PsyOps risk assessment matrix`
 - **476**: `refactor: add modular agent SDK`
 - **390**: `docs: expand roadmap with streaming and search`
 - **360**: `docs: mark next sprints as completed`
 
 ### J: Bug Fixes/Maintenance (2 PRs)
+
 - **389**: `fix: harden startup guardrails`
 - **472**: `feat: log llm usage for analytics` [DUPLICATE]
 
 ## Duplicates to Close:
+
 - PR 464 (duplicate of 465) - GraphQL federation
-- PR 474 (duplicate of 472) - LLM usage logging  
+- PR 474 (duplicate of 472) - LLM usage logging
 - PR 439 (duplicate of 438) - anomaly alerts
 
 ## Risk Assessment:
+
 - **High Risk**: Multi-tenant security changes (297, 526, 376)
 - **Medium Risk**: GraphQL federation refactor (465), AI/ML pipeline changes
 - **Low Risk**: Documentation, UI improvements, tooling fixes
