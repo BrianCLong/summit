@@ -158,11 +158,11 @@ Ops: green SLOs at higher load, incident postmortems templated, **enterprise ena
 **PCQ**
 
 - [ ] CI cross‑runtime matrix; auto‑triage; release timeline diffs.  
-      **LAC**
+       **LAC**
 - [ ] Policy bundles; author analytics; blast‑radius preview.  
-      **ZK‑TX**
+       **ZK‑TX**
 - [ ] Batch planner (≥15% gain); PSI ADR; SDK parity (Py/TS/Go).  
-      **Ops/Enablement**
+       **Ops/Enablement**
 - [ ] Upgrade guide; field kit; incident PM templates; step‑load pass.
 
 ---

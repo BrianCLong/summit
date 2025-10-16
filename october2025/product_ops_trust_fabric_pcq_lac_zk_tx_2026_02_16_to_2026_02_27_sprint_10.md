@@ -162,11 +162,11 @@ Ops: fairness SLO automation, **golden canary** track, quarterly compliance snap
 **ZK‑TX**
 
 - [ ] Limited GA + privacy budgets + 600 RPS.  
-      **LAC**
+       **LAC**
 - [ ] Timelines, typed macros, lint‑as‑you‑type.  
-      **PCQ**
+       **PCQ**
 - [ ] Causal drill‑down, what‑if replays, SLA dashboards.  
-      **Ops/Partner/Compliance**
+       **Ops/Partner/Compliance**
 - [ ] Golden canary, fairness alerts, Q1 snapshot, rollout kit.
 
 ---

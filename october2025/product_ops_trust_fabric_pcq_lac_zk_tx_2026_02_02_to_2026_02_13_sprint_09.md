@@ -160,11 +160,11 @@ Ops: **multi‑tenant fairness SLO**, **on‑call gameday #2**, and partner roll
 **ZK‑TX**
 
 - [ ] PSI pilot controls + explainer + 550 RPS soak.  
-      **LAC**
+       **LAC**
 - [ ] Root‑cause insights; auto‑merge for low‑risk drift; coaching hints.  
-      **PCQ**
+       **PCQ**
 - [ ] Anomaly explorer; suppression rules; tenant rollups.  
-      **Ops/Partner**
+       **Ops/Partner**
 - [ ] Fairness SLO; gameday #2; PSI pilot toolkit.
 
 ---

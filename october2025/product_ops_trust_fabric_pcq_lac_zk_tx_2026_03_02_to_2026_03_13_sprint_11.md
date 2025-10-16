@@ -159,11 +159,11 @@ Ops: FinOps reductions, quarterly chaos, SOC2 Type II **continuous evidence** au
 **ZK‑TX**
 
 - [ ] Privacy budgets v2; 700 RPS; multi‑region routing.  
-      **LAC**
+       **LAC**
 - [ ] Marketplace, autopilot, end‑user explainers (EN/ES).  
-      **PCQ**
+       **PCQ**
 - [ ] Drift prediction, scenario bundles, auditor API hook.  
-      **Ops/FinOps/Compliance**
+       **Ops/FinOps/Compliance**
 - [ ] −10% cost; chaos drill; SOC2 evidence automation v1.
 
 ---

@@ -162,11 +162,11 @@ Ops: **cost −8%/1k proofs**, quarterly compliance **auto‑snapshot v2**, gold
 **ZK‑TX**
 
 - [ ] Budgets v2.1; 800 RPS; partner self‑serve pilots.  
-      **LAC**
+       **LAC**
 - [ ] Roll‑forward/rollback bundles; autopilot v2; exec narratives.  
-      **PCQ**
+       **PCQ**
 - [ ] PR drift guard; scenario scheduler; auditor webhook receipts.  
-      **Ops/FinOps/Compliance**
+       **Ops/FinOps/Compliance**
 - [ ] −8% cost; canary maturity; auto‑snapshot v2.
 
 ---
