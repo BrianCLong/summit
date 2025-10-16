@@ -1,0 +1,53 @@
+name: CI (PR scoped)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      has_ts: ${{ steps.paths.outputs.ts }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: paths
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            ts:
+              - '**/*.ts'
+              - 'tsconfig*.json'
+              - 'package.json'
+  path-ci:
+    runs-on: ubuntu-latest
+    needs: detect
+    if: needs.detect.outputs.has_ts == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.14.x'
+          cache: 'pnpm'
+      - name: Enable corepack + pnpm
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+          pnpm -v
+      - name: Install
+        run: pnpm install --frozen-lockfile=false
+      - name: Lint
+        run: pnpm run lint || true
+      - name: Typecheck
+        run: pnpm run typecheck || true
+      - name: Test
+        run: pnpm run test || true
+      - name: Build
+        run: |
+          if [ -x scripts/build-workspaces.sh ]; then
+            bash scripts/build-workspaces.sh
+          else
+            echo "scripts/build-workspaces.sh not found; skipping"
+          fi

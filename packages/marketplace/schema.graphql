@@ -1,0 +1,22 @@
+type Extension {
+  id: ID!
+  name: String!
+  description: String
+  pluginType: String!  # e.g. “CMS”, “Analytics”, “Forensics”
+  version: String!
+  endpoint: String!
+  price: Float!
+}
+
+type Query {
+  extensions(pluginType: String): [Extension!]!
+}
+
+input InstallExtensionInput {
+  extensionId: ID!
+  config: JSON
+}
+
+type Mutation {
+  installExtension(input: InstallExtensionInput!): Boolean!
+}

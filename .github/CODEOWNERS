@@ -69,3 +69,18 @@
 /.github/workflows/*deploy*.yml              @intelgraph-devops-team @BrianCLong
 /.github/workflows/*release*.yml             @intelgraph-devops-team @BrianCLong
 /ops/                                        @intelgraph-devops-team
+
+# -----------------------------------------------------------------------------
+# Organization examples (for reference)
+# -----------------------------------------------------------------------------
+# You can also specify individuals
+# /docs/ @your-username
+# CI & Ops guardrails
+# .github/workflows/**   @your-org/platform-team
+# scripts/**             @your-org/platform-team
+# Infra (optional but recommended)
+# helm/**                @your-org/platform-team
+# infra/**               @your-org/platform-team
+# App-specific (examples; tweak as needed)
+# apps/web/**            @your-org/web-owners
+# apps/api/**            @your-org/api-owners

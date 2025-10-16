@@ -1,0 +1,23 @@
+name: pr-tripwire
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+jobs:
+  tripwire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No conflict markers
+        run: |
+          if grep -R --line-number -E '^(<<<<<<<|=======|>>>>>>>)' -- . ':(exclude).git'; then
+            echo "::error::Conflict markers present"; exit 1; fi
+      - name: No DB/caches or huge binaries in diff
+        run: |
+          set -e
+          git fetch origin main --depth=1 || true
+          files=$(git diff --name-only origin/main...HEAD || true)
+          deny='(^neo4j/|^data/|^datasets/|\.db$|\.sqlite|^dist/|^build/|^out/|^target/|^\.gradle/|^coverage/)'
+          if [ -n "$files" ] && echo "$files" | grep -E "$deny"; then
+            echo "::error::Offender paths detected in PR diff"; exit 1; fi

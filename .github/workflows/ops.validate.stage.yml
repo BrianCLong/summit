@@ -1,0 +1,33 @@
+name: Ops Validate (staging, hard)
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20.14.x', cache: 'pnpm' }
+      - name: Install & heal
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+          pnpm i -w --frozen-lockfile=false
+          node scripts/monorepo_heal.mjs || true
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.6
+          terraform_wrapper: false
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.15.2
+      - name: Ops validate (hard)
+        run: node scripts/ops_validate.mjs

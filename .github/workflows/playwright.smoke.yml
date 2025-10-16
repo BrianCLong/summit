@@ -1,0 +1,64 @@
+name: Playwright Smoke
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: paths
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            app:
+              - 'apps/**'
+      - name: Decide
+        id: decide
+        run: |
+          run="false"
+          if [ "${{ steps.paths.outputs.app }}" = "true" ]; then run="true"; fi
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            labels=$(jq -r '.pull_request.labels[].name' <<< '${{ toJson(github.event) }}' || true)
+            if echo "$labels" | grep -q '^ui:smoke$'; then run="true"; fi
+          fi
+          echo "run=$run" >> $GITHUB_OUTPUT
+
+  smoke:
+    needs: detect
+    if: needs.detect.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20.14.x', cache: 'pnpm' }
+      - name: Install deps & browsers
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+          pnpm i --frozen-lockfile=false
+          pnpm exec playwright install --with-deps
+      - name: Heal & build UI
+        run: |
+          node scripts/monorepo_heal.mjs
+          pnpm -w -r --filter ./apps... run build --if-present
+      - name: Run smoke
+        run: pnpm exec playwright test -j 1 --reporter=line --output=playwright-results
+      - name: Upload Playwright traces (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: |
+            playwright-results
+            playwright-report
+          retention-days: 7

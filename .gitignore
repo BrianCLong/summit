@@ -175,6 +175,12 @@ apps/**/dist/
 server/test-results/
 server/junit.xml
 
+# Neo4j & graph stores
+neo4j/data/
+neo4j/import/
+neo4j/logs/
+neo4j/backups/
+
 # Secrets
 .env
 *.pem

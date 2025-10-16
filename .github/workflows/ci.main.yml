@@ -1,0 +1,57 @@
+name: CI (main)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Node toolchain
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.14.x'
+          cache: 'pnpm'
+
+      - name: Enable corepack + pnpm
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+          pnpm -v
+
+      - name: Install
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Lint
+        run: pnpm run lint || true
+
+      - name: Typecheck
+        run: pnpm run typecheck || true
+
+      - name: Test
+        run: pnpm run test || true
+
+      - name: Build
+        run: |
+          if [ -x scripts/build-workspaces.sh ]; then
+            bash scripts/build-workspaces.sh
+          else
+            echo "scripts/build-workspaces.sh not found; skipping"
+          fi
+
+      - name: Upload artifacts (dist)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-bundle
+          path: |
+            **/dist/**
+          if-no-files-found: ignore

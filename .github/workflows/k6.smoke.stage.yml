@@ -1,0 +1,37 @@
+name: k6 Smoke (staging, hard)
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+concurrency:
+  group: k6-stage-${{ github.ref }}
+  cancel-in-progress: true
+
+environments: []
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20.14.x', cache: 'pnpm' }
+      - name: Install & heal
+        run: |
+          corepack enable || true
+          corepack prepare pnpm@9.12.3 --activate || true
+          pnpm i -w --frozen-lockfile=false
+          node scripts/monorepo_heal.mjs || true
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+      - name: Run k6 (hard)
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: .github/k6/smoke.js
+        env:
+          UI_URL: ${{ secrets.STAGE_UI_URL }}
+          API_URL: ${{ secrets.STAGE_API_URL }}
