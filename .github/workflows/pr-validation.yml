@@ -282,6 +282,15 @@ jobs:
         sarif_file: gitleaks.sarif
         category: gitleaks
 
+    - name: Secret scan with TruffleHog
+      if: matrix.validation == 'security'
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: ${{ github.event.pull_request.base.sha }}
+        head: ${{ github.event.pull_request.head.sha }}
+        extra_args: --only-verified --json
+
     - name: Generate security annotations
       if: matrix.validation == 'security' && always()
       run: |

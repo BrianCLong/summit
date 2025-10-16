@@ -1,11 +1,11 @@
-import { graphql, HttpResponse } from 'msw';
+import { graphql } from 'msw';
 
 // MSW GraphQL handlers for testing
 export const handlers = [
   // ServerStats query
-  graphql.query('ServerStats', ({ query, variables }) => {
-    return HttpResponse.json({
-      data: {
+  graphql.query('ServerStats', (req, res, ctx) => {
+    return res(ctx.data({
+      
         serverStats: {
           uptime: '2d 14h 32m',
           totalInvestigations: 128,
@@ -17,14 +17,13 @@ export const handlers = [
             neo4j: 'connected',
           },
         },
-      },
-    });
+      
+    }));
   }),
 
   // Investigations query
-  graphql.query('Investigations', ({ query, variables }) => {
-    return HttpResponse.json({
-      data: {
+  graphql.query('Investigations', (req, res, ctx) => {
+    return res(ctx.data({
         getInvestigations: [
           {
             id: '1',
@@ -45,14 +44,13 @@ export const handlers = [
             edgeCount: 1678,
           },
         ],
-      },
-    });
+      
+    }));
   }),
 
   // GraphData query for Graph Workbench
-  graphql.query('GW_GraphData', ({ query, variables }) => {
-    return HttpResponse.json({
-      data: {
+  graphql.query('GW_GraphData', (req, res, ctx) => {
+    return res(ctx.data({
         graphData: {
           nodes: [
             {
@@ -115,9 +113,8 @@ export const handlers = [
   }),
 
   // SearchEntities query
-  graphql.query('GW_SearchEntities', ({ query, variables }) => {
-    return HttpResponse.json({
-      data: {
+  graphql.query('GW_SearchEntities', (req, res, ctx) => {
+    return res(ctx.data({
         searchEntities: [
           {
             id: 'search-1',
@@ -135,11 +132,11 @@ export const handlers = [
   }),
 
   // EntityDetails query
-  graphql.query('GW_EntityDetails', ({ query, variables }) => {
-    return HttpResponse.json({
-      data: {
+  graphql.query('GW_EntityDetails', (req, res, ctx) => {
+    const { variables } = req;
+    return res(ctx.data({
         getEntityDetails: {
-          id: variables.entityId,
+          id: (variables as any).entityId,
           type: 'Person',
           label: 'Entity Details',
           description: 'Detailed entity information',
@@ -156,25 +153,24 @@ export const handlers = [
           triage_score: 0.75,
           actor_links: ['APT29'],
         },
-      },
-    });
+      
+    }));
   }),
 
   // Health check
-  graphql.query('HealthCheck', ({ query, variables }) => {
-    return HttpResponse.json({
-      data: {
+  graphql.query('HealthCheck', (req, res, ctx) => {
+    return res(ctx.data({
         health: 'OK',
-      },
-    });
+      
+    }));
   }),
 
   // Threat Analysis
-  graphql.query('ThreatAnalysis', ({ query, variables }) => {
-    return HttpResponse.json({
-      data: {
+  graphql.query('ThreatAnalysis', (req, res, ctx) => {
+    const { variables } = req;
+    return res(ctx.data({
         threatAnalysis: {
-          entityId: variables.entityId,
+          entityId: (variables as any).entityId,
           riskScore: 0.85,
           threatLevel: 'HIGH',
           mitreAttacks: [
@@ -207,9 +203,8 @@ export const handlers = [
   }),
 
   // Timeline Events
-  graphql.query('TimelineEvents', ({ query, variables }) => {
-    return HttpResponse.json({
-      data: {
+  graphql.query('TimelineEvents', (req, res, ctx) => {
+    return res(ctx.data({
         timelineEvents: [
           {
             id: 'event-1',
@@ -227,11 +222,11 @@ export const handlers = [
   }),
 
   // Entity Enrichment
-  graphql.query('EntityEnrichment', ({ query, variables }) => {
-    return HttpResponse.json({
-      data: {
+  graphql.query('EntityEnrichment', (req, res, ctx) => {
+    const { variables } = req;
+    return res(ctx.data({
         entityEnrichment: {
-          entityId: variables.entityId,
+          entityId: (variables as any).entityId,
           externalSources: [
             {
               source: 'VirusTotal',
@@ -263,7 +258,7 @@ export const handlers = [
           ],
           lastEnriched: '2024-01-15T14:00:00Z',
         },
-      },
-    });
+      
+    }));
   }),
 ];

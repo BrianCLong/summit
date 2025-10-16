@@ -1,7 +1,7 @@
 // server/src/optimization/performance-monitoring-system.ts
 
 import { getRedisClient, getNeo4jDriver, getPostgresPool } from '../config/database.js';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { EventEmitter } from 'events';
 import { Neo4jQueryOptimizer } from './neo4j-query-optimizer.js';
 import { PostgresPerformanceOptimizer } from './postgres-performance-optimizer.js';

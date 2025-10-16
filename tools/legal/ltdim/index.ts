@@ -154,7 +154,7 @@ export interface RunResult {
   reportText: string;
 }
 
-const DEFAULT_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIDioqkytGYvLg4OmcA6vFoDRnscbfz49FwsWnS0zYMTU\n-----END PRIVATE KEY-----`;
+const DEFAULT_PRIVATE_KEY = process.env.LTDIM_PRIVATE_KEY || '-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----'; // TODO: Load from a secure location
 
 const DEFAULT_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAtfR/sCXeHwMoUxAIKvs5ZS9NzDteLpUrG3LJpg973fM=\n-----END PUBLIC KEY-----`;
 

@@ -2,7 +2,7 @@
 
 import { Driver, Session, Result, Integer } from 'neo4j-driver';
 import { getRedisClient } from '../config/database.js';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { createHash } from 'crypto';
 import { EventEmitter } from 'events';
 

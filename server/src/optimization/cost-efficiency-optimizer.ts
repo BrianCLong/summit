@@ -1,7 +1,7 @@
 // server/src/optimization/cost-efficiency-optimizer.ts
 
 import { getRedisClient } from '../config/database.js';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { EventEmitter } from 'events';
 
 interface ModelProfile {
