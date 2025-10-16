@@ -92,7 +92,8 @@ app.post(
   body('transforms').isArray(),
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
     const { caseId, checksum, license, transforms, metadata } = req.body;
     const client = await pool.connect();
     try {
@@ -100,7 +101,13 @@ app.post(
       const { rows } = await client.query(
         `INSERT INTO evidence(case_id, checksum, license, transforms, metadata)
          VALUES ($1,$2,$3,$4,$5) RETURNING id`,
-        [caseId, checksum, license, JSON.stringify(transforms), metadata || null],
+        [
+          caseId,
+          checksum,
+          license,
+          JSON.stringify(transforms),
+          metadata || null,
+        ],
       );
       await client.query('COMMIT');
       res.status(201).json({ id: rows[0].id });
@@ -127,7 +134,10 @@ app.post('/bundle/export', async (req, res) => {
     const manifest = await buildManifest(caseId, ev);
     const signature = await signBytes(Buffer.from(JSON.stringify(manifest)));
     const { stream, finalize } = packBundle(manifest, signature, ev);
-    const url = await uploadStreamGetUrl(`bundles/${caseId}/${manifest.id}.zip`, stream);
+    const url = await uploadStreamGetUrl(
+      `bundles/${caseId}/${manifest.id}.zip`,
+      stream,
+    );
     await finalize();
     res.json({ url, manifestId: manifest.id });
   } catch (e) {
@@ -151,7 +161,12 @@ app.listen(port, () => console.log(`prov-ledger listening on :${port}`));
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
-type EvidenceRow = { id: string; checksum: string; license: string; transforms: any };
+type EvidenceRow = {
+  id: string;
+  checksum: string;
+  license: string;
+  transforms: any;
+};
 export type Manifest = {
   id: string;
   caseId: string;
@@ -162,8 +177,14 @@ export type Manifest = {
   signer: { alg: 'ed25519'; keyId: string };
 };
 
-export async function buildManifest(caseId: string, ev: EvidenceRow[]): Promise<Manifest> {
-  const files = ev.map((e) => ({ path: `evidence/${e.id}.bin`, sha256: e.checksum }));
+export async function buildManifest(
+  caseId: string,
+  ev: EvidenceRow[],
+): Promise<Manifest> {
+  const files = ev.map((e) => ({
+    path: `evidence/${e.id}.bin`,
+    sha256: e.checksum,
+  }));
   const hashes = files.map((f) => Buffer.from(f.sha256, 'hex'));
   const merkleRoot = merkle(hashes).toString('hex');
   return {
@@ -171,7 +192,9 @@ export async function buildManifest(caseId: string, ev: EvidenceRow[]): Promise<
     caseId,
     createdAt: new Date().toISOString(),
     files,
-    transforms: ev.flatMap((e) => (Array.isArray(e.transforms) ? e.transforms : [])),
+    transforms: ev.flatMap((e) =>
+      Array.isArray(e.transforms) ? e.transforms : [],
+    ),
     merkleRoot,
     signer: { alg: 'ed25519', keyId: process.env.SIGNING_KEY_ID! },
   };
@@ -205,15 +228,23 @@ import archiver from 'archiver';
 import { PassThrough } from 'stream';
 import { Manifest } from './manifest.js';
 
-export function packBundle(manifest: Manifest, signature: Buffer, evRows: any[]) {
+export function packBundle(
+  manifest: Manifest,
+  signature: Buffer,
+  evRows: any[],
+) {
   const stream = new PassThrough();
   const archive = archiver('zip', { zlib: { level: 9 } });
   archive.pipe(stream);
-  archive.append(Buffer.from(JSON.stringify(manifest, null, 2)), { name: 'manifest.json' });
+  archive.append(Buffer.from(JSON.stringify(manifest, null, 2)), {
+    name: 'manifest.json',
+  });
   archive.append(signature, { name: 'manifest.sig' });
   for (const e of evRows) {
     // In real system stream blobs from object store
-    archive.append(Buffer.from('placeholder'), { name: `evidence/${e.id}.bin` });
+    archive.append(Buffer.from('placeholder'), {
+      name: `evidence/${e.id}.bin`,
+    });
   }
   const finalize = () => archive.finalize();
   return {
@@ -230,12 +261,19 @@ export function packBundle(manifest: Manifest, signature: Buffer, evRows: any[])
 ```ts
 import crypto from 'crypto';
 export function verifyEnv() {
-  ['DATABASE_URL', 'SIGNING_PRIVATE_KEY_PEM', 'SIGNING_KEY_ID', 'BUNDLE_BUCKET'].forEach((k) => {
+  [
+    'DATABASE_URL',
+    'SIGNING_PRIVATE_KEY_PEM',
+    'SIGNING_KEY_ID',
+    'BUNDLE_BUCKET',
+  ].forEach((k) => {
     if (!process.env[k]) throw new Error(`Missing env ${k}`);
   });
 }
 export async function signBytes(data: Buffer): Promise<Buffer> {
-  const privateKey = crypto.createPrivateKey(process.env.SIGNING_PRIVATE_KEY_PEM!);
+  const privateKey = crypto.createPrivateKey(
+    process.env.SIGNING_PRIVATE_KEY_PEM!,
+  );
   return crypto.sign(null, data, privateKey);
 }
 ```
@@ -254,9 +292,13 @@ export async function uploadStreamGetUrl(key: string, body: Readable) {
   for await (const c of body) chunks.push(Buffer.from(c));
   const blob = Buffer.concat(chunks);
   await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: blob }));
-  return await getSignedUrl(s3, new PutObjectCommand({ Bucket: bucket, Key: key }), {
-    expiresIn: 300,
-  });
+  return await getSignedUrl(
+    s3,
+    new PutObjectCommand({ Bucket: bucket, Key: key }),
+    {
+      expiresIn: 300,
+    },
+  );
 }
 ```
 
@@ -319,17 +361,33 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import type { GraphQLRequestContext } from '@apollo/server';
 
 const typeDefs = readFileSync('schema.graphql', 'utf8');
-const resolvers = { Query: { caseEvidence: async () => [], claims: async () => [] } };
+const resolvers = {
+  Query: { caseEvidence: async () => [], claims: async () => [] },
+};
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-async function opaAllow(ctx: any, opName: string, fields: string[], labels: any) {
-  const res = await fetch(process.env.OPA_URL || 'http://opa:8181/v1/data/intelgraph/authz/allow', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      input: { user: ctx.user, operation: opName, fields, labels, reason: ctx.reason },
-    }),
-  });
+async function opaAllow(
+  ctx: any,
+  opName: string,
+  fields: string[],
+  labels: any,
+) {
+  const res = await fetch(
+    process.env.OPA_URL || 'http://opa:8181/v1/data/intelgraph/authz/allow',
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        input: {
+          user: ctx.user,
+          operation: opName,
+          fields,
+          labels,
+          reason: ctx.reason,
+        },
+      }),
+    },
+  );
   const json: any = await res.json();
   return json.result === true;
 }
@@ -356,7 +414,9 @@ const server = new ApolloServer({
             const doc = ctx.request.query || '';
             const cost = estimateCost(doc);
             if (cost > 2000) throw new Error('query_budget_exceeded');
-            const fields = Array.from(new Set(doc.match(/\b\w+\b/g) || [])).slice(0, 200);
+            const fields = Array.from(
+              new Set(doc.match(/\b\w+\b/g) || []),
+            ).slice(0, 200);
             const labels = {}; // derive from persisted query metadata in prod
             const ok = await opaAllow(ctx.contextValue, opName, fields, labels);
             if (!ok) throw new Error('policy_denied');
@@ -372,7 +432,10 @@ app.use(
   '/graphql',
   express.json(),
   expressMiddleware(server, {
-    context: async ({ req }) => ({ user: (req as any).user, reason: (req as any).reason }),
+    context: async ({ req }) => ({
+      user: (req as any).user,
+      reason: (req as any).reason,
+    }),
   }),
 );
 app.listen(9000, () => console.log('gateway :9000'));
@@ -441,7 +504,12 @@ allow {
 import { Driver } from 'neo4j-driver';
 export class ClaimRepo {
   constructor(private driver: Driver) {}
-  async upsertClaim(caseId: string, text: string, confidence: number, sourceEvidenceIds: string[]) {
+  async upsertClaim(
+    caseId: string,
+    text: string,
+    confidence: number,
+    sourceEvidenceIds: string[],
+  ) {
     const session = this.driver.session();
     try {
       const res = await session.executeWrite((tx) =>
@@ -465,10 +533,13 @@ export class ClaimRepo {
     const s = this.driver.session();
     try {
       await s.executeWrite((tx) =>
-        tx.run(`MATCH (a:Claim {id:$a}), (b:Claim {id:$b}) MERGE (a)-[:CONTRADICTS]->(b)`, {
-          a: claimIdA,
-          b: claimIdB,
-        }),
+        tx.run(
+          `MATCH (a:Claim {id:$a}), (b:Claim {id:$b}) MERGE (a)-[:CONTRADICTS]->(b)`,
+          {
+            a: claimIdA,
+            b: claimIdB,
+          },
+        ),
       );
     } finally {
       await s.close();
@@ -670,7 +741,8 @@ groups:
         expr: histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{job="gateway"}[5m])) by (le)) > 1.5
         for: 5m
         labels: { severity: page }
-        annotations: { summary: 'p95 over SLO', description: 'Gateway p95 > 1.5s for 5m' }
+        annotations:
+          { summary: 'p95 over SLO', description: 'Gateway p95 > 1.5s for 5m' }
       - alert: SlowQueryKillerFired
         expr: increase(gateway_query_killed_total[10m]) > 0
         for: 1m

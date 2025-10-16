@@ -1,10 +1,49 @@
 {
   "name": "integration/confluence-page-update",
   "nodes": [
-    { "parameters": { "path": "integration/confluence-page-update" }, "type": "n8n-nodes-base.webhook", "typeVersion": 1, "position": [200, 300], "name": "Webhook" },
-    { "parameters": { "authentication": "predefinedCredentialType", "nodeCredentialType": "confluenceApi", "resource": "page", "operation": "update", "spaceId": "={{$json.payload.spaceId}}", "pageId": "={{$json.payload.pageId}}", "title": "={{$json.payload.title}}", "body": "={{$json.payload.body}}" }, "type": "n8n-nodes-base.confluence", "typeVersion": 1, "position": [450, 300], "name": "Confluence Update" },
-    { "parameters": { "httpMethod": "POST", "url": "={{$json[\"maestroCallbackUrl\"]}}", "jsonParameters": true, "options": { "headerParametersJson": "={{$json[\"maestroHeaders\"]}}" }, "bodyParametersJson": "={{$json[\"maestroBody\"]}}" }, "type": "n8n-nodes-base.httpRequest", "typeVersion": 1, "position": [700, 300], "name": "Maestro Callback" }
+    {
+      "parameters": { "path": "integration/confluence-page-update" },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "confluenceApi",
+        "resource": "page",
+        "operation": "update",
+        "spaceId": "={{$json.payload.spaceId}}",
+        "pageId": "={{$json.payload.pageId}}",
+        "title": "={{$json.payload.title}}",
+        "body": "={{$json.payload.body}}"
+      },
+      "type": "n8n-nodes-base.confluence",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "name": "Confluence Update"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "={{$json[\"maestroCallbackUrl\"]}}",
+        "jsonParameters": true,
+        "options": { "headerParametersJson": "={{$json[\"maestroHeaders\"]}}" },
+        "bodyParametersJson": "={{$json[\"maestroBody\"]}}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [700, 300],
+      "name": "Maestro Callback"
+    }
   ],
-  "connections": { "Webhook": { "main": [[{"node": "Confluence Update", "type": "main", "index": 0}]] }, "Confluence Update": { "main": [[{"node": "Maestro Callback", "type": "main", "index": 0}]] } }
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Confluence Update", "type": "main", "index": 0 }]]
+    },
+    "Confluence Update": {
+      "main": [[{ "node": "Maestro Callback", "type": "main", "index": 0 }]]
+    }
+  }
 }
-

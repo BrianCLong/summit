@@ -1,10 +1,49 @@
 {
   "name": "integration/servicenow-create-incident",
   "nodes": [
-    { "parameters": { "path": "integration/servicenow-create-incident" }, "type": "n8n-nodes-base.webhook", "typeVersion": 1, "position": [200, 300], "name": "Webhook" },
-    { "parameters": { "authentication": "predefinedCredentialType", "nodeCredentialType": "serviceNowApi", "httpMethod": "POST", "url": "/api/now/table/incident", "sendBody": true, "jsonParameters": true, "options": {}, "bodyParametersJson": "={{$json.payload}}" }, "type": "n8n-nodes-base.serviceNow", "typeVersion": 1, "position": [450, 300], "name": "ServiceNow Incident" },
-    { "parameters": { "httpMethod": "POST", "url": "={{$json[\"maestroCallbackUrl\"]}}", "jsonParameters": true, "options": { "headerParametersJson": "={{$json[\"maestroHeaders\"]}}" }, "bodyParametersJson": "={{$json[\"maestroBody\"]}}" }, "type": "n8n-nodes-base.httpRequest", "typeVersion": 1, "position": [700, 300], "name": "Maestro Callback" }
+    {
+      "parameters": { "path": "integration/servicenow-create-incident" },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "serviceNowApi",
+        "httpMethod": "POST",
+        "url": "/api/now/table/incident",
+        "sendBody": true,
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{$json.payload}}"
+      },
+      "type": "n8n-nodes-base.serviceNow",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "name": "ServiceNow Incident"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "url": "={{$json[\"maestroCallbackUrl\"]}}",
+        "jsonParameters": true,
+        "options": { "headerParametersJson": "={{$json[\"maestroHeaders\"]}}" },
+        "bodyParametersJson": "={{$json[\"maestroBody\"]}}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [700, 300],
+      "name": "Maestro Callback"
+    }
   ],
-  "connections": { "Webhook": { "main": [[{"node": "ServiceNow Incident", "type": "main", "index": 0}]] }, "ServiceNow Incident": { "main": [[{"node": "Maestro Callback", "type": "main", "index": 0}]] } }
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "ServiceNow Incident", "type": "main", "index": 0 }]]
+    },
+    "ServiceNow Incident": {
+      "main": [[{ "node": "Maestro Callback", "type": "main", "index": 0 }]]
+    }
+  }
 }
-

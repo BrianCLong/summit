@@ -9,6 +9,7 @@ Welcome to IntelGraph development! This guide will help you set up your developm
 ### Prerequisites
 
 #### System Requirements
+
 - **Operating System**: macOS 12+, Ubuntu 20.04+, or Windows 11 with WSL2
 - **Memory**: 16GB RAM minimum, 32GB recommended
 - **Storage**: 100GB free space minimum
@@ -131,14 +132,15 @@ docker-compose -f docker-compose.dev.yml logs redis
 ```
 
 **docker-compose.dev.yml:**
+
 ```yaml
 version: '3.8'
 services:
   neo4j:
     image: neo4j:5.15-community
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - '7474:7474'
+      - '7687:7687'
     environment:
       NEO4J_AUTH: neo4j/devpassword
       NEO4J_PLUGINS: '["apoc"]'
@@ -154,7 +156,7 @@ services:
   postgres:
     image: postgres:15-alpine
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       POSTGRES_DB: intelgraph_dev
       POSTGRES_USER: intelgraph
@@ -168,7 +170,7 @@ services:
   redis:
     image: redis:7.2-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
@@ -178,12 +180,12 @@ services:
   elasticsearch:
     image: elasticsearch:8.11.0
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - '9200:9200'
+      - '9300:9300'
     environment:
       discovery.type: single-node
       xpack.security.enabled: false
-      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      ES_JAVA_OPTS: '-Xms1g -Xmx1g'
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     networks:
@@ -296,6 +298,7 @@ pnpm db:reset
 ```
 
 **Migration Example:**
+
 ```typescript
 // migrations/001_initial_setup.ts
 export async function up(client: Client) {
@@ -328,7 +331,7 @@ export async function up(client: Client) {
     CREATE CONSTRAINT entity_id IF NOT EXISTS 
     FOR (e:Entity) REQUIRE e.id IS UNIQUE
   `);
-  
+
   await neo4jClient.run(`
     CREATE INDEX entity_type_index IF NOT EXISTS 
     FOR (e:Entity) ON (e.type)
@@ -428,6 +431,7 @@ export async function up(client: Client) {
 ### Coding Standards
 
 #### Naming Conventions
+
 - **Variables/Functions**: `camelCase`
 - **Classes**: `PascalCase`
 - **Constants**: `UPPER_SNAKE_CASE`
@@ -457,10 +461,10 @@ interface UserProfileProps {
   className?: string;
 }
 
-export const UserProfile: React.FC<UserProfileProps> = ({ 
-  user, 
-  onUpdate, 
-  className 
+export const UserProfile: React.FC<UserProfileProps> = ({
+  user,
+  onUpdate,
+  className,
 }) => {
   // Component implementation
 };
@@ -478,17 +482,17 @@ export type CreateUserInput = z.infer<typeof CreateUserSchema>;
 export class UserService {
   constructor(
     private readonly db: Database,
-    private readonly logger: Logger
+    private readonly logger: Logger,
   ) {}
 
   async createUser(input: CreateUserInput): Promise<User> {
     const validatedInput = CreateUserSchema.parse(input);
-    
+
     try {
       const user = await this.db.user.create({
         data: validatedInput,
       });
-      
+
       this.logger.info('User created successfully', { userId: user.id });
       return user;
     } catch (error) {
@@ -513,28 +517,28 @@ module.exports = {
     '**/__tests__/**/*.test.ts',
     '**/__tests__/**/*.test.tsx',
     '**/*.test.ts',
-    '**/*.test.tsx'
+    '**/*.test.tsx',
   ],
   collectCoverageFrom: [
     'server/src/**/*.ts',
     'apps/**/*.{ts,tsx}',
     '!server/src/**/*.d.ts',
     '!**/__tests__/**',
-    '!**/node_modules/**'
+    '!**/node_modules/**',
   ],
   coverageThreshold: {
     global: {
       branches: 80,
       functions: 80,
       lines: 80,
-      statements: 80
-    }
+      statements: 80,
+    },
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   moduleNameMapping: {
     '^@/(.*)$': '<rootDir>/server/src/$1',
-    '^@/components/(.*)$': '<rootDir>/apps/web/src/components/$1'
-  }
+    '^@/components/(.*)$': '<rootDir>/apps/web/src/components/$1',
+  },
 };
 ```
 
@@ -547,7 +551,7 @@ import { mockDatabase, mockLogger } from '../../__mocks__';
 
 describe('UserService', () => {
   let userService: UserService;
-  
+
   beforeEach(() => {
     userService = new UserService(mockDatabase, mockLogger);
     jest.clearAllMocks();
@@ -559,16 +563,16 @@ describe('UserService', () => {
       const input = {
         email: 'test@example.com',
         name: 'Test User',
-        role: 'user' as const
+        role: 'user' as const,
       };
-      
+
       const expectedUser = {
         id: 'user-123',
         ...input,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
-      
+
       mockDatabase.user.create.mockResolvedValue(expectedUser);
 
       // Act
@@ -577,11 +581,11 @@ describe('UserService', () => {
       // Assert
       expect(result).toEqual(expectedUser);
       expect(mockDatabase.user.create).toHaveBeenCalledWith({
-        data: input
+        data: input,
       });
       expect(mockLogger.info).toHaveBeenCalledWith(
         'User created successfully',
-        { userId: 'user-123' }
+        { userId: 'user-123' },
       );
     });
 
@@ -590,7 +594,7 @@ describe('UserService', () => {
       const input = {
         email: 'invalid-email',
         name: 'Test User',
-        role: 'user' as const
+        role: 'user' as const,
       };
 
       // Act & Assert
@@ -646,7 +650,7 @@ describe('GraphQL Integration Tests', () => {
       // Act
       const response = await query({
         query: GET_USER,
-        variables: { id: 'test-user-id' }
+        variables: { id: 'test-user-id' },
       });
 
       // Assert
@@ -655,7 +659,7 @@ describe('GraphQL Integration Tests', () => {
         id: 'test-user-id',
         email: expect.any(String),
         name: expect.any(String),
-        role: expect.any(String)
+        role: expect.any(String),
       });
     });
   });
@@ -681,36 +685,41 @@ test.describe('Graph Analysis Flow', () => {
   test('should create and analyze a graph', async ({ page }) => {
     // Navigate to graph creation
     await page.click('[data-testid=create-graph-button]');
-    
+
     // Fill graph details
     await page.fill('[data-testid=graph-name-input]', 'Test Analysis Graph');
     await page.fill('[data-testid=graph-description-input]', 'E2E test graph');
     await page.click('[data-testid=create-button]');
-    
+
     // Wait for graph to be created
     await expect(page.locator('[data-testid=graph-canvas]')).toBeVisible();
-    
+
     // Add an entity
     await page.click('[data-testid=add-entity-button]');
     await page.selectOption('[data-testid=entity-type-select]', 'Person');
     await page.fill('[data-testid=entity-name-input]', 'John Doe');
     await page.click('[data-testid=confirm-entity-button]');
-    
+
     // Verify entity was added
     await expect(page.locator('[data-testid=graph-node]')).toHaveCount(1);
-    
+
     // Run AI analysis
     await page.click('[data-testid=ai-analysis-button]');
-    await page.selectOption('[data-testid=analysis-type-select]', 'community_detection');
+    await page.selectOption(
+      '[data-testid=analysis-type-select]',
+      'community_detection',
+    );
     await page.click('[data-testid=start-analysis-button]');
-    
+
     // Wait for analysis to complete
     await expect(page.locator('[data-testid=analysis-results]')).toBeVisible({
-      timeout: 30000
+      timeout: 30000,
     });
-    
+
     // Verify analysis results
-    const resultsText = await page.textContent('[data-testid=analysis-results]');
+    const resultsText = await page.textContent(
+      '[data-testid=analysis-results]',
+    );
     expect(resultsText).toContain('Analysis completed');
   });
 });
@@ -777,7 +786,7 @@ type Query {
     page: Int = 1
     limit: Int = 20
   ): GraphConnection!
-  
+
   # AI-powered queries
   analyzeGraph(id: ID!, type: AnalysisType!): AnalysisResult!
   suggestEntities(graphId: ID!, query: String!): [EntitySuggestion!]!
@@ -787,22 +796,22 @@ type Mutation {
   # User management
   createUser(input: CreateUserInput!): User!
   updateUser(id: ID!, input: UpdateUserInput!): User!
-  
+
   # Graph management
   createGraph(input: CreateGraphInput!): Graph!
   updateGraph(id: ID!, input: UpdateGraphInput!): Graph!
   deleteGraph(id: ID!): Boolean!
-  
+
   # Entity management
   createEntity(graphId: ID!, input: CreateEntityInput!): Entity!
   updateEntity(id: ID!, input: UpdateEntityInput!): Entity!
   deleteEntity(id: ID!): Boolean!
-  
+
   # Relationship management
   createRelationship(input: CreateRelationshipInput!): Relationship!
   updateRelationship(id: ID!, input: UpdateRelationshipInput!): Relationship!
   deleteRelationship(id: ID!): Boolean!
-  
+
   # AI operations
   enhanceEntity(id: ID!, provider: AIProvider = AUTO): Entity!
   detectAnomalies(graphId: ID!): [AnomalyDetection!]!
@@ -820,25 +829,25 @@ type Subscription {
 ```yaml
 # codegen.yml
 overwrite: true
-schema: "server/src/graphql/schema.graphql"
-documents: "apps/web/src/**/*.graphql"
+schema: 'server/src/graphql/schema.graphql'
+documents: 'apps/web/src/**/*.graphql'
 generates:
   server/src/generated/graphql-types.ts:
     plugins:
-      - "typescript"
-      - "typescript-resolvers"
+      - 'typescript'
+      - 'typescript-resolvers'
     config:
       useIndexSignature: true
       mappers:
-        User: "../db/models/User#UserModel"
-        Graph: "../db/models/Graph#GraphModel"
-        Entity: "../db/models/Entity#EntityModel"
-  
+        User: '../db/models/User#UserModel'
+        Graph: '../db/models/Graph#GraphModel'
+        Entity: '../db/models/Entity#EntityModel'
+
   apps/web/src/generated/graphql.ts:
     plugins:
-      - "typescript"
-      - "typescript-operations"
-      - "typescript-react-apollo"
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
     config:
       withHooks: true
       withHOC: false
@@ -866,17 +875,17 @@ export const userResolvers: Resolvers = {
       if (!context.user) {
         throw new ForbiddenError('Authentication required');
       }
-      
+
       const user = await context.dataSources.userService.findById(id);
       if (!user) {
         throw new UserInputError('User not found');
       }
-      
+
       // Check permissions
       if (user.id !== context.user.id && context.user.role !== 'ADMIN') {
         throw new ForbiddenError('Insufficient permissions');
       }
-      
+
       return user;
     },
   },
@@ -886,7 +895,7 @@ export const userResolvers: Resolvers = {
       if (!context.user || context.user.role !== 'ADMIN') {
         throw new ForbiddenError('Admin access required');
       }
-      
+
       try {
         return await context.dataSources.userService.create(input);
       } catch (error) {
@@ -981,7 +990,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
 
     const elements = GraphLayoutEngine.convertToElements(
       graph.entities,
-      graph.relationships
+      graph.relationships,
     );
 
     cyRef.current.batch(() => {
@@ -1009,7 +1018,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
           break;
         case 'RELATIONSHIP_ADDED':
           cyRef.current.add(
-            GraphLayoutEngine.convertRelationship(update.relationship)
+            GraphLayoutEngine.convertRelationship(update.relationship),
           );
           break;
         case 'RELATIONSHIP_REMOVED':
@@ -1063,7 +1072,7 @@ function getGraphStyles(): cytoscape.Stylesheet[] {
         label: 'data(label)',
         'text-valign': 'center',
         'text-halign': 'center',
-        'color': 'white',
+        color: 'white',
         'font-size': '12px',
         width: 'mapData(weight, 0, 100, 20, 80)',
         height: 'mapData(weight, 0, 100, 20, 80)',
@@ -1117,7 +1126,7 @@ import type { Graph, CreateGraphInput, UpdateGraphInput } from '@/types';
 
 export function useGraph(graphId: string) {
   const { user } = useAuth();
-  
+
   return useQuery({
     queryKey: ['graph', graphId],
     queryFn: () => graphService.getGraph(graphId),
@@ -1128,7 +1137,7 @@ export function useGraph(graphId: string) {
 
 export function useGraphs(filters?: GraphFilters) {
   const { user } = useAuth();
-  
+
   return useQuery({
     queryKey: ['graphs', filters],
     queryFn: () => graphService.getGraphs(filters),
@@ -1138,7 +1147,7 @@ export function useGraphs(filters?: GraphFilters) {
 
 export function useCreateGraph() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (input: CreateGraphInput) => graphService.createGraph(input),
     onSuccess: (newGraph) => {
@@ -1150,9 +1159,9 @@ export function useCreateGraph() {
 
 export function useUpdateGraph(graphId: string) {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (input: UpdateGraphInput) => 
+    mutationFn: (input: UpdateGraphInput) =>
       graphService.updateGraph(graphId, input),
     onSuccess: (updatedGraph) => {
       queryClient.setQueryData(['graph', graphId], updatedGraph);
@@ -1163,7 +1172,7 @@ export function useUpdateGraph(graphId: string) {
 
 export function useDeleteGraph() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (graphId: string) => graphService.deleteGraph(graphId),
     onSuccess: (_, graphId) => {
@@ -1177,26 +1186,33 @@ export function useGraphOperations(graphId: string) {
   const createGraphMutation = useCreateGraph();
   const updateGraphMutation = useUpdateGraph(graphId);
   const deleteGraphMutation = useDeleteGraph();
-  
-  const createGraph = useCallback((input: CreateGraphInput) => {
-    return createGraphMutation.mutateAsync(input);
-  }, [createGraphMutation]);
-  
-  const updateGraph = useCallback((input: UpdateGraphInput) => {
-    return updateGraphMutation.mutateAsync(input);
-  }, [updateGraphMutation]);
-  
+
+  const createGraph = useCallback(
+    (input: CreateGraphInput) => {
+      return createGraphMutation.mutateAsync(input);
+    },
+    [createGraphMutation],
+  );
+
+  const updateGraph = useCallback(
+    (input: UpdateGraphInput) => {
+      return updateGraphMutation.mutateAsync(input);
+    },
+    [updateGraphMutation],
+  );
+
   const deleteGraph = useCallback(() => {
     return deleteGraphMutation.mutateAsync(graphId);
   }, [deleteGraphMutation, graphId]);
-  
+
   return {
     createGraph,
     updateGraph,
     deleteGraph,
-    isLoading: createGraphMutation.isPending || 
-               updateGraphMutation.isPending || 
-               deleteGraphMutation.isPending,
+    isLoading:
+      createGraphMutation.isPending ||
+      updateGraphMutation.isPending ||
+      deleteGraphMutation.isPending,
   };
 }
 ```
@@ -1224,45 +1240,45 @@ class NewAnalysisConfig(BaseModel):
 
 class NewAnalysisService(BaseMLService):
     """Service for performing new type of graph analysis."""
-    
+
     def __init__(self, config: Optional[NewAnalysisConfig] = None):
         super().__init__()
         self.config = config or NewAnalysisConfig()
         self.logger = self.get_logger(__name__)
-    
+
     async def analyze(
-        self, 
+        self,
         graph_data: GraphData,
         config_override: Optional[Dict[str, Any]] = None
     ) -> AnalysisResult:
         """
         Perform new analysis on graph data.
-        
+
         Args:
             graph_data: Input graph data
             config_override: Optional configuration overrides
-            
+
         Returns:
             Analysis results with insights and metrics
         """
         try:
             # Validate input data
             validate_graph_data(graph_data)
-            
+
             # Merge configuration
             config = self._merge_config(config_override)
-            
+
             # Perform analysis
             self.logger.info(f"Starting analysis with algorithm: {config.algorithm}")
-            
+
             results = await self._run_analysis(graph_data, config)
-            
+
             # Generate insights
             insights = self._generate_insights(results, graph_data)
-            
+
             # Compute quality metrics
             metrics = compute_metrics(results, graph_data)
-            
+
             return AnalysisResult(
                 analysis_type="new_analysis",
                 results=results,
@@ -1270,36 +1286,36 @@ class NewAnalysisService(BaseMLService):
                 metrics=metrics,
                 config=config.dict()
             )
-            
+
         except Exception as e:
             self.logger.error(f"Analysis failed: {str(e)}")
             raise
-    
+
     async def _run_analysis(
-        self, 
-        graph_data: GraphData, 
+        self,
+        graph_data: GraphData,
         config: NewAnalysisConfig
     ) -> Dict[str, Any]:
         """Run the core analysis algorithm."""
         # Implementation specific to your analysis
         # This is where you'd implement the actual ML/AI logic
-        
+
         nodes = graph_data.nodes
         edges = graph_data.edges
-        
+
         # Example: Simple clustering analysis
         results = {
             "clusters": self._perform_clustering(nodes, edges, config),
             "node_scores": self._compute_node_scores(nodes, config),
             "edge_weights": self._compute_edge_weights(edges, config)
         }
-        
+
         return results
-    
+
     def _perform_clustering(
-        self, 
-        nodes: List[Dict], 
-        edges: List[Dict], 
+        self,
+        nodes: List[Dict],
+        edges: List[Dict],
         config: NewAnalysisConfig
     ) -> List[Dict]:
         """Perform clustering analysis."""
@@ -1307,10 +1323,10 @@ class NewAnalysisService(BaseMLService):
         clusters = []
         # ... clustering implementation
         return clusters
-    
+
     def _compute_node_scores(
-        self, 
-        nodes: List[Dict], 
+        self,
+        nodes: List[Dict],
         config: NewAnalysisConfig
     ) -> Dict[str, float]:
         """Compute importance scores for nodes."""
@@ -1319,15 +1335,15 @@ class NewAnalysisService(BaseMLService):
             # Implement scoring logic
             scores[node["id"]] = self._calculate_score(node, config)
         return scores
-    
+
     def _generate_insights(
-        self, 
-        results: Dict[str, Any], 
+        self,
+        results: Dict[str, Any],
         graph_data: GraphData
     ) -> List[Dict[str, Any]]:
         """Generate human-readable insights from results."""
         insights = []
-        
+
         # Example insights
         cluster_count = len(results.get("clusters", []))
         insights.append({
@@ -1342,32 +1358,32 @@ class NewAnalysisService(BaseMLService):
                 ) if results.get("clusters") else 0
             }
         })
-        
+
         return insights
 
 # Integration with TypeScript backend
 class NewAnalysisServiceAPI:
     """API wrapper for the new analysis service."""
-    
+
     def __init__(self):
         self.service = NewAnalysisService()
-    
+
     async def analyze_graph(self, graph_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
         """API endpoint for graph analysis."""
         try:
             # Fetch graph data (implement based on your data layer)
             graph_data = await self._fetch_graph_data(graph_id)
-            
+
             # Run analysis
             result = await self.service.analyze(graph_data, options)
-            
+
             # Return serializable result
             return {
                 "success": True,
                 "data": result.dict(),
                 "execution_time": result.execution_time
             }
-            
+
         except Exception as e:
             return {
                 "success": False,
@@ -1393,43 +1409,43 @@ import type { AnalysisResult, NewAnalysisOptions } from '../types';
 export class NewAnalysisService {
   constructor(
     private readonly logger: Logger,
-    private readonly graphService: GraphService
+    private readonly graphService: GraphService,
   ) {}
 
   async analyzeGraph(
-    graphId: string, 
-    options: NewAnalysisOptions = {}
+    graphId: string,
+    options: NewAnalysisOptions = {},
   ): Promise<AnalysisResult> {
     const startTime = Date.now();
-    
+
     try {
       // Fetch graph data
       const graph = await this.graphService.getGraphWithData(graphId);
-      
+
       // Prepare analysis request
       const analysisRequest = {
         graph_data: {
-          nodes: graph.entities.map(entity => ({
+          nodes: graph.entities.map((entity) => ({
             id: entity.id,
             type: entity.type,
-            properties: entity.properties
+            properties: entity.properties,
           })),
-          edges: graph.relationships.map(rel => ({
+          edges: graph.relationships.map((rel) => ({
             id: rel.id,
             source: rel.sourceId,
             target: rel.targetId,
             type: rel.type,
-            properties: rel.properties
-          }))
+            properties: rel.properties,
+          })),
         },
-        options
+        options,
       };
 
       // Call Python service
       const result = await this.callPythonService(
         'new_analysis_service',
         'analyze_graph',
-        analysisRequest
+        analysisRequest,
       );
 
       const executionTime = Date.now() - startTime;
@@ -1437,7 +1453,7 @@ export class NewAnalysisService {
       this.logger.info('New analysis completed', {
         graphId,
         executionTime,
-        insights: result.data.insights.length
+        insights: result.data.insights.length,
       });
 
       return {
@@ -1448,10 +1464,9 @@ export class NewAnalysisService {
         metadata: {
           executionTime,
           options,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       };
-
     } catch (error) {
       this.logger.error('New analysis failed', { graphId, error });
       throw new Error(`Analysis failed: ${error.message}`);
@@ -1461,7 +1476,7 @@ export class NewAnalysisService {
   private async callPythonService(
     service: string,
     method: string,
-    data: any
+    data: any,
   ): Promise<any> {
     return new Promise((resolve, reject) => {
       const pythonProcess = spawn('python', [
@@ -1469,21 +1484,23 @@ export class NewAnalysisService {
         `
 import sys
 import json
-from ml.services.${service} import ${service.split('_').map(s => 
-  s.charAt(0).toUpperCase() + s.slice(1)
-).join('')}API
+from ml.services.${service} import ${service
+          .split('_')
+          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+          .join('')}API
 
 try:
-    service = ${service.split('_').map(s => 
-      s.charAt(0).toUpperCase() + s.slice(1)
-    ).join('')}API()
+    service = ${service
+      .split('_')
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join('')}API()
     data = json.loads(sys.argv[1])
     result = await service.${method}(data['graph_data'], data['options'])
     print(json.dumps(result))
 except Exception as e:
     print(json.dumps({"success": False, "error": str(e)}))
         `,
-        JSON.stringify(data)
+        JSON.stringify(data),
       ]);
 
       let output = '';
@@ -1510,7 +1527,9 @@ except Exception as e:
             reject(new Error(`Failed to parse Python response: ${output}`));
           }
         } else {
-          reject(new Error(`Python process exited with code ${code}: ${error}`));
+          reject(
+            new Error(`Python process exited with code ${code}: ${error}`),
+          );
         }
       });
     });
@@ -1654,33 +1673,39 @@ echo "  - Runbooks: docs/runbooks/"
    - Refactoring: `refactor/description-of-refactoring`
 
 2. **Commit Messages**
+
    ```
    type(scope): description
-   
+
    Longer description if needed
-   
+
    Fixes #123
    ```
-   
+
    Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 3. **PR Template**
+
    ```markdown
    ## Description
+
    Brief description of changes
-   
+
    ## Type of Change
+
    - [ ] Bug fix
    - [ ] New feature
    - [ ] Breaking change
    - [ ] Documentation update
-   
+
    ## Testing
+
    - [ ] Unit tests pass
    - [ ] Integration tests pass
    - [ ] Manual testing completed
-   
+
    ## Checklist
+
    - [ ] Code follows style guidelines
    - [ ] Self-review completed
    - [ ] Documentation updated
@@ -1690,6 +1715,7 @@ echo "  - Runbooks: docs/runbooks/"
 ### Code Review Guidelines
 
 #### For Authors
+
 - Keep PRs small and focused
 - Write clear descriptions
 - Include tests for new functionality
@@ -1697,6 +1723,7 @@ echo "  - Runbooks: docs/runbooks/"
 - Respond promptly to feedback
 
 #### For Reviewers
+
 - Review within 24 hours
 - Focus on logic, security, and maintainability
 - Ask questions if unclear
@@ -1706,17 +1733,20 @@ echo "  - Runbooks: docs/runbooks/"
 ## Getting Help
 
 ### Documentation
+
 - [Architecture Overview](../ARCHITECTURE.md)
 - [API Documentation](../../openapi/)
 - [Deployment Guide](../deployment/production-deployment-guide.md)
 - [Troubleshooting](../runbooks/)
 
 ### Community
+
 - **Slack**: `#intelgraph-dev`
 - **Weekly Standup**: Fridays 10 AM PT
 - **Office Hours**: Tuesdays 2-3 PM PT
 
 ### Support
+
 - **Bug Reports**: GitHub Issues
 - **Feature Requests**: GitHub Issues with `enhancement` label
 - **Security Issues**: security@intelgraph.ai

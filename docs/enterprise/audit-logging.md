@@ -5,6 +5,7 @@ owner: enterprise
 ---
 
 ## Features
+
 - Comprehensive event logging.
 - Integration with SIEM solutions (Splunk, ELK).
 - Configurable retention policies.

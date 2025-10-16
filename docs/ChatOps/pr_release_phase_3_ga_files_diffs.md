@@ -180,7 +180,8 @@ export function persistedOnlyPlugin() {
       if (!enabled) return;
       const h = ctx.request.http?.headers.get('x-persisted-hash') || '';
       const tenant = ctx.request.http?.headers.get('x-tenant') || 'default';
-      const ok = h.startsWith('sha256:') && (await keyv.get(`pq:${tenant}:${h}`));
+      const ok =
+        h.startsWith('sha256:') && (await keyv.get(`pq:${tenant}:${h}`));
       if (!ok) throw new Error('Persisted queries only in production');
     },
   };
@@ -190,7 +191,9 @@ export function persistedOnlyPlugin() {
 **File:** `apps/gateway/src/plugins/costLimit.ts`
 
 ```ts
-export function costLimitPlugin(limitDefault = Number(process.env.GQL_MAX_COST || 1000)) {
+export function costLimitPlugin(
+  limitDefault = Number(process.env.GQL_MAX_COST || 1000),
+) {
   return {
     async didResolveOperation(ctx: any) {
       const roles = (ctx.contextValue?.roles as string[]) || [];
@@ -201,7 +204,8 @@ export function costLimitPlugin(limitDefault = Number(process.env.GQL_MAX_COST |
         const name = s?.name?.value || 'unknown';
         cost += name.includes('search') ? 50 : 10;
       }
-      if (cost > limit) throw new Error(`Query exceeds cost limit (${cost} > ${limit})`);
+      if (cost > limit)
+        throw new Error(`Query exceeds cost limit (${cost} > ${limit})`);
     },
   };
 }
@@ -284,7 +288,14 @@ name: Verify Phase-3 Evidence & Policy
 on:
   push: { tags: ['v3.*'] }
   pull_request:
-    paths: ['docs/releases/phase-3-ga/**', 'policy/**', 'apps/gateway/**', 'deploy/**', 'tests/**']
+    paths:
+      [
+        'docs/releases/phase-3-ga/**',
+        'policy/**',
+        'apps/gateway/**',
+        'deploy/**',
+        'tests/**',
+      ]
 jobs:
   verify:
     runs-on: ubuntu-latest

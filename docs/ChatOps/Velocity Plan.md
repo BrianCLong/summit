@@ -338,7 +338,7 @@ _// server/src/services/GraphRAGService.ts_
  answer: string;  
  confidence: number; _// 0..1_  
  citations: { entityIds: string\[\] };  
- why_paths: Array\<{ from: string; to: string; relId: string; type: string }\>; _// minimal proof edges_  
+ why*paths: Array\<{ from: string; to: string; relId: string; type: string }\>; *// minimal proof edges\_  
 };
 
 **const** Input \= z.object({  
@@ -455,12 +455,12 @@ _// server/src/middleware/persistedQueries.ts_
 **const** manifest \= JSON.parse(fs.readFileSync(process.env.PQ_MANIFEST || 'persisted-queries.json','utf8'));
 
 **export** **function** requirePersistedQueries(req: Request, res: Response, next: NextFunction) {  
- **if** (process.env.NODE_ENV \=== 'production') {  
+ **if** (process.env.NODE*ENV \=== 'production') {  
  **const** body \= req.body || {};  
- _// Accept APQ protocol: body may include queryId or hashed query_  
+ *// Accept APQ protocol: body may include queryId or hashed query*  
  **const** id \= body.extensions?.persistedQuery?.sha256Hash || body.id;  
  **if** (\!id || \!manifest\[id\]) **return** res.status(403).json({ error: 'Persisted query required' });  
- req.body.query \= manifest\[id\]; _// inject server‑side_  
+ req.body.query \= manifest\[id\]; *// inject server‑side\_  
  }  
  next();  
 }

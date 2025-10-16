@@ -5,6 +5,7 @@ owner: docs
 ---
 
 ## Top 5 tasks
+
 - Manage users and roles
 - Configure system settings
 - Monitor system health
@@ -12,9 +13,11 @@ owner: docs
 - Troubleshoot deployments
 
 ## Troubleshooting
+
 - Deployment errors
 - User access issues
 
 ## Contact/support paths
+
 - Admin console support
 - Enterprise support

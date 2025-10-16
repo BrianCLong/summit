@@ -173,8 +173,15 @@ export function wirePresence(io: Server, redis = new Redis()) {
   io.on('connection', (socket) => {
     socket.on('join-investigation', async ({ invId, user }) => {
       socket.join(`inv:${invId}`);
-      await redis.hset(`presence:${invId}`, socket.id, JSON.stringify({ user, ts: Date.now() }));
-      io.to(`inv:${invId}`).emit('presence:update', await redis.hlen(`presence:${invId}`));
+      await redis.hset(
+        `presence:${invId}`,
+        socket.id,
+        JSON.stringify({ user, ts: Date.now() }),
+      );
+      io.to(`inv:${invId}`).emit(
+        'presence:update',
+        await redis.hlen(`presence:${invId}`),
+      );
     });
 
     socket.on('disconnect', async () => {
@@ -296,7 +303,9 @@ export function applyLOD(cy) {
     const z = cy.zoom();
     const showLabels = z > 0.7;
     cy.batch(() => {
-      cy.nodes().forEach((n) => n.style('label', showLabels ? n.data('label') : ''));
+      cy.nodes().forEach((n) =>
+        n.style('label', showLabels ? n.data('label') : ''),
+      );
     });
   };
   cy.on('zoom', update);

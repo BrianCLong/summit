@@ -187,7 +187,10 @@ export default defineTask<In, { valid: true }>({
     addFormats(ajv);
     const validate = ajv.compile(payload.schema as any);
     const ok = validate(payload.data);
-    if (!ok) throw new Error('Schema validation failed: ' + JSON.stringify(validate.errors));
+    if (!ok)
+      throw new Error(
+        'Schema validation failed: ' + JSON.stringify(validate.errors),
+      );
     return { payload: { valid: true } };
   },
 });
@@ -272,8 +275,12 @@ interface In {
 }
 export default defineTask<In, { body: string }>({
   async execute(_ctx, { payload }) {
-    const s3 = new S3Client({ region: payload.region ?? process.env.AWS_REGION });
-    const res = await s3.send(new GetObjectCommand({ Bucket: payload.bucket, Key: payload.key }));
+    const s3 = new S3Client({
+      region: payload.region ?? process.env.AWS_REGION,
+    });
+    const res = await s3.send(
+      new GetObjectCommand({ Bucket: payload.bucket, Key: payload.key }),
+    );
     const body = await res.Body!.transformToString();
     return { payload: { body } };
   },
@@ -295,7 +302,9 @@ interface In {
 }
 export default defineTask<In, { etag: string }>({
   async execute(_ctx, { payload }) {
-    const s3 = new S3Client({ region: payload.region ?? process.env.AWS_REGION });
+    const s3 = new S3Client({
+      region: payload.region ?? process.env.AWS_REGION,
+    });
     const res = await s3.send(
       new PutObjectCommand({
         Bucket: payload.bucket,
@@ -319,7 +328,10 @@ interface In {
   endpoint?: string;
   items: Item[];
 }
-export default defineTask<In, { jobId: string; receipts: Array<{ id: string; hash: string }> }>({
+export default defineTask<
+  In,
+  { jobId: string; receipts: Array<{ id: string; hash: string }> }
+>({
   async execute(ctx, { payload }) {
     const endpoint = payload.endpoint ?? (await ctx.secrets('SIG_INGEST_URL'));
     const res = await fetch(`${endpoint}/ingest/batch`, {
@@ -380,7 +392,11 @@ export default defineTask<In, { bundle: string; manifest: ManifestEntry[] }>({
     archive.pipe(out);
     for (const f of payload.files) archive.file(f, { name: path.basename(f) });
     archive.append(
-      JSON.stringify({ generatedAt: new Date().toISOString(), files: manifest }, null, 2),
+      JSON.stringify(
+        { generatedAt: new Date().toISOString(), files: manifest },
+        null,
+        2,
+      ),
       { name: 'manifest.json' },
     );
     await archive.finalize();
@@ -399,8 +415,14 @@ export default defineTask<In, { bundle: string; manifest: ManifestEntry[] }>({
 import task from '../src/tasks/schema.validate.js';
 
 test('valid schema passes', async () => {
-  const schema = { type: 'object', properties: { a: { type: 'number' } }, required: ['a'] };
-  const out = await task.execute({} as any, { payload: { schema, data: { a: 1 } } });
+  const schema = {
+    type: 'object',
+    properties: { a: { type: 'number' } },
+    required: ['a'],
+  };
+  const out = await task.execute({} as any, {
+    payload: { schema, data: { a: 1 } },
+  });
   expect(out.payload.valid).toBe(true);
 });
 ```
@@ -505,7 +527,11 @@ spec:
       uses: tasks/schema.validate@0.1.0
       needs: [fetch]
       with:
-        schema: { '$schema': 'http://json-schema.org/draft-07/schema#', 'type': 'object' }
+        schema:
+          {
+            '$schema': 'http://json-schema.org/draft-07/schema#',
+            'type': 'object',
+          }
     - id: ingest
       uses: connectors/sig.ingest@0.1.0
       needs: [validate]
@@ -714,7 +740,10 @@ spec:
     - id: notify
       uses: tasks/notify.slack@0.1.0
       needs: [gate]
-      with: { text: 'Promoting ${params.service} from ${params.from} to ${params.to}' }
+      with:
+        {
+          text: 'Promoting ${params.service} from ${params.from} to ${params.to}',
+        }
 ```
 
 ### 4.8 `runbooks/rollback.yaml`

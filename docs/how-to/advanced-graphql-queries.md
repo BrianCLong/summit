@@ -1,8 +1,8 @@
 ### Patterns
 
-* **Time‑travel** queries
-* **Policy‑aware** path searches (exclude classified edges)
-* **Geo‑temporal** co‑presence windows
+- **Time‑travel** queries
+- **Policy‑aware** path searches (exclude classified edges)
+- **Geo‑temporal** co‑presence windows
 
 ### Schema (excerpt)
 
@@ -20,10 +20,10 @@ type Query {
 ```ts
 // server/src/graphql/guards.ts
 export function assertTenant(ctx: Ctx) {
-  if (!ctx.tenantId) throw new Error("tenant missing");
+  if (!ctx.tenantId) throw new Error('tenant missing');
 }
 export function requireAuthority(ctx: Ctx, scope: string) {
-  if (!ctx.scopes?.includes(scope)) throw new Error("unauthorized");
+  if (!ctx.scopes?.includes(scope)) throw new Error('unauthorized');
 }
 ```
 

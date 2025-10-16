@@ -1,6 +1,6 @@
-version: "1"
-name: "upgrade-typescript-5.6"
-description: "Batch upgrade TS to 5.6 with compat gates and codemods"
+version: '1'
+name: 'upgrade-typescript-5.6'
+description: 'Batch upgrade TS to 5.6 with compat gates and codemods'
 targets:
   include:
     - org/*
@@ -21,10 +21,9 @@ gates:
   semverPolicy: strict
   testCoverageMin: 0.8
 rollout:
-  waves: [5,25,100]
+  waves: [5, 25, 100]
   slo:
     greenRate: 0.9
     flakeBudget: 0.05
     perfDeltaMax: 0.05
   rateCapPerHour: 60
-

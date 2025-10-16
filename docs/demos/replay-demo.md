@@ -1,14 +1,17 @@
 # Deterministic Replay Demo Runbook
 
 ## Scenario
+
 Demonstrate deterministic replay of a GitHub Issues MCP session captured on 2025-09-28.
 
 ## Prerequisites
+
 - Replay engine container image `intelgraph/replay-engine:alpha1` deployed to staging.
 - Session recording stored at `s3://intelgraph-replay/demo/github-issues-2025-09-28.rec`.
 - Stub catalog generated via `scripts/replay/build_stubs.sh`.
 
 ## Steps
+
 1. Launch replay CLI:
    ```bash
    npm run replay -- \
@@ -25,10 +28,12 @@ Demonstrate deterministic replay of a GitHub Issues MCP session captured on 2025
 5. Export replay report (`.json` + `.html`) and attach to evidence bundle.
 
 ## Expected Outcomes
+
 - Replay success status = `PASS`.
 - Divergence detector shows zero mismatched payload hashes.
 - UI surfaces capability token scopes and ledger entry link.
 
 ## Supporting Assets
+
 - `tests/replay/replay-fidelity.spec.ts` (automated fidelity suite).
 - Grafana dashboard `Replay Overview` for aggregate metrics.

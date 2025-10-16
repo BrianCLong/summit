@@ -1,6 +1,7 @@
 # Public Trust Ledger Spec (Phase 7)
 
 ## Purpose
+
 Record all trust-relevant events (KPW issuance, attestation, revocation, contract upgrades, credential actions) in an immutable, append-only ledger openly queryable and verifiable.
 
 ## Event Schema
@@ -10,9 +11,11 @@ Record all trust-relevant events (KPW issuance, attestation, revocation, contrac
   "eventId": "string (UUID)",
   "type": "ISSUE | REVOKE | CONTRACT_UPGRADE | ATTARSER_REVOCATION | ZONE_CHANGE",
   "timestamp": "ISO8601",
-  "payload": { /* type-specific fields */ },
-  "prevHash": "hex", 
-  "merkleHash": "hex", 
+  "payload": {
+    /* type-specific fields */
+  },
+  "prevHash": "hex",
+  "merkleHash": "hex",
   "signature": "base64",
   "signer": "attester or foundation id"
 }

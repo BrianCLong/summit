@@ -60,7 +60,14 @@ flowchart LR
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "provider", "class", "context_tokens", "rpm_cap", "tpm_cap"],
+        "required": [
+          "name",
+          "provider",
+          "class",
+          "context_tokens",
+          "rpm_cap",
+          "tpm_cap"
+        ],
         "properties": {
           "name": { "type": "string" },
           "provider": { "type": "string" },
@@ -76,8 +83,14 @@ flowchart LR
               "type": "object",
               "required": ["start", "end"],
               "properties": {
-                "start": { "type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$" },
-                "end": { "type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$" },
+                "start": {
+                  "type": "string",
+                  "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+                },
+                "end": {
+                  "type": "string",
+                  "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+                },
                 "days": {
                   "type": "array",
                   "items": { "type": "integer", "minimum": 0, "maximum": 6 }
@@ -90,7 +103,10 @@ flowchart LR
           "loa_max": { "type": "integer", "minimum": 0, "maximum": 3 },
           "temperature_bounds": {
             "type": "object",
-            "properties": { "min": { "type": "number" }, "max": { "type": "number" } }
+            "properties": {
+              "min": { "type": "number" },
+              "max": { "type": "number" }
+            }
           },
           "preamble": { "type": "string" }
         }
@@ -108,7 +124,10 @@ flowchart LR
               "task": { "type": "string" },
               "loa": { "type": "integer" },
               "risk": { "type": "string", "enum": ["low", "medium", "high"] },
-              "requires_tools": { "type": "array", "items": { "type": "string" } }
+              "requires_tools": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
             }
           },
           "route": {
@@ -141,20 +160,33 @@ export type ModelCaps = {
   tpm_cap: number;
   daily_usd_cap?: number;
   usage_windows?: Window[];
-  counters: { rpm: number; tpm: number; usd_today: number; window_open: boolean };
+  counters: {
+    rpm: number;
+    tpm: number;
+    usd_today: number;
+    window_open: boolean;
+  };
 };
 
-export function isWindowOpen(windows: Window[] | undefined, now = DateTime.local()): boolean {
+export function isWindowOpen(
+  windows: Window[] | undefined,
+  now = DateTime.local(),
+): boolean {
   if (!windows || windows.length === 0) return true; // no windows means always on
   const wd = now.weekday % 7; // 1..7 → 0..6
   const hm = now.toFormat('HH:mm');
-  return windows.some((w) => (w.days ? w.days.includes(wd) : true) && hm >= w.start && hm < w.end);
+  return windows.some(
+    (w) => (w.days ? w.days.includes(wd) : true) && hm >= w.start && hm < w.end,
+  );
 }
 
 export function canRoute(model: ModelCaps): { ok: boolean; reason?: string } {
-  if (!isWindowOpen(model.usage_windows)) return { ok: false, reason: 'window_closed' };
-  if (model.counters.rpm >= model.rpm_cap) return { ok: false, reason: 'rpm_exhausted' };
-  if (model.counters.tpm >= model.tpm_cap) return { ok: false, reason: 'tpm_exhausted' };
+  if (!isWindowOpen(model.usage_windows))
+    return { ok: false, reason: 'window_closed' };
+  if (model.counters.rpm >= model.rpm_cap)
+    return { ok: false, reason: 'rpm_exhausted' };
+  if (model.counters.tpm >= model.tpm_cap)
+    return { ok: false, reason: 'tpm_exhausted' };
   if (model.daily_usd_cap && model.counters.usd_today >= model.daily_usd_cap) {
     return { ok: false, reason: 'budget_exhausted' };
   }
@@ -201,7 +233,10 @@ export type Decision = {
   reasons: Array<{ model: string; reason: string }>; // for Explain Route
 };
 
-export function decide(policy: any, req: { task: string; loa: number; risk?: string }): Decision {
+export function decide(
+  policy: any,
+  req: { task: string; loa: number; risk?: string },
+): Decision {
   if (!validate(policy)) {
     return { allow: false, denial: 'policy_invalid', reasons: [] };
   }
@@ -216,18 +251,28 @@ export function decide(policy: any, req: { task: string; loa: number; risk?: str
   );
   if (!rule) return { allow: false, denial: 'no_matching_rule', reasons: [] };
   const { pickModel } = require('./scheduler');
-  const { chosen, denied } = pickModel(candidates, rule.route.prefer, rule.route.fallback);
+  const { chosen, denied } = pickModel(
+    candidates,
+    rule.route.prefer,
+    rule.route.fallback,
+  );
   if (!chosen) {
     return {
       allow: false,
       denial: 'no_model_available',
-      reasons: Object.entries(denied).map(([model, reason]) => ({ model, reason })),
+      reasons: Object.entries(denied).map(([model, reason]) => ({
+        model,
+        reason,
+      })),
     };
   }
   return {
     allow: true,
     model: chosen.name,
-    reasons: Object.entries(denied).map(([model, reason]) => ({ model, reason })),
+    reasons: Object.entries(denied).map(([model, reason]) => ({
+      model,
+      reason,
+    })),
   };
 }
 ```
@@ -274,7 +319,10 @@ export function metricsHandler(req: Request, res: Response) {
 
 export function timed(routeLabel: string) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const end = httpReqLatency.startTimer({ route: routeLabel, method: req.method });
+    const end = httpReqLatency.startTimer({
+      route: routeLabel,
+      method: req.method,
+    });
     res.on('finish', () => end({ status: String(res.statusCode) }));
     next();
   };
@@ -371,7 +419,10 @@ export async function fileIncident(
   return r.data.number;
 }
 
-export async function upsertRunReport(auditId: string, jsonl: string): Promise<void> {
+export async function upsertRunReport(
+  auditId: string,
+  jsonl: string,
+): Promise<void> {
   const path = `runs/${auditId}.jsonl`;
   await octo.repos.createOrUpdateFileContents({
     owner,
@@ -402,7 +453,8 @@ export async function createJiraIssue({
   const res = await fetch(url, {
     method: 'POST',
     headers: {
-      Authorization: 'Basic ' + Buffer.from(`${email}:${apiToken}`).toString('base64'),
+      Authorization:
+        'Basic ' + Buffer.from(`${email}:${apiToken}`).toString('base64'),
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
@@ -415,7 +467,8 @@ export async function createJiraIssue({
       },
     }),
   });
-  if (!res.ok) throw new Error(`Jira create failed: ${res.status} ${await res.text()}`);
+  if (!res.ok)
+    throw new Error(`Jira create failed: ${res.status} ${await res.text()}`);
   return res.json();
 }
 ```
@@ -454,8 +507,16 @@ r.post('/route/execute', async (req, res) => {
       latencyMs / 1000,
     );
     const audit_id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    await upsertRunReport(audit_id, JSON.stringify({ decision, req }, null, 0) + '\n');
-    res.json({ audit_id, latency_ms: latencyMs, output, explain: decision.reasons });
+    await upsertRunReport(
+      audit_id,
+      JSON.stringify({ decision, req }, null, 0) + '\n',
+    );
+    res.json({
+      audit_id,
+      latency_ms: latencyMs,
+      output,
+      explain: decision.reasons,
+    });
   } catch (e: any) {
     routeExecuteLatency.observe(
       { model, stream: String(Boolean(req.body.stream)), status: 'err' },
@@ -534,7 +595,12 @@ export default function ModelMatrix() {
 
   return (
     <div style={{ height: 420, width: '100%' }}>
-      <DataGrid density="compact" rows={rows} columns={cols} disableRowSelectionOnClick />
+      <DataGrid
+        density="compact"
+        rows={rows}
+        columns={cols}
+        disableRowSelectionOnClick
+      />
     </div>
   );
 }
@@ -577,7 +643,13 @@ export function ExplainRouteDrawer({
 
 ```tsx
 import React, { useState } from 'react';
-import { Button, TextField, Stack, Switch, FormControlLabel } from '@mui/material';
+import {
+  Button,
+  TextField,
+  Stack,
+  Switch,
+  FormControlLabel,
+} from '@mui/material';
 import $ from 'jquery';
 
 export default function RunbookPlanner() {
@@ -599,7 +671,12 @@ export default function RunbookPlanner() {
 
   return (
     <Stack spacing={2} direction="row" alignItems="center">
-      <TextField size="small" label="Task" value={task} onChange={(e) => setTask(e.target.value)} />
+      <TextField
+        size="small"
+        label="Task"
+        value={task}
+        onChange={(e) => setTask(e.target.value)}
+      />
       <TextField
         size="small"
         label="LoA"
@@ -615,7 +692,12 @@ export default function RunbookPlanner() {
         style={{ minWidth: 280 }}
       />
       <FormControlLabel
-        control={<Switch checked={stream} onChange={(e) => setStream(e.target.checked)} />}
+        control={
+          <Switch
+            checked={stream}
+            onChange={(e) => setStream(e.target.checked)}
+          />
+        }
         label="Stream"
       />
       <Button variant="contained" onClick={execute}>
@@ -635,7 +717,9 @@ export const theme = createTheme({
   shape: { borderRadius: 16 },
   components: {
     MuiPaper: { styleOverrides: { root: { borderRadius: 16 } } },
-    MuiButton: { styleOverrides: { root: { textTransform: 'none', borderRadius: 9999 } } },
+    MuiButton: {
+      styleOverrides: { root: { textTransform: 'none', borderRadius: 9999 } },
+    },
   },
 });
 ```
@@ -652,7 +736,11 @@ Content-Security-Policy: default-src 'self'; connect-src 'self' http://127.0.0.1
 import mermaid from 'mermaid';
 import { useEffect } from 'react';
 useEffect(() => {
-  mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: 'neutral' });
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: 'strict',
+    theme: 'neutral',
+  });
 }, []);
 useEffect(
   () => {

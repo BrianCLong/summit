@@ -35,16 +35,25 @@ The Conductor has successfully implemented its foundational 6-pillar architectur
 ```typescript
 interface WebResourceOrchestrator {
   // Intelligent web interface selection
-  selectOptimalInterfaces(prompt: string, context: TaskContext): Promise<WebInterface[]>;
+  selectOptimalInterfaces(
+    prompt: string,
+    context: TaskContext,
+  ): Promise<WebInterface[]>;
 
   // Parallel prompt routing with rate limiting
-  routeToInterfaces(prompt: string, interfaces: WebInterface[]): Promise<RouteResult[]>;
+  routeToInterfaces(
+    prompt: string,
+    interfaces: WebInterface[],
+  ): Promise<RouteResult[]>;
 
   // Response synthesis from multiple sources
   synthesizeResponses(responses: WebResponse[]): Promise<SynthesizedResult>;
 
   // Compliance-first scraping with robots.txt respect
-  respectfulScrape(interface: WebInterface, query: string): Promise<ScrapedContent>;
+  respectfulScrape(
+    interface: WebInterface,
+    query: string,
+  ): Promise<ScrapedContent>;
 }
 
 interface WebInterface {
@@ -104,7 +113,9 @@ interface ResponseSynthesizer {
   }>;
 
   // Detect and resolve conflicts between sources
-  resolveConflicts(conflictingResponses: WebResponse[]): Promise<ConflictResolution>;
+  resolveConflicts(
+    conflictingResponses: WebResponse[],
+  ): Promise<ConflictResolution>;
 
   // Quality assessment across sources
   assessQuality(response: SynthesizedResult): Promise<QualityMetrics>;
@@ -141,19 +152,31 @@ const universalResources = [
   { domain: 'kubernetes.io', capabilities: ['k8s_docs', 'configuration'] },
 
   // Code Search & Examples
-  { domain: 'github.com', capabilities: ['code_search', 'repository_analysis'] },
-  { domain: 'stackoverflow.com', capabilities: ['qa_community', 'problem_solving'] },
+  {
+    domain: 'github.com',
+    capabilities: ['code_search', 'repository_analysis'],
+  },
+  {
+    domain: 'stackoverflow.com',
+    capabilities: ['qa_community', 'problem_solving'],
+  },
 
   // Intelligence & Research
   { domain: 'arxiv.org', capabilities: ['academic_research', 'papers'] },
-  { domain: 'scholar.google.com', capabilities: ['citation_analysis', 'research'] },
+  {
+    domain: 'scholar.google.com',
+    capabilities: ['citation_analysis', 'research'],
+  },
 
   // News & Current Events
   { domain: 'reuters.com', capabilities: ['current_events', 'verified_news'] },
   { domain: 'ap.org', capabilities: ['breaking_news', 'fact_checking'] },
 
   // Specialized Domains
-  { domain: 'cve.mitre.org', capabilities: ['vulnerability_research', 'security'] },
+  {
+    domain: 'cve.mitre.org',
+    capabilities: ['vulnerability_research', 'security'],
+  },
   { domain: 'nist.gov', capabilities: ['standards', 'cybersecurity_guidance'] },
 ];
 ```
@@ -219,7 +242,10 @@ interface SymphonyMemory {
   maintainContext(sessionId: string, context: SessionContext): Promise<void>;
 
   // Predictive resource selection
-  predictBestResources(query: string, userContext: UserContext): Promise<WebInterface[]>;
+  predictBestResources(
+    query: string,
+    userContext: UserContext,
+  ): Promise<WebInterface[]>;
 }
 ```
 

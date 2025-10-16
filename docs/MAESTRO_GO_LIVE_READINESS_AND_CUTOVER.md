@@ -78,7 +78,7 @@
 - Runbooks: `docs/runbooks/*`, `infra/runbooks/maestro-runbooks.yaml`
 - RACI: see docs tables; training via MAESTRO_ONECLICK.md and templates
 
-Go/No‑Go sign‑off: Security □  SRE □  Platform □  App Eng □  Compliance/Legal □  Exec Sponsor □
+Go/No‑Go sign‑off: Security □ SRE □ Platform □ App Eng □ Compliance/Legal □ Exec Sponsor □
 
 ---
 
@@ -108,9 +108,9 @@ Go/No‑Go sign‑off: Security □  SRE □  Platform □  App Eng □  Complia
 
 ## 6) Migration Workbook (template)
 
-| Team/Repo | Tier | Owner | Pipeline Size | Critical Deps | Scanners | Avg Build (min) | Shadow Pass % | Blocking Issues | Cutover Wave |
-| --- | --- | --- | --- | --- | --- | ---: | ---: | --- | --- |
-| <svc‑api> | 0 | <name> | 12 jobs | vault://prod, ghcr.io | SAST+DAST | 14.2 | 98% | flaky test pack | Wave‑1 |
+| Team/Repo | Tier | Owner  | Pipeline Size | Critical Deps         | Scanners  | Avg Build (min) | Shadow Pass % | Blocking Issues | Cutover Wave |
+| --------- | ---- | ------ | ------------- | --------------------- | --------- | --------------: | ------------: | --------------- | ------------ |
+| <svc‑api> | 0    | <name> | 12 jobs       | vault://prod, ghcr.io | SAST+DAST |            14.2 |           98% | flaky test pack | Wave‑1       |
 
 ---
 
@@ -133,12 +133,12 @@ Go/No‑Go sign‑off: Security □  SRE □  Platform □  App Eng □  Complia
 
 ## 9) RACI (Sign‑Off)
 
-| Activity | R | A | C | I |
-| --- | --- | --- | --- | --- |
-| Gate verification | Platform SRE | Head of Eng | Security, App Leads | All |
-| Security review | Security Eng | CISO | Platform, Legal | Team Leads |
-| DR drill | Platform SRE | SRE Lead | App Leads | Exec Sponsor |
-| Cutover comms | PM/TPM | Eng Director | Support, Comms | All |
+| Activity          | R            | A            | C                   | I            |
+| ----------------- | ------------ | ------------ | ------------------- | ------------ |
+| Gate verification | Platform SRE | Head of Eng  | Security, App Leads | All          |
+| Security review   | Security Eng | CISO         | Platform, Legal     | Team Leads   |
+| DR drill          | Platform SRE | SRE Lead     | App Leads           | Exec Sponsor |
+| Cutover comms     | PM/TPM       | Eng Director | Support, Comms      | All          |
 
 ---
 
@@ -154,6 +154,7 @@ Go/No‑Go sign‑off: Security □  SRE □  Platform □  App Eng □  Complia
 ## Quick Commands (One‑Click)
 
 - Staging:
+
 ```
 make oneclick-staging TAG=<git-or-image-tag>
 # or
@@ -161,6 +162,7 @@ make oneclick-staging IMMUTABLE_REF=ghcr.io/brianclong/maestro-control-plane@sha
 ```
 
 - Production:
+
 ```
 make oneclick-prod TAG=<git-or-image-tag>
 # or
@@ -168,14 +170,15 @@ make oneclick-prod IMMUTABLE_REF=ghcr.io/brianclong/maestro-control-plane@sha256
 ```
 
 - Safe CD dry‑run:
+
 ```
 gh workflow run cd.yml -f no_op=true --ref main
 ```
 
 - Auto‑pin + staged deploy:
+
 ```
 gh workflow run auto-pin-and-deploy.yml -f dry_run_first=true --ref main
 # finalize
 gh workflow run auto-pin-and-deploy.yml -f dry_run_first=false --ref main
 ```
-

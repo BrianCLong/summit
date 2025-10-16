@@ -132,7 +132,8 @@ import { createComplexityLimitRule } from 'graphql-validation-complexity';
 export const validationRules = [
   ...specifiedRules,
   createComplexityLimitRule(Number(process.env.MAX_COMPLEXITY || 1200), {
-    onCost: (cost) => cost > 0 && cost % 200 === 0 && console.warn('cost:', cost),
+    onCost: (cost) =>
+      cost > 0 && cost % 200 === 0 && console.warn('cost:', cost),
   }),
 ];
 ```
@@ -177,7 +178,10 @@ export const options = {
 export default function () {
   const q = `{"query":"query($id:ID!){entity(id:$id){id name degree}}"}`;
   const r = http.post(__ENV.API + '/graphql', q, {
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${__ENV.TOKEN}` },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${__ENV.TOKEN}`,
+    },
   });
   check(r, { 200: (res) => res.status === 200 });
   sleep(0.2);
@@ -189,7 +193,9 @@ export default function () {
 ```ts
 test('copilot suggests Cypher with citations', async ({ page }) => {
   await page.goto(process.env.APP_URL!);
-  await page.getByPlaceholder('Ask anything…').fill('Show orgs linked to ACME last 90 days');
+  await page
+    .getByPlaceholder('Ask anything…')
+    .fill('Show orgs linked to ACME last 90 days');
   await page.getByRole('button', { name: 'Generate' }).click();
   await expect(page.getByTestId('cypher-preview')).toContainText('MATCH');
   await expect(page.getByTestId('citations')).toHaveCountGreaterThan(0);

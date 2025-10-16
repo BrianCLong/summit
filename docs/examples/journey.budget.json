@@ -1,7 +1,30 @@
 {
   "journeys": [
-    {"name": "checkout", "weight": 0.35, "budgets": {"version": "1", "budgets": {"lcp_ms": 2000, "ttfb_ms": 250, "api_p95_ms": 350, "payload_kb": 250}}},
-    {"name": "search",   "weight": 0.25, "budgets": {"version": "1", "budgets": {"lcp_ms": 2200, "ttfb_ms": 250, "api_p95_ms": 350, "payload_kb": 200}}}
+    {
+      "name": "checkout",
+      "weight": 0.35,
+      "budgets": {
+        "version": "1",
+        "budgets": {
+          "lcp_ms": 2000,
+          "ttfb_ms": 250,
+          "api_p95_ms": 350,
+          "payload_kb": 250
+        }
+      }
+    },
+    {
+      "name": "search",
+      "weight": 0.25,
+      "budgets": {
+        "version": "1",
+        "budgets": {
+          "lcp_ms": 2200,
+          "ttfb_ms": 250,
+          "api_p95_ms": 350,
+          "payload_kb": 200
+        }
+      }
+    }
   ]
 }
-

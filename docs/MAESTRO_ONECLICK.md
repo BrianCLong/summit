@@ -52,4 +52,3 @@ The command sequence:
 - Gatekeeper denies unpinned or missing annotations: check `kubectl -n gatekeeper-system logs deploy/gatekeeper-controller-manager`.
 - Cosign verify failures in CD: confirm you are signing in the build and subjects match Kyverno attestors.
 - Rollout analysis stalls: verify Prometheus address and query labels.
-

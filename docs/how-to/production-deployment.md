@@ -1,4 +1,3 @@
-
 # Production Deployment Guide
 
 This guide provides instructions for deploying the IntelGraph platform to a production environment. The primary deployment method uses Docker Compose and shell scripts.
@@ -35,6 +34,7 @@ Execute the script from your local machine:
 ```
 
 The script will perform the following actions:
+
 - Install Docker and Docker Compose on the EC2 instance.
 - Install and configure nginx as a reverse proxy.
 - Copy the `docker-compose.yml` file to the server.
@@ -57,6 +57,7 @@ The `backend-deployment.sh` script is a one-time setup script that creates the e
 ```
 
 This script will:
+
 - Install backend dependencies.
 - Create the necessary directory structure.
 - Generate configuration files.

@@ -1,9 +1,11 @@
 # PII Ontology Mapping System
 
 ## Overview
+
 The PII Ontology Mapping System provides automated detection, contextual classification, and governance workflows for personally identifiable information (PII) across the IntelGraph platform. The engine combines deterministic pattern recognition, adaptive machine learning signals, and deep regulatory mappings to maintain compliance with GDPR, CCPA, and HIPAA.
 
 ## Core Capabilities
+
 - **Hybrid Detection Pipeline**
   - Configurable pattern registry with weighted confidence boosts.
   - Feature-driven ML signaler that learns from positive and negative samples.
@@ -18,6 +20,7 @@ The PII Ontology Mapping System provides automated detection, contextual classif
   - Control catalog with encryption, RBAC, PCI, HIPAA, and credential-hardening guidance.
 
 ## Operational Workflow
+
 1. **Training & Calibration**
    - Supply `TrainingSample` collections representing PII and non-PII values.
    - Register bespoke patterns for identifiers (SSN, Passport, National IDs), communications (email, phone), and sector-specific artifacts.
@@ -30,18 +33,21 @@ The PII Ontology Mapping System provides automated detection, contextual classif
    - Export `regulatorySummary` sections for audit binders and Data Protection Impact Assessments (DPIAs).
 
 ## Compliance Validation Matrix
-| Framework | Required Categories | Automated Obligations | Operational Controls |
-| --- | --- | --- | --- |
-| GDPR | Identifier, Contact, Financial, Health, Location, Biometric, Demographic, Authentication | Lawful basis tracking, minimization, DSAR enablement | Encryption, RBAC, access monitoring |
-| CCPA | Identifier, Contact, Financial, Health, Location, Demographic, Authentication | Disclosure notices, opt-out enforcement, consumer request fulfillment | Consent auditing, preference management, deletion workflows |
-| HIPAA | Health, Identifier, Contact, Location | Safeguards, minimum necessary use, breach readiness | HIPAA audit logging, restricted clinical zones, contingency plans |
+
+| Framework | Required Categories                                                                      | Automated Obligations                                                 | Operational Controls                                              |
+| --------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| GDPR      | Identifier, Contact, Financial, Health, Location, Biometric, Demographic, Authentication | Lawful basis tracking, minimization, DSAR enablement                  | Encryption, RBAC, access monitoring                               |
+| CCPA      | Identifier, Contact, Financial, Health, Location, Demographic, Authentication            | Disclosure notices, opt-out enforcement, consumer request fulfillment | Consent auditing, preference management, deletion workflows       |
+| HIPAA     | Health, Identifier, Contact, Location                                                    | Safeguards, minimum necessary use, breach readiness                   | HIPAA audit logging, restricted clinical zones, contingency plans |
 
 ## Testing & Validation
+
 - Unit coverage for entity detection, metadata enrichment, regulatory summarization, and validation flows (`server/src/tests/piiOntologyEngine.test.ts`).
 - Deterministic lineage verification across all detected entities.
 - Regression hook for targeted validation across GDPR/CCPA/HIPAA to ensure CI gates fail when required categories are missing.
 
 ## Deployment Guidance
+
 - **Thresholds:** Default detection threshold of `0.55` balances recall and precision; adjust per data domain.
 - **Risk Bands:** `MEDIUM` risk at ≥0.5, `HIGH` at ≥0.65, `CRITICAL` at ≥0.85 (configurable via enrichment options).
 - **Observability:** Forward `ClassificationReport` metrics to the platform telemetry pipeline; alert on spikes in newly detected categories or failed compliance validations.

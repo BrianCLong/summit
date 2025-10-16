@@ -142,7 +142,11 @@ const Input = z.object({
 
 export class GraphRAGService {
   async retrieveSubgraph(req: GraphRAGRequest) {
-    const { investigationId, focusEntityIds = [], maxHops = 2 } = Input.parse(req);
+    const {
+      investigationId,
+      focusEntityIds = [],
+      maxHops = 2,
+    } = Input.parse(req);
     const driver = getNeo4jDriver();
     const session = driver.session();
 
@@ -162,7 +166,11 @@ export class GraphRAGService {
         RETURN apoc.coll.toSet(apoc.coll.flatten(nss)) AS nodes, apoc.coll.toSet(apoc.coll.flatten(rss)) AS relationships
       `;
 
-    const res = await session.run(cypher, { ids: focusEntityIds, inv: investigationId, maxHops });
+    const res = await session.run(cypher, {
+      ids: focusEntityIds,
+      inv: investigationId,
+      maxHops,
+    });
     await session.close();
     if (!res.records.length) return { nodes: [], rels: [] };
     const rec = res.records[0];
@@ -200,7 +208,9 @@ export class GraphRAGService {
     return {
       answer: `Hypothesis: ${question}`,
       confidence: 0.72,
-      citations: { entityIds: facts.entities.slice(0, 5).map((e: any) => e.id) },
+      citations: {
+        entityIds: facts.entities.slice(0, 5).map((e: any) => e.id),
+      },
       why_paths: why,
     };
   }
@@ -278,12 +288,17 @@ const manifest = JSON.parse(
   fs.readFileSync(process.env.PQ_MANIFEST || 'persisted-queries.json', 'utf8'),
 );
 
-export function requirePersistedQueries(req: Request, res: Response, next: NextFunction) {
+export function requirePersistedQueries(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   if (process.env.NODE_ENV === 'production') {
     const body = req.body || {};
     // Accept APQ protocol: body may include queryId or hashed query
     const id = body.extensions?.persistedQuery?.sha256Hash || body.id;
-    if (!id || !manifest[id]) return res.status(403).json({ error: 'Persisted query required' });
+    if (!id || !manifest[id])
+      return res.status(403).json({ error: 'Persisted query required' });
     req.body.query = manifest[id]; // inject server‑side
   }
   next();
@@ -330,7 +345,10 @@ export const apolloMetricsPlugin = (): PluginDefinition => ({
       executionDidStart() {
         return {
           willResolveField({ info }) {
-            const end = hist.startTimer({ type: info.parentType.name, field: info.fieldName });
+            const end = hist.startTimer({
+              type: info.parentType.name,
+              field: info.fieldName,
+            });
             return () => end();
           },
         };
@@ -369,7 +387,10 @@ const Q = gql`
 
 export default function AIInsightsPanel({ cy, investigationId }) {
   const [q, setQ] = React.useState('What connects A to B?');
-  const [run, { data, loading }] = useQuery(Q, { variables: { investigationId, q }, skip: true });
+  const [run, { data, loading }] = useQuery(Q, {
+    variables: { investigationId, q },
+    skip: true,
+  });
 
   React.useEffect(() => {
     if (!cy || !data?.graphRagAnswer) return;

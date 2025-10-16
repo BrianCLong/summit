@@ -4,12 +4,11 @@ toolchains:
 targets:
   - name: web-app
     type: ts
-    inputs: ["src/**/*.ts", "package.json"]
-    outputs: ["dist/**"]
-    cache: { key: "tsc-${{hash(inputs)}}" }
+    inputs: ['src/**/*.ts', 'package.json']
+    outputs: ['dist/**']
+    cache: { key: 'tsc-${{hash(inputs)}}' }
     policy:
-      residency: "us-east-1"
-      sbom: "spdx2.3"
+      residency: 'us-east-1'
+      sbom: 'spdx2.3'
       network: []
       secrets: []
-

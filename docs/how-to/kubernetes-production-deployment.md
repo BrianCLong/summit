@@ -4,11 +4,11 @@ This guide covers a **Helm‑based** production deployment of IntelGraph onto a 
 
 ### Prerequisites
 
-* Kubernetes cluster with load balancer (EKS/GKE/AKS or on‑prem with MetalLB)
-* kubectl ≥ 1.27, Helm ≥ 3.14
-* Ingress Controller (NGINX) or Gateway API
-* cert-manager (TLS), external-dns (optional)
-* Secrets management (bitnami/sealed-secrets or SOPS)
+- Kubernetes cluster with load balancer (EKS/GKE/AKS or on‑prem with MetalLB)
+- kubectl ≥ 1.27, Helm ≥ 3.14
+- Ingress Controller (NGINX) or Gateway API
+- cert-manager (TLS), external-dns (optional)
+- Secrets management (bitnami/sealed-secrets or SOPS)
 
 ### Namespaces
 
@@ -52,27 +52,29 @@ kubectl apply -f k8s/secrets/ig-sealed.yaml
 # charts/intelgraph/values.yaml
 image:
   pullPolicy: IfNotPresent
-  tag: "v0.1.0"
+  tag: 'v0.1.0'
 
 global:
   env:
     NODE_ENV: production
-    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
-    AUTH_JWKS_URL: "https://your-idp/.well-known/jwks.json"
-    TENANCY_MODE: "multi"
+    OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317'
+    AUTH_JWKS_URL: 'https://your-idp/.well-known/jwks.json'
+    TENANCY_MODE: 'multi'
 
 server:
   replicaCount: 3
   resources:
-    requests: { cpu: "250m", memory: "512Mi" }
-    limits: { cpu: "1", memory: "1Gi" }
-  livenessProbe: { httpGet: { path: "/healthz", port: 3000 }, initialDelaySeconds: 20 }
-  readinessProbe: { httpGet: { path: "/readyz", port: 3000 }, initialDelaySeconds: 10 }
+    requests: { cpu: '250m', memory: '512Mi' }
+    limits: { cpu: '1', memory: '1Gi' }
+  livenessProbe:
+    { httpGet: { path: '/healthz', port: 3000 }, initialDelaySeconds: 20 }
+  readinessProbe:
+    { httpGet: { path: '/readyz', port: 3000 }, initialDelaySeconds: 10 }
   env:
-    POSTGRES_URL: "postgresql://postgres:$(POSTGRES_PASSWORD)@postgres:5432/ig"
-    NEO4J_URI: "bolt://neo4j:7687"
-    NEO4J_AUTH: "$(NEO4J_AUTH)"
-    REDIS_URL: "redis://redis:6379"
+    POSTGRES_URL: 'postgresql://postgres:$(POSTGRES_PASSWORD)@postgres:5432/ig'
+    NEO4J_URI: 'bolt://neo4j:7687'
+    NEO4J_AUTH: '$(NEO4J_AUTH)'
+    REDIS_URL: 'redis://redis:6379'
 
 postgres:
   primary:
@@ -83,13 +85,13 @@ postgres:
     enabled: true
 
 neo4j:
-  acceptLicenseAgreement: "yes"
-  edition: "community" # or enterprise if licensed
+  acceptLicenseAgreement: 'yes'
+  edition: 'community' # or enterprise if licensed
   volumes:
     data:
       mode: defaultStorageClass
   resources:
-    requests: { cpu: "500m", memory: "2Gi" }
+    requests: { cpu: '500m', memory: '2Gi' }
 
 redis:
   architecture: standalone
@@ -114,8 +116,8 @@ metadata:
   namespace: intelgraph
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
-    nginx.ingress.kubernetes.io/proxy-body-size: "32m"
-    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: '32m'
+    nginx.ingress.kubernetes.io/enable-cors: 'true'
 spec:
   tls:
     - hosts: [intelgraph.example.com]
@@ -135,6 +137,6 @@ spec:
 
 ### Health & SLO Checks
 
-* `kubectl -n intelgraph get pods,svc,hpa` shows all Ready
-* `/healthz`, `/readyz` return 200
-* p95 GraphQL query latency < **1.5s** on baseline dataset
+- `kubectl -n intelgraph get pods,svc,hpa` shows all Ready
+- `/healthz`, `/readyz` return 200
+- p95 GraphQL query latency < **1.5s** on baseline dataset

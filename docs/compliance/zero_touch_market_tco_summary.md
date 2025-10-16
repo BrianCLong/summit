@@ -6,13 +6,13 @@ The Summit + MC zero-touch compliance platform converges policy-as-code, automat
 
 ## Total Cost of Ownership (TCO)
 
-| Component | Human/Manual Baseline | Zero-Touch Automation | Delta |
-| --- | --- | --- | --- |
-| Policy authoring & maintenance | 2 FTE compliance engineers ($420k/year) | Shared policy registry with adapters ($110k/year incl. tooling) | -74% OPEX |
-| Evidence collection & audit prep | 1.5 FTE analysts ($285k/year) | Auto-generated ledger + validation harness ($45k/year infra) | -84% OPEX |
-| Remediation implementation | 3 FTE DevOps ($630k/year) | Auto-patch pipeline + human-in-loop review (<0.5 FTE oversight) | -78% OPEX |
-| External audit readiness | $180k/year consultants | Automated regulatory matrix + control attestations ($35k/year) | -81% spend |
-| Incident-driven fines & downtime | $950k 3-year risk-adjusted | Predictive scoring & remediation (<$120k residual exposure) | -87% risk-adjusted loss |
+| Component                        | Human/Manual Baseline                   | Zero-Touch Automation                                           | Delta                   |
+| -------------------------------- | --------------------------------------- | --------------------------------------------------------------- | ----------------------- |
+| Policy authoring & maintenance   | 2 FTE compliance engineers ($420k/year) | Shared policy registry with adapters ($110k/year incl. tooling) | -74% OPEX               |
+| Evidence collection & audit prep | 1.5 FTE analysts ($285k/year)           | Auto-generated ledger + validation harness ($45k/year infra)    | -84% OPEX               |
+| Remediation implementation       | 3 FTE DevOps ($630k/year)               | Auto-patch pipeline + human-in-loop review (<0.5 FTE oversight) | -78% OPEX               |
+| External audit readiness         | $180k/year consultants                  | Automated regulatory matrix + control attestations ($35k/year)  | -81% spend              |
+| Incident-driven fines & downtime | $950k 3-year risk-adjusted              | Predictive scoring & remediation (<$120k residual exposure)     | -87% risk-adjusted loss |
 
 ### Productivity Gains
 
@@ -22,12 +22,12 @@ The Summit + MC zero-touch compliance platform converges policy-as-code, automat
 
 ## Market Economics vs Competitors
 
-| Vendor Model | Coverage | Automation Depth | Annual Cost (est.) | Gaps vs Zero-Touch System |
-| --- | --- | --- | --- | --- |
-| Compliance SaaS A | IaC + policy catalog | Alerts only | $450k | No auto-remediation, limited runtime insight, lacks legal scoring. |
-| Compliance SaaS B | Kubernetes admission | Partial patching | $520k | No economic scoring, no FedRAMP/HIPAA mappings, manual audit exports. |
-| Big 4 Consultancy | Manual assessment | Human-driven | $1.2M | Snapshot only, no continuous enforcement, expensive change management. |
-| Summit + MC Zero-Touch | Full-stack (IaC, runtime, legal) | Auto-discover, auto-patch, human-in-loop | $300k | Provides scientific validation, regulatory matrix, ledgered evidence. |
+| Vendor Model           | Coverage                         | Automation Depth                         | Annual Cost (est.) | Gaps vs Zero-Touch System                                              |
+| ---------------------- | -------------------------------- | ---------------------------------------- | ------------------ | ---------------------------------------------------------------------- |
+| Compliance SaaS A      | IaC + policy catalog             | Alerts only                              | $450k              | No auto-remediation, limited runtime insight, lacks legal scoring.     |
+| Compliance SaaS B      | Kubernetes admission             | Partial patching                         | $520k              | No economic scoring, no FedRAMP/HIPAA mappings, manual audit exports.  |
+| Big 4 Consultancy      | Manual assessment                | Human-driven                             | $1.2M              | Snapshot only, no continuous enforcement, expensive change management. |
+| Summit + MC Zero-Touch | Full-stack (IaC, runtime, legal) | Auto-discover, auto-patch, human-in-loop | $300k              | Provides scientific validation, regulatory matrix, ledgered evidence.  |
 
 ## Scientific Validation Approach
 

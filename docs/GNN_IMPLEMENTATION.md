@@ -140,26 +140,31 @@ mutation {
 ## Model Types and Use Cases
 
 ### GraphSAGE
+
 - **Best for**: Large-scale graphs, node classification
 - **Strengths**: Scalable, inductive learning, handles new nodes
 - **Use cases**: Entity classification, social network analysis
 
 ### Graph Attention Networks (GAT)
+
 - **Best for**: Finding important neighbors, explainable AI
 - **Strengths**: Attention weights, interpretability
 - **Use cases**: Anomaly detection, threat analysis, relationship importance
 
 ### Graph Transformer
+
 - **Best for**: Long-range dependencies, complex patterns
 - **Strengths**: Global attention, powerful representation
 - **Use cases**: Complex threat detection, multi-hop reasoning
 
 ### Graph Isomorphism Networks (GIN)
+
 - **Best for**: Graph classification, structural analysis
 - **Strengths**: Theoretical guarantees, distinguishing power
 - **Use cases**: Network topology classification, pattern recognition
 
 ### Hierarchical GNN
+
 - **Best for**: Multi-scale analysis, large graphs
 - **Strengths**: Hierarchical patterns, scalability
 - **Use cases**: Organization analysis, community detection
@@ -169,16 +174,18 @@ mutation {
 ### Training Workflow
 
 1. **Data Preparation**
+
    ```python
    # Convert NetworkX to PyTorch Geometric
    pyg_data = GNNDataProcessor.networkx_to_pyg(
-       nx_graph, 
+       nx_graph,
        node_features=features,
        node_labels=labels
    )
    ```
 
 2. **Model Creation**
+
    ```python
    model = gnn_manager.create_model(
        model_name='custom_model',
@@ -190,6 +197,7 @@ mutation {
    ```
 
 3. **Training**
+
    ```python
    trainer = GNNTrainer(model)
    results = trainer.train(
@@ -216,16 +224,16 @@ mutation {
 
 ### REST Endpoints
 
-| Endpoint | Method | Description |
-|----------|---------|-------------|
-| `/gnn/node_classification` | POST | Queue node classification task |
-| `/gnn/link_prediction` | POST | Queue link prediction task |
-| `/gnn/graph_classification` | POST | Queue graph classification task |
-| `/gnn/anomaly_detection` | POST | Queue anomaly detection task |
-| `/gnn/generate_embeddings` | POST | Queue embedding generation task |
-| `/gnn/models` | GET | List available models |
-| `/gnn/models/{name}` | GET | Get model information |
-| `/gnn/models/{name}` | DELETE | Delete model |
+| Endpoint                    | Method | Description                     |
+| --------------------------- | ------ | ------------------------------- |
+| `/gnn/node_classification`  | POST   | Queue node classification task  |
+| `/gnn/link_prediction`      | POST   | Queue link prediction task      |
+| `/gnn/graph_classification` | POST   | Queue graph classification task |
+| `/gnn/anomaly_detection`    | POST   | Queue anomaly detection task    |
+| `/gnn/generate_embeddings`  | POST   | Queue embedding generation task |
+| `/gnn/models`               | GET    | List available models           |
+| `/gnn/models/{name}`        | GET    | Get model information           |
+| `/gnn/models/{name}`        | DELETE | Delete model                    |
 
 ### GraphQL Mutations
 
@@ -290,16 +298,19 @@ mutation {
 ## Performance Optimization
 
 ### Memory Management
+
 - **Batch Processing**: Configurable batch sizes for large graphs
 - **Graph Sampling**: Neighbor sampling for scalability
 - **Gradient Checkpointing**: Reduce memory during training
 
 ### GPU Acceleration
+
 - **CUDA Support**: Automatic GPU utilization when available
 - **Mixed Precision**: FP16 training for faster processing
 - **Multi-GPU**: Support for distributed training (future)
 
 ### Caching
+
 - **Model Caching**: Persistent model storage and loading
 - **Feature Caching**: Cache computed node features
 - **Result Caching**: Cache predictions for repeated queries
@@ -307,6 +318,7 @@ mutation {
 ## Monitoring and Observability
 
 ### Metrics Tracked
+
 - Model training metrics (loss, accuracy, F1-score)
 - Inference latency and throughput
 - Memory and GPU utilization
@@ -314,6 +326,7 @@ mutation {
 - Model accuracy and drift
 
 ### Health Checks
+
 - Model availability and loading status
 - GPU availability and memory
 - Task queue health
@@ -322,6 +335,7 @@ mutation {
 ## Intelligence Use Cases
 
 ### 1. Threat Actor Classification
+
 ```javascript
 // Classify entities in a threat intelligence graph
 mutation {
@@ -342,6 +356,7 @@ mutation {
 ```
 
 ### 2. Financial Crime Detection
+
 ```javascript
 // Detect suspicious financial relationships
 mutation {
@@ -362,6 +377,7 @@ mutation {
 ```
 
 ### 3. Social Network Analysis
+
 ```javascript
 // Predict relationships in social networks
 mutation {
@@ -377,6 +393,7 @@ mutation {
 ```
 
 ### 4. Communication Pattern Analysis
+
 ```javascript
 // Classify communication patterns
 mutation {
@@ -395,21 +412,25 @@ mutation {
 ## Advanced Features
 
 ### Custom Loss Functions
+
 - Focal loss for imbalanced datasets
 - Contrastive loss for embedding learning
 - Multi-task learning objectives
 
 ### Ensemble Methods
+
 - Model averaging across different architectures
 - Voting schemes for classification
 - Uncertainty quantification
 
 ### Explainability
+
 - Attention weight visualization
 - SHAP values for graph features
 - Counterfactual explanations
 
 ### Active Learning
+
 - Uncertainty-based sample selection
 - Graph-based active learning strategies
 - Human-in-the-loop training
@@ -419,6 +440,7 @@ mutation {
 ### Common Issues
 
 **Out of Memory Errors**:
+
 ```python
 # Reduce batch size
 model_config = {"batch_size": 16}
@@ -428,6 +450,7 @@ model_config = {"gradient_checkpointing": True}
 ```
 
 **Poor Model Performance**:
+
 ```python
 # Increase model capacity
 model_config = {
@@ -441,6 +464,7 @@ training_config = {"learning_rate": 0.0001}
 ```
 
 **Slow Training**:
+
 ```python
 # Enable GPU acceleration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -468,18 +492,21 @@ celery -A app.celery_app inspect active
 ## Security Considerations
 
 ### Model Security
+
 - Input validation and sanitization
 - Model versioning and integrity checks
 - Access control for model operations
 - Audit logging for model usage
 
 ### Data Privacy
+
 - Feature anonymization techniques
 - Differential privacy during training
 - Secure multi-party computation
 - Graph anonymization methods
 
 ### Infrastructure Security
+
 - Encrypted model storage
 - Secure API endpoints
 - Network isolation for training
@@ -488,12 +515,14 @@ celery -A app.celery_app inspect active
 ## Future Enhancements
 
 ### Research Directions
+
 - **Temporal GNNs**: Handle dynamic/evolving graphs
 - **Heterogeneous GNNs**: Multi-type nodes and edges
 - **Federated GNNs**: Distributed privacy-preserving learning
 - **Quantum GNNs**: Quantum computing for graph problems
 
 ### Platform Integration
+
 - **Real-time Inference**: Streaming graph analysis
 - **Automated ML**: AutoML for GNN architecture search
 - **Edge Deployment**: Mobile/edge device inference

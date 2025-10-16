@@ -16,10 +16,19 @@ paths:
           description: OK
           headers:
             Digest: { description: sha-256 of tar, schema: { type: string } }
-            ETag: { description: Weak ETag keyed to digest, schema: { type: string } }
-            X-Cosign-Bundle: { description: Optional inline Sigstore bundle, schema: { type: string } }
+            ETag:
+              {
+                description: Weak ETag keyed to digest,
+                schema: { type: string },
+              }
+            X-Cosign-Bundle:
+              {
+                description: Optional inline Sigstore bundle,
+                schema: { type: string },
+              }
           content:
-            application/vnd.intelgraph.policy+tar: { schema: { type: string, format: binary } }
+            application/vnd.intelgraph.policy+tar:
+              { schema: { type: string, format: binary } }
         '503': { description: Pack not built }
     head:
       summary: Probe for digest/etag without body
@@ -36,8 +45,12 @@ paths:
         '200':
           description: OK
           headers:
-            ETag: { description: Weak ETag keyed to pack digest, schema: { type: string } }
+            ETag:
+              {
+                description: Weak ETag keyed to pack digest,
+                schema: { type: string },
+              }
           content:
-            application/vnd.sigstore.bundle+json: { schema: { type: object, additionalProperties: true } }
+            application/vnd.sigstore.bundle+json:
+              { schema: { type: object, additionalProperties: true } }
         '503': { description: Attestation not available }
-

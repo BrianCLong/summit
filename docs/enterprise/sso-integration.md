@@ -5,5 +5,6 @@ owner: enterprise
 ---
 
 ## Overview
+
 - Supports SAML 2.0 and OIDC.
 - Integrates with Okta, Azure AD, Auth0.

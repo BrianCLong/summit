@@ -20,7 +20,6 @@
   - User documentation, empty-state guides, and customer verification checklist.
 - **Out-of-Scope (Track B):** Customer-managed encryption keys and regulator-specific bundles (captured in Forward Work below).
 
-
 ## Readiness (DoR) Evidence
 
 | Item                                                                                   | Owner            | Evidence / Link                                                                         | Status      |
@@ -74,15 +73,14 @@ _All DoR items are satisfied and linked above to unblock sprint planning._
 
 ## Interfaces & Contracts
 
-| Interface                          | Direction | Description                                                                                      | Status Signals |
-| ---------------------------------- | --------- | ------------------------------------------------------------------------------------------------ | -------------- |
-| `POST /disclosures/export`         | Client → API | Accepts `{ tenantId, dateRange, artifacts[] }`; enqueues async job and returns `202` with job ID. | Queue depth, validation failures |
-| `GET /jobs/{id}`                   | Client ↔ API | Polls job status (`pending`, `running`, `completed`, `failed`, `partial`) with progress metadata. | Completion latency, retry count |
-| Webhook `disclosure.export.ready`  | Platform → Tenant | Posts manifest summary, checksum index, and download URL; retries with exponential backoff.       | Delivery latency, failure alerts |
-| Bundle manifest JSON               | Worker → Storage | Captures artifact list, SHA-512 checksums, jurisdiction tags, and policy versions.               | Provenance graph updates |
+| Interface                         | Direction         | Description                                                                                       | Status Signals                   |
+| --------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `POST /disclosures/export`        | Client → API      | Accepts `{ tenantId, dateRange, artifacts[] }`; enqueues async job and returns `202` with job ID. | Queue depth, validation failures |
+| `GET /jobs/{id}`                  | Client ↔ API     | Polls job status (`pending`, `running`, `completed`, `failed`, `partial`) with progress metadata. | Completion latency, retry count  |
+| Webhook `disclosure.export.ready` | Platform → Tenant | Posts manifest summary, checksum index, and download URL; retries with exponential backoff.       | Delivery latency, failure alerts |
+| Bundle manifest JSON              | Worker → Storage  | Captures artifact list, SHA-512 checksums, jurisdiction tags, and policy versions.                | Provenance graph updates         |
 
 All interfaces documented in API reference PR-88; schema validation automated via contract tests.
-
 
 ## MVP Delivery Timeline (6 Weeks)
 
@@ -121,7 +119,6 @@ All interfaces documented in API reference PR-88; schema validation automated vi
 - **PII Redaction:** Data loss prevention checks integrated into export worker; alerts route to Security on violation.
 - **Access Control:** Role-based permissions enforced in API gateway; audit logs reviewed weekly.
 
-
 ## Risk Register
 
 | Risk                                  | Owner        | Mitigation                                               | Status  |
@@ -146,7 +143,6 @@ All interfaces documented in API reference PR-88; schema validation automated vi
 - CI infrastructure includes bundle signing secrets scoped to Disclosure Packager pipelines.
 - Customer identity service provides tenant scoping metadata required for authorization checks.
 
-
 ## Evidence & Reporting Cadence
 
 - Weekly status update includes ADR link, Grafana screenshot, release notes, policy diff, and demo snippet once available.
@@ -156,15 +152,14 @@ All interfaces documented in API reference PR-88; schema validation automated vi
 
 ### Evidence Matrix
 
-| Evidence Item            | Source Location                                                     | Owner        | Cadence |
-| ------------------------ | ------------------------------------------------------------------- | ------------ | ------- |
-| ADR-104                  | `docs/adr/ADR-104-disclosure-export.md`                             | Architecture | Weekly  |
-| Grafana Dashboards       | `/Disclosure Packager/Exports` and `/Disclosure Packager/Errors`    | SRE          | Weekly  |
-| Release Notes            | `docs/releases/disclosure-packager-v0.md`                           | Product Ops  | Weekly  |
-| Policy Diff Report       | `compliance/policy-diffs/disclosure-packager/`                      | Compliance   | Weekly  |
-| Demo Recording & Script  | `docs/demos/disclosure-packager/`                                   | Product Ops  | Bi-weekly |
-| Adoption Dashboard       | Looker dashboard `DP Adoption` (exported PDF in evidence folder)    | Analytics    | Weekly  |
-
+| Evidence Item           | Source Location                                                  | Owner        | Cadence   |
+| ----------------------- | ---------------------------------------------------------------- | ------------ | --------- |
+| ADR-104                 | `docs/adr/ADR-104-disclosure-export.md`                          | Architecture | Weekly    |
+| Grafana Dashboards      | `/Disclosure Packager/Exports` and `/Disclosure Packager/Errors` | SRE          | Weekly    |
+| Release Notes           | `docs/releases/disclosure-packager-v0.md`                        | Product Ops  | Weekly    |
+| Policy Diff Report      | `compliance/policy-diffs/disclosure-packager/`                   | Compliance   | Weekly    |
+| Demo Recording & Script | `docs/demos/disclosure-packager/`                                | Product Ops  | Bi-weekly |
+| Adoption Dashboard      | Looker dashboard `DP Adoption` (exported PDF in evidence folder) | Analytics    | Weekly    |
 
 ## Track B – Forward Work
 
@@ -196,14 +191,14 @@ All interfaces documented in API reference PR-88; schema validation automated vi
 
 ## Next Actions & Owners
 
-| Action                                                                 | Owner            | Due Date | Status |
-| ---------------------------------------------------------------------- | ---------------- | -------- | ------ |
-| Kickoff review to confirm responsibilities and finalize sprint backlog | Program Manager  | Week 0   | ✅ Complete |
-| Load-test queue worker for 10k event bundle scenarios                   | Backend Lead     | Week 1   | 🔄 In Progress |
-| Configure Checkly synthetic probes with alert routing                  | SRE              | Week 1   | ✅ Complete |
-| Draft empty-state content and review with UX & Legal                   | Frontend Lead    | Week 2   | 🔄 In Progress |
-| Produce demo walkthrough for MVP readiness review                      | Product Ops      | Week 5   | ⏳ Planned |
-| Schedule go/no-go checklist sign-off with executive stakeholders       | Program Manager  | Week 6   | ⏳ Planned |
+| Action                                                                 | Owner           | Due Date | Status         |
+| ---------------------------------------------------------------------- | --------------- | -------- | -------------- |
+| Kickoff review to confirm responsibilities and finalize sprint backlog | Program Manager | Week 0   | ✅ Complete    |
+| Load-test queue worker for 10k event bundle scenarios                  | Backend Lead    | Week 1   | 🔄 In Progress |
+| Configure Checkly synthetic probes with alert routing                  | SRE             | Week 1   | ✅ Complete    |
+| Draft empty-state content and review with UX & Legal                   | Frontend Lead   | Week 2   | 🔄 In Progress |
+| Produce demo walkthrough for MVP readiness review                      | Product Ops     | Week 5   | ⏳ Planned     |
+| Schedule go/no-go checklist sign-off with executive stakeholders       | Program Manager | Week 6   | ⏳ Planned     |
 
 ## Cadence & Governance
 

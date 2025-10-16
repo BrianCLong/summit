@@ -120,10 +120,14 @@ class AuthService {
       issuer: 'intelgraph',
     });
 
-    const refreshToken = jwt.sign({ ...payload, type: 'refresh' }, this.refreshSecret, {
-      expiresIn: this.refreshExpiry,
-      issuer: 'intelgraph',
-    });
+    const refreshToken = jwt.sign(
+      { ...payload, type: 'refresh' },
+      this.refreshSecret,
+      {
+        expiresIn: this.refreshExpiry,
+        issuer: 'intelgraph',
+      },
+    );
 
     return { accessToken, refreshToken };
   }
@@ -155,7 +159,10 @@ class GraphService {
   constructor() {
     this.driver = neo4j.driver(
       process.env.NEO4J_URI || 'bolt://localhost:7687',
-      neo4j.auth.basic(process.env.NEO4J_USER || 'neo4j', process.env.NEO4J_PASSWORD || 'password'),
+      neo4j.auth.basic(
+        process.env.NEO4J_USER || 'neo4j',
+        process.env.NEO4J_PASSWORD || 'password',
+      ),
     );
   }
 
@@ -441,7 +448,11 @@ module.exports = {
   },
   Subscription: {
     investigationUpdated: {
-      subscribe: () => pubsub.asyncIterator(['INVESTIGATION_CREATED', 'INVESTIGATION_UPDATED']),
+      subscribe: () =>
+        pubsub.asyncIterator([
+          'INVESTIGATION_CREATED',
+          'INVESTIGATION_UPDATED',
+        ]),
     },
   },
 };
@@ -452,7 +463,12 @@ module.exports = {
 #### 2.1 Apollo Client Setup (`client/src/services/apollo.js`)
 
 ```javascript
-import { ApolloClient, InMemoryCache, createHttpLink, from } from '@apollo/client';
+import {
+  ApolloClient,
+  InMemoryCache,
+  createHttpLink,
+  from,
+} from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 
@@ -470,17 +486,21 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
-  if (graphQLErrors) {
-    graphQLErrors.forEach(({ message, locations, path }) => {
-      console.error(`GraphQL error: Message: ${message}, Location: ${locations}, Path: ${path}`);
-    });
-  }
+const errorLink = onError(
+  ({ graphQLErrors, networkError, operation, forward }) => {
+    if (graphQLErrors) {
+      graphQLErrors.forEach(({ message, locations, path }) => {
+        console.error(
+          `GraphQL error: Message: ${message}, Location: ${locations}, Path: ${path}`,
+        );
+      });
+    }
 
-  if (networkError) {
-    console.error(`Network error: ${networkError}`);
-  }
-});
+    if (networkError) {
+      console.error(`Network error: ${networkError}`);
+    }
+  },
+);
 
 export const apolloClient = new ApolloClient({
   link: from([errorLink, authLink, httpLink]),
@@ -530,7 +550,12 @@ import cytoscape from 'cytoscape';
 import { Box, Paper, Typography, Fab, Menu, MenuItem } from '@mui/material';
 import { Add as AddIcon, Settings as SettingsIcon } from '@mui/icons-material';
 
-const GraphViewer = ({ entities = [], relationships = [], onEntityClick, onAddEntity }) => {
+const GraphViewer = ({
+  entities = [],
+  relationships = [],
+  onEntityClick,
+  onAddEntity,
+}) => {
   const cyRef = useRef(null);
   const [cy, setCy] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -688,11 +713,23 @@ const GraphViewer = ({ entities = [], relationships = [], onEntityClick, onAddEn
         <SettingsIcon />
       </Fab>
 
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
-        <MenuItem onClick={() => handleLayoutChange('cose')}>Force Layout</MenuItem>
-        <MenuItem onClick={() => handleLayoutChange('circle')}>Circle Layout</MenuItem>
-        <MenuItem onClick={() => handleLayoutChange('grid')}>Grid Layout</MenuItem>
-        <MenuItem onClick={() => handleLayoutChange('breadthfirst')}>Hierarchical Layout</MenuItem>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+      >
+        <MenuItem onClick={() => handleLayoutChange('cose')}>
+          Force Layout
+        </MenuItem>
+        <MenuItem onClick={() => handleLayoutChange('circle')}>
+          Circle Layout
+        </MenuItem>
+        <MenuItem onClick={() => handleLayoutChange('grid')}>
+          Grid Layout
+        </MenuItem>
+        <MenuItem onClick={() => handleLayoutChange('breadthfirst')}>
+          Hierarchical Layout
+        </MenuItem>
       </Menu>
     </Box>
   );
@@ -763,7 +800,8 @@ beforeAll(async () => {
   // Set test environment
   process.env.NODE_ENV = 'test';
   process.env.NEO4J_URI = 'bolt://localhost:7687';
-  process.env.POSTGRES_URL = 'postgresql://postgres:testpassword@localhost:5432/intelgraph_test';
+  process.env.POSTGRES_URL =
+    'postgresql://postgres:testpassword@localhost:5432/intelgraph_test';
 
   // Clear test databases
   const graphService = new GraphService();
@@ -817,7 +855,9 @@ describe('GraphQL API Integration Tests', () => {
       }
     `;
 
-    const response = await request(app).post('/graphql').send({ query: mutation });
+    const response = await request(app)
+      .post('/graphql')
+      .send({ query: mutation });
 
     expect(response.status).toBe(200);
     expect(response.body.data.register.user.email).toBe('test@example.com');
@@ -860,7 +900,9 @@ describe('GraphQL API Integration Tests', () => {
       .send({ query: mutation });
 
     expect(response.status).toBe(200);
-    expect(response.body.data.createInvestigation.title).toBe('Test Investigation');
+    expect(response.body.data.createInvestigation.title).toBe(
+      'Test Investigation',
+    );
   });
 });
 ```

@@ -1,6 +1,7 @@
 # Legal Hold Orchestrator
 
 ## Overview
+
 The Legal Hold Orchestrator coordinates end-to-end preservation workflows across distributed
 storage systems. It standardizes how legal teams initiate, monitor, and release holds while
 meeting regulatory, e-discovery, and chain-of-custody requirements. The orchestrator:
@@ -16,10 +17,12 @@ meeting regulatory, e-discovery, and chain-of-custody requirements. The orchestr
   tooling.
 
 ## Core Capabilities
-| Capability | Description | Controls / Outcomes |
-| --- | --- | --- |
-| **Preservation orchestration** | Fan-out preservation requests to registered connectors, capture
-discrete reference IDs, and verify applied retention locks. | Ensures preservation consistency
+
+| Capability                                                  | Description                                                     | Controls / Outcomes |
+| ----------------------------------------------------------- | --------------------------------------------------------------- | ------------------- |
+| **Preservation orchestration**                              | Fan-out preservation requests to registered connectors, capture |
+| discrete reference IDs, and verify applied retention locks. | Ensures preservation consistency                                |
+
 across AWS S3, Microsoft 365, GSuite, and other connectors. Verification logs document proof of
 lock status for audits. |
 | **Custodian lifecycle** | Issue notifications using existing NotificationService templates,
@@ -41,6 +44,7 @@ formats, and counts for ingestion into review platforms. |
 Delivers repeatable collections for FRCP production obligations and analytics. |
 
 ## Workflow Summary
+
 1. **Initiation**
    - Legal ops defines custodians, scope, and matter metadata.
    - Orchestrator registers the hold, suspends lifecycle policies, and emits custody/audit events.
@@ -61,6 +65,7 @@ Delivers repeatable collections for FRCP production obligations and analytics. |
      and lifecycle policies resume. Final custody and audit events close the chain.
 
 ## Control Mapping
+
 - **SOC 2 CC8.1 / CC7.4** – Demonstrated through automated audit logging, verification checkpoints,
   and retention policy integration.
 - **ISO 27001 A.12.3.1 & A.18.1.3** – Evidence of information backup, retention suspension, and
@@ -71,6 +76,7 @@ Delivers repeatable collections for FRCP production obligations and analytics. |
   actions mitigates spoliation risk.
 
 ## Operational Runbook Highlights
+
 - **Configuring Connectors**: Register connectors with capabilities (preservation, verification,
   export) and retention overrides. Ensure credentials are scoped to preservation operations only.
 - **Notification Templates**: Leverage NotificationService templates tagged with
@@ -83,6 +89,7 @@ Delivers repeatable collections for FRCP production obligations and analytics. |
   court submissions to provide immutable evidence bundles.
 
 ## Data Lifecycle Integration
+
 - Lifecycle policies provided to the orchestrator are automatically marked as suspended for the
   duration of the hold. Synthetic overrides are created for connectors without formal policy IDs,
   ensuring every data stream is governed.
@@ -90,12 +97,14 @@ Delivers repeatable collections for FRCP production obligations and analytics. |
   compliance loop.
 
 ## E-Discovery Support
+
 - Export metadata captures format, path, counts, and timestamps. Integrate with review tooling via
   automation hooks or manual downloads.
 - Supports iterative exports by maintaining the latest collection set while retaining prior audit
   references for defensibility.
 
 ## Chain-of-Custody Assurance
+
 - Every initiation, verification run, export, and release emits custody events stored with
   cryptographic signatures. Verification routines confirm chain integrity prior to producing an
   audit bundle.

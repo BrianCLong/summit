@@ -37,4 +37,3 @@ Templates
 Notes
 
 - Treat n8n as untrusted perimeter. Keep egress allow-list tight on n8n runtime. Secrets should be per-tenant and managed by platform secrets, not embedded in flows.
-

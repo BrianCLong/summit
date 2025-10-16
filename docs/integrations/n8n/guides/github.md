@@ -5,4 +5,3 @@
 - Import docs/integrations/n8n/github-issue-comment.json and set variables for owner, repo, issueNumber, and body.
 - Maestro → n8n: use triggerN8n with flowKey `integration/github-issue-comment`.
 - n8n → Maestro: compute HMAC with `N8N_SIGNING_SECRET` and POST to `/webhooks/n8n`.
-

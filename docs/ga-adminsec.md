@@ -29,4 +29,3 @@ This document outlines the high-level architecture for the GA-AdminSec vertical 
 ## Status
 
 This document serves as a starting point. The implementation is pending.
-

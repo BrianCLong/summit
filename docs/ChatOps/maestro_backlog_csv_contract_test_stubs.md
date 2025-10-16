@@ -122,7 +122,9 @@ import addFormats from 'ajv-formats';
 
 const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
 addFormats(ajv);
-const schema = JSON.parse(fs.readFileSync(path.join('contracts', 'workflow.schema.json'), 'utf8'));
+const schema = JSON.parse(
+  fs.readFileSync(path.join('contracts', 'workflow.schema.json'), 'utf8'),
+);
 
 function loadYaml(file: string) {
   // Minimal YAML loader stub; replace with 'yaml' pkg if desired
@@ -162,12 +164,17 @@ import path from 'node:path';
 import Ajv from 'ajv';
 
 const ajv = new Ajv({ allErrors: true });
-const schema = JSON.parse(fs.readFileSync(path.join('contracts', 'runbook.schema.json'), 'utf8'));
+const schema = JSON.parse(
+  fs.readFileSync(path.join('contracts', 'runbook.schema.json'), 'utf8'),
+);
 
 describe('Runbook manifest schema', () => {
   it('validates example runbook', () => {
     const rb = JSON.parse(
-      fs.readFileSync('examples/runbooks/backfill-entity-resolver.json', 'utf8'),
+      fs.readFileSync(
+        'examples/runbooks/backfill-entity-resolver.json',
+        'utf8',
+      ),
     );
     const validate = ajv.compile(schema);
     expect(validate(rb)).toBe(true);
@@ -199,11 +206,17 @@ describe('SIG API contracts', () => {
     const scope = nock(SIG_BASE)
       .post('/ingest/batch', (body) => {
         // Validate shape
-        return body && Array.isArray(body.items) && body.items.every((i: any) => i.id && i.payload);
+        return (
+          body &&
+          Array.isArray(body.items) &&
+          body.items.every((i: any) => i.id && i.payload)
+        );
       })
       .reply(200, { jobId: 'job-123', receipts: [{ id: 'i‑1', hash: 'abc' }] });
 
-    const res = await maestroIngestBatch({ items: [{ id: 'i‑1', payload: {} }] });
+    const res = await maestroIngestBatch({
+      items: [{ id: 'i‑1', payload: {} }],
+    });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.jobId).toBeDefined();
@@ -213,13 +226,20 @@ describe('SIG API contracts', () => {
 
   it('POST /policy/evaluate enforces purpose/authority/license', async () => {
     const policy = nock(SIG_BASE)
-      .post('/policy/evaluate', (body) => body && body.purpose && body.authority && body.license)
+      .post(
+        '/policy/evaluate',
+        (body) => body && body.purpose && body.authority && body.license,
+      )
       .reply(200, { decision: 'allow', reason: 'ok' });
 
     const res = await fetch(`${SIG_BASE}/policy/evaluate`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ purpose: 'ingest', authority: 'tasking:ops', license: 'internal' }),
+      body: JSON.stringify({
+        purpose: 'ingest',
+        authority: 'tasking:ops',
+        license: 'internal',
+      }),
     });
     expect(res.status).toBe(200);
     const json = await res.json();
@@ -244,7 +264,9 @@ describe('Runbooks trigger API (allow‑listed)', () => {
       .post('/runbooks/trigger')
       .reply(403, { error: 'runbook not allow‑listed' });
 
-    const res = await fetch(`${MAESTRO_BASE}/runbooks/trigger`, { method: 'POST' });
+    const res = await fetch(`${MAESTRO_BASE}/runbooks/trigger`, {
+      method: 'POST',
+    });
     expect(res.status).toBe(403);
     scope.done();
   });

@@ -1,9 +1,11 @@
 # MCP Tool Server Conformance Specification
 
 ## Purpose
+
 Enable tool authors to self-certify MCP servers before listing them in the IntelGraph marketplace and switchboard catalog. Conformance verifies interoperability, security, and performance guarantees that exceed Metorial's baseline.
 
 ## Test Categories
+
 1. **Protocol Compliance**
    - Validate MCP message sequencing (prompts, tools, resources, sampling).
    - Ensure schema adherence using JSON Schema fixtures.
@@ -24,6 +26,7 @@ Enable tool authors to self-certify MCP servers before listing them in the Intel
    - Attach provenance hash to each response.
 
 ## Running the Suite
+
 ```bash
 npm install
 npm run conformance -- \
@@ -33,16 +36,19 @@ npm run conformance -- \
 ```
 
 ## Outputs
+
 - `summary.json`: Pass/fail per category with latency percentiles.
 - `evidence/`: Replay fixture pack, SBOM verification logs, policy simulation report.
 - `badge-request.yaml`: Metadata for marketplace badge issuance.
 
 ## Submission Checklist
+
 - Attach `summary.json` signed with developer key.
 - Provide contact for security follow-ups (24h SLA).
 - Include runtime footprint (CPU, memory) for bin-packing hints.
 
 ## Resources
+
 - Fixture generator: `cli/intelgraph fixtures generate`.
 - Emulator docs: `clients/README.md` (local mode instructions).
 - Support: `support@intelgraph.example` (DX Guild triage).

@@ -97,7 +97,13 @@ packages/
 ### 1.3 `src/types.ts`
 
 ```ts
-export type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
+export type Json =
+  | null
+  | boolean
+  | number
+  | string
+  | Json[]
+  | { [k: string]: Json };
 
 export interface PolicyContext {
   purpose: string;
@@ -154,10 +160,15 @@ import type { RunContext, TaskInput, TaskOutput } from './types.js';
 export interface Task<TIn = unknown, TOut = unknown> {
   init?: (ctx: RunContext) => Promise<void> | void;
   validate?: (input: TaskInput<TIn>) => Promise<void> | void;
-  execute: (ctx: RunContext, input: TaskInput<TIn>) => Promise<TaskOutput<TOut>>;
+  execute: (
+    ctx: RunContext,
+    input: TaskInput<TIn>,
+  ) => Promise<TaskOutput<TOut>>;
 }
 
-export function defineTask<TIn = unknown, TOut = unknown>(task: Task<TIn, TOut>): Task<TIn, TOut> {
+export function defineTask<TIn = unknown, TOut = unknown>(
+  task: Task<TIn, TOut>,
+): Task<TIn, TOut> {
   return task;
 }
 ```
@@ -237,7 +248,11 @@ export * from './provenance.js';
 ### 1.10 Example Task — `examples/tasks/http-get.ts`
 
 ```ts
-import { defineTask, createRunContext, type TaskInput } from '@summit/maestro-sdk';
+import {
+  defineTask,
+  createRunContext,
+  type TaskInput,
+} from '@summit/maestro-sdk';
 
 export default defineTask<{ url: string }, { status: number; body: string }>({
   async validate(input: TaskInput<{ url: string }>) {
@@ -256,7 +271,9 @@ export default defineTask<{ url: string }, { status: number; body: string }>({
 if (process.env.NODE_ENV === 'development') {
   const ctx = createRunContext({});
   const task = (await import('./http-get.ts')).default;
-  task.execute(ctx, { payload: { url: 'https://example.com' } }).then((r) => console.log(r));
+  task
+    .execute(ctx, { payload: { url: 'https://example.com' } })
+    .then((r) => console.log(r));
 }
 ```
 
@@ -294,7 +311,9 @@ test('task validates and executes', async () => {
     validate: ({ payload }) => {
       if (payload.n == null) throw new Error('n required');
     },
-    execute: async (_ctx, { payload }) => ({ payload: { doubled: payload.n * 2 } }),
+    execute: async (_ctx, { payload }) => ({
+      payload: { doubled: payload.n * 2 },
+    }),
   });
   const ctx = createRunContext({});
   const out = await t.execute(ctx, { payload: { n: 2 } });

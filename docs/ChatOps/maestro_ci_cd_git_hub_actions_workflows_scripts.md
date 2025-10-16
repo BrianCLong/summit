@@ -134,7 +134,10 @@ function formatErrors(errors = []) {
   const validateRB = ajv.compile(rbSchema);
 
   const files = await glob(
-    ['examples/workflows/**/*.{yaml,yml,json}', 'examples/runbooks/**/*.{yaml,yml,json}'],
+    [
+      'examples/workflows/**/*.{yaml,yml,json}',
+      'examples/runbooks/**/*.{yaml,yml,json}',
+    ],
     { nodir: true },
   );
   if (!files.length) {
@@ -146,7 +149,8 @@ function formatErrors(errors = []) {
   for (const f of files) {
     const doc = load(f);
     const kind = doc?.kind;
-    const validate = kind === 'Workflow' ? validateWF : kind === 'Runbook' ? validateRB : null;
+    const validate =
+      kind === 'Workflow' ? validateWF : kind === 'Runbook' ? validateRB : null;
     if (!validate) {
       console.error(`✖ ${f}: unknown kind ${kind}`);
       failed++;
@@ -154,7 +158,9 @@ function formatErrors(errors = []) {
     }
     const ok = validate(doc);
     if (!ok) {
-      console.error(`✖ ${f}: schema validation failed\n${formatErrors(validate.errors)}`);
+      console.error(
+        `✖ ${f}: schema validation failed\n${formatErrors(validate.errors)}`,
+      );
       failed++;
     } else {
       console.log(`✔ ${f}`);

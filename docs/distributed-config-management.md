@@ -1,9 +1,11 @@
 # Distributed Configuration Management Service
 
 ## Overview
+
 The distributed configuration management service introduces a production-ready control plane for managing runtime configuration across Summit services. The service focuses on safety-critical concerns including deterministic rollouts, auditability, rapid recovery, and seamless integrations with existing operational tooling.
 
 ## Capabilities
+
 - **Versioned configuration history** with immutable audit records and commit metadata.
 - **Environment-specific overrides** that layer on top of baseline configuration values.
 - **Secret resolution** via pluggable resolvers (e.g., KeyVault) supporting nested secret references.
@@ -15,6 +17,7 @@ The distributed configuration management service introduces a production-ready c
 - **Rollback workflows** that promote any historical version while preserving metadata and auditing trail entries.
 
 ## Architecture
+
 ```
 ┌────────────────────────────┐
 │  DistributedConfigService  │
@@ -26,11 +29,13 @@ The distributed configuration management service introduces a production-ready c
 │ InMemoryConfigRepository   │
 └────────────────────────────┘
 ```
+
 - **DistributedConfigService** orchestrates validation, versioning, rollout logic, and integrations.
 - **InMemoryConfigRepository** persists configuration histories, audit logs, and applied state. It is easily replaceable with a database-backed repository when available.
 - **Secret and feature-flag adapters** allow integration with KeyVaultService, LaunchDarkly, or existing Summit feature toggles.
 
 ## Usage
+
 ```ts
 import {
   DistributedConfigService,
@@ -73,7 +78,9 @@ const { effectiveConfig } = await service.getConfig('notification-service', {
 ```
 
 ## Testing Strategy
+
 New Jest integration tests cover the following scenarios:
+
 - Environment override layering and watcher notifications.
 - Secret resolution, AB testing, canary rollouts, and rollback flows.
 - Drift detection output and feature flag adapter hand-offs.
@@ -81,6 +88,7 @@ New Jest integration tests cover the following scenarios:
 Run the suite via `cd server && npm test -- distributed-config-service`.
 
 ## Operational Guidance
+
 - Subscribe to the `config:updated` event emitter or register watchers to trigger hot reloads.
 - Call `recordApplied` after propagating configuration to capture applied checksums for drift comparison.
 - Use `detectDrift` during health checks to flag configuration divergence early.
