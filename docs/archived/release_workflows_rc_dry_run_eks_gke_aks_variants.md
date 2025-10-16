@@ -1,4 +1,5 @@
 # .github/workflows/release-rc.yml — **Dry‑Run (No External Systems)**
+
 Trigger on RC tags; runs tests, OPA, SBOM/vuln, Helm lint/template, and uploads evidence. No cluster or registry access.
 
 ```yaml
@@ -47,11 +48,12 @@ jobs:
 ---
 
 # .github/workflows/release-eks.yml — **EKS** (OIDC, GHCR)
+
 ```yaml
 name: release-eks
 on:
   push:
-    tags: [ 'v24.*' ]
+    tags: ['v24.*']
 permissions:
   id-token: write
   contents: read
@@ -77,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       EKS_CLUSTER: ${{ secrets.EKS_CLUSTER_NAME }}
-      AWS_REGION:  ${{ secrets.AWS_REGION }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -100,16 +102,18 @@ jobs:
         env:
           PAGERDUTY_ROUTING_KEY: ${{ secrets.PAGERDUTY_ROUTING_KEY }}
 ```
+
 **Secrets to set:** `AWS_ROLE_TO_ASSUME`, `AWS_REGION`, `EKS_CLUSTER_NAME`, `PAGERDUTY_ROUTING_KEY`.
 
 ---
 
 # .github/workflows/release-gke.yml — **GKE** (WIF, GHCR)
+
 ```yaml
 name: release-gke
 on:
   push:
-    tags: [ 'v24.*' ]
+    tags: ['v24.*']
 permissions:
   id-token: write
   contents: read
@@ -135,7 +139,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GKE_CLUSTER: ${{ secrets.GKE_CLUSTER_NAME }}
-      GKE_LOCATION: ${{ secrets.GKE_LOCATION }}  # zone or region
+      GKE_LOCATION: ${{ secrets.GKE_LOCATION }} # zone or region
       PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
@@ -161,16 +165,18 @@ jobs:
         env:
           PAGERDUTY_ROUTING_KEY: ${{ secrets.PAGERDUTY_ROUTING_KEY }}
 ```
+
 **Secrets to set:** `GCP_WIF_PROVIDER`, `GCP_SERVICE_ACCOUNT`, `GCP_PROJECT_ID`, `GKE_CLUSTER_NAME`, `GKE_LOCATION`, `PAGERDUTY_ROUTING_KEY`.
 
 ---
 
 # .github/workflows/release-aks.yml — **AKS** (OIDC, GHCR)
+
 ```yaml
 name: release-aks
 on:
   push:
-    tags: [ 'v24.*' ]
+    tags: ['v24.*']
 permissions:
   id-token: write
   contents: read
@@ -196,7 +202,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AKS_RESOURCE_GROUP: ${{ secrets.AKS_RESOURCE_GROUP }}
-      AKS_CLUSTER_NAME:  ${{ secrets.AKS_CLUSTER_NAME }}
+      AKS_CLUSTER_NAME: ${{ secrets.AKS_CLUSTER_NAME }}
     steps:
       - uses: actions/checkout@v4
       - uses: azure/login@v2
@@ -221,35 +227,44 @@ jobs:
         env:
           PAGERDUTY_ROUTING_KEY: ${{ secrets.PAGERDUTY_ROUTING_KEY }}
 ```
+
 **Secrets to set:** `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `AKS_RESOURCE_GROUP`, `AKS_CLUSTER_NAME`, `PAGERDUTY_ROUTING_KEY`.
 
 ---
 
 # Optional helper — tools/freeze-pq.js (repo utility)
+
 ```js
 #!/usr/bin/env node
 const fs = require('fs');
 const crypto = require('crypto');
 const queries = {
-  tenant: 'query($tenantId:ID!){ tenantCoherence(tenantId:$tenantId){ score status updatedAt } }',
-  publish: 'mutation($input:PublishCoherenceSignalInput!){ publishCoherenceSignal(input:$input) }'
+  tenant:
+    'query($tenantId:ID!){ tenantCoherence(tenantId:$tenantId){ score status updatedAt } }',
+  publish:
+    'mutation($input:PublishCoherenceSignalInput!){ publishCoherenceSignal(input:$input) }',
 };
-const out = {}; for (const k in queries) out[crypto.createHash('sha256').update(queries[k]).digest('hex')] = queries[k];
+const out = {};
+for (const k in queries)
+  out[crypto.createHash('sha256').update(queries[k]).digest('hex')] =
+    queries[k];
 fs.mkdirSync('.maestro', { recursive: true });
-fs.writeFileSync('.maestro/persisted-queries.json', JSON.stringify(out, null, 2));
+fs.writeFileSync(
+  '.maestro/persisted-queries.json',
+  JSON.stringify(out, null, 2),
+);
 console.log('Persisted queries written:', Object.keys(out));
 ```
 
 ---
 
 # Secrets Matrix (summary)
+
 - **Common:** `PAGERDUTY_ROUTING_KEY`
 - **EKS:** `AWS_ROLE_TO_ASSUME`, `AWS_REGION`, `EKS_CLUSTER_NAME`
 - **GKE:** `GCP_WIF_PROVIDER`, `GCP_SERVICE_ACCOUNT`, `GCP_PROJECT_ID`, `GKE_CLUSTER_NAME`, `GKE_LOCATION`
 - **AKS:** `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `AKS_RESOURCE_GROUP`, `AKS_CLUSTER_NAME`
 - **Registry (GHCR):** uses `${{ secrets.GITHUB_TOKEN }}` by default
-
-
 
 ---
 
@@ -415,9 +430,9 @@ jobs:
 ```
 
 ## Secrets & Vars to set
+
 - **Repo variable:** `CLUSTER_FLAVOR` → `eks` | `gke` | `aks`
 - **Common secret:** `PAGERDUTY_ROUTING_KEY`
 - **EKS secrets:** `AWS_ROLE_TO_ASSUME`, `AWS_REGION`, `EKS_CLUSTER_NAME`
 - **GKE secrets:** `GCP_WIF_PROVIDER`, `GCP_SERVICE_ACCOUNT`, `GCP_PROJECT_ID`, `GKE_CLUSTER_NAME`, `GKE_LOCATION`
 - **AKS secrets:** `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `AKS_RESOURCE_GROUP`, `AKS_CLUSTER_NAME`
-

@@ -144,7 +144,10 @@ _Target:_ **3-hop query p95 < 1.5s**, error rate < 0.5%.
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 export const options = {
-  thresholds: { http_req_duration: ['p(95)<1500'], http_req_failed: ['rate<0.005'] },
+  thresholds: {
+    http_req_duration: ['p(95)<1500'],
+    http_req_failed: ['rate<0.005'],
+  },
   vus: 25,
   duration: '3m',
 };
