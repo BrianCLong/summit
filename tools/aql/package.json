@@ -1,0 +1,22 @@
+{
+  "name": "@summit/aql-cli",
+  "version": "0.1.0",
+  "description": "TypeScript CLI for the Summit Audit Query Language (AQL)",
+  "bin": {
+    "aql": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node ts/cli.ts"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "execa": "^8.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.3"
+  }
+}
