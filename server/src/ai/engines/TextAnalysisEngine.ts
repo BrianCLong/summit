@@ -663,7 +663,7 @@ export class TextAnalysisEngine {
    */
   private calculateTextStatistics(text: string): TextStatistics {
     const characterCount = text.length;
-const words = (text.toLowerCase().match(/\b\w+\b/g) || []) as string[];
+const words: string[] = (text.toLowerCase().match(/\b\w+\b/g) || []) as string[];
     const wordCount = words.length;
     const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
     const sentenceCount = sentences.length;
@@ -683,7 +683,7 @@ const words = (text.toLowerCase().match(/\b\w+\b/g) || []) as string[];
     // Simple complexity score based on various factors
 const avgWordLength =
       (words.reduce((sum: number, word: string) => sum + word.length, 0) /
-        (wordCount || 1)) || 0;
+        Math.max(wordCount, 1)) || 0;
     const complexityScore =
       averageWordsPerSentence * 0.4 +
       avgWordLength * 0.3 +
