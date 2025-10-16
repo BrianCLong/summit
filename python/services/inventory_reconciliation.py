@@ -400,14 +400,17 @@ class InventoryReconciliationEngine:
 
         key_parts = [
             first_non_empty(("id", "resource_id", "asset_id")),
-            first_non_empty(("type", "resource_type", "asset_type")),
             first_non_empty(("tenant", "tenant_id", "account_id", "subscription_id")),
-            first_non_empty(("environment", "account_environment", "cloud_environment")),
-            first_non_empty(("name", "resource_name")),
-            first_non_empty(("provider", "cloud_provider"))
+            first_non_empty(("type", "resource_type", "asset_type"))
         ]
 
-        key_attrs = "|".join(key_parts)
+        # When stable identifiers are unavailable, fall back to name-based keys.
+        if not any(key_parts):
+            key_parts.extend([
+                first_non_empty(("name", "resource_name")),
+            ])
+
+        key_attrs = "|".join(part for part in key_parts if part)
         return hashlib.sha256(key_attrs.encode()).hexdigest()[:16]
 
     def _has_significant_change(self, old: Asset, new: Asset) -> bool:
