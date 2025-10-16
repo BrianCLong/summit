@@ -151,10 +151,10 @@ class CacheItem:
             elif isinstance(value, dict):
                 return sum(self._calculate_size(k) + self._calculate_size(v) for k, v in value.items())
             else:
-                # Fallback: try to pickle and measure
-                return len(pickle.dumps(value))
+                # Fallback: return a default size
+                return 1024
         except:
-            return 100  # Default estimate
+            return 1024  # Default estimate
 
 class MemoryCache:
     """In-memory cache with configurable eviction strategy"""
@@ -381,29 +381,50 @@ class RedisCache:
     
     def _serialize(self, value: Any) -> bytes:
         """Serialize value for Redis storage"""
-        if self.config.enable_compression:
-            data = pickle.dumps(value)
-            if len(data) > self.config.compression_threshold_bytes:
-                import gzip
-                data = gzip.compress(data)
-                return b'compressed:' + data
-            return b'pickled:' + data
-        else:
-            return b'pickled:' + pickle.dumps(value)
+        import hashlib
+        import os
+        secret_key = os.environ.get('SUMMIT_SIGNING_KEY')
+        if not secret_key:
+            self.logger.error("SUMMIT_SIGNING_KEY environment variable not set. Cannot serialize.")
+            raise ValueError("SUMMIT_SIGNING_KEY not set")
+
+        pickled_data = pickle.dumps(value)
+        signature = hashlib.sha256(secret_key.encode('utf-8') + pickled_data).hexdigest()
+        data_to_store = signature.encode('utf-8') + b'\n' + pickled_data
+
+        if self.config.enable_compression and len(data_to_store) > self.config.compression_threshold_bytes:
+            import gzip
+            compressed_data = gzip.compress(data_to_store)
+            return b'compressed:' + compressed_data
+        return data_to_store
     
     def _deserialize(self, data: bytes) -> Any:
         """Deserialize value from Redis"""
+        import hashlib
+        import os
+        secret_key = os.environ.get('SUMMIT_SIGNING_KEY')
+        if not secret_key:
+            self.logger.error("SUMMIT_SIGNING_KEY environment variable not set. Cannot deserialize.")
+            raise ValueError("SUMMIT_SIGNING_KEY not set")
+
         if data.startswith(b'compressed:'):
             import gzip
             compressed_data = data[11:]  # Remove 'compressed:' prefix
-            pickled_data = gzip.decompress(compressed_data)
-            return pickle.loads(pickled_data)
-        elif data.startswith(b'pickled:'):
-            pickled_data = data[8:]  # Remove 'pickled:' prefix
-            return pickle.loads(pickled_data)
-        else:
-            # Legacy format
-            return pickle.loads(data)
+            data = gzip.decompress(compressed_data)
+
+        parts = data.split(b'\n', 1)
+        if len(parts) != 2:
+            self.logger.error("Invalid data format. Cannot deserialize.")
+            raise ValueError("Invalid data format")
+
+        signature, pickled_data = parts
+        expected_signature = hashlib.sha256(secret_key.encode('utf-8') + pickled_data).hexdigest()
+
+        if signature.decode('utf-8') != expected_signature:
+            self.logger.error("Invalid signature. Data may be tampered.")
+            raise ValueError("Invalid signature")
+
+        return pickle.loads(pickled_data)
 
 class DiskCache:
     """File-based cache for large or persistent data"""
@@ -574,24 +595,52 @@ class DiskCache:
     
     def _serialize(self, value: Any) -> bytes:
         """Serialize value for disk storage"""
-        if self.config.enable_compression:
-            data = pickle.dumps(value)
-            if len(data) > self.config.compression_threshold_bytes:
-                import gzip
-                return gzip.compress(data)
-            return data
-        else:
-            return pickle.dumps(value)
+        import hashlib
+        import os
+        secret_key = os.environ.get('SUMMIT_SIGNING_KEY')
+        if not secret_key:
+            self.logger.error("SUMMIT_SIGNING_KEY environment variable not set. Cannot serialize.")
+            raise ValueError("SUMMIT_SIGNING_KEY not set")
+
+        pickled_data = pickle.dumps(value)
+        signature = hashlib.sha256(secret_key.encode('utf-8') + pickled_data).hexdigest()
+        data_to_store = signature.encode('utf-8') + b'\n' + pickled_data
+
+        if self.config.enable_compression and len(data_to_store) > self.config.compression_threshold_bytes:
+            import gzip
+            return gzip.compress(data_to_store)
+        return data_to_store
     
     def _deserialize(self, data: bytes) -> Any:
         """Deserialize value from disk"""
+        import hashlib
+        import os
+        secret_key = os.environ.get('SUMMIT_SIGNING_KEY')
+        if not secret_key:
+            self.logger.error("SUMMIT_SIGNING_KEY environment variable not set. Cannot deserialize.")
+            raise ValueError("SUMMIT_SIGNING_KEY not set")
+
         try:
             # Try gzip decompression first
             import gzip
-            return pickle.loads(gzip.decompress(data))
+            data = gzip.decompress(data)
         except:
-            # Fallback to direct pickle
-            return pickle.loads(data)
+            # Not compressed
+            pass
+
+        parts = data.split(b'\n', 1)
+        if len(parts) != 2:
+            self.logger.error("Invalid data format. Cannot deserialize.")
+            raise ValueError("Invalid data format")
+
+        signature, pickled_data = parts
+        expected_signature = hashlib.sha256(secret_key.encode('utf-8') + pickled_data).hexdigest()
+
+        if signature.decode('utf-8') != expected_signature:
+            self.logger.error("Invalid signature. Data may be tampered.")
+            raise ValueError("Invalid signature")
+
+        return pickle.loads(pickled_data)
 
 class CacheManager:
     """

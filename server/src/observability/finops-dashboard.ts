@@ -69,31 +69,41 @@ export class FinOpsObservabilityService {
         default: timeFilter = "created_at >= NOW() - INTERVAL '24 hours'";
       }
 
-      // Base query with optional tenant filter
-      const tenantFilter = tenantId ? ` AND tenant_id = '${tenantId}'` : '';
+      const params: any[] = [];
+      if (tenantId) {
+        params.push(tenantId);
+      }
+
+      const buildQuery = (baseQuery: string, useTenantFilter: boolean) => {
+        let query = baseQuery;
+        if (useTenantFilter && tenantId) {
+          query += ` AND tenant_id = $${params.length}`;
+        }
+        return query;
+      };
 
       // Total spend
-      const { rows: totalRows } = await pool.query(`
+      const totalSpendQuery = buildQuery(`
         SELECT COALESCE(SUM(amount_usd), 0) as total_spend
         FROM budget_spend 
-        WHERE ${timeFilter}${tenantFilter}
-      `);
+        WHERE ${timeFilter}`, true);
+      const { rows: totalRows } = await pool.query(totalSpendQuery, params);
 
       // Daily spend
-      const { rows: dailyRows } = await pool.query(`
+      const dailySpendQuery = buildQuery(`
         SELECT COALESCE(SUM(amount_usd), 0) as daily_spend
         FROM budget_spend 
-        WHERE created_at >= CURRENT_DATE${tenantFilter}
-      `);
+        WHERE created_at >= CURRENT_DATE`, true);
+      const { rows: dailyRows } = await pool.query(dailySpendQuery, params);
 
       // Spend by provider
-      const { rows: providerRows } = await pool.query(`
+      const providerSpendQuery = buildQuery(`
         SELECT expert_type as provider, SUM(amount_usd) as amount
         FROM budget_spend 
-        WHERE ${timeFilter}${tenantFilter}
+        WHERE ${timeFilter}
         GROUP BY expert_type
-        ORDER BY amount DESC
-      `);
+        ORDER BY amount DESC`, true);
+      const { rows: providerRows } = await pool.query(providerSpendQuery, params);
 
       // Spend by tenant (if not tenant-specific)
       let tenantSpend: Record<string, number> = {};
@@ -109,13 +119,13 @@ export class FinOpsObservabilityService {
       }
 
       // Cost trend (last 7 days)
-      const { rows: trendRows } = await pool.query(`
+      const costTrendQuery = buildQuery(`
         SELECT DATE(created_at) as date, SUM(amount_usd) as amount
         FROM budget_spend 
-        WHERE created_at >= NOW() - INTERVAL '7 days'${tenantFilter}
+        WHERE created_at >= NOW() - INTERVAL '7 days'
         GROUP BY DATE(created_at)
-        ORDER BY date
-      `);
+        ORDER BY date`, true);
+      const { rows: trendRows } = await pool.query(costTrendQuery, params);
 
       // Calculate projections and remaining budget
       const totalSpend = parseFloat(totalRows[0].total_spend || 0);

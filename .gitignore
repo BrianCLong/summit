@@ -211,3 +211,4 @@ apps/**/dist/
 **/dist/
 server/test-results/
 server/junit.xml
+\n# Secrets\n.env\n*.pem\n*.key\n*.signed.json

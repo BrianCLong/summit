@@ -57,10 +57,11 @@ router.get('/policies',
         }
       });
     } catch (error) {
+      const err = error as Error;
       logger.error('Failed to list DLP policies', {
         component: 'DLPRoutes',
-        error: error.message,
-        userId: req.user?.id
+        error: err.message,
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to retrieve DLP policies', 500);
     }
@@ -94,12 +95,12 @@ router.get('/policies/:id',
       if (error instanceof AppError) {
         throw error;
       }
-      
+      const err = error as Error;
       logger.error('Failed to get DLP policy', {
         component: 'DLPRoutes',
-        error: error.message,
+        error: err.message,
         policyId: req.params.id,
-        userId: req.user?.id
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to retrieve DLP policy', 500);
     }
@@ -148,8 +149,8 @@ router.post('/policies',
       logger.info('DLP policy created', {
         component: 'DLPRoutes',
         policyName: policyData.name,
-        createdBy: req.user?.id,
-        tenantId: req.user?.tenantId
+        createdBy: (req as any).user?.id,
+        tenantId: (req as any).user?.tenantId
       });
 
       res.status(201).json({
@@ -161,11 +162,11 @@ router.post('/policies',
       if (error instanceof AppError) {
         throw error;
       }
-      
+      const err = error as Error;
       logger.error('Failed to create DLP policy', {
         component: 'DLPRoutes',
-        error: error.message,
-        userId: req.user?.id
+        error: err.message,
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to create DLP policy', 500);
     }
@@ -217,8 +218,8 @@ router.put('/policies/:id',
       logger.info('DLP policy updated', {
         component: 'DLPRoutes',
         policyId,
-        updatedBy: req.user?.id,
-        tenantId: req.user?.tenantId,
+        updatedBy: (req as any).user?.id,
+        tenantId: (req as any).user?.tenantId,
         changes: Object.keys(updates)
       });
 
@@ -230,12 +231,12 @@ router.put('/policies/:id',
       if (error instanceof AppError) {
         throw error;
       }
-      
+      const err = error as Error;
       logger.error('Failed to update DLP policy', {
         component: 'DLPRoutes',
-        error: error.message,
+        error: err.message,
         policyId: req.params.id,
-        userId: req.user?.id
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to update DLP policy', 500);
     }
@@ -270,8 +271,8 @@ router.delete('/policies/:id',
       logger.info('DLP policy deleted', {
         component: 'DLPRoutes',
         policyId,
-        deletedBy: req.user?.id,
-        tenantId: req.user?.tenantId
+        deletedBy: (req as any).user?.id,
+        tenantId: (req as any).user?.tenantId
       });
 
       res.json({
@@ -282,12 +283,12 @@ router.delete('/policies/:id',
       if (error instanceof AppError) {
         throw error;
       }
-      
+      const err = error as Error;
       logger.error('Failed to delete DLP policy', {
         component: 'DLPRoutes',
-        error: error.message,
+        error: err.message,
         policyId: req.params.id,
-        userId: req.user?.id
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to delete DLP policy', 500);
     }
@@ -328,8 +329,8 @@ router.post('/policies/:id/toggle',
         component: 'DLPRoutes',
         policyId,
         newState: !policy.enabled,
-        toggledBy: req.user?.id,
-        tenantId: req.user?.tenantId
+        toggledBy: (req as any).user?.id,
+        tenantId: (req as any).user?.tenantId
       });
 
       res.json({
@@ -341,12 +342,12 @@ router.post('/policies/:id/toggle',
       if (error instanceof AppError) {
         throw error;
       }
-      
+      const err = error as Error;
       logger.error('Failed to toggle DLP policy', {
         component: 'DLPRoutes',
-        error: error.message,
+        error: err.message,
         policyId: req.params.id,
-        userId: req.user?.id
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to toggle DLP policy', 500);
     }
@@ -371,14 +372,14 @@ router.post('/scan',
       }
 
       const context = {
-        userId: req.user?.id || 'anonymous',
-        tenantId: req.user?.tenantId || 'default',
-        userRole: req.user?.role || 'user',
+        userId: (req as any).user?.id || 'anonymous',
+        tenantId: (req as any).user?.tenantId || 'default',
+        userRole: (req as any).user?.role || 'user',
         operationType: req.body.operationType || 'read' as const,
         contentType: 'manual-scan',
         metadata: {
           scanType: 'manual',
-          requestedBy: req.user?.id
+          requestedBy: (req as any).user?.id
         }
       };
 
@@ -412,18 +413,19 @@ router.post('/scan',
 
       logger.info('Manual DLP scan completed', {
         component: 'DLPRoutes',
-        userId: req.user?.id,
-        tenantId: req.user?.tenantId,
+        userId: (req as any).user?.id,
+        tenantId: (req as any).user?.tenantId,
         violationCount: scanResults.length,
         contentSize: JSON.stringify(req.body.content).length
       });
 
       res.json(response);
     } catch (error) {
+      const err = error as Error;
       logger.error('Manual DLP scan failed', {
         component: 'DLPRoutes',
-        error: error.message,
-        userId: req.user?.id
+        error: err.message,
+        userId: (req as any).user?.id
       });
       throw new AppError('DLP scan failed', 500);
     }
@@ -474,10 +476,11 @@ router.get('/metrics',
         data: mockMetrics
       });
     } catch (error) {
+      const err = error as Error;
       logger.error('Failed to get DLP metrics', {
         component: 'DLPRoutes',
-        error: error.message,
-        userId: req.user?.id
+        error: err.message,
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to retrieve DLP metrics', 500);
     }

@@ -52,10 +52,11 @@ router.get('/providers',
         }
       });
     } catch (error) {
+      const err = error as Error;
       logger.error('Failed to list SIEM providers', {
         component: 'SIEMRoutes',
-        error: error.message,
-        userId: req.user?.id
+        error: err.message,
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to retrieve SIEM providers', 500);
     }
@@ -86,15 +87,16 @@ router.get('/providers/:id',
         data: status
       });
     } catch (error) {
+      const err = error as Error;
       if (error instanceof AppError) {
         throw error;
       }
       
       logger.error('Failed to get SIEM provider', {
         component: 'SIEMRoutes',
-        error: error.message,
+        error: err.message,
         providerId: req.params.id,
-        userId: req.user?.id
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to retrieve SIEM provider', 500);
     }
@@ -138,8 +140,8 @@ router.put('/providers/:id',
       logger.info('SIEM provider updated', {
         component: 'SIEMRoutes',
         providerId,
-        updatedBy: req.user?.id,
-        tenantId: req.user?.tenantId,
+        updatedBy: (req as any).user?.id,
+        tenantId: (req as any).user?.tenantId,
         changes: Object.keys(updates)
       });
 
@@ -148,15 +150,16 @@ router.put('/providers/:id',
         message: 'SIEM provider updated successfully'
       });
     } catch (error) {
+      const err = error as Error;
       if (error instanceof AppError) {
         throw error;
       }
       
       logger.error('Failed to update SIEM provider', {
         component: 'SIEMRoutes',
-        error: error.message,
+        error: err.message,
         providerId: req.params.id,
-        userId: req.user?.id
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to update SIEM provider', 500);
     }
@@ -182,8 +185,8 @@ router.post('/providers/:id/test',
       logger.info('Testing SIEM provider connectivity', {
         component: 'SIEMRoutes',
         providerId,
-        testedBy: req.user?.id,
-        tenantId: req.user?.tenantId
+        testedBy: (req as any).user?.id,
+        tenantId: (req as any).user?.tenantId
       });
 
       const testResult = await siemService.testProvider(providerId);
@@ -197,11 +200,12 @@ router.post('/providers/:id/test',
         }
       });
     } catch (error) {
+      const err = error as Error;
       logger.error('SIEM provider test failed', {
         component: 'SIEMRoutes',
-        error: error.message,
+        error: err.message,
         providerId: req.params.id,
-        userId: req.user?.id
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to test SIEM provider', 500);
     }
@@ -236,13 +240,13 @@ router.post('/events',
         source: req.body.source,
         message: req.body.message,
         details: req.body.details || {},
-        userId: req.user?.id,
-        tenantId: req.user?.tenantId,
+        userId: (req as any).user?.id,
+        tenantId: (req as any).user?.tenantId,
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
         tags: req.body.tags || ['manual'],
         rawData: {
-          createdBy: req.user?.id,
+          createdBy: (req as any).user?.id,
           createdAt: new Date(),
           manual: true
         }
@@ -254,8 +258,8 @@ router.post('/events',
         component: 'SIEMRoutes',
         eventType: event.eventType,
         severity: event.severity,
-        sentBy: req.user?.id,
-        tenantId: req.user?.tenantId
+        sentBy: (req as any).user?.id,
+        tenantId: (req as any).user?.tenantId
       });
 
       res.json({
@@ -269,10 +273,11 @@ router.post('/events',
         }
       });
     } catch (error) {
+      const err = error as Error;
       logger.error('Failed to send manual SIEM event', {
         component: 'SIEMRoutes',
-        error: error.message,
-        userId: req.user?.id
+        error: err.message,
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to send SIEM event', 500);
     }
@@ -316,10 +321,11 @@ router.get('/status',
         data: statusSummary
       });
     } catch (error) {
+      const err = error as Error;
       logger.error('Failed to get SIEM status', {
         component: 'SIEMRoutes',
-        error: error.message,
-        userId: req.user?.id
+        error: err.message,
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to retrieve SIEM status', 500);
     }
@@ -399,10 +405,11 @@ router.get('/metrics',
         data: mockMetrics
       });
     } catch (error) {
+      const err = error as Error;
       logger.error('Failed to get SIEM metrics', {
         component: 'SIEMRoutes',
-        error: error.message,
-        userId: req.user?.id
+        error: err.message,
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to retrieve SIEM metrics', 500);
     }
@@ -435,8 +442,8 @@ router.post('/alerts',
         severity: req.body.severity,
         category: req.body.category || 'security',
         indicators: req.body.indicators || [],
-        createdBy: req.user?.id,
-        tenantId: req.user?.tenantId
+        createdBy: (req as any).user?.id,
+        tenantId: (req as any).user?.tenantId
       };
 
       // Create SIEM event for the alert
@@ -453,8 +460,8 @@ router.post('/alerts',
           indicators: alert.indicators,
           alertId: `alert-${Date.now()}`
         },
-        userId: req.user?.id,
-        tenantId: req.user?.tenantId,
+        userId: (req as any).user?.id,
+        tenantId: (req as any).user?.tenantId,
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
         tags: ['security', 'alert', 'manual']
@@ -466,8 +473,8 @@ router.post('/alerts',
         component: 'SIEMRoutes',
         alertTitle: alert.title,
         severity: alert.severity,
-        createdBy: req.user?.id,
-        tenantId: req.user?.tenantId
+        createdBy: (req as any).user?.id,
+        tenantId: (req as any).user?.tenantId
       });
 
       res.json({
@@ -480,10 +487,11 @@ router.post('/alerts',
         }
       });
     } catch (error) {
+      const err = error as Error;
       logger.error('Failed to create security alert', {
         component: 'SIEMRoutes',
-        error: error.message,
-        userId: req.user?.id
+        error: err.message,
+        userId: (req as any).user?.id
       });
       throw new AppError('Failed to create security alert', 500);
     }

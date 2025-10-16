@@ -1,7 +1,7 @@
 // server/src/optimization/api-gateway-optimizer.ts
 
 import { getRedisClient } from '../config/database.js';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { createHash } from 'crypto';
 import { EventEmitter } from 'events';
 
@@ -497,7 +497,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
   createBudgetMiddleware() {
     return async (req: any, res: any, next: any) => {
-      const userId = req.user?.id;
+      const userId = (req as any).user?.id;
       if (!userId) return next();
 
       const estimatedCost = this.estimateRequestCost(req);
@@ -550,7 +550,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
     const route = this.getRouteKey(req);
     const query = JSON.stringify(req.query, Object.keys(req.query).sort());
     const params = JSON.stringify(req.params, Object.keys(req.params).sort());
-    const userId = req.user?.id || 'anonymous';
+    const userId = (req as any).user?.id || 'anonymous';
     
     return createHash('md5')
       .update(`${route}:${query}:${params}:${userId}`)

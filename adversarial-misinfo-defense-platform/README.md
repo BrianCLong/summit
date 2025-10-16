@@ -2,63 +2,13 @@
 
 A comprehensive platform for detecting and defending against adversarial misinformation across multiple modalities including text, images, audio, video, memes, and deepfakes.
 
-## Overview
+## Features
 
-The Adversarial Misinformation Defense Platform is designed to combat sophisticated misinformation campaigns that leverage advanced AI techniques including deepfakes, coordinated inauthentic behavior, and multi-modal adversarial content generation. This platform provides cutting-edge detection capabilities, autonomous evolution mechanisms, and comprehensive validation suites.
-
-## Key Features
-
-### 1. Multi-Modal Detection
-- **Text Detection**: Advanced NLP techniques for identifying misleading narratives and adversarial text patterns
-- **Image Detection**: Sophisticated analysis for manipulated images and visual misinformation
-- **Audio Detection**: Deepfake audio detection and acoustic anomaly identification
-- **Video Detection**: Temporal consistency checks and deepfake video analysis
-- **Meme Detection**: Template recognition and caption analysis for meme-based misinformation
-- **Deepfake Detection**: Comprehensive deepfake identification across all modalities
-
-### 2. Autonomous Tactic Evolution
-- Self-evolving detection libraries that adapt to new adversarial techniques
-- Threat actor behavior modeling and prediction
-- Continuous learning from adversarial samples
-
-### 3. Adversarial Training
-- GAN-based adversarial sample generation for model improvement
-- Large Language Model (LLM) assisted detection library extension
-- Continuous model refinement through adversarial training cycles
-
-### 4. Red/Blue Team Operations
-- Scenario builder UI for creating realistic adversarial exercises
-- Comprehensive exercise management and tracking
-- Performance evaluation and improvement recommendations
-
-### 5. Validation Suite
-- State-of-the-art benchmark comparisons
-- Comprehensive performance metrics across all modalities
-- Detailed reporting and improvement recommendations
-
-## Architecture
-
-```
-adversarial-misinfo-defense-platform/
-├── detection_modules/
-│   ├── __init__.py
-│   ├── main_detector.py          # Main integration module
-│   ├── text_detector.py          # Text-based misinformation detection
-│   ├── image_detector.py         # Image manipulation and deepfake detection
-│   ├── audio_detector.py          # Audio deepfake and anomaly detection
-│   ├── video_detector.py          # Video deepfake and temporal analysis
-│   ├── meme_detector.py           # Meme template and caption analysis
-│   └── deepfake_detector.py      # Comprehensive deepfake detection
-├── adversarial_training.py        # Adversarial training with GANs and LLMs
-├── tactic_evolution.py            # Autonomous tactic evolution
-├── red_blue_team.py               # Red/Blue team exercise management
-├── scenario_builder_ui.py         # Web-based scenario builder interface
-├── validation_suite.py           # Validation against state-of-the-art attacks
-├── __init__.py                    # Package initialization
-├── README.md                      # This file
-├── requirements.txt               # Dependencies
-└── setup.py                      # Installation configuration
-```
+- **Multi-Modal Detection**: Advanced detection across text, image, audio, video, memes, and deepfakes
+- **Autonomous Tactic Evolution**: Self-evolving detection libraries that adapt to new adversarial techniques
+- **Adversarial Training**: GAN-based adversarial sample generation with LLM-assisted library extension
+- **Red/Blue Team Operations**: Scenario builder UI for adversarial exercises
+- **Validation Suite**: Comprehensive benchmarking against state-of-the-art attacks
 
 ## Installation
 
@@ -76,7 +26,26 @@ pip install -e .
 
 ## Quick Start
 
-### 1. Basic Usage
+### Command Line Usage
+
+```bash
+# Run detection on text
+python main.py detect --text "This shocking revelation will change everything!"
+
+# Run validation suite
+python main.py validate --output reports/validation_results.json
+
+# Manage red/blue team exercises
+python main.py exercise --interactive
+
+# Run adversarial training
+python main.py train --data /path/to/training/data --epochs 100
+
+# Run autonomous tactic evolution
+python main.py evolve --cycles 5
+```
+
+### Python API Usage
 
 ```python
 from adversarial_misinfo_defense import create_platform
@@ -97,52 +66,31 @@ results = detector.detect_text_misinfo(text_samples)
 print(results)
 ```
 
-### 2. Running Validation
+## Components
 
-```python
-from adversarial_misinfo_defense import ValidationBenchmark
+### Detection Modules
+- `text_detector.py`: Advanced NLP techniques for text misinformation
+- `image_detector.py`: Computer vision for image manipulation detection
+- `audio_detector.py`: Acoustic analysis for audio deepfake detection
+- `video_detector.py`: Temporal analysis for video deepfake detection
+- `meme_detector.py`: Template recognition for meme manipulation
+- `deepfake_detector.py`: Comprehensive deepfake identification
 
-# Create validation benchmark
-validator = ValidationBenchmark()
+### Training & Evolution
+- `adversarial_training.py`: GAN-based adversarial sample generation
+- `tactic_evolution.py`: Autonomous tactic evolution system
+- `red_blue_team.py`: Red/Blue team exercise management
 
-# Run comprehensive validation
-results = validator.run_comprehensive_validation()
+### Validation
+- `validation_suite.py`: Comprehensive benchmarking suite
+- `VALIDATION_REPORT.md`: Detailed validation results
 
-# Generate report
-report = validator.generate_validation_report(results)
-print(report)
-```
+## Documentation
 
-### 3. Starting Red/Blue Team Exercises
-
-```python
-from adversarial_misinfo_defense import RedBlueTeamExerciseManager
-
-# Create exercise manager
-exercise_manager = RedBlueTeamExerciseManager()
-
-# Create a new scenario
-scenario = exercise_manager.create_scenario(
-    name="Social Media Influence Campaign",
-    description="Simulate a coordinated social media influence operation",
-    exercise_type=ExerciseType.SOCIAL_ENGINEERING,
-    difficulty=ScenarioDifficulty.INTERMEDIATE,
-    objectives=[
-        "Detect coordinated account behavior",
-        "Identify inauthentic engagement patterns",
-        "Trace information flow manipulation"
-    ]
-)
-
-# Start an exercise session
-session = exercise_manager.start_exercise_session(
-    scenario.scenario_id,
-    participating_teams=[
-        {"role": "red_team", "members": ["attacker1", "attacker2"]},
-        {"role": "blue_team", "members": ["defender1", "defender2"]}
-    ]
-)
-```
+- `USER_GUIDE.md`: Detailed usage guide
+- `PATENT_CLAIM_CHECKLIST.md`: Intellectual property mapping
+- `VALIDATION_REPORT.md`: Performance benchmarks
+- `FINAL_SUMMARY.md`: Implementation summary
 
 ## Requirements
 
@@ -154,48 +102,9 @@ session = exercise_manager.start_exercise_session(
 - NumPy
 - Pandas
 - Scikit-learn
-- Streamlit (for UI components)
 
 See `requirements.txt` for detailed dependencies.
-
-## Development
-
-### Running Tests
-
-```bash
-# Run unit tests
-python -m pytest tests/
-
-# Run specific test modules
-python -m pytest tests/test_text_detector.py
-```
-
-### Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Run the test suite
-6. Submit a pull request
-
-## Documentation
-
-- [API Reference](docs/api.md)
-- [Architecture Guide](docs/architecture.md)
-- [Development Guide](docs/development.md)
-- [Deployment Guide](docs/deployment.md)
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Built using state-of-the-art machine learning frameworks
-- Inspired by research in adversarial machine learning and misinformation detection
-- Developed with support from the cybersecurity research community
-
-## Contact
-
-For questions, issues, or contributions, please open an issue on the GitHub repository.

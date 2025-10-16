@@ -1,7 +1,7 @@
 // server/src/optimization/optimization-manager.ts
 
 import { getNeo4jDriver, getPostgresPool } from '../config/database.js';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { Neo4jQueryOptimizer } from './neo4j-query-optimizer.js';
 import { PostgresPerformanceOptimizer } from './postgres-performance-optimizer.js';
 import { ApiGatewayOptimizer } from './api-gateway-optimizer.js';

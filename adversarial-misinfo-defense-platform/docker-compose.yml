@@ -1,0 +1,141 @@
+version: '3.8'
+
+services:
+  # Main adversarial misinformation defense platform
+  amd-platform:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: adversarial-misinfo-defense:latest
+    container_name: amd-platform
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+      - ./scenarios:/app/scenarios
+    environment:
+      - AMD_DATA_DIR=/app/data
+      - AMD_MODEL_DIR=/app/models
+      - AMD_LOG_DIR=/app/logs
+      - AMD_API_HOST=0.0.0.0
+      - AMD_API_PORT=8000
+      - AMD_LOG_LEVEL=INFO
+    command: ["serve", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
+    networks:
+      - amd-network
+
+  # Database for storing detection results and exercise data
+  amd-database:
+    image: postgres:14-alpine
+    container_name: amd-database
+    environment:
+      POSTGRES_DB: adversarial_misinfo
+      POSTGRES_USER: amd_user
+      POSTGRES_PASSWORD: amd_password_secure
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - amd-network
+
+  # Redis for caching and real-time collaboration
+  amd-redis:
+    image: redis:7-alpine
+    container_name: amd-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - amd-network
+
+  # Neo4j for graph-based analysis
+  amd-neo4j:
+    image: neo4j:5-community
+    container_name: amd-neo4j
+    environment:
+      NEO4J_AUTH: neo4j/amd_password_secure
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - ./neo4j.conf:/var/lib/neo4j/conf/neo4j.conf
+    ports:
+      - "7474:7474"  # HTTP browser
+      - "7687:7687"  # Bolt protocol
+    restart: unless-stopped
+    networks:
+      - amd-network
+
+  # Web-based UI for scenario builder and dashboard
+  amd-web-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    image: amd-web-ui:latest
+    container_name: amd-web-ui
+    ports:
+      - "3000:3000"
+    environment:
+      - AMD_API_URL=http://amd-platform:8000
+      - NODE_ENV=production
+    depends_on:
+      - amd-platform
+    restart: unless-stopped
+    networks:
+      - amd-network
+
+  # Monitoring and observability
+  amd-prometheus:
+    image: prom/prometheus:v2.40.0
+    container_name: amd-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - amd-network
+
+  amd-grafana:
+    image: grafana/grafana-enterprise:9.2.0
+    container_name: amd-grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin_password_secure
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    networks:
+      - amd-network
+    depends_on:
+      - amd-prometheus
+
+volumes:
+  postgres_data:
+  neo4j_data:
+  neo4j_logs:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  amd-network:
+    driver: bridge

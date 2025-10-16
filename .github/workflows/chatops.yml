@@ -16,15 +16,15 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
-  checks: read
-  statuses: read
-  actions: write
 
 jobs:
   # Parse and route ChatOps commands
   chatops-router:
     if: github.event.issue.pull_request
     runs-on: ubuntu-latest
+    permissions:
+      issues: read
+      pull-requests: read
     outputs:
       command: ${{ steps.parse.outputs.command }}
       args: ${{ steps.parse.outputs.args }}
@@ -33,6 +33,7 @@ jobs:
     steps:
     - name: Parse command
       id: parse
+      shell: bash
       run: |
         COMMENT="${{ github.event.comment.body }}"
         echo "Parsing comment: $COMMENT"
@@ -54,6 +55,7 @@ jobs:
 
     - name: Check authorization
       id: auth
+      shell: bash
       run: |
         USER="${{ github.event.comment.user.login }}"
         ASSOCIATION="${{ github.event.comment.author_association }}"
@@ -92,6 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Acknowledge command
+      shell: bash
       run: |
         gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
         🚢 **Release Captain Activated**
@@ -124,13 +127,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Trigger test rerun
+      shell: bash
       run: |
         gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
         🧪 **Rerunning Tests**
 
         @${{ github.event.comment.user.login }} requested test rerun for PR #${{ needs.chatops-router.outputs.pr_number }}.
-
-        **Arguments**: ${{ needs.chatops-router.outputs.args }}
         "
 
         # Trigger PR validation workflow
@@ -148,10 +150,11 @@ jobs:
       needs.chatops-router.outputs.authorized == 'true'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b
 
     - name: Parse deploy arguments
       id: deploy-args
+      shell: bash
       run: |
         ARGS="${{ needs.chatops-router.outputs.args }}"
 
@@ -178,6 +181,7 @@ jobs:
         echo "confirm=$CONFIRM" >> $GITHUB_OUTPUT
 
     - name: Validate deployment request
+      shell: bash
       run: |
         ENV="${{ steps.deploy-args.outputs.environment }}"
         STRATEGY="${{ steps.deploy-args.outputs.strategy }}"
@@ -212,6 +216,7 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Trigger deployment
+      shell: bash
       run: |
         # Create deployment event
         gh api -X POST "/repos/${{ github.repository }}/deployments" \
@@ -231,10 +236,11 @@ jobs:
       needs.chatops-router.outputs.authorized == 'true'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b
 
     - name: Parse rollback arguments
       id: rollback-args
+      shell: bash
       run: |
         ARGS="${{ needs.chatops-router.outputs.args }}"
 
@@ -261,6 +267,7 @@ jobs:
         echo "confirm=$CONFIRM" >> $GITHUB_OUTPUT
 
     - name: Execute rollback
+      shell: bash
       run: |
         ENV="${{ steps.rollback-args.outputs.environment }}"
         VERSION="${{ steps.rollback-args.outputs.to_version }}"
@@ -301,9 +308,10 @@ jobs:
       needs.chatops-router.outputs.authorized == 'true'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@44c2b7a8a4ea60a981eaca3cf939b5f4305c123b
 
     - name: Get system status
+      shell: bash
       run: |
         # Get deployment status
         echo "📊 Gathering system status..."
@@ -349,6 +357,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check service health
+      shell: bash
       run: |
         gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
         🏥 **Health Check Initiated**
@@ -391,8 +400,11 @@ jobs:
     needs: chatops-router
     if: needs.chatops-router.outputs.command == 'help'
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
     - name: Show help
+      shell: bash
       run: |
         gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
         🤖 **Summit ChatOps Commands**
@@ -434,8 +446,11 @@ jobs:
       needs.chatops-router.outputs.command != '' &&
       needs.chatops-router.outputs.authorized != 'true'
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
     - name: Post unauthorized message
+      shell: bash
       run: |
         gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
         🚫 **Access Denied**
@@ -466,8 +481,11 @@ jobs:
       needs.chatops-router.outputs.command != 'help' &&
       needs.chatops-router.outputs.authorized == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
     - name: Handle unknown command
+      shell: bash
       run: |
         gh pr comment ${{ needs.chatops-router.outputs.pr_number }} --body "
         ❓ **Unknown Command**

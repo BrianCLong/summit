@@ -7,7 +7,7 @@
 
 import logger from '../utils/logger.js';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js';
-import { redisClient } from '../db/redis.js';
+import { getRedisClient } from '../db/redis.js';
 import { dlpService } from './DLPService.js';
 import fs from 'fs/promises';
 import path from 'path';
@@ -120,8 +120,10 @@ class ComplianceService {
   constructor() {
     this.circuitBreaker = new CircuitBreaker({
       failureThreshold: 5,
-      recoveryTimeout: 30000,
-      monitoringPeriod: 60000
+      successThreshold: 3,
+      resetTimeout: 30000,
+      p95ThresholdMs: 2000,
+      errorRateThreshold: 0.5,
     });
 
     this.initializeFrameworks();
@@ -151,7 +153,7 @@ class ComplianceService {
             title: 'Data Protection by Design and by Default',
             description: 'Implement appropriate technical and organizational measures to ensure data protection principles',
             priority: 'critical',
-            status: 'pending',
+            status: 'partial',
             controls: [
               {
                 id: 'gdpr-art-25-ctrl-1',
@@ -187,7 +189,7 @@ class ComplianceService {
             title: 'Records of Processing Activities',
             description: 'Maintain records of all data processing activities',
             priority: 'high',
-            status: 'pending',
+            status: 'partial',
             controls: [
               {
                 id: 'gdpr-art-30-ctrl-1',
@@ -209,7 +211,7 @@ class ComplianceService {
             title: 'Security of Processing',
             description: 'Implement appropriate technical and organizational measures to ensure security',
             priority: 'critical',
-            status: 'pending',
+            status: 'partial',
             controls: [
               {
                 id: 'gdpr-art-32-ctrl-1',
@@ -254,7 +256,7 @@ class ComplianceService {
             title: 'Logical and Physical Access Controls',
             description: 'The entity implements logical and physical access controls to protect entity system resources',
             priority: 'critical',
-            status: 'pending',
+            status: 'partial',
             controls: [
               {
                 id: 'soc2-cc-6.1-ctrl-1',
@@ -284,7 +286,7 @@ class ComplianceService {
             title: 'System Operations',
             description: 'The entity monitors system capacity and utilization',
             priority: 'medium',
-            status: 'pending',
+            status: 'partial',
             controls: [
               {
                 id: 'soc2-cc-7.1-ctrl-1',
@@ -321,7 +323,7 @@ class ComplianceService {
             title: 'Information Classification',
             description: 'Information shall be classified in terms of legal, value, criticality and sensitivity',
             priority: 'high',
-            status: 'pending',
+            status: 'partial',
             controls: [
               {
                 id: 'iso27001-a-8-2-ctrl-1',
@@ -1028,13 +1030,13 @@ class ComplianceService {
    */
   async getReport(reportId: string): Promise<ComplianceReport | null> {
     try {
-      const cached = await redisClient.get(`${this.cachePrefix}report:${reportId}`);
+      const cached = await getRedisClient().get(`${this.cachePrefix}report:${reportId}`);
       return cached ? JSON.parse(cached) : null;
     } catch (error) {
       logger.error('Failed to retrieve compliance report', {
         component: 'ComplianceService',
         reportId,
-        error: error.message
+        error: (error as Error).message
       });
       return null;
     }
@@ -1048,12 +1050,13 @@ class ComplianceService {
       const cacheKey = `${this.cachePrefix}report:${report.id}`;
       const ttl = 86400 * 7; // 7 days
       
-      await redisClient.setex(cacheKey, ttl, JSON.stringify(report));
+      // Use SET with EX for TTL to match client and mock implementations
+      await getRedisClient().set(cacheKey, JSON.stringify(report), 'EX', ttl);
     } catch (error) {
       logger.warn('Failed to cache compliance report', {
         component: 'ComplianceService',
         reportId: report.id,
-        error: error.message
+        error: (error as Error).message
       });
     }
   }

@@ -17,12 +17,15 @@ import hashlib
 import json
 import time
 import uuid
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Tuple
 
+from typing import Callable, Dict, Iterable, List, Tuple
+
 from rapidfuzz import fuzz
+from intelgraph_py.utils.file_security import safe_path_join
 try:
     import spacy
     NLP = spacy.load("en_core_web_sm")
@@ -175,11 +178,13 @@ class IngestionPipeline:
         self.parsers[extension.lower()] = parser
 
     def ingest(self, path: Path, source: str) -> Dict[str, float]:
-        parser = self.parsers.get(path.suffix.lower())
+        # Validate path to prevent directory traversal
+        validated_path = safe_path_join(Path.cwd(), str(path))
+        parser = self.parsers.get(validated_path.suffix.lower())
         if not parser:
-            raise ValueError(f"No parser registered for {path.suffix}")
+            raise ValueError(f"No parser registered for {validated_path.suffix}")
         start = time.time()
-        entities, relationships = parser(path, source)
+        entities, relationships = parser(validated_path, source)
         metrics = {"processed": len(entities) + len(relationships), "upserts": 0, "dedup": 0, "dlq": 0}
         resolver = EntityResolver()
         mapping = resolver.resolve(entities)
