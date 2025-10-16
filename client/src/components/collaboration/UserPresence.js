@@ -24,6 +24,7 @@ import {
   DialogActions,
   Switch,
   FormControlLabel,
+  ListItemButton,
 } from '@mui/material';
 import {
   Group,
@@ -385,9 +386,8 @@ function UserPresence({
 
             <List dense>
               {activeUsers.map((user) => (
-                <ListItem
+                <ListItemButton
                   key={user.id}
-                  button
                   onClick={() => onUserClick?.(user)}
                   sx={{ borderRadius: 1 }}
                 >
@@ -418,7 +418,7 @@ function UserPresence({
                       <VideoCall />
                     </IconButton>
                   </Box>
-                </ListItem>
+                </ListItemButton>
               ))}
             </List>
 
@@ -448,25 +448,24 @@ function UserPresence({
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <List sx={{ width: 200 }}>
-          <ListItem button onClick={() => setSettingsOpen(true)}>
+          <ListItemButton onClick={() => setSettingsOpen(true)}>
             <Settings sx={{ mr: 1 }} />
             Settings
-          </ListItem>
-          <ListItem button onClick={() => setIsVisible(false)}>
+          </ListItemButton>
+          <ListItemButton onClick={() => setIsVisible(false)}>
             <VisibilityOff sx={{ mr: 1 }} />
             Hide Presence
-          </ListItem>
-          <ListItem button onClick={onInviteUser}>
+          </ListItemButton>
+          <ListItemButton onClick={onInviteUser}>
             <PersonAdd sx={{ mr: 1 }} />
             Invite User
-          </ListItem>
-          <ListItem
-            button
+          </ListItemButton>
+          <ListItemButton
             onClick={() => navigator.share?.({ url: window.location.href })}
           >
             <Share sx={{ mr: 1 }} />
             Share Investigation
-          </ListItem>
+          </ListItemButton>
         </List>
       </Popover>
 
