@@ -1,6 +1,9 @@
 import type {
+  CollectibleSignalDatum,
   CompositeMarketSnapshot,
+  ConsumerMarketDatum,
   DemandForecastDatum,
+  FinancialMarketDatum,
   StrategyInput,
   StrategyRecommendation,
   WorkloadProfile
@@ -29,6 +32,88 @@ function getEnergyScore(snapshot: CompositeMarketSnapshot, region: string, weigh
   }
   const normalizedCarbon = Math.max(0, 1 - energy.carbonIntensityGramsPerKwh / 600);
   return normalizedCarbon * weight;
+}
+
+function summarizeConsumerSignals(signals: ConsumerMarketDatum[], region: string): {
+  score: number;
+  momentum: number;
+} {
+  const regionSignals = signals.filter(signal => signal.region === region);
+  if (!regionSignals.length) {
+    return { score: 0.2, momentum: 0 };
+  }
+
+  const avgDemand =
+    regionSignals.reduce((sum, signal) => sum + signal.demandScore, 0) / regionSignals.length;
+  const avgSentiment =
+    regionSignals.reduce((sum, signal) => sum + signal.sentimentScore, 0) / regionSignals.length;
+  const avgMomentum =
+    regionSignals.reduce((sum, signal) => sum + signal.priceChangePercent, 0) /
+    regionSignals.length /
+    100;
+  const avgVolume =
+    regionSignals.reduce((sum, signal) => sum + signal.volume24h, 0) / regionSignals.length;
+  const volumeBoost = Math.min(0.2, Math.log10(Math.max(1, avgVolume + 1)) * 0.05);
+
+  const score = Math.min(1, 0.2 + avgDemand * 0.35 + avgSentiment * 0.25 + volumeBoost);
+
+  return { score, momentum: Math.max(-0.3, Math.min(0.4, avgMomentum)) };
+}
+
+function summarizeCollectibleSignals(signals: CollectibleSignalDatum[], region: string): {
+  score: number;
+  scarcityMomentum: number;
+} {
+  const regionSignals = signals.filter(
+    signal => signal.region === region || signal.region.toLowerCase() === 'global'
+  );
+  if (!regionSignals.length) {
+    return { score: 0.18, scarcityMomentum: 0 };
+  }
+
+  const avgScarcity =
+    regionSignals.reduce((sum, signal) => sum + signal.scarcityScore, 0) / regionSignals.length;
+  const avgClear =
+    regionSignals.reduce((sum, signal) => sum + signal.auctionClearRate, 0) / regionSignals.length;
+  const avgSentiment =
+    regionSignals.reduce((sum, signal) => sum + signal.sentimentScore, 0) / regionSignals.length;
+  const avgFloor =
+    regionSignals.reduce((sum, signal) => sum + signal.floorPrice, 0) / regionSignals.length;
+  const scarcityMomentum = Math.max(-0.25, Math.min(0.35, (avgScarcity - 0.5) * 0.5));
+  const priceBoost = Math.min(0.2, Math.log10(Math.max(1, avgFloor + 1)) * 0.03);
+
+  const score = Math.min(0.9, 0.18 + avgScarcity * 0.4 + avgClear * 0.2 + avgSentiment * 0.2 + priceBoost);
+
+  return { score, scarcityMomentum };
+}
+
+function computeCrossMarketScores(
+  financial: FinancialMarketDatum,
+  consumer: { score: number; momentum: number },
+  collectibles: { score: number; scarcityMomentum: number }
+): {
+  consumerScore: number;
+  collectiblesScore: number;
+  arbitrageOpportunityScore: number;
+  hedgeScore: number;
+} {
+  const priceAnchor = Math.max(0.01, financial.spotPricePerUnit);
+  const consumerPressure = Math.max(0, consumer.momentum) * 0.4 + consumer.score * 0.3;
+  const scarcityPressure = Math.max(0, collectibles.scarcityMomentum) * 0.5 + collectibles.score * 0.25;
+  const arbitrageOpportunityScore = Math.min(0.8, consumerPressure + scarcityPressure + 0.1 / priceAnchor);
+
+  const hedgeDifferential = Math.abs(consumer.score - collectibles.score);
+  const hedgeScore = Math.min(
+    0.7,
+    hedgeDifferential * 0.4 + Math.max(0, collectibles.scarcityMomentum - consumer.momentum) * 0.3
+  );
+
+  return {
+    consumerScore: consumer.score,
+    collectiblesScore: collectibles.score,
+    arbitrageOpportunityScore,
+    hedgeScore
+  };
 }
 
 function getRegulatoryScore(
@@ -74,6 +159,12 @@ function buildRecommendations(
       financial.region,
       'compute'
     );
+    const consumerSignals = summarizeConsumerSignals(snapshot.consumer, financial.region);
+    const collectibleSignals = summarizeCollectibleSignals(
+      snapshot.collectibles,
+      financial.region
+    );
+    const crossMarket = computeCrossMarketScores(financial, consumerSignals, collectibleSignals);
     const basePrice = priceSelector({
       spot: financial.spotPricePerUnit,
       reserved: financial.reservedPricePerUnit,
@@ -83,7 +174,14 @@ function buildRecommendations(
     const energyScore = getEnergyScore(snapshot, financial.region, profile.sustainabilityWeight);
     const regulatoryScore = getRegulatoryScore(snapshot, financial.provider, financial.region);
     const performanceScore = basePerformanceScore(demand, profile);
-    const totalScore = performanceScore + energyScore + regulatoryScore;
+    const totalScore =
+      performanceScore +
+      energyScore +
+      regulatoryScore +
+      crossMarket.consumerScore +
+      crossMarket.collectiblesScore +
+      crossMarket.arbitrageOpportunityScore +
+      crossMarket.hedgeScore;
 
     const recommendation: StrategyRecommendation = {
       strategy: label,
@@ -94,6 +192,10 @@ function buildRecommendations(
       expectedPerformanceScore: performanceScore,
       sustainabilityScore: energyScore,
       regulatoryScore,
+      consumerSignalScore: crossMarket.consumerScore,
+      collectiblesSignalScore: crossMarket.collectiblesScore,
+      arbitrageOpportunityScore: crossMarket.arbitrageOpportunityScore,
+      hedgeScore: crossMarket.hedgeScore,
       totalScore
     };
 
