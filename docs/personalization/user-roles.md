@@ -5,6 +5,7 @@ owner: docs
 ---
 
 ## Roles
+
 - **Admin**: Full access to all content and features.
 - **Operator**: Access to operational guides and tools.
 - **Viewer**: Read-only access to public documentation.

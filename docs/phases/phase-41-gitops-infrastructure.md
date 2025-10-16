@@ -1,40 +1,43 @@
 # Phase 41: GitOps Documentation Workflows with Infrastructure as Code
 
 ## Overview
+
 Implement GitOps-driven documentation workflows where documentation infrastructure and content are managed entirely through code, providing automated deployments, rollbacks, and multi-environment management.
 
 ## Architecture Components
 
 ### 1. Infrastructure as Code for Documentation
+
 ```yaml
 # terraform/docs-infrastructure/main.tf
 resource "kubernetes_namespace" "docs" {
-  metadata {
-    name = "docs-platform"
-    labels = {
-      "app.kubernetes.io/name" = "docs-platform"
-      "app.kubernetes.io/version" = var.version
-    }
-  }
+metadata {
+name = "docs-platform"
+labels = {
+"app.kubernetes.io/name" = "docs-platform"
+"app.kubernetes.io/version" = var.version
+}
+}
 }
 
 resource "helm_release" "docs_platform" {
-  name       = "docs-platform"
-  namespace  = kubernetes_namespace.docs.metadata[0].name
-  chart      = "./charts/docs-platform"
-  version    = var.chart_version
+name       = "docs-platform"
+namespace  = kubernetes_namespace.docs.metadata[0].name
+chart      = "./charts/docs-platform"
+version    = var.chart_version
 
-  values = [
-    templatefile("${path.module}/values.yaml.tpl", {
-      domain = var.domain
-      replicas = var.replicas
-      resources = var.resources
-    })
-  ]
+values = [
+templatefile("${path.module}/values.yaml.tpl", {
+domain = var.domain
+replicas = var.replicas
+resources = var.resources
+})
+]
 }
 ```
 
 ### 2. GitOps Workflow Configuration
+
 ```yaml
 # .github/workflows/docs-gitops.yml
 name: Documentation GitOps Workflow
@@ -57,7 +60,7 @@ jobs:
           terraform init -backend=false
           terraform validate
           terraform fmt -check
-      
+
       - name: Helm Chart Validation
         run: |
           helm template charts/docs-platform --dry-run
@@ -72,7 +75,7 @@ jobs:
       - name: Deploy Preview Environment
         run: |
           ./scripts/deploy-preview.sh ${{ github.event.number }}
-      
+
       - name: Comment Preview URL
         uses: actions/github-script@v6
         with:
@@ -97,6 +100,7 @@ jobs:
 ```
 
 ### 3. Kubernetes Manifests for Documentation Platform
+
 ```yaml
 # k8s/docs-platform/deployment.yaml
 apiVersion: apps/v1
@@ -196,6 +200,7 @@ spec:
 ```
 
 ### 4. ArgoCD Application Configuration
+
 ```yaml
 # argocd/docs-platform.yaml
 apiVersion: argoproj.io/v1alpha1
@@ -213,8 +218,8 @@ spec:
     path: k8s/docs-platform
     helm:
       valueFiles:
-      - values.yaml
-      - values-{{ .Values.environment }}.yaml
+        - values.yaml
+        - values-{{ .Values.environment }}.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: docs-platform
@@ -224,9 +229,9 @@ spec:
       selfHeal: true
       allowEmpty: false
     syncOptions:
-    - CreateNamespace=true
-    - PrunePropagationPolicy=foreground
-    - PruneLast=true
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
     retry:
       limit: 5
       backoff:
@@ -238,12 +243,13 @@ spec:
 ## Implementation Features
 
 ### 1. GitOps Content Management System
+
 ```typescript
 // src/gitops/content-manager.ts
 export class GitOpsContentManager {
   private git: SimpleGit;
   private config: GitOpsConfig;
-  
+
   constructor(config: GitOpsConfig) {
     this.git = simpleGit();
     this.config = config;
@@ -253,7 +259,7 @@ export class GitOpsContentManager {
     try {
       await this.git.checkout(branch);
       await this.git.pull('origin', branch);
-      
+
       const changes = await this.detectChanges();
       if (changes.length > 0) {
         await this.processChanges(changes);
@@ -268,17 +274,17 @@ export class GitOpsContentManager {
   private async detectChanges(): Promise<FileChange[]> {
     const status = await this.git.status();
     const changes: FileChange[] = [];
-    
+
     for (const file of [...status.modified, ...status.created]) {
       if (file.match(/\.(md|mdx|json|yaml)$/)) {
         changes.push({
           type: 'content',
           path: file,
-          action: status.created.includes(file) ? 'create' : 'update'
+          action: status.created.includes(file) ? 'create' : 'update',
         });
       }
     }
-    
+
     return changes;
   }
 
@@ -300,28 +306,29 @@ export class GitOpsContentManager {
     await webhook.trigger({
       type: 'content-sync',
       timestamp: new Date().toISOString(),
-      commit: await this.git.revparse(['HEAD'])
+      commit: await this.git.revparse(['HEAD']),
     });
   }
 }
 ```
 
 ### 2. Infrastructure State Management
+
 ```typescript
 // src/gitops/infrastructure-state.ts
 export class InfrastructureStateManager {
   private terraform: TerraformRunner;
   private kubectl: KubectlRunner;
-  
+
   async planInfrastructureChanges(): Promise<TerraformPlan> {
     const plan = await this.terraform.plan({
-      varFile: `environments/${this.config.environment}.tfvars`
+      varFile: `environments/${this.config.environment}.tfvars`,
     });
-    
+
     return {
       ...plan,
       resources: await this.analyzeResourceChanges(plan),
-      cost: await this.calculateCostImpact(plan)
+      cost: await this.calculateCostImpact(plan),
     };
   }
 
@@ -329,17 +336,16 @@ export class InfrastructureStateManager {
     try {
       // Pre-deployment validation
       await this.validatePrerequisites();
-      
+
       // Apply changes with rollback capability
       await this.terraform.apply(plan, {
         autoApprove: true,
         lock: true,
-        parallelism: 10
+        parallelism: 10,
       });
-      
+
       // Verify deployment health
       await this.verifyDeploymentHealth();
-      
     } catch (error) {
       this.logger.error('Infrastructure deployment failed:', error);
       await this.initiateRollback();
@@ -352,14 +358,14 @@ export class InfrastructureStateManager {
       this.checkClusterHealth(),
       this.checkResourceQuotas(),
       this.checkSecretAvailability(),
-      this.checkNetworkPolicies()
+      this.checkNetworkPolicies(),
     ];
-    
+
     const results = await Promise.allSettled(checks);
     const failures = results
-      .filter(r => r.status === 'rejected')
-      .map(r => (r as PromiseRejectedResult).reason);
-    
+      .filter((r) => r.status === 'rejected')
+      .map((r) => (r as PromiseRejectedResult).reason);
+
     if (failures.length > 0) {
       throw new Error(`Prerequisite checks failed: ${failures.join(', ')}`);
     }
@@ -368,11 +374,12 @@ export class InfrastructureStateManager {
 ```
 
 ### 3. Multi-Environment Configuration Management
+
 ```typescript
 // src/gitops/environment-config.ts
 export class EnvironmentConfigManager {
   private environments: Map<string, EnvironmentConfig> = new Map();
-  
+
   constructor() {
     this.loadEnvironmentConfigs();
   }
@@ -387,7 +394,7 @@ export class EnvironmentConfigManager {
         resources: { cpu: '100m', memory: '128Mi' },
         domain: 'docs-dev.intelgraph.io',
         features: ['debug-mode', 'hot-reload'],
-        syncPolicy: 'automatic'
+        syncPolicy: 'automatic',
       },
       {
         name: 'staging',
@@ -397,7 +404,7 @@ export class EnvironmentConfigManager {
         resources: { cpu: '200m', memory: '256Mi' },
         domain: 'docs-staging.intelgraph.io',
         features: ['performance-testing', 'integration-tests'],
-        syncPolicy: 'manual'
+        syncPolicy: 'manual',
       },
       {
         name: 'production',
@@ -407,30 +414,30 @@ export class EnvironmentConfigManager {
         resources: { cpu: '500m', memory: '512Mi' },
         domain: 'docs.intelgraph.io',
         features: ['high-availability', 'auto-scaling', 'monitoring'],
-        syncPolicy: 'manual-with-approval'
-      }
+        syncPolicy: 'manual-with-approval',
+      },
     ];
-    
-    configs.forEach(config => {
+
+    configs.forEach((config) => {
       this.environments.set(config.name, config);
     });
   }
 
   async promoteToEnvironment(
-    from: string, 
-    to: string, 
-    options: PromotionOptions = {}
+    from: string,
+    to: string,
+    options: PromotionOptions = {},
   ): Promise<void> {
     const fromEnv = this.environments.get(from);
     const toEnv = this.environments.get(to);
-    
+
     if (!fromEnv || !toEnv) {
       throw new Error(`Invalid environment: ${from} -> ${to}`);
     }
 
     // Run pre-promotion checks
     await this.runPrePromotionChecks(fromEnv, toEnv);
-    
+
     // Create promotion PR or direct deployment
     if (toEnv.syncPolicy === 'manual-with-approval') {
       await this.createPromotionPR(from, to, options);
@@ -440,21 +447,21 @@ export class EnvironmentConfigManager {
   }
 
   private async runPrePromotionChecks(
-    from: EnvironmentConfig, 
-    to: EnvironmentConfig
+    from: EnvironmentConfig,
+    to: EnvironmentConfig,
   ): Promise<void> {
     const checks = [
       this.checkHealthMetrics(from),
       this.checkSecurityScans(from),
       this.checkPerformanceTests(from),
-      this.checkCompatibility(from, to)
+      this.checkCompatibility(from, to),
     ];
-    
+
     const results = await Promise.allSettled(checks);
     const failures = results
-      .filter(r => r.status === 'rejected')
-      .map(r => (r as PromiseRejectedResult).reason);
-    
+      .filter((r) => r.status === 'rejected')
+      .map((r) => (r as PromiseRejectedResult).reason);
+
     if (failures.length > 0) {
       throw new Error(`Promotion checks failed: ${failures.join(', ')}`);
     }
@@ -463,26 +470,28 @@ export class EnvironmentConfigManager {
 ```
 
 ### 4. Automated Rollback System
+
 ```typescript
 // src/gitops/rollback-manager.ts
 export class RollbackManager {
   private deploymentHistory: DeploymentRecord[] = [];
-  
+
   async recordDeployment(deployment: DeploymentRecord): Promise<void> {
     this.deploymentHistory.unshift(deployment);
-    
+
     // Keep only last 10 deployments for rollback
     if (this.deploymentHistory.length > 10) {
       this.deploymentHistory = this.deploymentHistory.slice(0, 10);
     }
-    
+
     await this.persistDeploymentHistory();
   }
 
   async rollbackToVersion(version: string): Promise<void> {
-    const targetDeployment = this.deploymentHistory
-      .find(d => d.version === version);
-    
+    const targetDeployment = this.deploymentHistory.find(
+      (d) => d.version === version,
+    );
+
     if (!targetDeployment) {
       throw new Error(`Version ${version} not found in deployment history`);
     }
@@ -490,16 +499,17 @@ export class RollbackManager {
     try {
       // Create rollback deployment
       await this.createRollbackDeployment(targetDeployment);
-      
+
       // Verify rollback success
       await this.verifyRollbackHealth(targetDeployment);
-      
+
       // Update current version
       await this.updateCurrentVersion(version);
-      
     } catch (error) {
       this.logger.error('Rollback failed:', error);
-      throw new Error(`Failed to rollback to version ${version}: ${error.message}`);
+      throw new Error(
+        `Failed to rollback to version ${version}: ${error.message}`,
+      );
     }
   }
 
@@ -509,17 +519,22 @@ export class RollbackManager {
     }
 
     const lastKnownGood = this.deploymentHistory[1]; // Previous deployment
-    
-    this.logger.warn('Critical health check failure, initiating auto-rollback', {
-      currentVersion: this.deploymentHistory[0].version,
-      targetVersion: lastKnownGood.version,
-      healthCheck
-    });
+
+    this.logger.warn(
+      'Critical health check failure, initiating auto-rollback',
+      {
+        currentVersion: this.deploymentHistory[0].version,
+        targetVersion: lastKnownGood.version,
+        healthCheck,
+      },
+    );
 
     await this.rollbackToVersion(lastKnownGood.version);
   }
 
-  private async createRollbackDeployment(deployment: DeploymentRecord): Promise<void> {
+  private async createRollbackDeployment(
+    deployment: DeploymentRecord,
+  ): Promise<void> {
     const rollbackConfig = {
       ...deployment.config,
       metadata: {
@@ -528,9 +543,9 @@ export class RollbackManager {
           ...deployment.config.metadata.annotations,
           'deployment.kubernetes.io/revision': deployment.revision,
           'rollback.intelgraph.io/timestamp': new Date().toISOString(),
-          'rollback.intelgraph.io/reason': 'automated-rollback'
-        }
-      }
+          'rollback.intelgraph.io/reason': 'automated-rollback',
+        },
+      },
     };
 
     await this.kubectl.apply(rollbackConfig);
@@ -541,11 +556,12 @@ export class RollbackManager {
 ## Monitoring and Observability
 
 ### GitOps Metrics Dashboard
+
 ```typescript
 // src/gitops/metrics-collector.ts
 export class GitOpsMetricsCollector {
   private metrics: PrometheusRegistry;
-  
+
   constructor() {
     this.metrics = new PrometheusRegistry();
     this.initializeMetrics();
@@ -556,19 +572,19 @@ export class GitOpsMetricsCollector {
       name: 'gitops_deployment_duration_seconds',
       help: 'Time taken for deployments',
       labelNames: ['environment', 'component', 'status'],
-      buckets: [1, 5, 10, 30, 60, 300, 600]
+      buckets: [1, 5, 10, 30, 60, 300, 600],
     });
 
     this.deploymentFrequency = new Counter({
       name: 'gitops_deployments_total',
       help: 'Total number of deployments',
-      labelNames: ['environment', 'component', 'status']
+      labelNames: ['environment', 'component', 'status'],
     });
 
     this.rollbackCount = new Counter({
       name: 'gitops_rollbacks_total',
       help: 'Total number of rollbacks',
-      labelNames: ['environment', 'trigger', 'reason']
+      labelNames: ['environment', 'trigger', 'reason'],
     });
   }
 
@@ -576,15 +592,13 @@ export class GitOpsMetricsCollector {
     environment: string,
     component: string,
     duration: number,
-    status: 'success' | 'failure'
+    status: 'success' | 'failure',
   ): void {
     this.deploymentDuration
       .labels(environment, component, status)
       .observe(duration);
-    
-    this.deploymentFrequency
-      .labels(environment, component, status)
-      .inc();
+
+    this.deploymentFrequency.labels(environment, component, status).inc();
   }
 }
 ```
@@ -592,6 +606,7 @@ export class GitOpsMetricsCollector {
 ## Security and Compliance
 
 ### 1. Secret Management
+
 ```yaml
 # k8s/secrets/external-secrets.yaml
 apiVersion: external-secrets.io/v1beta1
@@ -602,13 +617,13 @@ metadata:
 spec:
   provider:
     vault:
-      server: "https://vault.intelgraph.io"
-      path: "secret"
-      version: "v2"
+      server: 'https://vault.intelgraph.io'
+      path: 'secret'
+      version: 'v2'
       auth:
         kubernetes:
-          mountPath: "kubernetes"
-          role: "docs-platform"
+          mountPath: 'kubernetes'
+          role: 'docs-platform'
 
 ---
 apiVersion: external-secrets.io/v1beta1
@@ -624,17 +639,18 @@ spec:
     name: docs-platform-secrets
     creationPolicy: Owner
   data:
-  - secretKey: database-url
-    remoteRef:
-      key: docs-platform
-      property: database_url
-  - secretKey: api-key
-    remoteRef:
-      key: docs-platform
-      property: api_key
+    - secretKey: database-url
+      remoteRef:
+        key: docs-platform
+        property: database_url
+    - secretKey: api-key
+      remoteRef:
+        key: docs-platform
+        property: api_key
 ```
 
 ### 2. Policy as Code
+
 ```yaml
 # policies/docs-platform-policy.yaml
 apiVersion: kyverno.io/v1
@@ -645,40 +661,40 @@ spec:
   validationFailureAction: enforce
   background: true
   rules:
-  - name: require-security-context
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-          namespaces:
-          - docs-platform
-    validate:
-      message: "Security context is required"
-      pattern:
-        spec:
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: ">1000"
-  
-  - name: require-resource-limits
-    match:
-      any:
-      - resources:
-          kinds:
-          - Pod
-          namespaces:
-          - docs-platform
-    validate:
-      message: "Resource limits are required"
-      pattern:
-        spec:
-          containers:
-          - name: "*"
-            resources:
-              limits:
-                memory: "?*"
-                cpu: "?*"
+    - name: require-security-context
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - docs-platform
+      validate:
+        message: 'Security context is required'
+        pattern:
+          spec:
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: '>1000'
+
+    - name: require-resource-limits
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - docs-platform
+      validate:
+        message: 'Resource limits are required'
+        pattern:
+          spec:
+            containers:
+              - name: '*'
+                resources:
+                  limits:
+                    memory: '?*'
+                    cpu: '?*'
 ```
 
 This completes Phase 41: GitOps Documentation Workflows with Infrastructure as Code. The implementation provides:

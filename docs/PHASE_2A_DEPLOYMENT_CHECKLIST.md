@@ -298,24 +298,24 @@ Initiate immediate rollback if ANY of the following occur:
 
 ### **Technical Approval**
 
-- [ ] **Engineering Lead:** [Name/Date] ******\_\_\_\_******
-- [ ] **DevOps Lead:** [Name/Date] ******\_\_\_\_******
-- [ ] **Security Lead:** [Name/Date] ******\_\_\_\_******
-- [ ] **Quality Assurance:** [Name/Date] ******\_\_\_\_******
+- [ ] **Engineering Lead:** [Name/Date] **\*\***\_\_\_\_**\*\***
+- [ ] **DevOps Lead:** [Name/Date] **\*\***\_\_\_\_**\*\***
+- [ ] **Security Lead:** [Name/Date] **\*\***\_\_\_\_**\*\***
+- [ ] **Quality Assurance:** [Name/Date] **\*\***\_\_\_\_**\*\***
 
 ### **Business Approval**
 
-- [ ] **Product Manager:** [Name/Date] ******\_\_\_\_******
-- [ ] **Legal/Compliance:** [Name/Date] ******\_\_\_\_******
-- [ ] **Finance/Budget:** [Name/Date] ******\_\_\_\_******
-- [ ] **Executive Sponsor:** [Name/Date] ******\_\_\_\_******
+- [ ] **Product Manager:** [Name/Date] **\*\***\_\_\_\_**\*\***
+- [ ] **Legal/Compliance:** [Name/Date] **\*\***\_\_\_\_**\*\***
+- [ ] **Finance/Budget:** [Name/Date] **\*\***\_\_\_\_**\*\***
+- [ ] **Executive Sponsor:** [Name/Date] **\*\***\_\_\_\_**\*\***
 
 ### **Operational Readiness**
 
-- [ ] **SRE Lead:** [Name/Date] ******\_\_\_\_******
-- [ ] **Support Manager:** [Name/Date] ******\_\_\_\_******
-- [ ] **Documentation Complete:** [Name/Date] ******\_\_\_\_******
-- [ ] **Training Complete:** [Name/Date] ******\_\_\_\_******
+- [ ] **SRE Lead:** [Name/Date] **\*\***\_\_\_\_**\*\***
+- [ ] **Support Manager:** [Name/Date] **\*\***\_\_\_\_**\*\***
+- [ ] **Documentation Complete:** [Name/Date] **\*\***\_\_\_\_**\*\***
+- [ ] **Training Complete:** [Name/Date] **\*\***\_\_\_\_**\*\***
 
 ---
 

@@ -5,5 +5,6 @@ owner: docs
 ---
 
 ## Algorithms
+
 - **Collaborative Filtering**: Based on user behavior and preferences.
 - **Content-Based Filtering**: Based on document metadata and user interests.
