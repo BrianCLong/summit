@@ -19,13 +19,19 @@ jobs:
               - '**'
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - run: npm ci
-      - name: Lint (client-only if applicable)
+      - name: Install deps (scoped)
         run: |
           if [[ "${{ steps.changes.outputs.client }}" == 'true' && "${{ steps.changes.outputs.server }}" != 'true' ]]; then \
-            npm run lint:client || true && npm run typecheck:client || true && npm run build:client; \
+            cd client && npm ci; \
           else \
-            npm run lint || true && npm run typecheck || true && npm run build; \
+            npm ci; \
+          fi
+      - name: Lint/Typecheck/Build (scoped)
+        run: |
+          if [[ "${{ steps.changes.outputs.client }}" == 'true' && "${{ steps.changes.outputs.server }}" != 'true' ]]; then \
+            cd client && (npm run lint || true) && (npm run typecheck || true) && npm run build; \
+          else \
+            (npm run lint || true) && (npm run typecheck || true) && npm run build; \
           fi
       - name: Done
         run: echo "Switchboard build completed"

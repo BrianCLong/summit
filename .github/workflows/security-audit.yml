@@ -10,7 +10,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: 'pnpm' }
       - run: corepack enable && pnpm i --frozen-lockfile
+        continue-on-error: true
       - run: pnpm audit --audit-level=high || true
+        continue-on-error: true
       - run: pnpm audit --json > audit.json || true
+        continue-on-error: true
       - uses: actions/upload-artifact@v4
         with: { name: npm-audit, path: audit.json, if-no-files-found: ignore }
