@@ -339,12 +339,10 @@ app.post('/exports', async (req, reply) => {
   const manifest = buildManifest(body.claimId);
   const licenseCheck = checkLicenses(manifest.licenses);
   if (!licenseCheck.valid) {
-    reply
-      .status(400)
-      .send({
-        error: licenseCheck.reason,
-        appealCode: licenseCheck.appealCode,
-      });
+    reply.status(400).send({
+      error: licenseCheck.reason,
+      appealCode: licenseCheck.appealCode,
+    });
     return;
   }
   const pack = tar.pack();
