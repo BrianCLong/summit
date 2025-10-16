@@ -51,7 +51,7 @@ export const handlers = [
   // GraphData query for Graph Workbench
   graphql.query('GW_GraphData', (req, res, ctx) => {
     return res(ctx.data({
-        graphData: {
+      graphData: {
           nodes: [
             {
               id: 'entity-1',
@@ -108,14 +108,14 @@ export const handlers = [
           nodeCount: 3,
           edgeCount: 2,
         },
-      },
-    });
+      }
+    }));
   }),
 
   // SearchEntities query
   graphql.query('GW_SearchEntities', (req, res, ctx) => {
     return res(ctx.data({
-        searchEntities: [
+      searchEntities: [
           {
             id: 'search-1',
             type: 'Person',
@@ -127,8 +127,7 @@ export const handlers = [
             investigationId: 'default',
           },
         ],
-      },
-    });
+      }));
   }),
 
   // EntityDetails query
@@ -169,7 +168,7 @@ export const handlers = [
   graphql.query('ThreatAnalysis', (req, res, ctx) => {
     const { variables } = req;
     return res(ctx.data({
-        threatAnalysis: {
+      threatAnalysis: {
           entityId: (variables as any).entityId,
           riskScore: 0.85,
           threatLevel: 'HIGH',
@@ -199,13 +198,13 @@ export const handlers = [
           lastUpdated: '2024-01-15T15:30:00Z',
         },
       },
-    });
+    }));
   }),
 
   // Timeline Events
   graphql.query('TimelineEvents', (req, res, ctx) => {
     return res(ctx.data({
-        timelineEvents: [
+      timelineEvents: [
           {
             id: 'event-1',
             timestamp: '2024-01-15T10:00:00Z',
@@ -216,9 +215,9 @@ export const handlers = [
             source: 'Network Monitor',
             metadata: { bytes_transferred: 1024000 },
           },
-        ],
-      },
-    });
+        ]
+      }
+    }));
   }),
 
   // Entity Enrichment

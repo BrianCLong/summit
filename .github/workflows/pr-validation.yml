@@ -291,6 +291,69 @@ jobs:
         head: ${{ github.event.pull_request.head.sha }}
         extra_args: --only-verified --json
 
+    - name: Generate SBOM (CycloneDX)
+      if: matrix.validation == 'security'
+      run: |
+        # For Node.js projects
+        if [[ -f "package.json" ]]; then
+          npx @cyclonedx/bom generate --output-file cyclonedx-node.json --output-format json
+        fi
+        # For Python projects
+        if [[ -f "requirements.txt" ]]; then
+          pip install cyclonedx-bom
+          cyclonedx-bom -r -o cyclonedx-python.json
+        fi
+        # For Go projects
+        if ls *.go &> /dev/null; then
+          go install github.com/CycloneDX/cyclonedx-go/cmd/cyclonedx-go@latest
+          cyclonedx-go -output cyclonedx-go.json
+        fi
+        # For Rust projects
+        if [[ -f "Cargo.toml" ]]; then
+          cargo install cyclonedx-bom
+          cyclonedx-bom -o cyclonedx-rust.json
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload SBOM Artifacts
+      if: matrix.validation == 'security' && always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: sbom-artifacts
+        path: |
+          cyclonedx-node.json
+          cyclonedx-python.json
+          cyclonedx-go.json
+          cyclonedx-rust.json
+        retention-days: 5
+
+    - name: Run npm audit
+      if: matrix.validation == 'security' && -f 'package.json'
+      run: npm audit --omit=dev --json > npm-audit.json || true
+
+    - name: Run pip-audit
+      if: matrix.validation == 'security' && -f 'requirements.txt'
+      run: |
+        python3.12 -m pip install pip-audit
+        pip-audit -r requirements.txt --json > pip-audit.json || true
+
+    - name: Run go vet
+      if: matrix.validation == 'security' && ls *.go &> /dev/null
+      run: go vet ./...
+
+    - name: Run cargo audit
+      if: matrix.validation == 'security' && -f 'Cargo.toml'
+      run: |
+        cargo install cargo-audit
+        cargo audit --json > cargo-audit.json || true
+
+    - name: Run gradle dependencyCheck
+      if: matrix.validation == 'security' && -f 'build.gradle'
+      run: |
+        ./gradlew dependencyCheckAnalyze
+        # Convert XML report to SARIF if possible
+
     - name: Generate security annotations
       if: matrix.validation == 'security' && always()
       run: |
