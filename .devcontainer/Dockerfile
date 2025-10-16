@@ -40,7 +40,7 @@ RUN npm install -g \
     eslint
 
 # Install development tools via pip
-RUN pip3 install \
+RUN pip3 install --break-system-packages \
     pre-commit \
     black \
     flake8 \
@@ -56,19 +56,28 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
     && apt update \
     && apt install gh -y
 
-# Install yq for YAML processing
-RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
+# Install yq for YAML processing (arch-aware)
+RUN DEB_ARCH="$(dpkg --print-architecture)" \
+    && wget -qO /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${DEB_ARCH}" \
     && chmod +x /usr/local/bin/yq
 
-# Install actionlint for GitHub Actions validation
-RUN curl -fsSL https://raw.githubusercontent.com/rhymond/actionlint/main/scripts/download-actionlint.bash | bash \
-    && mv actionlint /usr/local/bin/
+# Install actionlint for GitHub Actions validation (pinned, arch-aware)
+ARG ACTIONLINT_VERSION=v1.7.1
+RUN ARCH_UNAME="$(uname -m)"; \
+    if [ "$ARCH_UNAME" = "x86_64" ]; then ACTIONLINT_ARCH="linux_amd64"; \
+    elif [ "$ARCH_UNAME" = "aarch64" ] || [ "$ARCH_UNAME" = "arm64" ]; then ACTIONLINT_ARCH="linux_arm64"; \
+    else ACTIONLINT_ARCH="linux_amd64"; fi; \
+    curl -fsSL -o /tmp/actionlint.tar.gz "https://github.com/rhysd/actionlint/releases/download/${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION#v}_${ACTIONLINT_ARCH}.tar.gz" \
+    && tar -C /usr/local/bin -xzf /tmp/actionlint.tar.gz actionlint \
+    && rm /tmp/actionlint.tar.gz
 
 # Install shellcheck for shell script linting
 RUN apt-get update && apt-get install -y shellcheck && rm -rf /var/lib/apt/lists/*
 
-# Install cosign for supply chain verification
-RUN wget -O cosign https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64 \
+# Install cosign for supply chain verification (arch-aware)
+RUN ARCH_UNAME="$(uname -m)"; \
+    if [ "$ARCH_UNAME" = "x86_64" ]; then GO_ARCH=amd64; elif [ "$ARCH_UNAME" = "aarch64" ] || [ "$ARCH_UNAME" = "arm64" ]; then GO_ARCH=arm64; else GO_ARCH=amd64; fi; \
+    wget -O cosign "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-${GO_ARCH}" \
     && chmod +x cosign \
     && mv cosign /usr/local/bin/
 
@@ -85,18 +94,27 @@ RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-ke
     && apt-get install -y trivy \
     && rm -rf /var/lib/apt/lists/*
 
-# Install k6 for load testing
-RUN wget -q -O - https://github.com/grafana/k6/releases/latest/download/k6-v0.47.0-linux-amd64.tar.gz | tar -xzf - --strip-components=1 -C /usr/local/bin k6-v0.47.0-linux-amd64/k6
+# Install k6 for load testing (pinned, arch-aware, robust)
+ARG K6_VERSION=v0.47.0
+RUN ARCH_UNAME="$(uname -m)"; \
+    if [ "$ARCH_UNAME" = "x86_64" ]; then GO_ARCH=amd64; elif [ "$ARCH_UNAME" = "aarch64" ] || [ "$ARCH_UNAME" = "arm64" ]; then GO_ARCH=arm64; else GO_ARCH=amd64; fi; \
+    curl -fsSL -L -o /tmp/k6.tgz "https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K6_VERSION}-linux-${GO_ARCH}.tar.gz" \
+    && tar -xzf /tmp/k6.tgz --strip-components=1 -C /usr/local/bin "k6-${K6_VERSION}-linux-${GO_ARCH}/k6" \
+    && rm /tmp/k6.tgz
 
-# Install SLSA verifier
-RUN wget -O slsa-verifier https://github.com/slsa-framework/slsa-verifier/releases/latest/download/slsa-verifier-linux-amd64 \
+# Install SLSA verifier (arch-aware)
+RUN ARCH_UNAME="$(uname -m)"; \
+    if [ "$ARCH_UNAME" = "x86_64" ]; then GO_ARCH=amd64; elif [ "$ARCH_UNAME" = "aarch64" ] || [ "$ARCH_UNAME" = "arm64" ]; then GO_ARCH=arm64; else GO_ARCH=amd64; fi; \
+    wget -O slsa-verifier "https://github.com/slsa-framework/slsa-verifier/releases/latest/download/slsa-verifier-linux-${GO_ARCH}" \
     && chmod +x slsa-verifier \
     && mv slsa-verifier /usr/local/bin/
 
-# Install dive for Docker image analysis
-RUN wget -O dive.deb https://github.com/wagoodman/dive/releases/latest/download/dive_0.11.0_linux_amd64.deb \
-    && dpkg -i dive.deb \
-    && rm dive.deb
+# Install dive for Docker image analysis (pinned, arch-aware)
+ARG DIVE_VERSION=0.13.1
+RUN DEB_ARCH="$(dpkg --print-architecture)" \
+    && wget -O /tmp/dive.deb "https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/dive_${DIVE_VERSION}_linux_${DEB_ARCH}.deb" \
+    && dpkg -i /tmp/dive.deb \
+    && rm /tmp/dive.deb
 
 # Install semantic-release for automated releases
 RUN npm install -g \

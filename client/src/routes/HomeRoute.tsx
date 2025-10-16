@@ -680,7 +680,6 @@ function HomeRouteInner() {
             <RealTimePresence
               currentUser={currentUser}
               onUserClick={(user) => console.log('Clicked user:', user)}
-              className="h-80"
             />
           </div>
         </div>
@@ -748,7 +747,6 @@ function HomeRouteInner() {
           <AdvancedAnalyticsDashboard
             investigationId={selectedInvestigation?.id}
             timeRange="24h"
-            className="max-w-full"
           />
         </div>
       )}
@@ -763,7 +761,6 @@ function HomeRouteInner() {
                   console.log('AI requested action:', action);
                   toast.info('AI Action', `Action requested: ${action.type}`);
                 }}
-                className="h-full"
               />
             </div>
           </div>
@@ -931,11 +928,13 @@ function HomeRouteInner() {
                 console.log('Collaboration event:', event);
                 toast.info('Collaboration', `${event.type}: ${event.userId}`);
               }}
-              onWorkspaceShare={(workspaceId, users) => {
-                console.log('Workspace shared:', workspaceId, users);
-                toast.success('Workspace', `Shared with ${users.length} user(s)`);
+              onWorkspaceShare={(workspace) => {
+                console.log('Workspace shared:', workspace);
+                const count = Array.isArray(workspace?.participants)
+                  ? workspace.participants.length
+                  : 0;
+                toast.success('Workspace', `Shared with ${count} user(s)`);
               }}
-              className="h-full w-full"
             />
           </div>
         </div>
@@ -969,7 +968,6 @@ function HomeRouteInner() {
                 console.log('Compliance violation:', violation);
                 toast.warning('Compliance', `${violation.rule}: ${violation.description}`);
               }}
-              className="h-full w-full"
             />
           </div>
         </div>
@@ -998,13 +996,12 @@ function HomeRouteInner() {
                 console.log('Metric threshold:', metric, threshold);
                 toast.info('Performance', `${metric.name} exceeded ${threshold.value}`);
               }}
-              onLogEvent={(logEvent) => {
+              onLogEvent={(logEvent: any) => {
                 console.log('Log event:', logEvent);
                 if (logEvent.level === 'ERROR') {
                   toast.error('System Error', logEvent.message.substring(0, 100));
                 }
               }}
-              className="h-full w-full"
             />
           </div>
         </div>
@@ -1041,7 +1038,6 @@ function HomeRouteInner() {
                 console.log('Template applied:', template, connector);
                 toast.success('Template', `Applied ${template.name} to ${connector.name}`);
               }}
-              className="h-full w-full"
             />
           </div>
         </div>

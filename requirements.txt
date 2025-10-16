@@ -25,9 +25,7 @@ click==8.1.8
 cryptography==46.0.2
     # via python-jose
 ecdsa==0.19.1
-    # via
-    #   -r requirements.in
-    #   python-jose
+    # via python-jose
 fastapi==0.116.2
     # via -r requirements.in
 h11==0.16.0
@@ -64,7 +62,7 @@ pyjwt==2.10.1
     # via redis
 python-dotenv==1.1.1
     # via -r requirements.in
-python-jose[cryptography]==3.5.0
+python-jose[cryptography]==3.3.0
     # via -r requirements.in
 python-multipart==0.0.20
     # via -r requirements.in

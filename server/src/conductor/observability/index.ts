@@ -1,12 +1,20 @@
-// Conductor Observability Module
-// Provides OpenTelemetry instrumentation and Prometheus metrics integration
-// for the Conductor MoE+MCP system
-
-import { trace, _context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
+// Conductor Observability Module (No-op Tracing Shim)
+// Provides metric recording and optional no-op tracing helpers without OTEL deps
 import { conductorMetrics } from '../metrics';
 import { ExpertType } from '../types';
 
-const tracer = trace.getTracer('conductor', '1.0.0');
+// Local no-op tracer shim
+const tracer = {
+  startSpan: (_name: string, _opts?: any) => ({
+    setAttributes: (_a?: any) => {},
+    setStatus: (_s?: any) => {},
+    recordException: (_e?: any) => {},
+    end: () => {},
+  }),
+};
+
+// Minimal placeholders for kinds
+const SpanKind = { INTERNAL: 'internal', CLIENT: 'client', SERVER: 'server' } as const;
 
 export interface ConductorSpanAttributes {
   'conductor.decision_id': string;
@@ -39,7 +47,6 @@ export function createRoutingSpan(
   attributes: Partial<ConductorSpanAttributes> = {},
 ) {
   return tracer.startSpan('conductor.routing.decide', {
-    kind: SpanKind.INTERNAL,
     attributes: {
       'conductor.decision_id': decisionId,
       'conductor.task_hash': hashTask(taskInput),
@@ -58,7 +65,6 @@ export function createExpertExecutionSpan(
   attributes: Partial<ConductorSpanAttributes> = {},
 ) {
   return tracer.startSpan(`conductor.expert.${expert.toLowerCase()}`, {
-    kind: SpanKind.INTERNAL,
     attributes: {
       'conductor.expert': expert,
       'conductor.decision_id': decisionId,
@@ -78,7 +84,6 @@ export function createMCPToolSpan(
   attributes: Partial<MCPSpanAttributes> = {},
 ) {
   return tracer.startSpan(`conductor.mcp.${toolName}`, {
-    kind: SpanKind.CLIENT,
     attributes: {
       'mcp.server': serverName,
       'mcp.tool': toolName,
@@ -97,7 +102,6 @@ export function createSecurityCheckSpan(
   attributes: Partial<ConductorSpanAttributes> = {},
 ) {
   return tracer.startSpan(`conductor.security.${checkType}`, {
-    kind: SpanKind.INTERNAL,
     attributes: {
       'conductor.security_check': checkType,
       'conductor.operation': 'security_validation',
@@ -137,13 +141,13 @@ export function recordRoutingDecision(
     });
 
     if (error) {
-      span.recordException(error);
-      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+      span.recordException?.(error);
+      span.setStatus?.({ message: error.message });
     } else {
-      span.setStatus({ code: SpanStatusCode.OK });
+      span.setStatus?.({});
     }
   } finally {
-    span.end();
+    span.end?.();
   }
 }
 
@@ -271,23 +275,20 @@ export async function withConductorSpan<T>(
   operation: (span: any) => Promise<T>,
   attributes: Record<string, any> = {},
 ): Promise<T> {
-  const span = tracer.startSpan(spanName, {
-    kind: SpanKind.INTERNAL,
-    attributes,
-  });
+  const span = tracer.startSpan(spanName, { attributes });
 
   try {
     const result = await operation(span);
-    span.setStatus({ code: SpanStatusCode.OK });
+    span.setStatus?.({});
     return result;
   } catch (error) {
     if (error instanceof Error) {
-      span.recordException(error);
-      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+      span.recordException?.(error);
+      span.setStatus?.({ message: error.message });
     }
     throw error;
   } finally {
-    span.end();
+    span.end?.();
   }
 }
 
@@ -295,15 +296,7 @@ export async function withConductorSpan<T>(
  * Get current trace context for propagation
  */
 export function getCurrentTraceContext() {
-  const span = trace.getActiveSpan();
-  if (!span) return null;
-
-  const spanContext = span.spanContext();
-  return {
-    traceId: spanContext.traceId,
-    spanId: spanContext.spanId,
-    traceFlags: spanContext.traceFlags,
-  };
+  return null;
 }
 
 /**
@@ -337,7 +330,6 @@ function hashTask(taskInput: string): string {
 export function conductorTracingMiddleware() {
   return (req: any, res: any, next: any) => {
     const span = tracer.startSpan(`conductor.http.${req.method} ${req.path}`, {
-      kind: SpanKind.SERVER,
       attributes: {
         'http.method': req.method,
         'http.url': req.url,
@@ -355,21 +347,21 @@ export function conductorTracingMiddleware() {
     }
 
     // Wrap response end to capture metrics
-    const originalEnd = res.end;
-    res.end = function (chunk: any, encoding: any) {
-      span.setAttributes({
+    const originalEnd = res.end.bind(res);
+    (res as any).end = (chunk: any, encoding?: any) => {
+      span.setAttributes?.({
         'http.status_code': res.statusCode,
         'conductor.response_size': chunk ? chunk.length : 0,
       });
 
       if (res.statusCode >= 400) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: `HTTP ${res.statusCode}` });
+        span.setStatus?.({ message: `HTTP ${res.statusCode}` });
       } else {
-        span.setStatus({ code: SpanStatusCode.OK });
+        span.setStatus?.({});
       }
 
-      span.end();
-      originalEnd.call(this, chunk, encoding);
+      span.end?.();
+      return originalEnd(chunk, encoding);
     };
 
     next();
@@ -398,9 +390,9 @@ export function createConductorGraphQLPlugin() {
           const { operationName } = requestContext.request;
 
           if (operationName === 'conduct' || operationName === 'previewRouting') {
-            const span = trace.getActiveSpan();
+            const span = null as any;
             if (span) {
-              span.setAttributes({
+              span.setAttributes?.({
                 'conductor.graphql.operation': operationName,
                 'conductor.graphql.variables_count': Object.keys(
                   requestContext.request.variables || {},
@@ -415,16 +407,16 @@ export function createConductorGraphQLPlugin() {
           const { operationName } = requestContext.request;
 
           if (operationName === 'conduct' || operationName === 'previewRouting') {
-            const span = trace.getActiveSpan();
+            const span = null as any;
             if (span) {
               requestContext.errors.forEach((error: any) => {
-                span.recordException(error);
-                span.setAttributes({
+                span.recordException?.(error);
+                span.setAttributes?.({
                   'conductor.graphql.error': error.message,
                   'conductor.graphql.error_path': error.path?.join('.') || 'unknown',
                 });
               });
-              span.setStatus({ code: SpanStatusCode.ERROR });
+              span.setStatus?.({});
             }
           }
         },

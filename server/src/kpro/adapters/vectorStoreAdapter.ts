@@ -110,7 +110,7 @@ export class PineconeVectorStoreAdapter implements VectorStoreAdapter {
 
   async snapshot(): Promise<VectorIndexSnapshot> {
     const ids: string[] = [];
-    let next?: string;
+    let next: string | undefined;
     do {
       const payload: Record<string, any> = {
         namespace: this.namespace,
@@ -237,7 +237,7 @@ export class WeaviateVectorStoreAdapter implements VectorStoreAdapter {
 
   async snapshot(): Promise<VectorIndexSnapshot> {
     const ids: string[] = [];
-    let after?: string;
+    let after: string | undefined;
     do {
       const res = await this.fetch(`${this.baseUrl}/v1/graphql`, {
         method: 'POST',

@@ -5,8 +5,8 @@
  */
 
 import { Pool } from 'pg';
-import { Driver } from 'neo4j-driver';
-import logger from '../config/logger.js';
+import type { Driver } from 'neo4j-driver';
+import logger from '../utils/logger.js';
 
 const workerLogger = logger.child({ name: 'OutboxNeo4jSync' });
 
@@ -87,7 +87,7 @@ export class OutboxNeo4jSync {
 
     try {
       // Get unprocessed events with advisory lock to prevent concurrent processing
-      const { rows } = await client.query<OutboxEvent>(
+      const { rows } = await client.query(
         `SELECT id, topic, payload, created_at, attempts, last_error
          FROM outbox_events 
          WHERE processed_at IS NULL 
@@ -98,15 +98,15 @@ export class OutboxNeo4jSync {
         [this.config.maxRetries, this.config.batchSize],
       );
 
-      if (rows.length === 0) {
+      if ((rows as any[]).length === 0) {
         return;
       }
 
-      workerLogger.debug(`Processing ${rows.length} outbox events`);
+      workerLogger.debug(`Processing ${(rows as any[]).length} outbox events`);
 
       // Process each event
-      for (const event of rows) {
-        await this.processEvent(client, event);
+      for (const event of rows as any[]) {
+        await this.processEvent(client, event as OutboxEvent);
       }
     } finally {
       client.release();
