@@ -1,6 +1,6 @@
 catalog_version: "1.0"
 models:
-  - id: zhipu-glm-4.5-suite
+- id: zhipu-glm-4-5-suite
     vendor: "Zhipu AI (Z.ai)"
     family: "GLM / ChatGLM"
     last_verified: "2025-09-25"
