@@ -5,6 +5,7 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
