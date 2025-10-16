@@ -50,6 +50,8 @@ const config = {
     '<rootDir>/src/components/graph/__tests__/GraphContextMenu.test.jsx',
     '<rootDir>/src/components/graph/__tests__/AIInsightsPanel.test.jsx',
     '<rootDir>/src/components/visualization/__tests__/InteractiveGraphCanvas.test.tsx',
+    '<rootDir>/src/components/mlops/__tests__/ModelManagementDashboard.test.tsx',
+    '<rootDir>/src/components/dashboard/__tests__/StatsOverview.test.tsx',
   ],
 };
 
