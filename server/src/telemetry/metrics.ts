@@ -1,17 +1,8 @@
 /**
- * Comprehensive Metrics Collection for IntelGraph Maestro
- * Production-ready metrics using OpenTelemetry and Prometheus
+ * No-op Metrics Collection for IntelGraph Maestro (OTel disabled)
+ * Preserves API compatibility without external dependencies.
  */
-
-import { metrics, ValueType } from '@opentelemetry/api';
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import {
-  PeriodicExportingMetricReader,
-  ConsoleMetricExporter,
-} from '@opentelemetry/sdk-metrics';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import logger from '../utils/logger.js';
 
 /**
  * IntelGraph Metrics Manager
@@ -19,7 +10,6 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 export class IntelGraphMetrics {
   private static instance: IntelGraphMetrics;
   private meter: any;
-  private prometheusExporter: PrometheusExporter;
 
   // Core Application Metrics
   private orchestrationRequests: any;
@@ -75,24 +65,24 @@ export class IntelGraphMetrics {
   }
 
   private setupMetrics(): void {
-    // Setup Prometheus exporter
-    this.prometheusExporter = new PrometheusExporter(
-      {
-        port: 9464,
-        endpoint: '/metrics',
-      },
-      () => {
-        console.log('✅ Prometheus metrics server started on port 9464');
-      },
-    );
-
-    // Get meter
-    this.meter = metrics.getMeter('intelgraph-maestro', '2.0.0');
+    // No-op meter factory
+    const noopInstrument = {
+      add: (_v: number, _attrs?: any) => {},
+      record: (_v: number, _attrs?: any) => {},
+      set: (_v: number, _attrs?: any) => {},
+    };
+    const noopObservable = { addCallback: (_cb: any) => {} };
+    this.meter = {
+      createCounter: (_: string, __?: any) => ({ ...noopInstrument }),
+      createHistogram: (_: string, __?: any) => ({ ...noopInstrument }),
+      createGauge: (_: string, __?: any) => ({ ...noopInstrument }),
+      createUpDownCounter: (_: string, __?: any) => ({ ...noopInstrument }),
+      createObservableGauge: (_: string, __?: any) => ({ ...noopObservable }),
+    };
 
     this.initializeMetrics();
     this.setupSystemMetrics();
-
-    console.log('✅ IntelGraph metrics collection initialized');
+    logger.info('Metrics disabled (no-op).');
   }
 
   private initializeMetrics(): void {
@@ -298,13 +288,7 @@ export class IntelGraphMetrics {
       },
     );
 
-    this.memoryUsage.addCallback((result: any) => {
-      const used = process.memoryUsage();
-      result.observe(used.rss, { type: 'rss' });
-      result.observe(used.heapUsed, { type: 'heap_used' });
-      result.observe(used.heapTotal, { type: 'heap_total' });
-      result.observe(used.external, { type: 'external' });
-    });
+    // no-op
 
     // CPU usage
     this.cpuUsage = this.meter.createObservableGauge(
@@ -314,14 +298,7 @@ export class IntelGraphMetrics {
       },
     );
 
-    let lastCpuUsage = process.cpuUsage();
-    this.cpuUsage.addCallback((result: any) => {
-      const currentCpuUsage = process.cpuUsage(lastCpuUsage);
-      const totalTime = currentCpuUsage.user + currentCpuUsage.system;
-      const usage = (totalTime / 1000000) * 100;
-      result.observe(usage);
-      lastCpuUsage = process.cpuUsage();
-    });
+    // no-op
 
     // Event loop lag
     const eventLoopLag = this.meter.createObservableGauge(
@@ -331,13 +308,7 @@ export class IntelGraphMetrics {
       },
     );
 
-    let lastCheck = process.hrtime.bigint();
-    eventLoopLag.addCallback((result: any) => {
-      const now = process.hrtime.bigint();
-      const lag = Number(now - lastCheck) / 1e9;
-      result.observe(lag);
-      lastCheck = now;
-    });
+    // no-op
   }
 
   // Public API Methods
@@ -477,9 +448,7 @@ export class IntelGraphMetrics {
     this.activeSessions.add(delta, { type: sessionType });
   }
 
-  public async shutdown(): Promise<void> {
-    console.log('🔄 IntelGraph metrics collection shutdown complete');
-  }
+  public async shutdown(): Promise<void> { /* no-op */ }
 }
 
 const metricsInstance = IntelGraphMetrics.getInstance();
