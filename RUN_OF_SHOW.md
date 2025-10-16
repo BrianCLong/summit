@@ -126,8 +126,8 @@ NEO4J_BACKUP_ID=$(kubectl -n intelgraph-maestro exec deploy/neo4j-0 -- ls -t /ba
 echo "📝 Neo4j backup ID: $NEO4J_BACKUP_ID"
 ```
 
-- [ ] **PostgreSQL PITR marker**: ********\_******** _(Time)_
-- [ ] **Neo4j backup ID**: ********\_******** _(Backup Path)_
+- [ ] **PostgreSQL PITR marker**: **\*\*\*\***\_**\*\*\*\*** _(Time)_
+- [ ] **Neo4j backup ID**: **\*\*\*\***\_**\*\*\*\*** _(Backup Path)_
 - [ ] **Backup verification**: Restore procedures tested
 
 ---
@@ -179,7 +179,7 @@ kubectl -n intelgraph-maestro annotate ingress intelgraph-maestro-ingress \
   "alb.ingress.kubernetes.io/actions.weighted-routing=..." --overwrite
 ```
 
-- [ ] **40% traffic active**: ********\_******** _(Time)_
+- [ ] **40% traffic active**: **\*\*\*\***\_**\*\*\*\*** _(Time)_
 - [ ] **SLO validation**: API p95 ≤ 350ms ✅ / ❌
 - [ ] **Error rate check**: 5xx ≤ 1% ✅ / ❌
 
@@ -190,7 +190,7 @@ echo "📈 Ramping to 60% traffic..."
 # [Same pattern as above]
 ```
 
-- [ ] **60% traffic active**: ********\_******** _(Time)_
+- [ ] **60% traffic active**: **\*\*\*\***\_**\*\*\*\*** _(Time)_
 - [ ] **SLO validation**: API p95 ≤ 350ms ✅ / ❌
 - [ ] **Error rate check**: 5xx ≤ 1% ✅ / ❌
 
@@ -201,7 +201,7 @@ echo "📈 Ramping to 80% traffic..."
 # [Same pattern as above]
 ```
 
-- [ ] **80% traffic active**: ********\_******** _(Time)_
+- [ ] **80% traffic active**: **\*\*\*\***\_**\*\*\*\*** _(Time)_
 - [ ] **SLO validation**: API p95 ≤ 350ms ✅ / ❌
 - [ ] **Error rate check**: 5xx ≤ 1% ✅ / ❌
 
@@ -218,7 +218,7 @@ helm upgrade intelgraph-maestro ./charts/intelgraph-maestro \
   --set ingress.traffic.canary.enabled=false --wait
 ```
 
-- [ ] **100% traffic active**: ********\_******** _(Time)_
+- [ ] **100% traffic active**: **\*\*\*\***\_**\*\*\*\*** _(Time)_
 - [ ] **Canary mode disabled**: Locked to production configuration
 - [ ] **Final SLO validation**: All metrics within targets ✅ / ❌
 
@@ -309,7 +309,7 @@ echo "🚨 EMERGENCY ROLLBACK INITIATED"
 ./scripts/cutover/emergency-rollback.sh full
 ```
 
-- [ ] **Rollback executed**: ********\_******** _(Time & Reason)_
+- [ ] **Rollback executed**: **\*\*\*\***\_**\*\*\*\*** _(Time & Reason)_
 
 ---
 
@@ -453,10 +453,10 @@ kubectl -n intelgraph-maestro exec deploy/opa -- curl -s localhost:8181/v1/data/
 
 #### Sign GO_LIVE_APPROVAL.md
 
-- [ ] **Platform Lead**: ********\_******** _(Signature & Date)_
-- [ ] **SRE Lead**: ********\_******** _(Signature & Date)_
-- [ ] **Security Lead**: ********\_******** _(Signature & Date)_
-- [ ] **CTO**: ********\_******** _(Signature & Date)_
+- [ ] **Platform Lead**: **\*\*\*\***\_**\*\*\*\*** _(Signature & Date)_
+- [ ] **SRE Lead**: **\*\*\*\***\_**\*\*\*\*** _(Signature & Date)_
+- [ ] **Security Lead**: **\*\*\*\***\_**\*\*\*\*** _(Signature & Date)_
+- [ ] **CTO**: **\*\*\*\***\_**\*\*\*\*** _(Signature & Date)_
 
 #### Evidence Archive
 
