@@ -26,6 +26,13 @@ following areas:
 - Cached results are deep-cloned on retrieval to prevent in-memory mutation of canonical findings.
 - Cache size and TTL are configurable, enabling operators to align with retention requirements.
 
+### Differential privacy guardrails
+- `/query/privacy/degree` applies a Laplace mechanism with explicit epsilon and sensitivity inputs.
+- The service captures an attestation hash (`zkp_sha256_*`) so governance systems can validate
+  parameter choices without storing raw results.
+- Operators can scope the node set per request, reducing composition overhead while preserving
+  real-time responsiveness.
+
 ## Anomaly detection and correlation
 - Anomaly detection thresholds are tunable per deployment, allowing environment-specific baselines.
 - Correlation logic requires multiple systems or repeated hits before exposing keys, reducing the
