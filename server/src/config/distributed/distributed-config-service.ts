@@ -19,13 +19,14 @@ import {
   RepositoryWriter,
   SecretReference,
   SecretResolver,
+  DeepPartial,
 } from './types';
 
 const SECRET_REFERENCE_KEY = '__secretRef';
 
 interface CreateOrUpdateOptions<TConfig> {
   config: TConfig;
-  overrides?: Partial<Record<EnvironmentName, Partial<TConfig>>>;
+  overrides?: Partial<Record<EnvironmentName, DeepPartial<TConfig>>>;
   metadata: {
     actor: string;
     message?: string;
@@ -69,7 +70,7 @@ function isSecretReference(
 
 function deepMerge<TConfig>(
   base: TConfig,
-  override?: Partial<TConfig>,
+  override?: DeepPartial<TConfig>,
 ): TConfig {
   if (!override) {
     return base;
@@ -89,7 +90,7 @@ function deepMerge<TConfig>(
       typeof (base as any)[key] === 'object' &&
       !Array.isArray((base as any)[key])
     ) {
-      result[key] = deepMerge((base as any)[key], value);
+      result[key] = deepMerge((base as any)[key], value as any);
     } else {
       result[key] = value;
     }
@@ -203,9 +204,10 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     if (schema) {
       schema.parse(options.config);
       if (options.overrides) {
+        const deepPartial = schema.deepPartial ? schema.deepPartial() : schema.partial();
         for (const override of Object.values(options.overrides)) {
           if (override) {
-            schema.partial().parse(override);
+            deepPartial.parse(override);
           }
         }
       }
@@ -295,7 +297,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     if (options.environment && version.overrides[options.environment]) {
       effectiveConfig = deepMerge(
         effectiveConfig,
-        version.overrides[options.environment],
+        version.overrides[options.environment] as DeepPartial<TConfig>,
       );
     }
 
@@ -323,10 +325,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
             )
           : selectVariant(version.abTest, identifier, options.assignmentValue);
       if (variant) {
-        effectiveConfig = deepMerge(
-          effectiveConfig,
-          variant.config as Partial<TConfig>,
-        );
+        effectiveConfig = deepMerge(effectiveConfig, variant.config as DeepPartial<TConfig>);
       }
     }
 
