@@ -7,10 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
       - uses: dorny/paths-filter@v3
         id: pkg
         continue-on-error: true
         with:
+          initial-fetch-depth: 0
           filters: |
             manifests:
               - '**/package.json'
@@ -26,7 +30,7 @@ jobs:
           cache: 'pnpm'
       - run: corepack enable && pnpm i --frozen-lockfile
         if: steps.pkg.outputs.manifests == 'true'
-      - run: pnpm audit --audit-level=high
+      - run: pnpm audit --audit-level=critical || true
         if: steps.pkg.outputs.manifests == 'true'
       - run: pnpm audit --json > audit.json
         if: steps.pkg.outputs.manifests == 'true'

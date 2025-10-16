@@ -7,10 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
       - uses: dorny/paths-filter@v3
         id: changes
         continue-on-error: true
         with:
+          initial-fetch-depth: 0
           filters: |
             catalog:
               - 'model-catalog/**'
@@ -18,9 +22,11 @@ jobs:
         if: steps.changes.outputs.catalog != 'true'
         run: echo "No model catalog changes; skipping"
       - uses: actions/setup-node@v4
+        if: steps.changes.outputs.catalog == 'true'
         with:
           node-version: '20'
       - name: Install validators
+        if: steps.changes.outputs.catalog == 'true'
         run: npm i -g ajv-cli@5 && npm i yaml@2
       - name: Validate schema
         continue-on-error: true
@@ -28,6 +34,7 @@ jobs:
           ajv validate -s model-catalog/schemas/model.schema.json -d model-catalog/cataloga?.yaml --errors=text || \
           ajv validate -s model-catalog/schemas/model.schema.json -d model-catalog/catalog.yaml
       - name: Render Markdown
+        if: steps.changes.outputs.catalog == 'true'
         run: |
           node -e '
           const fs=require("fs");
