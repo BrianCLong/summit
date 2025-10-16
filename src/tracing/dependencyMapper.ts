@@ -102,7 +102,11 @@ export interface Bottleneck {
 }
 
 export interface Anomaly {
-  type: 'latency_spike' | 'error_spike' | 'new_dependency' | 'missing_dependency';
+  type:
+    | 'latency_spike'
+    | 'error_spike'
+    | 'new_dependency'
+    | 'missing_dependency';
   service: string;
   description: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -118,7 +122,11 @@ export interface DependencyAnalysis {
 }
 
 export interface PerformanceInsight {
-  type: 'slow_service' | 'high_error_rate' | 'resource_intensive' | 'inefficient_pattern';
+  type:
+    | 'slow_service'
+    | 'high_error_rate'
+    | 'resource_intensive'
+    | 'inefficient_pattern';
   service: string;
   metric: string;
   currentValue: number;
@@ -197,8 +205,10 @@ export class DependencyMapper extends EventEmitter {
     });
 
     this.serviceGraph.metadata.totalTraces += Object.keys(traces).length;
-    this.serviceGraph.metadata.totalSpans += Object.values(traces)
-      .reduce((sum, spans) => sum + spans.length, 0);
+    this.serviceGraph.metadata.totalSpans += Object.values(traces).reduce(
+      (sum, spans) => sum + spans.length,
+      0,
+    );
 
     this.emit('traces_added', { count: Object.keys(traces).length });
   }
@@ -208,7 +218,7 @@ export class DependencyMapper extends EventEmitter {
    */
   async analyzeDependencies(): Promise<DependencyAnalysis> {
     const startTime = Date.now();
-    
+
     // Clear existing analysis
     this.serviceGraph.nodes = [];
     this.serviceGraph.edges = [];
@@ -231,17 +241,17 @@ export class DependencyMapper extends EventEmitter {
 
     // Find critical paths
     const criticalPaths = this.findCriticalPaths();
-    
+
     // Generate performance insights
     const performanceInsights = this.generatePerformanceInsights();
-    
+
     // Calculate reliability metrics
     const reliabilityMetrics = this.calculateReliabilityMetrics();
 
     // Detect anomalies
     const anomalies = await this.anomalyDetector.detectAnomalies(
       this.serviceGraph,
-      this.analysisHistory
+      this.analysisHistory,
     );
 
     this.serviceGraph.metadata.anomalies = anomalies;
@@ -260,10 +270,10 @@ export class DependencyMapper extends EventEmitter {
     }
 
     const analysisTime = Date.now() - startTime;
-    this.emit('analysis_completed', { 
-      analysis, 
+    this.emit('analysis_completed', {
+      analysis,
       analysisTime,
-      tracesAnalyzed: this.traces.size 
+      tracesAnalyzed: this.traces.size,
     });
 
     return analysis;
@@ -283,8 +293,12 @@ export class DependencyMapper extends EventEmitter {
     upstream: DependencyEdge[];
     downstream: DependencyEdge[];
   } {
-    const upstream = this.serviceGraph.edges.filter(edge => edge.target === serviceName);
-    const downstream = this.serviceGraph.edges.filter(edge => edge.source === serviceName);
+    const upstream = this.serviceGraph.edges.filter(
+      (edge) => edge.target === serviceName,
+    );
+    const downstream = this.serviceGraph.edges.filter(
+      (edge) => edge.source === serviceName,
+    );
 
     return { upstream, downstream };
   }
@@ -298,27 +312,30 @@ export class DependencyMapper extends EventEmitter {
 
     // Build span tree
     const spanTree = this.buildSpanTree(spans);
-    
+
     // Find the longest path
     const criticalPath = this.findLongestPath(spanTree);
-    
-    return criticalPath.map(span => span.serviceName);
+
+    return criticalPath.map((span) => span.serviceName);
   }
 
   /**
    * Get performance metrics for a service
    */
   getServiceMetrics(serviceName: string): NodeMetrics | null {
-    const node = this.serviceGraph.nodes.find(n => n.name === serviceName);
+    const node = this.serviceGraph.nodes.find((n) => n.name === serviceName);
     return node ? node.metrics : null;
   }
 
   /**
    * Get dependency metrics between two services
    */
-  getDependencyMetrics(sourceService: string, targetService: string): EdgeMetrics | null {
+  getDependencyMetrics(
+    sourceService: string,
+    targetService: string,
+  ): EdgeMetrics | null {
     const edge = this.serviceGraph.edges.find(
-      e => e.source === sourceService && e.target === targetService
+      (e) => e.source === sourceService && e.target === targetService,
     );
     return edge ? edge.metrics : null;
   }
@@ -330,13 +347,13 @@ export class DependencyMapper extends EventEmitter {
     switch (format) {
       case 'json':
         return JSON.stringify(this.serviceGraph, null, 2);
-      
+
       case 'dot':
         return this.exportToDot();
-      
+
       case 'cytoscape':
         return this.exportToCytoscape();
-        
+
       default:
         throw new Error(`Unsupported format: ${format}`);
     }
@@ -346,14 +363,14 @@ export class DependencyMapper extends EventEmitter {
    * Process a single trace and extract dependencies
    */
   private processTrace(
-    spans: TraceSpan[], 
+    spans: TraceSpan[],
     serviceMap: Map<string, ServiceNode>,
-    dependencyMap: Map<string, DependencyEdge>
+    dependencyMap: Map<string, DependencyEdge>,
   ): void {
     // Create service nodes
     for (const span of spans) {
       const serviceId = `${span.serviceName}:${span.tags.environment || 'unknown'}`;
-      
+
       if (!serviceMap.has(serviceId)) {
         serviceMap.set(serviceId, this.createServiceNode(span));
       } else {
@@ -364,12 +381,15 @@ export class DependencyMapper extends EventEmitter {
     // Create dependency edges
     for (const span of spans) {
       if (span.parentSpanId) {
-        const parentSpan = spans.find(s => s.spanId === span.parentSpanId);
+        const parentSpan = spans.find((s) => s.spanId === span.parentSpanId);
         if (parentSpan && parentSpan.serviceName !== span.serviceName) {
           const edgeId = `${parentSpan.serviceName}->${span.serviceName}`;
-          
+
           if (!dependencyMap.has(edgeId)) {
-            dependencyMap.set(edgeId, this.createDependencyEdge(parentSpan, span));
+            dependencyMap.set(
+              edgeId,
+              this.createDependencyEdge(parentSpan, span),
+            );
           } else {
             this.updateDependencyMetrics(dependencyMap.get(edgeId)!, span);
           }
@@ -384,7 +404,8 @@ export class DependencyMapper extends EventEmitter {
   private processTraceIncremental(spans: TraceSpan[]): void {
     // Real-time processing for large traces
     for (const span of spans) {
-      if (span.duration > 1000) { // Spans longer than 1 second
+      if (span.duration > 1000) {
+        // Spans longer than 1 second
         this.emit('slow_operation', {
           service: span.serviceName,
           operation: span.operationName,
@@ -436,10 +457,11 @@ export class DependencyMapper extends EventEmitter {
     if (span.status === 'error') {
       node.metrics.errorCount++;
     }
-    
+
     node.metrics.totalDuration += span.duration;
-    node.metrics.avgLatency = node.metrics.totalDuration / node.metrics.requestCount;
-    
+    node.metrics.avgLatency =
+      node.metrics.totalDuration / node.metrics.requestCount;
+
     // Update health based on error rate
     const errorRate = node.metrics.errorCount / node.metrics.requestCount;
     if (errorRate > 0.1) {
@@ -454,7 +476,10 @@ export class DependencyMapper extends EventEmitter {
   /**
    * Create a new dependency edge
    */
-  private createDependencyEdge(parentSpan: TraceSpan, childSpan: TraceSpan): DependencyEdge {
+  private createDependencyEdge(
+    parentSpan: TraceSpan,
+    childSpan: TraceSpan,
+  ): DependencyEdge {
     return {
       id: `${parentSpan.serviceName}->${childSpan.serviceName}`,
       source: parentSpan.serviceName,
@@ -469,12 +494,17 @@ export class DependencyMapper extends EventEmitter {
         p99Latency: childSpan.duration,
         errorRate: childSpan.status === 'error' ? 1 : 0,
       },
-      errorTypes: childSpan.status === 'error' ? [{
-        type: childSpan.tags.error?.type || 'unknown',
-        count: 1,
-        lastOccurrence: childSpan.startTime,
-        samples: [childSpan.tags.error?.message || ''],
-      }] : [],
+      errorTypes:
+        childSpan.status === 'error'
+          ? [
+              {
+                type: childSpan.tags.error?.type || 'unknown',
+                count: 1,
+                lastOccurrence: childSpan.startTime,
+                samples: [childSpan.tags.error?.message || ''],
+              },
+            ]
+          : [],
     };
   }
 
@@ -486,9 +516,10 @@ export class DependencyMapper extends EventEmitter {
     if (span.status === 'error') {
       edge.metrics.errorCount++;
     }
-    
+
     edge.metrics.totalDuration += span.duration;
-    edge.metrics.avgLatency = edge.metrics.totalDuration / edge.metrics.callCount;
+    edge.metrics.avgLatency =
+      edge.metrics.totalDuration / edge.metrics.callCount;
     edge.metrics.errorRate = edge.metrics.errorCount / edge.metrics.callCount;
   }
 
@@ -498,15 +529,20 @@ export class DependencyMapper extends EventEmitter {
   private inferServiceType(span: TraceSpan): ServiceNode['type'] {
     if (span.tags['db.system']) return 'database';
     if (span.tags['messaging.system']) return 'queue';
-    if (span.tags['cache.system'] || span.operationName.includes('cache')) return 'cache';
-    if (span.tags['http.url'] && !span.serviceName.includes('internal')) return 'external';
+    if (span.tags['cache.system'] || span.operationName.includes('cache'))
+      return 'cache';
+    if (span.tags['http.url'] && !span.serviceName.includes('internal'))
+      return 'external';
     return 'service';
   }
 
   /**
    * Infer dependency type from span attributes
    */
-  private inferDependencyType(parentSpan: TraceSpan, childSpan: TraceSpan): DependencyEdge['type'] {
+  private inferDependencyType(
+    parentSpan: TraceSpan,
+    childSpan: TraceSpan,
+  ): DependencyEdge['type'] {
     if (childSpan.tags['db.system']) return 'database';
     if (childSpan.tags['messaging.system']) return 'messaging';
     if (childSpan.tags['http.method']) return 'http';
@@ -519,7 +555,7 @@ export class DependencyMapper extends EventEmitter {
    */
   private buildSpanTree(spans: TraceSpan[]): Map<string, TraceSpan[]> {
     const tree = new Map<string, TraceSpan[]>();
-    
+
     for (const span of spans) {
       if (span.parentSpanId) {
         if (!tree.has(span.parentSpanId)) {
@@ -528,7 +564,7 @@ export class DependencyMapper extends EventEmitter {
         tree.get(span.parentSpanId)!.push(span);
       }
     }
-    
+
     return tree;
   }
 
@@ -546,9 +582,9 @@ export class DependencyMapper extends EventEmitter {
   private findCriticalPaths(): CriticalPath[] {
     // Analyze all traces to find common critical paths
     const paths: CriticalPath[] = [];
-    
+
     // Implementation would analyze trace patterns to identify critical paths
-    
+
     return paths;
   }
 
@@ -557,7 +593,7 @@ export class DependencyMapper extends EventEmitter {
    */
   private generatePerformanceInsights(): PerformanceInsight[] {
     const insights: PerformanceInsight[] = [];
-    
+
     // Analyze service performance
     for (const node of this.serviceGraph.nodes) {
       if (node.metrics.avgLatency > 1000) {
@@ -575,7 +611,7 @@ export class DependencyMapper extends EventEmitter {
           ],
         });
       }
-      
+
       const errorRate = node.metrics.errorCount / node.metrics.requestCount;
       if (errorRate > 0.05) {
         insights.push({
@@ -593,7 +629,7 @@ export class DependencyMapper extends EventEmitter {
         });
       }
     }
-    
+
     return insights;
   }
 
@@ -602,15 +638,18 @@ export class DependencyMapper extends EventEmitter {
    */
   private calculateReliabilityMetrics(): ReliabilityMetrics {
     const serviceAvailability: Record<string, number> = {};
-    
+
     for (const node of this.serviceGraph.nodes) {
       const errorRate = node.metrics.errorCount / node.metrics.requestCount;
       serviceAvailability[node.name] = (1 - errorRate) * 100;
     }
-    
-    const healthyServices = this.serviceGraph.nodes.filter(n => n.health === 'healthy').length;
-    const overallHealthScore = (healthyServices / this.serviceGraph.nodes.length) * 100;
-    
+
+    const healthyServices = this.serviceGraph.nodes.filter(
+      (n) => n.health === 'healthy',
+    ).length;
+    const overallHealthScore =
+      (healthyServices / this.serviceGraph.nodes.length) * 100;
+
     return {
       overallHealthScore,
       serviceAvailability,
@@ -625,14 +664,14 @@ export class DependencyMapper extends EventEmitter {
   private calculateTimeRange(): { start: number; end: number } {
     let start = Infinity;
     let end = 0;
-    
+
     for (const spans of this.traces.values()) {
       for (const span of spans) {
         start = Math.min(start, span.startTime);
         end = Math.max(end, span.startTime + span.duration);
       }
     }
-    
+
     return { start, end };
   }
 
@@ -643,22 +682,26 @@ export class DependencyMapper extends EventEmitter {
     let dot = 'digraph ServiceDependencies {\n';
     dot += '  rankdir=LR;\n';
     dot += '  node [shape=box];\n\n';
-    
+
     // Add nodes
     for (const node of this.serviceGraph.nodes) {
-      const color = node.health === 'healthy' ? 'green' : 
-                   node.health === 'degraded' ? 'yellow' : 'red';
+      const color =
+        node.health === 'healthy'
+          ? 'green'
+          : node.health === 'degraded'
+            ? 'yellow'
+            : 'red';
       dot += `  "${node.name}" [color=${color}];\n`;
     }
-    
+
     dot += '\n';
-    
+
     // Add edges
     for (const edge of this.serviceGraph.edges) {
       const weight = Math.max(1, Math.floor(edge.metrics.callCount / 100));
       dot += `  "${edge.source}" -> "${edge.target}" [label="${edge.metrics.callCount}", penwidth=${weight}];\n`;
     }
-    
+
     dot += '}\n';
     return dot;
   }
@@ -668,7 +711,7 @@ export class DependencyMapper extends EventEmitter {
    */
   private exportToCytoscape(): string {
     const elements = [];
-    
+
     // Add nodes
     for (const node of this.serviceGraph.nodes) {
       elements.push({
@@ -681,7 +724,7 @@ export class DependencyMapper extends EventEmitter {
         },
       });
     }
-    
+
     // Add edges
     for (const edge of this.serviceGraph.edges) {
       elements.push({
@@ -694,7 +737,7 @@ export class DependencyMapper extends EventEmitter {
         },
       });
     }
-    
+
     return JSON.stringify({ elements }, null, 2);
   }
 
@@ -721,18 +764,20 @@ export class DependencyMapper extends EventEmitter {
   private cleanupOldTraces(): void {
     const cutoff = Date.now() - 3600000; // 1 hour ago
     const tracesToDelete: string[] = [];
-    
+
     for (const [traceId, spans] of this.traces.entries()) {
-      const latestSpanTime = Math.max(...spans.map(s => s.startTime + s.duration));
+      const latestSpanTime = Math.max(
+        ...spans.map((s) => s.startTime + s.duration),
+      );
       if (latestSpanTime < cutoff) {
         tracesToDelete.push(traceId);
       }
     }
-    
+
     for (const traceId of tracesToDelete) {
       this.traces.delete(traceId);
     }
-    
+
     if (tracesToDelete.length > 0) {
       this.emit('traces_cleaned', { count: tracesToDelete.length });
     }
@@ -745,20 +790,20 @@ export class DependencyMapper extends EventEmitter {
 class AnomalyDetector {
   async detectAnomalies(
     currentGraph: ServiceDependencyGraph,
-    history: DependencyAnalysis[]
+    history: DependencyAnalysis[],
   ): Promise<Anomaly[]> {
     const anomalies: Anomaly[] = [];
-    
+
     if (history.length === 0) return anomalies;
-    
+
     const previousGraph = history[history.length - 1].serviceDependencies;
-    
+
     // Detect new dependencies
     for (const edge of currentGraph.edges) {
       const existsInPrevious = previousGraph.edges.some(
-        e => e.source === edge.source && e.target === edge.target
+        (e) => e.source === edge.source && e.target === edge.target,
       );
-      
+
       if (!existsInPrevious) {
         anomalies.push({
           type: 'new_dependency',
@@ -770,12 +815,15 @@ class AnomalyDetector {
         });
       }
     }
-    
+
     // Detect latency spikes
     for (const node of currentGraph.nodes) {
-      const previousNode = previousGraph.nodes.find(n => n.name === node.name);
+      const previousNode = previousGraph.nodes.find(
+        (n) => n.name === node.name,
+      );
       if (previousNode) {
-        const latencyIncrease = node.metrics.avgLatency / previousNode.metrics.avgLatency;
+        const latencyIncrease =
+          node.metrics.avgLatency / previousNode.metrics.avgLatency;
         if (latencyIncrease > 2) {
           anomalies.push({
             type: 'latency_spike',
@@ -783,7 +831,7 @@ class AnomalyDetector {
             description: `Latency spike detected: ${latencyIncrease.toFixed(2)}x increase`,
             severity: latencyIncrease > 5 ? 'critical' : 'high',
             timestamp: Date.now(),
-            metadata: { 
+            metadata: {
               currentLatency: node.metrics.avgLatency,
               previousLatency: previousNode.metrics.avgLatency,
               increase: latencyIncrease,
@@ -792,7 +840,7 @@ class AnomalyDetector {
         }
       }
     }
-    
+
     return anomalies;
   }
 }

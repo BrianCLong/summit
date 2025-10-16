@@ -25,7 +25,13 @@ export interface AuditEvent {
   userAgent?: string;
   outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL';
   severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  category: 'AUTHENTICATION' | 'AUTHORIZATION' | 'DATA_ACCESS' | 'SYSTEM' | 'CONFIGURATION' | 'ADMIN';
+  category:
+    | 'AUTHENTICATION'
+    | 'AUTHORIZATION'
+    | 'DATA_ACCESS'
+    | 'SYSTEM'
+    | 'CONFIGURATION'
+    | 'ADMIN';
   details: Record<string, any>;
   metadata: {
     version: string;
@@ -68,7 +74,7 @@ export class AdvancedAuditLogger extends EventEmitter {
     super();
     this.config = config;
     this.anomalyDetector = new AnomalyDetector();
-    
+
     if (config.siem_integration) {
       this.siemConnector = new SIEMConnector();
     }
@@ -89,35 +95,34 @@ export class AdvancedAuditLogger extends EventEmitter {
   async logEvent(eventData: Partial<AuditEvent>): Promise<void> {
     try {
       const event = this.enrichEvent(eventData);
-      
+
       // Generate integrity hash
       event.integrity_hash = this.generateIntegrityHash(event);
-      
+
       // Store correlation
       this.updateCorrelation(event);
-      
+
       // Risk scoring
       event.risk_score = this.calculateRiskScore(event);
-      
+
       // Real-time analysis
       if (this.config.real_time_analysis) {
         await this.performRealTimeAnalysis(event);
       }
-      
+
       // Storage
       await this.storeEvent(event);
-      
+
       // SIEM integration
       if (this.siemConnector) {
         await this.siemConnector.sendEvent(event);
       }
-      
+
       // Emit for real-time subscribers
       this.emit('audit_event', event);
-      
+
       // Check for alerts
       await this.checkAlertConditions(event);
-      
     } catch (error) {
       console.error('Failed to log audit event:', error);
       // Log the failure itself
@@ -129,8 +134,9 @@ export class AdvancedAuditLogger extends EventEmitter {
    * Enrich event with context and correlation data
    */
   private enrichEvent(eventData: Partial<AuditEvent>): AuditEvent {
-    const correlationId = eventData.correlationId || this.generateCorrelationId();
-    
+    const correlationId =
+      eventData.correlationId || this.generateCorrelationId();
+
     return {
       id: this.generateEventId(),
       timestamp: new Date(),
@@ -145,11 +151,11 @@ export class AdvancedAuditLogger extends EventEmitter {
         version: process.env.APP_VERSION || '1.0.0',
         environment: process.env.NODE_ENV || 'development',
         service: 'intelgraph',
-        module: eventData.metadata?.module || 'core'
+        module: eventData.metadata?.module || 'core',
       },
       tags: eventData.tags || [],
       integrity_hash: '', // Will be generated
-      ...eventData
+      ...eventData,
     };
   }
 
@@ -170,7 +176,9 @@ export class AdvancedAuditLogger extends EventEmitter {
   /**
    * Generate integrity hash for tamper detection
    */
-  private generateIntegrityHash(event: Omit<AuditEvent, 'integrity_hash'>): string {
+  private generateIntegrityHash(
+    event: Omit<AuditEvent, 'integrity_hash'>,
+  ): string {
     const eventString = JSON.stringify(event, Object.keys(event).sort());
     return createHash('sha256').update(eventString).digest('hex');
   }
@@ -182,11 +190,11 @@ export class AdvancedAuditLogger extends EventEmitter {
     if (!this.correlationMap.has(event.correlationId)) {
       this.correlationMap.set(event.correlationId, []);
     }
-    
+
     this.correlationMap.get(event.correlationId)!.push(event.id);
-    
+
     // Clean up old correlations (older than 24 hours)
-    const cutoff = Date.now() - (24 * 60 * 60 * 1000);
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
     for (const [corrId, events] of this.correlationMap.entries()) {
       if (events.length > 0) {
         // Check if correlation is old (simplified check)
@@ -206,12 +214,12 @@ export class AdvancedAuditLogger extends EventEmitter {
 
     // Base score by category
     const categoryScores = {
-      'AUTHENTICATION': 10,
-      'AUTHORIZATION': 15,
-      'DATA_ACCESS': 20,
-      'SYSTEM': 5,
-      'CONFIGURATION': 25,
-      'ADMIN': 30
+      AUTHENTICATION: 10,
+      AUTHORIZATION: 15,
+      DATA_ACCESS: 20,
+      SYSTEM: 5,
+      CONFIGURATION: 25,
+      ADMIN: 30,
     };
     score += categoryScores[event.category] || 5;
 
@@ -220,7 +228,7 @@ export class AdvancedAuditLogger extends EventEmitter {
     if (event.outcome === 'PARTIAL') score += 10;
 
     // Severity modifier
-    const severityMultipliers = { 'LOW': 1, 'MEDIUM': 1.5, 'HIGH': 2, 'CRITICAL': 3 };
+    const severityMultipliers = { LOW: 1, MEDIUM: 1.5, HIGH: 2, CRITICAL: 3 };
     score *= severityMultipliers[event.severity];
 
     // Time-based risk (off-hours access)
@@ -240,7 +248,7 @@ export class AdvancedAuditLogger extends EventEmitter {
   private async performRealTimeAnalysis(event: AuditEvent): Promise<void> {
     try {
       const anomalies = await this.anomalyDetector.analyze(event);
-      
+
       if (anomalies.length > 0) {
         await this.logEvent({
           action: 'ANOMALY_DETECTED',
@@ -249,7 +257,7 @@ export class AdvancedAuditLogger extends EventEmitter {
           severity: 'HIGH',
           outcome: 'SUCCESS',
           details: { anomalies, original_event: event.id },
-          tags: ['anomaly', 'security', 'real-time']
+          tags: ['anomaly', 'security', 'real-time'],
         });
 
         this.emit('anomaly_detected', { event, anomalies });
@@ -359,12 +367,18 @@ export class AdvancedAuditLogger extends EventEmitter {
     console.log(`Storing audit event ${event.id} to file`);
   }
 
-  private async storeToDatabase(event: AuditEvent, data: string): Promise<void> {
+  private async storeToDatabase(
+    event: AuditEvent,
+    data: string,
+  ): Promise<void> {
     // Database storage implementation
     console.log(`Storing audit event ${event.id} to database`);
   }
 
-  private async storeToElasticsearch(event: AuditEvent, data: string): Promise<void> {
+  private async storeToElasticsearch(
+    event: AuditEvent,
+    data: string,
+  ): Promise<void> {
     // Elasticsearch storage implementation
     console.log(`Storing audit event ${event.id} to Elasticsearch`);
   }
@@ -402,7 +416,10 @@ export class AdvancedAuditLogger extends EventEmitter {
     this.emit('alert', { type, event });
   }
 
-  private async logSystemEvent(action: string, details: Record<string, any>): Promise<void> {
+  private async logSystemEvent(
+    action: string,
+    details: Record<string, any>,
+  ): Promise<void> {
     // Log system-level events
     console.log(`System event: ${action}`, details);
   }

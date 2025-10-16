@@ -1,12 +1,11 @@
-// @ts-nocheck
-import { graphql } from 'msw';
+import { graphql, HttpResponse } from 'msw';
 
 // MSW GraphQL handlers for testing
 export const handlers = [
   // ServerStats query
-  graphql.query('ServerStats', (req: any, res: any, ctx: any) => {
-    return res(ctx.data({
-      
+  graphql.query('ServerStats', ({ query, variables }) => {
+    return HttpResponse.json({
+      data: {
         serverStats: {
           uptime: '2d 14h 32m',
           totalInvestigations: 128,
@@ -18,13 +17,14 @@ export const handlers = [
             neo4j: 'connected',
           },
         },
-      
-    }));
+      },
+    });
   }),
 
   // Investigations query
-  graphql.query('Investigations', (req: any, res: any, ctx: any) => {
-    return res(ctx.data({
+  graphql.query('Investigations', ({ query, variables }) => {
+    return HttpResponse.json({
+      data: {
         getInvestigations: [
           {
             id: '1',
@@ -45,13 +45,14 @@ export const handlers = [
             edgeCount: 1678,
           },
         ],
-      }));
+      },
+    });
   }),
 
   // GraphData query for Graph Workbench
-  graphql.query('GW_GraphData', (req: any, res: any, ctx: any) => {
-    return res(
-      ctx.data({
+  graphql.query('GW_GraphData', ({ query, variables }) => {
+    return HttpResponse.json({
+      data: {
         graphData: {
           nodes: [
             {
@@ -109,14 +110,15 @@ export const handlers = [
           nodeCount: 3,
           edgeCount: 2,
         },
-      })
-    );
+      },
+    });
   }),
 
   // SearchEntities query
-  graphql.query('GW_SearchEntities', (req: any, res: any, ctx: any) => {
-    return res(ctx.data({
-      searchEntities: [
+  graphql.query('GW_SearchEntities', ({ query, variables }) => {
+    return HttpResponse.json({
+      data: {
+        searchEntities: [
           {
             id: 'search-1',
             type: 'Person',
@@ -128,15 +130,16 @@ export const handlers = [
             investigationId: 'default',
           },
         ],
-      }));
+      },
+    });
   }),
 
   // EntityDetails query
-  graphql.query('GW_EntityDetails', (req: any, res: any, ctx: any) => {
-    const { variables } = req;
-    return res(ctx.data({
+  graphql.query('GW_EntityDetails', ({ query, variables }) => {
+    return HttpResponse.json({
+      data: {
         getEntityDetails: {
-          id: (variables as any).entityId,
+          id: variables.entityId,
           type: 'Person',
           label: 'Entity Details',
           description: 'Detailed entity information',
@@ -153,24 +156,25 @@ export const handlers = [
           triage_score: 0.75,
           actor_links: ['APT29'],
         },
-      
-    }));
+      },
+    });
   }),
 
   // Health check
-  graphql.query('HealthCheck', (req: any, res: any, ctx: any) => {
-    return res(ctx.data({
+  graphql.query('HealthCheck', ({ query, variables }) => {
+    return HttpResponse.json({
+      data: {
         health: 'OK',
-      
-    }));
+      },
+    });
   }),
 
   // Threat Analysis
-  graphql.query('ThreatAnalysis', (req: any, res: any, ctx: any) => {
-    const { variables } = req;
-    return res(ctx.data({
-      threatAnalysis: {
-          entityId: (variables as any).entityId,
+  graphql.query('ThreatAnalysis', ({ query, variables }) => {
+    return HttpResponse.json({
+      data: {
+        threatAnalysis: {
+          entityId: variables.entityId,
           riskScore: 0.85,
           threatLevel: 'HIGH',
           mitreAttacks: [
@@ -199,13 +203,13 @@ export const handlers = [
           lastUpdated: '2024-01-15T15:30:00Z',
         },
       },
-    }));
+    });
   }),
 
   // Timeline Events
-  graphql.query('TimelineEvents', (req: any, res: any, ctx: any) => {
-    return res(
-      ctx.data({
+  graphql.query('TimelineEvents', ({ query, variables }) => {
+    return HttpResponse.json({
+      data: {
         timelineEvents: [
           {
             id: 'event-1',
@@ -218,16 +222,16 @@ export const handlers = [
             metadata: { bytes_transferred: 1024000 },
           },
         ],
-      })
-    );
+      },
+    });
   }),
 
   // Entity Enrichment
-  graphql.query('EntityEnrichment', (req: any, res: any, ctx: any) => {
-    const { variables } = req;
-    return res(ctx.data({
+  graphql.query('EntityEnrichment', ({ query, variables }) => {
+    return HttpResponse.json({
+      data: {
         entityEnrichment: {
-          entityId: (variables as any).entityId,
+          entityId: variables.entityId,
           externalSources: [
             {
               source: 'VirusTotal',
@@ -259,7 +263,7 @@ export const handlers = [
           ],
           lastEnriched: '2024-01-15T14:00:00Z',
         },
-      
-    }));
+      },
+    });
   }),
 ];

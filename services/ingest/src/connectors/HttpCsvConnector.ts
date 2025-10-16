@@ -50,7 +50,8 @@ export class HttpCsvConnector extends BaseConnector {
           name: 'headers',
           type: 'string',
           required: false,
-          description: 'HTTP headers as JSON string (e.g., {"Authorization": "Bearer token"})',
+          description:
+            'HTTP headers as JSON string (e.g., {"Authorization": "Bearer token"})',
           defaultValue: '{}',
         },
         {
@@ -84,7 +85,8 @@ export class HttpCsvConnector extends BaseConnector {
           name: 'idField',
           type: 'string',
           required: false,
-          description: 'CSV field to use as record ID (if empty, UUIDs will be generated)',
+          description:
+            'CSV field to use as record ID (if empty, UUIDs will be generated)',
         },
         {
           name: 'nameField',
@@ -153,7 +155,9 @@ export class HttpCsvConnector extends BaseConnector {
     super(config);
   }
 
-  async validate(parameters: Record<string, any>): Promise<{ valid: boolean; errors?: string[] }> {
+  async validate(
+    parameters: Record<string, any>,
+  ): Promise<{ valid: boolean; errors?: string[] }> {
     const errors: string[] = [];
 
     // Validate required fields
@@ -325,7 +329,11 @@ export class HttpCsvConnector extends BaseConnector {
             }
 
             // Create and transform record
-            const record = this.createRecordFromRow(row, fieldMapping, transformations);
+            const record = this.createRecordFromRow(
+              row,
+              fieldMapping,
+              transformations,
+            );
             if (record) {
               records.push(record);
               rowCount++;
@@ -380,10 +388,15 @@ export class HttpCsvConnector extends BaseConnector {
 
       // Map fields
       const mappedData =
-        Object.keys(fieldMapping).length > 0 ? this.mapFields(row, fieldMapping) : row;
+        Object.keys(fieldMapping).length > 0
+          ? this.mapFields(row, fieldMapping)
+          : row;
 
       // Apply transformations
-      const transformedData = this.applyFieldTransformations(mappedData, transformations);
+      const transformedData = this.applyFieldTransformations(
+        mappedData,
+        transformations,
+      );
 
       // Determine entity name
       const name =
@@ -391,11 +404,16 @@ export class HttpCsvConnector extends BaseConnector {
           ? transformedData[this.parameters.nameField]
           : id;
 
-      return this.createRecord(id, this.parameters.entityType || 'CUSTOM', transformedData, {
-        source: this.config.name,
-        originalRow: row,
-        rowNumber: this.metrics.recordsProcessed + 1,
-      });
+      return this.createRecord(
+        id,
+        this.parameters.entityType || 'CUSTOM',
+        transformedData,
+        {
+          source: this.config.name,
+          originalRow: row,
+          rowNumber: this.metrics.recordsProcessed + 1,
+        },
+      );
     } catch (error) {
       logger.error({
         message: 'Failed to create record from CSV row',
@@ -422,8 +440,12 @@ export class HttpCsvConnector extends BaseConnector {
 
       if (fieldValue === undefined) return false;
 
-      const compareValue = caseSensitive ? fieldValue : fieldValue.toLowerCase();
-      const targetValue = caseSensitive ? filterValue : String(filterValue).toLowerCase();
+      const compareValue = caseSensitive
+        ? fieldValue
+        : fieldValue.toLowerCase();
+      const targetValue = caseSensitive
+        ? filterValue
+        : String(filterValue).toLowerCase();
 
       switch (filter.operator) {
         case 'equals':
@@ -439,7 +461,9 @@ export class HttpCsvConnector extends BaseConnector {
         case 'ends_with':
           return compareValue.endsWith(targetValue);
         case 'regex':
-          return new RegExp(filterValue, caseSensitive ? 'g' : 'gi').test(fieldValue);
+          return new RegExp(filterValue, caseSensitive ? 'g' : 'gi').test(
+            fieldValue,
+          );
         case 'greater_than':
           return parseFloat(fieldValue) > parseFloat(filterValue);
         case 'less_than':
@@ -501,7 +525,10 @@ export class HttpCsvConnector extends BaseConnector {
               break;
             case 'substring':
               if (params?.start !== undefined) {
-                transformed[field] = String(value).substring(params.start, params.end);
+                transformed[field] = String(value).substring(
+                  params.start,
+                  params.end,
+                );
               }
               break;
             case 'prefix':

@@ -1,10 +1,12 @@
 # Summit Ticket Pack (Generated)
+
 **Generated:** 2025-09-10 06:46:08Z UTC
 
 This pack contains runnable CI workflows, security scans, IaC checks, policy templates, and a prioritized ticket backlog.
 Copy files into your repo root (merging with `.github/` and `docs/`) then open the tickets to drive execution.
 
 **Highlights**
+
 - Code & dependency gates (lint, typecheck, tests, coverage)
 - SBOM + vuln scanning (Syft/Grype/Trivy) via Docker
 - Terraform validation & lint (validate/tflint/checkov)

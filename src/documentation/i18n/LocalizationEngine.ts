@@ -1,6 +1,6 @@
 /**
  * Internationalization and Localization Framework
- * 
+ *
  * Provides comprehensive i18n/l10n support including:
  * - Multi-language content management
  * - Automated translation workflows
@@ -223,7 +223,6 @@ export class LocalizationEngine extends EventEmitter {
 
       console.log('✅ Localization engine initialized');
       this.emit('initialized');
-
     } catch (error) {
       console.error('❌ Failed to initialize localization engine:', error);
       throw error;
@@ -235,7 +234,7 @@ export class LocalizationEngine extends EventEmitter {
    */
   public async extractTranslatableStrings(
     contentPath: string,
-    sourceLocale: string = this.config.defaultLocale
+    sourceLocale: string = this.config.defaultLocale,
   ): Promise<TranslatableContent> {
     console.log(`📝 Extracting strings from ${contentPath}...`);
 
@@ -244,7 +243,7 @@ export class LocalizationEngine extends EventEmitter {
     const extractor = this.getStringExtractor(contentType);
 
     const extractedStrings = await extractor.extract(content);
-    
+
     const translatableContent: TranslatableContent = {
       id: this.generateContentId(contentPath),
       sourceLocale,
@@ -254,7 +253,7 @@ export class LocalizationEngine extends EventEmitter {
       metadata: await this.extractContentMetadata(content),
       translations: new Map(),
       lastModified: new Date(),
-      priority: this.determinePriority(contentPath)
+      priority: this.determinePriority(contentPath),
     };
 
     this.translatableContent.set(translatableContent.id, translatableContent);
@@ -269,7 +268,7 @@ export class LocalizationEngine extends EventEmitter {
   public async translateContent(
     contentId: string,
     targetLocale: string,
-    method: 'machine' | 'human' | 'hybrid' = 'hybrid'
+    method: 'machine' | 'human' | 'hybrid' = 'hybrid',
   ): Promise<TranslatedContent> {
     const content = this.translatableContent.get(contentId);
     if (!content) {
@@ -289,10 +288,10 @@ export class LocalizationEngine extends EventEmitter {
         consistency: 0,
         cultural: 0,
         overall: 0,
-        issues: []
+        issues: [],
       },
       lastModified: new Date(),
-      reviewComments: []
+      reviewComments: [],
     };
 
     // Translate each string
@@ -302,7 +301,7 @@ export class LocalizationEngine extends EventEmitter {
           string,
           content.sourceLocale,
           targetLocale,
-          method
+          method,
         );
         translatedContent.translatedStrings.set(string.id, translatedString);
       }
@@ -329,7 +328,7 @@ export class LocalizationEngine extends EventEmitter {
     description: string,
     contentIds: string[],
     targetLocales: string[],
-    deadline?: Date
+    deadline?: Date,
   ): TranslationProject {
     const project: TranslationProject = {
       id: this.generateProjectId(),
@@ -344,7 +343,7 @@ export class LocalizationEngine extends EventEmitter {
       progress: {},
       qualityGates: this.createDefaultQualityGates(),
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Initialize progress tracking
@@ -364,7 +363,7 @@ export class LocalizationEngine extends EventEmitter {
   public async generateLocalizedOutput(
     contentId: string,
     locale: string,
-    outputFormat: 'html' | 'markdown' | 'json' = 'markdown'
+    outputFormat: 'html' | 'markdown' | 'json' = 'markdown',
   ): Promise<string> {
     const content = this.translatableContent.get(contentId);
     if (!content) {
@@ -392,7 +391,9 @@ export class LocalizationEngine extends EventEmitter {
     console.log(`🔄 Synchronizing translations for ${content.sourcePath}...`);
 
     // Re-extract strings from updated source
-    const updatedContent = await this.extractTranslatableStrings(content.sourcePath);
+    const updatedContent = await this.extractTranslatableStrings(
+      content.sourcePath,
+    );
     const changes = this.detectChanges(content, updatedContent);
 
     const syncResult: SyncResult = {
@@ -401,7 +402,7 @@ export class LocalizationEngine extends EventEmitter {
       modifiedStrings: changes.modified.length,
       removedStrings: changes.removed.length,
       affectedLocales: Array.from(content.translations.keys()),
-      requiresReview: changes.modified.length > 0 || changes.removed.length > 0
+      requiresReview: changes.modified.length > 0 || changes.removed.length > 0,
     };
 
     // Update translations for each locale
@@ -427,10 +428,12 @@ export class LocalizationEngine extends EventEmitter {
       pendingReview: 0,
       completeness: 0,
       qualityScore: 0,
-      localeStats: {}
+      localeStats: {},
     };
 
-    const locales = locale ? [locale] : this.config.supportedLocales.map(l => l.code);
+    const locales = locale
+      ? [locale]
+      : this.config.supportedLocales.map((l) => l.code);
 
     for (const loc of locales) {
       const localeStats: LocaleStats = {
@@ -440,7 +443,7 @@ export class LocalizationEngine extends EventEmitter {
         pendingReview: 0,
         completeness: 0,
         qualityScore: 0,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       };
 
       for (const content of this.translatableContent.values()) {
@@ -448,25 +451,39 @@ export class LocalizationEngine extends EventEmitter {
         if (translation) {
           localeStats.totalStrings += content.extractedStrings.length;
           localeStats.translatedStrings += translation.translatedStrings.size;
-          localeStats.approvedStrings += Array.from(translation.translatedStrings.values())
-            .filter(t => t.approved).length;
-          localeStats.pendingReview += translation.status === 'in_review' ? 1 : 0;
+          localeStats.approvedStrings += Array.from(
+            translation.translatedStrings.values(),
+          ).filter((t) => t.approved).length;
+          localeStats.pendingReview +=
+            translation.status === 'in_review' ? 1 : 0;
         }
       }
 
-      localeStats.completeness = localeStats.totalStrings > 0 
-        ? (localeStats.translatedStrings / localeStats.totalStrings) * 100
-        : 0;
+      localeStats.completeness =
+        localeStats.totalStrings > 0
+          ? (localeStats.translatedStrings / localeStats.totalStrings) * 100
+          : 0;
 
       stats.localeStats[loc] = localeStats;
     }
 
     // Calculate overall stats
     const allLocaleStats = Object.values(stats.localeStats);
-    stats.totalStrings = Math.max(...allLocaleStats.map(s => s.totalStrings), 0);
-    stats.translatedStrings = allLocaleStats.reduce((sum, s) => sum + s.translatedStrings, 0);
-    stats.approvedStrings = allLocaleStats.reduce((sum, s) => sum + s.approvedStrings, 0);
-    stats.completeness = allLocaleStats.reduce((sum, s) => sum + s.completeness, 0) / allLocaleStats.length;
+    stats.totalStrings = Math.max(
+      ...allLocaleStats.map((s) => s.totalStrings),
+      0,
+    );
+    stats.translatedStrings = allLocaleStats.reduce(
+      (sum, s) => sum + s.translatedStrings,
+      0,
+    );
+    stats.approvedStrings = allLocaleStats.reduce(
+      (sum, s) => sum + s.approvedStrings,
+      0,
+    );
+    stats.completeness =
+      allLocaleStats.reduce((sum, s) => sum + s.completeness, 0) /
+      allLocaleStats.length;
 
     return stats;
   }
@@ -478,19 +495,19 @@ export class LocalizationEngine extends EventEmitter {
     sourceText: string,
     sourceLocale: string,
     targetLocale: string,
-    fuzzyThreshold: number = 0.7
+    fuzzyThreshold: number = 0.7,
   ): TranslationMemory[] {
     return this.translationMemory
-      .filter(tm => 
-        tm.sourceLocale === sourceLocale && 
-        tm.targetLocale === targetLocale
+      .filter(
+        (tm) =>
+          tm.sourceLocale === sourceLocale && tm.targetLocale === targetLocale,
       )
-      .map(tm => ({
+      .map((tm) => ({
         ...tm,
-        similarity: this.calculateSimilarity(sourceText, tm.sourceText)
+        similarity: this.calculateSimilarity(sourceText, tm.sourceText),
       }))
-      .filter(tm => tm.similarity! >= fuzzyThreshold)
-      .sort((a, b) => (b.similarity! - a.similarity!));
+      .filter((tm) => tm.similarity! >= fuzzyThreshold)
+      .sort((a, b) => b.similarity! - a.similarity!);
   }
 
   /**
@@ -498,7 +515,7 @@ export class LocalizationEngine extends EventEmitter {
    */
   public async exportTranslations(
     locale: string,
-    format: 'json' | 'po' | 'xliff' | 'csv'
+    format: 'json' | 'po' | 'xliff' | 'csv',
   ): Promise<string> {
     const exporter = this.getExporter(format);
     const translations: ExportTranslation[] = [];
@@ -506,15 +523,20 @@ export class LocalizationEngine extends EventEmitter {
     for (const content of this.translatableContent.values()) {
       const translation = content.translations.get(locale);
       if (translation) {
-        for (const [stringId, translatedString] of translation.translatedStrings) {
-          const sourceString = content.extractedStrings.find(s => s.id === stringId);
+        for (const [
+          stringId,
+          translatedString,
+        ] of translation.translatedStrings) {
+          const sourceString = content.extractedStrings.find(
+            (s) => s.id === stringId,
+          );
           if (sourceString) {
             translations.push({
               key: sourceString.key,
               sourceText: sourceString.sourceText,
               translatedText: translatedString.translatedText,
               context: sourceString.context,
-              approved: translatedString.approved
+              approved: translatedString.approved,
             });
           }
         }
@@ -545,16 +567,23 @@ export class LocalizationEngine extends EventEmitter {
   private detectContentType(path: string): TranslatableContent['contentType'] {
     const ext = path.split('.').pop()?.toLowerCase();
     switch (ext) {
-      case 'md': return 'markdown';
-      case 'html': return 'html';
-      case 'json': return 'json';
+      case 'md':
+        return 'markdown';
+      case 'html':
+        return 'html';
+      case 'json':
+        return 'json';
       case 'yml':
-      case 'yaml': return 'yaml';
-      default: return 'markdown';
+      case 'yaml':
+        return 'yaml';
+      default:
+        return 'markdown';
     }
   }
 
-  private getStringExtractor(contentType: TranslatableContent['contentType']): StringExtractor {
+  private getStringExtractor(
+    contentType: TranslatableContent['contentType'],
+  ): StringExtractor {
     // Return appropriate string extractor based on content type
     return new MarkdownExtractor();
   }
@@ -563,13 +592,13 @@ export class LocalizationEngine extends EventEmitter {
     string: TranslatableString,
     sourceLocale: string,
     targetLocale: string,
-    method: 'machine' | 'human' | 'hybrid'
+    method: 'machine' | 'human' | 'hybrid',
   ): Promise<TranslatedString> {
     // Check translation memory first
     const tmMatches = this.searchTranslationMemory(
       string.sourceText,
       sourceLocale,
-      targetLocale
+      targetLocale,
     );
 
     if (tmMatches.length > 0 && tmMatches[0].similarity! > 0.95) {
@@ -579,13 +608,21 @@ export class LocalizationEngine extends EventEmitter {
         translator: 'tm',
         translationMethod: 'human',
         confidence: tmMatches[0].similarity!,
-        approved: tmMatches[0].metadata.approved
+        approved: tmMatches[0].metadata.approved,
       };
     }
 
     // Use translation provider
-    const provider = this.selectTranslationProvider(sourceLocale, targetLocale, method);
-    const translatedText = await provider.translate(string.sourceText, sourceLocale, targetLocale);
+    const provider = this.selectTranslationProvider(
+      sourceLocale,
+      targetLocale,
+      method,
+    );
+    const translatedText = await provider.translate(
+      string.sourceText,
+      sourceLocale,
+      targetLocale,
+    );
 
     return {
       stringId: string.id,
@@ -593,28 +630,30 @@ export class LocalizationEngine extends EventEmitter {
       translator: provider.name,
       translationMethod: method,
       confidence: method === 'machine' ? 0.7 : 0.9,
-      approved: false
+      approved: false,
     };
   }
 
   private selectTranslationProvider(
     sourceLocale: string,
     targetLocale: string,
-    method: 'machine' | 'human' | 'hybrid'
+    method: 'machine' | 'human' | 'hybrid',
   ): TranslationProvider {
-    return this.config.translationProviders
-      .filter(p => 
-        p.type === method && 
-        p.supportedLanguages.includes(targetLocale)
-      )[0] || this.config.translationProviders[0];
+    return (
+      this.config.translationProviders.filter(
+        (p) => p.type === method && p.supportedLanguages.includes(targetLocale),
+      )[0] || this.config.translationProviders[0]
+    );
   }
 
   private async updateTranslationMemory(
     content: TranslatableContent,
-    translation: TranslatedContent
+    translation: TranslatedContent,
   ): Promise<void> {
     for (const [stringId, translatedString] of translation.translatedStrings) {
-      const sourceString = content.extractedStrings.find(s => s.id === stringId);
+      const sourceString = content.extractedStrings.find(
+        (s) => s.id === stringId,
+      );
       if (sourceString) {
         const tmEntry: TranslationMemory = {
           id: this.generateTMId(),
@@ -629,10 +668,10 @@ export class LocalizationEngine extends EventEmitter {
             translator: translatedString.translator,
             approved: translatedString.approved,
             createdAt: new Date(),
-            tags: sourceString.tags
+            tags: sourceString.tags,
           },
           usage: 1,
-          lastUsed: new Date()
+          lastUsed: new Date(),
         };
 
         this.translationMemory.push(tmEntry);
@@ -641,7 +680,9 @@ export class LocalizationEngine extends EventEmitter {
   }
 
   private generateContentId(path: string): string {
-    return Buffer.from(path).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
+    return Buffer.from(path)
+      .toString('base64')
+      .replace(/[^a-zA-Z0-9]/g, '');
   }
 
   private generateProjectId(): string {
@@ -652,12 +693,14 @@ export class LocalizationEngine extends EventEmitter {
     return 'tm_' + Math.random().toString(36).substring(2, 15);
   }
 
-  private async extractContentMetadata(content: string): Promise<ContentMetadata> {
+  private async extractContentMetadata(
+    content: string,
+  ): Promise<ContentMetadata> {
     return {
       wordCount: content.split(/\s+/).length,
       complexity: 'medium',
       domain: 'technical',
-      tags: []
+      tags: [],
     };
   }
 
@@ -676,34 +719,45 @@ export class LocalizationEngine extends EventEmitter {
       {
         name: 'Completeness',
         criteria: [{ metric: 'completeness', threshold: 100, weight: 1.0 }],
-        required: true
+        required: true,
       },
       {
         name: 'Quality',
         criteria: [{ metric: 'overall_quality', threshold: 80, weight: 1.0 }],
-        required: true
-      }
+        required: true,
+      },
     ];
   }
 
   private getOutputGenerator(format: string): OutputGenerator {
     switch (format) {
-      case 'html': return new HTMLGenerator();
-      case 'json': return new JSONGenerator();
-      default: return new MarkdownGenerator();
+      case 'html':
+        return new HTMLGenerator();
+      case 'json':
+        return new JSONGenerator();
+      default:
+        return new MarkdownGenerator();
     }
   }
 
   private detectChanges(
     oldContent: TranslatableContent,
-    newContent: TranslatableContent
+    newContent: TranslatableContent,
   ): ContentChanges {
-    const oldStrings = new Map(oldContent.extractedStrings.map(s => [s.key, s]));
-    const newStrings = new Map(newContent.extractedStrings.map(s => [s.key, s]));
+    const oldStrings = new Map(
+      oldContent.extractedStrings.map((s) => [s.key, s]),
+    );
+    const newStrings = new Map(
+      newContent.extractedStrings.map((s) => [s.key, s]),
+    );
 
-    const added = newContent.extractedStrings.filter(s => !oldStrings.has(s.key));
-    const removed = oldContent.extractedStrings.filter(s => !newStrings.has(s.key));
-    const modified = newContent.extractedStrings.filter(s => {
+    const added = newContent.extractedStrings.filter(
+      (s) => !oldStrings.has(s.key),
+    );
+    const removed = oldContent.extractedStrings.filter(
+      (s) => !newStrings.has(s.key),
+    );
+    const modified = newContent.extractedStrings.filter((s) => {
       const oldString = oldStrings.get(s.key);
       return oldString && oldString.sourceText !== s.sourceText;
     });
@@ -714,7 +768,7 @@ export class LocalizationEngine extends EventEmitter {
   private async updateTranslation(
     translation: TranslatedContent,
     changes: ContentChanges,
-    locale: string
+    locale: string,
   ): Promise<void> {
     // Mark translation as needing review if there are changes
     if (changes.modified.length > 0 || changes.removed.length > 0) {
@@ -733,24 +787,24 @@ export class LocalizationEngine extends EventEmitter {
     // Simple Levenshtein distance-based similarity
     const longer = text1.length > text2.length ? text1 : text2;
     const shorter = text1.length > text2.length ? text2 : text1;
-    
+
     if (longer.length === 0) return 1.0;
-    
+
     const distance = this.levenshteinDistance(longer, shorter);
     return (longer.length - distance) / longer.length;
   }
 
   private levenshteinDistance(str1: string, str2: string): number {
     const matrix = [];
-    
+
     for (let i = 0; i <= str2.length; i++) {
       matrix[i] = [i];
     }
-    
+
     for (let j = 0; j <= str1.length; j++) {
       matrix[0][j] = j;
     }
-    
+
     for (let i = 1; i <= str2.length; i++) {
       for (let j = 1; j <= str1.length; j++) {
         if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
@@ -759,21 +813,25 @@ export class LocalizationEngine extends EventEmitter {
           matrix[i][j] = Math.min(
             matrix[i - 1][j - 1] + 1,
             matrix[i][j - 1] + 1,
-            matrix[i - 1][j] + 1
+            matrix[i - 1][j] + 1,
           );
         }
       }
     }
-    
+
     return matrix[str2.length][str1.length];
   }
 
   private getExporter(format: string): TranslationExporter {
     switch (format) {
-      case 'po': return new POExporter();
-      case 'xliff': return new XLIFFExporter();
-      case 'csv': return new CSVExporter();
-      default: return new JSONExporter();
+      case 'po':
+        return new POExporter();
+      case 'xliff':
+        return new XLIFFExporter();
+      case 'csv':
+        return new CSVExporter();
+      default:
+        return new JSONExporter();
     }
   }
 }
@@ -782,7 +840,10 @@ export class LocalizationEngine extends EventEmitter {
 class QualityAssuranceEngine {
   constructor(private config: QAConfig) {}
 
-  async analyze(content: TranslatableContent, translation: TranslatedContent): Promise<QualityScore> {
+  async analyze(
+    content: TranslatableContent,
+    translation: TranslatedContent,
+  ): Promise<QualityScore> {
     // Implementation for quality analysis
     return {
       accuracy: 85,
@@ -790,7 +851,7 @@ class QualityAssuranceEngine {
       consistency: 88,
       cultural: 82,
       overall: 86,
-      issues: []
+      issues: [],
     };
   }
 }
@@ -806,7 +867,7 @@ abstract class StringExtractor {
 class MarkdownExtractor extends StringExtractor {
   async extract(content: string): Promise<TranslatableString[]> {
     const strings: TranslatableString[] = [];
-    
+
     // Extract headings
     const headingRegex = /^(#+)\s+(.+)$/gm;
     let match;
@@ -817,10 +878,10 @@ class MarkdownExtractor extends StringExtractor {
         sourceText: match[2],
         context: 'heading',
         tags: ['heading'],
-        translatable: true
+        translatable: true,
       });
     }
-    
+
     // Extract paragraphs
     const paragraphRegex = /^([^#\n\r-*+>].*?)$/gm;
     while ((match = paragraphRegex.exec(content)) !== null) {
@@ -831,11 +892,11 @@ class MarkdownExtractor extends StringExtractor {
           sourceText: match[1].trim(),
           context: 'paragraph',
           tags: ['paragraph'],
-          translatable: true
+          translatable: true,
         });
       }
     }
-    
+
     return strings;
   }
 }
@@ -844,7 +905,7 @@ abstract class OutputGenerator {
   abstract generate(
     content: TranslatableContent,
     translation: TranslatedContent,
-    locale: string
+    locale: string,
   ): Promise<string>;
 }
 
@@ -852,18 +913,23 @@ class MarkdownGenerator extends OutputGenerator {
   async generate(
     content: TranslatableContent,
     translation: TranslatedContent,
-    locale: string
+    locale: string,
   ): Promise<string> {
     // Generate localized Markdown content
     let output = content.sourcePath; // Start with original content
-    
+
     for (const [stringId, translatedString] of translation.translatedStrings) {
-      const sourceString = content.extractedStrings.find(s => s.id === stringId);
+      const sourceString = content.extractedStrings.find(
+        (s) => s.id === stringId,
+      );
       if (sourceString) {
-        output = output.replace(sourceString.sourceText, translatedString.translatedText);
+        output = output.replace(
+          sourceString.sourceText,
+          translatedString.translatedText,
+        );
       }
     }
-    
+
     return output;
   }
 }
@@ -872,7 +938,7 @@ class HTMLGenerator extends OutputGenerator {
   async generate(
     content: TranslatableContent,
     translation: TranslatedContent,
-    locale: string
+    locale: string,
   ): Promise<string> {
     // Generate localized HTML content
     return '<html></html>';
@@ -883,41 +949,52 @@ class JSONGenerator extends OutputGenerator {
   async generate(
     content: TranslatableContent,
     translation: TranslatedContent,
-    locale: string
+    locale: string,
   ): Promise<string> {
     const translations: { [key: string]: string } = {};
-    
+
     for (const [stringId, translatedString] of translation.translatedStrings) {
-      const sourceString = content.extractedStrings.find(s => s.id === stringId);
+      const sourceString = content.extractedStrings.find(
+        (s) => s.id === stringId,
+      );
       if (sourceString) {
         translations[sourceString.key] = translatedString.translatedText;
       }
     }
-    
+
     return JSON.stringify(translations, null, 2);
   }
 }
 
 abstract class TranslationExporter {
-  abstract export(translations: ExportTranslation[], locale: string): Promise<string>;
+  abstract export(
+    translations: ExportTranslation[],
+    locale: string,
+  ): Promise<string>;
 }
 
 class JSONExporter extends TranslationExporter {
-  async export(translations: ExportTranslation[], locale: string): Promise<string> {
+  async export(
+    translations: ExportTranslation[],
+    locale: string,
+  ): Promise<string> {
     const output: { [key: string]: string } = {};
-    
+
     for (const translation of translations) {
       output[translation.key] = translation.translatedText;
     }
-    
+
     return JSON.stringify(output, null, 2);
   }
 }
 
 class POExporter extends TranslationExporter {
-  async export(translations: ExportTranslation[], locale: string): Promise<string> {
+  async export(
+    translations: ExportTranslation[],
+    locale: string,
+  ): Promise<string> {
     let output = `# Translation file for ${locale}\n\n`;
-    
+
     for (const translation of translations) {
       if (translation.context) {
         output += `#. ${translation.context}\n`;
@@ -925,26 +1002,32 @@ class POExporter extends TranslationExporter {
       output += `msgid "${translation.sourceText}"\n`;
       output += `msgstr "${translation.translatedText}"\n\n`;
     }
-    
+
     return output;
   }
 }
 
 class XLIFFExporter extends TranslationExporter {
-  async export(translations: ExportTranslation[], locale: string): Promise<string> {
+  async export(
+    translations: ExportTranslation[],
+    locale: string,
+  ): Promise<string> {
     // XLIFF format implementation
     return '<xliff></xliff>';
   }
 }
 
 class CSVExporter extends TranslationExporter {
-  async export(translations: ExportTranslation[], locale: string): Promise<string> {
+  async export(
+    translations: ExportTranslation[],
+    locale: string,
+  ): Promise<string> {
     let output = 'Key,Source,Translation,Context,Approved\n';
-    
+
     for (const translation of translations) {
       output += `"${translation.key}","${translation.sourceText}","${translation.translatedText}","${translation.context || ''}","${translation.approved}"\n`;
     }
-    
+
     return output;
   }
 }

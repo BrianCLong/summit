@@ -1,6 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 
-export default function TryApi({ specUrl, proxy }: { specUrl: string; proxy?: string }){
+export default function TryApi({
+  specUrl,
+  proxy,
+}: {
+  specUrl: string;
+  proxy?: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     (async () => {
@@ -8,11 +14,11 @@ export default function TryApi({ specUrl, proxy }: { specUrl: string; proxy?: st
       SwaggerUI({
         domNode: ref.current!,
         url: specUrl,
-        "tryItOutEnabled": true,
+        tryItOutEnabled: true,
         requestInterceptor: (req: any) => {
           if (proxy) req.url = req.url.replace(/^https?:\/\/.+?\//, proxy);
           return req;
-        }
+        },
       });
     })();
   }, [specUrl, proxy]);

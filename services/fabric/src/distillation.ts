@@ -1,4 +1,4 @@
-export type CloudProvider = "aws" | "gcp" | "azure";
+export type CloudProvider = 'aws' | 'gcp' | 'azure';
 
 export interface Quote {
   provider: CloudProvider;
@@ -57,11 +57,16 @@ export class FabricDistillationEngine {
   private securityPulse = 0.7;
   private lastSignals: DistilledBuildSignalSummary[] = [];
 
-  rankQuotes(quotes: Quote[], context: FabricDistillationContext = {}): RankedQuote[] {
+  rankQuotes(
+    quotes: Quote[],
+    context: FabricDistillationContext = {},
+  ): RankedQuote[] {
     this.ingestSignals(context.buildSignals);
 
     const { needGpu, expectedBurst, minReliability } = context;
-    const burstAmplifier = expectedBurst ? clamp(expectedBurst / 10, 0, 0.3) : 0;
+    const burstAmplifier = expectedBurst
+      ? clamp(expectedBurst / 10, 0, 0.3)
+      : 0;
 
     return quotes
       .map((quote) => {
@@ -69,7 +74,11 @@ export class FabricDistillationEngine {
         const profile = this.getOrCreateProfile(quote);
 
         profile.emaCost = this.ema(profile.emaCost, quote.spotUsdHour, 0.35);
-        profile.emaLatency = this.ema(profile.emaLatency, quote.latencyMs, 0.35);
+        profile.emaLatency = this.ema(
+          profile.emaLatency,
+          quote.latencyMs,
+          0.35,
+        );
 
         const costScore = this.scoreCost(profile.emaCost);
         const latencyScore = this.scoreLatency(profile.emaLatency);
@@ -85,7 +94,7 @@ export class FabricDistillationEngine {
         if (needGpu) {
           reliabilityWeight += 0.05;
           latencyWeight += 0.05;
-          rationale.push("GPU bias applied for deterministic warm-up");
+          rationale.push('GPU bias applied for deterministic warm-up');
         }
 
         const weightTotal = costWeight + latencyWeight + reliabilityWeight;
@@ -101,19 +110,23 @@ export class FabricDistillationEngine {
 
         if (reliabilityScore < (minReliability ?? 0.45)) {
           score *= reliabilityScore / ((minReliability ?? 0.45) || 1);
-          rationale.push("Reliability gating applied by fabric distiller");
+          rationale.push('Reliability gating applied by fabric distiller');
         }
 
         profile.lastScore = score;
         profile.observations += 1;
 
-        if (costScore > 0.7) rationale.push("Cost-efficient after distillation");
-        if (latencyScore > 0.75 && urgency > 0.2) rationale.push("Latency prioritized due to slow build velocity");
+        if (costScore > 0.7)
+          rationale.push('Cost-efficient after distillation');
+        if (latencyScore > 0.75 && urgency > 0.2)
+          rationale.push('Latency prioritized due to slow build velocity');
         if (reliabilityScore > 0.75 && securityUrgency > 0.2) {
-          rationale.push("Reliability uplifted for security hardening");
+          rationale.push('Reliability uplifted for security hardening');
         }
         if (burstAmplifier > 0) {
-          rationale.push(`Burst amplifier ${burstAmplifier.toFixed(2)} for expected demand`);
+          rationale.push(
+            `Burst amplifier ${burstAmplifier.toFixed(2)} for expected demand`,
+          );
         }
 
         return {
@@ -138,14 +151,20 @@ export class FabricDistillationEngine {
   recordOutcome(quote: Quote, success: boolean) {
     const profile = this.getOrCreateProfile(quote);
     const delta = success ? 0.1 : -0.15;
-    profile.reliabilityBias = clamp(profile.reliabilityBias + delta, 0.05, 0.98);
+    profile.reliabilityBias = clamp(
+      profile.reliabilityBias + delta,
+      0.05,
+      0.98,
+    );
   }
 
   getSnapshot(): FabricSnapshot {
-    const providers = Array.from(this.providerProfiles.values()).map((profile) => ({
-      ...profile,
-      quote: this.parseKey(profile.key),
-    }));
+    const providers = Array.from(this.providerProfiles.values()).map(
+      (profile) => ({
+        ...profile,
+        quote: this.parseKey(profile.key),
+      }),
+    );
 
     return {
       providers,
@@ -160,25 +179,32 @@ export class FabricDistillationEngine {
 
     this.lastSignals = signals;
 
-    const avg = (selector: (signal: DistilledBuildSignalSummary) => number | undefined) => {
+    const avg = (
+      selector: (signal: DistilledBuildSignalSummary) => number | undefined,
+    ) => {
       const values = signals
         .map((signal) => selector(signal))
-        .filter((value): value is number => typeof value === "number" && !Number.isNaN(value));
+        .filter(
+          (value): value is number =>
+            typeof value === 'number' && !Number.isNaN(value),
+        );
       if (values.length === 0) return undefined;
       return values.reduce((acc, value) => acc + value, 0) / values.length;
     };
 
-    const reliability = avg((signal) => signal.reliability ?? signal.studentScore);
+    const reliability = avg(
+      (signal) => signal.reliability ?? signal.studentScore,
+    );
     const velocity = avg((signal) => signal.velocity);
     const security = avg((signal) => signal.security ?? signal.coverage);
 
-    if (typeof reliability === "number") {
+    if (typeof reliability === 'number') {
       this.reliabilityPulse = clamp(reliability);
     }
-    if (typeof velocity === "number") {
+    if (typeof velocity === 'number') {
       this.velocityPulse = clamp(velocity);
     }
-    if (typeof security === "number") {
+    if (typeof security === 'number') {
       this.securityPulse = clamp(security);
     }
   }
@@ -195,8 +221,13 @@ export class FabricDistillationEngine {
     return clamp(scaled);
   }
 
-  private scoreReliability(profile: ProviderProfile, minReliability?: number): number {
-    const baseline = clamp((profile.reliabilityBias + this.reliabilityPulse) / 2);
+  private scoreReliability(
+    profile: ProviderProfile,
+    minReliability?: number,
+  ): number {
+    const baseline = clamp(
+      (profile.reliabilityBias + this.reliabilityPulse) / 2,
+    );
     if (!minReliability) return baseline;
 
     if (baseline < minReliability) {
@@ -230,7 +261,7 @@ export class FabricDistillationEngine {
   }
 
   private parseKey(key: string): Quote {
-    const [provider, region] = key.split(":");
+    const [provider, region] = key.split(':');
     return {
       provider: provider as CloudProvider,
       region,

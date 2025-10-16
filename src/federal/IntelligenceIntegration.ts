@@ -3,8 +3,22 @@ import { EventEmitter } from 'events';
 export interface FederalDataSource {
   id: string;
   name: string;
-  agency: 'CIA' | 'FBI' | 'NSA' | 'DHS' | 'DNI' | 'DOD' | 'STATE' | 'TREASURY' | 'CUSTOM';
-  classification: 'UNCLASSIFIED' | 'CONFIDENTIAL' | 'SECRET' | 'TOP_SECRET' | 'SCI';
+  agency:
+    | 'CIA'
+    | 'FBI'
+    | 'NSA'
+    | 'DHS'
+    | 'DNI'
+    | 'DOD'
+    | 'STATE'
+    | 'TREASURY'
+    | 'CUSTOM';
+  classification:
+    | 'UNCLASSIFIED'
+    | 'CONFIDENTIAL'
+    | 'SECRET'
+    | 'TOP_SECRET'
+    | 'SCI';
   caveat?: string;
   endpoint: string;
   authentication: AuthenticationConfig;
@@ -52,7 +66,15 @@ export interface GeoLocation {
 
 export interface IntelligenceEntity {
   id: string;
-  type: 'PERSON' | 'ORGANIZATION' | 'LOCATION' | 'EVENT' | 'ASSET' | 'THREAT_ACTOR' | 'MALWARE' | 'IOC';
+  type:
+    | 'PERSON'
+    | 'ORGANIZATION'
+    | 'LOCATION'
+    | 'EVENT'
+    | 'ASSET'
+    | 'THREAT_ACTOR'
+    | 'MALWARE'
+    | 'IOC';
   name: string;
   aliases: string[];
   attributes: Record<string, any>;
@@ -76,7 +98,15 @@ export interface EntityRelationship {
 
 export interface ThreatIndicator {
   id: string;
-  type: 'IP' | 'DOMAIN' | 'URL' | 'HASH' | 'EMAIL' | 'PHONE' | 'CERTIFICATE' | 'YARA_RULE';
+  type:
+    | 'IP'
+    | 'DOMAIN'
+    | 'URL'
+    | 'HASH'
+    | 'EMAIL'
+    | 'PHONE'
+    | 'CERTIFICATE'
+    | 'YARA_RULE';
   value: string;
   confidence: number;
   severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
@@ -158,7 +188,13 @@ export interface FusionCenter {
 
 export interface IntelligenceProduct {
   id: string;
-  type: 'ASSESSMENT' | 'WARNING' | 'BRIEFING' | 'SUMMARY' | 'ANALYSIS' | 'FORECAST';
+  type:
+    | 'ASSESSMENT'
+    | 'WARNING'
+    | 'BRIEFING'
+    | 'SUMMARY'
+    | 'ANALYSIS'
+    | 'FORECAST';
   title: string;
   classification: string;
   executiveSummary: string;
@@ -195,24 +231,27 @@ export class FederalIntelligenceIntegration extends EventEmitter {
   async initialize(): Promise<void> {
     try {
       console.log('🇺🇸 Initializing Federal Intelligence Integration...');
-      
+
       await this.loadDataSources();
       await this.establishSecureConnections();
       await this.validateCompliance();
       await this.startContinuousSync();
-      
+
       this.isInitialized = true;
       this.emit('initialized', { timestamp: new Date() });
-      
     } catch (error) {
       this.emit('error', { error, context: 'initialization' });
       throw error;
     }
   }
 
-  async registerDataSource(config: Partial<FederalDataSource>): Promise<FederalDataSource> {
+  async registerDataSource(
+    config: Partial<FederalDataSource>,
+  ): Promise<FederalDataSource> {
     const dataSource: FederalDataSource = {
-      id: config.id || `ds-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id:
+        config.id ||
+        `ds-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: config.name || 'Unknown Source',
       agency: config.agency || 'CUSTOM',
       classification: config.classification || 'UNCLASSIFIED',
@@ -222,17 +261,17 @@ export class FederalIntelligenceIntegration extends EventEmitter {
         type: 'MTLS',
         credentials: {},
         refreshInterval: 3600000,
-        lastRefresh: new Date()
+        lastRefresh: new Date(),
       },
       dataTypes: config.dataTypes || [],
       updateFrequency: config.updateFrequency || 3600000, // 1 hour default
       lastSync: new Date(0),
       status: 'INACTIVE',
-      reliability: config.reliability || 0.8
+      reliability: config.reliability || 0.8,
     };
 
     this.dataSources.set(dataSource.id, dataSource);
-    
+
     // Test connection
     try {
       await this.testConnection(dataSource);
@@ -241,7 +280,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
       dataSource.status = 'ERROR';
       this.emit('connectionError', { dataSource, error });
     }
-    
+
     this.emit('dataSourceRegistered', dataSource);
     return dataSource;
   }
@@ -255,41 +294,49 @@ export class FederalIntelligenceIntegration extends EventEmitter {
     let totalRecords = 0;
 
     try {
-      const sourcesToSync = sourceId 
+      const sourcesToSync = sourceId
         ? [this.dataSources.get(sourceId)!].filter(Boolean)
-        : Array.from(this.dataSources.values()).filter(ds => ds.status === 'ACTIVE');
+        : Array.from(this.dataSources.values()).filter(
+            (ds) => ds.status === 'ACTIVE',
+          );
 
       for (const dataSource of sourcesToSync) {
         try {
-          console.log(`📡 Syncing data from ${dataSource.name} (${dataSource.agency})...`);
-          
+          console.log(
+            `📡 Syncing data from ${dataSource.name} (${dataSource.agency})...`,
+          );
+
           const records = await this.fetchIntelligenceData(dataSource);
           await this.processIntelligenceRecords(records, dataSource);
-          
+
           dataSource.lastSync = new Date();
           totalRecords += records.length;
-          
-          this.emit('syncComplete', { 
-            dataSource: dataSource.id, 
+
+          this.emit('syncComplete', {
+            dataSource: dataSource.id,
             records: records.length,
-            timestamp: new Date()
+            timestamp: new Date(),
           });
-          
         } catch (error) {
-          console.error(`Failed to sync from ${dataSource.name}:`, error.message);
+          console.error(
+            `Failed to sync from ${dataSource.name}:`,
+            error.message,
+          );
           dataSource.status = 'ERROR';
           this.emit('syncError', { dataSource: dataSource.id, error });
         }
       }
 
       return totalRecords;
-      
     } finally {
       this.syncInProgress = false;
     }
   }
 
-  async executeAnalyticsQuery(queryId: string, parameters: Record<string, any> = {}): Promise<AnalyticsResult> {
+  async executeAnalyticsQuery(
+    queryId: string,
+    parameters: Record<string, any> = {},
+  ): Promise<AnalyticsResult> {
     const query = this.queries.get(queryId);
     if (!query) {
       throw new Error(`Query ${queryId} not found`);
@@ -300,11 +347,14 @@ export class FederalIntelligenceIntegration extends EventEmitter {
 
     try {
       // Process query with parameters
-      const processedQuery = this.processQueryParameters(query.query, { ...query.parameters, ...parameters });
-      
+      const processedQuery = this.processQueryParameters(query.query, {
+        ...query.parameters,
+        ...parameters,
+      });
+
       // Execute against data sources
       const results = await this.executeQuery(processedQuery, query.dataSource);
-      
+
       const result: AnalyticsResult = {
         queryId,
         executionId,
@@ -317,8 +367,8 @@ export class FederalIntelligenceIntegration extends EventEmitter {
         metadata: {
           parameters,
           dataSources: query.dataSource,
-          executedBy: 'system'
-        }
+          executedBy: 'system',
+        },
       };
 
       query.lastExecuted = new Date();
@@ -326,7 +376,6 @@ export class FederalIntelligenceIntegration extends EventEmitter {
 
       this.emit('queryExecuted', result);
       return result;
-
     } catch (error) {
       const result: AnalyticsResult = {
         queryId,
@@ -339,8 +388,8 @@ export class FederalIntelligenceIntegration extends EventEmitter {
         classification: query.classification,
         metadata: {
           parameters,
-          error: error.message
-        }
+          error: error.message,
+        },
       };
 
       this.emit('queryFailed', result);
@@ -349,15 +398,14 @@ export class FederalIntelligenceIntegration extends EventEmitter {
   }
 
   async generateIntelligenceProduct(
-    type: IntelligenceProduct['type'], 
-    title: string, 
+    type: IntelligenceProduct['type'],
+    title: string,
     classification: string,
-    options: Partial<IntelligenceProduct> = {}
+    options: Partial<IntelligenceProduct> = {},
   ): Promise<IntelligenceProduct> {
-    
     // Generate analysis based on current intelligence data
     const analysis = await this.performIntelligenceAnalysis(type, options);
-    
+
     const product: IntelligenceProduct = {
       id: `prod-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type,
@@ -372,12 +420,12 @@ export class FederalIntelligenceIntegration extends EventEmitter {
       validUntil: options.validUntil,
       created: new Date(),
       author: options.author || 'IntelGraph Analytics Engine',
-      approver: options.approver
+      approver: options.approver,
     };
 
     this.products.set(product.id, product);
     this.emit('productGenerated', product);
-    
+
     return product;
   }
 
@@ -388,7 +436,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
     }
 
     console.log(`📋 Assessing compliance for ${framework.name}...`);
-    
+
     const findings: ComplianceFinding[] = [];
     let totalScore = 0;
     let assessedRequirements = 0;
@@ -409,24 +457,24 @@ export class FederalIntelligenceIntegration extends EventEmitter {
         if (assessment.findings) {
           findings.push(...assessment.findings);
         }
-
       } catch (error) {
         requirement.status = 'NON_COMPLIANT';
         requirement.score = 0;
         assessedRequirements++;
-        
+
         findings.push({
           id: `finding-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           requirementId: requirement.id,
           severity: 'HIGH',
           description: `Assessment failed: ${error.message}`,
           recommendation: 'Review requirement implementation',
-          status: 'OPEN'
+          status: 'OPEN',
         });
       }
     }
 
-    framework.complianceScore = assessedRequirements > 0 ? totalScore / assessedRequirements : 0;
+    framework.complianceScore =
+      assessedRequirements > 0 ? totalScore / assessedRequirements : 0;
     framework.findings = findings;
     framework.assessmentDate = new Date();
 
@@ -441,15 +489,29 @@ export class FederalIntelligenceIntegration extends EventEmitter {
     timeRange?: { start: Date; end: Date };
     confidence?: { min: number; max?: number };
   }): Promise<IntelligenceEntity[]> {
-    
-    const results = Array.from(this.entities.values()).filter(entity => {
+    const results = Array.from(this.entities.values()).filter((entity) => {
       if (criteria.type && entity.type !== criteria.type) return false;
-      if (criteria.name && !entity.name.toLowerCase().includes(criteria.name.toLowerCase())) return false;
-      if (criteria.confidence?.min && entity.confidence < criteria.confidence.min) return false;
-      if (criteria.confidence?.max && entity.confidence > criteria.confidence.max) return false;
-      
+      if (
+        criteria.name &&
+        !entity.name.toLowerCase().includes(criteria.name.toLowerCase())
+      )
+        return false;
+      if (
+        criteria.confidence?.min &&
+        entity.confidence < criteria.confidence.min
+      )
+        return false;
+      if (
+        criteria.confidence?.max &&
+        entity.confidence > criteria.confidence.max
+      )
+        return false;
+
       if (criteria.timeRange) {
-        if (entity.lastSeen < criteria.timeRange.start || entity.firstSeen > criteria.timeRange.end) {
+        if (
+          entity.lastSeen < criteria.timeRange.start ||
+          entity.firstSeen > criteria.timeRange.end
+        ) {
           return false;
         }
       }
@@ -468,33 +530,53 @@ export class FederalIntelligenceIntegration extends EventEmitter {
     }
 
     // Find related entities and indicators
-    const relationships = Array.from(this.relationships.values())
-      .filter(rel => rel.sourceEntityId === entityId || rel.targetEntityId === entityId);
-    
-    const relatedEntities = relationships.map(rel => 
-      rel.sourceEntityId === entityId 
-        ? this.entities.get(rel.targetEntityId)
-        : this.entities.get(rel.sourceEntityId)
-    ).filter(Boolean);
+    const relationships = Array.from(this.relationships.values()).filter(
+      (rel) =>
+        rel.sourceEntityId === entityId || rel.targetEntityId === entityId,
+    );
 
-    const relatedIndicators = Array.from(this.indicators.values())
-      .filter(indicator => indicator.sources.includes(entityId));
+    const relatedEntities = relationships
+      .map((rel) =>
+        rel.sourceEntityId === entityId
+          ? this.entities.get(rel.targetEntityId)
+          : this.entities.get(rel.sourceEntityId),
+      )
+      .filter(Boolean);
+
+    const relatedIndicators = Array.from(this.indicators.values()).filter(
+      (indicator) => indicator.sources.includes(entityId),
+    );
 
     // Calculate threat score
-    const threatScore = this.calculateThreatScore(entity, relatedEntities, relatedIndicators);
-    
+    const threatScore = this.calculateThreatScore(
+      entity,
+      relatedEntities,
+      relatedIndicators,
+    );
+
     const assessment = {
       entityId,
       entity,
       threatScore,
-      riskLevel: threatScore > 0.8 ? 'CRITICAL' : threatScore > 0.6 ? 'HIGH' : threatScore > 0.4 ? 'MEDIUM' : 'LOW',
+      riskLevel:
+        threatScore > 0.8
+          ? 'CRITICAL'
+          : threatScore > 0.6
+            ? 'HIGH'
+            : threatScore > 0.4
+              ? 'MEDIUM'
+              : 'LOW',
       relatedEntities: relatedEntities.length,
       indicators: relatedIndicators.length,
       relationships: relationships.length,
-      keyFindings: this.generateKeyFindings(entity, relatedEntities, relatedIndicators),
+      keyFindings: this.generateKeyFindings(
+        entity,
+        relatedEntities,
+        relatedIndicators,
+      ),
       recommendations: this.generateThreatRecommendations(entity, threatScore),
       confidence: entity.confidence,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
 
     this.emit('threatAssessment', assessment);
@@ -511,7 +593,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
         endpoint: 'https://fbi.ic.gov/cyber-intel/v2',
         dataTypes: ['cyber_threats', 'malware', 'indicators'],
         updateFrequency: 900000, // 15 minutes
-        reliability: 0.95
+        reliability: 0.95,
       },
       {
         name: 'NSA Threat Intelligence Platform',
@@ -519,9 +601,13 @@ export class FederalIntelligenceIntegration extends EventEmitter {
         classification: 'TOP_SECRET',
         caveat: 'SI',
         endpoint: 'https://nsa.ic.gov/threat-intel/v3',
-        dataTypes: ['signals_intelligence', 'technical_indicators', 'attribution'],
+        dataTypes: [
+          'signals_intelligence',
+          'technical_indicators',
+          'attribution',
+        ],
         updateFrequency: 1800000, // 30 minutes
-        reliability: 0.98
+        reliability: 0.98,
       },
       {
         name: 'DHS CISA Cybersecurity Alerts',
@@ -530,7 +616,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
         endpoint: 'https://cisa.dhs.gov/alerts/api/v1',
         dataTypes: ['vulnerabilities', 'alerts', 'advisories'],
         updateFrequency: 3600000, // 1 hour
-        reliability: 0.92
+        reliability: 0.92,
       },
       {
         name: 'CIA Counterintelligence Center',
@@ -540,7 +626,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
         endpoint: 'https://cia.ic.gov/counterintel/v2',
         dataTypes: ['counterintelligence', 'foreign_threats', 'espionage'],
         updateFrequency: 7200000, // 2 hours
-        reliability: 0.94
+        reliability: 0.94,
       },
       {
         name: 'Treasury OFAC Sanctions Data',
@@ -549,8 +635,8 @@ export class FederalIntelligenceIntegration extends EventEmitter {
         endpoint: 'https://treasury.gov/ofac/api/v2',
         dataTypes: ['sanctions', 'financial_intelligence', 'entities'],
         updateFrequency: 86400000, // 24 hours
-        reliability: 0.99
-      }
+        reliability: 0.99,
+      },
     ];
 
     for (const config of mockDataSources) {
@@ -560,7 +646,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
 
   private async establishSecureConnections(): Promise<void> {
     console.log('🔒 Establishing secure federal connections...');
-    
+
     for (const [id, dataSource] of this.dataSources) {
       if (dataSource.status === 'ACTIVE') {
         try {
@@ -574,24 +660,35 @@ export class FederalIntelligenceIntegration extends EventEmitter {
     }
   }
 
-  private async testConnection(dataSource: FederalDataSource): Promise<boolean> {
+  private async testConnection(
+    dataSource: FederalDataSource,
+  ): Promise<boolean> {
     // Mock connection test
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.random() * 1000 + 500),
+    );
     return Math.random() > 0.05; // 95% success rate
   }
 
-  private async authenticateConnection(dataSource: FederalDataSource): Promise<void> {
+  private async authenticateConnection(
+    dataSource: FederalDataSource,
+  ): Promise<void> {
     // Mock authentication process
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 200));
-    
-    if (Math.random() > 0.02) { // 98% success rate
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.random() * 500 + 200),
+    );
+
+    if (Math.random() > 0.02) {
+      // 98% success rate
       dataSource.authentication.lastRefresh = new Date();
     } else {
       throw new Error('Authentication failed');
     }
   }
 
-  private async fetchIntelligenceData(dataSource: FederalDataSource): Promise<any[]> {
+  private async fetchIntelligenceData(
+    dataSource: FederalDataSource,
+  ): Promise<any[]> {
     // Mock data fetching
     const recordCount = Math.floor(Math.random() * 100) + 20;
     const records = [];
@@ -599,22 +696,27 @@ export class FederalIntelligenceIntegration extends EventEmitter {
     for (let i = 0; i < recordCount; i++) {
       records.push({
         id: `record-${Date.now()}-${i}`,
-        type: dataSource.dataTypes[Math.floor(Math.random() * dataSource.dataTypes.length)],
+        type: dataSource.dataTypes[
+          Math.floor(Math.random() * dataSource.dataTypes.length)
+        ],
         classification: dataSource.classification,
         timestamp: new Date(Date.now() - Math.random() * 86400000), // Last 24 hours
         data: {
           title: `Intelligence Report ${i + 1}`,
           content: `Mock intelligence data from ${dataSource.agency}`,
           confidence: Math.random() * 0.4 + 0.6, // 0.6-1.0
-          reliability: ['A', 'B', 'C'][Math.floor(Math.random() * 3)]
-        }
+          reliability: ['A', 'B', 'C'][Math.floor(Math.random() * 3)],
+        },
       });
     }
 
     return records;
   }
 
-  private async processIntelligenceRecords(records: any[], dataSource: FederalDataSource): Promise<void> {
+  private async processIntelligenceRecords(
+    records: any[],
+    dataSource: FederalDataSource,
+  ): Promise<void> {
     for (const record of records) {
       // Convert to IntelligenceReport
       const report: IntelligenceReport = {
@@ -627,12 +729,12 @@ export class FederalIntelligenceIntegration extends EventEmitter {
         content: record.data.content,
         confidence: record.data.confidence,
         reliability: record.data.reliability,
-        credibility: Math.floor(Math.random() * 6) + 1 as any,
+        credibility: (Math.floor(Math.random() * 6) + 1) as any,
         timestamp: record.timestamp,
         entities: [],
         relationships: [],
         indicators: [],
-        metadata: { sourceAgency: dataSource.agency }
+        metadata: { sourceAgency: dataSource.agency },
       };
 
       this.reports.set(report.id, report);
@@ -655,7 +757,9 @@ export class FederalIntelligenceIntegration extends EventEmitter {
 
   private createMockEntity(dataSource: FederalDataSource): IntelligenceEntity {
     const entityTypes = ['PERSON', 'ORGANIZATION', 'THREAT_ACTOR', 'MALWARE'];
-    const type = entityTypes[Math.floor(Math.random() * entityTypes.length)] as any;
+    const type = entityTypes[
+      Math.floor(Math.random() * entityTypes.length)
+    ] as any;
 
     return {
       id: `entity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -664,25 +768,27 @@ export class FederalIntelligenceIntegration extends EventEmitter {
       aliases: [],
       attributes: {
         sourceAgency: dataSource.agency,
-        classification: dataSource.classification
+        classification: dataSource.classification,
       },
       confidence: Math.random() * 0.3 + 0.7,
       sources: [dataSource.id],
       firstSeen: new Date(),
-      lastSeen: new Date()
+      lastSeen: new Date(),
     };
   }
 
   private createMockIndicator(dataSource: FederalDataSource): ThreatIndicator {
     const indicatorTypes = ['IP', 'DOMAIN', 'URL', 'HASH', 'EMAIL'];
-    const type = indicatorTypes[Math.floor(Math.random() * indicatorTypes.length)] as any;
-    
+    const type = indicatorTypes[
+      Math.floor(Math.random() * indicatorTypes.length)
+    ] as any;
+
     const mockValues = {
       IP: '192.168.1.' + Math.floor(Math.random() * 255),
       DOMAIN: `malicious${Math.floor(Math.random() * 1000)}.com`,
       URL: `http://evil${Math.floor(Math.random() * 100)}.net/malware`,
       HASH: Math.random().toString(36).substr(2, 32),
-      EMAIL: `threat${Math.floor(Math.random() * 100)}@evil.com`
+      EMAIL: `threat${Math.floor(Math.random() * 100)}@evil.com`,
     };
 
     return {
@@ -690,161 +796,198 @@ export class FederalIntelligenceIntegration extends EventEmitter {
       type,
       value: mockValues[type],
       confidence: Math.random() * 0.3 + 0.7,
-      severity: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'][Math.floor(Math.random() * 4)] as any,
-      tags: ['malware', 'apt', 'espionage'].slice(0, Math.floor(Math.random() * 3) + 1),
+      severity: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'][
+        Math.floor(Math.random() * 4)
+      ] as any,
+      tags: ['malware', 'apt', 'espionage'].slice(
+        0,
+        Math.floor(Math.random() * 3) + 1,
+      ),
       firstSeen: new Date(),
       lastSeen: new Date(),
       sources: [dataSource.id],
-      context: `Detected by ${dataSource.agency}`
+      context: `Detected by ${dataSource.agency}`,
     };
   }
 
-  private processQueryParameters(query: string, parameters: Record<string, any>): string {
+  private processQueryParameters(
+    query: string,
+    parameters: Record<string, any>,
+  ): string {
     let processedQuery = query;
-    
+
     for (const [key, value] of Object.entries(parameters)) {
       const placeholder = `{{${key}}}`;
-      processedQuery = processedQuery.replace(new RegExp(placeholder, 'g'), String(value));
+      processedQuery = processedQuery.replace(
+        new RegExp(placeholder, 'g'),
+        String(value),
+      );
     }
-    
+
     return processedQuery;
   }
 
-  private async executeQuery(query: string, dataSources: string[]): Promise<any[]> {
+  private async executeQuery(
+    query: string,
+    dataSources: string[],
+  ): Promise<any[]> {
     // Mock query execution
     const results = [];
     const resultCount = Math.floor(Math.random() * 50) + 10;
-    
+
     for (let i = 0; i < resultCount; i++) {
       results.push({
         id: `result-${i}`,
         data: `Query result ${i + 1}`,
         confidence: Math.random(),
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
-    
+
     return results;
   }
 
-  private async performIntelligenceAnalysis(type: string, options: any): Promise<any> {
+  private async performIntelligenceAnalysis(
+    type: string,
+    options: any,
+  ): Promise<any> {
     // Mock intelligence analysis
     const mockAnalysis = {
       ASSESSMENT: {
-        executiveSummary: 'Current threat landscape shows increasing sophistication in nation-state cyber operations with focus on critical infrastructure.',
+        executiveSummary:
+          'Current threat landscape shows increasing sophistication in nation-state cyber operations with focus on critical infrastructure.',
         keyFindings: [
           'APT groups showing enhanced tradecraft',
           'Increase in supply chain compromises',
-          'Growing use of legitimate tools for malicious purposes'
+          'Growing use of legitimate tools for malicious purposes',
         ],
         recommendations: [
           'Enhance supply chain security measures',
           'Implement behavioral detection capabilities',
-          'Increase information sharing with private sector'
+          'Increase information sharing with private sector',
         ],
         confidence: 0.87,
-        sources: Array.from(this.dataSources.keys()).slice(0, 3)
+        sources: Array.from(this.dataSources.keys()).slice(0, 3),
       },
       WARNING: {
-        executiveSummary: 'Imminent threat detected against critical infrastructure sectors requiring immediate protective measures.',
+        executiveSummary:
+          'Imminent threat detected against critical infrastructure sectors requiring immediate protective measures.',
         keyFindings: [
           'Credible threat intelligence indicates planned attacks',
           'Multiple indicators of compromise identified',
-          'Attribution to known threat actor group'
+          'Attribution to known threat actor group',
         ],
         recommendations: [
           'Implement emergency protective measures',
           'Coordinate with sector partners',
-          'Enhance monitoring and alerting'
+          'Enhance monitoring and alerting',
         ],
         confidence: 0.94,
-        sources: Array.from(this.dataSources.keys()).slice(0, 2)
-      }
+        sources: Array.from(this.dataSources.keys()).slice(0, 2),
+      },
     };
 
     return mockAnalysis[type] || mockAnalysis['ASSESSMENT'];
   }
 
-  private async assessRequirement(requirement: ComplianceRequirement): Promise<any> {
+  private async assessRequirement(
+    requirement: ComplianceRequirement,
+  ): Promise<any> {
     // Mock compliance assessment
     const mockAssessment = {
-      status: Math.random() > 0.2 ? 'COMPLIANT' : Math.random() > 0.5 ? 'PARTIAL' : 'NON_COMPLIANT',
+      status:
+        Math.random() > 0.2
+          ? 'COMPLIANT'
+          : Math.random() > 0.5
+            ? 'PARTIAL'
+            : 'NON_COMPLIANT',
       score: Math.random() * 30 + 70, // 70-100 range
       evidence: [
         'Security controls implemented and tested',
         'Documentation reviewed and approved',
-        'Regular monitoring in place'
+        'Regular monitoring in place',
       ],
-      remediation: Math.random() > 0.8 ? 'Update security documentation' : undefined,
-      findings: Math.random() > 0.9 ? [{
-        id: `finding-${Date.now()}`,
-        requirementId: requirement.id,
-        severity: 'MEDIUM' as any,
-        description: 'Minor compliance gap identified',
-        recommendation: 'Address within 30 days',
-        status: 'OPEN' as any
-      }] : undefined
+      remediation:
+        Math.random() > 0.8 ? 'Update security documentation' : undefined,
+      findings:
+        Math.random() > 0.9
+          ? [
+              {
+                id: `finding-${Date.now()}`,
+                requirementId: requirement.id,
+                severity: 'MEDIUM' as any,
+                description: 'Minor compliance gap identified',
+                recommendation: 'Address within 30 days',
+                status: 'OPEN' as any,
+              },
+            ]
+          : undefined,
     };
 
     return mockAssessment;
   }
 
   private calculateThreatScore(
-    entity: IntelligenceEntity, 
-    relatedEntities: IntelligenceEntity[], 
-    indicators: ThreatIndicator[]
+    entity: IntelligenceEntity,
+    relatedEntities: IntelligenceEntity[],
+    indicators: ThreatIndicator[],
   ): number {
     let score = 0.4; // Base score
-    
+
     // Entity type weighting
     const typeWeights = {
-      'THREAT_ACTOR': 0.3,
-      'MALWARE': 0.25,
-      'ORGANIZATION': 0.15,
-      'PERSON': 0.1,
-      'LOCATION': 0.05,
-      'EVENT': 0.1,
-      'ASSET': 0.05,
-      'IOC': 0.2
+      THREAT_ACTOR: 0.3,
+      MALWARE: 0.25,
+      ORGANIZATION: 0.15,
+      PERSON: 0.1,
+      LOCATION: 0.05,
+      EVENT: 0.1,
+      ASSET: 0.05,
+      IOC: 0.2,
     };
-    
-    score += (typeWeights[entity.type] || 0.1);
-    
+
+    score += typeWeights[entity.type] || 0.1;
+
     // Related entities impact
     score += Math.min(relatedEntities.length * 0.05, 0.2);
-    
+
     // Indicators impact
     score += Math.min(indicators.length * 0.1, 0.3);
-    
+
     // Confidence weighting
     score *= entity.confidence;
-    
+
     return Math.min(score, 1.0);
   }
 
   private generateKeyFindings(
     entity: IntelligenceEntity,
     relatedEntities: IntelligenceEntity[],
-    indicators: ThreatIndicator[]
+    indicators: ThreatIndicator[],
   ): string[] {
     const findings = [
       `Entity ${entity.name} has ${entity.confidence > 0.8 ? 'high' : 'moderate'} confidence attribution`,
       `${relatedEntities.length} related entities identified in intelligence network`,
-      `${indicators.length} threat indicators associated with this entity`
+      `${indicators.length} threat indicators associated with this entity`,
     ];
 
-    if (indicators.some(i => i.severity === 'CRITICAL')) {
+    if (indicators.some((i) => i.severity === 'CRITICAL')) {
       findings.push('Critical severity indicators detected');
     }
 
     if (relatedEntities.length > 5) {
-      findings.push('Extensive network of related entities suggests organized threat group');
+      findings.push(
+        'Extensive network of related entities suggests organized threat group',
+      );
     }
 
     return findings;
   }
 
-  private generateThreatRecommendations(entity: IntelligenceEntity, threatScore: number): string[] {
+  private generateThreatRecommendations(
+    entity: IntelligenceEntity,
+    threatScore: number,
+  ): string[] {
     const recommendations = [];
 
     if (threatScore > 0.8) {
@@ -885,11 +1028,13 @@ export class FederalIntelligenceIntegration extends EventEmitter {
 
   private async validateCompliance(): Promise<void> {
     console.log('📋 Validating federal compliance requirements...');
-    
+
     for (const framework of this.complianceFrameworks.values()) {
       try {
         await this.assessCompliance(framework.id);
-        console.log(`   ✅ ${framework.name}: ${framework.complianceScore.toFixed(1)}%`);
+        console.log(
+          `   ✅ ${framework.name}: ${framework.complianceScore.toFixed(1)}%`,
+        );
       } catch (error) {
         console.log(`   ❌ ${framework.name}: Assessment failed`);
       }
@@ -909,7 +1054,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
             description: 'Implement access control policies and procedures',
             status: 'COMPLIANT',
             score: 85,
-            evidence: []
+            evidence: [],
           },
           {
             id: 'fisma-au-1',
@@ -917,12 +1062,12 @@ export class FederalIntelligenceIntegration extends EventEmitter {
             description: 'Establish audit and accountability controls',
             status: 'COMPLIANT',
             score: 92,
-            evidence: []
-          }
+            evidence: [],
+          },
         ],
         assessmentDate: new Date(),
         complianceScore: 88,
-        findings: []
+        findings: [],
       },
       {
         id: 'ica',
@@ -932,10 +1077,11 @@ export class FederalIntelligenceIntegration extends EventEmitter {
           {
             id: 'ica-data-1',
             category: 'Data Handling',
-            description: 'Proper classification and handling of intelligence data',
+            description:
+              'Proper classification and handling of intelligence data',
             status: 'COMPLIANT',
             score: 94,
-            evidence: []
+            evidence: [],
           },
           {
             id: 'ica-share-1',
@@ -943,13 +1089,13 @@ export class FederalIntelligenceIntegration extends EventEmitter {
             description: 'Secure intelligence sharing protocols',
             status: 'PARTIAL',
             score: 78,
-            evidence: []
-          }
+            evidence: [],
+          },
         ],
         assessmentDate: new Date(),
         complianceScore: 86,
-        findings: []
-      }
+        findings: [],
+      },
     ];
 
     for (const framework of frameworks) {
@@ -964,23 +1110,31 @@ export class FederalIntelligenceIntegration extends EventEmitter {
         name: 'National Counterterrorism Center',
         region: 'National',
         jurisdiction: ['United States', 'International'],
-        capabilities: ['terrorism_analysis', 'threat_assessment', 'intelligence_fusion'],
+        capabilities: [
+          'terrorism_analysis',
+          'threat_assessment',
+          'intelligence_fusion',
+        ],
         dataSharing: true,
         securityLevel: 'TS/SCI',
         contactInfo: { emergency: '1-800-NCTC-TIP' },
-        partnerAgencies: ['CIA', 'FBI', 'NSA', 'DHS']
+        partnerAgencies: ['CIA', 'FBI', 'NSA', 'DHS'],
       },
       {
         id: 'ncjttf',
         name: 'National Cyber Joint Task Force',
         region: 'National',
         jurisdiction: ['United States'],
-        capabilities: ['cyber_threat_analysis', 'attribution', 'incident_response'],
+        capabilities: [
+          'cyber_threat_analysis',
+          'attribution',
+          'incident_response',
+        ],
         dataSharing: true,
         securityLevel: 'SECRET',
         contactInfo: { ops: '1-800-CYBER-TF' },
-        partnerAgencies: ['FBI', 'NSA', 'CISA', 'DOD']
-      }
+        partnerAgencies: ['FBI', 'NSA', 'CISA', 'DOD'],
+      },
     ];
 
     for (const center of centers) {
@@ -994,7 +1148,9 @@ export class FederalIntelligenceIntegration extends EventEmitter {
   }
 
   getActiveDataSources(): FederalDataSource[] {
-    return Array.from(this.dataSources.values()).filter(ds => ds.status === 'ACTIVE');
+    return Array.from(this.dataSources.values()).filter(
+      (ds) => ds.status === 'ACTIVE',
+    );
   }
 
   getReportCount(): number {

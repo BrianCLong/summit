@@ -1,9 +1,22 @@
-import { HealthScorer, summarizeSyntheticFailures, withinBakeWindow } from "./healthScorer";
-import { AuditEvent, CanaryConfig, CanaryState, EvaluationOutcome, HealthSample } from "./types";
+import {
+  HealthScorer,
+  summarizeSyntheticFailures,
+  withinBakeWindow,
+} from './healthScorer';
+import {
+  AuditEvent,
+  CanaryConfig,
+  CanaryState,
+  EvaluationOutcome,
+  HealthSample,
+} from './types';
 
 const DEFAULT_STEPS = [10, 25, 50, 100];
 
-export function buildDefaultConfig(service: string, environment: string): CanaryConfig {
+export function buildDefaultConfig(
+  service: string,
+  environment: string,
+): CanaryConfig {
   return {
     service,
     environment,
@@ -39,21 +52,30 @@ export class CanaryManager {
 
   public initialiseState(): CanaryState {
     return {
-      status: "idle",
+      status: 'idle',
       currentStepIndex: -1,
       breaches: 0,
       history: [],
     };
   }
 
-  public evaluate(state: CanaryState, sample: HealthSample, now = new Date()): EvaluationOutcome {
+  public evaluate(
+    state: CanaryState,
+    sample: HealthSample,
+    now = new Date(),
+  ): EvaluationOutcome {
     if (state.abortSignal) {
-      return this.abort(state, state.abortSignal.actor, state.abortSignal.reason, now);
+      return this.abort(
+        state,
+        state.abortSignal.actor,
+        state.abortSignal.reason,
+        now,
+      );
     }
-    if (state.status === "completed" || state.status === "rolling_back") {
+    if (state.status === 'completed' || state.status === 'rolling_back') {
       return {
-        action: "noop",
-        reason: "Rollout already finished",
+        action: 'noop',
+        reason: 'Rollout already finished',
         state,
         compositeScore: 1,
         sloBreaches: [],
@@ -65,7 +87,7 @@ export class CanaryManager {
     const nextState = { ...state };
     if (nextState.currentStepIndex === -1) {
       nextState.currentStepIndex = 0;
-      nextState.status = "running";
+      nextState.status = 'running';
       nextState.stepStartedAt = now.toISOString();
       nextState.history = [
         {
@@ -75,13 +97,15 @@ export class CanaryManager {
         },
       ];
       return {
-        action: "start_step",
+        action: 'start_step',
         reason: `Initialising canary at ${this.currentStepWeight(nextState)}% traffic`,
         state: nextState,
         compositeScore: 1,
         sloBreaches: [],
         syntheticFailures: [],
-        helmCommands: [this.buildHelmCommand(this.currentStepWeight(nextState))],
+        helmCommands: [
+          this.buildHelmCommand(this.currentStepWeight(nextState)),
+        ],
       };
     }
 
@@ -89,7 +113,9 @@ export class CanaryManager {
     const evaluation = this.scorer.evaluate(sample);
     const syntheticFailures = summarizeSyntheticFailures(sample);
     const sloBreaches = evaluation.sloBreaches;
-    const historyEntry = nextState.history.find((item) => item.stepIndex === nextState.currentStepIndex);
+    const historyEntry = nextState.history.find(
+      (item) => item.stepIndex === nextState.currentStepIndex,
+    );
     if (historyEntry) {
       historyEntry.evaluations.push({
         collectedAt: sample.collectedAt,
@@ -107,24 +133,33 @@ export class CanaryManager {
     }
 
     if (nextState.breaches >= this.config.policy.consecutiveBreachLimit) {
-      return this.rollback(nextState, evaluation.compositeScore, sloBreaches, syntheticFailures, {
-        actor: "auto-controller",
-        action: "rollback",
-        reason: sloBreaches[0] ?? syntheticFailures[0] ?? "Composite score under threshold",
-        timestamp: now.toISOString(),
-        metadata: {
-          stepIndex: nextState.currentStepIndex,
-          score: evaluation.compositeScore,
-          trafficWeight: step.weight,
-          environment: this.config.environment,
+      return this.rollback(
+        nextState,
+        evaluation.compositeScore,
+        sloBreaches,
+        syntheticFailures,
+        {
+          actor: 'auto-controller',
+          action: 'rollback',
+          reason:
+            sloBreaches[0] ??
+            syntheticFailures[0] ??
+            'Composite score under threshold',
+          timestamp: now.toISOString(),
+          metadata: {
+            stepIndex: nextState.currentStepIndex,
+            score: evaluation.compositeScore,
+            trafficWeight: step.weight,
+            environment: this.config.environment,
+          },
         },
-      });
+      );
     }
 
     if (evaluation.compositeScore < this.config.policy.compositePassScore) {
-      nextState.status = "holding";
+      nextState.status = 'holding';
       return {
-        action: "hold",
+        action: 'hold',
         reason: `Composite score ${evaluation.compositeScore.toFixed(2)} below threshold ${this.config.policy.compositePassScore.toFixed(2)}`,
         state: nextState,
         compositeScore: evaluation.compositeScore,
@@ -134,10 +169,12 @@ export class CanaryManager {
       };
     }
 
-    if (!withinBakeWindow(nextState.stepStartedAt, step.minBakeTimeSeconds, now)) {
-      nextState.status = "running";
+    if (
+      !withinBakeWindow(nextState.stepStartedAt, step.minBakeTimeSeconds, now)
+    ) {
+      nextState.status = 'running';
       return {
-        action: "hold",
+        action: 'hold',
         reason: `Bake window ${step.minBakeTimeSeconds}s not yet satisfied`,
         state: nextState,
         compositeScore: evaluation.compositeScore,
@@ -148,19 +185,19 @@ export class CanaryManager {
     }
 
     if (nextState.currentStepIndex === this.config.steps.length - 1) {
-      nextState.status = "completed";
+      nextState.status = 'completed';
       return {
-        action: "complete",
-        reason: "Canary rollout finished successfully",
+        action: 'complete',
+        reason: 'Canary rollout finished successfully',
         state: nextState,
         compositeScore: evaluation.compositeScore,
         sloBreaches,
         syntheticFailures,
         helmCommands: [this.buildHelmPromotionCommand()],
         auditEvent: {
-          actor: "auto-controller",
-          action: "canary_completed",
-          reason: "Composite score healthy across all steps",
+          actor: 'auto-controller',
+          action: 'canary_completed',
+          reason: 'Composite score healthy across all steps',
           timestamp: now.toISOString(),
           metadata: {
             finalScore: evaluation.compositeScore,
@@ -171,7 +208,7 @@ export class CanaryManager {
     }
 
     nextState.currentStepIndex += 1;
-    nextState.status = "running";
+    nextState.status = 'running';
     nextState.stepStartedAt = now.toISOString();
     nextState.history.push({
       stepIndex: nextState.currentStepIndex,
@@ -180,7 +217,7 @@ export class CanaryManager {
     });
 
     return {
-      action: "promote",
+      action: 'promote',
       reason: `Promoting canary to ${this.currentStepWeight(nextState)}% traffic`,
       state: nextState,
       compositeScore: evaluation.compositeScore,
@@ -188,9 +225,9 @@ export class CanaryManager {
       syntheticFailures,
       helmCommands: [this.buildHelmCommand(this.currentStepWeight(nextState))],
       auditEvent: {
-        actor: "auto-controller",
-        action: "promote_step",
-        reason: "Composite score above threshold and bake window satisfied",
+        actor: 'auto-controller',
+        action: 'promote_step',
+        reason: 'Composite score above threshold and bake window satisfied',
         timestamp: now.toISOString(),
         metadata: {
           stepIndex: nextState.currentStepIndex,
@@ -202,7 +239,11 @@ export class CanaryManager {
     };
   }
 
-  public requestAbort(state: CanaryState, actor: string, reason: string): CanaryState {
+  public requestAbort(
+    state: CanaryState,
+    actor: string,
+    reason: string,
+  ): CanaryState {
     return {
       ...state,
       abortSignal: {
@@ -213,13 +254,18 @@ export class CanaryManager {
     };
   }
 
-  public abort(state: CanaryState, actor: string, reason: string, now = new Date()): EvaluationOutcome {
+  public abort(
+    state: CanaryState,
+    actor: string,
+    reason: string,
+    now = new Date(),
+  ): EvaluationOutcome {
     const abortedState: CanaryState = {
       ...state,
-      status: "aborted",
+      status: 'aborted',
     };
     return {
-      action: "abort",
+      action: 'abort',
       reason,
       state: abortedState,
       compositeScore: 0,
@@ -228,7 +274,7 @@ export class CanaryManager {
       helmCommands: [this.buildHelmRollbackCommand()],
       auditEvent: {
         actor,
-        action: "canary_aborted",
+        action: 'canary_aborted',
         reason,
         timestamp: now.toISOString(),
         metadata: {
@@ -248,11 +294,11 @@ export class CanaryManager {
   ): EvaluationOutcome {
     const rollbackState: CanaryState = {
       ...state,
-      status: "rolling_back",
+      status: 'rolling_back',
     };
 
     return {
-      action: "rollback",
+      action: 'rollback',
       reason: auditEvent.reason,
       state: rollbackState,
       compositeScore,
@@ -282,11 +328,16 @@ export class CanaryManager {
     if (state.currentStepIndex < 0) {
       return this.config.steps[0]?.weight ?? DEFAULT_STEPS[0];
     }
-    return this.config.steps[state.currentStepIndex]?.weight ?? DEFAULT_STEPS.at(-1)!;
+    return (
+      this.config.steps[state.currentStepIndex]?.weight ?? DEFAULT_STEPS.at(-1)!
+    );
   }
 }
 
-export function meanTimeToRollback(history: CanaryState, now = new Date()): number | undefined {
+export function meanTimeToRollback(
+  history: CanaryState,
+  now = new Date(),
+): number | undefined {
   const lastHistory = history.history.at(-1);
   if (!lastHistory) {
     return undefined;
@@ -295,7 +346,9 @@ export function meanTimeToRollback(history: CanaryState, now = new Date()): numb
   if (!lastEvaluation) {
     return undefined;
   }
-  const breachIndex = lastHistory.evaluations.findIndex((entry) => entry.sloBreaches.length > 0);
+  const breachIndex = lastHistory.evaluations.findIndex(
+    (entry) => entry.sloBreaches.length > 0,
+  );
   if (breachIndex === -1) {
     return undefined;
   }

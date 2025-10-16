@@ -5,7 +5,12 @@
  */
 
 import { EventEmitter } from 'events';
-import { Migration, MigrationResult, ValidationCheck, ValidationResult } from './MigrationManager.js';
+import {
+  Migration,
+  MigrationResult,
+  ValidationCheck,
+  ValidationResult,
+} from './MigrationManager.js';
 
 /**
  * Migration test configuration
@@ -15,7 +20,12 @@ export interface MigrationTest {
   name: string;
   description: string;
   migrationId: string;
-  testType: 'unit' | 'integration' | 'performance' | 'data_integrity' | 'rollback';
+  testType:
+    | 'unit'
+    | 'integration'
+    | 'performance'
+    | 'data_integrity'
+    | 'rollback';
   environment: 'test' | 'staging' | 'production';
   setup: TestSetup;
   assertions: TestAssertion[];
@@ -66,10 +76,22 @@ export interface DataGenerator {
  */
 export interface TestAssertion {
   name: string;
-  type: 'sql_query' | 'row_count' | 'schema_check' | 'performance' | 'data_integrity' | 'custom';
+  type:
+    | 'sql_query'
+    | 'row_count'
+    | 'schema_check'
+    | 'performance'
+    | 'data_integrity'
+    | 'custom';
   query?: string;
   expectedResult?: any;
-  operator?: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains' | 'regex';
+  operator?:
+    | 'equals'
+    | 'not_equals'
+    | 'greater_than'
+    | 'less_than'
+    | 'contains'
+    | 'regex';
   threshold?: number;
   customValidator?: (result: any) => Promise<boolean>;
   critical: boolean;
@@ -162,7 +184,14 @@ export interface SchemaDriftResult {
  * Schema difference
  */
 export interface SchemaDifference {
-  type: 'table' | 'column' | 'index' | 'constraint' | 'sequence' | 'view' | 'function';
+  type:
+    | 'table'
+    | 'column'
+    | 'index'
+    | 'constraint'
+    | 'sequence'
+    | 'view'
+    | 'function';
   action: 'added' | 'removed' | 'modified';
   object: string;
   details: {
@@ -209,7 +238,7 @@ export class MigrationValidator extends EventEmitter {
       maxTestDuration: number; // minutes
       parallelTestExecution: boolean;
       retainTestResults: number; // days
-    }
+    },
   ) {
     super();
   }
@@ -234,7 +263,7 @@ export class MigrationValidator extends EventEmitter {
    */
   async validateMigration(
     migration: Migration,
-    environment: string = 'test'
+    environment: string = 'test',
   ): Promise<ValidationReport> {
     const startTime = new Date();
 
@@ -247,24 +276,25 @@ export class MigrationValidator extends EventEmitter {
         hasDrift: false,
         differences: [],
         severity: 'low',
-        recommendations: []
+        recommendations: [],
       },
       overall: {
         status: 'passed',
         score: 0,
         criticalIssues: 0,
-        warnings: 0
+        warnings: 0,
       },
       recommendations: [],
-      approvalRequired: false
+      approvalRequired: false,
     };
 
     try {
       this.emit('validation:started', { migration, environment });
 
       // Get tests for this migration
-      const migrationTests = Array.from(this.tests.values())
-        .filter(test => test.migrationId === migration.id);
+      const migrationTests = Array.from(this.tests.values()).filter(
+        (test) => test.migrationId === migration.id,
+      );
 
       if (migrationTests.length === 0) {
         console.warn(`No tests found for migration: ${migration.id}`);
@@ -279,7 +309,6 @@ export class MigrationValidator extends EventEmitter {
           if (testResult.status === 'failed') {
             report.overall.criticalIssues++;
           }
-
         } catch (error) {
           console.error(`Test execution failed: ${test.id}`, error);
           report.overall.criticalIssues++;
@@ -288,16 +317,22 @@ export class MigrationValidator extends EventEmitter {
 
       // Perform schema drift detection
       if (this.config.enableSchemaValidation) {
-        report.schemaDrift = await this.detectSchemaDrift(migration, environment);
-        
-        if (report.schemaDrift.hasDrift && report.schemaDrift.severity === 'critical') {
+        report.schemaDrift = await this.detectSchemaDrift(
+          migration,
+          environment,
+        );
+
+        if (
+          report.schemaDrift.hasDrift &&
+          report.schemaDrift.severity === 'critical'
+        ) {
           report.overall.criticalIssues++;
         }
       }
 
       // Calculate overall score
       report.overall.score = this.calculateValidationScore(report);
-      
+
       // Determine overall status
       if (report.overall.criticalIssues > 0) {
         report.overall.status = 'failed';
@@ -314,11 +349,10 @@ export class MigrationValidator extends EventEmitter {
       report.approvalRequired = this.requiresApproval(report, migration);
 
       this.emit('validation:completed', { migration, report });
-
     } catch (error) {
       report.overall.status = 'failed';
       report.overall.criticalIssues++;
-      
+
       this.emit('validation:failed', { migration, error });
     }
 
@@ -328,7 +362,10 @@ export class MigrationValidator extends EventEmitter {
   /**
    * Execute individual migration test
    */
-  async executeTest(test: MigrationTest, migration: Migration): Promise<MigrationTestResult> {
+  async executeTest(
+    test: MigrationTest,
+    migration: Migration,
+  ): Promise<MigrationTestResult> {
     const startTime = new Date();
 
     const result: MigrationTestResult = {
@@ -347,7 +384,7 @@ export class MigrationValidator extends EventEmitter {
         averageQueryTime: 0,
         slowestQuery: { sql: '', duration: 0 },
         memoryUsage: { before: 0, after: 0, peak: 0 },
-        diskUsage: { before: 0, after: 0 }
+        diskUsage: { before: 0, after: 0 },
       },
       coverage: {
         tablesAffected: [],
@@ -355,8 +392,8 @@ export class MigrationValidator extends EventEmitter {
         indexesAffected: [],
         constraintsAffected: [],
         migratedRows: 0,
-        rollbackCoverage: 0
-      }
+        rollbackCoverage: 0,
+      },
     };
 
     this.emit('test:started', { test, migration });
@@ -413,7 +450,6 @@ export class MigrationValidator extends EventEmitter {
       result.duration = result.endTime.getTime() - startTime.getTime();
 
       this.emit('test:completed', { test, result });
-
     } catch (error) {
       result.status = 'error';
       result.errors.push(error.message);
@@ -421,7 +457,6 @@ export class MigrationValidator extends EventEmitter {
       result.duration = result.endTime.getTime() - startTime.getTime();
 
       this.emit('test:failed', { test, error });
-
     } finally {
       // Clean up test environment
       await this.cleanupTestEnvironment(test);
@@ -440,20 +475,22 @@ export class MigrationValidator extends EventEmitter {
    */
   async detectSchemaDrift(
     migration: Migration,
-    environment: string
+    environment: string,
   ): Promise<SchemaDriftResult> {
     const result: SchemaDriftResult = {
       hasDrift: false,
       differences: [],
       severity: 'low',
-      recommendations: []
+      recommendations: [],
     };
 
     try {
       // Get baseline schema
       const baseline = this.schemaBaselines.get(environment);
       if (!baseline) {
-        result.recommendations.push('No baseline schema found for drift detection');
+        result.recommendations.push(
+          'No baseline schema found for drift detection',
+        );
         return result;
       }
 
@@ -468,12 +505,15 @@ export class MigrationValidator extends EventEmitter {
       result.severity = this.calculateDriftSeverity(result.differences);
 
       // Generate recommendations
-      result.recommendations = this.generateDriftRecommendations(result.differences);
-
+      result.recommendations = this.generateDriftRecommendations(
+        result.differences,
+      );
     } catch (error) {
       console.error('Schema drift detection failed:', error);
       result.severity = 'critical';
-      result.recommendations.push(`Schema drift detection failed: ${error.message}`);
+      result.recommendations.push(
+        `Schema drift detection failed: ${error.message}`,
+      );
     }
 
     return result;
@@ -484,7 +524,7 @@ export class MigrationValidator extends EventEmitter {
    */
   async testRollback(
     migration: Migration,
-    environment: string = 'test'
+    environment: string = 'test',
   ): Promise<{
     success: boolean;
     duration: number;
@@ -496,7 +536,7 @@ export class MigrationValidator extends EventEmitter {
       success: false,
       duration: 0,
       dataIntegrityPreserved: false,
-      errors: []
+      errors: [],
     };
 
     try {
@@ -506,28 +546,35 @@ export class MigrationValidator extends EventEmitter {
       }
 
       // Capture data checksum before migration
-      const preChecksum = await this.calculateDataChecksum(migration.metadata.targetTables);
+      const preChecksum = await this.calculateDataChecksum(
+        migration.metadata.targetTables,
+      );
 
       // Execute migration
       // (Implementation would execute migration)
 
       // Capture data checksum after migration
-      const postChecksum = await this.calculateDataChecksum(migration.metadata.targetTables);
+      const postChecksum = await this.calculateDataChecksum(
+        migration.metadata.targetTables,
+      );
 
       // Execute rollback
       // (Implementation would execute rollback)
 
       // Capture data checksum after rollback
-      const rollbackChecksum = await this.calculateDataChecksum(migration.metadata.targetTables);
+      const rollbackChecksum = await this.calculateDataChecksum(
+        migration.metadata.targetTables,
+      );
 
       // Verify data integrity
-      rollbackResult.dataIntegrityPreserved = (preChecksum === rollbackChecksum);
+      rollbackResult.dataIntegrityPreserved = preChecksum === rollbackChecksum;
       rollbackResult.success = true;
 
       if (!rollbackResult.dataIntegrityPreserved) {
-        rollbackResult.errors.push('Data integrity not preserved during rollback');
+        rollbackResult.errors.push(
+          'Data integrity not preserved during rollback',
+        );
       }
-
     } catch (error) {
       rollbackResult.errors.push(error.message);
     }
@@ -554,16 +601,16 @@ export class MigrationValidator extends EventEmitter {
         fixtures: this.generateTestFixtures(migration),
         prerequisites: migration.dependencies,
         mockData: this.generateMockData(migration),
-        isolationLevel: 'transaction'
+        isolationLevel: 'transaction',
       },
       assertions: this.generateBasicAssertions(migration),
       cleanup: {
         dropTables: [],
         truncateTables: migration.metadata.targetTables,
-        resetSequences: []
+        resetSequences: [],
       },
       timeout: 30,
-      retries: 2
+      retries: 2,
     });
 
     // Generate data integrity test
@@ -579,16 +626,16 @@ export class MigrationValidator extends EventEmitter {
           fixtures: this.generateLargeDataFixtures(migration),
           prerequisites: migration.dependencies,
           mockData: [],
-          isolationLevel: 'database'
+          isolationLevel: 'database',
         },
         assertions: this.generateIntegrityAssertions(migration),
         cleanup: {
           dropTables: [],
           truncateTables: migration.metadata.targetTables,
-          resetSequences: []
+          resetSequences: [],
         },
         timeout: 60,
-        retries: 1
+        retries: 1,
       });
     }
 
@@ -605,16 +652,16 @@ export class MigrationValidator extends EventEmitter {
           fixtures: this.generateTestFixtures(migration),
           prerequisites: migration.dependencies,
           mockData: [],
-          isolationLevel: 'database'
+          isolationLevel: 'database',
         },
         assertions: this.generateRollbackAssertions(migration),
         cleanup: {
           dropTables: [],
           truncateTables: migration.metadata.targetTables,
-          resetSequences: []
+          resetSequences: [],
         },
         timeout: 45,
-        retries: 1
+        retries: 1,
       });
     }
 
@@ -635,7 +682,9 @@ export class MigrationValidator extends EventEmitter {
     }
 
     if (test.timeout <= 0 || test.timeout > this.config.maxTestDuration) {
-      throw new Error(`Test timeout must be between 1 and ${this.config.maxTestDuration} minutes`);
+      throw new Error(
+        `Test timeout must be between 1 and ${this.config.maxTestDuration} minutes`,
+      );
     }
   }
 
@@ -656,7 +705,7 @@ export class MigrationValidator extends EventEmitter {
   private async executeUnitTest(
     test: MigrationTest,
     migration: Migration,
-    result: MigrationTestResult
+    result: MigrationTestResult,
   ): Promise<void> {
     // Execute migration phases individually
     // Verify each phase works correctly
@@ -666,7 +715,7 @@ export class MigrationValidator extends EventEmitter {
   private async executeIntegrationTest(
     test: MigrationTest,
     migration: Migration,
-    result: MigrationTestResult
+    result: MigrationTestResult,
   ): Promise<void> {
     // Execute full migration
     // Test integration with other systems
@@ -676,7 +725,7 @@ export class MigrationValidator extends EventEmitter {
   private async executePerformanceTest(
     test: MigrationTest,
     migration: Migration,
-    result: MigrationTestResult
+    result: MigrationTestResult,
   ): Promise<void> {
     // Measure migration performance
     // Check against performance thresholds
@@ -686,7 +735,7 @@ export class MigrationValidator extends EventEmitter {
   private async executeDataIntegrityTest(
     test: MigrationTest,
     migration: Migration,
-    result: MigrationTestResult
+    result: MigrationTestResult,
   ): Promise<void> {
     // Verify data integrity before/after migration
     // Check constraints, foreign keys, etc.
@@ -696,23 +745,25 @@ export class MigrationValidator extends EventEmitter {
   private async executeRollbackTest(
     test: MigrationTest,
     migration: Migration,
-    result: MigrationTestResult
+    result: MigrationTestResult,
   ): Promise<void> {
     // Execute migration then rollback
     // Verify data and schema are restored
     console.log(`Executing rollback test: ${test.id}`);
   }
 
-  private async executeAssertion(assertion: TestAssertion): Promise<AssertionResult> {
+  private async executeAssertion(
+    assertion: TestAssertion,
+  ): Promise<AssertionResult> {
     const startTime = Date.now();
-    
+
     const result: AssertionResult = {
       name: assertion.name,
       status: 'passed',
       expected: assertion.expectedResult,
       actual: null,
       message: '',
-      duration: 0
+      duration: 0,
     };
 
     try {
@@ -728,7 +779,8 @@ export class MigrationValidator extends EventEmitter {
         case 'row_count':
           // Count rows and compare
           result.actual = 100; // Mock count
-          result.status = result.actual === assertion.expectedResult ? 'passed' : 'failed';
+          result.status =
+            result.actual === assertion.expectedResult ? 'passed' : 'failed';
           break;
 
         case 'custom':
@@ -739,9 +791,10 @@ export class MigrationValidator extends EventEmitter {
           break;
       }
 
-      result.message = result.status === 'passed' ? 'Assertion passed' : 
-        `Expected ${assertion.expectedResult}, got ${result.actual}`;
-
+      result.message =
+        result.status === 'passed'
+          ? 'Assertion passed'
+          : `Expected ${assertion.expectedResult}, got ${result.actual}`;
     } catch (error) {
       result.status = 'error';
       result.message = error.message;
@@ -751,7 +804,9 @@ export class MigrationValidator extends EventEmitter {
     return result;
   }
 
-  private async calculatePerformanceMetrics(result: MigrationTestResult): Promise<void> {
+  private async calculatePerformanceMetrics(
+    result: MigrationTestResult,
+  ): Promise<void> {
     // Calculate performance metrics from test execution
     result.performance.migrationDuration = result.duration;
     result.performance.queriesExecuted = 10; // Mock value
@@ -760,7 +815,7 @@ export class MigrationValidator extends EventEmitter {
 
   private async calculateCoverageMetrics(
     test: MigrationTest,
-    migration: Migration
+    migration: Migration,
   ): Promise<CoverageMetrics> {
     return {
       tablesAffected: migration.metadata.targetTables,
@@ -768,7 +823,8 @@ export class MigrationValidator extends EventEmitter {
       indexesAffected: [],
       constraintsAffected: [],
       migratedRows: migration.metadata.affectedRows,
-      rollbackCoverage: migration.rollbackPlan.rollbackPhases.length > 0 ? 100 : 0
+      rollbackCoverage:
+        migration.rollbackPlan.rollbackPhases.length > 0 ? 100 : 0,
     };
   }
 
@@ -777,26 +833,35 @@ export class MigrationValidator extends EventEmitter {
     return {}; // Mock schema
   }
 
-  private async compareSchemas(baseline: any, current: any): Promise<SchemaDifference[]> {
+  private async compareSchemas(
+    baseline: any,
+    current: any,
+  ): Promise<SchemaDifference[]> {
     // Compare schema structures and return differences
     return []; // Mock differences
   }
 
-  private calculateDriftSeverity(differences: SchemaDifference[]): 'low' | 'medium' | 'high' | 'critical' {
-    const breakingChanges = differences.filter(d => d.impact === 'breaking');
-    
+  private calculateDriftSeverity(
+    differences: SchemaDifference[],
+  ): 'low' | 'medium' | 'high' | 'critical' {
+    const breakingChanges = differences.filter((d) => d.impact === 'breaking');
+
     if (breakingChanges.length > 5) return 'critical';
     if (breakingChanges.length > 2) return 'high';
     if (breakingChanges.length > 0) return 'medium';
     return 'low';
   }
 
-  private generateDriftRecommendations(differences: SchemaDifference[]): string[] {
+  private generateDriftRecommendations(
+    differences: SchemaDifference[],
+  ): string[] {
     const recommendations: string[] = [];
-    
-    differences.forEach(diff => {
+
+    differences.forEach((diff) => {
       if (diff.impact === 'breaking') {
-        recommendations.push(`Address breaking change: ${diff.type} ${diff.object} was ${diff.action}`);
+        recommendations.push(
+          `Address breaking change: ${diff.type} ${diff.object} was ${diff.action}`,
+        );
       }
     });
 
@@ -810,15 +875,17 @@ export class MigrationValidator extends EventEmitter {
 
   private calculateValidationScore(report: ValidationReport): number {
     let score = 100;
-    
+
     // Deduct points for critical issues
     score -= report.overall.criticalIssues * 20;
-    
+
     // Deduct points for warnings
     score -= report.overall.warnings * 5;
-    
+
     // Deduct points for failed tests
-    const failedTests = report.testResults.filter(t => t.status === 'failed').length;
+    const failedTests = report.testResults.filter(
+      (t) => t.status === 'failed',
+    ).length;
     score -= failedTests * 15;
 
     return Math.max(0, score);
@@ -826,61 +893,73 @@ export class MigrationValidator extends EventEmitter {
 
   private generateRecommendations(report: ValidationReport): string[] {
     const recommendations: string[] = [];
-    
+
     if (report.overall.criticalIssues > 0) {
-      recommendations.push('Address all critical issues before proceeding with migration');
+      recommendations.push(
+        'Address all critical issues before proceeding with migration',
+      );
     }
 
-    if (report.testResults.some(t => t.status === 'failed')) {
+    if (report.testResults.some((t) => t.status === 'failed')) {
       recommendations.push('Fix failing tests to ensure migration safety');
     }
 
     if (report.schemaDrift.hasDrift) {
-      recommendations.push('Review schema drift and update migration accordingly');
+      recommendations.push(
+        'Review schema drift and update migration accordingly',
+      );
     }
 
     return recommendations;
   }
 
-  private requiresApproval(report: ValidationReport, migration: Migration): boolean {
+  private requiresApproval(
+    report: ValidationReport,
+    migration: Migration,
+  ): boolean {
     // Require approval for high-risk migrations or those with issues
-    return report.overall.criticalIssues > 0 || 
-           migration.riskLevel === 'high' || 
-           migration.riskLevel === 'critical';
+    return (
+      report.overall.criticalIssues > 0 ||
+      migration.riskLevel === 'high' ||
+      migration.riskLevel === 'critical'
+    );
   }
 
   private generateTestFixtures(migration: Migration): DataFixture[] {
     // Generate minimal test data for migration testing
-    return migration.metadata.targetTables.map(table => ({
+    return migration.metadata.targetTables.map((table) => ({
       table,
       data: [
         { id: 1, name: 'test_record_1', created_at: new Date() },
-        { id: 2, name: 'test_record_2', created_at: new Date() }
-      ]
+        { id: 2, name: 'test_record_2', created_at: new Date() },
+      ],
     }));
   }
 
   private generateLargeDataFixtures(migration: Migration): DataFixture[] {
     // Generate larger dataset for stress testing
-    return migration.metadata.targetTables.map(table => ({
+    return migration.metadata.targetTables.map((table) => ({
       table,
       data: Array.from({ length: 1000 }, (_, i) => ({
         id: i + 1,
         name: `test_record_${i + 1}`,
-        created_at: new Date()
-      }))
+        created_at: new Date(),
+      })),
     }));
   }
 
   private generateMockData(migration: Migration): MockDataConfig[] {
-    return migration.metadata.targetTables.map(table => ({
+    return migration.metadata.targetTables.map((table) => ({
       table,
       rowCount: 100,
       generators: {
         id: { type: 'sequence', parameters: { start: 1 } },
         name: { type: 'random', parameters: { pattern: 'test_${random}' } },
-        created_at: { type: 'expression', parameters: { value: 'CURRENT_TIMESTAMP' } }
-      }
+        created_at: {
+          type: 'expression',
+          parameters: { value: 'CURRENT_TIMESTAMP' },
+        },
+      },
     }));
   }
 
@@ -892,17 +971,17 @@ export class MigrationValidator extends EventEmitter {
         query: 'SELECT 1',
         expectedResult: { success: true },
         operator: 'equals',
-        critical: true
+        critical: true,
       },
       {
         name: 'Target tables exist',
         type: 'sql_query',
         query: `SELECT COUNT(*) as table_count FROM information_schema.tables 
-                WHERE table_name IN (${migration.metadata.targetTables.map(t => `'${t}'`).join(', ')})`,
+                WHERE table_name IN (${migration.metadata.targetTables.map((t) => `'${t}'`).join(', ')})`,
         expectedResult: { table_count: migration.metadata.targetTables.length },
         operator: 'equals',
-        critical: true
-      }
+        critical: true,
+      },
     ];
   }
 
@@ -914,7 +993,7 @@ export class MigrationValidator extends EventEmitter {
         query: 'SELECT COUNT(*) as row_count FROM users',
         expectedResult: { row_count: 1000 },
         operator: 'equals',
-        critical: true
+        critical: true,
       },
       {
         name: 'Foreign key constraints preserved',
@@ -924,8 +1003,8 @@ export class MigrationValidator extends EventEmitter {
                 WHERE constraint_type = 'FOREIGN KEY'`,
         expectedResult: { constraint_count: 5 },
         operator: 'greater_than',
-        critical: true
-      }
+        critical: true,
+      },
     ];
   }
 
@@ -937,7 +1016,7 @@ export class MigrationValidator extends EventEmitter {
         query: 'SELECT 1',
         expectedResult: { success: true },
         operator: 'equals',
-        critical: true
+        critical: true,
       },
       {
         name: 'Data integrity preserved after rollback',
@@ -946,8 +1025,8 @@ export class MigrationValidator extends EventEmitter {
           // Custom validation logic for rollback data integrity
           return true;
         },
-        critical: true
-      }
+        critical: true,
+      },
     ];
   }
 }

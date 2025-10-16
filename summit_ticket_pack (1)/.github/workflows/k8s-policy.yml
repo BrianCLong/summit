@@ -1,7 +1,7 @@
 name: K8s Policy & Hygiene
 on:
   pull_request:
-    paths: ["**/*.yaml", "**/*.yml"]
+    paths: ['**/*.yaml', '**/*.yml']
 jobs:
   kube:
     runs-on: ubuntu-latest

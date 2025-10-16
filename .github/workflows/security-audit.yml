@@ -20,7 +20,9 @@ jobs:
         run: echo "No manifest changes; skipping audit"
       - uses: actions/setup-node@v4
         if: steps.pkg.outputs.manifests == 'true'
-        with: { node-version: 20, cache: 'pnpm' }
+        with:
+          node-version: 20
+          cache: 'pnpm'
       - run: corepack enable && pnpm i --frozen-lockfile
         if: steps.pkg.outputs.manifests == 'true'
       - run: pnpm audit --audit-level=high
@@ -29,10 +31,7 @@ jobs:
         if: steps.pkg.outputs.manifests == 'true'
       - uses: actions/upload-artifact@v4
         if: steps.pkg.outputs.manifests == 'true'
-        continue-on-error: true
-      - run: pnpm audit --audit-level=high || true
-        continue-on-error: true
-      - run: pnpm audit --json > audit.json || true
-        continue-on-error: true
-      - uses: actions/upload-artifact@v4
-        with: { name: npm-audit, path: audit.json, if-no-files-found: ignore }
+        with:
+          name: npm-audit
+          path: audit.json
+          if-no-files-found: ignore

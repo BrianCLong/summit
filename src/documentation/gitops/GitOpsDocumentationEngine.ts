@@ -114,16 +114,16 @@ export class GitOpsDocumentationEngine extends EventEmitter {
         namespace: 'argocd',
         labels: {
           'app.kubernetes.io/name': 'argocd-cm',
-          'app.kubernetes.io/part-of': 'argocd'
-        }
+          'app.kubernetes.io/part-of': 'argocd',
+        },
       },
       data: {
         'application.instanceLabelKey': 'argocd.argoproj.io/instance',
         'server.rbac.policy': this.generateRBACPolicy(),
         'policy.default': 'role:readonly',
-        'scopes': '[groups, email]',
-        'url': 'https://docs-gitops.intelgraph.com'
-      }
+        scopes: '[groups, email]',
+        url: 'https://docs-gitops.intelgraph.com',
+      },
     };
 
     await this.applyKubernetesManifest(argoConfig);
@@ -137,7 +137,10 @@ export class GitOpsDocumentationEngine extends EventEmitter {
     for (const repo of this.config.repositories) {
       for (const env of this.config.environments) {
         const application = this.generateArgoApplication(repo, env);
-        this.applicationDefinitions.set(`${repo.name}-${env.name}`, application);
+        this.applicationDefinitions.set(
+          `${repo.name}-${env.name}`,
+          application,
+        );
         await this.applyKubernetesManifest(application);
       }
     }
@@ -147,14 +150,17 @@ export class GitOpsDocumentationEngine extends EventEmitter {
   /**
    * Generate ArgoCD application manifest
    */
-  private generateArgoApplication(repo: GitOpsRepository, env: GitOpsEnvironment): ArgoApplication {
+  private generateArgoApplication(
+    repo: GitOpsRepository,
+    env: GitOpsEnvironment,
+  ): ArgoApplication {
     return {
       apiVersion: 'argoproj.io/v1alpha1',
       kind: 'Application',
       metadata: {
         name: `docs-${repo.name}-${env.name}`,
         namespace: 'argocd',
-        finalizers: ['resources-finalizer.argocd.argoproj.io']
+        finalizers: ['resources-finalizer.argocd.argoproj.io'],
       },
       spec: {
         project: 'default',
@@ -167,28 +173,30 @@ export class GitOpsDocumentationEngine extends EventEmitter {
             parameters: [
               {
                 name: 'image.tag',
-                value: 'latest'
+                value: 'latest',
               },
               {
                 name: 'ingress.hosts[0].host',
-                value: env.domain
-              }
-            ]
-          }
+                value: env.domain,
+              },
+            ],
+          },
         },
         destination: {
           server: env.cluster,
-          namespace: env.namespace
+          namespace: env.namespace,
         },
         syncPolicy: {
-          automated: repo.syncPolicy.automated ? {
-            prune: repo.syncPolicy.prune,
-            selfHeal: repo.syncPolicy.selfHeal
-          } : undefined,
+          automated: repo.syncPolicy.automated
+            ? {
+                prune: repo.syncPolicy.prune,
+                selfHeal: repo.syncPolicy.selfHeal,
+              }
+            : undefined,
           syncOptions: repo.syncPolicy.syncOptions,
-          retry: repo.syncPolicy.retry
-        }
-      }
+          retry: repo.syncPolicy.retry,
+        },
+      },
     };
   }
 
@@ -201,41 +209,47 @@ export class GitOpsDocumentationEngine extends EventEmitter {
       kind: 'ConfigMap',
       metadata: {
         name: 'prometheus-docs-config',
-        namespace: 'monitoring'
+        namespace: 'monitoring',
       },
       data: {
         'prometheus.yml': yaml.dump({
           global: {
             scrape_interval: '15s',
-            evaluation_interval: '15s'
+            evaluation_interval: '15s',
           },
           rule_files: ['/etc/prometheus/rules/*.yml'],
           scrape_configs: [
             {
               job_name: 'argocd-metrics',
-              static_configs: [{
-                targets: ['argocd-metrics:8082']
-              }]
+              static_configs: [
+                {
+                  targets: ['argocd-metrics:8082'],
+                },
+              ],
             },
             {
               job_name: 'docs-applications',
-              kubernetes_sd_configs: [{
-                role: 'endpoints',
-                namespaces: {
-                  names: ['docs-staging', 'docs-production']
-                }
-              }],
+              kubernetes_sd_configs: [
+                {
+                  role: 'endpoints',
+                  namespaces: {
+                    names: ['docs-staging', 'docs-production'],
+                  },
+                },
+              ],
               relabel_configs: [
                 {
-                  source_labels: ['__meta_kubernetes_service_annotation_prometheus_io_scrape'],
+                  source_labels: [
+                    '__meta_kubernetes_service_annotation_prometheus_io_scrape',
+                  ],
                   action: 'keep',
-                  regex: 'true'
-                }
-              ]
-            }
-          ]
-        })
-      }
+                  regex: 'true',
+                },
+              ],
+            },
+          ],
+        }),
+      },
     };
 
     await this.applyKubernetesManifest(prometheusConfig);
@@ -258,10 +272,12 @@ export class GitOpsDocumentationEngine extends EventEmitter {
             id: 1,
             title: 'Application Health',
             type: 'stat',
-            targets: [{
-              expr: 'sum by (health_status) (argocd_app_health_status)',
-              legendFormat: '{{health_status}}'
-            }],
+            targets: [
+              {
+                expr: 'sum by (health_status) (argocd_app_health_status)',
+                legendFormat: '{{health_status}}',
+              },
+            ],
             fieldConfig: {
               defaults: {
                 color: { mode: 'thresholds' },
@@ -269,37 +285,41 @@ export class GitOpsDocumentationEngine extends EventEmitter {
                   steps: [
                     { color: 'red', value: 0 },
                     { color: 'yellow', value: 0.8 },
-                    { color: 'green', value: 1 }
-                  ]
-                }
-              }
-            }
+                    { color: 'green', value: 1 },
+                  ],
+                },
+              },
+            },
           },
           {
             id: 2,
             title: 'Sync Status',
             type: 'piechart',
-            targets: [{
-              expr: 'sum by (sync_status) (argocd_app_sync_total)',
-              legendFormat: '{{sync_status}}'
-            }]
+            targets: [
+              {
+                expr: 'sum by (sync_status) (argocd_app_sync_total)',
+                legendFormat: '{{sync_status}}',
+              },
+            ],
           },
           {
             id: 3,
             title: 'Deployment Frequency',
             type: 'graph',
-            targets: [{
-              expr: 'increase(argocd_app_sync_total[1h])',
-              legendFormat: 'Deployments/hour'
-            }]
-          }
+            targets: [
+              {
+                expr: 'increase(argocd_app_sync_total[1h])',
+                legendFormat: 'Deployments/hour',
+              },
+            ],
+          },
         ],
         time: {
           from: 'now-6h',
-          to: 'now'
+          to: 'now',
         },
-        refresh: '30s'
-      }
+        refresh: '30s',
+      },
     };
 
     const configMap = {
@@ -309,12 +329,12 @@ export class GitOpsDocumentationEngine extends EventEmitter {
         name: 'grafana-dashboard-docs-gitops',
         namespace: 'monitoring',
         labels: {
-          'grafana_dashboard': '1'
-        }
+          grafana_dashboard: '1',
+        },
       },
       data: {
-        'docs-gitops.json': JSON.stringify(dashboardConfig, null, 2)
-      }
+        'docs-gitops.json': JSON.stringify(dashboardConfig, null, 2),
+      },
     };
 
     await this.applyKubernetesManifest(configMap);
@@ -329,52 +349,58 @@ export class GitOpsDocumentationEngine extends EventEmitter {
       kind: 'ConfigMap',
       metadata: {
         name: 'prometheus-docs-alerts',
-        namespace: 'monitoring'
+        namespace: 'monitoring',
       },
       data: {
         'docs-alerts.yml': yaml.dump({
-          groups: [{
-            name: 'docs-gitops',
-            rules: [
-              {
-                alert: 'DocsApplicationUnhealthy',
-                expr: 'argocd_app_health_status{health_status!="Healthy"} > 0',
-                for: '5m',
-                labels: {
-                  severity: 'critical'
+          groups: [
+            {
+              name: 'docs-gitops',
+              rules: [
+                {
+                  alert: 'DocsApplicationUnhealthy',
+                  expr: 'argocd_app_health_status{health_status!="Healthy"} > 0',
+                  for: '5m',
+                  labels: {
+                    severity: 'critical',
+                  },
+                  annotations: {
+                    summary:
+                      'Documentation application {{ $labels.name }} is unhealthy',
+                    description:
+                      'Application {{ $labels.name }} has been unhealthy for more than 5 minutes',
+                  },
                 },
-                annotations: {
-                  summary: 'Documentation application {{ $labels.name }} is unhealthy',
-                  description: 'Application {{ $labels.name }} has been unhealthy for more than 5 minutes'
-                }
-              },
-              {
-                alert: 'DocsApplicationOutOfSync',
-                expr: 'argocd_app_sync_status{sync_status!="Synced"} > 0',
-                for: '10m',
-                labels: {
-                  severity: 'warning'
+                {
+                  alert: 'DocsApplicationOutOfSync',
+                  expr: 'argocd_app_sync_status{sync_status!="Synced"} > 0',
+                  for: '10m',
+                  labels: {
+                    severity: 'warning',
+                  },
+                  annotations: {
+                    summary:
+                      'Documentation application {{ $labels.name }} is out of sync',
+                    description:
+                      'Application {{ $labels.name }} has been out of sync for more than 10 minutes',
+                  },
                 },
-                annotations: {
-                  summary: 'Documentation application {{ $labels.name }} is out of sync',
-                  description: 'Application {{ $labels.name }} has been out of sync for more than 10 minutes'
-                }
-              },
-              {
-                alert: 'DocsDeploymentFailed',
-                expr: 'increase(argocd_app_sync_total{phase="Failed"}[5m]) > 0',
-                labels: {
-                  severity: 'critical'
+                {
+                  alert: 'DocsDeploymentFailed',
+                  expr: 'increase(argocd_app_sync_total{phase="Failed"}[5m]) > 0',
+                  labels: {
+                    severity: 'critical',
+                  },
+                  annotations: {
+                    summary: 'Documentation deployment failed',
+                    description: 'Deployment for {{ $labels.name }} has failed',
+                  },
                 },
-                annotations: {
-                  summary: 'Documentation deployment failed',
-                  description: 'Deployment for {{ $labels.name }} has failed'
-                }
-              }
-            ]
-          }]
-        })
-      }
+              ],
+            },
+          ],
+        }),
+      },
     };
 
     await this.applyKubernetesManifest(alertRules);
@@ -383,12 +409,19 @@ export class GitOpsDocumentationEngine extends EventEmitter {
   /**
    * Execute deployment with advanced strategies
    */
-  async deployApplication(appName: string, strategy: DeploymentStrategy): Promise<DeploymentResult> {
+  async deployApplication(
+    appName: string,
+    strategy: DeploymentStrategy,
+  ): Promise<DeploymentResult> {
     const startTime = Date.now();
     const deploymentId = this.generateDeploymentId();
 
     try {
-      this.emit('deployment:started', { appName, deploymentId, strategy: strategy.name });
+      this.emit('deployment:started', {
+        appName,
+        deploymentId,
+        strategy: strategy.name,
+      });
 
       // Pre-deployment validation
       await this.validateDeployment(appName);
@@ -406,7 +439,7 @@ export class GitOpsDocumentationEngine extends EventEmitter {
         startTime,
         endTime: Date.now(),
         status: 'success',
-        result
+        result,
       };
 
       this.recordDeployment(record);
@@ -421,7 +454,7 @@ export class GitOpsDocumentationEngine extends EventEmitter {
         startTime,
         endTime: Date.now(),
         status: 'failed',
-        error: error.message
+        error: error.message,
       };
 
       this.recordDeployment(record);
@@ -434,7 +467,10 @@ export class GitOpsDocumentationEngine extends EventEmitter {
   /**
    * Execute specific deployment strategy
    */
-  private async executeDeploymentStrategy(appName: string, strategy: DeploymentStrategy): Promise<any> {
+  private async executeDeploymentStrategy(
+    appName: string,
+    strategy: DeploymentStrategy,
+  ): Promise<any> {
     switch (strategy.type) {
       case 'blue-green':
         return this.executeBlueGreenDeployment(appName, strategy);
@@ -450,16 +486,19 @@ export class GitOpsDocumentationEngine extends EventEmitter {
   /**
    * Execute blue-green deployment
    */
-  private async executeBlueGreenDeployment(appName: string, strategy: DeploymentStrategy): Promise<any> {
+  private async executeBlueGreenDeployment(
+    appName: string,
+    strategy: DeploymentStrategy,
+  ): Promise<any> {
     // Deploy to green environment
     await this.deployToEnvironment(appName, 'green');
-    
+
     // Run health checks on green
     await this.runHealthChecks(appName, 'green', strategy.healthChecks);
-    
+
     // Switch traffic to green
     await this.switchTraffic(appName, 'green');
-    
+
     // Cleanup blue environment
     await this.cleanupEnvironment(appName, 'blue');
 
@@ -469,11 +508,14 @@ export class GitOpsDocumentationEngine extends EventEmitter {
   /**
    * Execute canary deployment
    */
-  private async executeCanaryDeployment(appName: string, strategy: DeploymentStrategy): Promise<any> {
+  private async executeCanaryDeployment(
+    appName: string,
+    strategy: DeploymentStrategy,
+  ): Promise<any> {
     for (const step of strategy.rolloutSteps) {
       // Deploy canary with specific traffic weight
       await this.deployCanary(appName, step.weight);
-      
+
       // Run analysis if configured
       if (step.analysis) {
         const analysisResult = await this.runAnalysis(appName, step.analysis);
@@ -482,13 +524,13 @@ export class GitOpsDocumentationEngine extends EventEmitter {
           throw new Error(`Canary analysis failed: ${analysisResult.reason}`);
         }
       }
-      
+
       // Pause if configured
       if (step.pause) {
         await this.pause(step.pause);
       }
     }
-    
+
     // Promote canary to stable
     await this.promoteCanary(appName);
 
@@ -498,10 +540,13 @@ export class GitOpsDocumentationEngine extends EventEmitter {
   /**
    * Automated rollback functionality
    */
-  async rollbackApplication(appName: string, targetRevision?: string): Promise<RollbackResult> {
+  async rollbackApplication(
+    appName: string,
+    targetRevision?: string,
+  ): Promise<RollbackResult> {
     const history = this.deploymentHistory.get(appName) || [];
     const lastSuccessfulDeployment = history
-      .filter(d => d.status === 'success')
+      .filter((d) => d.status === 'success')
       .sort((a, b) => b.endTime - a.endTime)[0];
 
     if (!lastSuccessfulDeployment && !targetRevision) {
@@ -509,21 +554,23 @@ export class GitOpsDocumentationEngine extends EventEmitter {
     }
 
     const rollbackTarget = targetRevision || lastSuccessfulDeployment.id;
-    
+
     try {
       // Execute ArgoCD rollback
-      execSync(`argocd app rollback ${appName} ${rollbackTarget}`, { stdio: 'pipe' });
-      
+      execSync(`argocd app rollback ${appName} ${rollbackTarget}`, {
+        stdio: 'pipe',
+      });
+
       // Wait for rollback to complete
       await this.waitForSync(appName);
-      
+
       this.emit('rollback:completed', { appName, target: rollbackTarget });
-      
+
       return {
         success: true,
         appName,
         targetRevision: rollbackTarget,
-        completedAt: new Date()
+        completedAt: new Date(),
       };
     } catch (error) {
       this.emit('rollback:failed', { appName, target: rollbackTarget, error });
@@ -541,19 +588,19 @@ export class GitOpsDocumentationEngine extends EventEmitter {
       try {
         // Get live state from cluster
         const liveState = await this.getLiveState(appName);
-        
+
         // Get desired state from git
         const desiredState = await this.getDesiredState(application);
-        
+
         // Compare states
         const drift = this.comparStates(liveState, desiredState);
-        
+
         if (drift.hasDrift) {
           driftResults.push({
             appName,
             driftType: drift.type,
             differences: drift.differences,
-            severity: drift.severity
+            severity: drift.severity,
           });
         }
       } catch (error) {
@@ -561,7 +608,7 @@ export class GitOpsDocumentationEngine extends EventEmitter {
           appName,
           driftType: 'error',
           error: error.message,
-          severity: 'high'
+          severity: 'high',
         });
       }
     }
@@ -570,7 +617,7 @@ export class GitOpsDocumentationEngine extends EventEmitter {
       timestamp: new Date(),
       totalApplications: this.applicationDefinitions.size,
       applicationsWithDrift: driftResults.length,
-      results: driftResults
+      results: driftResults,
     };
 
     this.emit('drift:detected', report);
@@ -584,16 +631,16 @@ export class GitOpsDocumentationEngine extends EventEmitter {
     const checks: ComplianceCheck[] = [];
 
     // Security compliance checks
-    checks.push(...await this.runSecurityCompliance());
-    
-    // Policy compliance checks
-    checks.push(...await this.runPolicyCompliance());
-    
-    // Operational compliance checks
-    checks.push(...await this.runOperationalCompliance());
+    checks.push(...(await this.runSecurityCompliance()));
 
-    const passedChecks = checks.filter(c => c.status === 'passed').length;
-    const failedChecks = checks.filter(c => c.status === 'failed').length;
+    // Policy compliance checks
+    checks.push(...(await this.runPolicyCompliance()));
+
+    // Operational compliance checks
+    checks.push(...(await this.runOperationalCompliance()));
+
+    const passedChecks = checks.filter((c) => c.status === 'passed').length;
+    const failedChecks = checks.filter((c) => c.status === 'failed').length;
 
     return {
       timestamp: new Date(),
@@ -602,7 +649,7 @@ export class GitOpsDocumentationEngine extends EventEmitter {
       passedChecks,
       failedChecks,
       checks,
-      recommendations: this.generateRecommendations(checks)
+      recommendations: this.generateRecommendations(checks),
     };
   }
 
@@ -611,7 +658,7 @@ export class GitOpsDocumentationEngine extends EventEmitter {
     const yamlContent = yaml.dump(manifest);
     const tempFile = `/tmp/manifest-${Date.now()}.yaml`;
     fs.writeFileSync(tempFile, yamlContent);
-    
+
     try {
       execSync(`kubectl apply -f ${tempFile}`, { stdio: 'pipe' });
     } finally {
@@ -626,12 +673,12 @@ export class GitOpsDocumentationEngine extends EventEmitter {
   private recordDeployment(record: DeploymentRecord): void {
     const history = this.deploymentHistory.get(record.appName) || [];
     history.push(record);
-    
+
     // Keep only last 100 deployments
     if (history.length > 100) {
       history.splice(0, history.length - 100);
     }
-    
+
     this.deploymentHistory.set(record.appName, history);
   }
 
@@ -650,15 +697,25 @@ export class GitOpsDocumentationEngine extends EventEmitter {
     // Add validation logic
   }
 
-  private async verifyDeployment(appName: string, healthChecks: HealthCheck[]): Promise<void> {
+  private async verifyDeployment(
+    appName: string,
+    healthChecks: HealthCheck[],
+  ): Promise<void> {
     // Add verification logic
   }
 
-  private async runHealthChecks(appName: string, environment: string, checks: HealthCheck[]): Promise<void> {
+  private async runHealthChecks(
+    appName: string,
+    environment: string,
+    checks: HealthCheck[],
+  ): Promise<void> {
     // Add health check logic
   }
 
-  private async waitForSync(appName: string, timeout: number = 300000): Promise<void> {
+  private async waitForSync(
+    appName: string,
+    timeout: number = 300000,
+  ): Promise<void> {
     // Add sync waiting logic
   }
 }

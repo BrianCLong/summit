@@ -62,16 +62,18 @@ export class BuildExecutor {
       maxCpuPercent: 80,
       sandbox: true,
       cacheEnabled: true,
-      ...config
+      ...config,
     };
 
     this.cache = new CacheManager({
       localDir: '.maestro-cache',
       ttlDays: 7,
-      maxSizeMB: 2000
+      maxSizeMB: 2000,
     });
-    
-    console.log(`🏗️  Build executor initialized: ${this.config.maxWorkers} workers`);
+
+    console.log(
+      `🏗️  Build executor initialized: ${this.config.maxWorkers} workers`,
+    );
   }
 
   /**
@@ -80,7 +82,7 @@ export class BuildExecutor {
   addTask(task: BuildTask): void {
     this.taskQueue.push(task);
     this.dependencyGraph.set(task.id, task.dependencies);
-    
+
     // Track pending dependencies
     if (task.dependencies.length > 0) {
       this.pendingDependencies.set(task.id, new Set(task.dependencies));
@@ -92,21 +94,21 @@ export class BuildExecutor {
    */
   async execute(): Promise<Map<string, BuildResult>> {
     console.log(`🚀 Starting build execution: ${this.taskQueue.length} tasks`);
-    
+
     const startTime = performance.now();
-    
+
     // Initialize workers
     this.initializeWorkers();
-    
+
     // Start execution loop
     await this.executionLoop();
-    
+
     // Cleanup workers
     await this.shutdownWorkers();
-    
+
     const totalTime = Math.round(performance.now() - startTime);
     console.log(`✅ Build completed in ${totalTime}ms`);
-    
+
     this.printExecutionSummary();
     return this.completedTasks;
   }
@@ -116,8 +118,8 @@ export class BuildExecutor {
       const worker = new Worker(__filename, {
         workerData: {
           workerId: i,
-          config: this.config
-        }
+          config: this.config,
+        },
       });
 
       worker.on('message', (result: BuildResult) => {
@@ -134,43 +136,47 @@ export class BuildExecutor {
 
   private async executionLoop(): Promise<void> {
     const executionPromises: Promise<void>[] = [];
-    
+
     // Continue until all tasks complete
     while (this.completedTasks.size < this.taskQueue.length) {
       const readyTasks = this.getReadyTasks();
-      
+
       if (readyTasks.length === 0) {
         // Wait for running tasks to complete
         if (this.runningTasks.size > 0) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
           continue;
         } else {
           // Deadlock detection
-          const remaining = this.taskQueue.filter(t => !this.completedTasks.has(t.id));
-          throw new Error(`Deadlock detected! Remaining tasks: ${remaining.map(t => t.id).join(', ')}`);
+          const remaining = this.taskQueue.filter(
+            (t) => !this.completedTasks.has(t.id),
+          );
+          throw new Error(
+            `Deadlock detected! Remaining tasks: ${remaining.map((t) => t.id).join(', ')}`,
+          );
         }
       }
 
       // Dispatch tasks to available workers
       for (const task of readyTasks) {
         if (this.runningTasks.size >= this.config.maxWorkers) break;
-        
+
         const worker = this.getAvailableWorker();
         if (worker) {
           this.dispatchTask(task, worker);
         }
       }
-      
-      await new Promise(resolve => setTimeout(resolve, 50));
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
     }
   }
 
   private getReadyTasks(): BuildTask[] {
-    return this.taskQueue.filter(task => {
+    return this.taskQueue.filter((task) => {
       if (this.completedTasks.has(task.id) || this.runningTasks.has(task.id)) {
         return false;
       }
-      
+
       // Check if all dependencies are satisfied
       const pendingDeps = this.pendingDependencies.get(task.id);
       return !pendingDeps || pendingDeps.size === 0;
@@ -178,25 +184,27 @@ export class BuildExecutor {
   }
 
   private getAvailableWorker(): Worker | null {
-    return this.workers.find(worker => {
-      // Check if worker is currently processing a task
-      for (const [taskId, taskWorker] of this.runningTasks) {
-        if (taskWorker === worker) return false;
-      }
-      return true;
-    }) || null;
+    return (
+      this.workers.find((worker) => {
+        // Check if worker is currently processing a task
+        for (const [taskId, taskWorker] of this.runningTasks) {
+          if (taskWorker === worker) return false;
+        }
+        return true;
+      }) || null
+    );
   }
 
   private async dispatchTask(task: BuildTask, worker: Worker): Promise<void> {
     console.log(`🔄 Starting: ${task.name}`);
-    
+
     // Check cache first
     if (this.config.cacheEnabled) {
       const cacheKey = this.cache.generateCacheKey({
         sources: task.inputs,
         toolchain: task.metadata.toolchain,
         environment: task.metadata.environment,
-        command: task.command
+        command: task.command,
       });
 
       if (await this.cache.has(cacheKey)) {
@@ -207,7 +215,7 @@ export class BuildExecutor {
             success: true,
             duration: 50, // Fast cache hit
             cacheHit: true,
-            outputs: task.outputs
+            outputs: task.outputs,
           };
           this.handleTaskCompletion(result);
         }, 50);
@@ -216,18 +224,18 @@ export class BuildExecutor {
     }
 
     this.runningTasks.set(task.id, worker);
-    
+
     // Send task to worker
     worker.postMessage({
       type: 'execute',
-      task
+      task,
     });
   }
 
   private handleTaskCompletion(result: BuildResult): void {
     this.completedTasks.set(result.taskId, result);
     this.runningTasks.delete(result.taskId);
-    
+
     const status = result.success ? '✅' : '❌';
     const cache = result.cacheHit ? '📦' : '🔨';
     console.log(`${status} ${cache} ${result.taskId}: ${result.duration}ms`);
@@ -255,98 +263,111 @@ export class BuildExecutor {
 
   private async cacheTaskResult(result: BuildResult): Promise<void> {
     // Find the original task
-    const task = this.taskQueue.find(t => t.id === result.taskId);
+    const task = this.taskQueue.find((t) => t.id === result.taskId);
     if (!task) return;
 
     const cacheKey = this.cache.generateCacheKey({
       sources: task.inputs,
       toolchain: task.metadata.toolchain,
       environment: task.metadata.environment,
-      command: task.command
+      command: task.command,
     });
 
     // For now, create a placeholder artifact file
     // In real implementation, this would be the actual build output
-    const artifactPath = path.join('.maestro-cache', `${result.taskId}.artifact`);
+    const artifactPath = path.join(
+      '.maestro-cache',
+      `${result.taskId}.artifact`,
+    );
     await fs.writeFile(artifactPath, JSON.stringify(result.outputs));
 
     await this.cache.put(cacheKey, artifactPath, {
       inputs: task.inputs,
       toolchain: task.metadata.toolchain,
-      environment: task.metadata.environment
+      environment: task.metadata.environment,
     });
   }
 
   private async shutdownWorkers(): Promise<void> {
-    await Promise.all(this.workers.map(worker => worker.terminate()));
+    await Promise.all(this.workers.map((worker) => worker.terminate()));
     this.workers = [];
   }
 
   private printExecutionSummary(): void {
     const results = Array.from(this.completedTasks.values());
-    const successful = results.filter(r => r.success).length;
-    const cacheHits = results.filter(r => r.cacheHit).length;
+    const successful = results.filter((r) => r.success).length;
+    const cacheHits = results.filter((r) => r.cacheHit).length;
     const totalDuration = results.reduce((sum, r) => sum + r.duration, 0);
     const avgDuration = totalDuration / results.length;
 
     console.log('\n📊 Execution Summary');
     console.log('='.repeat(40));
     console.log(`Tasks completed: ${results.length}`);
-    console.log(`Success rate: ${(successful/results.length*100).toFixed(1)}%`);
-    console.log(`Cache hit rate: ${(cacheHits/results.length*100).toFixed(1)}%`);
+    console.log(
+      `Success rate: ${((successful / results.length) * 100).toFixed(1)}%`,
+    );
+    console.log(
+      `Cache hit rate: ${((cacheHits / results.length) * 100).toFixed(1)}%`,
+    );
     console.log(`Average duration: ${avgDuration.toFixed(0)}ms`);
     console.log(`Total build time: ${totalDuration}ms`);
-    
+
     // Show cache stats
     const cacheStats = this.cache.getStats();
     console.log(`Cache entries: ${cacheStats.entries}`);
-    console.log(`Cache size: ${(cacheStats.totalSize/1024/1024).toFixed(1)}MB`);
+    console.log(
+      `Cache size: ${(cacheStats.totalSize / 1024 / 1024).toFixed(1)}MB`,
+    );
   }
 }
 
 // Worker thread execution
 if (!isMainThread && parentPort) {
-  parentPort.on('message', async ({ type, task }: { type: string; task: BuildTask }) => {
-    if (type === 'execute') {
-      const result = await executeTaskInWorker(task);
-      parentPort!.postMessage(result);
-    }
-  });
+  parentPort.on(
+    'message',
+    async ({ type, task }: { type: string; task: BuildTask }) => {
+      if (type === 'execute') {
+        const result = await executeTaskInWorker(task);
+        parentPort!.postMessage(result);
+      }
+    },
+  );
 }
 
 async function executeTaskInWorker(task: BuildTask): Promise<BuildResult> {
   const startTime = performance.now();
-  
+
   try {
     // Simulate build execution with some realistic timing
     const baseDuration = task.metadata.estimatedDuration || 1000;
     const variance = Math.random() * 500; // Add some variance
     const simulatedDuration = baseDuration + variance;
-    
+
     // For demo purposes, simulate the build with setTimeout
     // In real implementation, this would execute the actual build command
-    await new Promise(resolve => setTimeout(resolve, Math.min(simulatedDuration, 5000)));
-    
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.min(simulatedDuration, 5000)),
+    );
+
     const duration = Math.round(performance.now() - startTime);
-    
+
     return {
       taskId: task.id,
       success: Math.random() > 0.05, // 95% success rate for demo
       duration,
       cacheHit: false,
-      outputs: task.outputs
+      outputs: task.outputs,
     };
-    
   } catch (error) {
     const duration = Math.round(performance.now() - startTime);
-    
+
     return {
       taskId: task.id,
       success: false,
       duration,
       cacheHit: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      outputs: []
+      outputs: [],
     };
   }
 }

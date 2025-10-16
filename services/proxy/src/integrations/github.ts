@@ -14,7 +14,10 @@ export async function fileIncident(
   return r.data.number;
 }
 
-export async function upsertRunReport(auditId: string, jsonl: string): Promise<void> {
+export async function upsertRunReport(
+  auditId: string,
+  jsonl: string,
+): Promise<void> {
   const path = `runs/${auditId}.jsonl`;
   await octo.repos.createOrUpdateFileContents({
     owner,

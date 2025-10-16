@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * IntelGraph Maestro Composer vNext+6: Real-time Insights Dashboard
- * 
+ *
  * Interactive dashboard for visualizing analytics, predictions, and recommendations
  * with real-time updates and customizable views.
- * 
+ *
  * @author IntelGraph Maestro Composer
  * @version 6.0.0
  */
@@ -79,11 +79,11 @@ class InsightsDashboard extends EventEmitter {
   private layouts: Map<string, DashboardLayout> = new Map();
   private visualizations: Map<string, InsightVisualization> = new Map();
   private activeFilters: Map<string, any> = new Map();
-  
+
   // Real-time data streams
   private dataStreams: Map<string, any> = new Map();
   private websocketConnections: Set<any> = new Set();
-  
+
   // Dashboard metrics
   private metrics = {
     totalViews: 0,
@@ -91,7 +91,7 @@ class InsightsDashboard extends EventEmitter {
     widgetsCreated: 0,
     insightsGenerated: 0,
     alertsTriggered: 0,
-    automatedActions: 0
+    automatedActions: 0,
   };
 
   constructor() {
@@ -108,7 +108,7 @@ class InsightsDashboard extends EventEmitter {
     const executiveDashboard = this.createExecutiveDashboard();
     this.layouts.set('executive', executiveDashboard);
 
-    // Developer Dashboard Layout  
+    // Developer Dashboard Layout
     const developerDashboard = this.createDeveloperDashboard();
     this.layouts.set('developer', developerDashboard);
 
@@ -116,7 +116,9 @@ class InsightsDashboard extends EventEmitter {
     const operationsDashboard = this.createOperationsDashboard();
     this.layouts.set('operations', operationsDashboard);
 
-    console.log(`📊 Initialized ${this.layouts.size} default dashboard layouts`);
+    console.log(
+      `📊 Initialized ${this.layouts.size} default dashboard layouts`,
+    );
   }
 
   /**
@@ -134,16 +136,16 @@ class InsightsDashboard extends EventEmitter {
           metric: 'success_rate',
           format: 'percentage',
           target: 95,
-          trend: true
+          trend: true,
         },
         data: {
           value: 94.7,
           trend: 2.3,
           target: 95,
-          status: 'warning'
+          status: 'warning',
         },
         refreshInterval: 30000,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         id: 'cost-trends',
@@ -155,10 +157,15 @@ class InsightsDashboard extends EventEmitter {
           chartType: 'line',
           series: [
             { name: 'Daily Cost', field: 'cost', color: '#3B82F6' },
-            { name: 'Target', field: 'target', color: '#EF4444', type: 'dashed' }
+            {
+              name: 'Target',
+              field: 'target',
+              color: '#EF4444',
+              type: 'dashed',
+            },
           ],
           timeRange: '30d',
-          yAxis: 'Cost ($)'
+          yAxis: 'Cost ($)',
         },
         data: {
           labels: this.generateDateLabels(30),
@@ -166,17 +173,17 @@ class InsightsDashboard extends EventEmitter {
             {
               name: 'Daily Cost',
               data: this.generateTrendData(30, 400, 50),
-              color: '#3B82F6'
+              color: '#3B82F6',
             },
             {
               name: 'Target',
               data: Array(30).fill(380),
-              color: '#EF4444'
-            }
-          ]
+              color: '#EF4444',
+            },
+          ],
         },
         refreshInterval: 300000,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         id: 'prediction-accuracy',
@@ -191,16 +198,16 @@ class InsightsDashboard extends EventEmitter {
           thresholds: [
             { value: 70, color: '#EF4444' },
             { value: 85, color: '#F59E0B' },
-            { value: 95, color: '#10B981' }
-          ]
+            { value: 95, color: '#10B981' },
+          ],
         },
         data: {
           value: 88.7,
           status: 'good',
-          trend: 1.2
+          trend: 1.2,
         },
         refreshInterval: 60000,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         id: 'top-insights',
@@ -211,7 +218,7 @@ class InsightsDashboard extends EventEmitter {
         config: {
           maxItems: 5,
           prioritize: 'impact',
-          categories: ['cost', 'performance', 'quality']
+          categories: ['cost', 'performance', 'quality'],
         },
         data: {
           recommendations: [
@@ -221,15 +228,15 @@ class InsightsDashboard extends EventEmitter {
               impact: 'high',
               category: 'performance',
               description: '30% build time reduction potential',
-              action: 'Enable parallel execution for test suites'
+              action: 'Enable parallel execution for test suites',
             },
             {
-              id: '2', 
+              id: '2',
               title: 'Implement distributed caching',
               impact: 'high',
               category: 'cost',
               description: '$1,847/month savings potential',
-              action: 'Deploy Redis cluster for build artifacts'
+              action: 'Deploy Redis cluster for build artifacts',
             },
             {
               id: '3',
@@ -237,13 +244,13 @@ class InsightsDashboard extends EventEmitter {
               impact: 'medium',
               category: 'cost',
               description: '15% infrastructure cost reduction',
-              action: 'Migrate to optimized instance types'
-            }
-          ]
+              action: 'Migrate to optimized instance types',
+            },
+          ],
         },
         refreshInterval: 900000,
-        lastUpdated: new Date().toISOString()
-      }
+        lastUpdated: new Date().toISOString(),
+      },
     ];
 
     return {
@@ -253,12 +260,12 @@ class InsightsDashboard extends EventEmitter {
       widgets,
       filters: {
         timeRange: '30d',
-        environment: 'production'
+        environment: 'production',
       },
       autoRefresh: true,
       refreshInterval: 300000,
       created: new Date().toISOString(),
-      updated: new Date().toISOString()
+      updated: new Date().toISOString(),
     };
   }
 
@@ -275,16 +282,16 @@ class InsightsDashboard extends EventEmitter {
         position: { x: 0, y: 0 },
         config: {
           personalizedView: true,
-          metrics: ['success_rate', 'avg_duration', 'tests_passed']
+          metrics: ['success_rate', 'avg_duration', 'tests_passed'],
         },
         data: {
           successRate: 92.3,
           avgDuration: 247000,
           testsPassedRate: 96.8,
-          totalBuilds: 156
+          totalBuilds: 156,
         },
         refreshInterval: 60000,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         id: 'build-timeline',
@@ -295,13 +302,13 @@ class InsightsDashboard extends EventEmitter {
         config: {
           maxItems: 20,
           showDetails: true,
-          colorByStatus: true
+          colorByStatus: true,
         },
         data: {
-          builds: this.generateBuildTimeline(20)
+          builds: this.generateBuildTimeline(20),
         },
         refreshInterval: 30000,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         id: 'test-coverage-trend',
@@ -311,22 +318,22 @@ class InsightsDashboard extends EventEmitter {
         position: { x: 0, y: 1 },
         config: {
           chartType: 'line',
-          series: [
-            { name: 'Coverage %', field: 'coverage', color: '#10B981' }
-          ],
+          series: [{ name: 'Coverage %', field: 'coverage', color: '#10B981' }],
           timeRange: '14d',
-          target: 80
+          target: 80,
         },
         data: {
           labels: this.generateDateLabels(14),
-          datasets: [{
-            name: 'Coverage %',
-            data: this.generateTrendData(14, 78, 5),
-            color: '#10B981'
-          }]
+          datasets: [
+            {
+              name: 'Coverage %',
+              data: this.generateTrendData(14, 78, 5),
+              color: '#10B981',
+            },
+          ],
         },
         refreshInterval: 3600000,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         id: 'code-quality-alerts',
@@ -336,7 +343,7 @@ class InsightsDashboard extends EventEmitter {
         position: { x: 1, y: 1 },
         config: {
           severity: ['warning', 'error'],
-          categories: ['complexity', 'coverage', 'duplication', 'security']
+          categories: ['complexity', 'coverage', 'duplication', 'security'],
         },
         data: {
           alerts: [
@@ -347,22 +354,22 @@ class InsightsDashboard extends EventEmitter {
               title: 'High cyclomatic complexity detected',
               file: 'src/components/DataProcessor.ts:127',
               message: 'Function complexity score: 15 (threshold: 10)',
-              action: 'Refactor function to reduce complexity'
+              action: 'Refactor function to reduce complexity',
             },
             {
               id: 'alert-2',
-              severity: 'warning', 
+              severity: 'warning',
               category: 'coverage',
               title: 'Low test coverage in module',
               file: 'src/utils/ValidationHelpers.ts',
               message: 'Coverage: 62% (target: 80%)',
-              action: 'Add unit tests for uncovered paths'
-            }
-          ]
+              action: 'Add unit tests for uncovered paths',
+            },
+          ],
         },
         refreshInterval: 300000,
-        lastUpdated: new Date().toISOString()
-      }
+        lastUpdated: new Date().toISOString(),
+      },
     ];
 
     return {
@@ -372,12 +379,12 @@ class InsightsDashboard extends EventEmitter {
       widgets,
       filters: {
         timeRange: '7d',
-        userId: 'current'
+        userId: 'current',
       },
       autoRefresh: true,
       refreshInterval: 60000,
       created: new Date().toISOString(),
-      updated: new Date().toISOString()
+      updated: new Date().toISOString(),
     };
   }
 
@@ -394,7 +401,12 @@ class InsightsDashboard extends EventEmitter {
         position: { x: 0, y: 0 },
         config: {
           aggregation: 'weighted_average',
-          components: ['build_success', 'performance', 'availability', 'security']
+          components: [
+            'build_success',
+            'performance',
+            'availability',
+            'security',
+          ],
         },
         data: {
           value: 94.2,
@@ -403,11 +415,11 @@ class InsightsDashboard extends EventEmitter {
             build_success: 94.7,
             performance: 91.3,
             availability: 99.1,
-            security: 97.8
-          }
+            security: 97.8,
+          },
         },
         refreshInterval: 30000,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         id: 'anomaly-heatmap',
@@ -419,13 +431,13 @@ class InsightsDashboard extends EventEmitter {
           chartType: 'heatmap',
           xAxis: 'Time',
           yAxis: 'Service',
-          colorScale: 'severity'
+          colorScale: 'severity',
         },
         data: {
-          heatmapData: this.generateAnomalyHeatmap()
+          heatmapData: this.generateAnomalyHeatmap(),
         },
         refreshInterval: 120000,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         id: 'resource-utilization',
@@ -438,20 +450,20 @@ class InsightsDashboard extends EventEmitter {
           series: [
             { name: 'CPU', field: 'cpu', color: '#3B82F6' },
             { name: 'Memory', field: 'memory', color: '#10B981' },
-            { name: 'Storage', field: 'storage', color: '#F59E0B' }
+            { name: 'Storage', field: 'storage', color: '#F59E0B' },
           ],
-          target: 80
+          target: 80,
         },
         data: {
           categories: ['Builder-1', 'Builder-2', 'Builder-3', 'Builder-4'],
           series: [
             { name: 'CPU', data: [67, 89, 45, 72] },
             { name: 'Memory', data: [54, 76, 38, 63] },
-            { name: 'Storage', data: [23, 34, 12, 28] }
-          ]
+            { name: 'Storage', data: [23, 34, 12, 28] },
+          ],
         },
         refreshInterval: 60000,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       },
       {
         id: 'incident-timeline',
@@ -462,7 +474,7 @@ class InsightsDashboard extends EventEmitter {
         config: {
           maxItems: 10,
           colorBySeverity: true,
-          showResolution: true
+          showResolution: true,
         },
         data: {
           incidents: [
@@ -473,7 +485,7 @@ class InsightsDashboard extends EventEmitter {
               title: 'Build queue backlog detected',
               status: 'resolved',
               resolution: 'Auto-scaled build capacity',
-              duration: '8m 23s'
+              duration: '8m 23s',
             },
             {
               id: 'inc-002',
@@ -482,13 +494,13 @@ class InsightsDashboard extends EventEmitter {
               title: 'Cache hit rate degradation',
               status: 'resolved',
               resolution: 'Cache warm-up triggered',
-              duration: '4m 12s'
-            }
-          ]
+              duration: '4m 12s',
+            },
+          ],
         },
         refreshInterval: 60000,
-        lastUpdated: new Date().toISOString()
-      }
+        lastUpdated: new Date().toISOString(),
+      },
     ];
 
     return {
@@ -498,12 +510,12 @@ class InsightsDashboard extends EventEmitter {
       widgets,
       filters: {
         timeRange: '24h',
-        environment: 'all'
+        environment: 'all',
       },
       autoRefresh: true,
       refreshInterval: 30000,
       created: new Date().toISOString(),
-      updated: new Date().toISOString()
+      updated: new Date().toISOString(),
     };
   }
 
@@ -528,16 +540,18 @@ class InsightsDashboard extends EventEmitter {
         rendering: {
           responsive: true,
           interactive: true,
-          exportable: true
-        }
+          exportable: true,
+        },
       },
       interactivity: {
         drillDown: true,
         filters: ['timeRange', 'environment', 'team'],
-        exports: ['png', 'svg', 'pdf', 'json']
+        exports: ['png', 'svg', 'pdf', 'json'],
       },
       insights: this.generateInsightsFromVisualization(config.type),
-      recommendations: this.generateRecommendationsFromVisualization(config.type)
+      recommendations: this.generateRecommendationsFromVisualization(
+        config.type,
+      ),
     };
 
     this.visualizations.set(visualization.id, visualization);
@@ -571,9 +585,11 @@ class InsightsDashboard extends EventEmitter {
   private updateWidgetData(): void {
     for (const [layoutId, layout] of this.layouts.entries()) {
       for (const widget of layout.widgets) {
-        if (widget.refreshInterval && 
-            Date.now() - new Date(widget.lastUpdated).getTime() > widget.refreshInterval) {
-          
+        if (
+          widget.refreshInterval &&
+          Date.now() - new Date(widget.lastUpdated).getTime() >
+            widget.refreshInterval
+        ) {
           // Update widget data based on type
           switch (widget.type) {
             case 'metric':
@@ -589,7 +605,7 @@ class InsightsDashboard extends EventEmitter {
               this.updateAlertWidget(widget);
               break;
           }
-          
+
           widget.lastUpdated = new Date().toISOString();
           this.widgets.set(widget.id, widget);
         }
@@ -608,19 +624,24 @@ class InsightsDashboard extends EventEmitter {
           value: Math.round(currentRate * 10) / 10,
           trend: (Math.random() - 0.5) * 4,
           target: 95,
-          status: currentRate >= 95 ? 'good' : currentRate >= 90 ? 'warning' : 'critical'
+          status:
+            currentRate >= 95
+              ? 'good'
+              : currentRate >= 90
+                ? 'warning'
+                : 'critical',
         };
         break;
-        
+
       case 'prediction-accuracy':
         const accuracy = 88.7 + (Math.random() - 0.5) * 3;
         widget.data = {
           value: Math.round(accuracy * 10) / 10,
           status: accuracy >= 85 ? 'good' : 'warning',
-          trend: (Math.random() - 0.5) * 2
+          trend: (Math.random() - 0.5) * 2,
         };
         break;
-        
+
       case 'system-health':
         const health = 94.2 + (Math.random() - 0.5) * 2;
         widget.data = {
@@ -630,8 +651,8 @@ class InsightsDashboard extends EventEmitter {
             build_success: 94.7 + (Math.random() - 0.5) * 2,
             performance: 91.3 + (Math.random() - 0.5) * 3,
             availability: 99.1 + (Math.random() - 0.5) * 0.5,
-            security: 97.8 + (Math.random() - 0.5) * 1
-          }
+            security: 97.8 + (Math.random() - 0.5) * 1,
+          },
         };
         break;
     }
@@ -650,10 +671,12 @@ class InsightsDashboard extends EventEmitter {
         widget.data.labels.push(new Date().toISOString().split('T')[0]);
         widget.data.labels.shift();
         break;
-        
+
       case 'test-coverage-trend':
         const newCoverage = 78 + (Math.random() - 0.5) * 10;
-        widget.data.datasets[0].data.push(Math.max(0, Math.min(100, newCoverage)));
+        widget.data.datasets[0].data.push(
+          Math.max(0, Math.min(100, newCoverage)),
+        );
         widget.data.datasets[0].data.shift();
         break;
     }
@@ -672,9 +695,9 @@ class InsightsDashboard extends EventEmitter {
         success: Math.random() > 0.1,
         branch: 'main',
         commit: crypto.randomBytes(4).toString('hex'),
-        author: 'developer-' + Math.floor(Math.random() * 5)
+        author: 'developer-' + Math.floor(Math.random() * 5),
       };
-      
+
       widget.data.builds.unshift(newBuild);
       widget.data.builds = widget.data.builds.slice(0, 20);
     }
@@ -684,17 +707,20 @@ class InsightsDashboard extends EventEmitter {
    * Update alert widget
    */
   private updateAlertWidget(widget: DashboardWidget): void {
-    if (Math.random() > 0.9) { // 10% chance of new alert
+    if (Math.random() > 0.9) {
+      // 10% chance of new alert
       const newAlert = {
         id: `alert-${crypto.randomBytes(4).toString('hex')}`,
         severity: Math.random() > 0.7 ? 'warning' : 'error',
-        category: ['complexity', 'coverage', 'duplication', 'security'][Math.floor(Math.random() * 4)],
+        category: ['complexity', 'coverage', 'duplication', 'security'][
+          Math.floor(Math.random() * 4)
+        ],
         title: 'New code quality issue detected',
         file: `src/components/Component${Math.floor(Math.random() * 10)}.ts`,
         message: 'Automated analysis detected potential issue',
-        action: 'Review and address the identified issue'
+        action: 'Review and address the identified issue',
       };
-      
+
       widget.data.alerts.unshift(newAlert);
       widget.data.alerts = widget.data.alerts.slice(0, 10);
     }
@@ -710,15 +736,19 @@ class InsightsDashboard extends EventEmitter {
         if (widget.type === 'metric' && widget.config.target) {
           const value = widget.data.value;
           const target = widget.config.target;
-          
-          if (Math.abs(value - target) > target * 0.1) { // 10% deviation
+
+          if (Math.abs(value - target) > target * 0.1) {
+            // 10% deviation
             this.triggerAlert({
               widgetId: widget.id,
-              severity: Math.abs(value - target) > target * 0.2 ? 'critical' : 'warning',
+              severity:
+                Math.abs(value - target) > target * 0.2
+                  ? 'critical'
+                  : 'warning',
               message: `${widget.title} is ${value > target ? 'above' : 'below'} target: ${value} vs ${target}`,
               value,
               target,
-              deviation: ((value - target) / target) * 100
+              deviation: ((value - target) / target) * 100,
             });
           }
         }
@@ -731,11 +761,11 @@ class InsightsDashboard extends EventEmitter {
    */
   private triggerAlert(alert: any): void {
     this.metrics.alertsTriggered++;
-    
+
     console.log(`🚨 DASHBOARD ALERT: ${alert.severity.toUpperCase()}`);
     console.log(`   Widget: ${alert.widgetId}`);
     console.log(`   Message: ${alert.message}`);
-    
+
     this.emit('dashboard-alert', alert);
   }
 
@@ -747,11 +777,11 @@ class InsightsDashboard extends EventEmitter {
       timestamp: new Date().toISOString(),
       type: 'dashboard-update',
       widgets: Array.from(this.widgets.values()),
-      metrics: this.metrics
+      metrics: this.metrics,
     };
-    
+
     // Simulate WebSocket broadcast
-    this.websocketConnections.forEach(connection => {
+    this.websocketConnections.forEach((connection) => {
       // connection.send(JSON.stringify(updatePayload));
     });
   }
@@ -761,12 +791,12 @@ class InsightsDashboard extends EventEmitter {
    */
   private async executeDataQuery(query: any): Promise<any> {
     // Simulate data query execution
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     return {
       rows: Math.floor(Math.random() * 1000 + 100),
       columns: query.fields || ['timestamp', 'value'],
-      data: this.generateMockQueryData(query)
+      data: this.generateMockQueryData(query),
     };
   }
 
@@ -778,31 +808,35 @@ class InsightsDashboard extends EventEmitter {
       trend: [
         'Build performance shows consistent improvement over the last 7 days',
         'Test coverage has increased by 12% this quarter',
-        'Cost optimization efforts are yielding positive results'
+        'Cost optimization efforts are yielding positive results',
       ],
       correlation: [
         'Strong correlation between code complexity and build failure rate',
         'Team size inversely correlates with deployment frequency',
-        'Cache hit rate directly impacts build duration'
+        'Cache hit rate directly impacts build duration',
       ],
       distribution: [
         '80% of builds complete within 5 minutes',
         'Most failures occur during integration testing phase',
-        'Peak build activity occurs between 2-4 PM'
+        'Peak build activity occurs between 2-4 PM',
       ],
       anomaly: [
         'Unusual spike in memory usage detected last Tuesday',
         'Build queue times exceeded normal range 3 times this week',
-        'Cache performance degraded significantly on weekend'
+        'Cache performance degraded significantly on weekend',
       ],
       prediction: [
         'Model predicts 15% increase in build volume next month',
         'Failure rate expected to decrease with recent improvements',
-        'Resource scaling will be needed by end of quarter'
-      ]
+        'Resource scaling will be needed by end of quarter',
+      ],
     };
-    
-    return insights[type as keyof typeof insights] || ['No specific insights available'];
+
+    return (
+      insights[type as keyof typeof insights] || [
+        'No specific insights available',
+      ]
+    );
   }
 
   /**
@@ -813,31 +847,35 @@ class InsightsDashboard extends EventEmitter {
       trend: [
         'Continue current optimization strategies',
         'Consider implementing automated performance monitoring',
-        'Schedule quarterly performance review'
+        'Schedule quarterly performance review',
       ],
       correlation: [
         'Implement complexity gates in CI/CD pipeline',
         'Provide team scaling guidelines',
-        'Optimize cache configuration for better hit rates'
+        'Optimize cache configuration for better hit rates',
       ],
       distribution: [
         'Focus optimization efforts on longest-running builds',
         'Investigate and address integration testing bottlenecks',
-        'Consider load balancing during peak hours'
+        'Consider load balancing during peak hours',
       ],
       anomaly: [
         'Investigate root cause of memory usage spike',
         'Implement queue monitoring and auto-scaling',
-        'Set up weekend maintenance windows'
+        'Set up weekend maintenance windows',
       ],
       prediction: [
         'Plan capacity expansion for anticipated growth',
         'Document and share successful improvement practices',
-        'Evaluate resource scaling automation options'
-      ]
+        'Evaluate resource scaling automation options',
+      ],
     };
-    
-    return recommendations[type as keyof typeof recommendations] || ['No specific recommendations available'];
+
+    return (
+      recommendations[type as keyof typeof recommendations] || [
+        'No specific recommendations available',
+      ]
+    );
   }
 
   /**
@@ -853,7 +891,11 @@ class InsightsDashboard extends EventEmitter {
     return labels;
   }
 
-  private generateTrendData(points: number, base: number, variance: number): number[] {
+  private generateTrendData(
+    points: number,
+    base: number,
+    variance: number,
+  ): number[] {
     const data = [];
     let current = base;
     for (let i = 0; i < points; i++) {
@@ -868,7 +910,7 @@ class InsightsDashboard extends EventEmitter {
     for (let i = 0; i < count; i++) {
       const date = new Date();
       date.setMinutes(date.getMinutes() - i * 15);
-      
+
       builds.push({
         id: `build-${crypto.randomBytes(4).toString('hex')}`,
         timestamp: date.toISOString(),
@@ -876,7 +918,7 @@ class InsightsDashboard extends EventEmitter {
         success: Math.random() > 0.15,
         branch: i % 3 === 0 ? 'main' : `feature/branch-${i}`,
         commit: crypto.randomBytes(4).toString('hex'),
-        author: `developer-${Math.floor(Math.random() * 5)}`
+        author: `developer-${Math.floor(Math.random() * 5)}`,
       });
     }
     return builds;
@@ -886,33 +928,33 @@ class InsightsDashboard extends EventEmitter {
     const services = ['Builder', 'Cache', 'Storage', 'Network', 'Security'];
     const timeSlots = 24;
     const heatmap = [];
-    
+
     for (let service of services) {
       for (let hour = 0; hour < timeSlots; hour++) {
         heatmap.push({
           service,
           hour,
           anomalies: Math.floor(Math.random() * 5),
-          severity: Math.random()
+          severity: Math.random(),
         });
       }
     }
-    
+
     return heatmap;
   }
 
   private generateMockQueryData(query: any): any[] {
     const rowCount = Math.floor(Math.random() * 100 + 20);
     const data = [];
-    
+
     for (let i = 0; i < rowCount; i++) {
       data.push({
         timestamp: new Date(Date.now() - i * 3600000).toISOString(),
         value: Math.random() * 100,
-        category: ['A', 'B', 'C'][Math.floor(Math.random() * 3)]
+        category: ['A', 'B', 'C'][Math.floor(Math.random() * 3)],
       });
     }
-    
+
     return data;
   }
 
@@ -930,17 +972,25 @@ class InsightsDashboard extends EventEmitter {
     return {
       timestamp: new Date().toISOString(),
       totalLayouts: this.layouts.size,
-      totalWidgets: Array.from(this.layouts.values()).reduce((sum, layout) => sum + layout.widgets.length, 0),
+      totalWidgets: Array.from(this.layouts.values()).reduce(
+        (sum, layout) => sum + layout.widgets.length,
+        0,
+      ),
       totalVisualizations: this.visualizations.size,
       metrics: this.metrics,
       activeLayouts: Array.from(this.layouts.keys()),
       recentActivity: {
         alertsTriggered: this.metrics.alertsTriggered,
         insightsGenerated: this.metrics.insightsGenerated,
-        activeUsers: this.metrics.activeUsers
-      }
+        activeUsers: this.metrics.activeUsers,
+      },
     };
   }
 }
 
-export { InsightsDashboard, type DashboardLayout, type DashboardWidget, type InsightVisualization };
+export {
+  InsightsDashboard,
+  type DashboardLayout,
+  type DashboardWidget,
+  type InsightVisualization,
+};

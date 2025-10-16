@@ -6,5 +6,5 @@ module.exports = {
   coverageDirectory: '<rootDir>/coverage',
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/'],
   moduleFileExtensions: ['ts', 'js', 'json'],
-  testMatch: ['**/*.test.ts']
+  testMatch: ['**/*.test.ts'],
 };

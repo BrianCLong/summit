@@ -21,19 +21,19 @@ export function createTesqPolicyHook(manifest: AllowlistManifest) {
   return function enforce(request: ToolInvocationRequest) {
     if (request.environment !== manifest.environment) {
       throw new AllowlistViolation(
-        `Manifest environment mismatch: expected ${manifest.environment}, received ${request.environment}`
+        `Manifest environment mismatch: expected ${manifest.environment}, received ${request.environment}`,
       );
     }
     const key = `${request.tool.toLowerCase()}@${request.version}`;
     if (!index.has(key)) {
       throw new AllowlistViolation(
-        `Tool ${request.tool}@${request.version} is not present in the allowlist`
+        `Tool ${request.tool}@${request.version} is not present in the allowlist`,
       );
     }
     return {
       tool: request.tool,
       version: request.version,
-      riskScore: index.get(key) ?? 0
+      riskScore: index.get(key) ?? 0,
     };
   };
 }

@@ -1,4 +1,8 @@
-import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  HeadObjectCommand,
+} from '@aws-sdk/client-s3';
 import { createHash } from 'crypto';
 import { pickBucket } from './buckets';
 
@@ -12,7 +16,9 @@ export async function putCAS(bytes: Buffer, bucketOverride?: string) {
     await s3.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
     return { digest, uri: `s3://${bucket}/${key}` };
   } catch {
-    await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: bytes }));
+    await s3.send(
+      new PutObjectCommand({ Bucket: bucket, Key: key, Body: bytes }),
+    );
     return { digest, uri: `s3://${bucket}/${key}` };
   }
 }

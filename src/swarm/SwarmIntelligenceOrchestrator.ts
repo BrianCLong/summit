@@ -3,7 +3,13 @@ import { EventEmitter } from 'events';
 export interface SwarmAgent {
   id: string;
   name: string;
-  type: 'cognitive' | 'analytical' | 'sensor' | 'executor' | 'coordinator' | 'specialist';
+  type:
+    | 'cognitive'
+    | 'analytical'
+    | 'sensor'
+    | 'executor'
+    | 'coordinator'
+    | 'specialist';
   capabilities: string[];
   status: 'active' | 'idle' | 'busy' | 'offline' | 'learning' | 'evolving';
   autonomyLevel: number;
@@ -64,7 +70,11 @@ export interface SwarmCluster {
   };
   governance: {
     consensusAlgorithm: string;
-    decisionMaking: 'democratic' | 'hierarchical' | 'meritocratic' | 'consensus';
+    decisionMaking:
+      | 'democratic'
+      | 'hierarchical'
+      | 'meritocratic'
+      | 'consensus';
     leaderSelection: 'elected' | 'performance-based' | 'rotating' | 'emergent';
     conflictResolution: string[];
   };
@@ -79,7 +89,13 @@ export interface SwarmCluster {
 export interface CognitiveTask {
   id: string;
   name: string;
-  type: 'analysis' | 'prediction' | 'optimization' | 'exploration' | 'synthesis' | 'learning';
+  type:
+    | 'analysis'
+    | 'prediction'
+    | 'optimization'
+    | 'exploration'
+    | 'synthesis'
+    | 'learning';
   complexity: number;
   priority: 'critical' | 'high' | 'medium' | 'low';
   requirements: {
@@ -125,7 +141,11 @@ export interface EmergentBehavior {
   name: string;
   description: string;
   clusterId: string;
-  type: 'collective-intelligence' | 'swarm-optimization' | 'adaptive-learning' | 'self-organization';
+  type:
+    | 'collective-intelligence'
+    | 'swarm-optimization'
+    | 'adaptive-learning'
+    | 'self-organization';
   strength: number;
   stability: number;
   beneficial: boolean;
@@ -186,9 +206,9 @@ export class SwarmCommunicationNetwork {
       latency: config.latency || 5,
       participants: [],
       messageHistory: [],
-      created: new Date()
+      created: new Date(),
     });
-    
+
     this.messageQueues.set(channelId, []);
     return channelId;
   }
@@ -204,7 +224,7 @@ export class SwarmCommunicationNetwork {
       type: message.type || 'broadcast',
       content: message,
       priority: message.priority || 'medium',
-      ttl: message.ttl || 3600
+      ttl: message.ttl || 3600,
     };
 
     const queue = this.messageQueues.get(channelId) || [];
@@ -214,7 +234,11 @@ export class SwarmCommunicationNetwork {
     channel.messageHistory.push(swarmMessage);
   }
 
-  propagateIntelligence(sourceAgent: string, intelligence: any, scope: 'cluster' | 'global'): void {
+  propagateIntelligence(
+    sourceAgent: string,
+    intelligence: any,
+    scope: 'cluster' | 'global',
+  ): void {
     const propagation = {
       id: `prop-${Date.now()}`,
       source: sourceAgent,
@@ -223,15 +247,19 @@ export class SwarmCommunicationNetwork {
       timestamp: new Date(),
       hops: 0,
       maxHops: scope === 'global' ? 10 : 5,
-      visited: [sourceAgent]
+      visited: [sourceAgent],
     };
 
     this.channels.forEach((channel) => {
       if (scope === 'global' || channel.participants.includes(sourceAgent)) {
-        this.broadcastMessage(channel.id, {
-          type: 'intelligence-propagation',
-          data: propagation
-        }, sourceAgent);
+        this.broadcastMessage(
+          channel.id,
+          {
+            type: 'intelligence-propagation',
+            data: propagation,
+          },
+          sourceAgent,
+        );
       }
     });
   }
@@ -244,24 +272,31 @@ export class SwarmCommunicationNetwork {
         votes: new Map(),
         threshold: 0.67,
         status: 'voting',
-        timeout: Date.now() + 30000
+        timeout: Date.now() + 30000,
       };
 
-      this.broadcastMessage(channelId, {
-        type: 'consensus-request',
-        data: consensus
-      }, 'swarm-coordinator');
+      this.broadcastMessage(
+        channelId,
+        {
+          type: 'consensus-request',
+          data: consensus,
+        },
+        'swarm-coordinator',
+      );
 
       setTimeout(() => {
         const totalVotes = consensus.votes.size;
-        const positiveVotes = Array.from(consensus.votes.values()).filter(v => v === 'yes').length;
-        const consensusReached = (positiveVotes / totalVotes) >= consensus.threshold;
-        
+        const positiveVotes = Array.from(consensus.votes.values()).filter(
+          (v) => v === 'yes',
+        ).length;
+        const consensusReached =
+          positiveVotes / totalVotes >= consensus.threshold;
+
         resolve({
           consensus: consensusReached,
           votes: totalVotes,
           support: positiveVotes / totalVotes,
-          result: consensusReached ? 'accepted' : 'rejected'
+          result: consensusReached ? 'accepted' : 'rejected',
         });
       }, 1000);
     });
@@ -276,13 +311,13 @@ export class CollectiveIntelligenceEngine {
   aggregateIntelligence(agents: SwarmAgent[], domain: string): any {
     const collectiveKnowledge = {
       domain,
-      contributors: agents.map(a => a.id),
+      contributors: agents.map((a) => a.id),
       aggregationMethod: 'weighted-consensus',
       knowledgeBase: this.synthesizeKnowledge(agents, domain),
       emergentInsights: this.discoverEmergentInsights(agents, domain),
       collectiveIQ: this.calculateCollectiveIQ(agents),
       diversityIndex: this.calculateDiversityIndex(agents),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     return collectiveKnowledge;
@@ -290,50 +325,71 @@ export class CollectiveIntelligenceEngine {
 
   private synthesizeKnowledge(agents: SwarmAgent[], domain: string): any {
     return {
-      concepts: agents.flatMap(a => a.specialization).filter((c, i, arr) => arr.indexOf(c) === i),
-      experiences: agents.reduce((sum, a) => sum + a.experience.tasksCompleted, 0),
-      skills: agents.flatMap(a => a.experience.skillsAcquired).filter((s, i, arr) => arr.indexOf(s) === i),
-      adaptations: agents.reduce((sum, a) => sum + a.experience.evolutionCycles, 0)
+      concepts: agents
+        .flatMap((a) => a.specialization)
+        .filter((c, i, arr) => arr.indexOf(c) === i),
+      experiences: agents.reduce(
+        (sum, a) => sum + a.experience.tasksCompleted,
+        0,
+      ),
+      skills: agents
+        .flatMap((a) => a.experience.skillsAcquired)
+        .filter((s, i, arr) => arr.indexOf(s) === i),
+      adaptations: agents.reduce(
+        (sum, a) => sum + a.experience.evolutionCycles,
+        0,
+      ),
     };
   }
 
-  private discoverEmergentInsights(agents: SwarmAgent[], domain: string): any[] {
+  private discoverEmergentInsights(
+    agents: SwarmAgent[],
+    domain: string,
+  ): any[] {
     return [
       {
         type: 'pattern-emergence',
         description: 'Collective behavior patterns discovered',
         strength: Math.random() * 0.4 + 0.6,
-        novelty: Math.random() * 0.5 + 0.5
+        novelty: Math.random() * 0.5 + 0.5,
       },
       {
         type: 'knowledge-synthesis',
         description: 'Cross-agent knowledge fusion detected',
         strength: Math.random() * 0.3 + 0.7,
-        novelty: Math.random() * 0.4 + 0.6
+        novelty: Math.random() * 0.4 + 0.6,
       },
       {
         type: 'capability-amplification',
         description: 'Collective capabilities exceed individual sum',
         strength: Math.random() * 0.5 + 0.5,
-        novelty: Math.random() * 0.3 + 0.7
-      }
+        novelty: Math.random() * 0.3 + 0.7,
+      },
     ];
   }
 
   private calculateCollectiveIQ(agents: SwarmAgent[]): number {
-    const individualIQ = agents.reduce((sum, a) => sum + (a.performance.accuracy * 100), 0) / agents.length;
-    const cooperationBonus = agents.reduce((sum, a) => sum + a.cooperationIndex, 0) / agents.length * 20;
+    const individualIQ =
+      agents.reduce((sum, a) => sum + a.performance.accuracy * 100, 0) /
+      agents.length;
+    const cooperationBonus =
+      (agents.reduce((sum, a) => sum + a.cooperationIndex, 0) / agents.length) *
+      20;
     const diversityBonus = this.calculateDiversityIndex(agents) * 30;
-    
+
     return Math.min(200, individualIQ + cooperationBonus + diversityBonus);
   }
 
   private calculateDiversityIndex(agents: SwarmAgent[]): number {
-    const uniqueTypes = new Set(agents.map(a => a.type)).size;
-    const uniqueSpecializations = new Set(agents.flatMap(a => a.specialization)).size;
+    const uniqueTypes = new Set(agents.map((a) => a.type)).size;
+    const uniqueSpecializations = new Set(
+      agents.flatMap((a) => a.specialization),
+    ).size;
     const maxTypes = 6; // cognitive, analytical, sensor, executor, coordinator, specialist
-    
-    return (uniqueTypes / maxTypes + uniqueSpecializations / (agents.length * 3)) / 2;
+
+    return (
+      (uniqueTypes / maxTypes + uniqueSpecializations / (agents.length * 3)) / 2
+    );
   }
 
   evolveCollectiveIntelligence(clusterId: string, performance: any): any {
@@ -345,7 +401,7 @@ export class CollectiveIntelligenceEngine {
       selections: this.selectForEvolution(performance),
       crossovers: this.performCrossovers(performance),
       adaptations: this.generateAdaptations(performance),
-      emergentProperties: this.identifyEmergentProperties(performance)
+      emergentProperties: this.identifyEmergentProperties(performance),
     };
 
     return evolution;
@@ -356,7 +412,7 @@ export class CollectiveIntelligenceEngine {
       'enhanced-cooperation-protocols',
       'adaptive-task-allocation',
       'dynamic-specialization-shifts',
-      'emergent-leadership-patterns'
+      'emergent-leadership-patterns',
     ];
   }
 
@@ -365,7 +421,7 @@ export class CollectiveIntelligenceEngine {
       'high-performance-agents',
       'strong-collaborators',
       'adaptive-learners',
-      'innovative-contributors'
+      'innovative-contributors',
     ];
   }
 
@@ -374,7 +430,7 @@ export class CollectiveIntelligenceEngine {
       'knowledge-sharing-protocols',
       'skill-transfer-mechanisms',
       'behavior-pattern-exchange',
-      'experience-synthesis'
+      'experience-synthesis',
     ];
   }
 
@@ -383,7 +439,7 @@ export class CollectiveIntelligenceEngine {
       'context-aware-behavior',
       'dynamic-role-adaptation',
       'emergent-specialization',
-      'collective-memory-enhancement'
+      'collective-memory-enhancement',
     ];
   }
 
@@ -392,7 +448,7 @@ export class CollectiveIntelligenceEngine {
       'swarm-intelligence-amplification',
       'collective-decision-optimization',
       'distributed-problem-solving',
-      'adaptive-system-resilience'
+      'adaptive-system-resilience',
     ];
   }
 }
@@ -401,16 +457,23 @@ export class AutonomousTaskAllocator {
   private allocationHistory: Map<string, any[]> = new Map();
   private performanceMetrics: Map<string, any> = new Map();
 
-  allocateTask(task: CognitiveTask, availableAgents: SwarmAgent[]): Map<string, string[]> {
+  allocateTask(
+    task: CognitiveTask,
+    availableAgents: SwarmAgent[],
+  ): Map<string, string[]> {
     const allocation = new Map<string, string[]>();
-    
+
     // Analyze task requirements
     const suitableAgents = this.filterSuitableAgents(task, availableAgents);
     const optimizedTeam = this.optimizeTeamComposition(task, suitableAgents);
-    
+
     // Allocate subtasks
-    task.decomposition.subtasks.forEach(subtask => {
-      const bestAgent = this.selectBestAgentForSubtask(subtask, optimizedTeam, task);
+    task.decomposition.subtasks.forEach((subtask) => {
+      const bestAgent = this.selectBestAgentForSubtask(
+        subtask,
+        optimizedTeam,
+        task,
+      );
       if (bestAgent) {
         if (!allocation.has(bestAgent.id)) {
           allocation.set(bestAgent.id, []);
@@ -421,33 +484,43 @@ export class AutonomousTaskAllocator {
 
     // Record allocation decision
     this.recordAllocation(task.id, allocation, optimizedTeam);
-    
+
     return allocation;
   }
 
-  private filterSuitableAgents(task: CognitiveTask, agents: SwarmAgent[]): SwarmAgent[] {
-    return agents.filter(agent => {
+  private filterSuitableAgents(
+    task: CognitiveTask,
+    agents: SwarmAgent[],
+  ): SwarmAgent[] {
+    return agents.filter((agent) => {
       const hasRequiredType = task.requirements.agentTypes.includes(agent.type);
-      const hasRequiredSkills = task.requirements.skillsRequired.some(skill => 
-        agent.capabilities.includes(skill) || agent.specialization.includes(skill)
+      const hasRequiredSkills = task.requirements.skillsRequired.some(
+        (skill) =>
+          agent.capabilities.includes(skill) ||
+          agent.specialization.includes(skill),
       );
       const isAvailable = agent.status === 'active' || agent.status === 'idle';
       const meetsPerformance = agent.performance.taskCompletionRate >= 0.7;
-      
-      return hasRequiredType && hasRequiredSkills && isAvailable && meetsPerformance;
+
+      return (
+        hasRequiredType && hasRequiredSkills && isAvailable && meetsPerformance
+      );
     });
   }
 
-  private optimizeTeamComposition(task: CognitiveTask, agents: SwarmAgent[]): SwarmAgent[] {
+  private optimizeTeamComposition(
+    task: CognitiveTask,
+    agents: SwarmAgent[],
+  ): SwarmAgent[] {
     const teamSize = Math.min(
       Math.max(task.requirements.minAgents, Math.ceil(agents.length * 0.3)),
-      Math.min(task.requirements.maxAgents, agents.length)
+      Math.min(task.requirements.maxAgents, agents.length),
     );
 
     // Sort agents by suitability score
-    const scoredAgents = agents.map(agent => ({
+    const scoredAgents = agents.map((agent) => ({
       agent,
-      score: this.calculateAgentSuitability(agent, task)
+      score: this.calculateAgentSuitability(agent, task),
     }));
 
     scoredAgents.sort((a, b) => b.score - a.score);
@@ -458,9 +531,10 @@ export class AutonomousTaskAllocator {
 
     for (const { agent } of scoredAgents) {
       if (selectedAgents.length >= teamSize) break;
-      
+
       const typeCount = typeDistribution.get(agent.type) || 0;
-      if (typeCount < Math.ceil(teamSize / 6)) { // Ensure diversity
+      if (typeCount < Math.ceil(teamSize / 6)) {
+        // Ensure diversity
         selectedAgents.push(agent);
         typeDistribution.set(agent.type, typeCount + 1);
       }
@@ -469,31 +543,44 @@ export class AutonomousTaskAllocator {
     return selectedAgents;
   }
 
-  private calculateAgentSuitability(agent: SwarmAgent, task: CognitiveTask): number {
+  private calculateAgentSuitability(
+    agent: SwarmAgent,
+    task: CognitiveTask,
+  ): number {
     let score = 0;
-    
+
     // Performance metrics
     score += agent.performance.accuracy * 0.3;
     score += agent.performance.taskCompletionRate * 0.3;
     score += agent.performance.collaborationScore * 0.2;
-    
+
     // Skill match
-    const skillMatch = task.requirements.skillsRequired.filter(skill =>
-      agent.capabilities.includes(skill) || agent.specialization.includes(skill)
-    ).length / task.requirements.skillsRequired.length;
+    const skillMatch =
+      task.requirements.skillsRequired.filter(
+        (skill) =>
+          agent.capabilities.includes(skill) ||
+          agent.specialization.includes(skill),
+      ).length / task.requirements.skillsRequired.length;
     score += skillMatch * 0.2;
-    
+
     // Autonomy and learning
-    score += (agent.autonomyLevel * agent.learningRate) * 0.1;
-    
+    score += agent.autonomyLevel * agent.learningRate * 0.1;
+
     // Experience relevance
-    const experienceBonus = Math.min(agent.experience.tasksCompleted / 1000, 0.1);
+    const experienceBonus = Math.min(
+      agent.experience.tasksCompleted / 1000,
+      0.1,
+    );
     score += experienceBonus;
-    
+
     return score;
   }
 
-  private selectBestAgentForSubtask(subtask: CognitiveSubtask, team: SwarmAgent[], task: CognitiveTask): SwarmAgent | null {
+  private selectBestAgentForSubtask(
+    subtask: CognitiveSubtask,
+    team: SwarmAgent[],
+    task: CognitiveTask,
+  ): SwarmAgent | null {
     if (team.length === 0) return null;
 
     let bestAgent = team[0];
@@ -510,17 +597,33 @@ export class AutonomousTaskAllocator {
     return bestAgent;
   }
 
-  private calculateSubtaskFit(agent: SwarmAgent, subtask: CognitiveSubtask, task: CognitiveTask): number {
-    return agent.performance.accuracy * agent.autonomyLevel * (1 + agent.cooperationIndex);
+  private calculateSubtaskFit(
+    agent: SwarmAgent,
+    subtask: CognitiveSubtask,
+    task: CognitiveTask,
+  ): number {
+    return (
+      agent.performance.accuracy *
+      agent.autonomyLevel *
+      (1 + agent.cooperationIndex)
+    );
   }
 
-  private recordAllocation(taskId: string, allocation: Map<string, string[]>, team: SwarmAgent[]): void {
+  private recordAllocation(
+    taskId: string,
+    allocation: Map<string, string[]>,
+    team: SwarmAgent[],
+  ): void {
     const record = {
       taskId,
       timestamp: new Date(),
       allocation: Object.fromEntries(allocation),
-      teamComposition: team.map(a => ({ id: a.id, type: a.type, specialization: a.specialization })),
-      reasoning: 'autonomous-optimization-based-allocation'
+      teamComposition: team.map((a) => ({
+        id: a.id,
+        type: a.type,
+        specialization: a.specialization,
+      })),
+      reasoning: 'autonomous-optimization-based-allocation',
     };
 
     if (!this.allocationHistory.has(taskId)) {
@@ -536,19 +639,19 @@ export class AutonomousTaskAllocator {
         'dynamic-team-sizing',
         'skill-based-matching',
         'diversity-optimization',
-        'performance-prediction'
+        'performance-prediction',
       ],
       improvements: {
         accuracyGain: Math.random() * 0.15 + 0.05,
         efficiencyGain: Math.random() * 0.2 + 0.1,
-        adaptabilityGain: Math.random() * 0.1 + 0.05
+        adaptabilityGain: Math.random() * 0.1 + 0.05,
       },
       recommendations: [
         'Increase agent specialization diversity',
         'Implement cross-training programs',
         'Enhance inter-agent communication protocols',
-        'Deploy adaptive learning mechanisms'
-      ]
+        'Deploy adaptive learning mechanisms',
+      ],
     };
   }
 }
@@ -575,21 +678,48 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
 
   private initializeSwarmAgents(): void {
     const agentTemplates = [
-      { type: 'cognitive', specialization: ['reasoning', 'analysis', 'synthesis'], count: 20 },
-      { type: 'analytical', specialization: ['data-mining', 'pattern-recognition', 'statistics'], count: 15 },
-      { type: 'sensor', specialization: ['data-collection', 'monitoring', 'detection'], count: 25 },
-      { type: 'executor', specialization: ['task-execution', 'implementation', 'optimization'], count: 18 },
-      { type: 'coordinator', specialization: ['orchestration', 'planning', 'resource-management'], count: 12 },
-      { type: 'specialist', specialization: ['domain-expertise', 'innovation', 'problem-solving'], count: 10 }
+      {
+        type: 'cognitive',
+        specialization: ['reasoning', 'analysis', 'synthesis'],
+        count: 20,
+      },
+      {
+        type: 'analytical',
+        specialization: ['data-mining', 'pattern-recognition', 'statistics'],
+        count: 15,
+      },
+      {
+        type: 'sensor',
+        specialization: ['data-collection', 'monitoring', 'detection'],
+        count: 25,
+      },
+      {
+        type: 'executor',
+        specialization: ['task-execution', 'implementation', 'optimization'],
+        count: 18,
+      },
+      {
+        type: 'coordinator',
+        specialization: ['orchestration', 'planning', 'resource-management'],
+        count: 12,
+      },
+      {
+        type: 'specialist',
+        specialization: ['domain-expertise', 'innovation', 'problem-solving'],
+        count: 10,
+      },
     ];
 
-    agentTemplates.forEach(template => {
+    agentTemplates.forEach((template) => {
       for (let i = 0; i < template.count; i++) {
         const agent: SwarmAgent = {
           id: `agent-${template.type}-${i + 1}`,
           name: `${template.type.charAt(0).toUpperCase() + template.type.slice(1)} Agent ${i + 1}`,
           type: template.type as any,
-          capabilities: this.generateCapabilities(template.type, template.specialization),
+          capabilities: this.generateCapabilities(
+            template.type,
+            template.specialization,
+          ),
           status: Math.random() > 0.1 ? 'active' : 'idle',
           autonomyLevel: Math.random() * 0.4 + 0.6,
           learningRate: Math.random() * 0.3 + 0.2,
@@ -598,34 +728,34 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
           location: {
             type: 'virtual',
             region: this.getRandomRegion(),
-            networkAddress: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`
+            networkAddress: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
           },
           resources: {
             processingPower: Math.random() * 80 + 20,
             memory: `${Math.floor(Math.random() * 16) + 4}GB`,
             storage: `${Math.floor(Math.random() * 500) + 100}GB`,
             bandwidth: `${Math.floor(Math.random() * 900) + 100}Mbps`,
-            energy: Math.random() * 80 + 20
+            energy: Math.random() * 80 + 20,
           },
           performance: {
             taskCompletionRate: Math.random() * 0.25 + 0.75,
             accuracy: Math.random() * 0.15 + 0.85,
             responseTime: Math.random() * 100 + 50,
             collaborationScore: Math.random() * 0.3 + 0.7,
-            adaptabilityIndex: Math.random() * 0.4 + 0.6
+            adaptabilityIndex: Math.random() * 0.4 + 0.6,
           },
           relationships: {
             collaborators: [],
             mentors: [],
             apprentices: [],
-            competitors: []
+            competitors: [],
           },
           experience: {
             tasksCompleted: Math.floor(Math.random() * 1000),
             hoursActive: Math.floor(Math.random() * 10000),
             skillsAcquired: this.generateSkills(),
-            evolutionCycles: Math.floor(Math.random() * 50)
-          }
+            evolutionCycles: Math.floor(Math.random() * 50),
+          },
         };
 
         this.agents.set(agent.id, agent);
@@ -633,55 +763,138 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
     });
   }
 
-  private generateCapabilities(type: string, specialization: string[]): string[] {
-    const baseCapabilities = ['communication', 'learning', 'adaptation', 'collaboration'];
+  private generateCapabilities(
+    type: string,
+    specialization: string[],
+  ): string[] {
+    const baseCapabilities = [
+      'communication',
+      'learning',
+      'adaptation',
+      'collaboration',
+    ];
     const typeSpecific = {
-      cognitive: ['reasoning', 'abstract-thinking', 'decision-making', 'problem-solving'],
-      analytical: ['data-analysis', 'pattern-matching', 'statistical-modeling', 'trend-analysis'],
-      sensor: ['data-acquisition', 'signal-processing', 'anomaly-detection', 'monitoring'],
-      executor: ['task-automation', 'process-optimization', 'resource-utilization', 'implementation'],
-      coordinator: ['resource-allocation', 'workflow-management', 'conflict-resolution', 'planning'],
-      specialist: ['domain-knowledge', 'expert-analysis', 'innovation', 'quality-assurance']
+      cognitive: [
+        'reasoning',
+        'abstract-thinking',
+        'decision-making',
+        'problem-solving',
+      ],
+      analytical: [
+        'data-analysis',
+        'pattern-matching',
+        'statistical-modeling',
+        'trend-analysis',
+      ],
+      sensor: [
+        'data-acquisition',
+        'signal-processing',
+        'anomaly-detection',
+        'monitoring',
+      ],
+      executor: [
+        'task-automation',
+        'process-optimization',
+        'resource-utilization',
+        'implementation',
+      ],
+      coordinator: [
+        'resource-allocation',
+        'workflow-management',
+        'conflict-resolution',
+        'planning',
+      ],
+      specialist: [
+        'domain-knowledge',
+        'expert-analysis',
+        'innovation',
+        'quality-assurance',
+      ],
     };
 
-    return [...baseCapabilities, ...(typeSpecific[type as keyof typeof typeSpecific] || []), ...specialization];
+    return [
+      ...baseCapabilities,
+      ...(typeSpecific[type as keyof typeof typeSpecific] || []),
+      ...specialization,
+    ];
   }
 
   private generateSkills(): string[] {
     const skillPool = [
-      'machine-learning', 'natural-language-processing', 'computer-vision', 'robotics',
-      'data-science', 'cybersecurity', 'quantum-computing', 'distributed-systems',
-      'optimization', 'simulation', 'modeling', 'visualization'
+      'machine-learning',
+      'natural-language-processing',
+      'computer-vision',
+      'robotics',
+      'data-science',
+      'cybersecurity',
+      'quantum-computing',
+      'distributed-systems',
+      'optimization',
+      'simulation',
+      'modeling',
+      'visualization',
     ];
-    
+
     const numSkills = Math.floor(Math.random() * 6) + 3;
     return skillPool.sort(() => Math.random() - 0.5).slice(0, numSkills);
   }
 
   private getRandomRegion(): string {
-    const regions = ['north-america', 'europe', 'asia-pacific', 'south-america', 'africa', 'oceania'];
+    const regions = [
+      'north-america',
+      'europe',
+      'asia-pacific',
+      'south-america',
+      'africa',
+      'oceania',
+    ];
     return regions[Math.floor(Math.random() * regions.length)];
   }
 
   private initializeSwarmClusters(): void {
     const clusterConfigs = [
-      { name: 'Analytics Cluster', purpose: 'Data analysis and intelligence extraction', types: ['analytical', 'cognitive'], size: 12 },
-      { name: 'Sensor Network', purpose: 'Environmental monitoring and data collection', types: ['sensor', 'coordinator'], size: 15 },
-      { name: 'Execution Swarm', purpose: 'Task implementation and optimization', types: ['executor', 'specialist'], size: 10 },
-      { name: 'Cognitive Collective', purpose: 'Complex reasoning and decision making', types: ['cognitive', 'specialist', 'coordinator'], size: 18 },
-      { name: 'Adaptive Learning Group', purpose: 'Continuous learning and evolution', types: ['cognitive', 'analytical', 'specialist'], size: 14 }
+      {
+        name: 'Analytics Cluster',
+        purpose: 'Data analysis and intelligence extraction',
+        types: ['analytical', 'cognitive'],
+        size: 12,
+      },
+      {
+        name: 'Sensor Network',
+        purpose: 'Environmental monitoring and data collection',
+        types: ['sensor', 'coordinator'],
+        size: 15,
+      },
+      {
+        name: 'Execution Swarm',
+        purpose: 'Task implementation and optimization',
+        types: ['executor', 'specialist'],
+        size: 10,
+      },
+      {
+        name: 'Cognitive Collective',
+        purpose: 'Complex reasoning and decision making',
+        types: ['cognitive', 'specialist', 'coordinator'],
+        size: 18,
+      },
+      {
+        name: 'Adaptive Learning Group',
+        purpose: 'Continuous learning and evolution',
+        types: ['cognitive', 'analytical', 'specialist'],
+        size: 14,
+      },
     ];
 
     clusterConfigs.forEach((config, index) => {
       const availableAgents = Array.from(this.agents.values())
-        .filter(agent => config.types.includes(agent.type))
+        .filter((agent) => config.types.includes(agent.type))
         .slice(0, config.size);
 
       const cluster: SwarmCluster = {
         id: `cluster-${index + 1}`,
         name: config.name,
         purpose: config.purpose,
-        agents: availableAgents.map(a => a.id),
+        agents: availableAgents.map((a) => a.id),
         emergentBehaviors: [],
         collectiveIntelligence: Math.random() * 30 + 70,
         cohesionLevel: Math.random() * 0.3 + 0.7,
@@ -693,35 +906,48 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
           frequency: 10 + Math.random() * 40,
           bandwidth: '10Gbps',
           latency: Math.random() * 10 + 5,
-          encryption: true
+          encryption: true,
         },
         governance: {
           consensusAlgorithm: 'weighted-voting',
           decisionMaking: 'consensus',
           leaderSelection: 'performance-based',
-          conflictResolution: ['negotiation', 'arbitration', 'voting']
+          conflictResolution: ['negotiation', 'arbitration', 'voting'],
         },
         objectives: {
           primary: [config.purpose],
-          secondary: ['knowledge-sharing', 'collective-learning', 'adaptive-improvement'],
-          constraints: ['resource-limits', 'time-constraints', 'quality-thresholds'],
+          secondary: [
+            'knowledge-sharing',
+            'collective-learning',
+            'adaptive-improvement',
+          ],
+          constraints: [
+            'resource-limits',
+            'time-constraints',
+            'quality-thresholds',
+          ],
           successMetrics: new Map([
             ['task-completion-rate', 0.9],
             ['collective-accuracy', 0.85],
             ['adaptation-speed', 0.8],
-            ['innovation-index', 0.7]
-          ])
-        }
+            ['innovation-index', 0.7],
+          ]),
+        },
       };
 
       this.clusters.set(cluster.id, cluster);
-      
+
       // Create communication channel for cluster
-      this.communicationNetwork.createChannel(cluster.id, cluster.communication);
+      this.communicationNetwork.createChannel(
+        cluster.id,
+        cluster.communication,
+      );
     });
   }
 
-  async createCognitiveTask(taskDefinition: Partial<CognitiveTask>): Promise<string> {
+  async createCognitiveTask(
+    taskDefinition: Partial<CognitiveTask>,
+  ): Promise<string> {
     const task: CognitiveTask = {
       id: `task-${Date.now()}`,
       name: taskDefinition.name || 'Unnamed Task',
@@ -729,29 +955,36 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
       complexity: taskDefinition.complexity || Math.random() * 5 + 1,
       priority: taskDefinition.priority || 'medium',
       requirements: {
-        agentTypes: taskDefinition.requirements?.agentTypes || ['cognitive', 'analytical'],
+        agentTypes: taskDefinition.requirements?.agentTypes || [
+          'cognitive',
+          'analytical',
+        ],
         minAgents: taskDefinition.requirements?.minAgents || 3,
         maxAgents: taskDefinition.requirements?.maxAgents || 10,
-        skillsRequired: taskDefinition.requirements?.skillsRequired || ['analysis', 'reasoning'],
-        resourceRequirements: taskDefinition.requirements?.resourceRequirements || {}
+        skillsRequired: taskDefinition.requirements?.skillsRequired || [
+          'analysis',
+          'reasoning',
+        ],
+        resourceRequirements:
+          taskDefinition.requirements?.resourceRequirements || {},
       },
       decomposition: {
         subtasks: this.generateSubtasks(taskDefinition),
         dependencies: new Map(),
         parallelizable: true,
-        coordination: 'distributed'
+        coordination: 'distributed',
       },
       timeConstraints: {
         deadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
         estimatedDuration: Math.random() * 7200 + 1800,
-        criticalPath: []
+        criticalPath: [],
       },
       qualityMetrics: {
         accuracyTarget: 0.9,
         completenessThreshold: 0.95,
         innovationIndex: 0.7,
-        reliabilityScore: 0.85
-      }
+        reliabilityScore: 0.85,
+      },
     };
 
     this.tasks.set(task.id, task);
@@ -759,7 +992,9 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
     return task.id;
   }
 
-  private generateSubtasks(taskDefinition: Partial<CognitiveTask>): CognitiveSubtask[] {
+  private generateSubtasks(
+    taskDefinition: Partial<CognitiveTask>,
+  ): CognitiveSubtask[] {
     const subtaskCount = Math.floor(Math.random() * 8) + 3;
     const subtasks: CognitiveSubtask[] = [];
 
@@ -770,7 +1005,7 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
         status: 'pending',
         complexity: Math.random() * 3 + 1,
         estimatedEffort: Math.random() * 300 + 60,
-        dependencies: i > 0 ? [`subtask-${i}`] : []
+        dependencies: i > 0 ? [`subtask-${i}`] : [],
       });
     }
 
@@ -787,17 +1022,26 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
 
     // Select optimal cluster for task
     const cluster = this.selectOptimalCluster(task);
-    const availableAgents = cluster.agents.map(id => this.agents.get(id)!).filter(a => a);
+    const availableAgents = cluster.agents
+      .map((id) => this.agents.get(id)!)
+      .filter((a) => a);
 
     // Allocate task to agents
     const allocation = this.taskAllocator.allocateTask(task, availableAgents);
-    
+
     // Execute task with swarm coordination
-    const results = await this.coordinateSwarmExecution(task, allocation, cluster);
-    
+    const results = await this.coordinateSwarmExecution(
+      task,
+      allocation,
+      cluster,
+    );
+
     // Collect and synthesize results
-    const synthesis = this.collectiveIntelligence.aggregateIntelligence(availableAgents, task.type);
-    
+    const synthesis = this.collectiveIntelligence.aggregateIntelligence(
+      availableAgents,
+      task.type,
+    );
+
     const finalResult = {
       taskId,
       cluster: cluster.id,
@@ -806,7 +1050,7 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
       synthesis,
       emergentBehaviors: this.detectEmergentBehaviors(cluster.id),
       performance: this.calculateSwarmPerformance(cluster, results),
-      evolution: this.evolveSwarmCapabilities(cluster, results)
+      evolution: this.evolveSwarmCapabilities(cluster, results),
     };
 
     this.emit('swarm-execution-completed', finalResult);
@@ -828,24 +1072,34 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
     return bestCluster;
   }
 
-  private calculateClusterFitness(cluster: SwarmCluster, task: CognitiveTask): number {
-    const agents = cluster.agents.map(id => this.agents.get(id)!).filter(a => a);
-    
+  private calculateClusterFitness(
+    cluster: SwarmCluster,
+    task: CognitiveTask,
+  ): number {
+    const agents = cluster.agents
+      .map((id) => this.agents.get(id)!)
+      .filter((a) => a);
+
     let score = 0;
-    score += cluster.collectiveIntelligence / 100 * 0.3;
+    score += (cluster.collectiveIntelligence / 100) * 0.3;
     score += cluster.adaptabilityScore * 0.2;
     score += cluster.cohesionLevel * 0.2;
-    
+
     // Agent type match
-    const typeMatch = task.requirements.agentTypes.filter(type =>
-      agents.some(agent => agent.type === type)
-    ).length / task.requirements.agentTypes.length;
+    const typeMatch =
+      task.requirements.agentTypes.filter((type) =>
+        agents.some((agent) => agent.type === type),
+      ).length / task.requirements.agentTypes.length;
     score += typeMatch * 0.3;
 
     return score;
   }
 
-  private async coordinateSwarmExecution(task: CognitiveTask, allocation: Map<string, string[]>, cluster: SwarmCluster): Promise<any> {
+  private async coordinateSwarmExecution(
+    task: CognitiveTask,
+    allocation: Map<string, string[]>,
+    cluster: SwarmCluster,
+  ): Promise<any> {
     const executionResults = new Map();
 
     // Simulate distributed execution
@@ -854,26 +1108,35 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
       if (!agent) continue;
 
       for (const subtaskId of subtaskIds) {
-        const subtask = task.decomposition.subtasks.find(st => st.id === subtaskId);
+        const subtask = task.decomposition.subtasks.find(
+          (st) => st.id === subtaskId,
+        );
         if (!subtask) continue;
 
         // Simulate subtask execution
         const result = await this.executeSubtask(subtask, agent, cluster);
         executionResults.set(subtaskId, result);
-        
+
         // Update agent experience
         agent.experience.tasksCompleted++;
-        agent.performance.taskCompletionRate = Math.min(1, agent.performance.taskCompletionRate + 0.01);
+        agent.performance.taskCompletionRate = Math.min(
+          1,
+          agent.performance.taskCompletionRate + 0.01,
+        );
       }
     }
 
     return Object.fromEntries(executionResults);
   }
 
-  private async executeSubtask(subtask: CognitiveSubtask, agent: SwarmAgent, cluster: SwarmCluster): Promise<any> {
+  private async executeSubtask(
+    subtask: CognitiveSubtask,
+    agent: SwarmAgent,
+    cluster: SwarmCluster,
+  ): Promise<any> {
     return new Promise((resolve) => {
       const executionTime = Math.random() * 1000 + 200;
-      
+
       setTimeout(() => {
         const result = {
           subtaskId: subtask.id,
@@ -884,15 +1147,15 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
           resources: {
             processingUsed: Math.random() * 50 + 10,
             memoryUsed: Math.random() * 30 + 5,
-            energyConsumed: Math.random() * 20 + 5
+            energyConsumed: Math.random() * 20 + 5,
           },
           insights: [
             'Pattern discovered in data subset',
             'Optimization opportunity identified',
-            'Anomaly detected in processing'
+            'Anomaly detected in processing',
           ],
           collaborations: Math.floor(Math.random() * 3),
-          innovations: Math.random() > 0.8 ? ['novel-approach-applied'] : []
+          innovations: Math.random() > 0.8 ? ['novel-approach-applied'] : [],
         };
 
         resolve(result);
@@ -915,26 +1178,35 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
         stability: Math.random() * 0.3 + 0.7,
         beneficial: true,
         conditions: {
-          triggers: ['complex-problem-encountered', 'individual-agent-limitation'],
-          requirements: ['sufficient-agent-diversity', 'communication-bandwidth'],
-          inhibitors: ['resource-competition', 'conflicting-objectives']
+          triggers: [
+            'complex-problem-encountered',
+            'individual-agent-limitation',
+          ],
+          requirements: [
+            'sufficient-agent-diversity',
+            'communication-bandwidth',
+          ],
+          inhibitors: ['resource-competition', 'conflicting-objectives'],
         },
         effects: {
           performance: Math.random() * 0.3 + 0.2,
           efficiency: Math.random() * 0.2 + 0.1,
           innovation: Math.random() * 0.4 + 0.3,
-          resilience: Math.random() * 0.2 + 0.2
+          resilience: Math.random() * 0.2 + 0.2,
         },
         evolution: {
           generations: Math.floor(Math.random() * 10) + 1,
           mutations: ['enhanced-coordination', 'specialized-roles'],
           selections: ['high-performance-coalitions', 'stable-partnerships'],
-          adaptations: ['dynamic-role-assignment', 'context-sensitive-formation']
-        }
-      }
+          adaptations: [
+            'dynamic-role-assignment',
+            'context-sensitive-formation',
+          ],
+        },
+      },
     ];
 
-    behaviors.forEach(behavior => {
+    behaviors.forEach((behavior) => {
       this.behaviors.set(behavior.id, behavior);
     });
 
@@ -942,8 +1214,10 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
   }
 
   private calculateSwarmPerformance(cluster: SwarmCluster, results: any): any {
-    const agents = cluster.agents.map(id => this.agents.get(id)!).filter(a => a);
-    
+    const agents = cluster.agents
+      .map((id) => this.agents.get(id)!)
+      .filter((a) => a);
+
     return {
       overallScore: Math.random() * 20 + 80,
       efficiency: Math.random() * 0.2 + 0.8,
@@ -954,97 +1228,119 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
       emergentIntelligence: cluster.collectiveIntelligence + Math.random() * 5,
       resourceUtilization: Math.random() * 0.2 + 0.7,
       scalability: Math.random() * 0.3 + 0.7,
-      resilience: Math.random() * 0.2 + 0.8
+      resilience: Math.random() * 0.2 + 0.8,
     };
   }
 
   private evolveSwarmCapabilities(cluster: SwarmCluster, results: any): any {
     this.evolutionCycles++;
-    
-    const evolution = this.collectiveIntelligence.evolveCollectiveIntelligence(cluster.id, {
-      generation: this.evolutionCycles,
-      overallScore: Math.random() * 20 + 80
-    });
+
+    const evolution = this.collectiveIntelligence.evolveCollectiveIntelligence(
+      cluster.id,
+      {
+        generation: this.evolutionCycles,
+        overallScore: Math.random() * 20 + 80,
+      },
+    );
 
     // Apply evolution to cluster
     cluster.collectiveIntelligence += Math.random() * 5;
-    cluster.adaptabilityScore = Math.min(1, cluster.adaptabilityScore + Math.random() * 0.1);
-    
+    cluster.adaptabilityScore = Math.min(
+      1,
+      cluster.adaptabilityScore + Math.random() * 0.1,
+    );
+
     return evolution;
   }
 
   getSwarmStatus(): any {
-    const activeAgents = Array.from(this.agents.values()).filter(a => a.status === 'active');
+    const activeAgents = Array.from(this.agents.values()).filter(
+      (a) => a.status === 'active',
+    );
     const clusters = Array.from(this.clusters.values());
-    
+
     return {
       agents: {
         total: this.agents.size,
         active: activeAgents.length,
         byType: this.getAgentsByType(),
-        averageAutonomy: activeAgents.reduce((sum, a) => sum + a.autonomyLevel, 0) / activeAgents.length,
-        averageCooperation: activeAgents.reduce((sum, a) => sum + a.cooperationIndex, 0) / activeAgents.length
+        averageAutonomy:
+          activeAgents.reduce((sum, a) => sum + a.autonomyLevel, 0) /
+          activeAgents.length,
+        averageCooperation:
+          activeAgents.reduce((sum, a) => sum + a.cooperationIndex, 0) /
+          activeAgents.length,
       },
       clusters: {
         total: this.clusters.size,
-        averageIntelligence: clusters.reduce((sum, c) => sum + c.collectiveIntelligence, 0) / clusters.length,
-        averageCohesion: clusters.reduce((sum, c) => sum + c.cohesionLevel, 0) / clusters.length,
-        averageAdaptability: clusters.reduce((sum, c) => sum + c.adaptabilityScore, 0) / clusters.length
+        averageIntelligence:
+          clusters.reduce((sum, c) => sum + c.collectiveIntelligence, 0) /
+          clusters.length,
+        averageCohesion:
+          clusters.reduce((sum, c) => sum + c.cohesionLevel, 0) /
+          clusters.length,
+        averageAdaptability:
+          clusters.reduce((sum, c) => sum + c.adaptabilityScore, 0) /
+          clusters.length,
       },
       tasks: {
         active: this.tasks.size,
         completed: this.evolutionCycles * 3,
-        success_rate: '94.7%'
+        success_rate: '94.7%',
       },
       emergentBehaviors: {
         detected: this.behaviors.size,
-        beneficial: Array.from(this.behaviors.values()).filter(b => b.beneficial).length,
-        evolution: this.evolutionCycles
+        beneficial: Array.from(this.behaviors.values()).filter(
+          (b) => b.beneficial,
+        ).length,
+        evolution: this.evolutionCycles,
       },
       systemMetrics: {
-        swarmIntelligence: clusters.reduce((sum, c) => sum + c.collectiveIntelligence, 0) / clusters.length,
+        swarmIntelligence:
+          clusters.reduce((sum, c) => sum + c.collectiveIntelligence, 0) /
+          clusters.length,
         distributedCognition: 'optimal',
         autonomousCapability: 'advanced',
-        collectiveLearning: 'active'
+        collectiveLearning: 'active',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
   private getAgentsByType(): Record<string, number> {
     const byType: Record<string, number> = {};
-    
+
     for (const agent of this.agents.values()) {
       byType[agent.type] = (byType[agent.type] || 0) + 1;
     }
-    
+
     return byType;
   }
 
   async simulateSwarmEvolution(generations: number): Promise<any> {
     const evolutionResults = [];
-    
+
     for (let gen = 0; gen < generations; gen++) {
       // Create test tasks
       const taskId = await this.createCognitiveTask({
         name: `Evolution Test Gen ${gen + 1}`,
         type: 'optimization',
-        complexity: Math.random() * 3 + 2
+        complexity: Math.random() * 3 + 2,
       });
-      
+
       // Execute with current swarm
       const result = await this.executeSwarmTask(taskId);
       evolutionResults.push({
         generation: gen + 1,
         performance: result.performance,
         emergentBehaviors: result.emergentBehaviors.length,
-        collectiveIntelligence: result.synthesis.collectiveIQ
+        collectiveIntelligence: result.synthesis.collectiveIQ,
       });
-      
+
       // Clean up
       this.tasks.delete(taskId);
     }
-    
+
     return {
       generations,
       evolutionPath: evolutionResults,
@@ -1052,8 +1348,8 @@ export class SwarmIntelligenceOrchestrator extends EventEmitter {
       improvements: {
         intelligenceGain: Math.random() * 20 + 10,
         efficiencyGain: Math.random() * 15 + 5,
-        adaptabilityGain: Math.random() * 25 + 15
-      }
+        adaptabilityGain: Math.random() * 25 + 15,
+      },
     };
   }
 }

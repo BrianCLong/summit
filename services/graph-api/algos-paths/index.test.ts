@@ -1,12 +1,45 @@
-import { PathEdge, shortestPath, kShortestPaths, constrainedPaths } from './index';
+import {
+  PathEdge,
+  shortestPath,
+  kShortestPaths,
+  constrainedPaths,
+} from './index';
 
 describe('Pathfinding Suite', () => {
   const edges: PathEdge[] = [
-    { from: 'A', to: 'B', weight: 1, policy: 'allow', territory: 'US', time: 1 },
-    { from: 'B', to: 'C', weight: 1, policy: 'allow', territory: 'US', time: 2 },
+    {
+      from: 'A',
+      to: 'B',
+      weight: 1,
+      policy: 'allow',
+      territory: 'US',
+      time: 1,
+    },
+    {
+      from: 'B',
+      to: 'C',
+      weight: 1,
+      policy: 'allow',
+      territory: 'US',
+      time: 2,
+    },
     { from: 'A', to: 'C', weight: 5, policy: 'deny', territory: 'EU', time: 3 },
-    { from: 'C', to: 'D', weight: 1, policy: 'allow', territory: 'US', time: 4 },
-    { from: 'B', to: 'D', weight: 2, policy: 'allow', territory: 'US', time: 5 },
+    {
+      from: 'C',
+      to: 'D',
+      weight: 1,
+      policy: 'allow',
+      territory: 'US',
+      time: 4,
+    },
+    {
+      from: 'B',
+      to: 'D',
+      weight: 2,
+      policy: 'allow',
+      territory: 'US',
+      time: 5,
+    },
   ];
 
   test('finds shortest path', () => {

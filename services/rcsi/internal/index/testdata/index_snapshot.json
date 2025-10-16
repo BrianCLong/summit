@@ -3,80 +3,47 @@
   "documents": [
     {
       "id": "doc-001",
-      "tokens": [
-        "privacy",
-        "policy",
-        "rtbf"
-      ],
-      "vector": [
-        0.12,
-        0.34,
-        0.56
-      ],
+      "tokens": ["privacy", "policy", "rtbf"],
+      "vector": [0.12, 0.34, 0.56],
       "updatedAt": "2024-01-01T00:00:00Z"
     },
     {
       "id": "doc-002",
-      "tokens": [
-        "user",
-        "request"
-      ],
-      "vector": [
-        0.91,
-        0.17,
-        0.38
-      ],
+      "tokens": ["user", "request"],
+      "vector": [0.91, 0.17, 0.38],
       "updatedAt": "2024-01-01T01:00:00Z"
     }
   ],
   "inverted": [
     {
       "term": "policy",
-      "documents": [
-        "doc-001"
-      ]
+      "documents": ["doc-001"]
     },
     {
       "term": "privacy",
-      "documents": [
-        "doc-001"
-      ]
+      "documents": ["doc-001"]
     },
     {
       "term": "request",
-      "documents": [
-        "doc-002"
-      ]
+      "documents": ["doc-002"]
     },
     {
       "term": "rtbf",
-      "documents": [
-        "doc-001"
-      ]
+      "documents": ["doc-001"]
     },
     {
       "term": "user",
-      "documents": [
-        "doc-002"
-      ]
+      "documents": ["doc-002"]
     }
   ],
   "vectors": [
     {
       "documentId": "doc-001",
-      "vector": [
-        0.12,
-        0.34,
-        0.56
-      ]
+      "vector": [0.12, 0.34, 0.56]
     },
     {
       "documentId": "doc-002",
-      "vector": [
-        0.91,
-        0.17,
-        0.38
-      ]
+      "vector": [0.91, 0.17, 0.38]
     }
   ],
   "documentTombstones": [

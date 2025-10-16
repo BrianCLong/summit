@@ -20,7 +20,14 @@ export interface Metric {
 export interface MetricAggregation {
   metric: string;
   timeWindow: number; // milliseconds
-  aggregationType: 'sum' | 'avg' | 'count' | 'min' | 'max' | 'percentile' | 'rate';
+  aggregationType:
+    | 'sum'
+    | 'avg'
+    | 'count'
+    | 'min'
+    | 'max'
+    | 'percentile'
+    | 'rate';
   percentile?: number; // for percentile aggregations
   groupBy?: string[]; // label keys to group by
 }
@@ -42,7 +49,14 @@ export interface Dashboard {
 export interface DashboardPanel {
   id: string;
   title: string;
-  type: 'graph' | 'stat' | 'table' | 'heatmap' | 'gauge' | 'bargraph' | 'piechart';
+  type:
+    | 'graph'
+    | 'stat'
+    | 'table'
+    | 'heatmap'
+    | 'gauge'
+    | 'bargraph'
+    | 'piechart';
   position: {
     x: number;
     y: number;
@@ -120,7 +134,7 @@ export interface AlertRule {
 export interface MetricsStorage {
   retention: {
     raw: number; // days
-    hourly: number; // days  
+    hourly: number; // days
     daily: number; // days
     monthly: number; // months
   };
@@ -164,22 +178,22 @@ export class MetricsAggregator extends EventEmitter {
     const fullMetric: Metric = {
       id: uuidv4(),
       timestamp: new Date(),
-      ...metric
+      ...metric,
     };
 
     // Store metric
     if (!this.metrics.has(metric.name)) {
       this.metrics.set(metric.name, []);
     }
-    
+
     this.metrics.get(metric.name)!.push(fullMetric);
-    
+
     // Trigger real-time aggregations
     this.processRealTimeAggregations(fullMetric);
-    
+
     // Check alerts
     this.alertManager.checkAlerts(fullMetric);
-    
+
     this.emit('metric_recorded', fullMetric);
   }
 
@@ -188,86 +202,99 @@ export class MetricsAggregator extends EventEmitter {
    */
   recordBatch(metrics: Array<Omit<Metric, 'id' | 'timestamp'>>): void {
     const timestamp = new Date();
-    
+
     for (const metric of metrics) {
       this.record({ ...metric });
     }
-    
+
     this.emit('batch_recorded', { count: metrics.length, timestamp });
   }
 
   /**
    * Increment a counter metric
    */
-  increment(name: string, value: number = 1, labels: Record<string, string> = {}): void {
+  increment(
+    name: string,
+    value: number = 1,
+    labels: Record<string, string> = {},
+  ): void {
     this.record({
       name,
       type: 'counter',
       value,
-      labels
+      labels,
     });
   }
 
   /**
    * Set a gauge metric
    */
-  gauge(name: string, value: number, labels: Record<string, string> = {}): void {
+  gauge(
+    name: string,
+    value: number,
+    labels: Record<string, string> = {},
+  ): void {
     this.record({
       name,
       type: 'gauge',
       value,
-      labels
+      labels,
     });
   }
 
   /**
    * Record a histogram metric
    */
-  histogram(name: string, value: number, labels: Record<string, string> = {}): void {
+  histogram(
+    name: string,
+    value: number,
+    labels: Record<string, string> = {},
+  ): void {
     this.record({
       name,
       type: 'histogram',
       value,
-      labels
+      labels,
     });
   }
 
   /**
    * Time an operation and record the duration
    */
-  time<T>(name: string, operation: () => Promise<T>, labels: Record<string, string> = {}): Promise<T> {
+  time<T>(
+    name: string,
+    operation: () => Promise<T>,
+    labels: Record<string, string> = {},
+  ): Promise<T> {
     const start = Date.now();
-    
+
     return operation().then(
-      result => {
+      (result) => {
         this.record({
           name,
           type: 'timer',
           value: Date.now() - start,
           labels,
-          unit: 'ms'
+          unit: 'ms',
         });
         return result;
       },
-      error => {
+      (error) => {
         this.record({
           name: `${name}_error`,
           type: 'counter',
           value: 1,
-          labels: { ...labels, error: error.message }
+          labels: { ...labels, error: error.message },
         });
         throw error;
-      }
+      },
     );
   }
 
   /**
    * Create a metric aggregation rule
    */
-  createAggregation(
-    name: string,
-    aggregation: MetricAggregation
-  ): void {
+  createAggregation(name: string, aggregation: MetricAggregation): void {
     this.aggregations.set(name, aggregation);
     this.emit('aggregation_created', { name, aggregation });
   }
@@ -279,7 +306,7 @@ export class MetricsAggregator extends EventEmitter {
     expression: string,
     startTime: Date,
     endTime: Date,
-    step?: number
+    step?: number,
   ): Promise<any> {
     return this.queryEngine.execute(expression, startTime, endTime, step);
   }
@@ -291,12 +318,12 @@ export class MetricsAggregator extends EventEmitter {
     const dashboardId = uuidv4();
     const fullDashboard: Dashboard = {
       id: dashboardId,
-      ...dashboard
+      ...dashboard,
     };
-    
+
     this.dashboards.set(dashboardId, fullDashboard);
     this.emit('dashboard_created', fullDashboard);
-    
+
     return dashboardId;
   }
 
@@ -308,10 +335,10 @@ export class MetricsAggregator extends EventEmitter {
     if (!dashboard) {
       throw new Error(`Dashboard ${dashboardId} not found`);
     }
-    
+
     const updatedDashboard = { ...dashboard, ...updates };
     this.dashboards.set(dashboardId, updatedDashboard);
-    
+
     this.emit('dashboard_updated', updatedDashboard);
   }
 
@@ -325,34 +352,34 @@ export class MetricsAggregator extends EventEmitter {
     }
 
     const panelData = await Promise.all(
-      dashboard.panels.map(async panel => {
+      dashboard.panels.map(async (panel) => {
         const queries = await Promise.all(
-          panel.queries.map(async query => {
+          panel.queries.map(async (query) => {
             const results = await this.query(
               query.expression,
               new Date(dashboard.timeRange.from),
-              new Date(dashboard.timeRange.to)
+              new Date(dashboard.timeRange.to),
             );
             return {
               refId: query.refId,
-              results
+              results,
             };
-          })
+          }),
         );
-        
+
         return {
           id: panel.id,
           title: panel.title,
           type: panel.type,
-          data: queries
+          data: queries,
         };
-      })
+      }),
     );
 
     return {
       dashboard: dashboard,
       data: panelData,
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
   }
 
@@ -376,29 +403,32 @@ export class MetricsAggregator extends EventEmitter {
   importDashboard(dashboard: Dashboard): string {
     const dashboardId = dashboard.id || uuidv4();
     const importedDashboard = { ...dashboard, id: dashboardId };
-    
+
     this.dashboards.set(dashboardId, importedDashboard);
     this.emit('dashboard_imported', importedDashboard);
-    
+
     return dashboardId;
   }
 
   /**
    * Get metric statistics
    */
-  getMetricStats(metricName: string, timeRange: { start: Date; end: Date }): any {
+  getMetricStats(
+    metricName: string,
+    timeRange: { start: Date; end: Date },
+  ): any {
     const metricData = this.metrics.get(metricName) || [];
     const filteredData = metricData.filter(
-      m => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end
+      (m) => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end,
     );
 
     if (filteredData.length === 0) {
       return null;
     }
 
-    const values = filteredData.map(m => m.value);
+    const values = filteredData.map((m) => m.value);
     const sortedValues = values.sort((a, b) => a - b);
-    
+
     return {
       count: filteredData.length,
       sum: values.reduce((a, b) => a + b, 0),
@@ -408,7 +438,7 @@ export class MetricsAggregator extends EventEmitter {
       median: sortedValues[Math.floor(sortedValues.length / 2)],
       p95: sortedValues[Math.floor(sortedValues.length * 0.95)],
       p99: sortedValues[Math.floor(sortedValues.length * 0.99)],
-      stddev: this.calculateStandardDeviation(values)
+      stddev: this.calculateStandardDeviation(values),
     };
   }
 
@@ -417,11 +447,12 @@ export class MetricsAggregator extends EventEmitter {
    */
   getSystemHealth(): any {
     const totalMetrics = Array.from(this.metrics.values()).reduce(
-      (sum, metrics) => sum + metrics.length, 0
+      (sum, metrics) => sum + metrics.length,
+      0,
     );
-    
+
     const memoryUsage = process.memoryUsage();
-    
+
     return {
       totalMetrics,
       uniqueMetricNames: this.metrics.size,
@@ -432,7 +463,7 @@ export class MetricsAggregator extends EventEmitter {
         heapUsed: memoryUsage.heapUsed / 1024 / 1024, // MB
         heapTotal: memoryUsage.heapTotal / 1024 / 1024, // MB
       },
-      uptime: process.uptime()
+      uptime: process.uptime(),
     };
   }
 
@@ -454,30 +485,30 @@ export class MetricsAggregator extends EventEmitter {
   private processAggregation(
     name: string,
     aggregation: MetricAggregation,
-    metric: Metric
+    metric: Metric,
   ): void {
     // Get metrics within the time window
     const now = new Date();
     const windowStart = new Date(now.getTime() - aggregation.timeWindow);
-    
+
     const metricData = this.metrics.get(aggregation.metric) || [];
     const windowData = metricData.filter(
-      m => m.timestamp >= windowStart && m.timestamp <= now
+      (m) => m.timestamp >= windowStart && m.timestamp <= now,
     );
 
     if (windowData.length === 0) return;
 
     // Group by labels if specified
-    const groupedData = aggregation.groupBy 
+    const groupedData = aggregation.groupBy
       ? this.groupByLabels(windowData, aggregation.groupBy)
-      : { 'default': windowData };
+      : { default: windowData };
 
     // Calculate aggregation for each group
     for (const [groupKey, groupData] of Object.entries(groupedData)) {
       const aggregatedValue = this.calculateAggregatedValue(
         groupData as Metric[],
         aggregation.aggregationType,
-        aggregation.percentile
+        aggregation.percentile,
       );
 
       // Create aggregated metric
@@ -490,8 +521,8 @@ export class MetricsAggregator extends EventEmitter {
         labels: {
           aggregation: name,
           group: groupKey,
-          window: `${aggregation.timeWindow}ms`
-        }
+          window: `${aggregation.timeWindow}ms`,
+        },
       };
 
       // Store aggregated metric
@@ -504,21 +535,21 @@ export class MetricsAggregator extends EventEmitter {
    */
   private groupByLabels(
     metrics: Metric[],
-    labelKeys: string[]
+    labelKeys: string[],
   ): Record<string, Metric[]> {
     const groups: Record<string, Metric[]> = {};
-    
+
     for (const metric of metrics) {
       const groupKey = labelKeys
-        .map(key => `${key}=${metric.labels[key] || 'unknown'}`)
+        .map((key) => `${key}=${metric.labels[key] || 'unknown'}`)
         .join(',');
-      
+
       if (!groups[groupKey]) {
         groups[groupKey] = [];
       }
       groups[groupKey].push(metric);
     }
-    
+
     return groups;
   }
 
@@ -528,10 +559,10 @@ export class MetricsAggregator extends EventEmitter {
   private calculateAggregatedValue(
     metrics: Metric[],
     aggregationType: string,
-    percentile?: number
+    percentile?: number,
   ): number {
-    const values = metrics.map(m => m.value);
-    
+    const values = metrics.map((m) => m.value);
+
     switch (aggregationType) {
       case 'sum':
         return values.reduce((a, b) => a + b, 0);
@@ -544,14 +575,17 @@ export class MetricsAggregator extends EventEmitter {
       case 'max':
         return Math.max(...values);
       case 'percentile':
-        if (percentile === undefined) throw new Error('Percentile value required');
+        if (percentile === undefined)
+          throw new Error('Percentile value required');
         const sorted = values.sort((a, b) => a - b);
         const index = Math.floor((percentile / 100) * sorted.length);
         return sorted[index] || 0;
       case 'rate':
         // Calculate rate per second
-        const timeSpan = (metrics[metrics.length - 1].timestamp.getTime() - 
-                         metrics[0].timestamp.getTime()) / 1000;
+        const timeSpan =
+          (metrics[metrics.length - 1].timestamp.getTime() -
+            metrics[0].timestamp.getTime()) /
+          1000;
         return timeSpan > 0 ? values.length / timeSpan : 0;
       default:
         return 0;
@@ -563,8 +597,9 @@ export class MetricsAggregator extends EventEmitter {
    */
   private calculateStandardDeviation(values: number[]): number {
     const avg = values.reduce((a, b) => a + b, 0) / values.length;
-    const squareDiffs = values.map(value => Math.pow(value - avg, 2));
-    const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / values.length;
+    const squareDiffs = values.map((value) => Math.pow(value - avg, 2));
+    const avgSquareDiff =
+      squareDiffs.reduce((a, b) => a + b, 0) / values.length;
     return Math.sqrt(avgSquareDiff);
   }
 
@@ -586,9 +621,12 @@ export class MetricsAggregator extends EventEmitter {
    */
   private setupRetentionTasks(): void {
     // Run retention cleanup daily
-    setInterval(() => {
-      this.performRetentionCleanup();
-    }, 24 * 60 * 60 * 1000); // 24 hours
+    setInterval(
+      () => {
+        this.performRetentionCleanup();
+      },
+      24 * 60 * 60 * 1000,
+    ); // 24 hours
   }
 
   /**
@@ -596,16 +634,18 @@ export class MetricsAggregator extends EventEmitter {
    */
   private performRetentionCleanup(): void {
     const now = new Date();
-    const retentionCutoff = new Date(now.getTime() - this.storage.retention.raw * 24 * 60 * 60 * 1000);
-    
+    const retentionCutoff = new Date(
+      now.getTime() - this.storage.retention.raw * 24 * 60 * 60 * 1000,
+    );
+
     for (const [metricName, metrics] of this.metrics.entries()) {
-      const retained = metrics.filter(m => m.timestamp >= retentionCutoff);
+      const retained = metrics.filter((m) => m.timestamp >= retentionCutoff);
       this.metrics.set(metricName, retained);
     }
-    
+
     this.emit('retention_cleanup_completed', {
       timestamp: now,
-      cutoff: retentionCutoff
+      cutoff: retentionCutoff,
     });
   }
 }
@@ -629,11 +669,11 @@ class AlertManager extends EventEmitter {
   checkAlerts(metric: Metric): void {
     for (const [ruleId, rule] of this.rules.entries()) {
       if (!rule.enabled) continue;
-      
+
       // Simple alert condition checking
       // In a real implementation, this would parse the condition expression
       const isTriggered = this.evaluateCondition(rule.condition, metric);
-      
+
       if (isTriggered) {
         this.triggerAlert(rule, metric);
       }
@@ -649,7 +689,7 @@ class AlertManager extends EventEmitter {
     this.emit('alert_triggered', {
       rule,
       metric,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 }
@@ -662,16 +702,18 @@ class MetricsQueryEngine {
     expression: string,
     startTime: Date,
     endTime: Date,
-    step?: number
+    step?: number,
   ): Promise<any> {
     // Mock query execution
     // In a real implementation, this would parse and execute the query expression
-    console.log(`Executing query: ${expression} from ${startTime} to ${endTime}`);
-    
+    console.log(
+      `Executing query: ${expression} from ${startTime} to ${endTime}`,
+    );
+
     return {
       metric: expression,
       values: this.generateMockData(startTime, endTime, step || 60000),
-      timestamps: this.generateTimestamps(startTime, endTime, step || 60000)
+      timestamps: this.generateTimestamps(startTime, endTime, step || 60000),
     };
   }
 
@@ -683,12 +725,12 @@ class MetricsQueryEngine {
   private generateTimestamps(start: Date, end: Date, step: number): Date[] {
     const timestamps = [];
     let current = new Date(start);
-    
+
     while (current <= end) {
       timestamps.push(new Date(current));
       current = new Date(current.getTime() + step);
     }
-    
+
     return timestamps;
   }
 }

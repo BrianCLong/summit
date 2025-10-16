@@ -1,20 +1,20 @@
-name-template: "v$RESOLVED_VERSION"
-tag-template: "v$RESOLVED_VERSION"
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
 categories:
-  - title: "🚀 Features"
-    labels: ["feat", "feature", "enhancement"]
-  - title: "🐛 Fixes"
-    labels: ["bug", "fix"]
-  - title: "🧰 Maintenance"
-    labels: ["chore", "deps", "refactor"]
-change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+  - title: '🚀 Features'
+    labels: ['feat', 'feature', 'enhancement']
+  - title: '🐛 Fixes'
+    labels: ['bug', 'fix']
+  - title: '🧰 Maintenance'
+    labels: ['chore', 'deps', 'refactor']
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 version-resolver:
   major:
-    labels: ["major"]
+    labels: ['major']
   minor:
-    labels: ["minor","feat"]
+    labels: ['minor', 'feat']
   patch:
-    labels: ["patch","fix","chore"]
+    labels: ['patch', 'fix', 'chore']
 template: |
   ## What’s Changed
   $CHANGES

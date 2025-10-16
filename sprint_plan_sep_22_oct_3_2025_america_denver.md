@@ -11,6 +11,7 @@
 ## 1) Sprint Goal
 
 <<<<<<< HEAD
+
 1. Lift **new-user activation rate by +8%** via onboarding improvements and timely nudges.
 2. Ship **search engagement telemetry** to validate latency/relevance changes.
 3. Deliver **one scalable lifecycle channel** (email) with experimentable templates.
@@ -62,66 +63,66 @@
 
 ### Epic A — Activation & Onboarding Support
 
-**IG-241 | Event schema for onboarding v2** — *5 pts*
+**IG-241 | Event schema for onboarding v2** — _5 pts_
 
 - **AC:**
   - Emit `onboarding_step_started/completed`, `checklist_viewed`, `tooltip_opened` with `user_id`, `step_id`, `ts`.
   - P95 ingestion-to-warehouse < 10 min; schema documented in dbt.
 
-**IG-242 | Nudge service: magic-link reminder** — *8 pts*
+**IG-242 | Nudge service: magic-link reminder** — _8 pts_
 
 - **AC:**
   - Send reminder after 10 minutes of idle invite; throttle per user/day; unsubscribe honored.
   - Template variables: `first_name`, `cta_url`, `exp_minutes`.
   - Metrics: send, delivered, open, click, convert.
 
-**IG-243 | In-app coach marks (progressive)** — *5 pts*
+**IG-243 | In-app coach marks (progressive)** — _5 pts_
 
 - **AC:** Contextual tips appear only when step incomplete; dismiss persists; a11y verified.
 
 ### Epic B — Search Engagement & Measurement
 
-**IG-244 | Search telemetry envelope** — *8 pts*
+**IG-244 | Search telemetry envelope** — _8 pts_
 
 - **AC:**
   - Client logs `query`, `has_quotes`, `results_count`, `latency_ms`, `click_position`, `zero_result`.
   - Server aggregates CTR, zero-result rate by cohort; dashboard in Looker/Metabase.
 
-**IG-245 | Relevance evaluation set v1** — *5 pts*
+**IG-245 | Relevance evaluation set v1** — _5 pts_
 
 - **AC:** 200 labeled queries with relevance grades; nightly job computes NDCG@10 baseline.
 
-**IG-246 | Zero-result rescue UX test** — *5 pts*
+**IG-246 | Zero-result rescue UX test** — _5 pts_
 
 - **AC:** When zero-result, show suggestions/typo fix; track adoption & re-query rate.
 
 ### Epic C — Lifecycle Channel & Experimentation
 
-**IG-247 | Email infrastructure (SendGrid) hardening** — *8 pts*
+**IG-247 | Email infrastructure (SendGrid) hardening** — _8 pts_
 
 - **AC:** DKIM/SPF/DMARC aligned; categories set; IP warm-up plan; bounce/complaint webhooks.
 
-**IG-248 | Experiment framework v1 (feature flags + assignment)** — *8 pts*
+**IG-248 | Experiment framework v1 (feature flags + assignment)** — _8 pts_
 
 - **AC:** User assignment deterministic; exposure events; guardrails on churn & complaint rate.
 
-**IG-249 | Onboarding email v1 (copy + design)** — *5 pts*
+**IG-249 | Onboarding email v1 (copy + design)** — _5 pts_
 
 - **AC:** Modular template (header/body/cta); dark-mode compliant; renders in top 5 clients.
 
 ### Bugs/Chores
 
-**IG-250 | Fix: duplicate activation events** — *3 pts*
+**IG-250 | Fix: duplicate activation events** — _3 pts_
 
 - **AC:** Exactly-once semantics via idempotency key; warehouse de-dupe migration.
 
-**IG-251 | Data quality: timezone normalization** — *3 pts*
+**IG-251 | Data quality: timezone normalization** — _3 pts_
 
 - **AC:** All user timestamps stored in UTC; UI shows local; backfill script executed.
 
 **Stretch (not committed)**
 
-- **IG-252 | D1 retention cohort dashboard** — *5 pts*
+- **IG-252 | D1 retention cohort dashboard** — _5 pts_
 
 **Total committed:** ≈ **69 pts** (excl. stretch)
 
@@ -129,11 +130,11 @@
 
 ## 6) Experiment Plans (Pre-Registered)
 
-| ID    | Hypothesis                                            | Metric        | Min Detectable Effect | Sample/Power | Duration |
-| ----- | ----------------------------------------------------- | ------------- | --------------------: | -----------: | -------- |
-| EXP-A | Coach marks raise completion of "Connect Source" step | Step completion rate | +8% | 80% @ α=.05 | 7–10 days |
-| EXP-B | Reminder email raises D1 activation                   | D1 activated  | +5% | 80% @ α=.05 | 7–10 days |
-| EXP-C | Zero-result rescue increases search CTR               | CTR           | +6% | 80% @ α=.05 | 5–7 days |
+| ID    | Hypothesis                                            | Metric               | Min Detectable Effect | Sample/Power | Duration  |
+| ----- | ----------------------------------------------------- | -------------------- | --------------------: | -----------: | --------- |
+| EXP-A | Coach marks raise completion of "Connect Source" step | Step completion rate |                   +8% |  80% @ α=.05 | 7–10 days |
+| EXP-B | Reminder email raises D1 activation                   | D1 activated         |                   +5% |  80% @ α=.05 | 7–10 days |
+| EXP-C | Zero-result rescue increases search CTR               | CTR                  |                   +6% |  80% @ α=.05 | 5–7 days  |
 
 Guardrails: error rate, complaint rate, unsubscribe rate; instant kill if thresholds breached.
 
@@ -157,12 +158,12 @@ Guardrails: error rate, complaint rate, unsubscribe rate; instant kill if thresh
 
 ## 9) Dependencies & Risks
 
-| ID | Item                                                 | Likelihood | Impact | Mitigation                                  |
-| -- | ---------------------------------------------------- | ---------: | -----: | ------------------------------------------- |
-| D1 | Build Platform: webhooks & secrets mgmt for SendGrid |        Med |   High | Align on ADR-043; stage first               |
-| D2 | Core App: onboarding checklist v2 availability       |        Med |    Med | Stubs/feature flag; decouple event emission |
-| R1 | Email deliverability                                 |        Med |   High | Warm-up, seed tests, feedback loops         |
-| R2 | Data privacy/compliance                              |        Low |   High | DPIA checklist; opt-out flow verified       |
+| ID  | Item                                                 | Likelihood | Impact | Mitigation                                  |
+| --- | ---------------------------------------------------- | ---------: | -----: | ------------------------------------------- |
+| D1  | Build Platform: webhooks & secrets mgmt for SendGrid |        Med |   High | Align on ADR-043; stage first               |
+| D2  | Core App: onboarding checklist v2 availability       |        Med |    Med | Stubs/feature flag; decouple event emission |
+| R1  | Email deliverability                                 |        Med |   High | Warm-up, seed tests, feedback loops         |
+| R2  | Data privacy/compliance                              |        Low |   High | DPIA checklist; opt-out flow verified       |
 
 ---
 
@@ -185,24 +186,24 @@ Guardrails: error rate, complaint rate, unsubscribe rate; instant kill if thresh
 
 - PRD links (placeholders): Activation PRD, Search Telemetry PRD, Email Infra PRD.
 - Design: Figma file for coach marks & email template.
-- Data: dbt repo `models/activation/`, `models/search/`.
-=======
+- # Data: dbt repo `models/activation/`, `models/search/`.
+
 * **Reduce CI end-to-end time by ≥ 30%** (baseline P50 28m → target ≤ 19m).
 * **Reach SLSA L2 posture** (attestations & provenance for all prod artifacts).
 * **Stabilize flakiness to ≤ 1.5%** (7-day moving average).
 
 **Success signals**
 
-* P50/P95 pipeline time ≤ 19m/35m.
-* Green-to-deploy success rate ≥ 97%.
-* Signed images with SBOMs published for 100% of deployable services.
+- P50/P95 pipeline time ≤ 19m/35m.
+- Green-to-deploy success rate ≥ 97%.
+- Signed images with SBOMs published for 100% of deployable services.
 
 ---
 
 ## 2) Scope & Non-Goals
 
-* **In-scope:** CI/CD performance, caching, runner strategy, test parallelization, supply-chain security, build insights.
-* **Out-of-scope:** Language upgrades (except build tooling), infra scaling unrelated to CI/CD.
+- **In-scope:** CI/CD performance, caching, runner strategy, test parallelization, supply-chain security, build insights.
+- **Out-of-scope:** Language upgrades (except build tooling), infra scaling unrelated to CI/CD.
 
 ---
 
@@ -213,7 +214,7 @@ Guardrails: error rate, complaint rate, unsubscribe rate; instant kill if thresh
 | Build/Tooling Eng |      3 |        27 | 10-day sprint; 1 day ceremonies per person |
 | SRE               |      1 |         8 | shared across squads                       |
 | QA/SET            |      1 |         9 | focus on e2e stability                     |
-| **Est. Velocity** |      — |         — | **~36–40 pts** commitment                 |
+| **Est. Velocity** |      — |         — | **~36–40 pts** commitment                  |
 
 ---
 
@@ -223,61 +224,61 @@ Guardrails: error rate, complaint rate, unsubscribe rate; instant kill if thresh
 
 ### Theme A — CI Performance
 
-**BP-201 | Remote build cache for Docker+Node layers** — *8 pts*
+**BP-201 | Remote build cache for Docker+Node layers** — _8 pts_
 
-* **AC:**
-  * Shared registry cache enabled; cache hit-rate ≥ 60% on repeat builds.
-  * `--mount=type=cache` used for npm/pnpm; warm cache job precedes fan-out.
-  * No cache poisoning; eviction policy documented.
-* **Tasks:** Cache registry setup; pipeline step; cache metrics panel.
+- **AC:**
+  - Shared registry cache enabled; cache hit-rate ≥ 60% on repeat builds.
+  - `--mount=type=cache` used for npm/pnpm; warm cache job precedes fan-out.
+  - No cache poisoning; eviction policy documented.
+- **Tasks:** Cache registry setup; pipeline step; cache metrics panel.
 
-**BP-202 | Test sharding & parallelism v2** — *5 pts*
+**BP-202 | Test sharding & parallelism v2** — _5 pts_
 
-* **AC:** Dynamic shards via historical timings; retry only failed shards; P50 test phase −40%.
-* **Tasks:** Timing store; shard allocator; CI matrix; docs.
+- **AC:** Dynamic shards via historical timings; retry only failed shards; P50 test phase −40%.
+- **Tasks:** Timing store; shard allocator; CI matrix; docs.
 
-**BP-203 | Ephemeral runners on autoscaling** — *5 pts*
+**BP-203 | Ephemeral runners on autoscaling** — _5 pts_
 
-* **AC:** Workloads move to ephemeral VMs/containers; isolation per job; scale-to-zero in < 5m idle.
-* **Tasks:** Runner image; autoscaling config; budget guardrails.
+- **AC:** Workloads move to ephemeral VMs/containers; isolation per job; scale-to-zero in < 5m idle.
+- **Tasks:** Runner image; autoscaling config; budget guardrails.
 
-**BP-204 | Flaky test quarantine workflow** — *3 pts*
+**BP-204 | Flaky test quarantine workflow** — _3 pts_
 
-* **AC:** Flaky label auto-applied after 3/50 failures; quarantine lane; weekly report.
+- **AC:** Flaky label auto-applied after 3/50 failures; quarantine lane; weekly report.
 
 ### Theme B — Supply-Chain Security
 
-**BP-205 | SBOM + image signing (Syft + Cosign)** — *8 pts*
+**BP-205 | SBOM + image signing (Syft + Cosign)** — _8 pts_
 
-* **AC:** SBOMs for all images (SPDX); signatures verified in admission; publish to artifact store.
+- **AC:** SBOMs for all images (SPDX); signatures verified in admission; publish to artifact store.
 
-**BP-206 | Provenance attestations (SLSA L2)** — *5 pts*
+**BP-206 | Provenance attestations (SLSA L2)** — _5 pts_
 
-* **AC:** Provenance attached to artifacts; verification step gates prod deploy.
+- **AC:** Provenance attached to artifacts; verification step gates prod deploy.
 
 ### Theme C — Developer Experience
 
-**BP-207 | Pipeline templates v3 (monorepo aware)** — *3 pts*
+**BP-207 | Pipeline templates v3 (monorepo aware)** — _3 pts_
 
-* **AC:** DRY templates with path filters; changed-packages only; docs with examples.
+- **AC:** DRY templates with path filters; changed-packages only; docs with examples.
 
-**BP-208 | Pre-merge preview envs (smoke pack)** — *5 pts*
+**BP-208 | Pre-merge preview envs (smoke pack)** — _5 pts_
 
-* **AC:** On PR label, deploy minimal stack; 5-minute teardown SLA; smoke suite auto-runs.
+- **AC:** On PR label, deploy minimal stack; 5-minute teardown SLA; smoke suite auto-runs.
 
 ### Theme D — Observability & Cost
 
-**BP-209 | CI observability dashboard** — *3 pts*
+**BP-209 | CI observability dashboard** — _3 pts_
 
-* **AC:** Panels for queue time, exec time by job, cache hit-rate, flakiness, spend/day.
+- **AC:** Panels for queue time, exec time by job, cache hit-rate, flakiness, spend/day.
 
-**BP-210 | Artifact retention policy** — *2 pts*
+**BP-210 | Artifact retention policy** — _2 pts_
 
-* **AC:** Default retention 30d; LTS builds 180d; documented recovery path.
+- **AC:** Default retention 30d; LTS builds 180d; documented recovery path.
 
 **Stretch (not committed)**
 
-* **BP-211 | Bazel/Turbo POC for top package** — *5 pts*
+- **BP-211 | Bazel/Turbo POC for top package** — _5 pts_
 
 **Total committed:** ~42 pts (trim to 38–40 during planning if capacity tight)
 
@@ -285,45 +286,45 @@ Guardrails: error rate, complaint rate, unsubscribe rate; instant kill if thresh
 
 ## 5) Acceptance Criteria (Cross-Cutting)
 
-* All pipelines linted; templates validated.
-* Rollback path for each change (flag or revertable config).
-* Metrics & alerts wired for each new capability.
+- All pipelines linted; templates validated.
+- Rollback path for each change (flag or revertable config).
+- Metrics & alerts wired for each new capability.
 
 ---
 
 ## 6) Definition of Ready (DoR)
 
-* Clear success metric (time, rate, or coverage).
-* Validation plan defined (how we’ll measure improvement).
-* Security review needs noted (if admission/verify stages touched).
+- Clear success metric (time, rate, or coverage).
+- Validation plan defined (how we’ll measure improvement).
+- Security review needs noted (if admission/verify stages touched).
 
 ## 7) Definition of Done (DoD)
 
-* Code/config merged; CI green.
-* Dashboards updated; alerts firing in staging.
-* Docs/playbooks updated; runbook snippet added.
-* Change released and verified in production (or behind a safe flag).
+- Code/config merged; CI green.
+- Dashboards updated; alerts firing in staging.
+- Docs/playbooks updated; runbook snippet added.
+- Change released and verified in production (or behind a safe flag).
 
 ---
 
 ## 8) Risks & Mitigations
 
-| ID | Risk                              | Likelihood | Impact | Mitigation                                                          |
-| -- | --------------------------------- | ---------: | -----: | ------------------------------------------------------------------- |
-| R1 | Cache corruption/poisoning        |        Low |   High | Content-addressable cache; signature verify; kill-switch            |
-| R2 | Ephemeral runners hit quota caps  |        Med |    Med | Scale policy + budget alerts; fallback static pool                  |
-| R3 | Signing breaks deploys            |        Med |   High | Staged rollout; verify in staging; emergency bypass key w/ approval |
-| R4 | Test sharding increases flakiness |        Low |    Med | Sticky re-runs; shard stability tracking                            |
+| ID  | Risk                              | Likelihood | Impact | Mitigation                                                          |
+| --- | --------------------------------- | ---------: | -----: | ------------------------------------------------------------------- |
+| R1  | Cache corruption/poisoning        |        Low |   High | Content-addressable cache; signature verify; kill-switch            |
+| R2  | Ephemeral runners hit quota caps  |        Med |    Med | Scale policy + budget alerts; fallback static pool                  |
+| R3  | Signing breaks deploys            |        Med |   High | Staged rollout; verify in staging; emergency bypass key w/ approval |
+| R4  | Test sharding increases flakiness |        Low |    Med | Sticky re-runs; shard stability tracking                            |
 
 ---
 
 ## 9) Measurement Plan (Dashboards)
 
-* **CI lead time:** queue, setup, build, test, artifact, deploy phases.
-* **Flaky rate:** flaky/total tests by suite; top offenders list.
-* **Cache hit-rate:** by job & step; misses by key.
-* **Supply-chain:** % images with valid SBOM & signature; attestation verification pass rate.
-* **Spend:** cost per 100 pipelines; cost per successful deploy.
+- **CI lead time:** queue, setup, build, test, artifact, deploy phases.
+- **Flaky rate:** flaky/total tests by suite; top offenders list.
+- **Cache hit-rate:** by job & step; misses by key.
+- **Supply-chain:** % images with valid SBOM & signature; attestation verification pass rate.
+- **Spend:** cost per 100 pipelines; cost per successful deploy.
 
 ---
 
@@ -338,14 +339,14 @@ Guardrails: error rate, complaint rate, unsubscribe rate; instant kill if thresh
 
 ## 11) Communications
 
-* Daily update thread in **#eng-platform** (queue time, failures, blockers).
-* Weekly digest to stakeholders (Fri): deltas vs baseline, risks, asks.
+- Daily update thread in **#eng-platform** (queue time, failures, blockers).
+- Weekly digest to stakeholders (Fri): deltas vs baseline, risks, asks.
 
 ---
 
 ## 12) Backlog Links & Artifacts
 
-* ADRs: `ADR-042 Build Cache`, `ADR-043 Signing & SBOM`, `ADR-044 Runner Strategy` (create during sprint).
-* Runbooks: `CI-Cache-Ops`, `Signing-Verify-Gate`, `Quarantine-Flow`.
-* Flags/Config: `ci.cache.enabled`, `ci.runners.ephemeral`, `deploy.verify.attestations`.
->>>>>>> 8ebc785cf (docs: refresh build platform sprint plan)
+- ADRs: `ADR-042 Build Cache`, `ADR-043 Signing & SBOM`, `ADR-044 Runner Strategy` (create during sprint).
+- Runbooks: `CI-Cache-Ops`, `Signing-Verify-Gate`, `Quarantine-Flow`.
+- Flags/Config: `ci.cache.enabled`, `ci.runners.ephemeral`, `deploy.verify.attestations`.
+  > > > > > > > 8ebc785cf (docs: refresh build platform sprint plan)

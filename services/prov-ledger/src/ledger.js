@@ -15,7 +15,10 @@ export function appendRecord(type, data) {
   const prevHash = chain.length ? chain[chain.length - 1].hash : '';
   const timestamp = new Date().toISOString();
   const record = { ...parsed, type, timestamp, prevHash };
-  const hash = crypto.createHash('sha256').update(JSON.stringify(record)).digest('hex');
+  const hash = crypto
+    .createHash('sha256')
+    .update(JSON.stringify(record))
+    .digest('hex');
   const entry = { ...record, hash };
   chain.push(entry);
   return entry;
@@ -23,6 +26,9 @@ export function appendRecord(type, data) {
 
 export function createManifest() {
   const manifest = { records: chain };
-  const sha256 = crypto.createHash('sha256').update(JSON.stringify(manifest)).digest('hex');
+  const sha256 = crypto
+    .createHash('sha256')
+    .update(JSON.stringify(manifest))
+    .digest('hex');
   return { manifest, sha256 };
 }

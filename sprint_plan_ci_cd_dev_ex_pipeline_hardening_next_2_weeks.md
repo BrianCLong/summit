@@ -1,9 +1,11 @@
 # Sprint Goal
+
 Deliver a **clean, repeatable, policy‑enforced build + test + deploy flow** so that **every PR merges, builds, and tests cleanly** by default, and the **Maestro Conductor** (autonomous build orchestration platform) can scale from here with observable, reversible releases.
 
 ---
 
 ## Success Criteria (Definition of Success)
+
 - **0 red on main**: main branch has **no failing required checks** for 7 consecutive days.
 - **100% PR compliance**: All merged PRs pass: lint, unit, contract, e2e smoke, SCA/SAST, SBOM, infra plan, migration gate, license policy, and DCO/CLA (if applicable).
 - **Preview envs**: Ephemeral preview environments spin up for every PR and auto-tear-down on close/merge.
@@ -15,6 +17,7 @@ Deliver a **clean, repeatable, policy‑enforced build + test + deploy flow** so
 ---
 
 ## Guardrails (Policy, required going forward)
+
 - **Branch protections**: main is protected; squash merge only; linear history; required checks cannot be bypassed.
 - **PR Template + Conventional Commits** enforced; CODEOWNERS required reviews; no self-approval on critical paths.
 - **IaC golden path**: Terraform + Helm with policy-as-code (OPA). Secrets only via sealed-secrets; never plaintext.
@@ -25,9 +28,11 @@ Deliver a **clean, repeatable, policy‑enforced build + test + deploy flow** so
 ---
 
 ## Sprint Structure (2 Weeks)
+
 **Timebox**: 10 working days
 
 ### Theme 1 — Pipeline Hygiene & Reliability
+
 1. **Unify CI entrypoints**
    - Create `ci/pipeline` reusable workflows (build, test, scan, package, publish, deploy).
    - Acceptance: All repos call shared workflows; duplication removed.
@@ -49,6 +54,7 @@ Deliver a **clean, repeatable, policy‑enforced build + test + deploy flow** so
    - Acceptance: Build time reduced ≥ 30% average; cache hit rate visible.
 
 ### Theme 2 — Progressive Delivery & Rollback
+
 6. **Canary with auto-rollback**
    - Helm upgrade with progressive steps; health checks on golden signals; auto-rollback on breach.
    - Acceptance: Stage simulates rollback successfully; runbook updated.
@@ -62,90 +68,103 @@ Deliver a **clean, repeatable, policy‑enforced build + test + deploy flow** so
    - Acceptance: All new risky features behind flags; Admin Console shows state.
 
 ### Theme 3 — Observability & Compliance by Default
+
 9. **OTEL everywhere**
    - Instrument CI jobs and services; propagate trace IDs from CI → app → deployer; structured JSON logs.
    - Acceptance: Trace graph shows end-to-end span from PR to prod.
 
 10. **SLO dashboards & alerts**
-   - P95 latency, error rate, saturation; SLO burn alerts; cost dashboards per service.
-   - Acceptance: Dashboards exist for dev/stage/prod; alerts integrated with on-call.
+
+- P95 latency, error rate, saturation; SLO burn alerts; cost dashboards per service.
+- Acceptance: Dashboards exist for dev/stage/prod; alerts integrated with on-call.
 
 11. **Immutable audits + reason-for-access**
-   - Enforce reason prompts on privileged flows; append signed audit records to tamper-evident store.
-   - Acceptance: Sample audit trail demonstrates who/what/why/when for a prod deploy.
+
+- Enforce reason prompts on privileged flows; append signed audit records to tamper-evident store.
+- Acceptance: Sample audit trail demonstrates who/what/why/when for a prod deploy.
 
 12. **Security posture**
-   - SBOM publishing; license policy; secret scanning in CI; OPA policies on Terraform/Helm plans.
-   - Acceptance: No critical findings at release cut; policy checks are blocking.
+
+- SBOM publishing; license policy; secret scanning in CI; OPA policies on Terraform/Helm plans.
+- Acceptance: No critical findings at release cut; policy checks are blocking.
 
 ### Theme 4 — Developer Experience (DevEx)
+
 13. **Preview environments per PR**
-   - Automated namespace/env; seeded test data; URL surfaced in PR checks; auto-destroy on merge/close.
-   - Acceptance: Median preview ready time < 10 min.
+
+- Automated namespace/env; seeded test data; URL surfaced in PR checks; auto-destroy on merge/close.
+- Acceptance: Median preview ready time < 10 min.
 
 14. **Fast feedback**
-   - Parallelize jobs; split test shards; early artifact upload; PR comment bots with summaries and links.
-   - Acceptance: Median time-to-green < 12 min for typical service.
+
+- Parallelize jobs; split test shards; early artifact upload; PR comment bots with summaries and links.
+- Acceptance: Median time-to-green < 12 min for typical service.
 
 15. **Templates & runbooks**
-   - Update PR/issue templates; add runbooks for canary, rollback, migration, incident classes.
-   - Acceptance: Engineers use templates; runbooks referenced in pipelines.
+
+- Update PR/issue templates; add runbooks for canary, rollback, migration, incident classes.
+- Acceptance: Engineers use templates; runbooks referenced in pipelines.
 
 ---
 
 ## Backlog (Stories & Acceptance Criteria)
 
 ### EPIC A — CI/CD Platform Unification
+
 - **A1: Reusable pipeline modules**
   - Create shared workflows: `build.yml`, `test.yml`, `scan.yml`, `package.yml`, `publish.yml`, `deploy.yml`.
-  - *Done when*: All services reference shared workflows; versioned; changelog documented.
+  - _Done when_: All services reference shared workflows; versioned; changelog documented.
 
 - **A2: Required checks registry**
   - Codify required checks via repo rule sets; document mapping from checks → gates.
-  - *Done when*: main branch shows all checks required; bypass impossible without admin break-glass.
+  - _Done when_: main branch shows all checks required; bypass impossible without admin break-glass.
 
 - **A3: Artifact signing & provenance**
   - Sign images/packages; attach SBOM; store attestations; verify at deploy time.
-  - *Done when*: Deploy blocks if signature or SBOM missing.
+  - _Done when_: Deploy blocks if signature or SBOM missing.
 
 ### EPIC B — Progressive Delivery
+
 - **B1: Canary strategy**
   - Implement stepwise rollout (e.g., 5%→25%→50%→100%); health windows; rollback triggers.
-  - *Done when*: Stage dry-run proves rollback; prod uses canary by default.
+  - _Done when_: Stage dry-run proves rollback; prod uses canary by default.
 
 - **B2: Migration gates**
   - Pre-merge bot checks for migration plan, dry-run output, and rollback script.
-  - *Done when*: Schema PRs without complete artifacts cannot merge.
+  - _Done when_: Schema PRs without complete artifacts cannot merge.
 
 ### EPIC C — Observability & Compliance
+
 - **C1: OTEL trace propagation**
   - CI job emits root span; injects tracecontext env; app and deployer continue trace.
-  - *Done when*: Single trace visualizes PR→build→test→deploy→request path.
+  - _Done when_: Single trace visualizes PR→build→test→deploy→request path.
 
 - **C2: SLO dashboards**
   - Per service: availability, p95 latency, error rate, saturation; SLO burn alerts.
-  - *Done when*: Release captain checks green dashboards at cut.
+  - _Done when_: Release captain checks green dashboards at cut.
 
 - **C3: Immutable audits**
   - Write-once audit store; reason-for-access prompts; link audit ID to deploy artifact.
-  - *Done when*: Audits visible in Admin Console and exportable for compliance.
+  - _Done when_: Audits visible in Admin Console and exportable for compliance.
 
 ### EPIC D — DevEx & Speed
+
 - **D1: Preview env automation**
   - Namespace per PR; seeded data; smoke URL in PR.
-  - *Done when*: ≥90% of PRs get previews; median ready <10m.
+  - _Done when_: ≥90% of PRs get previews; median ready <10m.
 
 - **D2: Flake reduction program**
   - Flake bot; retries limited; quarantine list; owners notified; CI reports flake index.
-  - *Done when*: Flake index < 0.05; no red merges due to flakes.
+  - _Done when_: Flake index < 0.05; no red merges due to flakes.
 
 - **D3: Tooling ergonomics**
   - CLI `maestro` commands for local → CI parity; templates for new services.
-  - *Done when*: New service bootstrap < 5 minutes with full pipeline.
+  - _Done when_: New service bootstrap < 5 minutes with full pipeline.
 
 ---
 
 ## Deliverables (Artifacts)
+
 - `/.github/workflows/` (or equivalent CI) shared workflows and versioned action set.
 - `/.ci/policies/` OPA policies for Terraform/Helm, license, migrations.
 - `/helm/` charts with canary values and health checks; `/terraform/` with policy checks and plan outputs.
@@ -158,14 +177,17 @@ Deliver a **clean, repeatable, policy‑enforced build + test + deploy flow** so
 ---
 
 ## Definition of Ready (DoR)
+
 - Issue scoped; risks listed; tests defined; migration plan noted; observability additions; flag strategy; rollback path.
 
 ## Definition of Done (DoD)
+
 - Code merged via protected PR; preview env passed; canary verified; dashboards green; audits present; docs+runbooks updated.
 
 ---
 
 ## Day-by-Day Plan (2-Week Sprint)
+
 **Day 1**: Kickoff, align on gates, choose golden path, enable branch protections.
 
 **Day 2**: Stand up shared workflows; migrate 1 pilot service; set required checks.
@@ -189,6 +211,7 @@ Deliver a **clean, repeatable, policy‑enforced build + test + deploy flow** so
 ---
 
 ## Responsibilities & Ownership
+
 - **DevOps/Platform**: IaC, clusters, runtime, secrets, autoscaling, SLO dashboards.
 - **CI/CD**: Pipelines, caches, artifacts, preview env lifecycle, policy gates, SBOM.
 - **Deployment**: Canary plan, migration execution under gates, golden signal monitors.
@@ -198,12 +221,14 @@ Deliver a **clean, repeatable, policy‑enforced build + test + deploy flow** so
 ---
 
 ## Metrics (DORA + quality)
+
 - Lead time for change, Deployment frequency, MTTR, Change failure rate.
 - Time-to-green, Cache hit rate, Flake index, Canary success rate, Rollback MTTR.
 
 ---
 
 ## Risk Register & Mitigations
+
 - **Secret sprawl** → sealed-secrets, secret scanning, CI redaction.
 - **Flaky tests** → quarantine lane, ownership, SLAs, instrumentation.
 - **Policy friction** → provide exceptions flow with time-bound waivers + audit records.
@@ -212,6 +237,7 @@ Deliver a **clean, repeatable, policy‑enforced build + test + deploy flow** so
 ---
 
 ## Integrating Maestro Conductor
+
 - **API Contract**: Maestro triggers shared workflows via a stable API; receives provenance IDs; posts back trace IDs.
 - **Telemetry**: Maestro emits OTEL spans for plan/apply/deploy; correlates with PR and release IDs.
 - **Policy Hooks**: Maestro enforces gates (OPA) and blocks promotion without green dashboards.
@@ -221,12 +247,13 @@ Deliver a **clean, repeatable, policy‑enforced build + test + deploy flow** so
 ---
 
 ## Acceptance Evidence to Capture
+
 - Screenshot/exports of green dashboards, passing checks, signed artifact attestations, audit log entries, canary success + rollback simulation report.
 
 ---
 
 ## Post-Sprint Hardening (Stretch)
+
 - Chaos drills (monthly) and DR tabletop; cross-region replicas validated.
 - Policy codification for license whitelists and data retention/purge with dual-control deletes.
 - Renovate/bot for dependency updates with risk-aware rollout.
-

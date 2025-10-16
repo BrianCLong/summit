@@ -2,5 +2,5 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sPSPAllowPrivilegeEscalationContainer
 metadata: { name: deny-allow-privilege-escalation }
 spec:
-  match: { kinds: [ { apiGroups: [""], kinds: ["Pod"] } ] }
+  match: { kinds: [{ apiGroups: [''], kinds: ['Pod'] }] }
   parameters: { allowed: false }

@@ -18,5 +18,5 @@ export const FEATURE_FLAGS = {
   coherence: true,
   multiRegion: false,
   advancedPolicy: true,
-  chaosEngineering: true
+  chaosEngineering: true,
 };

@@ -2,5 +2,5 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sPSPCapabilities
 metadata: { name: drop-all-capabilities }
 spec:
-  match: { kinds: [ { apiGroups: [""], kinds: ["Pod"] } ] }
-  parameters: { requiredDropCapabilities: ["ALL"] }
+  match: { kinds: [{ apiGroups: [''], kinds: ['Pod'] }] }
+  parameters: { requiredDropCapabilities: ['ALL'] }

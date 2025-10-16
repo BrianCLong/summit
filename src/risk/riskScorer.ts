@@ -17,7 +17,11 @@ interface RiskFactor {
 interface RiskScore {
   overall: number;
   factors: RiskFactor[];
-  recommendation: 'auto-merge' | 'review-recommended' | 'manual-review' | 'block';
+  recommendation:
+    | 'auto-merge'
+    | 'review-recommended'
+    | 'manual-review'
+    | 'block';
   evidence: {
     positive: string[];
     negative: string[];
@@ -68,7 +72,7 @@ export class PRRiskScorer {
       ['security-risk', this.assessSecurityRisk.bind(this)],
       ['process-adherence', this.assessProcessAdherence.bind(this)],
       ['timing-risk', this.assessTimingRisk.bind(this)],
-      ['rollback-risk', this.assessRollbackRisk.bind(this)]
+      ['rollback-risk', this.assessRollbackRisk.bind(this)],
     ]);
   }
 
@@ -85,8 +89,11 @@ export class PRRiskScorer {
     console.log(`📊 Analyzing PR risk for: ${prData.title}`);
 
     // Gather change statistics
-    const changeStats = await this.getChangeStatistics(prData.branch, prData.baseBranch);
-    
+    const changeStats = await this.getChangeStatistics(
+      prData.branch,
+      prData.baseBranch,
+    );
+
     // Get historical data
     const historicalData = await this.getHistoricalData(prData.author);
 
@@ -95,7 +102,7 @@ export class PRRiskScorer {
     const evaluationData = {
       ...prData,
       changeStats,
-      historicalData
+      historicalData,
     };
 
     for (const [name, evaluator] of this.riskFactors.entries()) {
@@ -111,18 +118,23 @@ export class PRRiskScorer {
           score: 50,
           evidence: [`Failed to evaluate: ${error.message}`],
           confidence: 0.1,
-          category: 'technical'
+          category: 'technical',
         });
       }
     }
 
     // Calculate weighted overall score
-    const totalWeight = factors.reduce((sum, f) => sum + f.weight * f.confidence, 0);
-    const weightedScore = factors.reduce((sum, f) => 
-      sum + (f.score * f.weight * f.confidence), 0
+    const totalWeight = factors.reduce(
+      (sum, f) => sum + f.weight * f.confidence,
+      0,
     );
-    
-    const overall = totalWeight > 0 ? Math.round(weightedScore / totalWeight) : 50;
+    const weightedScore = factors.reduce(
+      (sum, f) => sum + f.score * f.weight * f.confidence,
+      0,
+    );
+
+    const overall =
+      totalWeight > 0 ? Math.round(weightedScore / totalWeight) : 50;
 
     // Generate recommendation
     const recommendation = this.generateRecommendation(overall, factors);
@@ -141,15 +153,18 @@ export class PRRiskScorer {
         timestamp: new Date().toISOString(),
         commitCount: prData.commits.length,
         filesChanged: prData.files.length,
-        linesChanged: changeStats.linesAdded + changeStats.linesRemoved
-      }
+        linesChanged: changeStats.linesAdded + changeStats.linesRemoved,
+      },
     };
 
     await this.persistRiskScore(result);
     return result;
   }
 
-  private async getChangeStatistics(branch: string, baseBranch: string = 'main'): Promise<{
+  private async getChangeStatistics(
+    branch: string,
+    baseBranch: string = 'main',
+  ): Promise<{
     linesAdded: number;
     linesRemoved: number;
     filesChanged: number;
@@ -160,27 +175,34 @@ export class PRRiskScorer {
     try {
       const { stdout } = await execAsync(
         `git diff --stat ${baseBranch}...${branch}`,
-        { cwd: this.projectRoot }
+        { cwd: this.projectRoot },
       );
 
       const lines = stdout.split('\n');
       const summaryLine = lines[lines.length - 2] || '';
-      
+
       const addedMatch = summaryLine.match(/(\d+) insertion/);
       const removedMatch = summaryLine.match(/(\d+) deletion/);
-      
+
       const linesAdded = addedMatch ? parseInt(addedMatch[1]) : 0;
       const linesRemoved = removedMatch ? parseInt(removedMatch[1]) : 0;
 
       // Count different types of files
-      const filesChanged = lines.filter(l => l.includes('|')).length;
-      const testFilesChanged = lines.filter(l => 
-        l.includes('.test.') || l.includes('.spec.') || l.includes('__tests__')
+      const filesChanged = lines.filter((l) => l.includes('|')).length;
+      const testFilesChanged = lines.filter(
+        (l) =>
+          l.includes('.test.') ||
+          l.includes('.spec.') ||
+          l.includes('__tests__'),
       ).length;
-      const configFilesChanged = lines.filter(l =>
-        l.includes('config') || l.includes('.json') || l.includes('.yml') || l.includes('.yaml')
+      const configFilesChanged = lines.filter(
+        (l) =>
+          l.includes('config') ||
+          l.includes('.json') ||
+          l.includes('.yml') ||
+          l.includes('.yaml'),
       ).length;
-      const binaryFilesChanged = lines.filter(l => l.includes('Bin')).length;
+      const binaryFilesChanged = lines.filter((l) => l.includes('Bin')).length;
 
       return {
         linesAdded,
@@ -188,7 +210,7 @@ export class PRRiskScorer {
         filesChanged,
         testFilesChanged,
         configFilesChanged,
-        binaryFilesChanged
+        binaryFilesChanged,
       };
     } catch (error) {
       console.warn('Failed to get change statistics:', error.message);
@@ -198,7 +220,7 @@ export class PRRiskScorer {
         filesChanged: 0,
         testFilesChanged: 0,
         configFilesChanged: 0,
-        binaryFilesChanged: 0
+        binaryFilesChanged: 0,
       };
     }
   }
@@ -208,13 +230,15 @@ export class PRRiskScorer {
       // Get recent PR statistics (last 30 days)
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
+
       const { stdout: commitHistory } = await execAsync(
         `git log --author="${author}" --since="${thirtyDaysAgo.toISOString()}" --oneline`,
-        { cwd: this.projectRoot }
+        { cwd: this.projectRoot },
       );
 
-      const recentCommits = commitHistory.split('\n').filter(line => line.trim()).length;
+      const recentCommits = commitHistory
+        .split('\n')
+        .filter((line) => line.trim()).length;
 
       // Estimate PR statistics (simplified)
       return {
@@ -223,19 +247,28 @@ export class PRRiskScorer {
           merged: Math.floor(recentCommits / 3), // Estimate PRs from commits
           reverted: 0, // Would need more sophisticated analysis
           hotfixes: 0,
-          averageReviewTime: 24 // Default 24 hours
+          averageReviewTime: 24, // Default 24 hours
         },
         codeQuality: {
           testCoverage: 75, // Would get from coverage reports
           lintViolations: 0,
-          complexityScore: 50
-        }
+          complexityScore: 50,
+        },
       };
     } catch (error) {
       return {
         author,
-        recentPRs: { merged: 0, reverted: 0, hotfixes: 0, averageReviewTime: 48 },
-        codeQuality: { testCoverage: 0, lintViolations: 0, complexityScore: 50 }
+        recentPRs: {
+          merged: 0,
+          reverted: 0,
+          hotfixes: 0,
+          averageReviewTime: 48,
+        },
+        codeQuality: {
+          testCoverage: 0,
+          lintViolations: 0,
+          complexityScore: 50,
+        },
       };
     }
   }
@@ -244,10 +277,10 @@ export class PRRiskScorer {
   private async assessCodeComplexity(data: any): Promise<RiskFactor> {
     const { changeStats } = data;
     const evidence: string[] = [];
-    
+
     // Simple complexity heuristics
     let score = 30; // Start with low risk
-    
+
     const totalChanges = changeStats.linesAdded + changeStats.linesRemoved;
     if (totalChanges > 500) {
       score += 30;
@@ -262,7 +295,9 @@ export class PRRiskScorer {
       evidence.push(`Many files changed: ${changeStats.filesChanged} files`);
     } else if (changeStats.filesChanged > 5) {
       score += 10;
-      evidence.push(`Multiple files changed: ${changeStats.filesChanged} files`);
+      evidence.push(
+        `Multiple files changed: ${changeStats.filesChanged} files`,
+      );
     }
 
     return {
@@ -271,7 +306,7 @@ export class PRRiskScorer {
       score: Math.min(100, score),
       evidence,
       confidence: 0.8,
-      category: 'technical'
+      category: 'technical',
     };
   }
 
@@ -282,7 +317,8 @@ export class PRRiskScorer {
 
     // Check if tests were added/modified
     const hasTestChanges = changeStats.testFilesChanged > 0;
-    const testRatio = changeStats.testFilesChanged / Math.max(1, changeStats.filesChanged);
+    const testRatio =
+      changeStats.testFilesChanged / Math.max(1, changeStats.filesChanged);
 
     if (!hasTestChanges && changeStats.filesChanged > 3) {
       score += 40;
@@ -292,7 +328,9 @@ export class PRRiskScorer {
       evidence.push('Low ratio of test file changes to code changes');
     } else {
       score -= 10;
-      evidence.push(`Good test coverage: ${changeStats.testFilesChanged} test files updated`);
+      evidence.push(
+        `Good test coverage: ${changeStats.testFilesChanged} test files updated`,
+      );
     }
 
     if (historicalData.codeQuality.testCoverage < 60) {
@@ -306,7 +344,7 @@ export class PRRiskScorer {
       score: Math.min(100, Math.max(0, score)),
       evidence,
       confidence: 0.9,
-      category: 'technical'
+      category: 'technical',
     };
   }
 
@@ -316,32 +354,48 @@ export class PRRiskScorer {
     let score = 20;
 
     const criticalFiles = [
-      'package.json', 'package-lock.json', 'yarn.lock',
-      'Dockerfile', 'docker-compose.yml',
-      '.github/workflows', 'ci/', 'build/',
-      'config/', 'env', '.env'
+      'package.json',
+      'package-lock.json',
+      'yarn.lock',
+      'Dockerfile',
+      'docker-compose.yml',
+      '.github/workflows',
+      'ci/',
+      'build/',
+      'config/',
+      'env',
+      '.env',
     ];
 
     const criticalPaths = [
-      'auth', 'security', 'payment', 'billing',
-      'database', 'migration', 'schema'
+      'auth',
+      'security',
+      'payment',
+      'billing',
+      'database',
+      'migration',
+      'schema',
     ];
 
     for (const file of files) {
       // Check for critical files
-      if (criticalFiles.some(cf => file.includes(cf))) {
+      if (criticalFiles.some((cf) => file.includes(cf))) {
         score += 20;
         evidence.push(`Critical file modified: ${file}`);
       }
 
       // Check for critical paths
-      if (criticalPaths.some(cp => file.toLowerCase().includes(cp))) {
+      if (criticalPaths.some((cp) => file.toLowerCase().includes(cp))) {
         score += 15;
         evidence.push(`High-risk area: ${file}`);
       }
 
       // Check for generated files
-      if (file.includes('dist/') || file.includes('build/') || file.includes('.min.')) {
+      if (
+        file.includes('dist/') ||
+        file.includes('build/') ||
+        file.includes('.min.')
+      ) {
         score += 10;
         evidence.push(`Generated file modified: ${file}`);
       }
@@ -353,7 +407,7 @@ export class PRRiskScorer {
       score: Math.min(100, score),
       evidence,
       confidence: 0.95,
-      category: 'business'
+      category: 'business',
     };
   }
 
@@ -394,7 +448,7 @@ export class PRRiskScorer {
       score: Math.min(100, Math.max(0, score)),
       evidence,
       confidence: 0.7,
-      category: 'process'
+      category: 'process',
     };
   }
 
@@ -404,7 +458,7 @@ export class PRRiskScorer {
     let score = 10;
 
     const totalLines = changeStats.linesAdded + changeStats.linesRemoved;
-    
+
     if (totalLines > 1000) {
       score += 50;
       evidence.push(`Very large change: ${totalLines} lines`);
@@ -429,7 +483,7 @@ export class PRRiskScorer {
       score: Math.min(100, score),
       evidence,
       confidence: 0.9,
-      category: 'technical'
+      category: 'technical',
     };
   }
 
@@ -438,15 +492,22 @@ export class PRRiskScorer {
     const evidence: string[] = [];
     let score = 20;
 
-    const dependencyFiles = ['package.json', 'package-lock.json', 'yarn.lock', 'requirements.txt', 'Pipfile', 'go.mod'];
-    const hasDependencyChanges = files.some(file => 
-      dependencyFiles.some(df => file.includes(df))
+    const dependencyFiles = [
+      'package.json',
+      'package-lock.json',
+      'yarn.lock',
+      'requirements.txt',
+      'Pipfile',
+      'go.mod',
+    ];
+    const hasDependencyChanges = files.some((file) =>
+      dependencyFiles.some((df) => file.includes(df)),
     );
 
     if (hasDependencyChanges) {
       score += 30;
       evidence.push('Dependency changes detected');
-      
+
       // Check for major version updates (would need actual diff analysis)
       // This is a simplified check
       evidence.push('Recommend security audit of new dependencies');
@@ -458,7 +519,7 @@ export class PRRiskScorer {
       score,
       evidence,
       confidence: hasDependencyChanges ? 0.8 : 0.3,
-      category: 'security'
+      category: 'security',
     };
   }
 
@@ -468,12 +529,21 @@ export class PRRiskScorer {
     let score = 20;
 
     const securityKeywords = [
-      'auth', 'password', 'token', 'secret', 'key', 'crypto',
-      'security', 'permission', 'role', 'access', 'cors'
+      'auth',
+      'password',
+      'token',
+      'secret',
+      'key',
+      'crypto',
+      'security',
+      'permission',
+      'role',
+      'access',
+      'cors',
     ];
 
-    const securityFiles = files.filter(file =>
-      securityKeywords.some(keyword => file.toLowerCase().includes(keyword))
+    const securityFiles = files.filter((file) =>
+      securityKeywords.some((keyword) => file.toLowerCase().includes(keyword)),
     );
 
     if (securityFiles.length > 0) {
@@ -483,8 +553,8 @@ export class PRRiskScorer {
 
     // Check PR description for security context
     const titleDesc = `${title} ${description}`.toLowerCase();
-    const securityMentioned = securityKeywords.some(keyword => 
-      titleDesc.includes(keyword)
+    const securityMentioned = securityKeywords.some((keyword) =>
+      titleDesc.includes(keyword),
     );
 
     if (securityMentioned) {
@@ -498,7 +568,7 @@ export class PRRiskScorer {
       score,
       evidence,
       confidence: 0.8,
-      category: 'security'
+      category: 'security',
     };
   }
 
@@ -509,8 +579,10 @@ export class PRRiskScorer {
 
     // Check PR title format
     const hasIssueReference = /\b(fixes|closes|resolves)\s+#\d+/i.test(title);
-    const hasConventionalCommits = commits.some(commit => 
-      /^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+/.test(commit.message)
+    const hasConventionalCommits = commits.some((commit) =>
+      /^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+/.test(
+        commit.message,
+      ),
     );
 
     if (!hasIssueReference) {
@@ -536,7 +608,7 @@ export class PRRiskScorer {
       score: Math.min(100, score),
       evidence,
       confidence: 0.6,
-      category: 'process'
+      category: 'process',
     };
   }
 
@@ -571,7 +643,7 @@ export class PRRiskScorer {
       score,
       evidence,
       confidence: 0.8,
-      category: 'process'
+      category: 'process',
     };
   }
 
@@ -581,8 +653,8 @@ export class PRRiskScorer {
     let score = 30;
 
     // Database migrations
-    const hasMigrations = files.some(file => 
-      file.includes('migration') || file.includes('schema')
+    const hasMigrations = files.some(
+      (file) => file.includes('migration') || file.includes('schema'),
     );
 
     if (hasMigrations) {
@@ -591,8 +663,11 @@ export class PRRiskScorer {
     }
 
     // Infrastructure changes
-    const hasInfraChanges = files.some(file =>
-      file.includes('docker') || file.includes('k8s') || file.includes('terraform')
+    const hasInfraChanges = files.some(
+      (file) =>
+        file.includes('docker') ||
+        file.includes('k8s') ||
+        file.includes('terraform'),
     );
 
     if (hasInfraChanges) {
@@ -612,18 +687,20 @@ export class PRRiskScorer {
       score,
       evidence,
       confidence: 0.7,
-      category: 'business'
+      category: 'business',
     };
   }
 
   private generateRecommendation(
-    overall: number, 
-    factors: RiskFactor[]
+    overall: number,
+    factors: RiskFactor[],
   ): 'auto-merge' | 'review-recommended' | 'manual-review' | 'block' {
     // Check for blocking factors
-    const criticalFactors = factors.filter(f => 
-      f.score > 80 && f.confidence > 0.8 && 
-      (f.category === 'security' || f.category === 'business')
+    const criticalFactors = factors.filter(
+      (f) =>
+        f.score > 80 &&
+        f.confidence > 0.8 &&
+        (f.category === 'security' || f.category === 'business'),
     );
 
     if (criticalFactors.length > 0) {
@@ -649,7 +726,7 @@ export class PRRiskScorer {
     const evidence = {
       positive: [] as string[],
       negative: [] as string[],
-      neutral: [] as string[]
+      neutral: [] as string[],
     };
 
     for (const factor of factors) {
@@ -669,36 +746,39 @@ export class PRRiskScorer {
     const scoresDir = join(this.projectRoot, '.maestro', 'risk-scores');
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `risk-score-${score.metadata.prNumber || 'unknown'}-${timestamp}.json`;
-    
+
     try {
       const { mkdir } = await import('fs/promises');
       await mkdir(scoresDir, { recursive: true });
       await writeFile(
         join(scoresDir, filename),
-        JSON.stringify(score, null, 2)
+        JSON.stringify(score, null, 2),
       );
     } catch (error) {
       console.warn('Failed to persist risk score:', error);
     }
   }
 
-  async getHistoricalRiskScores(author?: string, days: number = 30): Promise<RiskScore[]> {
+  async getHistoricalRiskScores(
+    author?: string,
+    days: number = 30,
+  ): Promise<RiskScore[]> {
     try {
       const scoresDir = join(this.projectRoot, '.maestro', 'risk-scores');
       await access(scoresDir);
-      
+
       const { readdir } = await import('fs/promises');
       const files = await readdir(scoresDir);
-      
+
       const scores: RiskScore[] = [];
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - days);
-      
-      for (const file of files.filter(f => f.endsWith('.json'))) {
+
+      for (const file of files.filter((f) => f.endsWith('.json'))) {
         try {
           const content = await readFile(join(scoresDir, file), 'utf8');
           const score: RiskScore = JSON.parse(content);
-          
+
           const scoreDate = new Date(score.metadata.timestamp);
           if (scoreDate >= cutoff) {
             if (!author || score.metadata.author === author) {
@@ -706,12 +786,17 @@ export class PRRiskScorer {
             }
           }
         } catch (error) {
-          console.warn(`Failed to load risk score from ${file}:`, error.message);
+          console.warn(
+            `Failed to load risk score from ${file}:`,
+            error.message,
+          );
         }
       }
-      
-      return scores.sort((a, b) => 
-        new Date(b.metadata.timestamp).getTime() - new Date(a.metadata.timestamp).getTime()
+
+      return scores.sort(
+        (a, b) =>
+          new Date(b.metadata.timestamp).getTime() -
+          new Date(a.metadata.timestamp).getTime(),
       );
     } catch {
       return [];

@@ -1,1 +1,3 @@
-export function dataConvergence(config) { return { convergence: 'Data Convergence Placeholder' }; }
+export function dataConvergence(config) {
+  return { convergence: 'Data Convergence Placeholder' };
+}

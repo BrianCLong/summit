@@ -1,1 +1,3 @@
-export function truthSync(config) { return { sync: 'Truth Sync Placeholder' }; }
+export function truthSync(config) {
+  return { sync: 'Truth Sync Placeholder' };
+}

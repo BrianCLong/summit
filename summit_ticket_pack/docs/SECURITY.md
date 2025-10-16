@@ -1,5 +1,6 @@
 # Security Policy
-- **Supported branches:** main, release/*
+
+- **Supported branches:** main, release/\*
 - **Report vulnerabilities:** security@yourdomain.example (PGP preferred)
 - **Secret handling:** SOPS + age (see .sops.yaml); no plaintext secrets in repo.
 - **CI gates:** SBOM (Syft), vuln scan (Grype/Trivy), IaC scans (Checkov/TFLint), CodeQL.

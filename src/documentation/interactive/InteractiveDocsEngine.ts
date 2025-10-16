@@ -1,6 +1,6 @@
 /**
  * Interactive Documentation Engine
- * 
+ *
  * Creates rich, interactive documentation experiences with:
  * - Live code examples and playgrounds
  * - Interactive API testing
@@ -182,7 +182,6 @@ export class InteractiveDocsEngine extends EventEmitter {
 
       console.log('✅ Interactive documentation engine initialized');
       this.emit('initialized');
-
     } catch (error) {
       console.error('❌ Failed to initialize interactive engine:', error);
       throw error;
@@ -211,12 +210,12 @@ export class InteractiveDocsEngine extends EventEmitter {
   public async startSession(
     type: 'code' | 'api' | 'tutorial',
     contentId: string,
-    userId?: string
+    userId?: string,
   ): Promise<InteractiveSession> {
     const sessionId = this.generateSessionId();
-    
+
     let initialState: any = {};
-    
+
     if (type === 'code') {
       const example = this.codeExamples.get(contentId);
       if (!example) throw new Error(`Code example ${contentId} not found`);
@@ -234,10 +233,10 @@ export class InteractiveDocsEngine extends EventEmitter {
         currentCode: initialState.currentCode || '',
         output: '',
         errors: [],
-        variables: {}
+        variables: {},
       },
       participants: userId ? [userId] : [],
-      comments: []
+      comments: [],
     };
 
     this.activeSessions.set(sessionId, session);
@@ -252,20 +251,26 @@ export class InteractiveDocsEngine extends EventEmitter {
   /**
    * Execute code in sandbox
    */
-  public async executeCode(sessionId: string, code: string): Promise<ExecutionResult> {
+  public async executeCode(
+    sessionId: string,
+    code: string,
+  ): Promise<ExecutionResult> {
     const session = this.activeSessions.get(sessionId);
     if (!session) throw new Error(`Session ${sessionId} not found`);
 
     try {
       // Validate code if enabled
       if (this.config.enableCodeValidation) {
-        const validation = await this.validationEngine.validate(code, session.contentId);
+        const validation = await this.validationEngine.validate(
+          code,
+          session.contentId,
+        );
         if (!validation.valid) {
           return {
             success: false,
             output: '',
             errors: validation.errors,
-            executionTime: 0
+            executionTime: 0,
           };
         }
       }
@@ -286,18 +291,17 @@ export class InteractiveDocsEngine extends EventEmitter {
         errors: result.errors,
         executionTime,
         console: result.console,
-        variables: result.variables
+        variables: result.variables,
       };
 
       this.emit('code_executed', sessionId, executionResult);
       return executionResult;
-
     } catch (error) {
       const executionResult: ExecutionResult = {
         success: false,
         output: '',
         errors: [error.message],
-        executionTime: 0
+        executionTime: 0,
       };
 
       this.emit('code_execution_error', sessionId, error);
@@ -310,7 +314,7 @@ export class InteractiveDocsEngine extends EventEmitter {
    */
   public async testAPIEndpoint(
     sessionId: string,
-    request: APIRequest
+    request: APIRequest,
   ): Promise<APIResponse> {
     const session = this.activeSessions.get(sessionId);
     if (!session) throw new Error(`Session ${sessionId} not found`);
@@ -320,19 +324,18 @@ export class InteractiveDocsEngine extends EventEmitter {
 
     try {
       const response = await this.makeAPIRequest(sandbox, request);
-      
+
       session.lastActivity = new Date();
       this.emit('api_tested', sessionId, response);
-      
-      return response;
 
+      return response;
     } catch (error) {
       const errorResponse: APIResponse = {
         status: 0,
         statusText: 'Request Failed',
         headers: {},
         data: { error: error.message },
-        executionTime: 0
+        executionTime: 0,
       };
 
       this.emit('api_test_error', sessionId, error);
@@ -348,7 +351,7 @@ export class InteractiveDocsEngine extends EventEmitter {
     userId: string,
     userName: string,
     content: string,
-    lineNumber?: number
+    lineNumber?: number,
   ): Promise<Comment> {
     const session = this.activeSessions.get(sessionId);
     if (!session) throw new Error(`Session ${sessionId} not found`);
@@ -361,7 +364,7 @@ export class InteractiveDocsEngine extends EventEmitter {
       lineNumber,
       timestamp: new Date(),
       replies: [],
-      resolved: false
+      resolved: false,
     };
 
     session.comments.push(comment);
@@ -387,7 +390,10 @@ export class InteractiveDocsEngine extends EventEmitter {
   /**
    * Start guided tour
    */
-  public async startGuidedTour(tourId: string, userId?: string): Promise<TourSession> {
+  public async startGuidedTour(
+    tourId: string,
+    userId?: string,
+  ): Promise<TourSession> {
     const tour = this.guidedTours.get(tourId);
     if (!tour) throw new Error(`Guided tour ${tourId} not found`);
 
@@ -400,7 +406,7 @@ export class InteractiveDocsEngine extends EventEmitter {
       startedAt: new Date(),
       completedSteps: [],
       progress: 0,
-      state: {}
+      state: {},
     };
 
     this.emit('guided_tour_started', tourSession);
@@ -413,10 +419,10 @@ export class InteractiveDocsEngine extends EventEmitter {
   public generateEmbeddableWidget(
     type: 'code' | 'api' | 'tour',
     contentId: string,
-    options: EmbedOptions = {}
+    options: EmbedOptions = {},
   ): string {
     const widgetId = `interactive-widget-${Date.now()}`;
-    
+
     const config = {
       type,
       contentId,
@@ -425,10 +431,15 @@ export class InteractiveDocsEngine extends EventEmitter {
       height: options.height || 400,
       width: options.width || '100%',
       features: {
-        liveEditing: options.enableLiveEditing !== false && this.config.enableLiveEditing,
-        collaboration: options.enableCollaboration !== false && this.config.enableCollaboration,
-        validation: options.enableValidation !== false && this.config.enableCodeValidation
-      }
+        liveEditing:
+          options.enableLiveEditing !== false && this.config.enableLiveEditing,
+        collaboration:
+          options.enableCollaboration !== false &&
+          this.config.enableCollaboration,
+        validation:
+          options.enableValidation !== false &&
+          this.config.enableCodeValidation,
+      },
     };
 
     return `
@@ -457,21 +468,22 @@ export class InteractiveDocsEngine extends EventEmitter {
   public async getSessionAnalytics(
     startDate: Date,
     endDate: Date,
-    filters?: { [key: string]: any }
+    filters?: { [key: string]: any },
   ): Promise<SessionAnalytics> {
     const sessions = Array.from(this.activeSessions.values()).filter(
-      session => session.createdAt >= startDate && session.createdAt <= endDate
+      (session) =>
+        session.createdAt >= startDate && session.createdAt <= endDate,
     );
 
     return {
       totalSessions: sessions.length,
-      uniqueUsers: new Set(sessions.map(s => s.userId).filter(Boolean)).size,
+      uniqueUsers: new Set(sessions.map((s) => s.userId).filter(Boolean)).size,
       averageSessionDuration: this.calculateAverageSessionDuration(sessions),
       codeExecutions: await this.getCodeExecutionStats(sessions),
       apiTests: await this.getAPITestStats(sessions),
       mostPopularExamples: await this.getMostPopularExamples(sessions),
       userEngagement: await this.getUserEngagementMetrics(sessions),
-      errorRates: await this.getErrorRates(sessions)
+      errorRates: await this.getErrorRates(sessions),
     };
   }
 
@@ -484,10 +496,13 @@ export class InteractiveDocsEngine extends EventEmitter {
     return 'comment_' + Math.random().toString(36).substring(2, 15);
   }
 
-  private async runCode(code: string, session: InteractiveSession): Promise<any> {
+  private async runCode(
+    code: string,
+    session: InteractiveSession,
+  ): Promise<any> {
     // This would integrate with actual code execution environment
     // For security, this should run in isolated sandboxes
-    
+
     switch (this.config.sandboxProvider) {
       case 'codesandbox':
         return await this.runInCodeSandbox(code, session);
@@ -496,54 +511,68 @@ export class InteractiveDocsEngine extends EventEmitter {
       case 'custom':
         return await this.runInCustomSandbox(code, session);
       default:
-        throw new Error(`Unsupported sandbox provider: ${this.config.sandboxProvider}`);
+        throw new Error(
+          `Unsupported sandbox provider: ${this.config.sandboxProvider}`,
+        );
     }
   }
 
-  private async runInCodeSandbox(code: string, session: InteractiveSession): Promise<any> {
+  private async runInCodeSandbox(
+    code: string,
+    session: InteractiveSession,
+  ): Promise<any> {
     // CodeSandbox integration
     return {
       success: true,
       output: 'Code executed successfully',
       errors: [],
       console: [],
-      variables: {}
+      variables: {},
     };
   }
 
-  private async runInStackBlitz(code: string, session: InteractiveSession): Promise<any> {
+  private async runInStackBlitz(
+    code: string,
+    session: InteractiveSession,
+  ): Promise<any> {
     // StackBlitz integration
     return {
       success: true,
       output: 'Code executed successfully',
       errors: [],
       console: [],
-      variables: {}
+      variables: {},
     };
   }
 
-  private async runInCustomSandbox(code: string, session: InteractiveSession): Promise<any> {
+  private async runInCustomSandbox(
+    code: string,
+    session: InteractiveSession,
+  ): Promise<any> {
     // Custom sandbox implementation
     return {
       success: true,
       output: 'Code executed successfully',
       errors: [],
       console: [],
-      variables: {}
+      variables: {},
     };
   }
 
-  private async makeAPIRequest(sandbox: APISandbox, request: APIRequest): Promise<APIResponse> {
+  private async makeAPIRequest(
+    sandbox: APISandbox,
+    request: APIRequest,
+  ): Promise<APIResponse> {
     const startTime = Date.now();
-    
+
     try {
       const response = await fetch(sandbox.apiEndpoint, {
         method: sandbox.method,
         headers: {
           ...sandbox.headers,
-          ...request.headers
+          ...request.headers,
         },
-        body: request.body ? JSON.stringify(request.body) : undefined
+        body: request.body ? JSON.stringify(request.body) : undefined,
       });
 
       const data = await response.json();
@@ -554,9 +583,8 @@ export class InteractiveDocsEngine extends EventEmitter {
         statusText: response.statusText,
         headers: Object.fromEntries(response.headers.entries()),
         data,
-        executionTime
+        executionTime,
       };
-
     } catch (error) {
       throw new Error(`API request failed: ${error.message}`);
     }
@@ -566,7 +594,7 @@ export class InteractiveDocsEngine extends EventEmitter {
     setInterval(() => {
       const now = Date.now();
       const timeout = this.config.sessionTimeout;
-      
+
       for (const [sessionId, session] of this.activeSessions) {
         if (now - session.lastActivity.getTime() > timeout) {
           this.activeSessions.delete(sessionId);
@@ -594,18 +622,22 @@ export class InteractiveDocsEngine extends EventEmitter {
   }
 
   // Analytics helper methods
-  private calculateAverageSessionDuration(sessions: InteractiveSession[]): number {
+  private calculateAverageSessionDuration(
+    sessions: InteractiveSession[],
+  ): number {
     if (sessions.length === 0) return 0;
-    
+
     const totalDuration = sessions.reduce((sum, session) => {
       const endTime = session.lastActivity || new Date();
       return sum + (endTime.getTime() - session.createdAt.getTime());
     }, 0);
-    
+
     return totalDuration / sessions.length;
   }
 
-  private async getCodeExecutionStats(sessions: InteractiveSession[]): Promise<any> {
+  private async getCodeExecutionStats(
+    sessions: InteractiveSession[],
+  ): Promise<any> {
     // Implementation for code execution statistics
     return {};
   }
@@ -615,12 +647,16 @@ export class InteractiveDocsEngine extends EventEmitter {
     return {};
   }
 
-  private async getMostPopularExamples(sessions: InteractiveSession[]): Promise<any> {
+  private async getMostPopularExamples(
+    sessions: InteractiveSession[],
+  ): Promise<any> {
     // Implementation for popularity metrics
     return {};
   }
 
-  private async getUserEngagementMetrics(sessions: InteractiveSession[]): Promise<any> {
+  private async getUserEngagementMetrics(
+    sessions: InteractiveSession[],
+  ): Promise<any> {
     // Implementation for engagement metrics
     return {};
   }
@@ -652,7 +688,7 @@ class CodeValidationEngine {
       valid: true,
       errors: [],
       warnings: [],
-      suggestions: []
+      suggestions: [],
     };
   }
 }

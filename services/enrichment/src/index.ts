@@ -10,7 +10,10 @@ import { normalize } from './normalizer.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const quotaPath = path.resolve(__dirname, '../../../ops/enrichment/quota.json');
-const breakerPath = path.resolve(__dirname, '../../../ops/enrichment/circuit-breaker.json');
+const breakerPath = path.resolve(
+  __dirname,
+  '../../../ops/enrichment/circuit-breaker.json',
+);
 const quotaConfig = JSON.parse(readFileSync(quotaPath, 'utf8'));
 const breakerConfig = JSON.parse(readFileSync(breakerPath, 'utf8'));
 
@@ -25,7 +28,10 @@ for (const [provider, cfg] of Object.entries(quotaConfig)) {
   buckets.set(provider, new TokenBucket(cfg.capacity, cfg.refillPerSecond));
 }
 for (const [provider, cfg] of Object.entries(breakerConfig)) {
-  breakers.set(provider, new CircuitBreaker(cfg.failureThreshold, cfg.resetTimeoutMs));
+  breakers.set(
+    provider,
+    new CircuitBreaker(cfg.failureThreshold, cfg.resetTimeoutMs),
+  );
 }
 
 function signKey(key: string) {
@@ -42,7 +48,10 @@ async function setCache(key: string, value: unknown) {
   await redis.set(signKey(key), JSON.stringify(value), { EX: 3600 });
 }
 
-async function fetchWithRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
+async function fetchWithRetry<T>(
+  fn: () => Promise<T>,
+  retries = 3,
+): Promise<T> {
   let attempt = 0;
   while (true) {
     try {
@@ -82,7 +91,9 @@ async function processJob(jobId: string, body: any) {
       results.push({ ...cached, source: 'cache' });
       continue;
     }
-    const res = await fetchWithRetry(() => callProvider(item.provider, item.query));
+    const res = await fetchWithRetry(() =>
+      callProvider(item.provider, item.query),
+    );
     await setCache(cacheKey, res);
     results.push(res);
   }

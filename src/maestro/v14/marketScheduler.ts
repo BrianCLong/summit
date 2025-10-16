@@ -98,7 +98,7 @@ export class MarketScheduler extends EventEmitter {
       pricePerUnit: 0.002, // $0.002 per 1k tokens
       carbonPerUnit: 0.001, // 1g CO2e per 1k tokens
       region: 'us-east-1',
-      queueLength: 0
+      queueLength: 0,
     });
 
     // CI Compute Pool
@@ -109,7 +109,7 @@ export class MarketScheduler extends EventEmitter {
       pricePerUnit: 0.008, // $0.008 per minute
       carbonPerUnit: 0.5, // 0.5g CO2e per minute
       region: 'us-east-1',
-      queueLength: 0
+      queueLength: 0,
     });
 
     // GPU Pool
@@ -117,10 +117,10 @@ export class MarketScheduler extends EventEmitter {
       type: 'gpu',
       available: 120, // 120 GPU minutes
       total: 120,
-      pricePerUnit: 0.50, // $0.50 per GPU minute
+      pricePerUnit: 0.5, // $0.50 per GPU minute
       carbonPerUnit: 2.0, // 2g CO2e per GPU minute
       region: 'us-east-1',
-      queueLength: 0
+      queueLength: 0,
     });
   }
 
@@ -131,18 +131,18 @@ export class MarketScheduler extends EventEmitter {
       floor: {
         llmTokens: 50000, // 50k tokens floor
         ciMinutes: 30,
-        gpuMinutes: 10
+        gpuMinutes: 10,
       },
       ceiling: {
         llmTokens: 500000, // 500k tokens ceiling
         ciMinutes: 180,
-        gpuMinutes: 60
+        gpuMinutes: 60,
       },
       used: {
         llmTokens: 0,
         ciMinutes: 0,
-        gpuMinutes: 0
-      }
+        gpuMinutes: 0,
+      },
     });
 
     // Enterprise tenant
@@ -151,26 +151,29 @@ export class MarketScheduler extends EventEmitter {
       floor: {
         llmTokens: 200000,
         ciMinutes: 120,
-        gpuMinutes: 40
+        gpuMinutes: 40,
       },
       ceiling: {
         llmTokens: 2000000,
         ciMinutes: 600,
-        gpuMinutes: 200
+        gpuMinutes: 200,
       },
       used: {
         llmTokens: 0,
         ciMinutes: 0,
-        gpuMinutes: 0
-      }
+        gpuMinutes: 0,
+      },
     });
   }
 
   private startAuctionTimer(): void {
     // Run sealed-bid auctions every 5 minutes
-    this.auctionInterval = setInterval(() => {
-      this.runSealedBidAuction();
-    }, 5 * 60 * 1000);
+    this.auctionInterval = setInterval(
+      () => {
+        this.runSealedBidAuction();
+      },
+      5 * 60 * 1000,
+    );
   }
 
   /**
@@ -189,7 +192,7 @@ export class MarketScheduler extends EventEmitter {
   }): Promise<BidResult> {
     const bidId = `bid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const tenantId = bidData.tenantId || 'default';
-    
+
     // Check tenant quotas
     const quotaCheck = this.checkTenantQuotas(tenantId, bidData.resourceNeeds);
     if (!quotaCheck.allowed) {
@@ -200,7 +203,7 @@ export class MarketScheduler extends EventEmitter {
         totalCost: 0,
         reason: quotaCheck.reason,
         allocation: { llmTokens: 0, ciMinutes: 0, gpuMinutes: 0 },
-        estimatedDelay: 0
+        estimatedDelay: 0,
       };
     }
 
@@ -211,9 +214,12 @@ export class MarketScheduler extends EventEmitter {
       bidder: tenantId,
       valueEstimate: bidData.valueEstimate,
       resourceNeeds: bidData.resourceNeeds,
-      maxPrice: this.calculateMaxPrice(bidData.valueEstimate, bidData.resourceNeeds),
+      maxPrice: this.calculateMaxPrice(
+        bidData.valueEstimate,
+        bidData.resourceNeeds,
+      ),
       priority: bidData.priority || 'medium',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     // For high-priority bids, try immediate allocation
@@ -235,13 +241,13 @@ export class MarketScheduler extends EventEmitter {
       totalCost: 0,
       reason: 'Bid queued for next auction',
       allocation: { llmTokens: 0, ciMinutes: 0, gpuMinutes: 0 },
-      estimatedDelay: this.estimateDelay(bid)
+      estimatedDelay: this.estimateDelay(bid),
     };
   }
 
   private checkTenantQuotas(
-    tenantId: string, 
-    needs: { llmTokens: number; ciMinutes: number; gpuMinutes: number }
+    tenantId: string,
+    needs: { llmTokens: number; ciMinutes: number; gpuMinutes: number },
   ): { allowed: boolean; reason?: string } {
     const quota = this.tenantQuotas.get(tenantId);
     if (!quota) {
@@ -266,14 +272,14 @@ export class MarketScheduler extends EventEmitter {
     // Value density = ROI / Cost
     const estimatedCost = this.estimateResourceCost(needs);
     const roi = valueEstimate / Math.max(estimatedCost, 0.01);
-    
+
     // Max price is 80% of value estimate
     return Math.min(valueEstimate * 0.8, roi * estimatedCost);
   }
 
   private estimateResourceCost(needs: any): number {
     let cost = 0;
-    
+
     // LLM cost
     const llmPool = this.resourcePools.get('llm-us-east');
     if (llmPool) {
@@ -308,7 +314,7 @@ export class MarketScheduler extends EventEmitter {
     if (hasLLM && hasCI && hasGPU) {
       // Allocate immediately at current prices
       const cost = this.calculateCost(bid.resourceNeeds);
-      
+
       // Reserve resources
       llmPool.available -= bid.resourceNeeds.llmTokens;
       ciPool.available -= bid.resourceNeeds.ciMinutes;
@@ -326,7 +332,7 @@ export class MarketScheduler extends EventEmitter {
         totalCost: cost.total,
         carbonCost: cost.carbon,
         allocation: bid.resourceNeeds,
-        estimatedDelay: 0
+        estimatedDelay: 0,
       };
     }
 
@@ -337,11 +343,15 @@ export class MarketScheduler extends EventEmitter {
       totalCost: 0,
       reason: 'Insufficient immediate capacity',
       allocation: { llmTokens: 0, ciMinutes: 0, gpuMinutes: 0 },
-      estimatedDelay: this.estimateDelay(bid)
+      estimatedDelay: this.estimateDelay(bid),
     };
   }
 
-  private calculateCost(needs: any): { price: number; total: number; carbon: number } {
+  private calculateCost(needs: any): {
+    price: number;
+    total: number;
+    carbon: number;
+  } {
     const llmPool = this.resourcePools.get('llm-us-east')!;
     const ciPool = this.resourcePools.get('ci-us-east')!;
     const gpuPool = this.resourcePools.get('gpu-us-east')!;
@@ -360,7 +370,7 @@ export class MarketScheduler extends EventEmitter {
     return {
       price: total,
       total,
-      carbon
+      carbon,
     };
   }
 
@@ -371,9 +381,15 @@ export class MarketScheduler extends EventEmitter {
     const gpuPool = this.resourcePools.get('gpu-us-east')!;
 
     // Calculate bottleneck resource
-    const llmWait = Math.max(0, (bid.resourceNeeds.llmTokens - llmPool.available) / 10000); // 10k tokens per minute
+    const llmWait = Math.max(
+      0,
+      (bid.resourceNeeds.llmTokens - llmPool.available) / 10000,
+    ); // 10k tokens per minute
     const ciWait = Math.max(0, bid.resourceNeeds.ciMinutes - ciPool.available);
-    const gpuWait = Math.max(0, bid.resourceNeeds.gpuMinutes - gpuPool.available);
+    const gpuWait = Math.max(
+      0,
+      bid.resourceNeeds.gpuMinutes - gpuPool.available,
+    );
 
     return Math.max(llmWait, ciWait, gpuWait) * 60; // Convert to seconds
   }
@@ -393,7 +409,7 @@ export class MarketScheduler extends EventEmitter {
   private async runSealedBidAuction(): Promise<void> {
     const auctionId = `auction-${Date.now()}`;
     const startTime = Date.now();
-    
+
     // Get all active bids
     const bids = Array.from(this.activeBids.values());
     if (bids.length === 0) return;
@@ -405,7 +421,7 @@ export class MarketScheduler extends EventEmitter {
       bids,
       winners: [],
       clearingPrice: {},
-      fairnessIndex: 0
+      fairnessIndex: 0,
     };
 
     // Clear active bids
@@ -418,13 +434,18 @@ export class MarketScheduler extends EventEmitter {
       const gpuResults = this.runVickreyAuction(bids, 'gpuMinutes');
 
       // Determine winners (bids that win all needed resources)
-      const winners = this.determineAuctionWinners(bids, llmResults, ciResults, gpuResults);
-      
+      const winners = this.determineAuctionWinners(
+        bids,
+        llmResults,
+        ciResults,
+        gpuResults,
+      );
+
       // Calculate clearing prices
       const clearingPrice = {
         llm: llmResults.price || 0,
         ci: ciResults.price || 0,
-        gpu: gpuResults.price || 0
+        gpu: gpuResults.price || 0,
       };
 
       // Calculate fairness index
@@ -432,7 +453,7 @@ export class MarketScheduler extends EventEmitter {
 
       // Update auction results
       this.currentAuction.endTime = Date.now();
-      this.currentAuction.winners = winners.map(w => w.id);
+      this.currentAuction.winners = winners.map((w) => w.id);
       this.currentAuction.clearingPrice = clearingPrice;
       this.currentAuction.fairnessIndex = fairnessIndex;
 
@@ -452,9 +473,8 @@ export class MarketScheduler extends EventEmitter {
         winners: winners.length,
         totalBids: bids.length,
         clearingPrice,
-        fairnessIndex
+        fairnessIndex,
       });
-
     } catch (error) {
       this.emit('auctionError', { auctionId, error: error.message });
     }
@@ -466,29 +486,32 @@ export class MarketScheduler extends EventEmitter {
    * Vickrey auction implementation for a specific resource
    */
   private runVickreyAuction(
-    bids: ResourceBid[], 
-    resourceType: 'llmTokens' | 'ciMinutes' | 'gpuMinutes'
+    bids: ResourceBid[],
+    resourceType: 'llmTokens' | 'ciMinutes' | 'gpuMinutes',
   ): { winner: ResourceBid | null; price: number } {
     // Filter bids that need this resource
-    const relevantBids = bids.filter(bid => bid.resourceNeeds[resourceType] > 0);
+    const relevantBids = bids.filter(
+      (bid) => bid.resourceNeeds[resourceType] > 0,
+    );
     if (relevantBids.length === 0) return { winner: null, price: 0 };
 
     // Sort by value density (value per unit of resource)
     const sortedBids = relevantBids
-      .map(bid => ({
+      .map((bid) => ({
         bid,
-        density: bid.valueEstimate / bid.resourceNeeds[resourceType]
+        density: bid.valueEstimate / bid.resourceNeeds[resourceType],
       }))
       .sort((a, b) => b.density - a.density);
 
     if (sortedBids.length === 0) return { winner: null, price: 0 };
 
     const winner = sortedBids[0].bid;
-    const secondPrice = sortedBids.length > 1 ? sortedBids[1].density : sortedBids[0].density;
+    const secondPrice =
+      sortedBids.length > 1 ? sortedBids[1].density : sortedBids[0].density;
 
     return {
       winner,
-      price: secondPrice
+      price: secondPrice,
     };
   }
 
@@ -496,14 +519,17 @@ export class MarketScheduler extends EventEmitter {
     bids: ResourceBid[],
     llmResults: any,
     ciResults: any,
-    gpuResults: any
+    gpuResults: any,
   ): ResourceBid[] {
     const winners: ResourceBid[] = [];
 
     for (const bid of bids) {
-      const winsLLM = !bid.resourceNeeds.llmTokens || llmResults.winner?.id === bid.id;
-      const winsCI = !bid.resourceNeeds.ciMinutes || ciResults.winner?.id === bid.id;
-      const winsGPU = !bid.resourceNeeds.gpuMinutes || gpuResults.winner?.id === bid.id;
+      const winsLLM =
+        !bid.resourceNeeds.llmTokens || llmResults.winner?.id === bid.id;
+      const winsCI =
+        !bid.resourceNeeds.ciMinutes || ciResults.winner?.id === bid.id;
+      const winsGPU =
+        !bid.resourceNeeds.gpuMinutes || gpuResults.winner?.id === bid.id;
 
       if (winsLLM && winsCI && winsGPU) {
         winners.push(bid);
@@ -513,7 +539,10 @@ export class MarketScheduler extends EventEmitter {
     return winners;
   }
 
-  private calculateFairnessIndex(bids: ResourceBid[], winners: ResourceBid[]): number {
+  private calculateFairnessIndex(
+    bids: ResourceBid[],
+    winners: ResourceBid[],
+  ): number {
     // Jain's fairness index
     if (bids.length === 0) return 1.0;
 
@@ -544,12 +573,15 @@ export class MarketScheduler extends EventEmitter {
     return (sum * sum) / (ratios.length * sumSquares);
   }
 
-  private async allocateResourcesToWinner(winner: ResourceBid, clearingPrice: any): Promise<void> {
+  private async allocateResourcesToWinner(
+    winner: ResourceBid,
+    clearingPrice: any,
+  ): Promise<void> {
     // Calculate final cost
     const cost = {
       llm: (winner.resourceNeeds.llmTokens / 1000) * clearingPrice.llm,
       ci: winner.resourceNeeds.ciMinutes * clearingPrice.ci,
-      gpu: winner.resourceNeeds.gpuMinutes * clearingPrice.gpu
+      gpu: winner.resourceNeeds.gpuMinutes * clearingPrice.gpu,
     };
 
     const totalCost = cost.llm + cost.ci + cost.gpu;
@@ -572,7 +604,7 @@ export class MarketScheduler extends EventEmitter {
       tenant: winner.bidder,
       allocation: winner.resourceNeeds,
       cost: totalCost,
-      clearingPrice
+      clearingPrice,
     });
   }
 
@@ -624,7 +656,10 @@ export class MarketScheduler extends EventEmitter {
     } else {
       this.tenantQuotas.set(tenantId, quotaUpdate as TenantQuota);
     }
-    this.emit('tenantQuotaUpdated', { tenantId, quota: this.tenantQuotas.get(tenantId) });
+    this.emit('tenantQuotaUpdated', {
+      tenantId,
+      quota: this.tenantQuotas.get(tenantId),
+    });
   }
 
   /**

@@ -51,11 +51,12 @@ export interface WebAuthnMiddlewareConfig {
  * WebAuthn middleware for Express applications
  */
 export class WebAuthnMiddleware {
-  private attemptCounts: Map<string, { count: number; resetAt: Date }> = new Map();
+  private attemptCounts: Map<string, { count: number; resetAt: Date }> =
+    new Map();
 
   constructor(
     private webauthnManager: WebAuthnManager,
-    private config: WebAuthnMiddlewareConfig
+    private config: WebAuthnMiddlewareConfig,
   ) {
     this.startCleanupTask();
   }
@@ -63,7 +64,11 @@ export class WebAuthnMiddleware {
   /**
    * Main WebAuthn middleware
    */
-  middleware = async (req: WebAuthnRequest, res: Response, next: NextFunction): Promise<void> => {
+  middleware = async (
+    req: WebAuthnRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       // Skip middleware for excluded paths
       if (this.shouldSkipPath(req.path)) {
@@ -74,20 +79,20 @@ export class WebAuthnMiddleware {
       if (!this.checkRateLimit(req)) {
         return res.status(429).json({
           error: 'Too many authentication attempts',
-          code: 'RATE_LIMITED'
+          code: 'RATE_LIMITED',
         });
       }
 
       // Extract session information
       const sessionId = this.extractSessionId(req);
-      
+
       if (!sessionId) {
         return this.handleMissingSession(req, res, next);
       }
 
       // Get session details
       const session = this.webauthnManager.getSession(sessionId);
-      
+
       if (!session) {
         return this.handleInvalidSession(req, res, next);
       }
@@ -98,7 +103,7 @@ export class WebAuthnMiddleware {
         userId: session.userId,
         isElevated: session.isElevated,
         elevationLevel: session.elevationLevel,
-        riskScore: session.riskScore
+        riskScore: session.riskScore,
       };
 
       // Add step-up helper function to request
@@ -108,7 +113,7 @@ export class WebAuthnMiddleware {
 
       // Check if current path requires step-up
       const stepUpRequired = await this.checkPathStepUpRequirement(req);
-      
+
       if (stepUpRequired.required && !stepUpRequired.satisfied) {
         req.webauthn.requiresStepUp = true;
         req.webauthn.stepUpReason = stepUpRequired.reason;
@@ -120,12 +125,11 @@ export class WebAuthnMiddleware {
 
       // Continue to next middleware
       next();
-
     } catch (error) {
       console.error('WebAuthn middleware error:', error);
       res.status(500).json({
         error: 'Internal authentication error',
-        code: 'WEBAUTHN_ERROR'
+        code: 'WEBAUTHN_ERROR',
       });
     }
   };
@@ -133,11 +137,15 @@ export class WebAuthnMiddleware {
   /**
    * Require authentication middleware (must have valid session)
    */
-  requireAuth = (req: WebAuthnRequest, res: Response, next: NextFunction): void => {
+  requireAuth = (
+    req: WebAuthnRequest,
+    res: Response,
+    next: NextFunction,
+  ): void => {
     if (!req.webauthn?.sessionId) {
       return res.status(401).json({
         error: 'Authentication required',
-        code: 'AUTHENTICATION_REQUIRED'
+        code: 'AUTHENTICATION_REQUIRED',
       });
     }
 
@@ -148,7 +156,11 @@ export class WebAuthnMiddleware {
    * Require elevation middleware (must have elevated session)
    */
   requireElevation = (level: 'high' | 'critical' = 'high') => {
-    return async (req: WebAuthnRequest, res: Response, next: NextFunction): Promise<void> => {
+    return async (
+      req: WebAuthnRequest,
+      res: Response,
+      next: NextFunction,
+    ): Promise<void> => {
       if (!req.webauthn?.isElevated) {
         return this.handleElevationRequired(req, res, level);
       }
@@ -169,17 +181,21 @@ export class WebAuthnMiddleware {
    * Dynamic step-up middleware based on risk assessment
    */
   requireStepUpIfRisky = (baseRiskLevel: RiskLevel = 'medium') => {
-    return async (req: WebAuthnRequest, res: Response, next: NextFunction): Promise<void> => {
+    return async (
+      req: WebAuthnRequest,
+      res: Response,
+      next: NextFunction,
+    ): Promise<void> => {
       if (!req.webauthn) {
         return res.status(401).json({
           error: 'Authentication context missing',
-          code: 'AUTH_CONTEXT_MISSING'
+          code: 'AUTH_CONTEXT_MISSING',
         });
       }
 
       // Assess if step-up is needed based on risk
       const riskAssessment = await this.assessRequestRisk(req, baseRiskLevel);
-      
+
       if (riskAssessment.requiresStepUp && !req.webauthn.isElevated) {
         req.webauthn.requiresStepUp = true;
         req.webauthn.stepUpReason = riskAssessment.reason;
@@ -189,7 +205,7 @@ export class WebAuthnMiddleware {
           reason: riskAssessment.reason,
           satisfied: false,
           operation: riskAssessment.operation,
-          riskLevel: riskAssessment.riskLevel
+          riskLevel: riskAssessment.riskLevel,
         });
       }
 
@@ -200,17 +216,21 @@ export class WebAuthnMiddleware {
   /**
    * Middleware for high-value operations
    */
-  requireHighValueAuth = async (req: WebAuthnRequest, res: Response, next: NextFunction): Promise<void> => {
+  requireHighValueAuth = async (
+    req: WebAuthnRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     const operation = {
       type: 'high_value_operation',
       riskLevel: 'high' as RiskLevel,
-      resourceId: req.params.id
+      resourceId: req.params.id,
     };
 
     const stepUpNeeded = await this.requireStepUp(req, operation);
-    
+
     if (stepUpNeeded) {
-      req.webauthn = req.webauthn || {} as any;
+      req.webauthn = req.webauthn || ({} as any);
       req.webauthn.requiresStepUp = true;
       req.webauthn.stepUpReason = 'high_value_operation';
 
@@ -219,7 +239,7 @@ export class WebAuthnMiddleware {
         reason: 'high_value_operation',
         satisfied: false,
         operation: operation.type,
-        riskLevel: operation.riskLevel
+        riskLevel: operation.riskLevel,
       });
     }
 
@@ -229,17 +249,21 @@ export class WebAuthnMiddleware {
   /**
    * Middleware for admin operations
    */
-  requireAdminAuth = async (req: WebAuthnRequest, res: Response, next: NextFunction): Promise<void> => {
+  requireAdminAuth = async (
+    req: WebAuthnRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     const operation = {
       type: 'admin_action',
       riskLevel: 'critical' as RiskLevel,
-      resourceId: req.body.resourceId || req.params.id
+      resourceId: req.body.resourceId || req.params.id,
     };
 
     const stepUpNeeded = await this.requireStepUp(req, operation);
-    
+
     if (stepUpNeeded) {
-      req.webauthn = req.webauthn || {} as any;
+      req.webauthn = req.webauthn || ({} as any);
       req.webauthn.requiresStepUp = true;
       req.webauthn.stepUpReason = 'admin_action';
 
@@ -248,7 +272,7 @@ export class WebAuthnMiddleware {
         reason: 'admin_action',
         satisfied: false,
         operation: operation.type,
-        riskLevel: operation.riskLevel
+        riskLevel: operation.riskLevel,
       });
     }
 
@@ -264,15 +288,18 @@ export class WebAuthnMiddleware {
       type: string;
       riskLevel: RiskLevel;
       resourceId?: string;
-    }
+    },
   ): Promise<boolean> {
     if (!req.webauthn?.sessionId) {
       return true; // No session = requires authentication
     }
 
     const sessionId = req.webauthn.sessionId;
-    const result = await this.webauthnManager.requiresStepUp(sessionId, operation);
-    
+    const result = await this.webauthnManager.requiresStepUp(
+      sessionId,
+      operation,
+    );
+
     return result.required;
   }
 
@@ -305,7 +332,7 @@ export class WebAuthnMiddleware {
    * Check if path should skip WebAuthn middleware
    */
   private shouldSkipPath(path: string): boolean {
-    return this.config.skipPaths.some(skipPath => {
+    return this.config.skipPaths.some((skipPath) => {
       if (typeof skipPath === 'string') {
         return path === skipPath;
       }
@@ -320,14 +347,14 @@ export class WebAuthnMiddleware {
     const identifier = req.ip || 'unknown';
     const now = new Date();
     const windowMs = this.config.rateLimit.windowMs;
-    
+
     const entry = this.attemptCounts.get(identifier);
-    
+
     if (!entry || entry.resetAt <= now) {
       // Reset or create new entry
       this.attemptCounts.set(identifier, {
         count: 1,
-        resetAt: new Date(now.getTime() + windowMs)
+        resetAt: new Date(now.getTime() + windowMs),
       });
       return true;
     }
@@ -350,7 +377,7 @@ export class WebAuthnMiddleware {
     operation?: string;
     riskLevel?: RiskLevel;
   }> {
-    const pathConfig = this.config.stepUpPaths.find(config => {
+    const pathConfig = this.config.stepUpPaths.find((config) => {
       if (typeof config.path === 'string') {
         return req.path === config.path;
       }
@@ -364,8 +391,9 @@ export class WebAuthnMiddleware {
     // Path requires step-up, check if session is elevated
     const isElevated = req.webauthn?.isElevated || false;
     const elevationLevel = req.webauthn?.elevationLevel || 'standard';
-    
-    const sufficient = isElevated && 
+
+    const sufficient =
+      isElevated &&
       this.isElevationSufficient(elevationLevel, pathConfig.riskLevel);
 
     return {
@@ -373,7 +401,7 @@ export class WebAuthnMiddleware {
       satisfied: sufficient,
       reason: this.mapOperationToReason(pathConfig.operation),
       operation: pathConfig.operation,
-      riskLevel: pathConfig.riskLevel
+      riskLevel: pathConfig.riskLevel,
     };
   }
 
@@ -382,7 +410,7 @@ export class WebAuthnMiddleware {
    */
   private async assessRequestRisk(
     req: WebAuthnRequest,
-    baseRiskLevel: RiskLevel
+    baseRiskLevel: RiskLevel,
   ): Promise<{
     requiresStepUp: boolean;
     reason: StepUpReason;
@@ -393,7 +421,7 @@ export class WebAuthnMiddleware {
     let reason: StepUpReason = 'high_value_operation';
 
     // Increase risk based on request characteristics
-    
+
     // Check for sensitive parameters
     if (this.hasSensitiveParameters(req)) {
       riskLevel = this.escalateRisk(riskLevel);
@@ -418,14 +446,14 @@ export class WebAuthnMiddleware {
       reason = 'unusual_activity';
     }
 
-    const requiresStepUp = this.riskLevelRequiresStepUp(riskLevel) &&
-                          !req.webauthn?.isElevated;
+    const requiresStepUp =
+      this.riskLevelRequiresStepUp(riskLevel) && !req.webauthn?.isElevated;
 
     return {
       requiresStepUp,
       reason,
       operation: req.method + ' ' + req.path,
-      riskLevel
+      riskLevel,
     };
   }
 
@@ -435,15 +463,15 @@ export class WebAuthnMiddleware {
   private handleMissingSession(
     req: WebAuthnRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): void {
     res.status(401).json({
       error: 'No authentication session found',
       code: 'NO_SESSION',
       webauthn: {
         action: 'authenticate',
-        message: 'Please authenticate with WebAuthn'
-      }
+        message: 'Please authenticate with WebAuthn',
+      },
     });
   }
 
@@ -453,15 +481,15 @@ export class WebAuthnMiddleware {
   private handleInvalidSession(
     req: WebAuthnRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): void {
     res.status(401).json({
       error: 'Invalid or expired session',
       code: 'INVALID_SESSION',
       webauthn: {
         action: 're-authenticate',
-        message: 'Session expired, please re-authenticate'
-      }
+        message: 'Session expired, please re-authenticate',
+      },
     });
   }
 
@@ -476,7 +504,7 @@ export class WebAuthnMiddleware {
       reason: StepUpReason;
       operation: string;
       riskLevel: RiskLevel;
-    }
+    },
   ): void {
     res.status(403).json({
       error: 'Step-up authentication required',
@@ -488,8 +516,8 @@ export class WebAuthnMiddleware {
         riskLevel: requirement.riskLevel,
         message: this.getStepUpMessage(requirement.reason),
         challengeEndpoint: '/api/auth/webauthn/step-up/challenge',
-        verifyEndpoint: '/api/auth/webauthn/step-up/verify'
-      }
+        verifyEndpoint: '/api/auth/webauthn/step-up/verify',
+      },
     });
   }
 
@@ -499,7 +527,7 @@ export class WebAuthnMiddleware {
   private handleElevationRequired(
     req: WebAuthnRequest,
     res: Response,
-    requiredLevel: string
+    requiredLevel: string,
   ): void {
     res.status(403).json({
       error: 'Higher authentication level required',
@@ -510,8 +538,8 @@ export class WebAuthnMiddleware {
         requiredLevel,
         message: `This operation requires ${requiredLevel} level authentication`,
         challengeEndpoint: '/api/auth/webauthn/step-up/challenge',
-        verifyEndpoint: '/api/auth/webauthn/step-up/verify'
-      }
+        verifyEndpoint: '/api/auth/webauthn/step-up/verify',
+      },
     });
   }
 
@@ -519,41 +547,54 @@ export class WebAuthnMiddleware {
    * Helper methods
    */
 
-  private isElevationSufficient(currentLevel: string, requiredRisk: RiskLevel): boolean {
+  private isElevationSufficient(
+    currentLevel: string,
+    requiredRisk: RiskLevel,
+  ): boolean {
     const levelMapping = {
-      'standard': 1,
-      'high': 2,
-      'critical': 3
+      standard: 1,
+      high: 2,
+      critical: 3,
     };
 
     const riskMapping = {
-      'low': 1,
-      'medium': 1,
-      'high': 2,
-      'critical': 3
+      low: 1,
+      medium: 1,
+      high: 2,
+      critical: 3,
     };
 
-    return levelMapping[currentLevel as keyof typeof levelMapping] >= 
-           riskMapping[requiredRisk];
+    return (
+      levelMapping[currentLevel as keyof typeof levelMapping] >=
+      riskMapping[requiredRisk]
+    );
   }
 
   private mapOperationToReason(operation: string): StepUpReason {
     if (operation.includes('admin')) return 'admin_action';
     if (operation.includes('sensitive')) return 'sensitive_data_access';
-    if (operation.includes('delete') || operation.includes('destroy')) return 'high_value_operation';
+    if (operation.includes('delete') || operation.includes('destroy'))
+      return 'high_value_operation';
     return 'high_value_operation';
   }
 
   private hasSensitiveParameters(req: Request): boolean {
     const sensitiveFields = [
-      'password', 'token', 'key', 'secret', 'private',
-      'ssn', 'credit_card', 'bank_account', 'personal_data'
+      'password',
+      'token',
+      'key',
+      'secret',
+      'private',
+      'ssn',
+      'credit_card',
+      'bank_account',
+      'personal_data',
     ];
 
     const allParams = { ...req.body, ...req.query, ...req.params };
-    
-    return Object.keys(allParams).some(key => 
-      sensitiveFields.some(field => key.toLowerCase().includes(field))
+
+    return Object.keys(allParams).some((key) =>
+      sensitiveFields.some((field) => key.toLowerCase().includes(field)),
     );
   }
 
@@ -563,7 +604,7 @@ export class WebAuthnMiddleware {
     if (req.body?.items && Array.isArray(req.body.items)) return true;
     if (req.body?.bulk === true) return true;
     if (req.path.includes('bulk') || req.path.includes('batch')) return true;
-    
+
     return false;
   }
 
@@ -576,10 +617,13 @@ export class WebAuthnMiddleware {
     if (destructiveMethods.includes(req.method)) return true;
 
     // Check path
-    if (destructivePaths.some(path => req.path.includes(path))) return true;
+    if (destructivePaths.some((path) => req.path.includes(path))) return true;
 
     // Check body action
-    if (req.body?.action && destructiveActions.includes(req.body.action.toLowerCase())) {
+    if (
+      req.body?.action &&
+      destructiveActions.includes(req.body.action.toLowerCase())
+    ) {
       return true;
     }
 
@@ -588,10 +632,14 @@ export class WebAuthnMiddleware {
 
   private escalateRisk(currentRisk: RiskLevel): RiskLevel {
     switch (currentRisk) {
-      case 'low': return 'medium';
-      case 'medium': return 'high';
-      case 'high': return 'critical';
-      case 'critical': return 'critical';
+      case 'low':
+        return 'medium';
+      case 'medium':
+        return 'high';
+      case 'high':
+        return 'critical';
+      case 'critical':
+        return 'critical';
     }
   }
 
@@ -601,14 +649,17 @@ export class WebAuthnMiddleware {
 
   private getStepUpMessage(reason: StepUpReason): string {
     const messages = {
-      'high_value_operation': 'This high-value operation requires additional authentication',
-      'sensitive_data_access': 'Accessing sensitive data requires step-up authentication',
-      'admin_action': 'Administrative actions require elevated authentication',
-      'unusual_activity': 'Unusual activity detected, additional verification required',
-      'location_change': 'New location detected, please verify your identity',
-      'device_change': 'New device detected, additional authentication required',
-      'time_based': 'Session elevation expired, please re-authenticate',
-      'manual_request': 'Manual step-up authentication requested'
+      high_value_operation:
+        'This high-value operation requires additional authentication',
+      sensitive_data_access:
+        'Accessing sensitive data requires step-up authentication',
+      admin_action: 'Administrative actions require elevated authentication',
+      unusual_activity:
+        'Unusual activity detected, additional verification required',
+      location_change: 'New location detected, please verify your identity',
+      device_change: 'New device detected, additional authentication required',
+      time_based: 'Session elevation expired, please re-authenticate',
+      manual_request: 'Manual step-up authentication requested',
     };
 
     return messages[reason] || 'Additional authentication required';
@@ -634,7 +685,7 @@ export class WebAuthnMiddleware {
  */
 export function createWebAuthnMiddleware(
   webauthnManager: WebAuthnManager,
-  options: Partial<WebAuthnMiddlewareConfig> = {}
+  options: Partial<WebAuthnMiddlewareConfig> = {},
 ): WebAuthnMiddleware {
   const config: WebAuthnMiddlewareConfig = {
     sessionCookieName: 'webauthn_session',
@@ -645,31 +696,31 @@ export function createWebAuthnMiddleware(
       '/api/auth/webauthn/challenge',
       '/api/auth/webauthn/verify',
       '/api/health',
-      '/api/status'
+      '/api/status',
     ],
     stepUpPaths: [
       {
         path: /^\/api\/admin/,
         riskLevel: 'critical',
-        operation: 'admin_action'
+        operation: 'admin_action',
       },
       {
         path: /^\/api\/users\/[^/]+\/sensitive/,
         riskLevel: 'high',
-        operation: 'sensitive_data_access'
+        operation: 'sensitive_data_access',
       },
       {
         path: '/api/financial/transfer',
         riskLevel: 'critical',
-        operation: 'high_value_operation'
-      }
+        operation: 'high_value_operation',
+      },
     ],
     maxRetries: 5,
     rateLimit: {
       windowMs: 15 * 60 * 1000, // 15 minutes
-      maxAttempts: 10
+      maxAttempts: 10,
     },
-    ...options
+    ...options,
   };
 
   return new WebAuthnMiddleware(webauthnManager, config);

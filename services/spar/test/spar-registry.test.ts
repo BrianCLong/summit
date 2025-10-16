@@ -12,7 +12,10 @@ import {
 } from '../src';
 
 class TestSigner implements Signer {
-  constructor(private readonly secret: string, public readonly id: string) {}
+  constructor(
+    private readonly secret: string,
+    public readonly id: string,
+  ) {}
 
   sign(payload: string): string {
     return createHmac('sha256', this.secret).update(payload).digest('hex');
@@ -150,6 +153,8 @@ describe('SparRegistry', () => {
     const manifest = registry.exportManifest(artifact.id);
     manifest.output = 'tampered';
 
-    expect(() => replayManifest(manifest, signer)).toThrowError(/hash mismatch/i);
+    expect(() => replayManifest(manifest, signer)).toThrowError(
+      /hash mismatch/i,
+    );
   });
 });

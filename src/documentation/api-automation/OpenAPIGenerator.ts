@@ -1,6 +1,6 @@
 /**
  * Advanced OpenAPI Documentation Generator
- * 
+ *
  * Provides enterprise-grade API documentation automation with:
  * - Real-time schema generation from GraphQL and REST endpoints
  * - Multi-version API documentation support
@@ -79,7 +79,7 @@ export class OpenAPIGenerator {
    */
   public generateSpec(): OpenAPIV3.Document {
     const paths: OpenAPIV3.PathsObject = {};
-    
+
     // Group endpoints by path
     const pathGroups = new Map<string, APIEndpoint[]>();
     for (const endpoint of this.endpoints.values()) {
@@ -92,7 +92,7 @@ export class OpenAPIGenerator {
     // Build paths object
     for (const [pathKey, endpoints] of pathGroups) {
       const pathItem: OpenAPIV3.PathItemObject = {};
-      
+
       for (const endpoint of endpoints) {
         const operation: OpenAPIV3.OperationObject = {
           operationId: endpoint.operationId,
@@ -102,19 +102,21 @@ export class OpenAPIGenerator {
           parameters: endpoint.parameters,
           requestBody: endpoint.requestBody,
           responses: endpoint.responses,
-          security: endpoint.security
+          security: endpoint.security,
         };
 
-        pathItem[endpoint.method.toLowerCase() as keyof OpenAPIV3.PathItemObject] = operation;
+        pathItem[
+          endpoint.method.toLowerCase() as keyof OpenAPIV3.PathItemObject
+        ] = operation;
       }
-      
+
       paths[pathKey] = pathItem;
     }
 
     // Build components
     const components: OpenAPIV3.ComponentsObject = {
       schemas: Object.fromEntries(this.schemas),
-      securitySchemes: this.config.securitySchemes
+      securitySchemes: this.config.securitySchemes,
     };
 
     return {
@@ -124,13 +126,13 @@ export class OpenAPIGenerator {
         version: this.config.version,
         description: this.config.description,
         contact: this.config.contactInfo,
-        license: this.config.license
+        license: this.config.license,
       },
       servers: this.config.servers,
       paths,
       components,
       tags: this.config.tags,
-      externalDocs: this.config.externalDocs
+      externalDocs: this.config.externalDocs,
     };
   }
 
@@ -140,7 +142,7 @@ export class OpenAPIGenerator {
   public async generateFromGraphQL(schemaPath: string): Promise<void> {
     const schemaContent = await fs.readFile(schemaPath, 'utf8');
     const schema = buildSchema(schemaContent);
-    
+
     // Convert GraphQL types to OpenAPI schemas
     this.convertGraphQLToOpenAPI(schema);
   }
@@ -150,25 +152,27 @@ export class OpenAPIGenerator {
    */
   private convertGraphQLToOpenAPI(schema: GraphQLSchema): void {
     const typeMap = schema.getTypeMap();
-    
+
     for (const [typeName, type] of Object.entries(typeMap)) {
       if (typeName.startsWith('__')) continue; // Skip introspection types
-      
+
       if (type.astNode?.kind === 'ObjectTypeDefinition') {
         const schemaObject: OpenAPIV3.SchemaObject = {
           type: 'object',
           properties: {},
-          description: type.description || undefined
+          description: type.description || undefined,
         };
-        
+
         // Add properties from GraphQL fields
         const fields = (type as any).getFields?.();
         if (fields) {
           for (const [fieldName, field] of Object.entries(fields as any)) {
-            schemaObject.properties![fieldName] = this.convertGraphQLFieldType(field.type);
+            schemaObject.properties![fieldName] = this.convertGraphQLFieldType(
+              field.type,
+            );
           }
         }
-        
+
         this.registerSchema(typeName, schemaObject);
       }
     }
@@ -179,11 +183,16 @@ export class OpenAPIGenerator {
    */
   private convertGraphQLFieldType(type: any): OpenAPIV3.SchemaObject {
     const typeName = type.toString();
-    
+
     if (typeName === 'String' || typeName === 'String!') {
       return { type: 'string' };
     }
-    if (typeName === 'Int' || typeName === 'Int!' || typeName === 'Float' || typeName === 'Float!') {
+    if (
+      typeName === 'Int' ||
+      typeName === 'Int!' ||
+      typeName === 'Float' ||
+      typeName === 'Float!'
+    ) {
       return { type: 'number' };
     }
     if (typeName === 'Boolean' || typeName === 'Boolean!') {
@@ -192,10 +201,10 @@ export class OpenAPIGenerator {
     if (typeName.startsWith('[') && typeName.endsWith(']')) {
       return {
         type: 'array',
-        items: this.convertGraphQLFieldType(type.ofType)
+        items: this.convertGraphQLFieldType(type.ofType),
       };
     }
-    
+
     // Reference to another schema
     return { $ref: `#/components/schemas/${typeName.replace('!', '')}` };
   }
@@ -203,17 +212,20 @@ export class OpenAPIGenerator {
   /**
    * Export specification to file
    */
-  public async exportToFile(outputPath: string, format: 'json' | 'yaml' = 'yaml'): Promise<void> {
+  public async exportToFile(
+    outputPath: string,
+    format: 'json' | 'yaml' = 'yaml',
+  ): Promise<void> {
     const spec = this.generateSpec();
     const dir = path.dirname(outputPath);
-    
+
     await fs.mkdir(dir, { recursive: true });
-    
+
     if (format === 'yaml') {
       const yamlContent = yaml.dump(spec, {
         lineWidth: -1,
         quotingType: '"',
-        forceQuotes: false
+        forceQuotes: false,
       });
       await fs.writeFile(outputPath, yamlContent, 'utf8');
     } else {
@@ -226,7 +238,7 @@ export class OpenAPIGenerator {
    */
   public generateInteractiveDocs(): string {
     const spec = this.generateSpec();
-    
+
     return `
 <!DOCTYPE html>
 <html>
@@ -254,29 +266,30 @@ export class OpenAPIGenerator {
   public validateSpec(): { valid: boolean; errors: string[] } {
     const spec = this.generateSpec();
     const errors: string[] = [];
-    
+
     // Basic validation
     if (!spec.info.title) errors.push('API title is required');
     if (!spec.info.version) errors.push('API version is required');
-    if (Object.keys(spec.paths || {}).length === 0) errors.push('At least one path is required');
-    
+    if (Object.keys(spec.paths || {}).length === 0)
+      errors.push('At least one path is required');
+
     // Validate each path
     for (const [path, pathItem] of Object.entries(spec.paths || {})) {
       if (!pathItem) continue;
-      
+
       for (const [method, operation] of Object.entries(pathItem)) {
         if (!operation || typeof operation !== 'object') continue;
-        
+
         const op = operation as OpenAPIV3.OperationObject;
         if (!op.responses) {
           errors.push(`Missing responses for ${method.toUpperCase()} ${path}`);
         }
       }
     }
-    
+
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }
@@ -286,7 +299,7 @@ export class OpenAPIGenerator {
  */
 export class APIEndpointDiscovery {
   private basePath: string;
-  
+
   constructor(basePath: string) {
     this.basePath = basePath;
   }
@@ -296,29 +309,33 @@ export class APIEndpointDiscovery {
    */
   public async discoverEndpoints(): Promise<APIEndpoint[]> {
     const endpoints: APIEndpoint[] = [];
-    
+
     // Scan for Express.js routes
     await this.scanExpressRoutes(this.basePath, endpoints);
-    
+
     // Scan for GraphQL resolvers
     await this.scanGraphQLResolvers(this.basePath, endpoints);
-    
+
     return endpoints;
   }
 
-  private async scanExpressRoutes(dir: string, endpoints: APIEndpoint[]): Promise<void> {
+  private async scanExpressRoutes(
+    dir: string,
+    endpoints: APIEndpoint[],
+  ): Promise<void> {
     const files = await fs.readdir(dir, { withFileTypes: true });
-    
+
     for (const file of files) {
       if (file.isDirectory()) {
         await this.scanExpressRoutes(path.join(dir, file.name), endpoints);
       } else if (file.name.endsWith('.ts') || file.name.endsWith('.js')) {
         const content = await fs.readFile(path.join(dir, file.name), 'utf8');
-        
+
         // Simple regex to find Express route definitions
-        const routeRegex = /(?:router|app)\.(get|post|put|delete|patch)\(['"`]([^'"`]+)['"`]/g;
+        const routeRegex =
+          /(?:router|app)\.(get|post|put|delete|patch)\(['"`]([^'"`]+)['"`]/g;
         let match;
-        
+
         while ((match = routeRegex.exec(content)) !== null) {
           const [, method, routePath] = match;
           endpoints.push({
@@ -333,18 +350,21 @@ export class APIEndpointDiscovery {
                 description: 'Successful response',
                 content: {
                   'application/json': {
-                    schema: { type: 'object' }
-                  }
-                }
-              }
-            }
+                    schema: { type: 'object' },
+                  },
+                },
+              },
+            },
           });
         }
       }
     }
   }
 
-  private async scanGraphQLResolvers(dir: string, endpoints: APIEndpoint[]): Promise<void> {
+  private async scanGraphQLResolvers(
+    dir: string,
+    endpoints: APIEndpoint[],
+  ): Promise<void> {
     // Implementation for GraphQL resolver discovery would go here
     // This is a placeholder for the complex logic needed to parse GraphQL resolvers
   }

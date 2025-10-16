@@ -7,12 +7,12 @@ spec:
   background: true
   rules:
     - name: deny-hostpath
-      match: { resources: { kinds: ["Pod"] } }
+      match: { resources: { kinds: ['Pod'] } }
       validate:
-        message: "hostPath volumes are not allowed"
+        message: 'hostPath volumes are not allowed'
         deny:
           conditions:
             any:
-            - key: "{{ request.object.spec.volumes[].hostPath }}"
-              operator: AnyIn
-              value: ["*"]
+              - key: '{{ request.object.spec.volumes[].hostPath }}'
+                operator: AnyIn
+                value: ['*']

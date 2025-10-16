@@ -67,7 +67,11 @@ export interface CostModel {
   baseline: number;
   projected: number;
   reductionFactor: number;
-  drivers: Array<{ domain: WorkflowDomain; contribution: number; description: string }>;
+  drivers: Array<{
+    domain: WorkflowDomain;
+    contribution: number;
+    description: string;
+  }>;
 }
 
 export interface BehaviorModel {
@@ -147,7 +151,7 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
     const cycleId = randomUUID();
     const signals = [
       ...this.transformCriticSnapshot(input.criticSnapshot, timestamp),
-      ...(input.additionalSignals ?? [])
+      ...(input.additionalSignals ?? []),
     ];
 
     this.registerSignals(signals, 'live');
@@ -156,14 +160,18 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
     const opportunityMap = this.hyperElasticOpportunityDiscovery(fused);
     const costModel = this.stochasticCostMitigation(fused, opportunityMap);
     const behaviorModel = this.calculateBehaviorModel(fused);
-    const branchPlan = this.quantumAdaptiveBranching(fused, opportunityMap, behaviorModel);
+    const branchPlan = this.quantumAdaptiveBranching(
+      fused,
+      opportunityMap,
+      behaviorModel,
+    );
     const validation = this.validateValueRealization(costModel, opportunityMap);
     const autoPush = this.createAutoPushPayload(cycleId, input.mode, {
       opportunityMap,
       branchPlan,
       costModel,
       behaviorModel,
-      validation
+      validation,
     });
 
     const cycleOutput: StrategicCycleOutput = {
@@ -174,7 +182,7 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
       behaviorModel,
       branchPlan,
       autoPush,
-      validation
+      validation,
     };
 
     this.persistCycle(cycleOutput, signals);
@@ -189,7 +197,10 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
     return [...this.cycleHistory];
   }
 
-  private registerSignals(signals: WorkflowSignal[], scope: 'live' | 'historical'): void {
+  private registerSignals(
+    signals: WorkflowSignal[],
+    scope: 'live' | 'historical',
+  ): void {
     const target = scope === 'live' ? this.liveSignals : this.historicalSignals;
     for (const signal of signals) {
       target.push({ ...signal, id: signal.id ?? randomUUID() });
@@ -200,7 +211,10 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
     }
   }
 
-  private transformCriticSnapshot(snapshot: CriticSnapshot, timestamp: number): WorkflowSignal[] {
+  private transformCriticSnapshot(
+    snapshot: CriticSnapshot,
+    timestamp: number,
+  ): WorkflowSignal[] {
     const diff = snapshot.diffSummary;
     const staticResults = snapshot.staticCheckResults;
 
@@ -212,7 +226,10 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
         value: diff.linesAdded + diff.linesRemoved,
         weight: 0.6,
         timestamp,
-        metadata: { filesChanged: diff.filesChanged, complexity: diff.complexity }
+        metadata: {
+          filesChanged: diff.filesChanged,
+          complexity: diff.complexity,
+        },
       },
       {
         domain: 'engineering',
@@ -221,12 +238,12 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
         value: Math.max(1, 100 - snapshot.riskScore),
         weight: 0.4,
         timestamp,
-        metadata: { shouldProceed: snapshot.shouldProceed }
-      }
+        metadata: { shouldProceed: snapshot.shouldProceed },
+      },
     ];
 
-    const behavioralIssues = staticResults.flatMap(result =>
-      result.issues.filter(issue => issue.severity !== 'info')
+    const behavioralIssues = staticResults.flatMap((result) =>
+      result.issues.filter((issue) => issue.severity !== 'info'),
     );
     const dataSignals: WorkflowSignal[] = [
       {
@@ -236,7 +253,11 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
         value: behavioralIssues.length,
         weight: 0.5,
         timestamp,
-        metadata: { failingTools: staticResults.filter(result => !result.passed).map(r => r.tool) }
+        metadata: {
+          failingTools: staticResults
+            .filter((result) => !result.passed)
+            .map((r) => r.tool),
+        },
       },
       {
         domain: 'data',
@@ -245,8 +266,8 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
         value: Math.max(0, 100 - diff.testCoverage),
         weight: 0.5,
         timestamp,
-        metadata: { testCoverage: diff.testCoverage }
-      }
+        metadata: { testCoverage: diff.testCoverage },
+      },
     ];
 
     const pricingPressure = this.estimatePricingPressure(snapshot);
@@ -258,7 +279,7 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
         value: pricingPressure,
         weight: 0.7,
         timestamp,
-        metadata: { recommendations: snapshot.recommendations }
+        metadata: { recommendations: snapshot.recommendations },
       },
       {
         domain: 'business',
@@ -267,8 +288,8 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
         value: this.calculateConfidence(snapshot),
         weight: 0.3,
         timestamp,
-        metadata: { shouldProceed: snapshot.shouldProceed }
-      }
+        metadata: { shouldProceed: snapshot.shouldProceed },
+      },
     ];
 
     return [...engineeringSignals, ...dataSignals, ...businessSignals];
@@ -296,7 +317,9 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
   }
 
   private calculateConfidence(snapshot: CriticSnapshot): number {
-    const passCount = snapshot.staticCheckResults.filter(result => result.passed).length;
+    const passCount = snapshot.staticCheckResults.filter(
+      (result) => result.passed,
+    ).length;
     const total = snapshot.staticCheckResults.length || 1;
     return Math.min(100, (passCount / total) * 100 - snapshot.riskScore / 2);
   }
@@ -324,7 +347,10 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
         weightedSum += signal.value * weight;
         weightTotal += weight;
         values.push(signal.value);
-        if (signal.category === 'operational' || signal.category === 'pricing') {
+        if (
+          signal.category === 'operational' ||
+          signal.category === 'pricing'
+        ) {
           costPressure += signal.value * weight;
         }
         if (signal.category === 'behavioral') {
@@ -333,7 +359,8 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
       }
 
       const mean = weightTotal === 0 ? 0 : weightedSum / weightTotal;
-      const variance = values.reduce((acc, value) => acc + Math.pow(value - mean, 2), 0) /
+      const variance =
+        values.reduce((acc, value) => acc + Math.pow(value - mean, 2), 0) /
         Math.max(1, values.length - 1);
       const trend = this.estimateTrend(signals);
 
@@ -343,7 +370,7 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
         costPressure,
         behaviorAlignment,
         variance,
-        trend
+        trend,
       });
     }
 
@@ -363,17 +390,32 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
     return (deltaValue / deltaTime) * 1000;
   }
 
-  private hyperElasticOpportunityDiscovery(fused: DomainFusion[]): OpportunityInsight[] {
-    return fused.map(domainFusion => {
+  private hyperElasticOpportunityDiscovery(
+    fused: DomainFusion[],
+  ): OpportunityInsight[] {
+    return fused.map((domainFusion) => {
       const volatilityBuffer = Math.max(1, Math.sqrt(domainFusion.variance));
-      const antifragileGain = this.sigmoid(domainFusion.trend / volatilityBuffer);
-      const resilienceWeight = this.sigmoid(domainFusion.behaviorAlignment / 100);
+      const antifragileGain = this.sigmoid(
+        domainFusion.trend / volatilityBuffer,
+      );
+      const resilienceWeight = this.sigmoid(
+        domainFusion.behaviorAlignment / 100,
+      );
       const opportunityScore = parseFloat(
-        ((antifragileGain + resilienceWeight) * 55 + domainFusion.signalStrength / 10).toFixed(2)
+        (
+          (antifragileGain + resilienceWeight) * 55 +
+          domainFusion.signalStrength / 10
+        ).toFixed(2),
       );
 
-      const mitigationFocus = this.deriveMitigationFocus(domainFusion.domain, opportunityScore);
-      const valueLevers = this.deriveValueLevers(domainFusion.domain, opportunityScore);
+      const mitigationFocus = this.deriveMitigationFocus(
+        domainFusion.domain,
+        opportunityScore,
+      );
+      const valueLevers = this.deriveValueLevers(
+        domainFusion.domain,
+        opportunityScore,
+      );
 
       return {
         domain: domainFusion.domain,
@@ -381,34 +423,45 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
         opportunityScore,
         confidence: parseFloat((resilienceWeight * 0.9 + 0.1).toFixed(2)),
         mitigationFocus,
-        valueLevers
+        valueLevers,
       };
     });
   }
 
   private stochasticCostMitigation(
     fused: DomainFusion[],
-    opportunityMap: OpportunityInsight[]
+    opportunityMap: OpportunityInsight[],
   ): CostModel {
-    const opportunityLookup = new Map(opportunityMap.map(item => [item.domain, item]));
+    const opportunityLookup = new Map(
+      opportunityMap.map((item) => [item.domain, item]),
+    );
 
     let compositePressure = 0;
-    const drivers: Array<{ domain: WorkflowDomain; contribution: number; description: string }> = [];
+    const drivers: Array<{
+      domain: WorkflowDomain;
+      contribution: number;
+      description: string;
+    }> = [];
 
     for (const fusion of fused) {
       const opportunity = opportunityLookup.get(fusion.domain);
-      const opportunityRelief = opportunity ? opportunity.opportunityScore / 100 : 0.1;
-      const contribution = Math.max(1, fusion.costPressure * (1 - opportunityRelief));
+      const opportunityRelief = opportunity
+        ? opportunity.opportunityScore / 100
+        : 0.1;
+      const contribution = Math.max(
+        1,
+        fusion.costPressure * (1 - opportunityRelief),
+      );
       compositePressure += contribution;
       drivers.push({
         domain: fusion.domain,
         contribution: parseFloat(contribution.toFixed(2)),
-        description: this.describeCostDriver(fusion.domain, opportunity)
+        description: this.describeCostDriver(fusion.domain, opportunity),
       });
     }
 
     const projected = parseFloat(
-      (Math.max(1, compositePressure) / 10).toFixed(2)
+      (Math.max(1, compositePressure) / 10).toFixed(2),
     );
     const baseline = this.baselineCost;
     const reductionFactor = parseFloat((baseline / projected).toFixed(2));
@@ -417,11 +470,14 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
       baseline,
       projected,
       reductionFactor,
-      drivers
+      drivers,
     };
   }
 
-  private describeCostDriver(domain: WorkflowDomain, opportunity?: OpportunityInsight): string {
+  private describeCostDriver(
+    domain: WorkflowDomain,
+    opportunity?: OpportunityInsight,
+  ): string {
     const base = `Domain ${domain} cost pressure recalibrated`;
     if (!opportunity) {
       return `${base} via resilience fallback.`;
@@ -437,41 +493,57 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
 
   private calculateBehaviorModel(fused: DomainFusion[]): BehaviorModel {
     const antifragilityIndex = parseFloat(
-      (fused.reduce((acc, fusion) => acc + this.sigmoid(fusion.trend), 0) /
-        Math.max(1, fused.length) * 100).toFixed(2)
+      (
+        (fused.reduce((acc, fusion) => acc + this.sigmoid(fusion.trend), 0) /
+          Math.max(1, fused.length)) *
+        100
+      ).toFixed(2),
     );
 
     const adoptionProbability = parseFloat(
-      (fused.reduce((acc, fusion) => acc + this.sigmoid(fusion.behaviorAlignment / 100), 0) /
-        Math.max(1, fused.length) * 100).toFixed(2)
+      (
+        (fused.reduce(
+          (acc, fusion) => acc + this.sigmoid(fusion.behaviorAlignment / 100),
+          0,
+        ) /
+          Math.max(1, fused.length)) *
+        100
+      ).toFixed(2),
     );
 
     const frictionZones = fused
-      .filter(fusion => fusion.signalStrength < 30)
-      .map(fusion => `${fusion.domain}: low signal strength detected`);
+      .filter((fusion) => fusion.signalStrength < 30)
+      .map((fusion) => `${fusion.domain}: low signal strength detected`);
 
     const accelerationMoments = fused
-      .filter(fusion => fusion.trend > 0)
-      .map(fusion => `${fusion.domain}: positive opportunity momentum`);
+      .filter((fusion) => fusion.trend > 0)
+      .map((fusion) => `${fusion.domain}: positive opportunity momentum`);
 
     return {
       antifragilityIndex,
       adoptionProbability,
       frictionZones,
-      accelerationMoments
+      accelerationMoments,
     };
   }
 
   private quantumAdaptiveBranching(
     fused: DomainFusion[],
     opportunityMap: OpportunityInsight[],
-    behaviorModel: BehaviorModel
+    behaviorModel: BehaviorModel,
   ): BranchRecommendation[] {
-    return fused.map(fusion => {
-      const opportunity = opportunityMap.find(item => item.domain === fusion.domain);
-      const behaviorSignal = this.sigmoid(behaviorModel.antifragilityIndex / 100);
+    return fused.map((fusion) => {
+      const opportunity = opportunityMap.find(
+        (item) => item.domain === fusion.domain,
+      );
+      const behaviorSignal = this.sigmoid(
+        behaviorModel.antifragilityIndex / 100,
+      );
       const projectedLift = parseFloat(
-        ((opportunity?.opportunityScore ?? 0) * behaviorSignal / 30 + 1).toFixed(2)
+        (
+          ((opportunity?.opportunityScore ?? 0) * behaviorSignal) / 30 +
+          1
+        ).toFixed(2),
       );
 
       return {
@@ -479,12 +551,15 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
         focus: fusion.domain,
         hypothesis: this.composeBranchHypothesis(fusion.domain, opportunity),
         projectedLift,
-        actions: this.composeBranchActions(fusion.domain, opportunity)
+        actions: this.composeBranchActions(fusion.domain, opportunity),
       };
     });
   }
 
-  private composeBranchHypothesis(domain: WorkflowDomain, opportunity?: OpportunityInsight): string {
+  private composeBranchHypothesis(
+    domain: WorkflowDomain,
+    opportunity?: OpportunityInsight,
+  ): string {
     const base = `${domain} workflow branch will amplify antifragility`;
     if (!opportunity) {
       return `${base} by stabilizing latent signals.`;
@@ -498,8 +573,14 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
     return `${base} via incremental optimization pulses.`;
   }
 
-  private composeBranchActions(domain: WorkflowDomain, opportunity?: OpportunityInsight): string[] {
-    const common = [`Activate telemetry reinforcement for ${domain}`, `Align pricing guardrails with ${domain} cadence`];
+  private composeBranchActions(
+    domain: WorkflowDomain,
+    opportunity?: OpportunityInsight,
+  ): string[] {
+    const common = [
+      `Activate telemetry reinforcement for ${domain}`,
+      `Align pricing guardrails with ${domain} cadence`,
+    ];
     if (!opportunity) {
       return [...common, `Deploy resilience probes for ${domain}`];
     }
@@ -507,7 +588,7 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
       return [
         ...common,
         `Launch opportunity arbitrage pods for ${domain}`,
-        `Codify antifragile rituals for ${domain} squads`
+        `Codify antifragile rituals for ${domain} squads`,
       ];
     }
     return [...common, `Route opportunity backlog to ${domain} branch`];
@@ -515,17 +596,26 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
 
   private validateValueRealization(
     costModel: CostModel,
-    opportunityMap: OpportunityInsight[]
+    opportunityMap: OpportunityInsight[],
   ) {
-    const opportunityMomentum = opportunityMap.reduce((acc, item) => acc + item.opportunityScore, 0);
+    const opportunityMomentum = opportunityMap.reduce(
+      (acc, item) => acc + item.opportunityScore,
+      0,
+    );
     const valueExpansionMultiplier = parseFloat(
-      Math.max(3, (this.baselineValue * (opportunityMomentum / 150)).toFixed(2))
+      Math.max(
+        3,
+        (this.baselineValue * (opportunityMomentum / 150)).toFixed(2),
+      ),
     );
 
     return {
-      tcoReductionMultiplier: parseFloat(Math.max(10, costModel.reductionFactor).toFixed(2)),
+      tcoReductionMultiplier: parseFloat(
+        Math.max(10, costModel.reductionFactor).toFixed(2),
+      ),
       valueExpansionMultiplier,
-      benchmarkComparison: 'Outperforms orchestration cohort by ≥300% value delta and ≥1000% TCO delta.'
+      benchmarkComparison:
+        'Outperforms orchestration cohort by ≥300% value delta and ≥1000% TCO delta.',
     };
   }
 
@@ -538,22 +628,24 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
       costModel: CostModel;
       behaviorModel: BehaviorModel;
       validation: StrategicCycleOutput['validation'];
-    }
+    },
   ): AutoPushPayload {
     const recommendations = [
       `Deploy antifragile workflow cadence tuned for ${mode} mode`,
       `Lock in ${context.validation.tcoReductionMultiplier}x TCO delta via counter-pressure hedges`,
-      `Amplify ${context.validation.valueExpansionMultiplier}x value levers across branches`
+      `Amplify ${context.validation.valueExpansionMultiplier}x value levers across branches`,
     ];
 
     const optimizationPlan = {
       headline: 'Strategic Counter-Antifragile Orchestration burst ready',
-      initiatives: context.opportunityMap.map(item =>
-        `Activate ${item.domain} surge with ${item.opportunityScore.toFixed(1)} opportunity index`
+      initiatives: context.opportunityMap.map(
+        (item) =>
+          `Activate ${item.domain} surge with ${item.opportunityScore.toFixed(1)} opportunity index`,
       ),
-      guardrails: context.branchPlan.map(branch =>
-        `Monitor branch ${branch.branchId} for drift beyond ±5% cost envelope`
-      )
+      guardrails: context.branchPlan.map(
+        (branch) =>
+          `Monitor branch ${branch.branchId} for drift beyond ±5% cost envelope`,
+      ),
     };
 
     const payload: AutoPushPayload = {
@@ -561,7 +653,7 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
       timestamp: new Date().toISOString(),
       recommendations,
       branchDiffs: context.branchPlan,
-      optimizationPlan
+      optimizationPlan,
     };
 
     this.autoPushBacklog.push(payload);
@@ -572,7 +664,10 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
     return payload;
   }
 
-  private persistCycle(cycle: StrategicCycleOutput, signals: WorkflowSignal[]): void {
+  private persistCycle(
+    cycle: StrategicCycleOutput,
+    signals: WorkflowSignal[],
+  ): void {
     this.cycleHistory.push(cycle);
     while (this.cycleHistory.length > this.historyLimit) {
       this.cycleHistory.shift();
@@ -582,23 +677,35 @@ export class StrategicCounterAntifragileOrchestrationNetwork {
     this.liveSignals = [];
   }
 
-  private deriveMitigationFocus(domain: WorkflowDomain, opportunityScore: number): string[] {
+  private deriveMitigationFocus(
+    domain: WorkflowDomain,
+    opportunityScore: number,
+  ): string[] {
     if (opportunityScore > 80) {
       return [
         `${domain} predictive throttling`,
         `${domain} anomaly harvesting`,
-        `${domain} continuous value hedging`
+        `${domain} continuous value hedging`,
       ];
     }
     if (opportunityScore > 60) {
-      return [`${domain} signal smoothing`, `${domain} resilience reinforcement`];
+      return [
+        `${domain} signal smoothing`,
+        `${domain} resilience reinforcement`,
+      ];
     }
     return [`${domain} guardrail tuning`];
   }
 
-  private deriveValueLevers(domain: WorkflowDomain, opportunityScore: number): string[] {
+  private deriveValueLevers(
+    domain: WorkflowDomain,
+    opportunityScore: number,
+  ): string[] {
     if (opportunityScore > 80) {
-      return [`${domain} market moat expansion`, `${domain} pricing power amplification`];
+      return [
+        `${domain} market moat expansion`,
+        `${domain} pricing power amplification`,
+      ];
     }
     if (opportunityScore > 60) {
       return [`${domain} ops-to-value handshake`, `${domain} behavioral lift`];

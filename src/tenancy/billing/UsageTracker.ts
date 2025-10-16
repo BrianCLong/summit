@@ -5,15 +5,19 @@
  */
 
 import { EventEmitter } from 'events';
-import { TenantManager, ResourceUsage, TenantConfig } from '../core/TenantManager.js';
+import {
+  TenantManager,
+  ResourceUsage,
+  TenantConfig,
+} from '../core/TenantManager.js';
 
 /**
  * Billing model types supported
  */
-export type BillingModel = 
-  | 'subscription' 
-  | 'usage_based' 
-  | 'hybrid' 
+export type BillingModel =
+  | 'subscription'
+  | 'usage_based'
+  | 'hybrid'
   | 'enterprise_contract';
 
 /**
@@ -195,7 +199,7 @@ export class UsageTracker extends EventEmitter {
       overage_notifications: boolean;
       auto_suspend_on_overdue: boolean;
       credit_threshold_warning: number; // warn when credits below this
-    }
+    },
   ) {
     super();
     this.startUsageAggregation();
@@ -208,11 +212,11 @@ export class UsageTracker extends EventEmitter {
    */
   async setupBillingConfig(
     tenantId: string,
-    config: Omit<BillingConfig, 'tenantId'>
+    config: Omit<BillingConfig, 'tenantId'>,
   ): Promise<BillingConfig> {
     const billingConfig: BillingConfig = {
       tenantId,
-      ...config
+      ...config,
     };
 
     // Validate billing configuration
@@ -236,7 +240,7 @@ export class UsageTracker extends EventEmitter {
     tenantId: string,
     usageType: keyof UsageBillingMetrics,
     amount: number,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): Promise<void> {
     const tenant = await this.tenantManager.getTenant(tenantId);
     if (!tenant) {
@@ -245,7 +249,9 @@ export class UsageTracker extends EventEmitter {
 
     const billingConfig = this.billingConfigs.get(tenantId);
     if (!billingConfig) {
-      throw new Error(`Billing configuration not found for tenant: ${tenantId}`);
+      throw new Error(
+        `Billing configuration not found for tenant: ${tenantId}`,
+      );
     }
 
     // Check if usage would exceed limits
@@ -263,7 +269,7 @@ export class UsageTracker extends EventEmitter {
     const incrementalCost = await this.calculateIncrementalCost(
       tenantId,
       usageType,
-      amount
+      amount,
     );
 
     // Update pending charges
@@ -276,7 +282,7 @@ export class UsageTracker extends EventEmitter {
       amount,
       cost: incrementalCost,
       timestamp: new Date(),
-      metadata
+      metadata,
     });
 
     // Check for threshold violations
@@ -291,9 +297,10 @@ export class UsageTracker extends EventEmitter {
     const currentPeriod = this.getCurrentBillingPeriod();
 
     // Find current period aggregation
-    let currentAggregation = aggregations.find(agg =>
-      agg.period.start <= currentPeriod.start &&
-      agg.period.end >= currentPeriod.end
+    let currentAggregation = aggregations.find(
+      (agg) =>
+        agg.period.start <= currentPeriod.start &&
+        agg.period.end >= currentPeriod.end,
     );
 
     if (!currentAggregation) {
@@ -310,15 +317,15 @@ export class UsageTracker extends EventEmitter {
           apiCalls: 0,
           bandwidthGB: 0,
           collaborativeMinutes: 0,
-          aiInsightRequests: 0
+          aiInsightRequests: 0,
         },
         costs: {
           subscription: 0,
           usage: 0,
           overages: 0,
-          total: 0
+          total: 0,
         },
-        quotasExceeded: []
+        quotasExceeded: [],
       };
 
       aggregations.push(currentAggregation);
@@ -333,7 +340,7 @@ export class UsageTracker extends EventEmitter {
    */
   async generateInvoice(
     tenantId: string,
-    billingPeriod?: { start: Date; end: Date }
+    billingPeriod?: { start: Date; end: Date },
   ): Promise<BillingInvoice> {
     const tenant = await this.tenantManager.getTenant(tenantId);
     if (!tenant) {
@@ -349,13 +356,17 @@ export class UsageTracker extends EventEmitter {
     const usage = await this.getUsageForPeriod(tenantId, period);
 
     // Generate line items
-    const lineItems = await this.generateInvoiceLineItems(tenantId, usage, billingConfig);
+    const lineItems = await this.generateInvoiceLineItems(
+      tenantId,
+      usage,
+      billingConfig,
+    );
 
     // Calculate totals
     const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0);
     const taxes = this.calculateTaxes(subtotal, billingConfig.taxConfiguration);
     const total = subtotal + taxes;
-    
+
     // Apply credits
     const availableCredits = billingConfig.credits;
     const creditsApplied = Math.min(availableCredits, total);
@@ -377,8 +388,8 @@ export class UsageTracker extends EventEmitter {
       currency: 'USD',
       metadata: {
         tenantName: tenant.name,
-        billingModel: billingConfig.model
-      }
+        billingModel: billingConfig.model,
+      },
     };
 
     // Store invoice
@@ -404,10 +415,10 @@ export class UsageTracker extends EventEmitter {
     tenantId: string,
     invoiceId: string,
     amount: number,
-    paymentReference?: string
+    paymentReference?: string,
   ): Promise<boolean> {
     const tenantInvoices = this.invoices.get(tenantId) || [];
-    const invoice = tenantInvoices.find(inv => inv.invoiceId === invoiceId);
+    const invoice = tenantInvoices.find((inv) => inv.invoiceId === invoiceId);
 
     if (!invoice) {
       throw new Error(`Invoice not found: ${invoiceId}`);
@@ -421,7 +432,7 @@ export class UsageTracker extends EventEmitter {
     const paymentSuccessful = await this.processPaymentGateway(
       tenantId,
       amount,
-      paymentReference
+      paymentReference,
     );
 
     if (paymentSuccessful) {
@@ -433,7 +444,7 @@ export class UsageTracker extends EventEmitter {
         tenantId,
         invoiceId,
         amount,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Clear pending charges
@@ -448,7 +459,11 @@ export class UsageTracker extends EventEmitter {
   /**
    * Add credits to tenant account
    */
-  async addCredits(tenantId: string, amount: number, reason?: string): Promise<void> {
+  async addCredits(
+    tenantId: string,
+    amount: number,
+    reason?: string,
+  ): Promise<void> {
     const billingConfig = this.billingConfigs.get(tenantId);
     if (!billingConfig) {
       throw new Error(`Billing configuration not found: ${tenantId}`);
@@ -462,7 +477,7 @@ export class UsageTracker extends EventEmitter {
       amount,
       reason,
       newBalance: billingConfig.credits,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -478,7 +493,7 @@ export class UsageTracker extends EventEmitter {
   }> {
     const currentUsage = await this.getCurrentPeriodUsage(tenantId);
     const pendingCharges = this.pendingCharges.get(tenantId) || 0;
-    
+
     const billingConfig = this.billingConfigs.get(tenantId);
     const availableCredits = billingConfig?.credits || 0;
 
@@ -494,7 +509,7 @@ export class UsageTracker extends EventEmitter {
       pendingCharges,
       availableCredits,
       recentInvoices,
-      quotaUtilization
+      quotaUtilization,
     };
   }
 
@@ -508,9 +523,11 @@ export class UsageTracker extends EventEmitter {
     }
 
     // Validate billing address
-    if (!config.billingAddress.addressLine1 || 
-        !config.billingAddress.city || 
-        !config.billingAddress.country) {
+    if (
+      !config.billingAddress.addressLine1 ||
+      !config.billingAddress.city ||
+      !config.billingAddress.country
+    ) {
       throw new Error('Complete billing address is required');
     }
 
@@ -518,13 +535,17 @@ export class UsageTracker extends EventEmitter {
     switch (config.model) {
       case 'subscription':
         if (!config.subscription) {
-          throw new Error('Subscription configuration required for subscription model');
+          throw new Error(
+            'Subscription configuration required for subscription model',
+          );
         }
         break;
 
       case 'usage_based':
         if (!config.usageBased) {
-          throw new Error('Usage-based configuration required for usage-based model');
+          throw new Error(
+            'Usage-based configuration required for usage-based model',
+          );
         }
         break;
 
@@ -536,7 +557,9 @@ export class UsageTracker extends EventEmitter {
 
       case 'enterprise_contract':
         if (!config.enterprise) {
-          throw new Error('Enterprise configuration required for enterprise model');
+          throw new Error(
+            'Enterprise configuration required for enterprise model',
+          );
         }
         break;
     }
@@ -562,15 +585,15 @@ export class UsageTracker extends EventEmitter {
     tenantId: string,
     usageType: keyof UsageBillingMetrics,
     amount: number,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): Promise<void> {
     const currentAggregation = await this.getCurrentPeriodUsage(tenantId);
     currentAggregation.metrics[usageType] += amount;
 
     // Update aggregation
     const aggregations = this.usageAggregations.get(tenantId) || [];
-    const index = aggregations.findIndex(agg => 
-      agg.period.start === currentAggregation.period.start
+    const index = aggregations.findIndex(
+      (agg) => agg.period.start === currentAggregation.period.start,
     );
 
     if (index >= 0) {
@@ -588,7 +611,7 @@ export class UsageTracker extends EventEmitter {
   private async calculateIncrementalCost(
     tenantId: string,
     usageType: keyof UsageBillingMetrics,
-    amount: number
+    amount: number,
   ): Promise<number> {
     const billingConfig = this.billingConfigs.get(tenantId);
     if (!billingConfig) return 0;
@@ -608,7 +631,7 @@ export class UsageTracker extends EventEmitter {
         if (billingConfig.enterprise!.customRates) {
           rate = this.getUsageRate(
             billingConfig.enterprise!.customRates as UsageBillingRates,
-            usageType
+            usageType,
           );
         }
         break;
@@ -617,11 +640,14 @@ export class UsageTracker extends EventEmitter {
         // Check for overages
         if (billingConfig.usageBased?.overageCharges) {
           const currentUsage = await this.getCurrentPeriodUsage(tenantId);
-          const quota = this.getUsageQuota(billingConfig.usageBased.includedQuotas, usageType);
+          const quota = this.getUsageQuota(
+            billingConfig.usageBased.includedQuotas,
+            usageType,
+          );
           const currentAmount = currentUsage.metrics[usageType];
 
           if (currentAmount + amount > quota) {
-            const overage = Math.max(0, (currentAmount + amount) - quota);
+            const overage = Math.max(0, currentAmount + amount - quota);
             rate = this.getUsageRate(billingConfig.usageBased.rates, usageType);
             return overage * rate;
           }
@@ -635,18 +661,22 @@ export class UsageTracker extends EventEmitter {
   /**
    * Get usage rate for specific metric
    */
-  private getUsageRate(rates: UsageBillingRates, usageType: keyof UsageBillingMetrics): number {
-    const rateMap: Record<keyof UsageBillingMetrics, keyof UsageBillingRates> = {
-      nodesProcessed: 'perNode',
-      edgesTraversed: 'perEdge',
-      queriesExecuted: 'perQuery',
-      analysisMinutes: 'perAnalysisMinute',
-      storageGB: 'perStorageGB',
-      apiCalls: 'perApiCall',
-      bandwidthGB: 'perBandwidthGB',
-      collaborativeMinutes: 'perCollaborativeMinute',
-      aiInsightRequests: 'perAiInsightRequest'
-    };
+  private getUsageRate(
+    rates: UsageBillingRates,
+    usageType: keyof UsageBillingMetrics,
+  ): number {
+    const rateMap: Record<keyof UsageBillingMetrics, keyof UsageBillingRates> =
+      {
+        nodesProcessed: 'perNode',
+        edgesTraversed: 'perEdge',
+        queriesExecuted: 'perQuery',
+        analysisMinutes: 'perAnalysisMinute',
+        storageGB: 'perStorageGB',
+        apiCalls: 'perApiCall',
+        bandwidthGB: 'perBandwidthGB',
+        collaborativeMinutes: 'perCollaborativeMinute',
+        aiInsightRequests: 'perAiInsightRequest',
+      };
 
     return rates[rateMap[usageType]] || 0;
   }
@@ -654,7 +684,10 @@ export class UsageTracker extends EventEmitter {
   /**
    * Get usage quota for specific metric
    */
-  private getUsageQuota(quotas: UsageBillingMetrics, usageType: keyof UsageBillingMetrics): number {
+  private getUsageQuota(
+    quotas: UsageBillingMetrics,
+    usageType: keyof UsageBillingMetrics,
+  ): number {
     return quotas[usageType] || 0;
   }
 
@@ -664,7 +697,7 @@ export class UsageTracker extends EventEmitter {
   private async validateUsageAgainstQuotas(
     tenantId: string,
     usageType: keyof UsageBillingMetrics,
-    amount: number
+    amount: number,
   ): Promise<void> {
     const tenant = await this.tenantManager.getTenant(tenantId);
     if (!tenant) return;
@@ -675,7 +708,7 @@ export class UsageTracker extends EventEmitter {
       const canUse = await this.tenantManager.validateResourceUsage(
         tenantId,
         resourceType,
-        amount
+        amount,
       );
 
       if (!canUse) {
@@ -685,10 +718,16 @@ export class UsageTracker extends EventEmitter {
 
     // Check against billing quotas
     const billingConfig = this.billingConfigs.get(tenantId);
-    if (billingConfig?.model === 'subscription' && !billingConfig.usageBased?.overageCharges) {
+    if (
+      billingConfig?.model === 'subscription' &&
+      !billingConfig.usageBased?.overageCharges
+    ) {
       const currentUsage = await this.getCurrentPeriodUsage(tenantId);
-      const quota = this.getUsageQuota(billingConfig.usageBased!.includedQuotas, usageType);
-      
+      const quota = this.getUsageQuota(
+        billingConfig.usageBased!.includedQuotas,
+        usageType,
+      );
+
       if (currentUsage.metrics[usageType] + amount > quota) {
         throw new Error(`Usage would exceed billing quota for ${usageType}`);
       }
@@ -698,12 +737,14 @@ export class UsageTracker extends EventEmitter {
   /**
    * Map usage type to resource type for validation
    */
-  private mapUsageToResourceType(usageType: keyof UsageBillingMetrics): string | null {
+  private mapUsageToResourceType(
+    usageType: keyof UsageBillingMetrics,
+  ): string | null {
     const mapping: Record<string, string> = {
-      'nodesProcessed': 'maxNodes',
-      'queriesExecuted': 'maxQueries',
-      'apiCalls': 'maxApiCallsPerMinute',
-      'storageGB': 'maxStorage'
+      nodesProcessed: 'maxNodes',
+      queriesExecuted: 'maxQueries',
+      apiCalls: 'maxApiCallsPerMinute',
+      storageGB: 'maxStorage',
     };
 
     return mapping[usageType] || null;
@@ -714,7 +755,7 @@ export class UsageTracker extends EventEmitter {
    */
   private async checkUsageThresholds(
     tenantId: string,
-    usage: UsageBillingMetrics
+    usage: UsageBillingMetrics,
   ): Promise<void> {
     const billingConfig = this.billingConfigs.get(tenantId);
     if (!billingConfig || !this.config.overage_notifications) return;
@@ -732,14 +773,14 @@ export class UsageTracker extends EventEmitter {
               tenantId,
               metric,
               utilization,
-              threshold: 90
+              threshold: 90,
             });
           } else if (utilization >= 100) {
             this.emit('usage:exceeded', {
               tenantId,
               metric,
               utilization,
-              overage: amount - quota
+              overage: amount - quota,
             });
           }
         }
@@ -751,7 +792,7 @@ export class UsageTracker extends EventEmitter {
       this.emit('credits:low', {
         tenantId,
         balance: billingConfig.credits,
-        threshold: this.config.credit_threshold_warning
+        threshold: this.config.credit_threshold_warning,
       });
     }
   }
@@ -760,9 +801,12 @@ export class UsageTracker extends EventEmitter {
    * Start usage aggregation process
    */
   private startUsageAggregation(): void {
-    setInterval(() => {
-      this.aggregateUsage();
-    }, this.config.aggregationInterval * 60 * 1000);
+    setInterval(
+      () => {
+        this.aggregateUsage();
+      },
+      this.config.aggregationInterval * 60 * 1000,
+    );
   }
 
   /**
@@ -770,18 +814,24 @@ export class UsageTracker extends EventEmitter {
    */
   private startBillingCycle(): void {
     // Check for billing events every hour
-    setInterval(() => {
-      this.processBillingCycle();
-    }, 60 * 60 * 1000);
+    setInterval(
+      () => {
+        this.processBillingCycle();
+      },
+      60 * 60 * 1000,
+    );
   }
 
   /**
    * Monitor usage thresholds
    */
   private monitorUsageThresholds(): void {
-    setInterval(() => {
-      this.checkAllTenantThresholds();
-    }, 5 * 60 * 1000); // Check every 5 minutes
+    setInterval(
+      () => {
+        this.checkAllTenantThresholds();
+      },
+      5 * 60 * 1000,
+    ); // Check every 5 minutes
   }
 
   /**
@@ -793,7 +843,10 @@ export class UsageTracker extends EventEmitter {
         const currentUsage = await this.getCurrentPeriodUsage(tenantId);
         await this.updateUsageCosts(tenantId, currentUsage);
       } catch (error) {
-        console.error(`Failed to aggregate usage for tenant ${tenantId}:`, error);
+        console.error(
+          `Failed to aggregate usage for tenant ${tenantId}:`,
+          error,
+        );
       }
     }
   }
@@ -809,7 +862,7 @@ export class UsageTracker extends EventEmitter {
         // Check if it's time to generate invoice
         if (config.subscription && config.subscription.nextBillingDate <= now) {
           await this.generateInvoice(tenantId);
-          
+
           // Update next billing date
           const nextDate = new Date(config.subscription.nextBillingDate);
           switch (config.subscription.billingCycle) {
@@ -823,12 +876,15 @@ export class UsageTracker extends EventEmitter {
               nextDate.setFullYear(nextDate.getFullYear() + 1);
               break;
           }
-          
+
           config.subscription.nextBillingDate = nextDate;
           this.billingConfigs.set(tenantId, config);
         }
       } catch (error) {
-        console.error(`Failed to process billing cycle for tenant ${tenantId}:`, error);
+        console.error(
+          `Failed to process billing cycle for tenant ${tenantId}:`,
+          error,
+        );
       }
     }
   }
@@ -842,7 +898,10 @@ export class UsageTracker extends EventEmitter {
         const currentUsage = await this.getCurrentPeriodUsage(tenantId);
         await this.checkUsageThresholds(tenantId, currentUsage.metrics);
       } catch (error) {
-        console.error(`Failed to check thresholds for tenant ${tenantId}:`, error);
+        console.error(
+          `Failed to check thresholds for tenant ${tenantId}:`,
+          error,
+        );
       }
     }
   }
@@ -852,7 +911,7 @@ export class UsageTracker extends EventEmitter {
    */
   private async updateUsageCosts(
     tenantId: string,
-    aggregation: UsageAggregation
+    aggregation: UsageAggregation,
   ): Promise<void> {
     const billingConfig = this.billingConfigs.get(tenantId);
     if (!billingConfig) return;
@@ -868,7 +927,7 @@ export class UsageTracker extends EventEmitter {
           overageCost = this.calculateOverageCosts(
             aggregation.metrics,
             billingConfig.usageBased.includedQuotas,
-            billingConfig.usageBased.rates
+            billingConfig.usageBased.rates,
           );
         }
         break;
@@ -876,7 +935,7 @@ export class UsageTracker extends EventEmitter {
       case 'usage_based':
         usageCost = this.calculateUsageCosts(
           aggregation.metrics,
-          billingConfig.usageBased!.rates
+          billingConfig.usageBased!.rates,
         );
         break;
 
@@ -884,7 +943,7 @@ export class UsageTracker extends EventEmitter {
         subscriptionCost = billingConfig.hybrid!.baseCost;
         usageCost = this.calculateUsageCosts(
           aggregation.metrics,
-          billingConfig.hybrid!.usageRates
+          billingConfig.hybrid!.usageRates,
         );
         break;
 
@@ -897,7 +956,7 @@ export class UsageTracker extends EventEmitter {
       subscription: subscriptionCost,
       usage: usageCost,
       overages: overageCost,
-      total: subscriptionCost + usageCost + overageCost
+      total: subscriptionCost + usageCost + overageCost,
     };
   }
 
@@ -907,7 +966,7 @@ export class UsageTracker extends EventEmitter {
   private calculateOverageCosts(
     usage: UsageBillingMetrics,
     quotas: UsageBillingMetrics,
-    rates: UsageBillingRates
+    rates: UsageBillingRates,
   ): number {
     let overageCost = 0;
 
@@ -915,7 +974,10 @@ export class UsageTracker extends EventEmitter {
       const quota = quotas[metric as keyof UsageBillingMetrics];
       if (amount > quota) {
         const overage = amount - quota;
-        const rate = this.getUsageRate(rates, metric as keyof UsageBillingMetrics);
+        const rate = this.getUsageRate(
+          rates,
+          metric as keyof UsageBillingMetrics,
+        );
         overageCost += overage * rate;
       }
     });
@@ -928,12 +990,15 @@ export class UsageTracker extends EventEmitter {
    */
   private calculateUsageCosts(
     usage: UsageBillingMetrics,
-    rates: UsageBillingRates
+    rates: UsageBillingRates,
   ): number {
     let usageCost = 0;
 
     Object.entries(usage).forEach(([metric, amount]) => {
-      const rate = this.getUsageRate(rates, metric as keyof UsageBillingMetrics);
+      const rate = this.getUsageRate(
+        rates,
+        metric as keyof UsageBillingMetrics,
+      );
       usageCost += amount * rate;
     });
 
@@ -946,20 +1011,21 @@ export class UsageTracker extends EventEmitter {
   private async generateInvoiceLineItems(
     tenantId: string,
     usage: UsageAggregation,
-    billingConfig: BillingConfig
+    billingConfig: BillingConfig,
   ): Promise<InvoiceLineItem[]> {
     const lineItems: InvoiceLineItem[] = [];
 
     // Subscription line item
     if (usage.costs.subscription > 0) {
       lineItems.push({
-        description: billingConfig.subscription?.planName || 'Subscription Plan',
+        description:
+          billingConfig.subscription?.planName || 'Subscription Plan',
         category: 'subscription',
         quantity: 1,
         unitPrice: usage.costs.subscription,
         total: usage.costs.subscription,
         period: usage.period,
-        metadata: { planId: billingConfig.subscription?.planId }
+        metadata: { planId: billingConfig.subscription?.planId },
       });
     }
 
@@ -967,19 +1033,24 @@ export class UsageTracker extends EventEmitter {
     if (usage.costs.usage > 0) {
       Object.entries(usage.metrics).forEach(([metric, amount]) => {
         if (amount > 0) {
-          const rate = billingConfig.usageBased?.rates || 
-                      billingConfig.hybrid?.usageRates;
+          const rate =
+            billingConfig.usageBased?.rates || billingConfig.hybrid?.usageRates;
           if (rate) {
-            const unitPrice = this.getUsageRate(rate, metric as keyof UsageBillingMetrics);
+            const unitPrice = this.getUsageRate(
+              rate,
+              metric as keyof UsageBillingMetrics,
+            );
             if (unitPrice > 0) {
               lineItems.push({
-                description: this.getMetricDescription(metric as keyof UsageBillingMetrics),
+                description: this.getMetricDescription(
+                  metric as keyof UsageBillingMetrics,
+                ),
                 category: 'usage',
                 quantity: amount,
                 unitPrice,
                 total: amount * unitPrice,
                 period: usage.period,
-                metadata: { metric }
+                metadata: { metric },
               });
             }
           }
@@ -990,11 +1061,17 @@ export class UsageTracker extends EventEmitter {
     // Overage line items
     if (usage.costs.overages > 0 && billingConfig.usageBased) {
       Object.entries(usage.metrics).forEach(([metric, amount]) => {
-        const quota = billingConfig.usageBased!.includedQuotas[metric as keyof UsageBillingMetrics];
+        const quota =
+          billingConfig.usageBased!.includedQuotas[
+            metric as keyof UsageBillingMetrics
+          ];
         if (amount > quota) {
           const overage = amount - quota;
-          const rate = this.getUsageRate(billingConfig.usageBased!.rates, metric as keyof UsageBillingMetrics);
-          
+          const rate = this.getUsageRate(
+            billingConfig.usageBased!.rates,
+            metric as keyof UsageBillingMetrics,
+          );
+
           lineItems.push({
             description: `${this.getMetricDescription(metric as keyof UsageBillingMetrics)} - Overage`,
             category: 'overage',
@@ -1002,7 +1079,7 @@ export class UsageTracker extends EventEmitter {
             unitPrice: rate,
             total: overage * rate,
             period: usage.period,
-            metadata: { metric, quota, overage }
+            metadata: { metric, quota, overage },
           });
         }
       });
@@ -1024,7 +1101,7 @@ export class UsageTracker extends EventEmitter {
       apiCalls: 'API Calls',
       bandwidthGB: 'Bandwidth (GB)',
       collaborativeMinutes: 'Collaborative Minutes',
-      aiInsightRequests: 'AI Insight Requests'
+      aiInsightRequests: 'AI Insight Requests',
     };
 
     return descriptions[metric] || metric;
@@ -1043,7 +1120,7 @@ export class UsageTracker extends EventEmitter {
    */
   private calculateDueDate(billingConfig: BillingConfig): Date {
     const dueDate = new Date();
-    
+
     // Standard payment terms based on payment method
     switch (billingConfig.paymentMethod.type) {
       case 'credit_card':
@@ -1075,7 +1152,7 @@ export class UsageTracker extends EventEmitter {
       .update(`${tenantId}-${timestamp}`)
       .digest('hex')
       .substring(0, 8);
-    
+
     return `INV-${hash.toUpperCase()}`;
   }
 
@@ -1085,8 +1162,16 @@ export class UsageTracker extends EventEmitter {
   private getCurrentBillingPeriod(): { start: Date; end: Date } {
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1);
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-    
+    const end = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+
     return { start, end };
   }
 
@@ -1097,7 +1182,7 @@ export class UsageTracker extends EventEmitter {
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
-    
+
     return { start, end };
   }
 
@@ -1106,17 +1191,20 @@ export class UsageTracker extends EventEmitter {
    */
   private async getUsageForPeriod(
     tenantId: string,
-    period: { start: Date; end: Date }
+    period: { start: Date; end: Date },
   ): Promise<UsageAggregation> {
     const aggregations = this.usageAggregations.get(tenantId) || [];
-    
-    const periodUsage = aggregations.find(agg =>
-      agg.period.start.getTime() === period.start.getTime() &&
-      agg.period.end.getTime() === period.end.getTime()
+
+    const periodUsage = aggregations.find(
+      (agg) =>
+        agg.period.start.getTime() === period.start.getTime() &&
+        agg.period.end.getTime() === period.end.getTime(),
     );
 
     if (!periodUsage) {
-      throw new Error(`No usage data found for period ${period.start} - ${period.end}`);
+      throw new Error(
+        `No usage data found for period ${period.start} - ${period.end}`,
+      );
     }
 
     return periodUsage;
@@ -1125,7 +1213,9 @@ export class UsageTracker extends EventEmitter {
   /**
    * Calculate quota utilization
    */
-  private async calculateQuotaUtilization(tenantId: string): Promise<Record<string, number>> {
+  private async calculateQuotaUtilization(
+    tenantId: string,
+  ): Promise<Record<string, number>> {
     const billingConfig = this.billingConfigs.get(tenantId);
     if (!billingConfig || billingConfig.model !== 'subscription') {
       return {};
@@ -1133,7 +1223,7 @@ export class UsageTracker extends EventEmitter {
 
     const currentUsage = await this.getCurrentPeriodUsage(tenantId);
     const quotas = billingConfig.usageBased?.includedQuotas;
-    
+
     if (!quotas) return {};
 
     const utilization: Record<string, number> = {};
@@ -1154,14 +1244,14 @@ export class UsageTracker extends EventEmitter {
   private async processPaymentGateway(
     tenantId: string,
     amount: number,
-    paymentReference?: string
+    paymentReference?: string,
   ): Promise<boolean> {
     // Mock payment processing - in reality would integrate with Stripe, etc.
     console.log(`Processing payment for tenant ${tenantId}: $${amount}`);
-    
+
     // Simulate payment processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // Simulate 95% success rate
     return Math.random() > 0.05;
   }

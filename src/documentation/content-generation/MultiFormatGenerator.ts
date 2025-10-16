@@ -1,6 +1,6 @@
 /**
  * Multi-Format Content Generation Pipeline
- * 
+ *
  * Generates documentation in multiple formats from a single source:
  * - PDF with professional styling and branding
  * - EPUB for e-reader compatibility
@@ -46,7 +46,7 @@ export interface GenerationConfig {
   };
   styling: {
     pageSize: 'A4' | 'Letter' | 'Legal';
-    margins: { top: string; right: string; bottom: string; left: string; };
+    margins: { top: string; right: string; bottom: string; left: string };
     headerFooter: boolean;
     tableOfContents: boolean;
     indexGeneration: boolean;
@@ -99,8 +99,8 @@ export class MultiFormatGenerator {
       metrics: {
         totalPages: 0,
         fileSize: {},
-        generationTime: 0
-      }
+        generationTime: 0,
+      },
     };
 
     try {
@@ -114,11 +114,11 @@ export class MultiFormatGenerator {
         try {
           const outputPath = await this.generateFormat(format);
           result.formats[format] = outputPath;
-          
+
           // Calculate file size
           const stats = await fs.stat(outputPath);
           result.metrics.fileSize[format] = stats.size;
-          
+
           console.log(`✅ Generated ${format.toUpperCase()}: ${outputPath}`);
         } catch (error) {
           result.errors.push(`Failed to generate ${format}: ${error.message}`);
@@ -128,7 +128,6 @@ export class MultiFormatGenerator {
 
       result.metrics.generationTime = Date.now() - startTime;
       result.success = result.errors.length === 0;
-
     } catch (error) {
       result.errors.push(`Generation pipeline error: ${error.message}`);
       console.error('❌ Generation failed:', error);
@@ -155,16 +154,16 @@ export class MultiFormatGenerator {
     switch (source.type) {
       case 'markdown':
         return await fs.readFile(source.path, 'utf8');
-      
+
       case 'html':
         return await fs.readFile(source.path, 'utf8');
-      
+
       case 'docusaurus':
         return await this.loadDocusaurusContent(source.path);
-      
+
       case 'openapi':
         return await this.loadOpenAPIContent(source.path);
-      
+
       default:
         throw new Error(`Unsupported content type: ${source.type}`);
     }
@@ -176,13 +175,13 @@ export class MultiFormatGenerator {
   private async loadDocusaurusContent(basePath: string): Promise<string> {
     const docsDir = path.join(basePath, 'docs');
     const files = await this.getAllMarkdownFiles(docsDir);
-    
+
     let combinedContent = '';
     for (const file of files) {
       const content = await fs.readFile(file, 'utf8');
       combinedContent += content + '\n\n';
     }
-    
+
     return combinedContent;
   }
 
@@ -193,7 +192,7 @@ export class MultiFormatGenerator {
     const yaml = await import('js-yaml');
     const content = await fs.readFile(specPath, 'utf8');
     const spec = yaml.load(content) as any;
-    
+
     // Convert OpenAPI spec to markdown
     return this.convertOpenAPIToMarkdown(spec);
   }
@@ -205,21 +204,21 @@ export class MultiFormatGenerator {
     let markdown = `# ${spec.info.title}\n\n`;
     markdown += `${spec.info.description}\n\n`;
     markdown += `**Version:** ${spec.info.version}\n\n`;
-    
+
     if (spec.paths) {
       markdown += '## Endpoints\n\n';
-      
+
       for (const [path, pathItem] of Object.entries(spec.paths)) {
         if (!pathItem || typeof pathItem !== 'object') continue;
-        
+
         for (const [method, operation] of Object.entries(pathItem)) {
           if (!operation || typeof operation !== 'object') continue;
-          
+
           const op = operation as any;
           markdown += `### ${method.toUpperCase()} ${path}\n\n`;
           if (op.summary) markdown += `${op.summary}\n\n`;
           if (op.description) markdown += `${op.description}\n\n`;
-          
+
           if (op.parameters) {
             markdown += '#### Parameters\n\n';
             for (const param of op.parameters) {
@@ -230,36 +229,39 @@ export class MultiFormatGenerator {
         }
       }
     }
-    
+
     return markdown;
   }
 
   /**
    * Process content into unified structure
    */
-  private async processContent(content: string, source: ContentSource): Promise<ProcessedContent> {
+  private async processContent(
+    content: string,
+    source: ContentSource,
+  ): Promise<ProcessedContent> {
     let html: string;
-    
+
     if (source.type === 'markdown') {
       html = marked(content);
     } else {
       html = content;
     }
-    
+
     // Parse HTML to extract structure
     const dom = new JSDOM(html);
     const document = dom.window.document;
-    
+
     const sections = this.extractSections(document);
     const toc = this.generateTableOfContents(sections);
-    
+
     return {
       html,
       sections,
       toc,
       metadata: source.metadata,
       wordCount: this.countWords(content),
-      estimatedReadTime: Math.ceil(this.countWords(content) / 200) // 200 WPM average
+      estimatedReadTime: Math.ceil(this.countWords(content) / 200), // 200 WPM average
     };
   }
 
@@ -269,20 +271,20 @@ export class MultiFormatGenerator {
   private extractSections(document: Document): Section[] {
     const sections: Section[] = [];
     const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    
+
     headings.forEach((heading, index) => {
       const level = parseInt(heading.tagName.substring(1));
       const title = heading.textContent || '';
       const id = heading.id || `section-${index}`;
-      
+
       sections.push({
         level,
         title,
         id,
-        content: this.getSectionContent(heading)
+        content: this.getSectionContent(heading),
       });
     });
-    
+
     return sections;
   }
 
@@ -292,12 +294,12 @@ export class MultiFormatGenerator {
   private getSectionContent(heading: Element): string {
     let content = '';
     let next = heading.nextElementSibling;
-    
+
     while (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
       content += next.outerHTML;
       next = next.nextElementSibling;
     }
-    
+
     return content;
   }
 
@@ -305,11 +307,11 @@ export class MultiFormatGenerator {
    * Generate table of contents
    */
   private generateTableOfContents(sections: Section[]): TocEntry[] {
-    return sections.map(section => ({
+    return sections.map((section) => ({
       title: section.title,
       id: section.id,
       level: section.level,
-      page: 1 // Will be updated during PDF generation
+      page: 1, // Will be updated during PDF generation
     }));
   }
 
@@ -339,15 +341,15 @@ export class MultiFormatGenerator {
   private async generatePDF(): Promise<string> {
     const browser = await puppeteer.launch({ headless: 'new' });
     const page = await browser.newPage();
-    
+
     // Combine all processed content
     const combinedHtml = this.buildCombinedHTML('pdf');
-    
+
     await page.setContent(combinedHtml, { waitUntil: 'networkidle0' });
-    
+
     const outputPath = path.join(this.config.outputDir, 'documentation.pdf');
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
-    
+
     await page.pdf({
       path: outputPath,
       format: this.config.styling.pageSize as any,
@@ -355,9 +357,9 @@ export class MultiFormatGenerator {
       displayHeaderFooter: this.config.styling.headerFooter,
       headerTemplate: this.getHeaderTemplate(),
       footerTemplate: this.getFooterTemplate(),
-      printBackground: true
+      printBackground: true,
     });
-    
+
     await browser.close();
     return outputPath;
   }
@@ -368,17 +370,17 @@ export class MultiFormatGenerator {
   private async generateEPUB(): Promise<string> {
     const outputPath = path.join(this.config.outputDir, 'documentation.epub');
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
-    
+
     // Create EPUB structure
     const epubDir = path.join(this.config.outputDir, 'epub-temp');
     await this.createEPUBStructure(epubDir);
-    
+
     // Package EPUB
     await this.packageEPUB(epubDir, outputPath);
-    
+
     // Clean up temp directory
     await fs.rmdir(epubDir, { recursive: true });
-    
+
     return outputPath;
   }
 
@@ -388,20 +390,20 @@ export class MultiFormatGenerator {
   private async generateWeb(): Promise<string> {
     const outputDir = path.join(this.config.outputDir, 'web');
     await fs.mkdir(outputDir, { recursive: true });
-    
+
     // Generate main HTML file
     const html = this.buildCombinedHTML('web');
     const htmlPath = path.join(outputDir, 'index.html');
     await fs.writeFile(htmlPath, html, 'utf8');
-    
+
     // Generate CSS
     const css = this.generateCSS('web');
     const cssPath = path.join(outputDir, 'styles.css');
     await fs.writeFile(cssPath, css, 'utf8');
-    
+
     // Copy assets
     await this.copyAssets(outputDir);
-    
+
     return htmlPath;
   }
 
@@ -411,11 +413,11 @@ export class MultiFormatGenerator {
   private async generatePrint(): Promise<string> {
     const outputDir = path.join(this.config.outputDir, 'print');
     await fs.mkdir(outputDir, { recursive: true });
-    
+
     const html = this.buildCombinedHTML('print');
     const htmlPath = path.join(outputDir, 'print.html');
     await fs.writeFile(htmlPath, html, 'utf8');
-    
+
     return htmlPath;
   }
 
@@ -425,11 +427,11 @@ export class MultiFormatGenerator {
   private async generateMobile(): Promise<string> {
     const outputDir = path.join(this.config.outputDir, 'mobile');
     await fs.mkdir(outputDir, { recursive: true });
-    
+
     const html = this.buildCombinedHTML('mobile');
     const htmlPath = path.join(outputDir, 'mobile.html');
     await fs.writeFile(htmlPath, html, 'utf8');
-    
+
     return htmlPath;
   }
 
@@ -443,7 +445,7 @@ export class MultiFormatGenerator {
       version: '1.0.0',
       description: '',
       keywords: [],
-      language: 'en'
+      language: 'en',
     };
 
     let html = `
@@ -495,7 +497,7 @@ export class MultiFormatGenerator {
    */
   private generateCSS(format: string): string {
     const { colors, fonts } = this.config.branding;
-    
+
     let css = `
       :root {
         --primary-color: ${colors.primary};
@@ -618,14 +620,14 @@ export class MultiFormatGenerator {
   // Helper methods
   private generateTOCHTML(): string {
     let tocHTML = '<nav class="toc"><h2>Table of Contents</h2><ul>';
-    
+
     for (const [, content] of this.processedContent) {
       for (const entry of content.toc) {
         const indent = '  '.repeat(entry.level - 1);
         tocHTML += `${indent}<li><a href="#${entry.id}">${entry.title}</a></li>`;
       }
     }
-    
+
     tocHTML += '</ul></nav>';
     return tocHTML;
   }
@@ -649,16 +651,16 @@ export class MultiFormatGenerator {
   private async getAllMarkdownFiles(dir: string): Promise<string[]> {
     const files: string[] = [];
     const entries = await fs.readdir(dir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        files.push(...await this.getAllMarkdownFiles(fullPath));
+        files.push(...(await this.getAllMarkdownFiles(fullPath)));
       } else if (entry.name.endsWith('.md') || entry.name.endsWith('.mdx')) {
         files.push(fullPath);
       }
     }
-    
+
     return files;
   }
 
@@ -672,7 +674,10 @@ export class MultiFormatGenerator {
     await fs.mkdir(epubDir, { recursive: true });
   }
 
-  private async packageEPUB(epubDir: string, outputPath: string): Promise<void> {
+  private async packageEPUB(
+    epubDir: string,
+    outputPath: string,
+  ): Promise<void> {
     // EPUB packaging implementation would go here
   }
 

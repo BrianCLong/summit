@@ -75,7 +75,13 @@ export interface SCIMConfiguration {
 
 export interface ProvisioningEvent {
   id: string;
-  type: 'user_created' | 'user_updated' | 'user_deleted' | 'group_created' | 'group_updated' | 'group_deleted';
+  type:
+    | 'user_created'
+    | 'user_updated'
+    | 'user_deleted'
+    | 'group_created'
+    | 'group_updated'
+    | 'group_deleted';
   tenantId: string;
   userId?: string;
   groupId?: string;
@@ -132,12 +138,14 @@ export class SSOManager extends EventEmitter {
   /**
    * Configure SSO provider
    */
-  async configureSSOProvider(provider: Omit<SSOProvider, 'id' | 'createdAt' | 'updatedAt'>): Promise<SSOProvider> {
+  async configureSSOProvider(
+    provider: Omit<SSOProvider, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<SSOProvider> {
     const fullProvider: SSOProvider = {
       ...provider,
       id: crypto.randomUUID(),
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Validate configuration based on provider type
@@ -152,13 +160,18 @@ export class SSOManager extends EventEmitter {
   /**
    * Configure SCIM endpoint
    */
-  async configureSCIM(config: Omit<SCIMConfiguration, 'id' | 'createdAt' | 'updatedAt' | 'lastSync'>): Promise<SCIMConfiguration> {
+  async configureSCIM(
+    config: Omit<
+      SCIMConfiguration,
+      'id' | 'createdAt' | 'updatedAt' | 'lastSync'
+    >,
+  ): Promise<SCIMConfiguration> {
     const fullConfig: SCIMConfiguration = {
       ...config,
       id: crypto.randomUUID(),
       lastSync: null,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Validate SCIM endpoint
@@ -173,7 +186,10 @@ export class SSOManager extends EventEmitter {
   /**
    * Handle SSO authentication response
    */
-  async handleSSOAuthentication(providerId: string, authResponse: any): Promise<{
+  async handleSSOAuthentication(
+    providerId: string,
+    authResponse: any,
+  ): Promise<{
     user: User;
     token: string;
     refreshToken?: string;
@@ -191,7 +207,7 @@ export class SSOManager extends EventEmitter {
 
     // Create or update user
     const existingUser = Array.from(this.users.values()).find(
-      u => u.email === user.email && u.tenantId === user.tenantId
+      (u) => u.email === user.email && u.tenantId === user.tenantId,
     );
 
     let finalUser: User;
@@ -203,7 +219,7 @@ export class SSOManager extends EventEmitter {
         department: user.department,
         title: user.title,
         groups: user.groups,
-        lastLogin: new Date()
+        lastLogin: new Date(),
       });
     } else {
       finalUser = await this.createUser(user);
@@ -216,13 +232,13 @@ export class SSOManager extends EventEmitter {
     this.emit('sso_authentication_success', {
       user: finalUser,
       provider: provider.name,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return {
       user: finalUser,
       token,
-      refreshToken
+      refreshToken,
     };
   }
 
@@ -234,9 +250,11 @@ export class SSOManager extends EventEmitter {
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
     resourceType: 'Users' | 'Groups',
     resourceId?: string,
-    body?: any
+    body?: any,
   ): Promise<any> {
-    const config = Array.from(this.scimConfigs.values()).find(c => c.tenantId === tenantId && c.isActive);
+    const config = Array.from(this.scimConfigs.values()).find(
+      (c) => c.tenantId === tenantId && c.isActive,
+    );
     if (!config) {
       throw new Error('SCIM not configured for tenant');
     }
@@ -248,7 +266,13 @@ export class SSOManager extends EventEmitter {
         return this.handleSCIMCreate(config, resourceType, body);
       case 'PUT':
       case 'PATCH':
-        return this.handleSCIMUpdate(config, resourceType, resourceId!, body, method === 'PATCH');
+        return this.handleSCIMUpdate(
+          config,
+          resourceType,
+          resourceId!,
+          body,
+          method === 'PATCH',
+        );
       case 'DELETE':
         return this.handleSCIMDelete(config, resourceType, resourceId!);
       default:
@@ -308,9 +332,8 @@ export class SSOManager extends EventEmitter {
         configId,
         usersProcessed,
         groupsProcessed,
-        errors
+        errors,
       });
-
     } catch (error) {
       errors.push(`Sync failed: ${error.message}`);
     }
@@ -321,12 +344,14 @@ export class SSOManager extends EventEmitter {
   /**
    * Create user (internal or via provisioning)
    */
-  async createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
+  async createUser(
+    userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<User> {
     const user: User = {
       ...userData,
       id: crypto.randomUUID(),
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.users.set(user.id, user);
@@ -337,7 +362,7 @@ export class SSOManager extends EventEmitter {
       tenantId: user.tenantId,
       userId: user.id,
       changes: user,
-      source: user.source
+      source: user.source,
     });
 
     this.emit('user_created', user);
@@ -357,7 +382,7 @@ export class SSOManager extends EventEmitter {
     const updatedUser = {
       ...user,
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.users.set(userId, updatedUser);
@@ -368,7 +393,7 @@ export class SSOManager extends EventEmitter {
       tenantId: user.tenantId,
       userId: user.id,
       changes: updates,
-      source: 'manual' // Will be overridden by calling context
+      source: 'manual', // Will be overridden by calling context
     });
 
     this.emit('user_updated', updatedUser);
@@ -397,7 +422,7 @@ export class SSOManager extends EventEmitter {
       tenantId: user.tenantId,
       userId: user.id,
       changes: { isActive: false },
-      source: 'manual'
+      source: 'manual',
     });
 
     this.emit('user_deleted', user);
@@ -407,14 +432,20 @@ export class SSOManager extends EventEmitter {
    * Get SSO configuration for tenant
    */
   getSSOProviders(tenantId: string): SSOProvider[] {
-    return Array.from(this.providers.values()).filter(p => p.tenantId === tenantId);
+    return Array.from(this.providers.values()).filter(
+      (p) => p.tenantId === tenantId,
+    );
   }
 
   /**
    * Get SCIM configuration for tenant
    */
   getSCIMConfiguration(tenantId: string): SCIMConfiguration | null {
-    return Array.from(this.scimConfigs.values()).find(c => c.tenantId === tenantId) || null;
+    return (
+      Array.from(this.scimConfigs.values()).find(
+        (c) => c.tenantId === tenantId,
+      ) || null
+    );
   }
 
   /**
@@ -422,7 +453,7 @@ export class SSOManager extends EventEmitter {
    */
   getProvisioningAudit(tenantId: string, limit = 100): ProvisioningEvent[] {
     return Array.from(this.provisioningEvents.values())
-      .filter(e => e.tenantId === tenantId)
+      .filter((e) => e.tenantId === tenantId)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, limit);
   }
@@ -430,12 +461,18 @@ export class SSOManager extends EventEmitter {
   private async validateSSOConfiguration(provider: SSOProvider): Promise<void> {
     switch (provider.type) {
       case 'saml':
-        if (!provider.configuration.entityId || !provider.configuration.ssoURL) {
+        if (
+          !provider.configuration.entityId ||
+          !provider.configuration.ssoURL
+        ) {
           throw new Error('SAML provider requires entityId and ssoURL');
         }
         break;
       case 'oidc':
-        if (!provider.configuration.clientId || !provider.configuration.discoveryURL) {
+        if (
+          !provider.configuration.clientId ||
+          !provider.configuration.discoveryURL
+        ) {
           throw new Error('OIDC provider requires clientId and discoveryURL');
         }
         break;
@@ -450,9 +487,9 @@ export class SSOManager extends EventEmitter {
     try {
       const response = await fetch(`${config.endpoint}/ServiceProviderConfig`, {
         headers: {
-          'Authorization': `Bearer ${config.bearerToken}`,
-          'Content-Type': 'application/scim+json'
-        }
+          Authorization: `Bearer ${config.bearerToken}`,
+          'Content-Type': 'application/scim+json',
+        },
       });
 
       if (!response.ok) {
@@ -463,18 +500,24 @@ export class SSOManager extends EventEmitter {
     }
   }
 
-  private async parseAuthResponse(provider: SSOProvider, authResponse: any): Promise<Record<string, any>> {
+  private async parseAuthResponse(
+    provider: SSOProvider,
+    authResponse: any,
+  ): Promise<Record<string, any>> {
     // Implementation would parse SAML assertions, OIDC tokens, etc.
     // For now, return mock parsed attributes
     return {
       email: 'user@example.com',
       firstName: 'John',
       lastName: 'Doe',
-      groups: ['users', 'developers']
+      groups: ['users', 'developers'],
     };
   }
 
-  private async mapAttributesToUser(provider: SSOProvider, attributes: Record<string, any>): Promise<Omit<User, 'id' | 'createdAt' | 'updatedAt'>> {
+  private async mapAttributesToUser(
+    provider: SSOProvider,
+    attributes: Record<string, any>,
+  ): Promise<Omit<User, 'id' | 'createdAt' | 'updatedAt'>> {
     const mapping = provider.attributeMapping;
 
     return {
@@ -483,63 +526,85 @@ export class SSOManager extends EventEmitter {
       firstName: attributes[mapping.firstName],
       lastName: attributes[mapping.lastName],
       displayName: `${attributes[mapping.firstName]} ${attributes[mapping.lastName]}`,
-      department: mapping.department ? attributes[mapping.department] : undefined,
+      department: mapping.department
+        ? attributes[mapping.department]
+        : undefined,
       title: mapping.title ? attributes[mapping.title] : undefined,
       groups: attributes[mapping.groups] || [],
       tenantId: provider.tenantId,
       source: 'sso',
-      isActive: true
+      isActive: true,
     };
   }
 
   private generateAccessToken(user: User): string {
-    return jwt.sign({
-      sub: user.id,
-      email: user.email,
-      tenantId: user.tenantId,
-      groups: user.groups,
-      type: 'access'
-    }, process.env.JWT_SECRET || 'default-secret', {
-      expiresIn: '1h',
-      issuer: 'intelgraph',
-      audience: 'intelgraph-api'
-    });
+    return jwt.sign(
+      {
+        sub: user.id,
+        email: user.email,
+        tenantId: user.tenantId,
+        groups: user.groups,
+        type: 'access',
+      },
+      process.env.JWT_SECRET || 'default-secret',
+      {
+        expiresIn: '1h',
+        issuer: 'intelgraph',
+        audience: 'intelgraph-api',
+      },
+    );
   }
 
   private generateRefreshToken(user: User): string {
-    return jwt.sign({
-      sub: user.id,
-      type: 'refresh'
-    }, process.env.JWT_REFRESH_SECRET || 'default-refresh-secret', {
-      expiresIn: '30d',
-      issuer: 'intelgraph',
-      audience: 'intelgraph-api'
-    });
+    return jwt.sign(
+      {
+        sub: user.id,
+        type: 'refresh',
+      },
+      process.env.JWT_REFRESH_SECRET || 'default-refresh-secret',
+      {
+        expiresIn: '30d',
+        issuer: 'intelgraph',
+        audience: 'intelgraph-api',
+      },
+    );
   }
 
-  private async handleSCIMGet(config: SCIMConfiguration, resourceType: string, resourceId?: string): Promise<any> {
+  private async handleSCIMGet(
+    config: SCIMConfiguration,
+    resourceType: string,
+    resourceId?: string,
+  ): Promise<any> {
     if (resourceType === 'Users') {
       if (resourceId) {
-        const user = Array.from(this.users.values()).find(u => u.id === resourceId || u.externalId === resourceId);
+        const user = Array.from(this.users.values()).find(
+          (u) => u.id === resourceId || u.externalId === resourceId,
+        );
         return user ? this.formatSCIMUser(config, user) : null;
       } else {
-        const users = Array.from(this.users.values()).filter(u => u.tenantId === config.tenantId);
+        const users = Array.from(this.users.values()).filter(
+          (u) => u.tenantId === config.tenantId,
+        );
         return {
           schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
           totalResults: users.length,
-          Resources: users.map(user => this.formatSCIMUser(config, user))
+          Resources: users.map((user) => this.formatSCIMUser(config, user)),
         };
       }
     } else if (resourceType === 'Groups') {
       if (resourceId) {
-        const group = Array.from(this.groups.values()).find(g => g.id === resourceId || g.externalId === resourceId);
+        const group = Array.from(this.groups.values()).find(
+          (g) => g.id === resourceId || g.externalId === resourceId,
+        );
         return group ? this.formatSCIMGroup(config, group) : null;
       } else {
-        const groups = Array.from(this.groups.values()).filter(g => g.tenantId === config.tenantId);
+        const groups = Array.from(this.groups.values()).filter(
+          (g) => g.tenantId === config.tenantId,
+        );
         return {
           schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
           totalResults: groups.length,
-          Resources: groups.map(group => this.formatSCIMGroup(config, group))
+          Resources: groups.map((group) => this.formatSCIMGroup(config, group)),
         };
       }
     }
@@ -547,7 +612,11 @@ export class SSOManager extends EventEmitter {
     throw new Error(`Unsupported resource type: ${resourceType}`);
   }
 
-  private async handleSCIMCreate(config: SCIMConfiguration, resourceType: string, body: any): Promise<any> {
+  private async handleSCIMCreate(
+    config: SCIMConfiguration,
+    resourceType: string,
+    body: any,
+  ): Promise<any> {
     if (resourceType === 'Users') {
       const user = await this.createUserFromSCIM(config, body);
       return this.formatSCIMUser(config, user);
@@ -559,12 +628,22 @@ export class SSOManager extends EventEmitter {
     throw new Error(`Unsupported resource type: ${resourceType}`);
   }
 
-  private async handleSCIMUpdate(config: SCIMConfiguration, resourceType: string, resourceId: string, body: any, isPatch: boolean): Promise<any> {
+  private async handleSCIMUpdate(
+    config: SCIMConfiguration,
+    resourceType: string,
+    resourceId: string,
+    body: any,
+    isPatch: boolean,
+  ): Promise<any> {
     // Implementation for SCIM updates
     throw new Error('SCIM update not implemented');
   }
 
-  private async handleSCIMDelete(config: SCIMConfiguration, resourceType: string, resourceId: string): Promise<void> {
+  private async handleSCIMDelete(
+    config: SCIMConfiguration,
+    resourceType: string,
+    resourceId: string,
+  ): Promise<void> {
     if (resourceType === 'Users') {
       await this.deleteUser(resourceId);
     } else if (resourceType === 'Groups') {
@@ -582,15 +661,24 @@ export class SSOManager extends EventEmitter {
     return [];
   }
 
-  private async processSCIMUser(config: SCIMConfiguration, scimUser: any): Promise<void> {
+  private async processSCIMUser(
+    config: SCIMConfiguration,
+    scimUser: any,
+  ): Promise<void> {
     // Implementation to process and sync SCIM user
   }
 
-  private async processSCIMGroup(config: SCIMConfiguration, scimGroup: any): Promise<void> {
+  private async processSCIMGroup(
+    config: SCIMConfiguration,
+    scimGroup: any,
+  ): Promise<void> {
     // Implementation to process and sync SCIM group
   }
 
-  private async createUserFromSCIM(config: SCIMConfiguration, scimUser: any): Promise<User> {
+  private async createUserFromSCIM(
+    config: SCIMConfiguration,
+    scimUser: any,
+  ): Promise<User> {
     const mapping = config.attributeMapping;
 
     return this.createUser({
@@ -604,11 +692,14 @@ export class SSOManager extends EventEmitter {
       groups: [],
       tenantId: config.tenantId,
       source: 'scim',
-      isActive: scimUser.active !== false
+      isActive: scimUser.active !== false,
     });
   }
 
-  private async createGroupFromSCIM(config: SCIMConfiguration, scimGroup: any): Promise<Group> {
+  private async createGroupFromSCIM(
+    config: SCIMConfiguration,
+    scimGroup: any,
+  ): Promise<Group> {
     const group: Group = {
       id: crypto.randomUUID(),
       externalId: scimGroup.id,
@@ -620,7 +711,7 @@ export class SSOManager extends EventEmitter {
       source: 'scim',
       isActive: true,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.groups.set(group.id, group);
@@ -634,19 +725,21 @@ export class SSOManager extends EventEmitter {
       userName: user.email,
       name: {
         givenName: user.firstName,
-        familyName: user.lastName
+        familyName: user.lastName,
       },
       displayName: user.displayName,
-      emails: [{
-        value: user.email,
-        primary: true
-      }],
+      emails: [
+        {
+          value: user.email,
+          primary: true,
+        },
+      ],
       active: user.isActive,
       meta: {
         resourceType: 'User',
         created: user.createdAt.toISOString(),
-        lastModified: user.updatedAt.toISOString()
-      }
+        lastModified: user.updatedAt.toISOString(),
+      },
     };
   }
 
@@ -655,24 +748,26 @@ export class SSOManager extends EventEmitter {
       schemas: ['urn:ietf:params:scim:schemas:core:2.0:Group'],
       id: group.externalId || group.id,
       displayName: group.displayName,
-      members: group.members.map(memberId => ({
+      members: group.members.map((memberId) => ({
         value: memberId,
-        $ref: `Users/${memberId}`
+        $ref: `Users/${memberId}`,
       })),
       meta: {
         resourceType: 'Group',
         created: group.createdAt.toISOString(),
-        lastModified: group.updatedAt.toISOString()
-      }
+        lastModified: group.updatedAt.toISOString(),
+      },
     };
   }
 
-  private async recordProvisioningEvent(event: Omit<ProvisioningEvent, 'id' | 'timestamp' | 'status'>): Promise<void> {
+  private async recordProvisioningEvent(
+    event: Omit<ProvisioningEvent, 'id' | 'timestamp' | 'status'>,
+  ): Promise<void> {
     const provisioningEvent: ProvisioningEvent = {
       ...event,
       id: crypto.randomUUID(),
       timestamp: new Date(),
-      status: 'completed'
+      status: 'completed',
     };
 
     this.provisioningEvents.set(provisioningEvent.id, provisioningEvent);

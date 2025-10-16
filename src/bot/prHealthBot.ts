@@ -51,7 +51,7 @@ export class PRHealthBot {
     console.log(`🏥 PR Health Bot analyzing PR #${pr.number}: ${pr.title}`);
 
     const checks: HealthCheck[] = [];
-    
+
     // Run all health checks in parallel
     const [
       sizeCheck,
@@ -61,7 +61,7 @@ export class PRHealthBot {
       conflictCheck,
       testCheck,
       securityCheck,
-      performanceCheck
+      performanceCheck,
     ] = await Promise.all([
       this.checkSize(pr),
       this.checkTitle(pr),
@@ -70,16 +70,24 @@ export class PRHealthBot {
       this.checkConflicts(pr),
       this.checkTests(pr),
       this.checkSecurity(pr),
-      this.checkPerformance(pr)
+      this.checkPerformance(pr),
     ]);
 
-    checks.push(sizeCheck, titleCheck, descriptionCheck, branchCheck, 
-                conflictCheck, testCheck, securityCheck, performanceCheck);
+    checks.push(
+      sizeCheck,
+      titleCheck,
+      descriptionCheck,
+      branchCheck,
+      conflictCheck,
+      testCheck,
+      securityCheck,
+      performanceCheck,
+    );
 
     // Calculate overall health
     const score = this.calculateHealthScore(checks);
     const overall = this.determineOverallHealth(score, checks);
-    
+
     // Generate recommendations and auto-actions
     const recommendations = await this.generateRecommendations(checks, pr);
     const autoActions = this.determineAutoActions(checks);
@@ -89,7 +97,7 @@ export class PRHealthBot {
       score,
       checks,
       recommendations,
-      autoActions
+      autoActions,
     };
   }
 
@@ -103,7 +111,7 @@ export class PRHealthBot {
         status: 'fail',
         message: `Large PR: ${totalChanges} lines across ${fileCount} files`,
         severity: 'high',
-        fixable: false
+        fixable: false,
       };
     } else if (totalChanges > 300 || fileCount > 10) {
       return {
@@ -111,7 +119,7 @@ export class PRHealthBot {
         status: 'warn',
         message: `Medium PR: ${totalChanges} lines across ${fileCount} files`,
         severity: 'medium',
-        fixable: false
+        fixable: false,
       };
     }
 
@@ -120,24 +128,25 @@ export class PRHealthBot {
       status: 'pass',
       message: `Manageable size: ${totalChanges} lines across ${fileCount} files`,
       severity: 'low',
-      fixable: false
+      fixable: false,
     };
   }
 
   private async checkTitle(pr: PRContext): Promise<HealthCheck> {
     const title = pr.title;
-    
+
     // Check conventional commit format
-    const conventionalPattern = /^(feat|fix|docs|style|refactor|perf|test|chore)(\(.+\))?: .+/;
+    const conventionalPattern =
+      /^(feat|fix|docs|style|refactor|perf|test|chore)(\(.+\))?: .+/;
     const hasIssueRef = /\b(fixes|closes|resolves)\s+#\d+/i.test(title);
-    
+
     if (!conventionalPattern.test(title)) {
       return {
         name: 'Title Format',
         status: 'warn',
         message: 'Title should follow conventional commit format',
         severity: 'low',
-        fixable: true
+        fixable: true,
       };
     }
 
@@ -147,7 +156,7 @@ export class PRHealthBot {
         status: 'warn',
         message: 'Consider adding issue reference (fixes #123)',
         severity: 'low',
-        fixable: false
+        fixable: false,
       };
     }
 
@@ -156,20 +165,20 @@ export class PRHealthBot {
       status: 'pass',
       message: 'Well-formatted title',
       severity: 'low',
-      fixable: false
+      fixable: false,
     };
   }
 
   private async checkDescription(pr: PRContext): Promise<HealthCheck> {
     const body = pr.body || '';
-    
+
     if (body.length < 50) {
       return {
         name: 'Description',
         status: 'fail',
         message: 'Missing or minimal description',
         severity: 'medium',
-        fixable: true
+        fixable: true,
       };
     }
 
@@ -181,9 +190,10 @@ export class PRHealthBot {
       return {
         name: 'Description',
         status: 'warn',
-        message: 'Description could be more structured (Context, Changes, Testing)',
+        message:
+          'Description could be more structured (Context, Changes, Testing)',
         severity: 'low',
-        fixable: true
+        fixable: true,
       };
     }
 
@@ -192,7 +202,7 @@ export class PRHealthBot {
       status: 'pass',
       message: 'Well-structured description',
       severity: 'low',
-      fixable: false
+      fixable: false,
     };
   }
 
@@ -202,14 +212,14 @@ export class PRHealthBot {
 
     // Check branch naming convention
     const goodBranchPattern = /^(feature|bugfix|hotfix|chore)\/[a-z0-9-]+$/;
-    
+
     if (!goodBranchPattern.test(branch)) {
       return {
         name: 'Branch Name',
         status: 'warn',
         message: 'Branch name should follow pattern: type/description',
         severity: 'low',
-        fixable: false
+        fixable: false,
       };
     }
 
@@ -219,7 +229,7 @@ export class PRHealthBot {
         status: 'warn',
         message: `Unusual base branch: ${baseBranch}`,
         severity: 'medium',
-        fixable: false
+        fixable: false,
       };
     }
 
@@ -228,16 +238,19 @@ export class PRHealthBot {
       status: 'pass',
       message: 'Good branch naming',
       severity: 'low',
-      fixable: false
+      fixable: false,
     };
   }
 
   private async checkConflicts(pr: PRContext): Promise<HealthCheck> {
     // In a real implementation, this would check Git conflicts
     // For now, we'll simulate based on file overlap heuristics
-    
-    const conflictRiskFiles = pr.files.filter(f => 
-      f.includes('package.json') || f.includes('yarn.lock') || f.includes('schema')
+
+    const conflictRiskFiles = pr.files.filter(
+      (f) =>
+        f.includes('package.json') ||
+        f.includes('yarn.lock') ||
+        f.includes('schema'),
     );
 
     if (conflictRiskFiles.length > 0) {
@@ -246,7 +259,7 @@ export class PRHealthBot {
         status: 'warn',
         message: `Potential conflicts in: ${conflictRiskFiles.join(', ')}`,
         severity: 'medium',
-        fixable: true
+        fixable: true,
       };
     }
 
@@ -255,18 +268,24 @@ export class PRHealthBot {
       status: 'pass',
       message: 'No obvious conflict risks',
       severity: 'low',
-      fixable: false
+      fixable: false,
     };
   }
 
   private async checkTests(pr: PRContext): Promise<HealthCheck> {
-    const hasTestFiles = pr.files.some(f => 
-      f.includes('.test.') || f.includes('.spec.') || f.includes('__tests__')
+    const hasTestFiles = pr.files.some(
+      (f) =>
+        f.includes('.test.') || f.includes('.spec.') || f.includes('__tests__'),
     );
 
-    const hasCodeFiles = pr.files.some(f => 
-      (f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.tsx') || f.endsWith('.jsx')) &&
-      !f.includes('.test.') && !f.includes('.spec.')
+    const hasCodeFiles = pr.files.some(
+      (f) =>
+        (f.endsWith('.ts') ||
+          f.endsWith('.js') ||
+          f.endsWith('.tsx') ||
+          f.endsWith('.jsx')) &&
+        !f.includes('.test.') &&
+        !f.includes('.spec.'),
     );
 
     if (hasCodeFiles && !hasTestFiles) {
@@ -275,7 +294,7 @@ export class PRHealthBot {
         status: 'fail',
         message: 'Code changes without corresponding tests',
         severity: 'high',
-        fixable: true
+        fixable: true,
       };
     }
 
@@ -285,7 +304,7 @@ export class PRHealthBot {
         status: 'pass',
         message: 'Tests included with changes',
         severity: 'low',
-        fixable: false
+        fixable: false,
       };
     }
 
@@ -294,18 +313,26 @@ export class PRHealthBot {
       status: 'pass',
       message: 'No testable code changes',
       severity: 'low',
-      fixable: false
+      fixable: false,
     };
   }
 
   private async checkSecurity(pr: PRContext): Promise<HealthCheck> {
-    const securityFiles = pr.files.filter(f =>
-      f.includes('auth') || f.includes('security') || f.includes('password') ||
-      f.includes('token') || f.includes('.env') || f.includes('secret')
+    const securityFiles = pr.files.filter(
+      (f) =>
+        f.includes('auth') ||
+        f.includes('security') ||
+        f.includes('password') ||
+        f.includes('token') ||
+        f.includes('.env') ||
+        f.includes('secret'),
     );
 
-    const dependencyFiles = pr.files.filter(f =>
-      f.includes('package.json') || f.includes('requirements.txt') || f.includes('go.mod')
+    const dependencyFiles = pr.files.filter(
+      (f) =>
+        f.includes('package.json') ||
+        f.includes('requirements.txt') ||
+        f.includes('go.mod'),
     );
 
     if (securityFiles.length > 0) {
@@ -314,7 +341,7 @@ export class PRHealthBot {
         status: 'warn',
         message: `Security-sensitive files modified: ${securityFiles.join(', ')}`,
         severity: 'high',
-        fixable: false
+        fixable: false,
       };
     }
 
@@ -324,7 +351,7 @@ export class PRHealthBot {
         status: 'warn',
         message: 'Dependencies modified - security scan recommended',
         severity: 'medium',
-        fixable: false
+        fixable: false,
       };
     }
 
@@ -333,14 +360,19 @@ export class PRHealthBot {
       status: 'pass',
       message: 'No security-sensitive changes detected',
       severity: 'low',
-      fixable: false
+      fixable: false,
     };
   }
 
   private async checkPerformance(pr: PRContext): Promise<HealthCheck> {
-    const performanceRiskFiles = pr.files.filter(f =>
-      f.includes('database') || f.includes('query') || f.includes('migration') ||
-      f.includes('index') || f.includes('worker') || f.includes('job')
+    const performanceRiskFiles = pr.files.filter(
+      (f) =>
+        f.includes('database') ||
+        f.includes('query') ||
+        f.includes('migration') ||
+        f.includes('index') ||
+        f.includes('worker') ||
+        f.includes('job'),
     );
 
     if (performanceRiskFiles.length > 0) {
@@ -349,7 +381,7 @@ export class PRHealthBot {
         status: 'warn',
         message: `Performance-sensitive areas: ${performanceRiskFiles.join(', ')}`,
         severity: 'medium',
-        fixable: false
+        fixable: false,
       };
     }
 
@@ -358,27 +390,34 @@ export class PRHealthBot {
       status: 'pass',
       message: 'No performance-critical changes detected',
       severity: 'low',
-      fixable: false
+      fixable: false,
     };
   }
 
   private calculateHealthScore(checks: HealthCheck[]): number {
     let score = 100;
-    
+
     for (const check of checks) {
       if (check.status === 'fail') {
-        score -= check.severity === 'high' ? 25 : check.severity === 'medium' ? 15 : 5;
+        score -=
+          check.severity === 'high' ? 25 : check.severity === 'medium' ? 15 : 5;
       } else if (check.status === 'warn') {
-        score -= check.severity === 'high' ? 15 : check.severity === 'medium' ? 10 : 5;
+        score -=
+          check.severity === 'high' ? 15 : check.severity === 'medium' ? 10 : 5;
       }
     }
 
     return Math.max(0, score);
   }
 
-  private determineOverallHealth(score: number, checks: HealthCheck[]): 'healthy' | 'needs-attention' | 'unhealthy' {
-    const criticalFailures = checks.filter(c => c.status === 'fail' && c.severity === 'high').length;
-    
+  private determineOverallHealth(
+    score: number,
+    checks: HealthCheck[],
+  ): 'healthy' | 'needs-attention' | 'unhealthy' {
+    const criticalFailures = checks.filter(
+      (c) => c.status === 'fail' && c.severity === 'high',
+    ).length;
+
     if (criticalFailures > 0 || score < 50) {
       return 'unhealthy';
     } else if (score < 75) {
@@ -388,26 +427,37 @@ export class PRHealthBot {
     }
   }
 
-  private async generateRecommendations(checks: HealthCheck[], pr: PRContext): Promise<string[]> {
+  private async generateRecommendations(
+    checks: HealthCheck[],
+    pr: PRContext,
+  ): Promise<string[]> {
     const recommendations: string[] = [];
 
     for (const check of checks) {
       if (check.status !== 'pass') {
         switch (check.name) {
           case 'PR Size':
-            recommendations.push('🔄 Consider splitting large changes into smaller, focused PRs');
+            recommendations.push(
+              '🔄 Consider splitting large changes into smaller, focused PRs',
+            );
             break;
           case 'Title Format':
-            recommendations.push('📝 Update title to follow conventional commit format');
+            recommendations.push(
+              '📝 Update title to follow conventional commit format',
+            );
             break;
           case 'Description':
-            recommendations.push('📋 Add structured description with Context, Changes, and Testing sections');
+            recommendations.push(
+              '📋 Add structured description with Context, Changes, and Testing sections',
+            );
             break;
           case 'Test Coverage':
             recommendations.push('🧪 Add tests for modified code');
             break;
           case 'Security Review':
-            recommendations.push('🔒 Request security review for sensitive changes');
+            recommendations.push(
+              '🔒 Request security review for sensitive changes',
+            );
             break;
         }
       }
@@ -420,12 +470,18 @@ export class PRHealthBot {
           type: 'review',
           complexity: 'simple',
           priority: 'medium',
-          budget: { maxCost: 0.10, timeLimit: 5000 },
+          budget: { maxCost: 0.1, timeLimit: 5000 },
           qualityRequirements: { minAccuracy: 0.8, allowExperimental: true },
-          context: { estimatedTokens: 500, needsReasoning: false, requiresCreativity: false }
+          context: {
+            estimatedTokens: 500,
+            needsReasoning: false,
+            requiresCreativity: false,
+          },
         });
 
-        recommendations.push('🤖 AI-generated recommendations available via routing');
+        recommendations.push(
+          '🤖 AI-generated recommendations available via routing',
+        );
       } catch (error) {
         console.warn('Failed to generate AI recommendations:', error.message);
       }
@@ -437,8 +493,10 @@ export class PRHealthBot {
   private determineAutoActions(checks: HealthCheck[]): string[] {
     const actions: string[] = [];
 
-    const fixableChecks = checks.filter(c => c.fixable && c.status !== 'pass');
-    
+    const fixableChecks = checks.filter(
+      (c) => c.fixable && c.status !== 'pass',
+    );
+
     for (const check of fixableChecks) {
       switch (check.name) {
         case 'Description':
@@ -458,11 +516,11 @@ export class PRHealthBot {
 
   async generateComment(healthCheck: PRHealthCheck): Promise<string> {
     const { overall, score, checks, recommendations } = healthCheck;
-    
+
     const statusEmoji = {
-      'healthy': '✅',
-      'needs-attention': '⚠️', 
-      'unhealthy': '❌'
+      healthy: '✅',
+      'needs-attention': '⚠️',
+      unhealthy: '❌',
     }[overall];
 
     let comment = `## ${statusEmoji} PR Health Check (Score: ${score}/100)\n\n`;
@@ -471,18 +529,19 @@ export class PRHealthBot {
     // Detailed check results
     comment += '### Check Results\n\n';
     for (const check of checks) {
-      const icon = check.status === 'pass' ? '✅' : check.status === 'warn' ? '⚠️' : '❌';
+      const icon =
+        check.status === 'pass' ? '✅' : check.status === 'warn' ? '⚠️' : '❌';
       comment += `${icon} **${check.name}:** ${check.message}\n`;
     }
 
     // Recommendations
     if (recommendations.length > 0) {
       comment += '\n### Recommendations\n\n';
-      recommendations.forEach(rec => comment += `- ${rec}\n`);
+      recommendations.forEach((rec) => (comment += `- ${rec}\n`));
     }
 
     comment += '\n---\n*Generated by Maestro PR Health Bot v2*';
-    
+
     return comment;
   }
 }

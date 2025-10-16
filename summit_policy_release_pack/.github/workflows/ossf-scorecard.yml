@@ -1,7 +1,7 @@
 name: OSSF Scorecard
 on:
-  schedule: [ { cron: '23 6 * * 1' } ]
-  push: { branches: ["main"] }
+  schedule: [{ cron: '23 6 * * 1' }]
+  push: { branches: ['main'] }
 permissions:
   id-token: write
   contents: read

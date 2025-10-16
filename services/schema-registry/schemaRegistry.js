@@ -30,7 +30,9 @@ class SchemaRegistry {
 
   getCurrent() {
     if (this.data.current == null) return null;
-    return this.data.versions.find((v) => v.version === this.data.current) || null;
+    return (
+      this.data.versions.find((v) => v.version === this.data.current) || null
+    );
   }
 
   _save() {

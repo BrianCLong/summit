@@ -49,9 +49,15 @@ export interface NvdFeedCveItem {
     id: string;
     descriptions: Array<{ lang: string; value: string }>;
     metrics?: {
-      cvssMetricV31?: Array<{ cvssData: { baseScore: number; baseSeverity: string } }>;
-      cvssMetricV30?: Array<{ cvssData: { baseScore: number; baseSeverity: string } }>;
-      cvssMetricV2?: Array<{ cvssData: { baseScore: number; baseSeverity: string } }>;
+      cvssMetricV31?: Array<{
+        cvssData: { baseScore: number; baseSeverity: string };
+      }>;
+      cvssMetricV30?: Array<{
+        cvssData: { baseScore: number; baseSeverity: string };
+      }>;
+      cvssMetricV2?: Array<{
+        cvssData: { baseScore: number; baseSeverity: string };
+      }>;
     };
     weaknesses?: Array<unknown>;
     configurations?: {

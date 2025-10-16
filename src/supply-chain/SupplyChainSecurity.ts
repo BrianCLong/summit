@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * IntelGraph Maestro Composer vNext+5: Supply Chain Security
- * 
+ *
  * Advanced supply chain security with vulnerability scanning, dependency verification,
  * SBOM generation, and license compliance checking.
- * 
+ *
  * @author IntelGraph Maestro Composer
  * @version 5.0.0
  */
@@ -105,7 +105,7 @@ class SupplyChainSecurity extends EventEmitter {
     licenseViolations: 0,
     blockedPackages: 0,
     sbomGenerated: 0,
-    policyViolations: 0
+    policyViolations: 0,
   };
 
   constructor() {
@@ -130,7 +130,7 @@ class SupplyChainSecurity extends EventEmitter {
         cve: 'CVE-2020-8203',
         cvss: 7.4,
         fixedIn: '4.17.21',
-        patchAvailable: true
+        patchAvailable: true,
       },
       {
         id: 'SNYK-JS-AXIOS-174505',
@@ -141,7 +141,7 @@ class SupplyChainSecurity extends EventEmitter {
         cve: 'CVE-2020-28168',
         cvss: 5.3,
         fixedIn: '0.21.1',
-        patchAvailable: true
+        patchAvailable: true,
       },
       {
         id: 'SNYK-JS-REACT-1070199',
@@ -152,17 +152,19 @@ class SupplyChainSecurity extends EventEmitter {
         cve: 'CVE-2021-23840',
         cvss: 6.1,
         fixedIn: '17.0.2',
-        patchAvailable: true
-      }
+        patchAvailable: true,
+      },
     ];
 
-    vulnerabilities.forEach(vuln => {
+    vulnerabilities.forEach((vuln) => {
       const existing = this.vulnerabilityDb.get(vuln.package) || [];
       existing.push(vuln);
       this.vulnerabilityDb.set(vuln.package, existing);
     });
 
-    console.log(`🛡️  Loaded ${vulnerabilities.length} vulnerability signatures`);
+    console.log(
+      `🛡️  Loaded ${vulnerabilities.length} vulnerability signatures`,
+    );
   }
 
   /**
@@ -175,7 +177,7 @@ class SupplyChainSecurity extends EventEmitter {
       ['GPL-3.0', 'GNU General Public License v3.0'],
       ['BSD-3-Clause', 'BSD 3-Clause "New" or "Revised" License'],
       ['ISC', 'ISC License'],
-      ['LGPL-2.1', 'GNU Lesser General Public License v2.1']
+      ['LGPL-2.1', 'GNU Lesser General Public License v2.1'],
     ]);
 
     this.licenseDb = licenses;
@@ -192,16 +194,20 @@ class SupplyChainSecurity extends EventEmitter {
       maxVulnerabilityScore: 7.0,
       requireSignedPackages: true,
       requireSBOM: true,
-      autoUpdatePolicy: 'patch'
+      autoUpdatePolicy: 'patch',
     };
 
     const strictPolicy: SupplyChainPolicy = {
       allowedLicenses: ['MIT', 'Apache-2.0'],
-      blockedPackages: ['malicious-package', 'suspicious-lib', 'gpl-licensed-lib'],
+      blockedPackages: [
+        'malicious-package',
+        'suspicious-lib',
+        'gpl-licensed-lib',
+      ],
       maxVulnerabilityScore: 4.0,
       requireSignedPackages: true,
       requireSBOM: true,
-      autoUpdatePolicy: 'none'
+      autoUpdatePolicy: 'none',
     };
 
     this.policies.set('default', defaultPolicy);
@@ -213,10 +219,13 @@ class SupplyChainSecurity extends EventEmitter {
   /**
    * Scan project dependencies for vulnerabilities
    */
-  async scanDependencies(projectPath: string, policyName: string = 'default'): Promise<SupplyChainScanResult> {
+  async scanDependencies(
+    projectPath: string,
+    policyName: string = 'default',
+  ): Promise<SupplyChainScanResult> {
     const scanId = crypto.randomUUID();
     const startTime = Date.now();
-    
+
     console.log(`\n🔍 Starting supply chain security scan: ${scanId}`);
     console.log(`   Project: ${projectPath}`);
     console.log(`   Policy: ${policyName}`);
@@ -242,7 +251,7 @@ class SupplyChainSecurity extends EventEmitter {
         if (this.isVersionAffected(dep.version, vuln.version)) {
           vulnerabilities.push({
             ...vuln,
-            version: dep.version
+            version: dep.version,
           });
         }
       }
@@ -254,7 +263,7 @@ class SupplyChainSecurity extends EventEmitter {
           license: dep.license,
           compatible: false,
           risk: this.assessLicenseRisk(dep.license),
-          notes: `License ${dep.license} not in allowed list`
+          notes: `License ${dep.license} not in allowed list`,
         });
       }
 
@@ -265,8 +274,8 @@ class SupplyChainSecurity extends EventEmitter {
     }
 
     // Filter high-severity vulnerabilities
-    const highSeverityVulns = vulnerabilities.filter(v => 
-      v.cvss && v.cvss > policy.maxVulnerabilityScore
+    const highSeverityVulns = vulnerabilities.filter(
+      (v) => v.cvss && v.cvss > policy.maxVulnerabilityScore,
     );
 
     // Generate SBOM
@@ -280,18 +289,26 @@ class SupplyChainSecurity extends EventEmitter {
       dependencies: dependencies.length,
       vulnerabilities: {
         total: vulnerabilities.length,
-        critical: vulnerabilities.filter(v => v.severity === 'critical').length,
-        high: vulnerabilities.filter(v => v.severity === 'high').length,
-        medium: vulnerabilities.filter(v => v.severity === 'medium').length,
-        low: vulnerabilities.filter(v => v.severity === 'low').length,
-        fixable: vulnerabilities.filter(v => v.patchAvailable).length
+        critical: vulnerabilities.filter((v) => v.severity === 'critical')
+          .length,
+        high: vulnerabilities.filter((v) => v.severity === 'high').length,
+        medium: vulnerabilities.filter((v) => v.severity === 'medium').length,
+        low: vulnerabilities.filter((v) => v.severity === 'low').length,
+        fixable: vulnerabilities.filter((v) => v.patchAvailable).length,
       },
       licenseViolations: licenseViolations.length,
       blockedPackages: blockedPackages.length,
-      policyCompliant: highSeverityVulns.length === 0 && licenseViolations.length === 0 && blockedPackages.length === 0,
+      policyCompliant:
+        highSeverityVulns.length === 0 &&
+        licenseViolations.length === 0 &&
+        blockedPackages.length === 0,
       sbom,
       duration: Date.now() - startTime,
-      recommendations: this.generateRecommendations(vulnerabilities, licenseViolations, blockedPackages)
+      recommendations: this.generateRecommendations(
+        vulnerabilities,
+        licenseViolations,
+        blockedPackages,
+      ),
     };
 
     // Store results
@@ -300,11 +317,17 @@ class SupplyChainSecurity extends EventEmitter {
 
     // Log summary
     console.log(`\n📊 Scan completed in ${scanResult.duration}ms:`);
-    console.log(`   • Total vulnerabilities: ${scanResult.vulnerabilities.total}`);
-    console.log(`   • Critical: ${scanResult.vulnerabilities.critical}, High: ${scanResult.vulnerabilities.high}`);
+    console.log(
+      `   • Total vulnerabilities: ${scanResult.vulnerabilities.total}`,
+    );
+    console.log(
+      `   • Critical: ${scanResult.vulnerabilities.critical}, High: ${scanResult.vulnerabilities.high}`,
+    );
     console.log(`   • License violations: ${scanResult.licenseViolations}`);
     console.log(`   • Blocked packages: ${scanResult.blockedPackages}`);
-    console.log(`   • Policy compliant: ${scanResult.policyCompliant ? '✅' : '❌'}`);
+    console.log(
+      `   • Policy compliant: ${scanResult.policyCompliant ? '✅' : '❌'}`,
+    );
 
     return scanResult;
   }
@@ -312,30 +335,43 @@ class SupplyChainSecurity extends EventEmitter {
   /**
    * Generate Software Bill of Materials (SBOM)
    */
-  async generateSBOM(dependencies: Dependency[], vulnerabilities: Vulnerability[]): Promise<SBOM> {
+  async generateSBOM(
+    dependencies: Dependency[],
+    vulnerabilities: Vulnerability[],
+  ): Promise<SBOM> {
     const serialNumber = `urn:uuid:${crypto.randomUUID()}`;
-    
-    const components: SBOMComponent[] = dependencies.map(dep => ({
+
+    const components: SBOMComponent[] = dependencies.map((dep) => ({
       type: 'library',
       bomRef: `pkg:npm/${dep.name}@${dep.version}`,
       name: dep.name,
       version: dep.version,
-      supplier: dep.supplier ? {
-        name: dep.supplier,
-        url: dep.repository
-      } : undefined,
+      supplier: dep.supplier
+        ? {
+            name: dep.supplier,
+            url: dep.repository,
+          }
+        : undefined,
       purl: `pkg:npm/${dep.name}@${dep.version}`,
-      hashes: dep.integrity ? [{
-        alg: 'SHA-512',
-        content: dep.integrity
-      }] : undefined,
-      licenses: dep.license ? [{
-        license: {
-          id: dep.license,
-          name: this.licenseDb.get(dep.license)
-        }
-      }] : undefined,
-      vulnerabilities: vulnerabilities.filter(v => v.package === dep.name)
+      hashes: dep.integrity
+        ? [
+            {
+              alg: 'SHA-512',
+              content: dep.integrity,
+            },
+          ]
+        : undefined,
+      licenses: dep.license
+        ? [
+            {
+              license: {
+                id: dep.license,
+                name: this.licenseDb.get(dep.license),
+              },
+            },
+          ]
+        : undefined,
+      vulnerabilities: vulnerabilities.filter((v) => v.package === dep.name),
     }));
 
     const sbom: SBOM = {
@@ -345,19 +381,21 @@ class SupplyChainSecurity extends EventEmitter {
       version: 1,
       metadata: {
         timestamp: new Date().toISOString(),
-        tools: [{
-          vendor: 'IntelGraph',
-          name: 'Maestro Composer',
-          version: '5.0.0'
-        }],
+        tools: [
+          {
+            vendor: 'IntelGraph',
+            name: 'Maestro Composer',
+            version: '5.0.0',
+          },
+        ],
         component: {
           type: 'application',
           name: 'intelgraph-project',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       },
       components,
-      vulnerabilities
+      vulnerabilities,
     };
 
     // Store SBOM
@@ -376,34 +414,48 @@ class SupplyChainSecurity extends EventEmitter {
   private generateRecommendations(
     vulnerabilities: Vulnerability[],
     licenseViolations: LicenseCompliance[],
-    blockedPackages: string[]
+    blockedPackages: string[],
   ): string[] {
     const recommendations: string[] = [];
 
     // Vulnerability recommendations
-    const fixableVulns = vulnerabilities.filter(v => v.patchAvailable);
+    const fixableVulns = vulnerabilities.filter((v) => v.patchAvailable);
     if (fixableVulns.length > 0) {
-      recommendations.push(`Update ${fixableVulns.length} packages to fix vulnerabilities`);
+      recommendations.push(
+        `Update ${fixableVulns.length} packages to fix vulnerabilities`,
+      );
     }
 
-    const criticalVulns = vulnerabilities.filter(v => v.severity === 'critical');
+    const criticalVulns = vulnerabilities.filter(
+      (v) => v.severity === 'critical',
+    );
     if (criticalVulns.length > 0) {
-      recommendations.push(`URGENT: Address ${criticalVulns.length} critical vulnerabilities immediately`);
+      recommendations.push(
+        `URGENT: Address ${criticalVulns.length} critical vulnerabilities immediately`,
+      );
     }
 
     // License recommendations
     if (licenseViolations.length > 0) {
-      recommendations.push(`Review ${licenseViolations.length} license compatibility issues`);
-      
-      const highRiskLicenses = licenseViolations.filter(l => l.risk === 'high');
+      recommendations.push(
+        `Review ${licenseViolations.length} license compatibility issues`,
+      );
+
+      const highRiskLicenses = licenseViolations.filter(
+        (l) => l.risk === 'high',
+      );
       if (highRiskLicenses.length > 0) {
-        recommendations.push(`Replace ${highRiskLicenses.length} packages with high-risk licenses`);
+        recommendations.push(
+          `Replace ${highRiskLicenses.length} packages with high-risk licenses`,
+        );
       }
     }
 
     // Blocked packages
     if (blockedPackages.length > 0) {
-      recommendations.push(`Remove ${blockedPackages.length} blocked packages from project`);
+      recommendations.push(
+        `Remove ${blockedPackages.length} blocked packages from project`,
+      );
     }
 
     return recommendations;
@@ -421,7 +473,8 @@ class SupplyChainSecurity extends EventEmitter {
         license: 'MIT',
         supplier: 'Lodash Team',
         repository: 'https://github.com/lodash/lodash',
-        integrity: 'sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA=='
+        integrity:
+          'sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==',
       },
       {
         name: 'axios',
@@ -429,15 +482,17 @@ class SupplyChainSecurity extends EventEmitter {
         license: 'MIT',
         supplier: 'Matt Zabriskie',
         repository: 'https://github.com/axios/axios',
-        integrity: 'sha512-fmkJBknJKoZwem3/IKSSLpkdNXZeBu5Q7GA/aRsr2btgrptmSCxi2oFjZHqGdK9DoTil9PIHlPIZw2EcRJXRvw=='
+        integrity:
+          'sha512-fmkJBknJKoZwem3/IKSSLpkdNXZeBu5Q7GA/aRsr2btgrptmSCxi2oFjZHqGdK9DoTil9PIHlPIZw2EcRJXRvw==',
       },
       {
         name: 'react',
-        version: '17.0.1', // Vulnerable version  
+        version: '17.0.1', // Vulnerable version
         license: 'MIT',
         supplier: 'Facebook',
         repository: 'https://github.com/facebook/react',
-        integrity: 'sha512-lG9c9UuMHdcAuCXxfgNl6/gLF0p8EfKGWxhYZCXxR+qF8mpLBWJXjZv4PjLdT8SH17YoJTZr1hv7V/0mIq2g0w=='
+        integrity:
+          'sha512-lG9c9UuMHdcAuCXxfgNl6/gLF0p8EfKGWxhYZCXxR+qF8mpLBWJXjZv4PjLdT8SH17YoJTZr1hv7V/0mIq2g0w==',
       },
       {
         name: 'express',
@@ -445,22 +500,26 @@ class SupplyChainSecurity extends EventEmitter {
         license: 'MIT',
         supplier: 'TJ Holowaychuk',
         repository: 'https://github.com/expressjs/express',
-        integrity: 'sha512-5/PsL6iGPdfQ/lKM1UuielYgv3BUoJfz1aUwU9vHZ+J7gyvwdQXFEBIEIaxeGf0GIcreATNyBExtalisDbuMqQ=='
+        integrity:
+          'sha512-5/PsL6iGPdfQ/lKM1UuielYgv3BUoJfz1aUwU9vHZ+J7gyvwdQXFEBIEIaxeGf0GIcreATNyBExtalisDbuMqQ==',
       },
       {
         name: 'suspicious-lib',
         version: '1.0.0',
         license: 'GPL-3.0', // License violation
         supplier: 'Unknown',
-        repository: 'https://github.com/suspicious/lib'
-      }
+        repository: 'https://github.com/suspicious/lib',
+      },
     ];
   }
 
   /**
    * Check if version is affected by vulnerability
    */
-  private isVersionAffected(currentVersion: string, affectedVersionRange: string): boolean {
+  private isVersionAffected(
+    currentVersion: string,
+    affectedVersionRange: string,
+  ): boolean {
     // Simplified version checking - in real implementation would use semver
     if (affectedVersionRange.startsWith('<')) {
       const maxVersion = affectedVersionRange.substring(1);
@@ -475,15 +534,15 @@ class SupplyChainSecurity extends EventEmitter {
   private compareVersions(a: string, b: string): number {
     const aParts = a.split('.').map(Number);
     const bParts = b.split('.').map(Number);
-    
+
     for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
       const aVal = aParts[i] || 0;
       const bVal = bParts[i] || 0;
-      
+
       if (aVal < bVal) return -1;
       if (aVal > bVal) return 1;
     }
-    
+
     return 0;
   }
 
@@ -493,7 +552,7 @@ class SupplyChainSecurity extends EventEmitter {
   private assessLicenseRisk(license: string): 'low' | 'medium' | 'high' {
     const highRisk = ['GPL-3.0', 'AGPL-3.0', 'SSPL-1.0'];
     const mediumRisk = ['GPL-2.0', 'LGPL-3.0', 'MPL-2.0'];
-    
+
     if (highRisk.includes(license)) return 'high';
     if (mediumRisk.includes(license)) return 'medium';
     return 'low';
@@ -507,7 +566,7 @@ class SupplyChainSecurity extends EventEmitter {
     this.metrics.vulnerabilitiesFound += result.vulnerabilities.total;
     this.metrics.licenseViolations += result.licenseViolations;
     this.metrics.blockedPackages += result.blockedPackages;
-    
+
     if (!result.policyCompliant) {
       this.metrics.policyViolations++;
     }
@@ -523,23 +582,30 @@ class SupplyChainSecurity extends EventEmitter {
       vulnerabilityMetrics: {
         totalFound: this.metrics.vulnerabilitiesFound,
         totalFixed: this.metrics.vulnerabilitiesFixed,
-        fixRate: this.metrics.vulnerabilitiesFound > 0 ? 
-          this.metrics.vulnerabilitiesFixed / this.metrics.vulnerabilitiesFound : 0
+        fixRate:
+          this.metrics.vulnerabilitiesFound > 0
+            ? this.metrics.vulnerabilitiesFixed /
+              this.metrics.vulnerabilitiesFound
+            : 0,
       },
       licenseCompliance: {
         violations: this.metrics.licenseViolations,
-        complianceRate: this.metrics.totalScans > 0 ?
-          1 - (this.metrics.licenseViolations / this.metrics.totalScans) : 1
+        complianceRate:
+          this.metrics.totalScans > 0
+            ? 1 - this.metrics.licenseViolations / this.metrics.totalScans
+            : 1,
       },
       policyEnforcement: {
         violations: this.metrics.policyViolations,
-        enforcementRate: this.metrics.totalScans > 0 ?
-          1 - (this.metrics.policyViolations / this.metrics.totalScans) : 1
+        enforcementRate:
+          this.metrics.totalScans > 0
+            ? 1 - this.metrics.policyViolations / this.metrics.totalScans
+            : 1,
       },
       sbomGeneration: {
         total: this.metrics.sbomGenerated,
-        coverage: 1.0 // 100% SBOM generation
-      }
+        coverage: 1.0, // 100% SBOM generation
+      },
     };
   }
 }
@@ -598,4 +664,9 @@ interface SupplyChainReport {
   };
 }
 
-export { SupplyChainSecurity, type SBOM, type Vulnerability, type SupplyChainScanResult };
+export {
+  SupplyChainSecurity,
+  type SBOM,
+  type Vulnerability,
+  type SupplyChainScanResult,
+};

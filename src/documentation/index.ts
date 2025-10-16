@@ -1,8 +1,8 @@
 /**
  * IntelGraph Advanced Documentation Ecosystem
- * 
+ *
  * A comprehensive, enterprise-grade documentation system with:
- * 
+ *
  * Phase 21-40 Advanced Features:
  * ✅ API Documentation Automation with OpenAPI Integration
  * ✅ Multi-Format Content Generation (PDF, EPUB, Web)
@@ -24,15 +24,15 @@
  * 🚧 Advanced CI/CD Integration with Deployment Gates
  * 🚧 Documentation Federation and Microsite Management
  * 🚧 Advanced Monitoring and Alerting Systems
- * 
+ *
  * This represents phases 21-40 of the documentation ecosystem,
  * building upon the solid foundation of phases 1-20.
  */
 
 // Core Orchestration
-export { 
+export {
   DocumentationOrchestrator,
-  type OrchestratorConfig
+  type OrchestratorConfig,
 } from './orchestrator/DocumentationOrchestrator.js';
 
 // API Documentation Automation (Phase 21)
@@ -43,7 +43,7 @@ export {
   type APIDocumentationConfig,
   type APIEndpoint,
   type PipelineConfig,
-  type PipelineResult
+  type PipelineResult,
 } from './api-automation/index.js';
 
 // Multi-Format Content Generation (Phase 22)
@@ -51,7 +51,7 @@ export {
   MultiFormatGenerator,
   type ContentSource,
   type GenerationConfig,
-  type GenerationResult
+  type GenerationResult,
 } from './content-generation/MultiFormatGenerator.js';
 
 // Documentation Analytics (Phase 23)
@@ -63,7 +63,7 @@ export {
   type SearchAnalytics,
   type InteractionEvent,
   type AnalyticsReport,
-  type RealTimeData
+  type RealTimeData,
 } from './analytics/AnalyticsEngine.js';
 
 // Advanced Search and Discovery (Phase 24)
@@ -74,7 +74,7 @@ export {
   type SearchQuery,
   type SearchResult,
   type SearchResponse,
-  type AutoCompleteResult
+  type AutoCompleteResult,
 } from './search/AISearchEngine.js';
 
 // Interactive Documentation (Phase 25)
@@ -85,7 +85,7 @@ export {
   type APISandbox,
   type InteractiveSession,
   type GuidedTour,
-  type ExecutionResult
+  type ExecutionResult,
 } from './interactive/InteractiveDocsEngine.js';
 
 // Documentation Versioning (Phase 26)
@@ -95,7 +95,7 @@ export {
   type DocumentVersion,
   type MigrationRule,
   type ChangelogEntry,
-  type CompatibilityLevel
+  type CompatibilityLevel,
 } from './versioning/VersionManager.js';
 
 // Community Contribution Systems (Phase 27)
@@ -106,7 +106,7 @@ export {
   type Contributor,
   type ContributionReview,
   type Discussion,
-  type Badge
+  type Badge,
 } from './community/CommunityEngine.js';
 
 // Internationalization and Localization (Phase 28)
@@ -117,7 +117,7 @@ export {
   type TranslatableContent,
   type TranslatedContent,
   type TranslationProject,
-  type TranslationStats
+  type TranslationStats,
 } from './i18n/LocalizationEngine.js';
 
 // AI-Powered Content Assistance (Phase 29)
@@ -128,7 +128,7 @@ export {
   type ContentSuggestion,
   type QualityAssessment,
   type ContentGap,
-  type ExampleGeneration
+  type ExampleGeneration,
 } from './ai-assistance/AIContentAssistant.js';
 
 // Performance Optimization (Phase 30)
@@ -138,7 +138,7 @@ export {
   type PerformanceReport,
   type OptimizationResult,
   type CoreWebVitals,
-  type PWAResult
+  type PWAResult,
 } from './performance/PerformanceOptimizer.js';
 
 // Advanced Accessibility (Phase 31)
@@ -149,12 +149,12 @@ export {
   type AccessibilityViolation,
   type AccessibilityEnhancement,
   type UserPreferences,
-  type ColorContrastResult
+  type ColorContrastResult,
 } from './accessibility/AccessibilityEngine.js';
 
 /**
  * Documentation Ecosystem Factory
- * 
+ *
  * Provides a convenient way to initialize and configure the complete
  * documentation ecosystem with sensible defaults.
  */
@@ -164,7 +164,9 @@ export class DocumentationEcosystem {
   /**
    * Create a new documentation ecosystem instance
    */
-  public static create(config?: Partial<OrchestratorConfig>): DocumentationEcosystem {
+  public static create(
+    config?: Partial<OrchestratorConfig>,
+  ): DocumentationEcosystem {
     return new DocumentationEcosystem(config);
   }
 
@@ -191,7 +193,7 @@ export class DocumentationEcosystem {
         community: { enabled: true, config: {}, priority: 5 },
         i18n: { enabled: true, config: {}, priority: 6 },
         aiAssistant: { enabled: true, config: {}, priority: 7 },
-        performance: { enabled: true, config: {}, priority: 8 }
+        performance: { enabled: true, config: {}, priority: 8 },
       },
       workflows: {
         autoGeneration: {
@@ -201,44 +203,54 @@ export class DocumentationEcosystem {
           sources: ['src/**/*.ts', 'api/**/*.yaml'],
           targets: ['docs/', 'website/'],
           validation: true,
-          approval: 'conditional'
+          approval: 'conditional',
         },
         contentSync: {
           enabled: true,
           sources: ['docs/'],
           targets: ['website/', 'cdn/'],
           syncInterval: 300000, // 5 minutes
-          conflictResolution: 'latest_wins'
+          conflictResolution: 'latest_wins',
         },
         qualityAssurance: {
           enabled: true,
           checks: ['accessibility', 'performance', 'seo', 'content-quality'],
           thresholds: { accessibility: 95, performance: 90, seo: 85 },
           autoFix: true,
-          reportGeneration: true
+          reportGeneration: true,
         },
         deployment: {
           enabled: true,
           targets: [
-            { name: 'staging', type: 'netlify', config: {}, environment: 'staging' },
-            { name: 'production', type: 'github-pages', config: {}, environment: 'production' }
+            {
+              name: 'staging',
+              type: 'netlify',
+              config: {},
+              environment: 'staging',
+            },
+            {
+              name: 'production',
+              type: 'github-pages',
+              config: {},
+              environment: 'production',
+            },
           ],
           preDeployChecks: ['quality', 'security', 'performance'],
           rollbackEnabled: true,
-          notifications: ['slack', 'email']
+          notifications: ['slack', 'email'],
         },
         maintenance: {
           enabled: true,
           schedule: '0 3 * * 0', // Weekly on Sunday at 3 AM
           tasks: ['cleanup', 'optimization', 'health-check'],
           cleanup: true,
-          archiving: true
-        }
+          archiving: true,
+        },
       },
       deployment: {
         targets: [],
         strategy: 'blue-green',
-        automation: true
+        automation: true,
       },
       monitoring: {
         healthChecks: true,
@@ -246,27 +258,27 @@ export class DocumentationEcosystem {
         alerting: {
           enabled: true,
           channels: ['slack', 'email'],
-          thresholds: {}
+          thresholds: {},
         },
         logging: {
           level: 'info',
           outputs: ['console', 'file'],
-          structured: true
-        }
+          structured: true,
+        },
       },
       integrations: {
         github: {},
         slack: {},
         discord: {},
-        webhook: {}
+        webhook: {},
       },
       security: {
         authentication: true,
         authorization: true,
         encryption: true,
-        apiKeys: {}
+        apiKeys: {},
       },
-      performance: {}
+      performance: {},
     };
 
     // Merge with user config
@@ -295,7 +307,7 @@ export class DocumentationEcosystem {
    */
   public static async quickStart(): Promise<DocumentationOrchestrator> {
     console.log('⚡ Quick starting documentation ecosystem...');
-    
+
     const ecosystem = DocumentationEcosystem.create({
       environment: 'development',
       components: {
@@ -308,8 +320,8 @@ export class DocumentationEcosystem {
         versioning: { enabled: true, config: {}, priority: 9 },
         community: { enabled: false, config: {}, priority: 5 },
         i18n: { enabled: false, config: {}, priority: 6 },
-        performance: { enabled: true, config: {}, priority: 8 }
-      }
+        performance: { enabled: true, config: {}, priority: 8 },
+      },
     });
 
     return await ecosystem.initialize();
@@ -318,9 +330,11 @@ export class DocumentationEcosystem {
   /**
    * Enterprise setup with full features
    */
-  public static async enterpriseSetup(config: Partial<OrchestratorConfig>): Promise<DocumentationOrchestrator> {
+  public static async enterpriseSetup(
+    config: Partial<OrchestratorConfig>,
+  ): Promise<DocumentationOrchestrator> {
     console.log('🏢 Setting up enterprise documentation ecosystem...');
-    
+
     const ecosystem = DocumentationEcosystem.create({
       environment: 'production',
       ...config,
@@ -335,8 +349,8 @@ export class DocumentationEcosystem {
         i18n: { enabled: true, config: {}, priority: 6 },
         aiAssistant: { enabled: true, config: {}, priority: 7 },
         performance: { enabled: true, config: {}, priority: 8 },
-        ...config.components
-      }
+        ...config.components,
+      },
     });
 
     return await ecosystem.initialize();
@@ -379,14 +393,16 @@ export const FEATURES = {
   CONTENT_PERSONALIZATION: false, // Phase 37 - Coming soon
   ADVANCED_CICD: false, // Phase 38 - Coming soon
   MICROSITE_FEDERATION: false, // Phase 39 - Coming soon
-  MONITORING_ALERTING: false // Phase 40 - Coming soon
+  MONITORING_ALERTING: false, // Phase 40 - Coming soon
 } as const;
 
 /**
  * Ecosystem health check utility
  */
 export class EcosystemHealthCheck {
-  public static async performCheck(orchestrator: DocumentationOrchestrator): Promise<{
+  public static async performCheck(
+    orchestrator: DocumentationOrchestrator,
+  ): Promise<{
     status: 'healthy' | 'degraded' | 'critical';
     details: any;
     recommendations: string[];
@@ -396,21 +412,27 @@ export class EcosystemHealthCheck {
 
     // Analyze system health
     if (systemStatus.overall === 'critical') {
-      recommendations.push('Immediate attention required for critical system components');
+      recommendations.push(
+        'Immediate attention required for critical system components',
+      );
     }
 
     if (systemStatus.performance.errorRate > 0.1) {
-      recommendations.push('Error rate is elevated - investigate failing components');
+      recommendations.push(
+        'Error rate is elevated - investigate failing components',
+      );
     }
 
     if (systemStatus.performance.averageResponseTime > 5000) {
-      recommendations.push('Response times are slow - consider performance optimization');
+      recommendations.push(
+        'Response times are slow - consider performance optimization',
+      );
     }
 
     return {
       status: systemStatus.overall,
       details: systemStatus,
-      recommendations
+      recommendations,
     };
   }
 }

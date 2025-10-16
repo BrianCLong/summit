@@ -2,7 +2,10 @@ import Fastify from 'fastify';
 import { Kafka } from 'kafkajs';
 
 const fastify = Fastify({ logger: true });
-const kafka = new Kafka({ clientId: 'alerts-api', brokers: ['localhost:9092'] });
+const kafka = new Kafka({
+  clientId: 'alerts-api',
+  brokers: ['localhost:9092'],
+});
 
 fastify.get('/alerts/stream', async (request, reply) => {
   reply.raw.writeHead(200, {

@@ -2,5 +2,5 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sPSPHostNamespace
 metadata: { name: deny-host-namespaces }
 spec:
-  match: { kinds: [ { apiGroups: [""], kinds: ["Pod"] } ] }
+  match: { kinds: [{ apiGroups: [''], kinds: ['Pod'] }] }
   parameters: { hostNetwork: false, hostPID: false, hostIPC: false }

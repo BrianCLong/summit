@@ -14,14 +14,22 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Database connection
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/licenses'
+  connectionString:
+    process.env.DATABASE_URL ||
+    'postgres://postgres:postgres@localhost:5432/licenses',
 });
 
 // Schemas
 const LicenseSchema = z.object({
   id: z.string(),
   name: z.string(),
-  type: z.enum(['commercial', 'open_source', 'proprietary', 'restricted', 'public_domain']),
+  type: z.enum([
+    'commercial',
+    'open_source',
+    'proprietary',
+    'restricted',
+    'public_domain',
+  ]),
   version: z.string().optional(),
   terms: z.record(z.any()),
   restrictions: z.object({
@@ -29,11 +37,11 @@ const LicenseSchema = z.object({
     export_allowed: z.boolean(),
     research_only: z.boolean(),
     attribution_required: z.boolean(),
-    share_alike: z.boolean()
+    share_alike: z.boolean(),
   }),
   compliance_level: z.enum(['allow', 'warn', 'block']),
   expiry_date: z.string().datetime().optional(),
-  created_at: z.string().datetime()
+  created_at: z.string().datetime(),
 });
 
 const DataSourceSchema = z.object({
@@ -46,14 +54,14 @@ const DataSourceSchema = z.object({
   pii_classification: z.enum(['none', 'low', 'medium', 'high', 'critical']),
   retention_period: z.number(), // days
   geographic_restrictions: z.array(z.string()),
-  created_at: z.string().datetime()
+  created_at: z.string().datetime(),
 });
 
 const ComplianceCheckSchema = z.object({
   operation: z.enum(['query', 'export', 'ingest', 'transform']),
   data_source_ids: z.array(z.string()),
   purpose: z.string(),
-  jurisdiction: z.string().optional()
+  jurisdiction: z.string().optional(),
 });
 
 const DPIAAssessmentSchema = z.object({
@@ -66,7 +74,7 @@ const DPIAAssessmentSchema = z.object({
   third_party_sharing: z.boolean(),
   automated_decision_making: z.boolean(),
   completed_by: z.string(),
-  completed_at: z.string().datetime()
+  completed_at: z.string().datetime(),
 });
 
 type License = z.infer<typeof LicenseSchema>;
@@ -84,9 +92,9 @@ const LICENSE_TEMPLATES: Record<string, Partial<License>> = {
       export_allowed: true,
       research_only: false,
       attribution_required: true,
-      share_alike: false
+      share_alike: false,
     },
-    compliance_level: 'allow'
+    compliance_level: 'allow',
   },
   'commercial-restricted': {
     name: 'Commercial License - Export Restricted',
@@ -96,9 +104,9 @@ const LICENSE_TEMPLATES: Record<string, Partial<License>> = {
       export_allowed: false,
       research_only: false,
       attribution_required: true,
-      share_alike: false
+      share_alike: false,
     },
-    compliance_level: 'block'
+    compliance_level: 'block',
   },
   'research-only': {
     name: 'Academic Research Only',
@@ -108,10 +116,10 @@ const LICENSE_TEMPLATES: Record<string, Partial<License>> = {
       export_allowed: false,
       research_only: true,
       attribution_required: true,
-      share_alike: false
+      share_alike: false,
     },
-    compliance_level: 'warn'
-  }
+    compliance_level: 'warn',
+  },
 };
 
 // Policy enforcement
@@ -130,7 +138,7 @@ function policyMiddleware(request: any, reply: any, done: any) {
     return reply.status(403).send({
       error: 'Policy denial',
       reason: 'Missing authority binding or reason-for-access',
-      appealPath: '/ombudsman/appeals'
+      appealPath: '/ombudsman/appeals',
     });
   }
 
@@ -143,8 +151,10 @@ function policyMiddleware(request: any, reply: any, done: any) {
 const server = Fastify({
   logger: {
     level: NODE_ENV === 'development' ? 'debug' : 'info',
-    ...(NODE_ENV === 'development' ? { transport: { target: 'pino-pretty' } } : {})
-  }
+    ...(NODE_ENV === 'development'
+      ? { transport: { target: 'pino-pretty' } }
+      : {}),
+  },
 });
 
 // Register plugins
@@ -163,22 +173,24 @@ server.get('/health', async () => {
       timestamp: new Date().toISOString(),
       version: '1.0.0',
       dependencies: {
-        database: 'healthy'
-      }
+        database: 'healthy',
+      },
     };
   } catch (error) {
     return {
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
       dependencies: {
-        database: 'unhealthy'
-      }
+        database: 'unhealthy',
+      },
     };
   }
 });
 
 // License management endpoints
-server.post<{ Body: { name: string; type: string; restrictions: any; template?: string } }>('/licenses', async (request, reply) => {
+server.post<{
+  Body: { name: string; type: string; restrictions: any; template?: string };
+}>('/licenses', async (request, reply) => {
   try {
     const { name, type, restrictions, template } = request.body;
 
@@ -189,7 +201,7 @@ server.post<{ Body: { name: string; type: string; restrictions: any; template?: 
       restrictions,
       terms: {},
       compliance_level: 'warn',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
 
     // Apply template if specified
@@ -210,21 +222,20 @@ server.post<{ Body: { name: string; type: string; restrictions: any; template?: 
         JSON.stringify(licenseData.restrictions),
         licenseData.compliance_level,
         licenseData.expiry_date,
-        licenseData.created_at
-      ]
+        licenseData.created_at,
+      ],
     );
 
     server.log.info('Created license', {
       licenseId: licenseData.id,
-      authority: (request as any).authorityId
+      authority: (request as any).authorityId,
     });
 
     return LicenseSchema.parse({
       ...result.rows[0],
       terms: result.rows[0].terms,
-      restrictions: result.rows[0].restrictions
+      restrictions: result.rows[0].restrictions,
     });
-
   } catch (error) {
     server.log.error('Failed to create license', error);
     reply.status(500);
@@ -232,26 +243,30 @@ server.post<{ Body: { name: string; type: string; restrictions: any; template?: 
   }
 });
 
-server.get<{ Params: { id: string } }>('/licenses/:id', async (request, reply) => {
-  try {
-    const result = await pool.query('SELECT * FROM licenses WHERE id = $1', [request.params.id]);
+server.get<{ Params: { id: string } }>(
+  '/licenses/:id',
+  async (request, reply) => {
+    try {
+      const result = await pool.query('SELECT * FROM licenses WHERE id = $1', [
+        request.params.id,
+      ]);
 
-    if (result.rows.length === 0) {
-      reply.status(404);
-      return { error: 'License not found' };
+      if (result.rows.length === 0) {
+        reply.status(404);
+        return { error: 'License not found' };
+      }
+
+      return LicenseSchema.parse({
+        ...result.rows[0],
+        terms: result.rows[0].terms,
+        restrictions: result.rows[0].restrictions,
+      });
+    } catch (error) {
+      reply.status(500);
+      return { error: 'Failed to retrieve license' };
     }
-
-    return LicenseSchema.parse({
-      ...result.rows[0],
-      terms: result.rows[0].terms,
-      restrictions: result.rows[0].restrictions
-    });
-
-  } catch (error) {
-    reply.status(500);
-    return { error: 'Failed to retrieve license' };
-  }
-});
+  },
+);
 
 // Data source registration
 server.post<{ Body: any }>('/data-sources', async (request, reply) => {
@@ -259,7 +274,7 @@ server.post<{ Body: any }>('/data-sources', async (request, reply) => {
     const data = DataSourceSchema.parse({
       id: `ds_${Date.now()}`,
       ...request.body,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     });
 
     const result = await pool.query(
@@ -269,24 +284,29 @@ server.post<{ Body: any }>('/data-sources', async (request, reply) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
       [
-        data.id, data.name, data.source_type, data.license_id,
-        data.tos_accepted, data.dpia_completed, data.pii_classification,
-        data.retention_period, JSON.stringify(data.geographic_restrictions),
-        data.created_at
-      ]
+        data.id,
+        data.name,
+        data.source_type,
+        data.license_id,
+        data.tos_accepted,
+        data.dpia_completed,
+        data.pii_classification,
+        data.retention_period,
+        JSON.stringify(data.geographic_restrictions),
+        data.created_at,
+      ],
     );
 
     server.log.info('Registered data source', {
       dataSourceId: data.id,
       licenseId: data.license_id,
-      authority: (request as any).authorityId
+      authority: (request as any).authorityId,
     });
 
     return DataSourceSchema.parse({
       ...result.rows[0],
-      geographic_restrictions: result.rows[0].geographic_restrictions
+      geographic_restrictions: result.rows[0].geographic_restrictions,
     });
-
   } catch (error) {
     server.log.error('Failed to register data source', error);
     reply.status(500);
@@ -295,119 +315,144 @@ server.post<{ Body: any }>('/data-sources', async (request, reply) => {
 });
 
 // Compliance checking endpoint
-server.post<{ Body: ComplianceCheck }>('/compliance/check', {
-  schema: {
-    body: ComplianceCheckSchema
-  }
-}, async (request, reply) => {
-  try {
-    const { operation, data_source_ids, purpose, jurisdiction } = request.body;
+server.post<{ Body: ComplianceCheck }>(
+  '/compliance/check',
+  {
+    schema: {
+      body: ComplianceCheckSchema,
+    },
+  },
+  async (request, reply) => {
+    try {
+      const { operation, data_source_ids, purpose, jurisdiction } =
+        request.body;
 
-    // Get data sources with their licenses
-    const result = await pool.query(`
+      // Get data sources with their licenses
+      const result = await pool.query(
+        `
       SELECT ds.*, l.compliance_level, l.restrictions, l.name as license_name
       FROM data_sources ds
       JOIN licenses l ON ds.license_id = l.id
       WHERE ds.id = ANY($1)
-    `, [data_source_ids]);
+    `,
+        [data_source_ids],
+      );
 
-    const violations: any[] = [];
-    const warnings: any[] = [];
-    let overallCompliance = 'allow';
+      const violations: any[] = [];
+      const warnings: any[] = [];
+      let overallCompliance = 'allow';
 
-    for (const row of result.rows) {
-      const restrictions = row.restrictions;
-      const complianceLevel = row.compliance_level;
+      for (const row of result.rows) {
+        const restrictions = row.restrictions;
+        const complianceLevel = row.compliance_level;
 
-      // Check operation-specific restrictions
-      if (operation === 'export' && !restrictions.export_allowed) {
-        violations.push({
-          data_source: row.name,
-          license: row.license_name,
-          violation: 'Export not permitted under license terms',
-          severity: 'critical'
-        });
-        overallCompliance = 'block';
+        // Check operation-specific restrictions
+        if (operation === 'export' && !restrictions.export_allowed) {
+          violations.push({
+            data_source: row.name,
+            license: row.license_name,
+            violation: 'Export not permitted under license terms',
+            severity: 'critical',
+          });
+          overallCompliance = 'block';
+        }
+
+        if (
+          operation === 'query' &&
+          restrictions.research_only &&
+          purpose !== 'research'
+        ) {
+          violations.push({
+            data_source: row.name,
+            license: row.license_name,
+            violation: 'Commercial use not permitted - research only license',
+            severity: 'critical',
+          });
+          overallCompliance = 'block';
+        }
+
+        // Check DPIA completion for high-risk data
+        if (
+          ['high', 'critical'].includes(row.pii_classification) &&
+          !row.dpia_completed
+        ) {
+          warnings.push({
+            data_source: row.name,
+            warning: 'DPIA assessment required for high-risk PII processing',
+            severity: 'high',
+          });
+          if (overallCompliance !== 'block') overallCompliance = 'warn';
+        }
+
+        // Check geographic restrictions
+        if (
+          jurisdiction &&
+          row.geographic_restrictions.includes(jurisdiction)
+        ) {
+          violations.push({
+            data_source: row.name,
+            violation: `Data processing restricted in jurisdiction: ${jurisdiction}`,
+            severity: 'critical',
+          });
+          overallCompliance = 'block';
+        }
+
+        // Apply license compliance level
+        if (complianceLevel === 'block') {
+          violations.push({
+            data_source: row.name,
+            license: row.license_name,
+            violation: 'License marked as blocked for compliance',
+            severity: 'critical',
+          });
+          overallCompliance = 'block';
+        } else if (
+          complianceLevel === 'warn' &&
+          overallCompliance !== 'block'
+        ) {
+          warnings.push({
+            data_source: row.name,
+            license: row.license_name,
+            warning: 'License requires additional review',
+            severity: 'medium',
+          });
+          overallCompliance = 'warn';
+        }
       }
 
-      if (operation === 'query' && restrictions.research_only && purpose !== 'research') {
-        violations.push({
-          data_source: row.name,
-          license: row.license_name,
-          violation: 'Commercial use not permitted - research only license',
-          severity: 'critical'
-        });
-        overallCompliance = 'block';
-      }
+      const response = {
+        operation,
+        compliance_status: overallCompliance,
+        violations,
+        warnings,
+        human_readable_reason: generateHumanReadableReason(
+          overallCompliance,
+          violations,
+          warnings,
+        ),
+        appeal_path:
+          overallCompliance === 'block' ? '/ombudsman/appeals' : null,
+        checked_at: new Date().toISOString(),
+        authority_id: (request as any).authorityId,
+        reason_for_access: (request as any).reasonForAccess,
+      };
 
-      // Check DPIA completion for high-risk data
-      if (['high', 'critical'].includes(row.pii_classification) && !row.dpia_completed) {
-        warnings.push({
-          data_source: row.name,
-          warning: 'DPIA assessment required for high-risk PII processing',
-          severity: 'high'
-        });
-        if (overallCompliance !== 'block') overallCompliance = 'warn';
-      }
+      server.log.info('Compliance check performed', {
+        operation,
+        compliance: overallCompliance,
+        violationCount: violations.length,
+        warningCount: warnings.length,
+        authority: (request as any).authorityId,
+      });
 
-      // Check geographic restrictions
-      if (jurisdiction && row.geographic_restrictions.includes(jurisdiction)) {
-        violations.push({
-          data_source: row.name,
-          violation: `Data processing restricted in jurisdiction: ${jurisdiction}`,
-          severity: 'critical'
-        });
-        overallCompliance = 'block';
-      }
-
-      // Apply license compliance level
-      if (complianceLevel === 'block') {
-        violations.push({
-          data_source: row.name,
-          license: row.license_name,
-          violation: 'License marked as blocked for compliance',
-          severity: 'critical'
-        });
-        overallCompliance = 'block';
-      } else if (complianceLevel === 'warn' && overallCompliance !== 'block') {
-        warnings.push({
-          data_source: row.name,
-          license: row.license_name,
-          warning: 'License requires additional review',
-          severity: 'medium'
-        });
-        overallCompliance = 'warn';
-      }
+      return response;
+    } catch (error) {
+      server.log.error('Compliance check failed', error);
+      reply.status(500);
+      return { error: 'Compliance check failed' };
     }
-
-    const response = {
-      operation,
-      compliance_status: overallCompliance,
-      violations,
-      warnings,
-      human_readable_reason: generateHumanReadableReason(overallCompliance, violations, warnings),
-      appeal_path: overallCompliance === 'block' ? '/ombudsman/appeals' : null,
-      checked_at: new Date().toISOString(),
-      authority_id: (request as any).authorityId,
-      reason_for_access: (request as any).reasonForAccess
-    };
-
-    server.log.info('Compliance check performed', {
-      operation,
-      compliance: overallCompliance,
-      violationCount: violations.length,
-      warningCount: warnings.length,
-      authority: (request as any).authorityId
-    });
-
-    return response;
-
-  } catch (error) {
-    server.log.error('Compliance check failed', error);
-    reply.status(500);
-    return { error: 'Compliance check failed' };
-  }
-});
+  },
+);
 
 // DPIA assessment endpoint
 server.post<{ Body: any }>('/dpia/assessment', async (request, reply) => {
@@ -415,7 +460,7 @@ server.post<{ Body: any }>('/dpia/assessment', async (request, reply) => {
     const assessment = DPIAAssessmentSchema.parse({
       ...request.body,
       completed_by: (request as any).authorityId,
-      completed_at: new Date().toISOString()
+      completed_at: new Date().toISOString(),
     });
 
     const result = await pool.query(
@@ -426,32 +471,36 @@ server.post<{ Body: any }>('/dpia/assessment', async (request, reply) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
       [
-        assessment.data_source_id, assessment.risk_level,
-        assessment.processing_purpose, JSON.stringify(assessment.data_categories),
-        assessment.retention_justification, JSON.stringify(assessment.security_measures),
-        assessment.third_party_sharing, assessment.automated_decision_making,
-        assessment.completed_by, assessment.completed_at
-      ]
+        assessment.data_source_id,
+        assessment.risk_level,
+        assessment.processing_purpose,
+        JSON.stringify(assessment.data_categories),
+        assessment.retention_justification,
+        JSON.stringify(assessment.security_measures),
+        assessment.third_party_sharing,
+        assessment.automated_decision_making,
+        assessment.completed_by,
+        assessment.completed_at,
+      ],
     );
 
     // Update data source DPIA completion status
     await pool.query(
       'UPDATE data_sources SET dpia_completed = true WHERE id = $1',
-      [assessment.data_source_id]
+      [assessment.data_source_id],
     );
 
     server.log.info('DPIA assessment completed', {
       dataSourceId: assessment.data_source_id,
       riskLevel: assessment.risk_level,
-      authority: (request as any).authorityId
+      authority: (request as any).authorityId,
     });
 
     return DPIAAssessmentSchema.parse({
       ...result.rows[0],
       data_categories: result.rows[0].data_categories,
-      security_measures: result.rows[0].security_measures
+      security_measures: result.rows[0].security_measures,
     });
-
   } catch (error) {
     server.log.error('Failed to complete DPIA assessment', error);
     reply.status(500);
@@ -464,23 +513,23 @@ server.get('/licenses/templates', async () => {
   return {
     templates: Object.entries(LICENSE_TEMPLATES).map(([key, template]) => ({
       id: key,
-      ...template
-    }))
+      ...template,
+    })),
   };
 });
 
 function generateHumanReadableReason(
   compliance: string,
   violations: any[],
-  warnings: any[]
+  warnings: any[],
 ): string {
   if (compliance === 'block') {
-    const reasons = violations.map(v => v.violation).join('; ');
+    const reasons = violations.map((v) => v.violation).join('; ');
     return `Operation blocked due to license violations: ${reasons}. Please contact the data governance team for guidance.`;
   }
 
   if (compliance === 'warn') {
-    const reasons = warnings.map(w => w.warning).join('; ');
+    const reasons = warnings.map((w) => w.warning).join('; ');
     return `Operation permitted with warnings: ${reasons}. Consider reviewing data usage policies.`;
   }
 

@@ -3,14 +3,23 @@
  * OpenTelemetry-based tracing with performance profiling and service dependency mapping
  */
 
-import { trace, context, SpanKind, SpanStatusCode, Span } from '@opentelemetry/api';
+import {
+  trace,
+  context,
+  SpanKind,
+  SpanStatusCode,
+  Span,
+} from '@opentelemetry/api';
 import { NodeSDK } from '@opentelemetry/auto-instrumentations-node';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-otlp-http';
-import { BatchSpanProcessor, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node';
+import {
+  BatchSpanProcessor,
+  SimpleSpanProcessor,
+} from '@opentelemetry/sdk-trace-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
@@ -137,7 +146,8 @@ export class TracingManager extends EventEmitter {
     const resource = new Resource({
       [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
       [SemanticResourceAttributes.SERVICE_VERSION]: this.config.serviceVersion,
-      [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: this.config.environment,
+      [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
+        this.config.environment,
       ...this.config.customAttributes,
     });
 
@@ -148,47 +158,54 @@ export class TracingManager extends EventEmitter {
     this.sdk = new NodeSDK({
       resource,
       spanProcessors,
-      instrumentations: [getNodeAutoInstrumentations({
-        '@opentelemetry/instrumentation-http': {
-          requestHook: (span, request) => {
-            this.enhanceHttpSpan(span, request);
+      instrumentations: [
+        getNodeAutoInstrumentations({
+          '@opentelemetry/instrumentation-http': {
+            requestHook: (span, request) => {
+              this.enhanceHttpSpan(span, request);
+            },
+            responseHook: (span, response) => {
+              this.enhanceHttpResponse(span, response);
+            },
           },
-          responseHook: (span, response) => {
-            this.enhanceHttpResponse(span, response);
+          '@opentelemetry/instrumentation-express': {
+            requestHook: (span, info) => {
+              this.enhanceExpressSpan(span, info);
+            },
           },
-        },
-        '@opentelemetry/instrumentation-express': {
-          requestHook: (span, info) => {
-            this.enhanceExpressSpan(span, info);
+          '@opentelemetry/instrumentation-graphql': {
+            enabled: true,
+            mergeItems: true,
           },
-        },
-        '@opentelemetry/instrumentation-graphql': {
-          enabled: true,
-          mergeItems: true,
-        },
-        '@opentelemetry/instrumentation-redis': {
-          enabled: true,
-          dbStatementSerializer: (cmdName, cmdArgs) => {
-            return `${cmdName} ${cmdArgs.slice(0, 2).join(' ')}`;
+          '@opentelemetry/instrumentation-redis': {
+            enabled: true,
+            dbStatementSerializer: (cmdName, cmdArgs) => {
+              return `${cmdName} ${cmdArgs.slice(0, 2).join(' ')}`;
+            },
           },
-        },
-        '@opentelemetry/instrumentation-mongodb': {
-          enabled: true,
-          enhancedDatabaseReporting: true,
-        },
-        '@opentelemetry/instrumentation-neo4j': {
-          enabled: true,
-        },
-      })],
+          '@opentelemetry/instrumentation-mongodb': {
+            enabled: true,
+            enhancedDatabaseReporting: true,
+          },
+          '@opentelemetry/instrumentation-neo4j': {
+            enabled: true,
+          },
+        }),
+      ],
     });
 
     // Start the SDK
     this.sdk.start();
 
     // Get tracer instance
-    this.tracer = trace.getTracer(this.config.serviceName, this.config.serviceVersion);
+    this.tracer = trace.getTracer(
+      this.config.serviceName,
+      this.config.serviceVersion,
+    );
 
-    console.log(`OpenTelemetry tracing initialized for ${this.config.serviceName}`);
+    console.log(
+      `OpenTelemetry tracing initialized for ${this.config.serviceName}`,
+    );
   }
 
   /**
@@ -200,7 +217,9 @@ export class TracingManager extends EventEmitter {
     // Jaeger exporter
     if (this.config.exporters.jaeger?.enabled) {
       const jaegerExporter = new JaegerExporter({
-        endpoint: this.config.exporters.jaeger.endpoint || 'http://localhost:14268/api/traces',
+        endpoint:
+          this.config.exporters.jaeger.endpoint ||
+          'http://localhost:14268/api/traces',
         headers: this.config.exporters.jaeger.headers || {},
       });
       processors.push(new BatchSpanProcessor(jaegerExporter));
@@ -209,7 +228,9 @@ export class TracingManager extends EventEmitter {
     // Zipkin exporter
     if (this.config.exporters.zipkin?.enabled) {
       const zipkinExporter = new ZipkinExporter({
-        url: this.config.exporters.zipkin.endpoint || 'http://localhost:9411/api/v2/spans',
+        url:
+          this.config.exporters.zipkin.endpoint ||
+          'http://localhost:9411/api/v2/spans',
         headers: this.config.exporters.zipkin.headers || {},
       });
       processors.push(new BatchSpanProcessor(zipkinExporter));
@@ -218,7 +239,9 @@ export class TracingManager extends EventEmitter {
     // OTLP exporter
     if (this.config.exporters.otlp?.enabled) {
       const otlpExporter = new OTLPTraceExporter({
-        url: this.config.exporters.otlp.endpoint || 'http://localhost:4318/v1/traces',
+        url:
+          this.config.exporters.otlp.endpoint ||
+          'http://localhost:4318/v1/traces',
         headers: this.config.exporters.otlp.headers || {},
       });
       processors.push(new BatchSpanProcessor(otlpExporter));
@@ -234,19 +257,23 @@ export class TracingManager extends EventEmitter {
     name: string,
     kind: SpanKind = SpanKind.INTERNAL,
     attributes: Record<string, any> = {},
-    parentContext?: any
+    parentContext?: any,
   ): Span {
     const activeContext = parentContext || context.active();
-    
-    const span = this.tracer.startSpan(name, {
-      kind,
-      attributes: {
-        'service.name': this.config.serviceName,
-        'service.version': this.config.serviceVersion,
-        'environment': this.config.environment,
-        ...attributes,
+
+    const span = this.tracer.startSpan(
+      name,
+      {
+        kind,
+        attributes: {
+          'service.name': this.config.serviceName,
+          'service.version': this.config.serviceVersion,
+          environment: this.config.environment,
+          ...attributes,
+        },
       },
-    }, activeContext);
+      activeContext,
+    );
 
     // Record span start for metrics
     this.recordSpanStart(span, name);
@@ -260,7 +287,7 @@ export class TracingManager extends EventEmitter {
   createHttpSpan(
     method: string,
     url: string,
-    attributes: Record<string, any> = {}
+    attributes: Record<string, any> = {},
   ): Span {
     return this.createSpan(`HTTP ${method}`, SpanKind.CLIENT, {
       'http.method': method,
@@ -279,7 +306,7 @@ export class TracingManager extends EventEmitter {
     operation: string,
     database: string,
     table?: string,
-    attributes: Record<string, any> = {}
+    attributes: Record<string, any> = {},
   ): Span {
     return this.createSpan(`${database} ${operation}`, SpanKind.CLIENT, {
       'db.system': database,
@@ -297,10 +324,10 @@ export class TracingManager extends EventEmitter {
     operation: 'send' | 'receive' | 'process',
     destination: string,
     system: string = 'kafka',
-    attributes: Record<string, any> = {}
+    attributes: Record<string, any> = {},
   ): Span {
     const kind = operation === 'send' ? SpanKind.PRODUCER : SpanKind.CONSUMER;
-    
+
     return this.createSpan(`${destination} ${operation}`, kind, {
       'messaging.system': system,
       'messaging.destination': destination,
@@ -316,15 +343,18 @@ export class TracingManager extends EventEmitter {
     name: string,
     fn: (span: Span) => Promise<T>,
     kind: SpanKind = SpanKind.INTERNAL,
-    attributes: Record<string, any> = {}
+    attributes: Record<string, any> = {},
   ): Promise<T> {
     const span = this.createSpan(name, kind, attributes);
-    
+
     try {
-      const result = await context.with(trace.setSpan(context.active(), span), async () => {
-        return await fn(span);
-      });
-      
+      const result = await context.with(
+        trace.setSpan(context.active(), span),
+        async () => {
+          return await fn(span);
+        },
+      );
+
       span.setStatus({ code: SpanStatusCode.OK });
       return result;
     } catch (error: any) {
@@ -332,13 +362,13 @@ export class TracingManager extends EventEmitter {
         code: SpanStatusCode.ERROR,
         message: error.message,
       });
-      
+
       span.addEvent('exception', {
         'exception.type': error.constructor.name,
         'exception.message': error.message,
         'exception.stacktrace': error.stack,
       });
-      
+
       throw error;
     } finally {
       this.recordSpanEnd(span);
@@ -353,15 +383,15 @@ export class TracingManager extends EventEmitter {
     name: string,
     fn: (span: Span) => T,
     kind: SpanKind = SpanKind.INTERNAL,
-    attributes: Record<string, any> = {}
+    attributes: Record<string, any> = {},
   ): T {
     const span = this.createSpan(name, kind, attributes);
-    
+
     try {
       const result = context.with(trace.setSpan(context.active(), span), () => {
         return fn(span);
       });
-      
+
       span.setStatus({ code: SpanStatusCode.OK });
       return result;
     } catch (error: any) {
@@ -369,13 +399,13 @@ export class TracingManager extends EventEmitter {
         code: SpanStatusCode.ERROR,
         message: error.message,
       });
-      
+
       span.addEvent('exception', {
         'exception.type': error.constructor.name,
         'exception.message': error.message,
         'exception.stacktrace': error.stack,
       });
-      
+
       throw error;
     } finally {
       this.recordSpanEnd(span);
@@ -446,17 +476,19 @@ export class TracingManager extends EventEmitter {
    * Get service topology and dependencies
    */
   async getServiceTopology(): Promise<ServiceTopology> {
-    return this.serviceTopology || {
-      services: [],
-      dependencies: [],
-      metrics: {
-        totalServices: 0,
-        totalDependencies: 0,
-        healthyServices: 0,
-        criticalPaths: [],
-        bottlenecks: [],
-      },
-    };
+    return (
+      this.serviceTopology || {
+        services: [],
+        dependencies: [],
+        metrics: {
+          totalServices: 0,
+          totalDependencies: 0,
+          healthyServices: 0,
+          criticalPaths: [],
+          bottlenecks: [],
+        },
+      }
+    );
   }
 
   /**
@@ -471,15 +503,18 @@ export class TracingManager extends EventEmitter {
    */
   getServiceMetrics(serviceName?: string): any {
     const targetService = serviceName || this.config.serviceName;
-    const relevantSpans = Array.from(this.spanMetrics.values())
-      .filter(span => span.serviceName === targetService);
+    const relevantSpans = Array.from(this.spanMetrics.values()).filter(
+      (span) => span.serviceName === targetService,
+    );
 
     if (relevantSpans.length === 0) {
       return null;
     }
 
-    const durations = relevantSpans.map(span => span.duration);
-    const errorCount = relevantSpans.filter(span => span.status === 'error').length;
+    const durations = relevantSpans.map((span) => span.duration);
+    const errorCount = relevantSpans.filter(
+      (span) => span.status === 'error',
+    ).length;
 
     return {
       serviceName: targetService,
@@ -530,7 +565,8 @@ export class TracingManager extends EventEmitter {
   private enhanceExpressSpan(span: Span, info: any): void {
     span.setAttributes({
       'express.route': info.route || '',
-      'express.request.body_size': JSON.stringify(info.request.body || {}).length,
+      'express.request.body_size': JSON.stringify(info.request.body || {})
+        .length,
       'express.request.query_params': JSON.stringify(info.request.query || {}),
     });
   }
@@ -562,16 +598,16 @@ export class TracingManager extends EventEmitter {
   private recordSpanEnd(span: Span): void {
     const spanContext = span.spanContext();
     const spanMetric = this.spanMetrics.get(spanContext.spanId);
-    
+
     if (spanMetric) {
       spanMetric.endTime = Date.now();
       spanMetric.duration = spanMetric.endTime - spanMetric.startTime;
-      
+
       // Check for slow spans
       if (spanMetric.duration > this.config.performance.slowSpanThreshold) {
         this.emit('slow_span', spanMetric);
       }
-      
+
       this.emit('span_completed', spanMetric);
     }
   }
@@ -615,7 +651,7 @@ export class TracingManager extends EventEmitter {
    */
   private cleanupOldMetrics(): void {
     const cutoff = Date.now() - 300000; // 5 minutes ago
-    
+
     for (const [spanId, spanMetric] of this.spanMetrics.entries()) {
       if (spanMetric.endTime > 0 && spanMetric.endTime < cutoff) {
         this.spanMetrics.delete(spanId);
@@ -660,13 +696,18 @@ export function createTracingManager(config: TraceConfig): TracingManager {
 
 // Decorators for automatic tracing
 export function Trace(operationName?: string): MethodDecorator {
-  return function (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string | symbol,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
-    const spanName = operationName || `${target.constructor.name}.${String(propertyKey)}`;
+    const spanName =
+      operationName || `${target.constructor.name}.${String(propertyKey)}`;
 
     descriptor.value = async function (...args: any[]) {
       const tracingManager = (this as any).tracingManager as TracingManager;
-      
+
       if (!tracingManager) {
         return originalMethod.apply(this, args);
       }

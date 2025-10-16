@@ -24,7 +24,7 @@ class ProvenanceEmitter extends EventEmitter {
       retention: string;
       input: unknown;
       output: unknown;
-    }
+    },
   ): ProvenanceEvent {
     const timestamp = new Date().toISOString();
     const sourceHash = hash(base.input);
@@ -42,8 +42,8 @@ class ProvenanceEmitter extends EventEmitter {
       auditTrail: {
         ledgerId: randomUUID(),
         version: '1.0',
-        issuedAt: timestamp
-      }
+        issuedAt: timestamp,
+      },
     };
 
     this.emitEvent(event);
@@ -52,7 +52,10 @@ class ProvenanceEmitter extends EventEmitter {
 }
 
 const hash = (input: unknown): string => {
-  return crypto.createHash('sha256').update(JSON.stringify(input)).digest('hex');
+  return crypto
+    .createHash('sha256')
+    .update(JSON.stringify(input))
+    .digest('hex');
 };
 
 export const provenanceEmitter = new ProvenanceEmitter();

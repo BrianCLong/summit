@@ -49,7 +49,9 @@ export function computeHash(value: unknown): string {
   return createHash('sha256').update(canonical).digest('hex');
 }
 
-export function isPlainObject(value: unknown): value is Record<string, unknown> {
+export function isPlainObject(
+  value: unknown,
+): value is Record<string, unknown> {
   return Object.prototype.toString.call(value) === '[object Object]';
 }
 
@@ -75,7 +77,9 @@ export function deepEqual(a: unknown, b: unknown): boolean {
     if (keysA.length !== keysB.length) {
       return false;
     }
-    return keysA.every((key, index) => key === keysB[index] && deepEqual(a[key], b[key]));
+    return keysA.every(
+      (key, index) => key === keysB[index] && deepEqual(a[key], b[key]),
+    );
   }
 
   return stableStringify(a) === stableStringify(b);
@@ -85,7 +89,9 @@ export function normalisePolicyTags(tags: string[]): string[] {
   return Array.from(new Set(tags.map((tag) => tag.trim()))).sort();
 }
 
-export function normaliseTools<T extends { name: string; version: string }>(tools: T[]): T[] {
+export function normaliseTools<T extends { name: string; version: string }>(
+  tools: T[],
+): T[] {
   return [...tools].sort((a, b) => {
     if (a.name === b.name) {
       return a.version.localeCompare(b.version);

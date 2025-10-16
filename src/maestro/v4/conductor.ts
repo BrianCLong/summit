@@ -53,7 +53,10 @@ export class MaestroConductorV4 {
   /**
    * Main autonomous merge pipeline: Planner → Implementer → Critic → Fixer → Tester → Reviewer
    */
-  async processAutonomousMerge(prId: string, changes: any[]): Promise<{
+  async processAutonomousMerge(
+    prId: string,
+    changes: any[],
+  ): Promise<{
     success: boolean;
     riskScore: number;
     costToDate: number;
@@ -66,7 +69,7 @@ export class MaestroConductorV4 {
     try {
       // 1. Risk Assessment
       const riskScore = await this.riskScorer.computeRiskScore(changes);
-      
+
       // 2. Policy Check
       const policyResult = await this.policyEngine.validate(changes);
       if (!policyResult.allowed) {
@@ -75,26 +78,28 @@ export class MaestroConductorV4 {
           riskScore,
           costToDate: totalCost,
           evidenceBundle: { policyViolation: policyResult.reason },
-          requiresHumanReview: true
+          requiresHumanReview: true,
         };
       }
 
       // 3. Build affected-only targets
-      const affectedTargets = await this.buildGraph.computeAffectedTargets(changes);
+      const affectedTargets =
+        await this.buildGraph.computeAffectedTargets(changes);
       const buildResult = await this.buildGraph.buildTargets(affectedTargets);
-      
+
       if (!buildResult.success) {
         return {
           success: false,
           riskScore,
           costToDate: totalCost,
           evidenceBundle: { buildFailure: buildResult.errors },
-          requiresHumanReview: true
+          requiresHumanReview: true,
         };
       }
 
       // 4. Dynamic test sharding
-      const testShards = await this.testSharding.allocateShards(affectedTargets);
+      const testShards =
+        await this.testSharding.allocateShards(affectedTargets);
       const testResult = await this.testSharding.runShards(testShards);
 
       if (!testResult.success) {
@@ -103,30 +108,36 @@ export class MaestroConductorV4 {
           riskScore,
           costToDate: totalCost,
           evidenceBundle: { testFailures: testResult.failures },
-          requiresHumanReview: true
+          requiresHumanReview: true,
         };
       }
 
       // 5. Critic Agent Analysis
       const remainingBudget = this.config.budgetLimits.maxUsdPerPR - totalCost;
-      const criticModel = this.capabilityRouter.pickModel({ 
-        tokens: 5000, 
-        risk: riskScore 
-      }, remainingBudget);
+      const criticModel = this.capabilityRouter.pickModel(
+        {
+          tokens: 5000,
+          risk: riskScore,
+        },
+        remainingBudget,
+      );
 
       const criticResult = await this.criticAgent.analyze(changes, criticModel);
       totalCost += criticResult.cost;
 
       // 6. Fixer Agent (if needed)
       if (criticResult.needsFixes) {
-        const fixerModel = this.capabilityRouter.pickModel({
-          tokens: 8000,
-          risk: riskScore
-        }, this.config.budgetLimits.maxUsdPerPR - totalCost);
+        const fixerModel = this.capabilityRouter.pickModel(
+          {
+            tokens: 8000,
+            risk: riskScore,
+          },
+          this.config.budgetLimits.maxUsdPerPR - totalCost,
+        );
 
         const fixerResult = await this.fixerAgent.generateFixes(
-          criticResult.issues, 
-          fixerModel
+          criticResult.issues,
+          fixerModel,
         );
         totalCost += fixerResult.cost;
 
@@ -136,7 +147,7 @@ export class MaestroConductorV4 {
             riskScore,
             costToDate: totalCost,
             evidenceBundle: { fixerFailure: fixerResult.error },
-            requiresHumanReview: true
+            requiresHumanReview: true,
           };
         }
       }
@@ -148,7 +159,7 @@ export class MaestroConductorV4 {
         buildResult,
         testResult,
         riskScore,
-        cost: totalCost
+        cost: totalCost,
       });
 
       // 8. Evidence Bundle
@@ -159,26 +170,26 @@ export class MaestroConductorV4 {
         testResults: testResult.results,
         staticAnalysis: criticResult.staticAnalysis,
         provenance: provenanceData,
-        processingTime: Date.now() - startTime
+        processingTime: Date.now() - startTime,
       };
 
-      const requiresHumanReview = riskScore >= this.config.riskThresholds.requireReviewer;
+      const requiresHumanReview =
+        riskScore >= this.config.riskThresholds.requireReviewer;
 
       return {
         success: true,
         riskScore,
         costToDate: totalCost,
         evidenceBundle,
-        requiresHumanReview
+        requiresHumanReview,
       };
-
     } catch (error) {
       return {
         success: false,
         riskScore: 1.0, // Max risk on error
         costToDate: totalCost,
         evidenceBundle: { processingError: error },
-        requiresHumanReview: true
+        requiresHumanReview: true,
       };
     }
   }
@@ -216,16 +227,19 @@ export class MaestroConductorV4 {
       }
       metrics.cacheStats = cacheStats;
 
-      const status = issues.length === 0 ? 'healthy' : 
-                    issues.length <= 2 ? 'degraded' : 'unhealthy';
+      const status =
+        issues.length === 0
+          ? 'healthy'
+          : issues.length <= 2
+            ? 'degraded'
+            : 'unhealthy';
 
       return { status, metrics, issues };
-
     } catch (error) {
       return {
         status: 'unhealthy',
         metrics: {},
-        issues: [`Health check failed: ${error}`]
+        issues: [`Health check failed: ${error}`],
       };
     }
   }
@@ -244,8 +258,8 @@ export class MaestroConductorV4 {
         capabilityRouter: await this.capabilityRouter.getStats(),
         buildGraph: await this.buildGraph.getStats(),
         testSharding: await this.testSharding.getStats(),
-        provenance: await this.provenance.getStats()
-      }
+        provenance: await this.provenance.getStats(),
+      },
     };
   }
 }

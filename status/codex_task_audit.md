@@ -3,6 +3,7 @@
 This audit converts ambiguous or stalled Codex initiatives into actionable engineering tasks. Each entry documents the legacy item, its disposition, and the concrete follow-up required for delivery.
 
 ## 1. Fully deliver real-time narrative simulation engine (was blueprint-only)
+
 - **Disposition:** Archived legacy blueprint in favor of implementation-ready sibling task below.
 - **Actionable Task:** `feat/narrative-engine/real-time-core`
   - **Implementation Scope**
@@ -25,6 +26,7 @@ This audit converts ambiguous or stalled Codex initiatives into actionable engin
     - Example script executes without unhandled promise rejections.
 
 ## 2. Develop MC learning module (lint/format blocked)
+
 - **Disposition:** Converted to unblock-by-PR workflow; blueprint retained for reference but no longer primary task.
 - **Actionable Task:** `fix/mc-learning/bootstrap-pr`
   - **Implementation Scope**
@@ -40,6 +42,7 @@ This audit converts ambiguous or stalled Codex initiatives into actionable engin
     - Documentation updated describing workaround for contributors until lint debt resolved.
 
 ## 3. Develop automated influence network extraction system (architecture-only)
+
 - **Disposition:** Blueprint archived; new implementation track defined.
 - **Actionable Task:** `feat/influence-mining/extractor-core`
   - **Implementation Scope**
@@ -63,10 +66,12 @@ This audit converts ambiguous or stalled Codex initiatives into actionable engin
 ## 4. Tasks previously lacking status
 
 ### 4.1 Build a real-time narrative simulation engine
+
 - **Status Update:** Superseded by Task 1; mark original request as archived to avoid duplication.
 - **Follow-up:** Ensure Task 1 branch plan references this archival in commit message and closes associated ticket.
 
 ### 4.2 Design adaptive agent system
+
 - **Actionable Task:** `feat/adaptive-agents/system-core`
   - **Implementation Scope**
     - Create `packages/adaptive-agents/src/AgentKernel.ts` with pluggable behavior modules (`perceive`, `decide`, `act`).
@@ -77,6 +82,7 @@ This audit converts ambiguous or stalled Codex initiatives into actionable engin
   - **Acceptance Criteria:** Kernel supports concurrent agents with isolation, endpoints documented in OpenAPI spec, tests green.
 
 ### 4.3 Develop adversarial misinformation defense platform
+
 - **Actionable Task:** `feat/misinfo-defense/platform-mvp`
   - **Implementation Scope**
     - Scaffold `packages/misinfo-defense/` with services: `ingestion/ContentIngestionService.ts`, `analysis/ThreatClassifier.ts`, and `response/CountermeasurePlanner.ts`.
@@ -87,8 +93,10 @@ This audit converts ambiguous or stalled Codex initiatives into actionable engin
   - **Acceptance Criteria:** Automated tests pass, dashboard renders sample data via fixtures, and API doc published.
 
 ## 5. Open tasks with code review status
+
 - **Audit Result:** No open Codex tasks with ready-to-merge code were located in the repository metadata (`status/`, `pr-open.json`). Documented here to avoid ambiguity.
 - **Next Step:** When new code-bearing tasks appear, evaluate against merge criteria (tests, requirements) before closing or iterating.
 
 ---
+
 **Overall Outcome:** Every previously ambiguous Codex task now has a clear state—archived or replaced with implementation-ready directives, complete with file paths, interfaces, endpoints, and testing expectations.

@@ -3,7 +3,7 @@ import {
   AllowlistSigner,
   ToolRiskRegistry,
   createTesqPolicyHook,
-  severityWeights
+  severityWeights,
 } from '../src/index.js';
 
 const SECRET = 'super-secret-key';
@@ -20,7 +20,7 @@ describe('ToolRiskRegistry end-to-end', () => {
       version: '1.0.0',
       sbomDigest: 'sha256:abc123',
       dataAccessScope: 'write',
-      networkEgressClasses: ['restricted']
+      networkEgressClasses: ['restricted'],
     });
 
     const initialFeed = {
@@ -35,10 +35,10 @@ describe('ToolRiskRegistry end-to-end', () => {
                 {
                   cvssData: {
                     baseScore: 8.1,
-                    baseSeverity: 'HIGH'
-                  }
-                }
-              ]
+                    baseSeverity: 'HIGH',
+                  },
+                },
+              ],
             },
             configurations: {
               nodes: [
@@ -46,15 +46,15 @@ describe('ToolRiskRegistry end-to-end', () => {
                   cpeMatch: [
                     {
                       vulnerable: true,
-                      criteria: 'cpe:/a:acme:tesq-tool:1.0.0'
-                    }
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      ]
+                      criteria: 'cpe:/a:acme:tesq-tool:1.0.0',
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      ],
     };
 
     registry.ingestNvdFeed(initialFeed);
@@ -64,11 +64,11 @@ describe('ToolRiskRegistry end-to-end', () => {
     const signer = new AllowlistSigner({
       secret: SECRET,
       keyId: 'tesq-test-key',
-      deterministicBase: '2024-01-01T00:00:00.000Z'
+      deterministicBase: '2024-01-01T00:00:00.000Z',
     });
     const manifest = registry.generateAllowlistManifest(signer, {
       environment: 'prod',
-      riskThreshold: 15
+      riskThreshold: 15,
     });
 
     expect(manifest.entries).toHaveLength(1);
@@ -76,7 +76,7 @@ describe('ToolRiskRegistry end-to-end', () => {
 
     const manifestCopy = registry.generateAllowlistManifest(signer, {
       environment: 'prod',
-      riskThreshold: 15
+      riskThreshold: 15,
     });
     expect(manifestCopy).toEqual(manifest);
 
@@ -93,10 +93,10 @@ describe('ToolRiskRegistry end-to-end', () => {
                 {
                   cvssData: {
                     baseScore: 9.9,
-                    baseSeverity: 'CRITICAL'
-                  }
-                }
-              ]
+                    baseSeverity: 'CRITICAL',
+                  },
+                },
+              ],
             },
             configurations: {
               nodes: [
@@ -104,24 +104,26 @@ describe('ToolRiskRegistry end-to-end', () => {
                   cpeMatch: [
                     {
                       vulnerable: true,
-                      criteria: 'cpe:/a:acme:tesq-tool:1.0.0'
-                    }
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      ]
+                      criteria: 'cpe:/a:acme:tesq-tool:1.0.0',
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      ],
     };
 
     registry.ingestNvdFeed(updatedFeed);
     const afterUpdate = registry.getProfile('tesq-tool', '1.0.0');
-    expect(afterUpdate?.riskScore).toBe(1 + severityWeights().HIGH + severityWeights().CRITICAL + 3 + 1);
+    expect(afterUpdate?.riskScore).toBe(
+      1 + severityWeights().HIGH + severityWeights().CRITICAL + 3 + 1,
+    );
 
     const updatedManifest = registry.generateAllowlistManifest(signer, {
       environment: 'prod',
-      riskThreshold: 15
+      riskThreshold: 15,
     });
     expect(updatedManifest.entries).toHaveLength(0);
     expect(updatedManifest.signature).not.toEqual(manifest.signature);
@@ -134,29 +136,37 @@ describe('ToolRiskRegistry end-to-end', () => {
       version: '1.0.0',
       sbomDigest: 'sha256:abc123',
       dataAccessScope: 'read',
-      networkEgressClasses: ['none']
+      networkEgressClasses: ['none'],
     });
 
     const feed = {
-      vulnerabilities: []
+      vulnerabilities: [],
     };
     registry.ingestNvdFeed(feed);
 
     const signer = new AllowlistSigner({
       secret: SECRET,
       keyId: 'tesq-test-key',
-      deterministicBase: '2024-01-01T00:00:00.000Z'
+      deterministicBase: '2024-01-01T00:00:00.000Z',
     });
 
     const manifest = registry.generateAllowlistManifest(signer, {
       environment: 'sandbox',
-      riskThreshold: 10
+      riskThreshold: 10,
     });
 
     const enforce = createTesqPolicyHook(manifest);
-    const allowed = enforce({ tool: 'tesq-tool', version: '1.0.0', environment: 'sandbox' });
+    const allowed = enforce({
+      tool: 'tesq-tool',
+      version: '1.0.0',
+      environment: 'sandbox',
+    });
     expect(allowed.riskScore).toBeLessThanOrEqual(10);
-    expect(() => enforce({ tool: 'tesq-tool', version: '2.0.0', environment: 'sandbox' })).toThrowError();
-    expect(() => enforce({ tool: 'tesq-tool', version: '1.0.0', environment: 'prod' })).toThrowError();
+    expect(() =>
+      enforce({ tool: 'tesq-tool', version: '2.0.0', environment: 'sandbox' }),
+    ).toThrowError();
+    expect(() =>
+      enforce({ tool: 'tesq-tool', version: '1.0.0', environment: 'prod' }),
+    ).toThrowError();
   });
 });

@@ -1,6 +1,9 @@
 import express from 'express';
 import neo4j from 'neo4j-driver';
-import { compile, executeSandbox } from '../../../packages/sdk/nlq-js/src/index.js';
+import {
+  compile,
+  executeSandbox,
+} from '../../../packages/sdk/nlq-js/src/index.js';
 
 const router = express.Router();
 
@@ -12,7 +15,10 @@ router.post('/nlq/compile', (req, res) => {
 
 const driver = neo4j.driver(
   process.env.NEO4J_URI || 'neo4j://localhost',
-  neo4j.auth.basic(process.env.NEO4J_USER || 'readonly', process.env.NEO4J_PASSWORD || ''),
+  neo4j.auth.basic(
+    process.env.NEO4J_USER || 'readonly',
+    process.env.NEO4J_PASSWORD || '',
+  ),
   { disableLosslessIntegers: true },
 );
 

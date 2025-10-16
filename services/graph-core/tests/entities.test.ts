@@ -11,7 +11,11 @@ describe('entity upsert', () => {
     // idempotent
     const res2 = await request(app)
       .post(`/api/v1/entities/Person`)
-      .send({ id: res.body.id, attributes: { name: 'Alice' }, policy: { origin: 'test2' } });
+      .send({
+        id: res.body.id,
+        attributes: { name: 'Alice' },
+        policy: { origin: 'test2' },
+      });
     expect(res2.body.id).toBe(res.body.id);
     expect(res2.body.policy.origin).toBe('test2');
   });

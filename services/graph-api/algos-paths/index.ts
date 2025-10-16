@@ -19,13 +19,24 @@ interface QueueNode {
   path: string[];
 }
 
-function filterEdges(edges: PathEdge[], constraints?: ConstraintOptions): PathEdge[] {
+function filterEdges(
+  edges: PathEdge[],
+  constraints?: ConstraintOptions,
+): PathEdge[] {
   if (!constraints) return edges;
   return edges.filter((e) => {
-    if (constraints.policies && e.policy && !constraints.policies.includes(e.policy)) {
+    if (
+      constraints.policies &&
+      e.policy &&
+      !constraints.policies.includes(e.policy)
+    ) {
       return false;
     }
-    if (constraints.territories && e.territory && !constraints.territories.includes(e.territory)) {
+    if (
+      constraints.territories &&
+      e.territory &&
+      !constraints.territories.includes(e.territory)
+    ) {
       return false;
     }
     if (constraints.timeWindow && typeof e.time === 'number') {
@@ -102,7 +113,9 @@ export function kShortestPaths(
 
       for (const p of paths) {
         if (p.length > j && rootPath.every((v, idx) => v === p[idx])) {
-          const edgeToRemove = filtered.find((e) => e.from === p[j] && e.to === p[j + 1]);
+          const edgeToRemove = filtered.find(
+            (e) => e.from === p[j] && e.to === p[j + 1],
+          );
           if (edgeToRemove) {
             filtered.splice(filtered.indexOf(edgeToRemove), 1);
             removed.push(edgeToRemove);
@@ -115,7 +128,9 @@ export function kShortestPaths(
         const totalPath = [...rootPath.slice(0, -1), ...spurPath];
         const cost = totalPath.reduce((sum, _, idx, arr) => {
           if (idx === arr.length - 1) return sum;
-          const edge = edges.find((e) => e.from === arr[idx] && e.to === arr[idx + 1]);
+          const edge = edges.find(
+            (e) => e.from === arr[idx] && e.to === arr[idx + 1],
+          );
           return sum + (edge?.weight ?? 1);
         }, 0);
         potential.push({ cost, path: totalPath });

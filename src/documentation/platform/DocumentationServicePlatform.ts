@@ -112,31 +112,49 @@ export class DocumentationServicePlatform extends EventEmitter {
    */
   private async setupAPIRoutes(): Promise<void> {
     // Authentication routes
-    this.fastify.register(this.authenticationRoutes.bind(this), { prefix: '/api/v1/auth' });
-    
+    this.fastify.register(this.authenticationRoutes.bind(this), {
+      prefix: '/api/v1/auth',
+    });
+
     // Tenant management routes
-    this.fastify.register(this.tenantRoutes.bind(this), { prefix: '/api/v1/tenants' });
-    
+    this.fastify.register(this.tenantRoutes.bind(this), {
+      prefix: '/api/v1/tenants',
+    });
+
     // Documentation service routes
-    this.fastify.register(this.documentationRoutes.bind(this), { prefix: '/api/v1/docs' });
-    
+    this.fastify.register(this.documentationRoutes.bind(this), {
+      prefix: '/api/v1/docs',
+    });
+
     // Content management routes
-    this.fastify.register(this.contentRoutes.bind(this), { prefix: '/api/v1/content' });
-    
+    this.fastify.register(this.contentRoutes.bind(this), {
+      prefix: '/api/v1/content',
+    });
+
     // Analytics routes
-    this.fastify.register(this.analyticsRoutes.bind(this), { prefix: '/api/v1/analytics' });
-    
+    this.fastify.register(this.analyticsRoutes.bind(this), {
+      prefix: '/api/v1/analytics',
+    });
+
     // Billing routes
-    this.fastify.register(this.billingRoutes.bind(this), { prefix: '/api/v1/billing' });
-    
+    this.fastify.register(this.billingRoutes.bind(this), {
+      prefix: '/api/v1/billing',
+    });
+
     // Marketplace routes
-    this.fastify.register(this.marketplaceRoutes.bind(this), { prefix: '/api/v1/marketplace' });
-    
+    this.fastify.register(this.marketplaceRoutes.bind(this), {
+      prefix: '/api/v1/marketplace',
+    });
+
     // Integration routes
-    this.fastify.register(this.integrationRoutes.bind(this), { prefix: '/api/v1/integrations' });
-    
+    this.fastify.register(this.integrationRoutes.bind(this), {
+      prefix: '/api/v1/integrations',
+    });
+
     // Platform administration routes
-    this.fastify.register(this.adminRoutes.bind(this), { prefix: '/api/v1/admin' });
+    this.fastify.register(this.adminRoutes.bind(this), {
+      prefix: '/api/v1/admin',
+    });
 
     this.emit('routes:registered');
   }
@@ -147,20 +165,23 @@ export class DocumentationServicePlatform extends EventEmitter {
   private async authenticationRoutes(fastify: FastifyInstance): Promise<void> {
     // Login
     fastify.post('/login', this.handleLogin.bind(this));
-    
+
     // Register
     fastify.post('/register', this.handleRegister.bind(this));
-    
+
     // Refresh token
     fastify.post('/refresh', this.handleTokenRefresh.bind(this));
-    
+
     // Logout
     fastify.post('/logout', this.handleLogout.bind(this));
-    
+
     // OAuth endpoints
     fastify.get('/oauth/:provider', this.handleOAuthLogin.bind(this));
-    fastify.get('/oauth/:provider/callback', this.handleOAuthCallback.bind(this));
-    
+    fastify.get(
+      '/oauth/:provider/callback',
+      this.handleOAuthCallback.bind(this),
+    );
+
     // API key management
     fastify.get('/api-keys', this.getAPIKeys.bind(this));
     fastify.post('/api-keys', this.createAPIKey.bind(this));
@@ -173,24 +194,24 @@ export class DocumentationServicePlatform extends EventEmitter {
   private async tenantRoutes(fastify: FastifyInstance): Promise<void> {
     // Create tenant
     fastify.post('/', this.createTenant.bind(this));
-    
+
     // Get tenant info
     fastify.get('/:tenantId', this.getTenant.bind(this));
-    
+
     // Update tenant
     fastify.put('/:tenantId', this.updateTenant.bind(this));
-    
+
     // Delete tenant
     fastify.delete('/:tenantId', this.deleteTenant.bind(this));
-    
+
     // Tenant configuration
     fastify.get('/:tenantId/config', this.getTenantConfig.bind(this));
     fastify.put('/:tenantId/config', this.updateTenantConfig.bind(this));
-    
+
     // Tenant usage and metrics
     fastify.get('/:tenantId/usage', this.getTenantUsage.bind(this));
     fastify.get('/:tenantId/metrics', this.getTenantMetrics.bind(this));
-    
+
     // Tenant team management
     fastify.get('/:tenantId/team', this.getTenantTeam.bind(this));
     fastify.post('/:tenantId/team', this.addTeamMember.bind(this));
@@ -204,26 +225,62 @@ export class DocumentationServicePlatform extends EventEmitter {
     // Site management
     fastify.get('/:tenantId/sites', this.getDocumentationSites.bind(this));
     fastify.post('/:tenantId/sites', this.createDocumentationSite.bind(this));
-    fastify.get('/:tenantId/sites/:siteId', this.getDocumentationSite.bind(this));
-    fastify.put('/:tenantId/sites/:siteId', this.updateDocumentationSite.bind(this));
-    fastify.delete('/:tenantId/sites/:siteId', this.deleteDocumentationSite.bind(this));
-    
+    fastify.get(
+      '/:tenantId/sites/:siteId',
+      this.getDocumentationSite.bind(this),
+    );
+    fastify.put(
+      '/:tenantId/sites/:siteId',
+      this.updateDocumentationSite.bind(this),
+    );
+    fastify.delete(
+      '/:tenantId/sites/:siteId',
+      this.deleteDocumentationSite.bind(this),
+    );
+
     // Content operations
     fastify.get('/:tenantId/sites/:siteId/pages', this.getPages.bind(this));
     fastify.post('/:tenantId/sites/:siteId/pages', this.createPage.bind(this));
-    fastify.get('/:tenantId/sites/:siteId/pages/:pageId', this.getPage.bind(this));
-    fastify.put('/:tenantId/sites/:siteId/pages/:pageId', this.updatePage.bind(this));
-    fastify.delete('/:tenantId/sites/:siteId/pages/:pageId', this.deletePage.bind(this));
-    
+    fastify.get(
+      '/:tenantId/sites/:siteId/pages/:pageId',
+      this.getPage.bind(this),
+    );
+    fastify.put(
+      '/:tenantId/sites/:siteId/pages/:pageId',
+      this.updatePage.bind(this),
+    );
+    fastify.delete(
+      '/:tenantId/sites/:siteId/pages/:pageId',
+      this.deletePage.bind(this),
+    );
+
     // Search and navigation
-    fastify.get('/:tenantId/sites/:siteId/search', this.searchContent.bind(this));
-    fastify.get('/:tenantId/sites/:siteId/navigation', this.getNavigation.bind(this));
-    fastify.put('/:tenantId/sites/:siteId/navigation', this.updateNavigation.bind(this));
-    
+    fastify.get(
+      '/:tenantId/sites/:siteId/search',
+      this.searchContent.bind(this),
+    );
+    fastify.get(
+      '/:tenantId/sites/:siteId/navigation',
+      this.getNavigation.bind(this),
+    );
+    fastify.put(
+      '/:tenantId/sites/:siteId/navigation',
+      this.updateNavigation.bind(this),
+    );
+
     // Publishing and deployment
-    fastify.post('/:tenantId/sites/:siteId/publish', this.publishSite.bind(this));
-    fastify.get('/:tenantId/sites/:siteId/deployments', this.getDeployments.bind(this));
-    fastify.post('/:tenantId/sites/:siteId/rollback/:deploymentId', this.rollbackDeployment.bind(this));
+    fastify.post(
+      '/:tenantId/sites/:siteId/publish',
+      this.publishSite.bind(this),
+    );
+    fastify.get(
+      '/:tenantId/sites/:siteId/deployments',
+      this.getDeployments.bind(this),
+    );
+    fastify.post(
+      '/:tenantId/sites/:siteId/rollback/:deploymentId',
+      this.rollbackDeployment.bind(this),
+    );
   }
 
   /**
@@ -235,37 +292,48 @@ export class DocumentationServicePlatform extends EventEmitter {
     fastify.get('/:tenantId/assets', this.getAssets.bind(this));
     fastify.get('/:tenantId/assets/:assetId', this.getAsset.bind(this));
     fastify.delete('/:tenantId/assets/:assetId', this.deleteAsset.bind(this));
-    
+
     // Templates and themes
     fastify.get('/:tenantId/templates', this.getTemplates.bind(this));
     fastify.post('/:tenantId/templates', this.createTemplate.bind(this));
     fastify.get('/:tenantId/themes', this.getThemes.bind(this));
     fastify.post('/:tenantId/themes', this.createTheme.bind(this));
-    
+
     // Version control and collaboration
     fastify.get('/:tenantId/versions', this.getVersions.bind(this));
     fastify.post('/:tenantId/versions', this.createVersion.bind(this));
-    fastify.post('/:tenantId/merge-requests', this.createMergeRequest.bind(this));
+    fastify.post(
+      '/:tenantId/merge-requests',
+      this.createMergeRequest.bind(this),
+    );
     fastify.get('/:tenantId/merge-requests', this.getMergeRequests.bind(this));
-    
+
     // Content workflow
     fastify.get('/:tenantId/workflows', this.getWorkflows.bind(this));
     fastify.post('/:tenantId/workflows', this.createWorkflow.bind(this));
-    fastify.post('/:tenantId/workflows/:workflowId/trigger', this.triggerWorkflow.bind(this));
+    fastify.post(
+      '/:tenantId/workflows/:workflowId/trigger',
+      this.triggerWorkflow.bind(this),
+    );
   }
 
   /**
    * Create new tenant
    */
-  async createTenant(request: FastifyRequest<{ Body: CreateTenantRequest }>, reply: FastifyReply): Promise<void> {
+  async createTenant(
+    request: FastifyRequest<{ Body: CreateTenantRequest }>,
+    reply: FastifyReply,
+  ): Promise<void> {
     try {
       const tenantData = request.body;
-      
+
       // Validate tenant data
       await this.validateTenantData(tenantData);
-      
+
       // Check if tenant already exists
-      const existingTenant = Array.from(this.tenants.values()).find(t => t.name === tenantData.name);
+      const existingTenant = Array.from(this.tenants.values()).find(
+        (t) => t.name === tenantData.name,
+      );
       if (existingTenant) {
         return reply.code(409).send({ error: 'Tenant already exists' });
       }
@@ -282,21 +350,21 @@ export class DocumentationServicePlatform extends EventEmitter {
           bandwidth: 0,
           requests: 0,
           users: 0,
-          sites: 0
+          sites: 0,
         },
         billing: {
           plan: tenantData.plan || 'starter',
           status: 'active',
           nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           usage: {},
-          invoices: []
+          invoices: [],
         },
         metadata: {
           createdAt: new Date(),
           lastModified: new Date(),
           owner: tenantData.owner,
-          tags: tenantData.tags || []
-        }
+          tags: tenantData.tags || [],
+        },
       };
 
       this.tenants.set(tenant.id, tenant);
@@ -311,9 +379,8 @@ export class DocumentationServicePlatform extends EventEmitter {
 
       reply.code(201).send({
         tenant: this.sanitizeTenantForAPI(tenant),
-        message: 'Tenant created successfully'
+        message: 'Tenant created successfully',
       });
-
     } catch (error) {
       this.emit('tenant:creation-failed', { error });
       reply.code(500).send({ error: 'Failed to create tenant' });
@@ -323,7 +390,10 @@ export class DocumentationServicePlatform extends EventEmitter {
   /**
    * Get tenant information
    */
-  async getTenant(request: FastifyRequest<{ Params: { tenantId: string } }>, reply: FastifyReply): Promise<void> {
+  async getTenant(
+    request: FastifyRequest<{ Params: { tenantId: string } }>,
+    reply: FastifyReply,
+  ): Promise<void> {
     try {
       const tenantId = request.params.tenantId;
       const tenant = this.tenants.get(tenantId);
@@ -339,9 +409,8 @@ export class DocumentationServicePlatform extends EventEmitter {
       }
 
       reply.send({
-        tenant: this.sanitizeTenantForAPI(tenant)
+        tenant: this.sanitizeTenantForAPI(tenant),
       });
-
     } catch (error) {
       reply.code(500).send({ error: 'Failed to retrieve tenant' });
     }
@@ -351,8 +420,11 @@ export class DocumentationServicePlatform extends EventEmitter {
    * Create documentation site for tenant
    */
   async createDocumentationSite(
-    request: FastifyRequest<{ Params: { tenantId: string }; Body: CreateSiteRequest }>, 
-    reply: FastifyReply
+    request: FastifyRequest<{
+      Params: { tenantId: string };
+      Body: CreateSiteRequest;
+    }>,
+    reply: FastifyReply,
   ): Promise<void> {
     try {
       const tenantId = request.params.tenantId;
@@ -366,11 +438,16 @@ export class DocumentationServicePlatform extends EventEmitter {
       // Check tenant limits
       const canCreateSite = await this.checkTenantLimits(tenant, 'sites');
       if (!canCreateSite) {
-        return reply.code(429).send({ error: 'Site limit reached for current plan' });
+        return reply
+          .code(429)
+          .send({ error: 'Site limit reached for current plan' });
       }
 
       // Create documentation site
-      const site = await this.createDocumentationSiteForTenant(tenant, siteData);
+      const site = await this.createDocumentationSiteForTenant(
+        tenant,
+        siteData,
+      );
 
       // Update tenant usage
       tenant.usage.sites++;
@@ -379,9 +456,8 @@ export class DocumentationServicePlatform extends EventEmitter {
 
       reply.code(201).send({
         site,
-        message: 'Documentation site created successfully'
+        message: 'Documentation site created successfully',
       });
-
     } catch (error) {
       reply.code(500).send({ error: 'Failed to create documentation site' });
     }
@@ -390,42 +466,46 @@ export class DocumentationServicePlatform extends EventEmitter {
   /**
    * Get platform analytics
    */
-  async getPlatformAnalytics(period: AnalyticsPeriod): Promise<PlatformAnalytics> {
+  async getPlatformAnalytics(
+    period: AnalyticsPeriod,
+  ): Promise<PlatformAnalytics> {
     const analytics: PlatformAnalytics = {
       timestamp: new Date(),
       period,
       platform: {
         totalTenants: this.tenants.size,
-        activeTenants: Array.from(this.tenants.values()).filter(t => t.status === 'active').length,
+        activeTenants: Array.from(this.tenants.values()).filter(
+          (t) => t.status === 'active',
+        ).length,
         totalSites: await this.getTotalSites(),
         totalUsers: await this.getTotalUsers(),
         totalRequests: await this.getTotalRequests(period),
-        totalRevenue: await this.getTotalRevenue(period)
+        totalRevenue: await this.getTotalRevenue(period),
       },
       tenants: {
         byPlan: await this.getTenantsByPlan(),
         byStatus: await this.getTenantsByStatus(),
         growth: await this.getTenantGrowth(period),
-        churn: await this.getTenantChurn(period)
+        churn: await this.getTenantChurn(period),
       },
       usage: {
         storage: await this.getTotalStorage(),
         bandwidth: await this.getTotalBandwidth(period),
         requests: await this.getTotalAPIRequests(period),
-        features: await this.getFeatureUsage(period)
+        features: await this.getFeatureUsage(period),
       },
       performance: {
         apiLatency: await this.getAPILatency(period),
         uptime: await this.getPlatformUptime(period),
         errorRate: await this.getErrorRate(period),
-        throughput: await this.getThroughput(period)
+        throughput: await this.getThroughput(period),
       },
       billing: {
         mrr: await this.getMonthlyRecurringRevenue(),
         arr: await this.getAnnualRecurringRevenue(),
         averageRevenuePerTenant: await this.getAverageRevenuePerTenant(),
-        conversionRate: await this.getConversionRate(period)
-      }
+        conversionRate: await this.getConversionRate(period),
+      },
     };
 
     return analytics;
@@ -440,35 +520,33 @@ export class DocumentationServicePlatform extends EventEmitter {
       info: {
         title: 'Documentation Platform API',
         version: this.config.api.version,
-        description: 'Comprehensive API for the Documentation as a Service Platform',
+        description:
+          'Comprehensive API for the Documentation as a Service Platform',
         contact: {
           name: 'API Support',
           url: 'https://docs.example.com/support',
-          email: 'api-support@example.com'
+          email: 'api-support@example.com',
         },
         license: {
           name: 'MIT',
-          url: 'https://opensource.org/licenses/MIT'
-        }
+          url: 'https://opensource.org/licenses/MIT',
+        },
       },
       servers: [
         {
           url: this.config.api.baseUrl,
-          description: 'Production server'
-        }
+          description: 'Production server',
+        },
       ],
       paths: await this.generateAPIPaths(),
       components: {
         schemas: await this.generateAPISchemas(),
         securitySchemes: await this.generateSecuritySchemes(),
         responses: await this.generateCommonResponses(),
-        parameters: await this.generateCommonParameters()
+        parameters: await this.generateCommonParameters(),
       },
-      security: [
-        { BearerAuth: [] },
-        { ApiKeyAuth: [] }
-      ],
-      tags: await this.generateAPITags()
+      security: [{ BearerAuth: [] }, { ApiKeyAuth: [] }],
+      tags: await this.generateAPITags(),
     };
 
     return documentation;
@@ -479,25 +557,37 @@ export class DocumentationServicePlatform extends EventEmitter {
    */
   async setupMarketplace(): Promise<void> {
     await this.marketplaceManager.initialize();
-    
+
     // Register core marketplace routes
-    this.fastify.register(async (fastify) => {
-      // Browse marketplace
-      fastify.get('/browse', this.browseMarketplace.bind(this));
-      
-      // Get extension details
-      fastify.get('/extensions/:extensionId', this.getExtension.bind(this));
-      
-      // Install extension
-      fastify.post('/extensions/:extensionId/install', this.installExtension.bind(this));
-      
-      // Uninstall extension
-      fastify.delete('/extensions/:extensionId/uninstall', this.uninstallExtension.bind(this));
-      
-      // Extension management
-      fastify.get('/installed', this.getInstalledExtensions.bind(this));
-      fastify.put('/extensions/:extensionId/configure', this.configureExtension.bind(this));
-    }, { prefix: '/api/v1/marketplace' });
+    this.fastify.register(
+      async (fastify) => {
+        // Browse marketplace
+        fastify.get('/browse', this.browseMarketplace.bind(this));
+
+        // Get extension details
+        fastify.get('/extensions/:extensionId', this.getExtension.bind(this));
+
+        // Install extension
+        fastify.post(
+          '/extensions/:extensionId/install',
+          this.installExtension.bind(this),
+        );
+
+        // Uninstall extension
+        fastify.delete(
+          '/extensions/:extensionId/uninstall',
+          this.uninstallExtension.bind(this),
+        );
+
+        // Extension management
+        fastify.get('/installed', this.getInstalledExtensions.bind(this));
+        fastify.put(
+          '/extensions/:extensionId/configure',
+          this.configureExtension.bind(this),
+        );
+      },
+      { prefix: '/api/v1/marketplace' },
+    );
 
     this.emit('marketplace:initialized');
   }
@@ -509,11 +599,20 @@ export class DocumentationServicePlatform extends EventEmitter {
     // Webhook registration
     this.fastify.post('/api/v1/webhooks', this.createWebhook.bind(this));
     this.fastify.get('/api/v1/webhooks', this.getWebhooks.bind(this));
-    this.fastify.put('/api/v1/webhooks/:webhookId', this.updateWebhook.bind(this));
-    this.fastify.delete('/api/v1/webhooks/:webhookId', this.deleteWebhook.bind(this));
+    this.fastify.put(
+      '/api/v1/webhooks/:webhookId',
+      this.updateWebhook.bind(this),
+    );
+    this.fastify.delete(
+      '/api/v1/webhooks/:webhookId',
+      this.deleteWebhook.bind(this),
+    );
 
     // Webhook delivery
-    this.fastify.post('/api/v1/webhooks/:webhookId/test', this.testWebhook.bind(this));
+    this.fastify.post(
+      '/api/v1/webhooks/:webhookId/test',
+      this.testWebhook.bind(this),
+    );
 
     this.emit('webhooks:initialized');
   }
@@ -529,27 +628,27 @@ export class DocumentationServicePlatform extends EventEmitter {
         totalTenants: this.tenants.size,
         revenue: await this.getTotalRevenue(period),
         growth: await this.getPlatformGrowth(period),
-        health: await this.getPlatformHealth()
+        health: await this.getPlatformHealth(),
       },
       tenants: {
         acquisition: await this.getTenantAcquisition(period),
         retention: await this.getTenantRetention(period),
         satisfaction: await this.getTenantSatisfaction(period),
-        support: await this.getSupportMetrics(period)
+        support: await this.getSupportMetrics(period),
       },
       technical: {
         performance: await this.getTechnicalPerformance(period),
         reliability: await this.getSystemReliability(period),
         security: await this.getSecurityMetrics(period),
-        capacity: await this.getCapacityMetrics(period)
+        capacity: await this.getCapacityMetrics(period),
       },
       business: {
         revenue: await this.getRevenueAnalysis(period),
         costs: await this.getCostAnalysis(period),
         profitability: await this.getProfitabilityAnalysis(period),
-        forecast: await this.getBusinessForecast(period)
+        forecast: await this.getBusinessForecast(period),
       },
-      recommendations: await this.generatePlatformRecommendations(period)
+      recommendations: await this.generatePlatformRecommendations(period),
     };
 
     return report;
@@ -570,7 +669,9 @@ export class DocumentationServicePlatform extends EventEmitter {
     return `tenant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private async generateTenantConfiguration(data: CreateTenantRequest): Promise<TenantConfiguration> {
+  private async generateTenantConfiguration(
+    data: CreateTenantRequest,
+  ): Promise<TenantConfiguration> {
     return {
       domain: `${data.name}.docs.example.com`,
       customDomain: data.customDomain,
@@ -581,8 +682,8 @@ export class DocumentationServicePlatform extends EventEmitter {
       security: {
         sso: false,
         mfa: false,
-        ipWhitelist: []
-      }
+        ipWhitelist: [],
+      },
     };
   }
 
@@ -597,12 +698,18 @@ export class DocumentationServicePlatform extends EventEmitter {
     return publicData;
   }
 
-  private async checkTenantAccess(request: FastifyRequest, tenantId: string): Promise<boolean> {
+  private async checkTenantAccess(
+    request: FastifyRequest,
+    tenantId: string,
+  ): Promise<boolean> {
     // Implement access control logic
     return true; // Placeholder
   }
 
-  private async checkTenantLimits(tenant: Tenant, resource: string): Promise<boolean> {
+  private async checkTenantLimits(
+    tenant: Tenant,
+    resource: string,
+  ): Promise<boolean> {
     const limits = tenant.configuration.limits;
     switch (resource) {
       case 'sites':
@@ -626,7 +733,7 @@ export class DocumentationServicePlatform extends EventEmitter {
         customDomain: false,
         sso: false,
         analytics: 'basic',
-        support: 'community'
+        support: 'community',
       },
       professional: {
         sites: 10,
@@ -636,7 +743,7 @@ export class DocumentationServicePlatform extends EventEmitter {
         customDomain: true,
         sso: true,
         analytics: 'advanced',
-        support: 'email'
+        support: 'email',
       },
       enterprise: {
         sites: 'unlimited',
@@ -646,55 +753,97 @@ export class DocumentationServicePlatform extends EventEmitter {
         customDomain: true,
         sso: true,
         analytics: 'enterprise',
-        support: 'priority'
-      }
+        support: 'priority',
+      },
     };
     return features[plan] || features.starter;
   }
 
   private getPlanLimits(plan: TenantPlan): PlanLimits {
     const limits = {
-      starter: { sites: 1, users: 5, storage: 1073741824, bandwidth: 10737418240 },
-      professional: { sites: 10, users: 25, storage: 53687091200, bandwidth: 107374182400 },
-      enterprise: { sites: -1, users: -1, storage: 536870912000, bandwidth: 1099511627776 }
+      starter: {
+        sites: 1,
+        users: 5,
+        storage: 1073741824,
+        bandwidth: 10737418240,
+      },
+      professional: {
+        sites: 10,
+        users: 25,
+        storage: 53687091200,
+        bandwidth: 107374182400,
+      },
+      enterprise: {
+        sites: -1,
+        users: -1,
+        storage: 536870912000,
+        bandwidth: 1099511627776,
+      },
     };
     return limits[plan] || limits.starter;
   }
 
   // Route handlers (abbreviated for space)
-  private async handleLogin(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  private async handleLogin(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     // Implement login logic
   }
 
-  private async handleRegister(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  private async handleRegister(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     // Implement registration logic
   }
 
-  private async handleTokenRefresh(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  private async handleTokenRefresh(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     // Implement token refresh logic
   }
 
-  private async handleLogout(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  private async handleLogout(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     // Implement logout logic
   }
 
-  private async handleOAuthLogin(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  private async handleOAuthLogin(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     // Implement OAuth login logic
   }
 
-  private async handleOAuthCallback(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  private async handleOAuthCallback(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     // Implement OAuth callback logic
   }
 
-  private async getAPIKeys(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  private async getAPIKeys(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     // Get user's API keys
   }
 
-  private async createAPIKey(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  private async createAPIKey(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     // Create new API key
   }
 
-  private async revokeAPIKey(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  private async revokeAPIKey(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> {
     // Revoke API key
   }
 
@@ -704,7 +853,7 @@ export class DocumentationServicePlatform extends EventEmitter {
 // Supporting classes
 class APIGateway {
   constructor(private config: APIConfig) {}
-  
+
   async initialize(): Promise<void> {
     // Initialize API gateway
   }
@@ -712,7 +861,7 @@ class APIGateway {
 
 class BillingEngine {
   constructor(private config: BillingConfig) {}
-  
+
   async initializeTenantBilling(tenant: Tenant): Promise<void> {
     // Initialize billing for tenant
   }
@@ -720,7 +869,7 @@ class BillingEngine {
 
 class MarketplaceManager {
   constructor(private config: MarketplaceConfig) {}
-  
+
   async initialize(): Promise<void> {
     // Initialize marketplace
   }
@@ -728,7 +877,7 @@ class MarketplaceManager {
 
 class PlatformAnalyticsEngine {
   constructor(private config: PlatformAnalyticsConfig) {}
-  
+
   async trackEvent(event: string, data: any): Promise<void> {
     // Track analytics event
   }
@@ -737,9 +886,19 @@ class PlatformAnalyticsEngine {
 // Type definitions
 export type TenantPlan = 'starter' | 'professional' | 'enterprise';
 export type TenantStatus = 'active' | 'inactive' | 'suspended' | 'cancelled';
-export type ServiceCategory = 'core' | 'integration' | 'analytics' | 'security' | 'content';
+export type ServiceCategory =
+  | 'core'
+  | 'integration'
+  | 'analytics'
+  | 'security'
+  | 'content';
 export type AnalyticsPeriod = '24h' | '7d' | '30d' | '90d' | '1y';
-export type ReportPeriod = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+export type ReportPeriod =
+  | 'daily'
+  | 'weekly'
+  | 'monthly'
+  | 'quarterly'
+  | 'yearly';
 
 export interface CreateTenantRequest {
   name: string;

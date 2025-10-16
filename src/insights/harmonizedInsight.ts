@@ -1,1 +1,3 @@
-export function harmonizedInsight(config) { return { insight: 'Harmonized Insight Placeholder' }; }
+export function harmonizedInsight(config) {
+  return { insight: 'Harmonized Insight Placeholder' };
+}

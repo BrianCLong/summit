@@ -20,12 +20,19 @@ export type AuthenticatorAttachment = 'platform' | 'cross-platform';
 /**
  * User verification requirement
  */
-export type UserVerificationRequirement = 'required' | 'preferred' | 'discouraged';
+export type UserVerificationRequirement =
+  | 'required'
+  | 'preferred'
+  | 'discouraged';
 
 /**
  * Attestation conveyance preference
  */
-export type AttestationConveyancePreference = 'none' | 'indirect' | 'direct' | 'enterprise';
+export type AttestationConveyancePreference =
+  | 'none'
+  | 'indirect'
+  | 'direct'
+  | 'enterprise';
 
 /**
  * Transport methods
@@ -40,7 +47,7 @@ export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 /**
  * Step-up authentication reasons
  */
-export type StepUpReason = 
+export type StepUpReason =
   | 'high_value_operation'
   | 'sensitive_data_access'
   | 'admin_action'
@@ -252,8 +259,10 @@ export interface AuthenticationChallenge {
 export class WebAuthnManager extends EventEmitter {
   private credentials: Map<string, StoredCredential[]> = new Map();
   private sessions: Map<string, AuthSession> = new Map();
-  private registrationChallenges: Map<string, RegistrationChallenge> = new Map();
-  private authenticationChallenges: Map<string, AuthenticationChallenge> = new Map();
+  private registrationChallenges: Map<string, RegistrationChallenge> =
+    new Map();
+  private authenticationChallenges: Map<string, AuthenticationChallenge> =
+    new Map();
   private riskEngine: RiskAssessmentEngine;
 
   constructor(
@@ -271,7 +280,7 @@ export class WebAuthnManager extends EventEmitter {
       supportedAlgorithms: number[];
       maxCredentialsPerUser: number;
       attestationFormats: string[];
-    }
+    },
   ) {
     super();
     this.riskEngine = new RiskAssessmentEngine();
@@ -295,7 +304,7 @@ export class WebAuthnManager extends EventEmitter {
       attestation?: AttestationConveyancePreference;
       ipAddress: string;
       userAgent: string;
-    }
+    },
   ): Promise<{
     challengeId: string;
     options: CredentialCreationOptions;
@@ -306,40 +315,43 @@ export class WebAuthnManager extends EventEmitter {
 
     // Get existing credentials to exclude
     const existingCredentials = this.credentials.get(userId) || [];
-    const excludeCredentials = existingCredentials.map(cred => ({
+    const excludeCredentials = existingCredentials.map((cred) => ({
       type: 'public-key' as CredentialType,
       id: cred.credentialId,
-      transports: cred.transports
+      transports: cred.transports,
     }));
 
     // Build creation options
     const creationOptions: CredentialCreationOptions = {
       rp: {
         id: this.config.rpId,
-        name: this.config.rpName
+        name: this.config.rpName,
       },
       user: {
         id: this.stringToArrayBuffer(userId),
         name: userInfo.name,
-        displayName: userInfo.displayName
+        displayName: userInfo.displayName,
       },
       challenge,
-      pubKeyCredParams: this.config.supportedAlgorithms.map(alg => ({
+      pubKeyCredParams: this.config.supportedAlgorithms.map((alg) => ({
         type: 'public-key',
-        alg
+        alg,
       })),
       timeout: this.config.challengeTimeout * 60 * 1000,
       excludeCredentials,
       authenticatorSelection: {
-        authenticatorAttachment: options.authenticatorType === 'both' ? 
-          undefined : options.authenticatorType,
+        authenticatorAttachment:
+          options.authenticatorType === 'both'
+            ? undefined
+            : options.authenticatorType,
         residentKey: 'preferred',
         requireResidentKey: false,
-        userVerification: options.userVerification || 
-          (this.config.requireUserVerification ? 'required' : 'preferred')
+        userVerification:
+          options.userVerification ||
+          (this.config.requireUserVerification ? 'required' : 'preferred'),
       },
       attestation: options.attestation || 'none',
-      extensions: {}
+      extensions: {},
     };
 
     // Store challenge
@@ -351,7 +363,7 @@ export class WebAuthnManager extends EventEmitter {
       createdAt: new Date(),
       expiryAt: new Date(Date.now() + this.config.challengeTimeout * 60 * 1000),
       ipAddress: options.ipAddress,
-      userAgent: options.userAgent
+      userAgent: options.userAgent,
     };
 
     this.registrationChallenges.set(challengeId, challengeData);
@@ -360,12 +372,12 @@ export class WebAuthnManager extends EventEmitter {
     this.emit('registration:initiated', {
       userId,
       challengeId,
-      tenantId: options.tenantId
+      tenantId: options.tenantId,
     });
 
     return {
       challengeId,
-      options: creationOptions
+      options: creationOptions,
     };
   }
 
@@ -379,7 +391,7 @@ export class WebAuthnManager extends EventEmitter {
       nickname?: string;
       ipAddress: string;
       userAgent: string;
-    }
+    },
   ): Promise<{
     credentialId: string;
     success: boolean;
@@ -400,24 +412,25 @@ export class WebAuthnManager extends EventEmitter {
       // Verify the credential
       const verification = await this.verifyRegistrationCredential(
         credential,
-        challengeData
+        challengeData,
       );
 
       if (!verification.verified) {
         return {
           credentialId: '',
           success: false,
-          errors: verification.errors
+          errors: verification.errors,
         };
       }
 
       // Check credential limit
-      const existingCredentials = this.credentials.get(challengeData.userId) || [];
+      const existingCredentials =
+        this.credentials.get(challengeData.userId) || [];
       if (existingCredentials.length >= this.config.maxCredentialsPerUser) {
         return {
           credentialId: '',
           success: false,
-          errors: ['Maximum number of credentials reached']
+          errors: ['Maximum number of credentials reached'],
         };
       }
 
@@ -440,8 +453,8 @@ export class WebAuthnManager extends EventEmitter {
           authenticatorModel: verification.authenticatorModel,
           authenticatorVersion: verification.authenticatorVersion,
           userAgent: options.userAgent,
-          ipAddress: options.ipAddress
-        }
+          ipAddress: options.ipAddress,
+        },
       };
 
       // Add to stored credentials
@@ -455,14 +468,13 @@ export class WebAuthnManager extends EventEmitter {
       this.emit('registration:completed', {
         userId: challengeData.userId,
         credentialId: storedCredential.id,
-        credentialType: credential.authenticatorAttachment
+        credentialType: credential.authenticatorAttachment,
       });
 
       return {
         credentialId: storedCredential.id,
-        success: true
+        success: true,
       };
-
     } catch (error) {
       // Clean up challenge on error
       this.registrationChallenges.delete(challengeId);
@@ -470,7 +482,7 @@ export class WebAuthnManager extends EventEmitter {
       this.emit('registration:failed', {
         userId: challengeData.userId,
         challengeId,
-        error: error.message
+        error: error.message,
       });
 
       throw error;
@@ -480,16 +492,14 @@ export class WebAuthnManager extends EventEmitter {
   /**
    * Initiate WebAuthn authentication
    */
-  async initiateAuthentication(
-    options: {
-      userId?: string;
-      sessionId?: string;
-      stepUpRequest?: StepUpAuthRequest;
-      userVerification?: UserVerificationRequirement;
-      ipAddress: string;
-      userAgent: string;
-    }
-  ): Promise<{
+  async initiateAuthentication(options: {
+    userId?: string;
+    sessionId?: string;
+    stepUpRequest?: StepUpAuthRequest;
+    userVerification?: UserVerificationRequirement;
+    ipAddress: string;
+    userAgent: string;
+  }): Promise<{
     challengeId: string;
     options: CredentialRequestOptions;
   }> {
@@ -499,13 +509,13 @@ export class WebAuthnManager extends EventEmitter {
 
     // Get allowed credentials
     let allowCredentials: PublicKeyCredentialDescriptor[] = [];
-    
+
     if (options.userId) {
       const userCredentials = this.credentials.get(options.userId) || [];
-      allowCredentials = userCredentials.map(cred => ({
+      allowCredentials = userCredentials.map((cred) => ({
         type: 'public-key' as CredentialType,
         id: cred.credentialId,
-        transports: cred.transports
+        transports: cred.transports,
       }));
     }
 
@@ -514,10 +524,12 @@ export class WebAuthnManager extends EventEmitter {
       challenge,
       timeout: this.config.challengeTimeout * 60 * 1000,
       rpId: this.config.rpId,
-      allowCredentials: allowCredentials.length > 0 ? allowCredentials : undefined,
-      userVerification: options.userVerification || 
+      allowCredentials:
+        allowCredentials.length > 0 ? allowCredentials : undefined,
+      userVerification:
+        options.userVerification ||
         (this.config.requireUserVerification ? 'required' : 'preferred'),
-      extensions: {}
+      extensions: {},
     };
 
     // Store challenge
@@ -531,7 +543,7 @@ export class WebAuthnManager extends EventEmitter {
       createdAt: new Date(),
       expiryAt: new Date(Date.now() + this.config.challengeTimeout * 60 * 1000),
       ipAddress: options.ipAddress,
-      userAgent: options.userAgent
+      userAgent: options.userAgent,
     };
 
     this.authenticationChallenges.set(challengeId, challengeData);
@@ -541,12 +553,12 @@ export class WebAuthnManager extends EventEmitter {
       challengeId,
       userId: options.userId,
       sessionId: options.sessionId,
-      isStepUp: challengeData.isStepUp
+      isStepUp: challengeData.isStepUp,
     });
 
     return {
       challengeId,
-      options: requestOptions
+      options: requestOptions,
     };
   }
 
@@ -560,7 +572,7 @@ export class WebAuthnManager extends EventEmitter {
       ipAddress: string;
       userAgent: string;
       location?: GeolocationData;
-    }
+    },
   ): Promise<{
     success: boolean;
     sessionId?: string;
@@ -583,11 +595,11 @@ export class WebAuthnManager extends EventEmitter {
       // Find the credential
       const credentialId = this.arrayBufferToString(credential.rawId);
       const storedCredential = this.findCredentialById(credentialId);
-      
+
       if (!storedCredential) {
         return {
           success: false,
-          errors: ['Credential not found']
+          errors: ['Credential not found'],
         };
       }
 
@@ -595,16 +607,20 @@ export class WebAuthnManager extends EventEmitter {
       const verification = await this.verifyAuthenticationCredential(
         credential,
         storedCredential,
-        challengeData
+        challengeData,
       );
 
       if (!verification.verified) {
         // Record failed authentication attempt
-        this.recordFailedAuthentication(storedCredential.userId, credentialId, options);
-        
+        this.recordFailedAuthentication(
+          storedCredential.userId,
+          credentialId,
+          options,
+        );
+
         return {
           success: false,
-          errors: verification.errors
+          errors: verification.errors,
         };
       }
 
@@ -617,7 +633,7 @@ export class WebAuthnManager extends EventEmitter {
         const result = await this.handleStepUpAuthentication(
           challengeData.stepUpRequest,
           storedCredential,
-          options
+          options,
         );
 
         // Clean up challenge
@@ -631,7 +647,7 @@ export class WebAuthnManager extends EventEmitter {
         storedCredential.userId,
         challengeData.sessionId,
         storedCredential,
-        options
+        options,
       );
 
       // Clean up challenge
@@ -642,23 +658,22 @@ export class WebAuthnManager extends EventEmitter {
         userId: storedCredential.userId,
         sessionId: session.sessionId,
         credentialId: storedCredential.id,
-        isStepUp: challengeData.isStepUp
+        isStepUp: challengeData.isStepUp,
       });
 
       return {
         success: true,
         sessionId: session.sessionId,
         elevated: session.isElevated,
-        userId: storedCredential.userId
+        userId: storedCredential.userId,
       };
-
     } catch (error) {
       // Clean up challenge on error
       this.authenticationChallenges.delete(challengeId);
 
       this.emit('authentication:failed', {
         challengeId,
-        error: error.message
+        error: error.message,
       });
 
       throw error;
@@ -670,7 +685,7 @@ export class WebAuthnManager extends EventEmitter {
    */
   async requestStepUpAuthentication(
     sessionId: string,
-    request: StepUpAuthRequest
+    request: StepUpAuthRequest,
   ): Promise<{
     required: boolean;
     challengeId?: string;
@@ -684,11 +699,11 @@ export class WebAuthnManager extends EventEmitter {
 
     // Check if step-up is required based on risk assessment
     const riskAssessment = await this.assessStepUpRisk(session, request);
-    
+
     if (!riskAssessment.required) {
       return {
         required: false,
-        reason: 'Current authentication level sufficient'
+        reason: 'Current authentication level sufficient',
       };
     }
 
@@ -699,13 +714,13 @@ export class WebAuthnManager extends EventEmitter {
       stepUpRequest: request,
       userVerification: 'required',
       ipAddress: request.metadata.ipAddress || session.ipAddress,
-      userAgent: request.metadata.userAgent || session.userAgent
+      userAgent: request.metadata.userAgent || session.userAgent,
     });
 
     return {
       required: true,
       challengeId: auth.challengeId,
-      options: auth.options
+      options: auth.options,
     };
   }
 
@@ -719,7 +734,7 @@ export class WebAuthnManager extends EventEmitter {
       riskLevel: RiskLevel;
       resourceId?: string;
       metadata?: Record<string, any>;
-    }
+    },
   ): Promise<{
     required: boolean;
     reason?: StepUpReason;
@@ -732,17 +747,21 @@ export class WebAuthnManager extends EventEmitter {
     }
 
     // Check current elevation status
-    if (session.isElevated && session.elevationExpiry && session.elevationExpiry > new Date()) {
+    if (
+      session.isElevated &&
+      session.elevationExpiry &&
+      session.elevationExpiry > new Date()
+    ) {
       const currentElevationSufficient = this.isElevationSufficient(
         session.elevationLevel,
-        operation.riskLevel
+        operation.riskLevel,
       );
 
       if (currentElevationSufficient) {
         return {
           required: false,
           currentLevel: session.elevationLevel,
-          requiredLevel: this.mapRiskToElevationLevel(operation.riskLevel)
+          requiredLevel: this.mapRiskToElevationLevel(operation.riskLevel),
         };
       }
     }
@@ -754,7 +773,7 @@ export class WebAuthnManager extends EventEmitter {
       required: true,
       reason,
       currentLevel: session.isElevated ? session.elevationLevel : 'standard',
-      requiredLevel: this.mapRiskToElevationLevel(operation.riskLevel)
+      requiredLevel: this.mapRiskToElevationLevel(operation.riskLevel),
     };
   }
 
@@ -770,11 +789,11 @@ export class WebAuthnManager extends EventEmitter {
    */
   async removeCredential(
     userId: string,
-    credentialId: string
+    credentialId: string,
   ): Promise<boolean> {
     const userCredentials = this.credentials.get(userId) || [];
-    const index = userCredentials.findIndex(cred => cred.id === credentialId);
-    
+    const index = userCredentials.findIndex((cred) => cred.id === credentialId);
+
     if (index === -1) {
       return false;
     }
@@ -793,11 +812,11 @@ export class WebAuthnManager extends EventEmitter {
   async updateCredentialNickname(
     userId: string,
     credentialId: string,
-    nickname: string
+    nickname: string,
   ): Promise<boolean> {
     const userCredentials = this.credentials.get(userId) || [];
-    const credential = userCredentials.find(cred => cred.id === credentialId);
-    
+    const credential = userCredentials.find((cred) => cred.id === credentialId);
+
     if (!credential) {
       return false;
     }
@@ -836,7 +855,7 @@ export class WebAuthnManager extends EventEmitter {
    */
   async extendSessionElevation(
     sessionId: string,
-    durationMinutes: number = 15
+    durationMinutes: number = 15,
   ): Promise<boolean> {
     const session = this.sessions.get(sessionId);
     if (!session || !session.isElevated) {
@@ -857,7 +876,7 @@ export class WebAuthnManager extends EventEmitter {
 
   private async verifyRegistrationCredential(
     credential: WebAuthnCredential,
-    challengeData: RegistrationChallenge
+    challengeData: RegistrationChallenge,
   ): Promise<{
     verified: boolean;
     errors?: string[];
@@ -874,15 +893,18 @@ export class WebAuthnManager extends EventEmitter {
     try {
       // This is a simplified verification - in production would use
       // libraries like @simplewebauthn/server or fido2-lib
-      
+
       const response = credential.response as AuthenticatorAttestationResponse;
-      
+
       // Verify challenge matches
       const clientDataJSON = JSON.parse(
-        this.arrayBufferToString(response.clientDataJSON)
+        this.arrayBufferToString(response.clientDataJSON),
       );
-      
-      if (clientDataJSON.challenge !== this.arrayBufferToBase64(challengeData.challenge)) {
+
+      if (
+        clientDataJSON.challenge !==
+        this.arrayBufferToBase64(challengeData.challenge)
+      ) {
         return { verified: false, errors: ['Challenge mismatch'] };
       }
 
@@ -892,8 +914,10 @@ export class WebAuthnManager extends EventEmitter {
       }
 
       // Extract public key and other data from attestation
-      const attestationObject = this.parseAttestationObject(response.attestationObject);
-      
+      const attestationObject = this.parseAttestationObject(
+        response.attestationObject,
+      );
+
       return {
         verified: true,
         publicKey: attestationObject.publicKey,
@@ -902,13 +926,12 @@ export class WebAuthnManager extends EventEmitter {
         aaguid: attestationObject.aaguid,
         credentialBackedUp: attestationObject.credentialBackedUp,
         credentialDeviceType: attestationObject.credentialDeviceType,
-        attestationFormat: attestationObject.fmt
+        attestationFormat: attestationObject.fmt,
       };
-
     } catch (error) {
       return {
         verified: false,
-        errors: [`Verification failed: ${error.message}`]
+        errors: [`Verification failed: ${error.message}`],
       };
     }
   }
@@ -916,7 +939,7 @@ export class WebAuthnManager extends EventEmitter {
   private async verifyAuthenticationCredential(
     credential: WebAuthnCredential,
     storedCredential: StoredCredential,
-    challengeData: AuthenticationChallenge
+    challengeData: AuthenticationChallenge,
   ): Promise<{
     verified: boolean;
     errors?: string[];
@@ -924,13 +947,16 @@ export class WebAuthnManager extends EventEmitter {
   }> {
     try {
       const response = credential.response as AuthenticatorAssertionResponse;
-      
+
       // Verify challenge
       const clientDataJSON = JSON.parse(
-        this.arrayBufferToString(response.clientDataJSON)
+        this.arrayBufferToString(response.clientDataJSON),
       );
-      
-      if (clientDataJSON.challenge !== this.arrayBufferToBase64(challengeData.challenge)) {
+
+      if (
+        clientDataJSON.challenge !==
+        this.arrayBufferToBase64(challengeData.challenge)
+      ) {
         return { verified: false, errors: ['Challenge mismatch'] };
       }
 
@@ -941,7 +967,7 @@ export class WebAuthnManager extends EventEmitter {
 
       // Verify signature (simplified)
       const authData = this.parseAuthenticatorData(response.authenticatorData);
-      
+
       // Check counter
       if (authData.counter <= storedCredential.counter) {
         return { verified: false, errors: ['Invalid counter'] };
@@ -957,13 +983,12 @@ export class WebAuthnManager extends EventEmitter {
 
       return {
         verified: true,
-        newCounter: authData.counter
+        newCounter: authData.counter,
       };
-
     } catch (error) {
       return {
         verified: false,
-        errors: [`Authentication verification failed: ${error.message}`]
+        errors: [`Authentication verification failed: ${error.message}`],
       };
     }
   }
@@ -971,7 +996,7 @@ export class WebAuthnManager extends EventEmitter {
   private async handleStepUpAuthentication(
     request: StepUpAuthRequest,
     credential: StoredCredential,
-    options: any
+    options: any,
   ): Promise<{
     success: boolean;
     sessionId?: string;
@@ -983,7 +1008,7 @@ export class WebAuthnManager extends EventEmitter {
     if (!session) {
       return {
         success: false,
-        errors: ['Session not found']
+        errors: ['Session not found'],
       };
     }
 
@@ -992,7 +1017,8 @@ export class WebAuthnManager extends EventEmitter {
     session.elevationLevel = request.requiredLevel;
     session.elevatedAt = new Date();
     session.elevationExpiry = new Date(
-      Date.now() + (request.expiryMinutes || this.config.elevationTimeout) * 60 * 1000
+      Date.now() +
+        (request.expiryMinutes || this.config.elevationTimeout) * 60 * 1000,
     );
 
     // Add authentication method to session
@@ -1004,22 +1030,22 @@ export class WebAuthnManager extends EventEmitter {
       metadata: {
         stepUp: true,
         operation: request.operation,
-        reason: request.reason
-      }
+        reason: request.reason,
+      },
     });
 
     this.emit('session:elevated', {
       sessionId: session.sessionId,
       userId: session.userId,
       level: session.elevationLevel,
-      reason: request.reason
+      reason: request.reason,
     });
 
     return {
       success: true,
       sessionId: session.sessionId,
       elevated: true,
-      userId: session.userId
+      userId: session.userId,
     };
   }
 
@@ -1027,7 +1053,7 @@ export class WebAuthnManager extends EventEmitter {
     userId: string,
     existingSessionId: string | undefined,
     credential: StoredCredential,
-    options: any
+    options: any,
   ): Promise<AuthSession> {
     let session: AuthSession;
 
@@ -1035,16 +1061,15 @@ export class WebAuthnManager extends EventEmitter {
       // Update existing session
       session = this.sessions.get(existingSessionId)!;
       session.lastActivity = new Date();
-      
+
       // Add authentication method
       session.authMethods.push({
         type: 'webauthn',
         timestamp: new Date(),
         credentialId: credential.id,
         success: true,
-        metadata: {}
+        metadata: {},
       });
-
     } else {
       // Create new session
       const sessionId = this.generateSessionId();
@@ -1058,20 +1083,22 @@ export class WebAuthnManager extends EventEmitter {
         elevationLevel: 'standard',
         riskScore: riskAssessment.score,
         riskFactors: riskAssessment.factors,
-        authMethods: [{
-          type: 'webauthn',
-          timestamp: new Date(),
-          credentialId: credential.id,
-          success: true,
-          metadata: {}
-        }],
+        authMethods: [
+          {
+            type: 'webauthn',
+            timestamp: new Date(),
+            credentialId: credential.id,
+            success: true,
+            metadata: {},
+          },
+        ],
         ipAddress: options.ipAddress,
         userAgent: options.userAgent,
         location: options.location,
         deviceFingerprint: this.generateDeviceFingerprint(options),
         createdAt: new Date(),
         lastActivity: new Date(),
-        metadata: {}
+        metadata: {},
       };
 
       this.sessions.set(sessionId, session);
@@ -1082,30 +1109,32 @@ export class WebAuthnManager extends EventEmitter {
 
   private async assessStepUpRisk(
     session: AuthSession,
-    request: StepUpAuthRequest
+    request: StepUpAuthRequest,
   ): Promise<{ required: boolean; score: number; factors: RiskFactor[] }> {
     return this.riskEngine.assessStepUpRisk(session, request);
   }
 
   private isElevationSufficient(
     currentLevel: string,
-    operationRisk: RiskLevel
+    operationRisk: RiskLevel,
   ): boolean {
     const levelMapping = {
-      'standard': 1,
-      'high': 2,
-      'critical': 3
+      standard: 1,
+      high: 2,
+      critical: 3,
     };
 
     const riskMapping = {
-      'low': 1,
-      'medium': 1,
-      'high': 2,
-      'critical': 3
+      low: 1,
+      medium: 1,
+      high: 2,
+      critical: 3,
     };
 
-    return levelMapping[currentLevel as keyof typeof levelMapping] >= 
-           riskMapping[operationRisk];
+    return (
+      levelMapping[currentLevel as keyof typeof levelMapping] >=
+      riskMapping[operationRisk]
+    );
   }
 
   private mapRiskToElevationLevel(riskLevel: RiskLevel): string {
@@ -1121,46 +1150,48 @@ export class WebAuthnManager extends EventEmitter {
 
   private determineStepUpReason(
     session: AuthSession,
-    operation: any
+    operation: any,
   ): StepUpReason {
     if (operation.riskLevel === 'critical') return 'high_value_operation';
     if (operation.type.includes('admin')) return 'admin_action';
     if (operation.type.includes('sensitive')) return 'sensitive_data_access';
-    
+
     // Check for unusual activity
     if (session.riskScore > 70) return 'unusual_activity';
-    
+
     return 'high_value_operation';
   }
 
   private recordFailedAuthentication(
     userId: string,
     credentialId: string,
-    options: any
+    options: any,
   ): void {
     this.emit('authentication:failed_attempt', {
       userId,
       credentialId,
       timestamp: new Date(),
       ipAddress: options.ipAddress,
-      userAgent: options.userAgent
+      userAgent: options.userAgent,
     });
   }
 
   private findCredentialById(credentialId: string): StoredCredential | null {
     for (const userCredentials of this.credentials.values()) {
-      const credential = userCredentials.find(cred => 
-        this.arrayBufferToString(cred.credentialId) === credentialId
+      const credential = userCredentials.find(
+        (cred) => this.arrayBufferToString(cred.credentialId) === credentialId,
       );
       if (credential) return credential;
     }
     return null;
   }
 
-  private extractTransports(credential: WebAuthnCredential): AuthenticatorTransport[] {
+  private extractTransports(
+    credential: WebAuthnCredential,
+  ): AuthenticatorTransport[] {
     // Extract transport methods from credential
     const transports: AuthenticatorTransport[] = [];
-    
+
     if (credential.authenticatorAttachment === 'platform') {
       transports.push('internal');
     } else {
@@ -1179,14 +1210,14 @@ export class WebAuthnManager extends EventEmitter {
       aaguid: new ArrayBuffer(16),
       credentialBackedUp: false,
       credentialDeviceType: 'singleDevice',
-      fmt: 'none'
+      fmt: 'none',
     };
   }
 
   private parseAuthenticatorData(authData: ArrayBuffer): any {
     // Simplified parsing - in production would properly parse
     return {
-      counter: Math.floor(Math.random() * 1000000)
+      counter: Math.floor(Math.random() * 1000000),
     };
   }
 
@@ -1238,9 +1269,12 @@ export class WebAuthnManager extends EventEmitter {
     }, 60 * 1000); // Every minute
 
     // Update session activity
-    setInterval(() => {
-      this.updateSessionActivity();
-    }, 5 * 60 * 1000); // Every 5 minutes
+    setInterval(
+      () => {
+        this.updateSessionActivity();
+      },
+      5 * 60 * 1000,
+    ); // Every 5 minutes
   }
 
   private cleanupExpiredData(): void {
@@ -1263,9 +1297,11 @@ export class WebAuthnManager extends EventEmitter {
     // Clean up expired sessions
     const sessionTimeout = this.config.sessionTimeout * 60 * 1000;
     for (const [id, session] of this.sessions.entries()) {
-      const inactive = (now.getTime() - session.lastActivity.getTime()) > sessionTimeout;
-      const elevationExpired = session.elevationExpiry && session.elevationExpiry < now;
-      
+      const inactive =
+        now.getTime() - session.lastActivity.getTime() > sessionTimeout;
+      const elevationExpired =
+        session.elevationExpiry && session.elevationExpiry < now;
+
       if (inactive) {
         this.sessions.delete(id);
         this.emit('session:expired', { sessionId: id, userId: session.userId });
@@ -1299,7 +1335,7 @@ class RiskAssessmentEngine {
       ipAddress: string;
       userAgent: string;
       location?: GeolocationData;
-    }
+    },
   ): Promise<{ score: number; factors: RiskFactor[] }> {
     const factors: RiskFactor[] = [];
     let totalScore = 0;
@@ -1311,7 +1347,10 @@ class RiskAssessmentEngine {
 
     // Location risk assessment
     if (context.location) {
-      const locationRisk = await this.assessLocationRisk(userId, context.location);
+      const locationRisk = await this.assessLocationRisk(
+        userId,
+        context.location,
+      );
       factors.push(locationRisk);
       totalScore += locationRisk.score * 0.2;
     }
@@ -1333,13 +1372,13 @@ class RiskAssessmentEngine {
 
     return {
       score: Math.min(100, Math.max(0, totalScore)),
-      factors
+      factors,
     };
   }
 
   async assessStepUpRisk(
     session: AuthSession,
-    request: StepUpAuthRequest
+    request: StepUpAuthRequest,
   ): Promise<{ required: boolean; score: number; factors: RiskFactor[] }> {
     const factors: RiskFactor[] = [];
     let riskScore = session.riskScore;
@@ -1352,26 +1391,28 @@ class RiskAssessmentEngine {
     // Time since last authentication
     const lastAuth = session.authMethods[session.authMethods.length - 1];
     const timeSinceAuth = Date.now() - lastAuth.timestamp.getTime();
-    
-    if (timeSinceAuth > 30 * 60 * 1000) { // 30 minutes
+
+    if (timeSinceAuth > 30 * 60 * 1000) {
+      // 30 minutes
       const timeRisk: RiskFactor = {
         type: 'time',
         score: 30,
         description: 'Long time since last authentication',
-        data: { timeSinceAuthMinutes: timeSinceAuth / (60 * 1000) }
+        data: { timeSinceAuthMinutes: timeSinceAuth / (60 * 1000) },
       };
       factors.push(timeRisk);
       riskScore += 30;
     }
 
-    const required = riskScore > 50 || 
-                    request.requiredLevel === 'critical' ||
-                    ['high_value_operation', 'admin_action'].includes(request.reason);
+    const required =
+      riskScore > 50 ||
+      request.requiredLevel === 'critical' ||
+      ['high_value_operation', 'admin_action'].includes(request.reason);
 
     return {
       required,
       score: Math.min(100, riskScore),
-      factors
+      factors,
     };
   }
 
@@ -1382,35 +1423,41 @@ class RiskAssessmentEngine {
       type: 'network',
       score: 10,
       description: 'IP address risk assessment',
-      data: { ipAddress, category: 'residential' }
+      data: { ipAddress, category: 'residential' },
     };
   }
 
-  private async assessLocationRisk(userId: string, location: GeolocationData): Promise<RiskFactor> {
+  private async assessLocationRisk(
+    userId: string,
+    location: GeolocationData,
+  ): Promise<RiskFactor> {
     // Mock location risk assessment
     return {
       type: 'location',
       score: 15,
       description: 'Location-based risk assessment',
-      data: { 
+      data: {
         country: location.country,
         newLocation: false,
-        travelVelocity: 0
-      }
+        travelVelocity: 0,
+      },
     };
   }
 
-  private async assessDeviceRisk(userId: string, userAgent: string): Promise<RiskFactor> {
+  private async assessDeviceRisk(
+    userId: string,
+    userAgent: string,
+  ): Promise<RiskFactor> {
     // Mock device risk assessment
     return {
       type: 'device',
       score: 5,
       description: 'Device fingerprint risk assessment',
-      data: { 
+      data: {
         userAgent,
         knownDevice: true,
-        deviceAge: 30
-      }
+        deviceAge: 30,
+      },
     };
   }
 
@@ -1422,11 +1469,11 @@ class RiskAssessmentEngine {
       type: 'time',
       score: isOffHours ? 20 : 5,
       description: 'Time-based risk assessment',
-      data: { 
+      data: {
         hour,
         isOffHours,
-        timezone: 'UTC'
-      }
+        timezone: 'UTC',
+      },
     };
   }
 
@@ -1436,24 +1483,24 @@ class RiskAssessmentEngine {
       type: 'behavior',
       score: 10,
       description: 'Behavioral pattern analysis',
-      data: { 
+      data: {
         typingPattern: 'normal',
         navigationPattern: 'normal',
-        velocityAnomaly: false
-      }
+        velocityAnomaly: false,
+      },
     };
   }
 
   private assessOperationRisk(request: StepUpAuthRequest): RiskFactor {
     const riskScores = {
-      'high_value_operation': 60,
-      'sensitive_data_access': 50,
-      'admin_action': 70,
-      'unusual_activity': 80,
-      'location_change': 40,
-      'device_change': 35,
-      'time_based': 25,
-      'manual_request': 20
+      high_value_operation: 60,
+      sensitive_data_access: 50,
+      admin_action: 70,
+      unusual_activity: 80,
+      location_change: 40,
+      device_change: 35,
+      time_based: 25,
+      manual_request: 20,
     };
 
     const score = riskScores[request.reason] || 30;
@@ -1465,8 +1512,8 @@ class RiskAssessmentEngine {
       data: {
         operation: request.operation,
         reason: request.reason,
-        requiredLevel: request.requiredLevel
-      }
+        requiredLevel: request.requiredLevel,
+      },
     };
   }
 }

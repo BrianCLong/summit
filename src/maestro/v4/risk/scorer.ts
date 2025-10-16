@@ -22,15 +22,15 @@ export interface RiskAssessment {
 
 export class RiskScorer {
   private weights = {
-    loc: 0.10,
+    loc: 0.1,
     churn: 0.12,
     files: 0.08,
     owners: 0.08,
     dep: 0.18,
     cov: 0.14,
     cplx: 0.12,
-    alerts: 0.10,
-    fail: 0.08
+    alerts: 0.1,
+    fail: 0.08,
   };
 
   /**
@@ -55,13 +55,13 @@ export class RiskScorer {
       score,
       breakdown,
       signals,
-      recommendations
+      recommendations,
     };
   }
 
   private calculateScore(signals: RiskSignals): number {
     const clamp = (x: number) => Math.max(0, Math.min(1, x));
-    
+
     const normalizedSignals = {
       loc: clamp(signals.locChanged / 800),
       churn: clamp(signals.churn30d / 2000),
@@ -71,10 +71,10 @@ export class RiskScorer {
       cov: clamp((0 - signals.coverageDelta) / 0.1),
       cplx: clamp((signals.complexityDelta + 1) / 2),
       alerts: clamp(signals.staticAlerts / 10),
-      fail: clamp(signals.testFailRate)
+      fail: clamp(signals.testFailRate),
     };
 
-    const score = (
+    const score =
       this.weights.loc * normalizedSignals.loc +
       this.weights.churn * normalizedSignals.churn +
       this.weights.files * normalizedSignals.files +
@@ -83,25 +83,26 @@ export class RiskScorer {
       this.weights.cov * normalizedSignals.cov +
       this.weights.cplx * normalizedSignals.cplx +
       this.weights.alerts * normalizedSignals.alerts +
-      this.weights.fail * normalizedSignals.fail
-    );
+      this.weights.fail * normalizedSignals.fail;
 
     return Math.round(score * 1000) / 1000; // 3 decimal places
   }
 
   private calculateBreakdown(signals: RiskSignals): Record<string, number> {
     const clamp = (x: number) => Math.max(0, Math.min(1, x));
-    
+
     return {
       linesOfCode: this.weights.loc * clamp(signals.locChanged / 800),
       recentChurn: this.weights.churn * clamp(signals.churn30d / 2000),
       filesModified: this.weights.files * clamp(signals.filesTouched / 25),
       ownersInvolved: this.weights.owners * clamp(signals.ownersTouched / 6),
       dependencyCentrality: this.weights.dep * clamp(signals.depCentrality),
-      coverageImpact: this.weights.cov * clamp((0 - signals.coverageDelta) / 0.1),
-      complexityChange: this.weights.cplx * clamp((signals.complexityDelta + 1) / 2),
+      coverageImpact:
+        this.weights.cov * clamp((0 - signals.coverageDelta) / 0.1),
+      complexityChange:
+        this.weights.cplx * clamp((signals.complexityDelta + 1) / 2),
       staticAnalysis: this.weights.alerts * clamp(signals.staticAlerts / 10),
-      testFailures: this.weights.fail * clamp(signals.testFailRate)
+      testFailures: this.weights.fail * clamp(signals.testFailRate),
     };
   }
 
@@ -122,7 +123,7 @@ export class RiskScorer {
     for (const change of changes) {
       locChanged += (change.additions || 0) + (change.deletions || 0);
       filesTouched += change.files?.length || 1;
-      
+
       // Mock owner detection (would use CODEOWNERS or git blame)
       if (change.author) {
         touchedOwners.add(change.author);
@@ -150,7 +151,7 @@ export class RiskScorer {
       coverageDelta,
       complexityDelta,
       staticAlerts,
-      testFailRate
+      testFailRate,
     };
   }
 
@@ -174,11 +175,16 @@ export class RiskScorer {
     return Math.random() * 0.1; // 0-10% test failure rate
   }
 
-  private generateRecommendations(signals: RiskSignals, score: number): string[] {
+  private generateRecommendations(
+    signals: RiskSignals,
+    score: number,
+  ): string[] {
     const recommendations: string[] = [];
 
     if (score >= 0.8) {
-      recommendations.push('High risk change - consider breaking into smaller PRs');
+      recommendations.push(
+        'High risk change - consider breaking into smaller PRs',
+      );
     }
 
     if (signals.locChanged > 500) {
@@ -186,7 +192,9 @@ export class RiskScorer {
     }
 
     if (signals.ownersTouched > 3) {
-      recommendations.push('Multiple code owners affected - coordinate reviews');
+      recommendations.push(
+        'Multiple code owners affected - coordinate reviews',
+      );
     }
 
     if (signals.coverageDelta < -0.05) {
@@ -194,11 +202,15 @@ export class RiskScorer {
     }
 
     if (signals.staticAlerts > 5) {
-      recommendations.push('Multiple static analysis issues - address before merge');
+      recommendations.push(
+        'Multiple static analysis issues - address before merge',
+      );
     }
 
     if (signals.depCentrality > 0.7) {
-      recommendations.push('High-impact dependencies modified - extra caution required');
+      recommendations.push(
+        'High-impact dependencies modified - extra caution required',
+      );
     }
 
     if (recommendations.length === 0) {

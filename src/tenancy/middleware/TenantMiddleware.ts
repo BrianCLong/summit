@@ -33,7 +33,7 @@ export interface IsolationContext {
 /**
  * Tenant resolution strategies
  */
-export type TenantResolutionStrategy = 
+export type TenantResolutionStrategy =
   | 'subdomain'
   | 'header'
   | 'path'
@@ -58,10 +58,14 @@ export interface TenantMiddlewareConfig {
  * Tenant context cache for performance
  */
 class TenantContextCache {
-  private cache = new Map<string, { context: TenantContext; expires: number }>();
+  private cache = new Map<
+    string,
+    { context: TenantContext; expires: number }
+  >();
   private readonly ttl: number;
 
-  constructor(ttlMs: number = 300000) { // 5 minutes default
+  constructor(ttlMs: number = 300000) {
+    // 5 minutes default
     this.ttl = ttlMs;
     this.startCleanup();
   }
@@ -78,7 +82,7 @@ class TenantContextCache {
   set(key: string, context: TenantContext): void {
     this.cache.set(key, {
       context,
-      expires: Date.now() + this.ttl
+      expires: Date.now() + this.ttl,
     });
   }
 
@@ -113,7 +117,7 @@ export class TenantMiddleware {
 
   constructor(
     tenantManager: TenantManager,
-    private config: TenantMiddlewareConfig
+    private config: TenantMiddlewareConfig,
   ) {
     this.tenantManager = tenantManager;
     this.contextCache = new TenantContextCache(config.cacheTimeout);
@@ -122,29 +126,36 @@ export class TenantMiddleware {
   /**
    * Main middleware function for tenant context injection
    */
-  middleware = async (req: TenantRequest, res: Response, next: NextFunction): Promise<void> => {
+  middleware = async (
+    req: TenantRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     const startTime = performance.now();
-    
+
     try {
       // Extract tenant identifier from request
       const tenantIdentifier = await this.extractTenantIdentifier(req);
-      
+
       if (!tenantIdentifier) {
         return this.handleMissingTenant(req, res, next);
       }
 
       // Resolve tenant configuration
       const tenant = await this.resolveTenant(tenantIdentifier);
-      
+
       if (!tenant) {
         return this.handleInvalidTenant(req, res, next, tenantIdentifier);
       }
 
       // Create tenant context
       const context = await this.createRequestContext(req, tenant.tenantId);
-      
+
       // Set up isolation context
-      const isolationContext = await this.createIsolationContext(tenant.tenantId, req);
+      const isolationContext = await this.createIsolationContext(
+        tenant.tenantId,
+        req,
+      );
 
       // Attach to request
       req.tenant = context;
@@ -166,7 +177,6 @@ export class TenantMiddleware {
 
       // Continue to next middleware
       next();
-
     } catch (error) {
       await this.auditRequest(req, false, performance.now() - startTime, error);
       this.handleError(req, res, next, error);
@@ -176,23 +186,28 @@ export class TenantMiddleware {
   /**
    * Extract tenant identifier based on configured strategy
    */
-  private async extractTenantIdentifier(req: TenantRequest): Promise<string | null> {
+  private async extractTenantIdentifier(
+    req: TenantRequest,
+  ): Promise<string | null> {
     switch (this.config.strategy) {
       case 'subdomain':
         return this.extractFromSubdomain(req);
-      
+
       case 'header':
         return this.extractFromHeader(req);
-      
+
       case 'path':
         return this.extractFromPath(req);
-      
+
       case 'custom':
-        return this.config.customResolver ? 
-          await this.config.customResolver(req) : null;
-      
+        return this.config.customResolver
+          ? await this.config.customResolver(req)
+          : null;
+
       default:
-        throw new Error(`Unknown tenant resolution strategy: ${this.config.strategy}`);
+        throw new Error(
+          `Unknown tenant resolution strategy: ${this.config.strategy}`,
+        );
     }
   }
 
@@ -207,7 +222,7 @@ export class TenantMiddleware {
     if (parts.length < 2) return null;
 
     const subdomain = parts[0];
-    
+
     // Filter out common non-tenant subdomains
     const systemSubdomains = ['www', 'api', 'admin', 'app', 'dashboard'];
     if (systemSubdomains.includes(subdomain.toLowerCase())) {
@@ -222,7 +237,9 @@ export class TenantMiddleware {
    */
   private extractFromHeader(req: TenantRequest): string | null {
     if (!this.config.headerName) {
-      throw new Error('Header name not configured for header-based tenant resolution');
+      throw new Error(
+        'Header name not configured for header-based tenant resolution',
+      );
     }
 
     return req.get(this.config.headerName) || null;
@@ -233,10 +250,14 @@ export class TenantMiddleware {
    */
   private extractFromPath(req: TenantRequest): string | null {
     if (!this.config.pathPrefix) {
-      throw new Error('Path prefix not configured for path-based tenant resolution');
+      throw new Error(
+        'Path prefix not configured for path-based tenant resolution',
+      );
     }
 
-    const pathMatch = req.path.match(new RegExp(`^/${this.config.pathPrefix}/([^/]+)`));
+    const pathMatch = req.path.match(
+      new RegExp(`^/${this.config.pathPrefix}/([^/]+)`),
+    );
     return pathMatch ? pathMatch[1] : null;
   }
 
@@ -245,7 +266,7 @@ export class TenantMiddleware {
    */
   private async resolveTenant(identifier: string) {
     const cacheKey = `tenant:${identifier}`;
-    
+
     // Try cache first
     let cachedContext = this.contextCache.get(cacheKey);
     if (cachedContext) {
@@ -254,7 +275,7 @@ export class TenantMiddleware {
 
     // Resolve tenant by domain/identifier
     const tenant = await this.tenantManager.getTenantByDomain(identifier);
-    
+
     if (tenant) {
       // Cache the resolved context
       const context = this.tenantManager.createTenantContext(tenant.tenantId);
@@ -269,11 +290,15 @@ export class TenantMiddleware {
    */
   private async createRequestContext(
     req: TenantRequest,
-    tenantId: string
+    tenantId: string,
   ): Promise<TenantContext> {
     const userId = this.extractUserId(req);
     const sessionId = this.extractSessionId(req);
-    const permissions = await this.extractUserPermissions(req, tenantId, userId);
+    const permissions = await this.extractUserPermissions(
+      req,
+      tenantId,
+      userId,
+    );
 
     return this.tenantManager.createTenantContext(tenantId, userId, {
       sessionId,
@@ -282,8 +307,8 @@ export class TenantMiddleware {
         userAgent: req.get('user-agent'),
         ip: req.ip,
         timestamp: new Date(),
-        requestId: this.generateRequestId(req)
-      }
+        requestId: this.generateRequestId(req),
+      },
     });
   }
 
@@ -292,17 +317,18 @@ export class TenantMiddleware {
    */
   private async createIsolationContext(
     tenantId: string,
-    req: TenantRequest
+    req: TenantRequest,
   ): Promise<IsolationContext> {
     const tenant = await this.tenantManager.getTenant(tenantId);
-    
+
     return {
       tenantId,
-      isolationLevel: tenant?.security.auditLevel === 'comprehensive' ? 'strict' : 'standard',
+      isolationLevel:
+        tenant?.security.auditLevel === 'comprehensive' ? 'strict' : 'standard',
       allowedResources: await this.getAllowedResources(tenantId, req),
       restrictedOperations: await this.getRestrictedOperations(tenantId, req),
       auditRequired: tenant?.features.auditLogging || false,
-      encryptionRequired: tenant?.security.encryptionAtRest || false
+      encryptionRequired: tenant?.security.encryptionAtRest || false,
     };
   }
 
@@ -316,8 +342,8 @@ export class TenantMiddleware {
     // Check if accessing allowed resources
     const requestedResource = this.extractRequestedResource(req);
     if (requestedResource && isolationContext.allowedResources.length > 0) {
-      const hasAccess = isolationContext.allowedResources.some(resource =>
-        requestedResource.startsWith(resource)
+      const hasAccess = isolationContext.allowedResources.some((resource) =>
+        requestedResource.startsWith(resource),
       );
       if (!hasAccess) return false;
     }
@@ -329,7 +355,9 @@ export class TenantMiddleware {
     }
 
     // Additional IP-based restrictions
-    const tenant = await this.tenantManager.getTenant(isolationContext.tenantId);
+    const tenant = await this.tenantManager.getTenant(
+      isolationContext.tenantId,
+    );
     if (tenant?.security.ipWhitelist.length > 0) {
       const clientIp = req.ip;
       if (!tenant.security.ipWhitelist.includes(clientIp)) {
@@ -352,9 +380,11 @@ export class TenantMiddleware {
    * Extract session ID from request
    */
   private extractSessionId(req: TenantRequest): string {
-    return req.get('x-session-id') || 
-           req.sessionID || 
-           createHash('md5').update(`${req.ip}-${Date.now()}`).digest('hex');
+    return (
+      req.get('x-session-id') ||
+      req.sessionID ||
+      createHash('md5').update(`${req.ip}-${Date.now()}`).digest('hex')
+    );
   }
 
   /**
@@ -363,7 +393,7 @@ export class TenantMiddleware {
   private async extractUserPermissions(
     req: TenantRequest,
     tenantId: string,
-    userId?: string
+    userId?: string,
   ): Promise<string[]> {
     // Implementation would query user permissions from database
     // For now, return mock permissions
@@ -373,7 +403,10 @@ export class TenantMiddleware {
   /**
    * Get allowed resources for tenant
    */
-  private async getAllowedResources(tenantId: string, req: TenantRequest): Promise<string[]> {
+  private async getAllowedResources(
+    tenantId: string,
+    req: TenantRequest,
+  ): Promise<string[]> {
     // Implementation would return tenant-specific resource access list
     return [`/api/tenant/${tenantId}`];
   }
@@ -381,7 +414,10 @@ export class TenantMiddleware {
   /**
    * Get restricted operations for tenant
    */
-  private async getRestrictedOperations(tenantId: string, req: TenantRequest): Promise<string[]> {
+  private async getRestrictedOperations(
+    tenantId: string,
+    req: TenantRequest,
+  ): Promise<string[]> {
     const tenant = await this.tenantManager.getTenant(tenantId);
     const restrictions: string[] = [];
 
@@ -408,9 +444,11 @@ export class TenantMiddleware {
    * Generate unique request ID
    */
   private generateRequestId(req: TenantRequest): string {
-    return createHash('md5').update(
-      `${req.ip}-${req.get('user-agent')}-${Date.now()}-${Math.random()}`
-    ).digest('hex');
+    return createHash('md5')
+      .update(
+        `${req.ip}-${req.get('user-agent')}-${Date.now()}-${Math.random()}`,
+      )
+      .digest('hex');
   }
 
   /**
@@ -419,13 +457,13 @@ export class TenantMiddleware {
   private handleMissingTenant(
     req: TenantRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): void {
     switch (this.config.failureMode) {
       case 'block':
         res.status(400).json({
           error: 'Missing tenant identifier',
-          code: 'TENANT_REQUIRED'
+          code: 'TENANT_REQUIRED',
         });
         break;
 
@@ -451,12 +489,12 @@ export class TenantMiddleware {
     req: TenantRequest,
     res: Response,
     next: NextFunction,
-    identifier: string
+    identifier: string,
   ): void {
     res.status(404).json({
       error: 'Tenant not found',
       code: 'TENANT_NOT_FOUND',
-      identifier
+      identifier,
     });
   }
 
@@ -466,12 +504,12 @@ export class TenantMiddleware {
   private handleAccessDenied(
     req: TenantRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): void {
     res.status(403).json({
       error: 'Access denied',
       code: 'TENANT_ACCESS_DENIED',
-      resource: req.path
+      resource: req.path,
     });
   }
 
@@ -482,13 +520,13 @@ export class TenantMiddleware {
     req: TenantRequest,
     res: Response,
     next: NextFunction,
-    error: any
+    error: any,
   ): void {
     console.error('Tenant middleware error:', error);
-    
+
     res.status(500).json({
       error: 'Internal server error',
-      code: 'TENANT_MIDDLEWARE_ERROR'
+      code: 'TENANT_MIDDLEWARE_ERROR',
     });
   }
 
@@ -499,7 +537,7 @@ export class TenantMiddleware {
     req: TenantRequest,
     success: boolean,
     duration: number,
-    error?: any
+    error?: any,
   ): Promise<void> {
     const auditEntry = {
       timestamp: new Date(),
@@ -513,8 +551,8 @@ export class TenantMiddleware {
         userAgent: req.get('user-agent'),
         ip: req.ip,
         sessionId: req.tenant?.sessionId,
-        error: error?.message
-      }
+        error: error?.message,
+      },
     };
 
     this.auditLog.push(auditEntry);
@@ -535,9 +573,9 @@ export class TenantMiddleware {
    */
   getAuditLog(tenantId?: string, limit: number = 100): typeof this.auditLog {
     let filtered = this.auditLog;
-    
+
     if (tenantId) {
-      filtered = filtered.filter(entry => entry.tenantId === tenantId);
+      filtered = filtered.filter((entry) => entry.tenantId === tenantId);
     }
 
     return filtered.slice(-limit);
@@ -557,7 +595,7 @@ export class TenantMiddleware {
 export function createTenantMiddleware(
   tenantManager: TenantManager,
   strategy: TenantResolutionStrategy = 'subdomain',
-  options: Partial<TenantMiddlewareConfig> = {}
+  options: Partial<TenantMiddlewareConfig> = {},
 ): TenantMiddleware {
   const config: TenantMiddlewareConfig = {
     strategy,
@@ -565,7 +603,7 @@ export function createTenantMiddleware(
     auditRequests: true,
     cacheTimeout: 300000, // 5 minutes
     failureMode: 'block',
-    ...options
+    ...options,
   };
 
   return new TenantMiddleware(tenantManager, config);
@@ -575,11 +613,13 @@ export function createTenantMiddleware(
  * Tenant-aware database query wrapper
  */
 export function withTenantIsolation<T>(
-  query: (context: TenantContext) => Promise<T>
+  query: (context: TenantContext) => Promise<T>,
 ) {
   return async (req: TenantRequest): Promise<T> => {
     if (!req.tenant) {
-      throw new Error('Tenant context not found - ensure tenant middleware is configured');
+      throw new Error(
+        'Tenant context not found - ensure tenant middleware is configured',
+      );
     }
 
     return query(req.tenant);

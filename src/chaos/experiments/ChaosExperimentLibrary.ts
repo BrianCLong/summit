@@ -4,18 +4,20 @@
  * with detailed configuration and best practices.
  */
 
-import { ChaosEngine, ChaosExperiment, ChaosExperimentType } from '../core/ChaosEngine.js';
+import {
+  ChaosEngine,
+  ChaosExperiment,
+  ChaosExperimentType,
+} from '../core/ChaosEngine.js';
 
 /**
  * Library of pre-built chaos experiments
  */
 export class ChaosExperimentLibrary {
-  
   /**
    * Network partition experiments
    */
   static networkPartition = {
-    
     /**
      * Isolate service from network
      */
@@ -38,36 +40,38 @@ export class ChaosExperimentLibrary {
         parallel: false,
         dryRun: false,
         environment: config.environment,
-        targets: [{
-          name: config.serviceName,
-          type: 'service',
-          selector: {
-            type: 'label',
-            criteria: { 
-              'app.kubernetes.io/name': config.serviceName,
-              ...(config.namespace && { namespace: config.namespace })
-            }
+        targets: [
+          {
+            name: config.serviceName,
+            type: 'service',
+            selector: {
+              type: 'label',
+              criteria: {
+                'app.kubernetes.io/name': config.serviceName,
+                ...(config.namespace && { namespace: config.namespace }),
+              },
+            },
+            configuration: {
+              isolationType: 'complete',
+              direction: 'both',
+            },
           },
-          configuration: {
-            isolationType: 'complete',
-            direction: 'both'
-          }
-        }],
+        ],
         parameters: {
           action: 'isolate',
-          duration: config.duration
+          duration: config.duration,
         },
         safeguards: [
           {
             name: 'emergency_stop',
             type: 'circuit_breaker',
-            configuration: { 
+            configuration: {
               error_threshold: 50,
-              response_time_threshold: 5000 
+              response_time_threshold: 5000,
             },
-            enabled: true
-          }
-        ]
+            enabled: true,
+          },
+        ],
       },
       steadyState: {
         title: 'Service ecosystem is healthy',
@@ -79,12 +83,12 @@ export class ChaosExperimentLibrary {
             configuration: {
               url: `https://api.${config.environment}.intelgraph.io/health`,
               expectedStatus: [200],
-              timeout: 10
+              timeout: 10,
             },
             tolerance: { exact: 200 },
             frequency: 5,
             timeout: 10,
-            retries: 3
+            retries: 3,
           },
           {
             name: 'database_connectivity',
@@ -92,12 +96,12 @@ export class ChaosExperimentLibrary {
             configuration: {
               host: `db.${config.environment}.intelgraph.io`,
               port: 5432,
-              timeout: 5
+              timeout: 5,
             },
             tolerance: { custom: (result) => result.connected === true },
             frequency: 10,
             timeout: 5,
-            retries: 2
+            retries: 2,
           },
           {
             name: 'dependent_services_health',
@@ -106,22 +110,22 @@ export class ChaosExperimentLibrary {
               customProbe: async () => {
                 // Check health of services that depend on the isolated service
                 return { healthy_services: 8, total_services: 10 };
-              }
+              },
             },
-            tolerance: { 
-              custom: (result) => result.healthy_services >= 7 // 70% services healthy
+            tolerance: {
+              custom: (result) => result.healthy_services >= 7, // 70% services healthy
             },
             frequency: 15,
             timeout: 30,
-            retries: 1
-          }
+            retries: 1,
+          },
         ],
         tolerance: {
           failureThreshold: 20, // 20% of probes can fail
           responseTimeThreshold: 3000,
           errorRateThreshold: 5,
-          customTolerances: []
-        }
+          customTolerances: [],
+        },
       },
       method: [
         {
@@ -134,20 +138,20 @@ export class ChaosExperimentLibrary {
             label_selector: `app.kubernetes.io/name=${config.serviceName}`,
             namespace: config.namespace || 'default',
             isolation_type: 'network',
-            duration: config.duration
+            duration: config.duration,
           },
           configuration: {
             timeout: 60,
             retries: 3,
             background: true,
             continueOnFailure: false,
-            rollbackOnFailure: true
+            rollbackOnFailure: true,
           },
           pauses: {
             before: 30,
-            after: 15
-          }
-        }
+            after: 15,
+          },
+        },
       ],
       rollback: {
         enabled: true,
@@ -155,13 +159,13 @@ export class ChaosExperimentLibrary {
         conditions: [
           {
             type: 'steady_state_violation',
-            threshold: 30
+            threshold: 30,
           },
           {
             type: 'error_threshold',
             threshold: 25,
-            duration: 60
-          }
+            duration: 60,
+          },
         ],
         methods: [
           {
@@ -172,18 +176,18 @@ export class ChaosExperimentLibrary {
             function: 'restore_pod_network',
             arguments: {
               label_selector: `app.kubernetes.io/name=${config.serviceName}`,
-              namespace: config.namespace || 'default'
+              namespace: config.namespace || 'default',
             },
             configuration: {
               timeout: 30,
               retries: 5,
               background: false,
               continueOnFailure: false,
-              rollbackOnFailure: false
-            }
-          }
+              rollbackOnFailure: false,
+            },
+          },
         ],
-        timeout: 120
+        timeout: 120,
       },
       monitoring: {
         enabled: true,
@@ -193,22 +197,23 @@ export class ChaosExperimentLibrary {
             source: 'prometheus',
             query: `histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service="${config.serviceName}"}[5m]))`,
             aggregation: 'avg',
-            threshold: { warning: 1.0, critical: 3.0 }
+            threshold: { warning: 1.0, critical: 3.0 },
           },
           {
             name: 'service_error_rate',
             source: 'prometheus',
             query: `rate(http_requests_total{service="${config.serviceName}",status=~"5.."}[5m])`,
             aggregation: 'avg',
-            threshold: { warning: 0.01, critical: 0.05 }
+            threshold: { warning: 0.01, critical: 0.05 },
           },
           {
             name: 'dependent_services_health',
             source: 'custom',
-            query: 'SELECT COUNT(*) FROM services WHERE health_status = "healthy"',
+            query:
+              'SELECT COUNT(*) FROM services WHERE health_status = "healthy"',
             aggregation: 'count',
-            threshold: { warning: 8, critical: 6 }
-          }
+            threshold: { warning: 8, critical: 6 },
+          },
         ],
         alerts: [
           {
@@ -216,8 +221,8 @@ export class ChaosExperimentLibrary {
             condition: 'dependent_services_health < 6',
             severity: 'critical',
             channels: ['pagerduty', 'slack-critical'],
-            suppressDuration: 10
-          }
+            suppressDuration: 10,
+          },
         ],
         dashboards: ['chaos-experiments', 'service-health'],
         notifications: [
@@ -225,11 +230,15 @@ export class ChaosExperimentLibrary {
             type: 'slack',
             configuration: {
               webhook_url: '${SLACK_WEBHOOK_URL}',
-              channel: '#sre-alerts'
+              channel: '#sre-alerts',
             },
-            events: ['experiment_started', 'experiment_failed', 'rollback_triggered']
-          }
-        ]
+            events: [
+              'experiment_started',
+              'experiment_failed',
+              'rollback_triggered',
+            ],
+          },
+        ],
       },
       metadata: {
         author: 'sre-team',
@@ -238,8 +247,8 @@ export class ChaosExperimentLibrary {
         tags: ['network', 'isolation', 'dependency', 'resilience'],
         createdAt: new Date(),
         version: '2.1.0',
-        riskLevel: 'high'
-      }
+        riskLevel: 'high',
+      },
     }),
 
     /**
@@ -265,32 +274,34 @@ export class ChaosExperimentLibrary {
         parallel: false,
         dryRun: false,
         environment: config.environment,
-        targets: [{
-          name: config.targetService,
-          type: 'network',
-          selector: {
-            type: 'label',
-            criteria: { service: config.targetService }
+        targets: [
+          {
+            name: config.targetService,
+            type: 'network',
+            selector: {
+              type: 'label',
+              criteria: { service: config.targetService },
+            },
+            configuration: {
+              latency: config.latencyMs,
+              jitter: config.jitterMs,
+              distribution: 'normal',
+            },
           },
-          configuration: {
-            latency: config.latencyMs,
-            jitter: config.jitterMs,
-            distribution: 'normal'
-          }
-        }],
+        ],
         parameters: {
           delay: config.latencyMs,
           jitter: config.jitterMs,
-          duration: config.duration
+          duration: config.duration,
         },
         safeguards: [
           {
             name: 'latency_limit',
             type: 'resource_limit',
             configuration: { max_latency: 10000 },
-            enabled: true
-          }
-        ]
+            enabled: true,
+          },
+        ],
       },
       steadyState: {
         title: 'System performance within acceptable bounds',
@@ -302,22 +313,22 @@ export class ChaosExperimentLibrary {
             configuration: {
               url: 'https://api.intelgraph.io/v1/health',
               expectedStatus: [200],
-              timeout: 15
+              timeout: 15,
             },
-            tolerance: { 
-              custom: (result) => result.responseTime < 5000 
+            tolerance: {
+              custom: (result) => result.responseTime < 5000,
             },
             frequency: 10,
             timeout: 15,
-            retries: 2
-          }
+            retries: 2,
+          },
         ],
         tolerance: {
           failureThreshold: 10,
           responseTimeThreshold: 5000,
           errorRateThreshold: 2,
-          customTolerances: []
-        }
+          customTolerances: [],
+        },
       },
       method: [
         {
@@ -330,16 +341,16 @@ export class ChaosExperimentLibrary {
             interface: 'eth0',
             delay: `${config.latencyMs}ms`,
             jitter: `${config.jitterMs}ms`,
-            distribution: 'normal'
+            distribution: 'normal',
           },
           configuration: {
             timeout: 30,
             retries: 3,
             background: true,
             continueOnFailure: false,
-            rollbackOnFailure: true
-          }
-        }
+            rollbackOnFailure: true,
+          },
+        },
       ],
       rollback: {
         enabled: true,
@@ -347,8 +358,8 @@ export class ChaosExperimentLibrary {
         conditions: [
           {
             type: 'steady_state_violation',
-            threshold: 25
-          }
+            threshold: 25,
+          },
         ],
         methods: [
           {
@@ -358,18 +369,18 @@ export class ChaosExperimentLibrary {
             module: 'netem',
             function: 'clear_delay',
             arguments: {
-              interface: 'eth0'
+              interface: 'eth0',
             },
             configuration: {
               timeout: 30,
               retries: 5,
               background: false,
               continueOnFailure: false,
-              rollbackOnFailure: false
-            }
-          }
+              rollbackOnFailure: false,
+            },
+          },
         ],
-        timeout: 60
+        timeout: 60,
       },
       monitoring: {
         enabled: true,
@@ -377,14 +388,15 @@ export class ChaosExperimentLibrary {
           {
             name: 'network_latency',
             source: 'prometheus',
-            query: 'histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))',
+            query:
+              'histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))',
             aggregation: 'avg',
-            threshold: { warning: 2.0, critical: 5.0 }
-          }
+            threshold: { warning: 2.0, critical: 5.0 },
+          },
         ],
         alerts: [],
         dashboards: ['network-performance'],
-        notifications: []
+        notifications: [],
       },
       metadata: {
         author: 'network-team',
@@ -393,8 +405,8 @@ export class ChaosExperimentLibrary {
         tags: ['network', 'latency', 'performance'],
         createdAt: new Date(),
         version: '1.5.0',
-        riskLevel: 'medium'
-      }
+        riskLevel: 'medium',
+      },
     }),
 
     /**
@@ -419,30 +431,32 @@ export class ChaosExperimentLibrary {
         parallel: false,
         dryRun: false,
         environment: config.environment,
-        targets: [{
-          name: config.targetService,
-          type: 'network',
-          selector: {
-            type: 'label',
-            criteria: { service: config.targetService }
+        targets: [
+          {
+            name: config.targetService,
+            type: 'network',
+            selector: {
+              type: 'label',
+              criteria: { service: config.targetService },
+            },
+            configuration: {
+              loss_percentage: config.lossPercentage,
+              loss_correlation: 25,
+            },
           },
-          configuration: {
-            loss_percentage: config.lossPercentage,
-            loss_correlation: 25
-          }
-        }],
+        ],
         parameters: {
           loss: config.lossPercentage,
-          duration: config.duration
+          duration: config.duration,
         },
         safeguards: [
           {
             name: 'packet_loss_limit',
             type: 'resource_limit',
             configuration: { max_loss_percentage: 50 },
-            enabled: true
-          }
-        ]
+            enabled: true,
+          },
+        ],
       },
       steadyState: {
         title: 'Network communication is reliable',
@@ -454,22 +468,22 @@ export class ChaosExperimentLibrary {
             configuration: {
               host: config.targetService,
               port: 80,
-              timeout: 10
+              timeout: 10,
             },
-            tolerance: { 
-              custom: (result) => result.connected === true 
+            tolerance: {
+              custom: (result) => result.connected === true,
             },
             frequency: 15,
             timeout: 10,
-            retries: 3
-          }
+            retries: 3,
+          },
         ],
         tolerance: {
           failureThreshold: 30,
           responseTimeThreshold: 10000,
           errorRateThreshold: 10,
-          customTolerances: []
-        }
+          customTolerances: [],
+        },
       },
       method: [
         {
@@ -481,16 +495,16 @@ export class ChaosExperimentLibrary {
           arguments: {
             interface: 'eth0',
             loss_percentage: config.lossPercentage,
-            loss_correlation: '25%'
+            loss_correlation: '25%',
           },
           configuration: {
             timeout: 30,
             retries: 3,
             background: true,
             continueOnFailure: false,
-            rollbackOnFailure: true
-          }
-        }
+            rollbackOnFailure: true,
+          },
+        },
       ],
       rollback: {
         enabled: true,
@@ -498,8 +512,8 @@ export class ChaosExperimentLibrary {
         conditions: [
           {
             type: 'steady_state_violation',
-            threshold: 40
-          }
+            threshold: 40,
+          },
         ],
         methods: [
           {
@@ -509,18 +523,18 @@ export class ChaosExperimentLibrary {
             module: 'netem',
             function: 'clear_loss',
             arguments: {
-              interface: 'eth0'
+              interface: 'eth0',
             },
             configuration: {
               timeout: 30,
               retries: 5,
               background: false,
               continueOnFailure: false,
-              rollbackOnFailure: false
-            }
-          }
+              rollbackOnFailure: false,
+            },
+          },
         ],
-        timeout: 60
+        timeout: 60,
       },
       monitoring: {
         enabled: true,
@@ -529,12 +543,12 @@ export class ChaosExperimentLibrary {
             name: 'packet_loss_rate',
             source: 'prometheus',
             query: 'rate(network_packets_dropped_total[5m])',
-            aggregation: 'avg'
-          }
+            aggregation: 'avg',
+          },
         ],
         alerts: [],
         dashboards: ['network-reliability'],
-        notifications: []
+        notifications: [],
       },
       metadata: {
         author: 'network-team',
@@ -543,16 +557,15 @@ export class ChaosExperimentLibrary {
         tags: ['network', 'packet-loss', 'reliability'],
         createdAt: new Date(),
         version: '1.3.0',
-        riskLevel: 'medium'
-      }
-    })
+        riskLevel: 'medium',
+      },
+    }),
   };
 
   /**
    * Resource exhaustion experiments
    */
   static resourceExhaustion = {
-    
     /**
      * CPU stress test
      */
@@ -576,38 +589,40 @@ export class ChaosExperimentLibrary {
         parallel: false,
         dryRun: false,
         environment: config.environment,
-        targets: [{
-          name: config.targetService,
-          type: 'infrastructure',
-          selector: {
-            type: 'label',
-            criteria: { service: config.targetService }
+        targets: [
+          {
+            name: config.targetService,
+            type: 'infrastructure',
+            selector: {
+              type: 'label',
+              criteria: { service: config.targetService },
+            },
+            configuration: {
+              cpu_percentage: config.cpuPercentage,
+              cores: config.cores || 0, // 0 = all cores
+              workers: config.cores || 1,
+            },
           },
-          configuration: {
-            cpu_percentage: config.cpuPercentage,
-            cores: config.cores || 0, // 0 = all cores
-            workers: config.cores || 1
-          }
-        }],
+        ],
         parameters: {
           cpu_load: config.cpuPercentage,
           duration: config.duration,
-          workers: config.cores
+          workers: config.cores,
         },
         safeguards: [
           {
             name: 'cpu_limit',
             type: 'resource_limit',
             configuration: { max_cpu_percentage: 95 },
-            enabled: true
+            enabled: true,
           },
           {
             name: 'thermal_protection',
             type: 'circuit_breaker',
             configuration: { temperature_threshold: 85 },
-            enabled: true
-          }
-        ]
+            enabled: true,
+          },
+        ],
       },
       steadyState: {
         title: 'System performance is acceptable',
@@ -619,33 +634,34 @@ export class ChaosExperimentLibrary {
             configuration: {
               url: `https://${config.targetService}.intelgraph.io/health`,
               expectedStatus: [200],
-              timeout: 10
+              timeout: 10,
             },
-            tolerance: { 
-              custom: (result) => result.responseTime < 3000 
+            tolerance: {
+              custom: (result) => result.responseTime < 3000,
             },
             frequency: 10,
             timeout: 10,
-            retries: 3
+            retries: 3,
           },
           {
             name: 'cpu_usage_check',
             type: 'metric',
             configuration: {
-              query: 'cpu_usage_percentage{service="' + config.targetService + '"}'
+              query:
+                'cpu_usage_percentage{service="' + config.targetService + '"}',
             },
             tolerance: { max: 98 },
             frequency: 5,
             timeout: 5,
-            retries: 1
-          }
+            retries: 1,
+          },
         ],
         tolerance: {
           failureThreshold: 20,
           responseTimeThreshold: 5000,
           errorRateThreshold: 5,
-          customTolerances: []
-        }
+          customTolerances: [],
+        },
       },
       method: [
         {
@@ -657,16 +673,16 @@ export class ChaosExperimentLibrary {
           arguments: {
             workers: config.cores || 1,
             load_percentage: config.cpuPercentage,
-            timeout: config.duration
+            timeout: config.duration,
           },
           configuration: {
             timeout: config.duration + 30,
             retries: 2,
             background: true,
             continueOnFailure: false,
-            rollbackOnFailure: true
-          }
-        }
+            rollbackOnFailure: true,
+          },
+        },
       ],
       rollback: {
         enabled: true,
@@ -674,12 +690,12 @@ export class ChaosExperimentLibrary {
         conditions: [
           {
             type: 'steady_state_violation',
-            threshold: 35
+            threshold: 35,
           },
           {
             type: 'custom',
-            validator: (metrics) => metrics.system.cpu_usage > 98
-          }
+            validator: (metrics) => metrics.system.cpu_usage > 98,
+          },
         ],
         methods: [
           {
@@ -689,18 +705,18 @@ export class ChaosExperimentLibrary {
             module: 'stress',
             function: 'stop',
             arguments: {
-              signal: 'SIGTERM'
+              signal: 'SIGTERM',
             },
             configuration: {
               timeout: 30,
               retries: 3,
               background: false,
               continueOnFailure: false,
-              rollbackOnFailure: false
-            }
-          }
+              rollbackOnFailure: false,
+            },
+          },
         ],
-        timeout: 60
+        timeout: 60,
       },
       monitoring: {
         enabled: true,
@@ -710,15 +726,15 @@ export class ChaosExperimentLibrary {
             source: 'prometheus',
             query: 'rate(cpu_usage_seconds_total[5m]) * 100',
             aggregation: 'avg',
-            threshold: { warning: 80, critical: 95 }
+            threshold: { warning: 80, critical: 95 },
           },
           {
             name: 'load_average',
             source: 'prometheus',
             query: 'load_average_5m',
             aggregation: 'avg',
-            threshold: { warning: 4, critical: 8 }
-          }
+            threshold: { warning: 4, critical: 8 },
+          },
         ],
         alerts: [
           {
@@ -726,11 +742,11 @@ export class ChaosExperimentLibrary {
             condition: 'cpu_utilization > 95',
             severity: 'critical',
             channels: ['pagerduty'],
-            suppressDuration: 2
-          }
+            suppressDuration: 2,
+          },
         ],
         dashboards: ['resource-monitoring'],
-        notifications: []
+        notifications: [],
       },
       metadata: {
         author: 'performance-team',
@@ -739,8 +755,8 @@ export class ChaosExperimentLibrary {
         tags: ['cpu', 'performance', 'stress-test'],
         createdAt: new Date(),
         version: '2.0.0',
-        riskLevel: config.cpuPercentage > 80 ? 'high' : 'medium'
-      }
+        riskLevel: config.cpuPercentage > 80 ? 'high' : 'medium',
+      },
     }),
 
     /**
@@ -765,36 +781,38 @@ export class ChaosExperimentLibrary {
         parallel: false,
         dryRun: false,
         environment: config.environment,
-        targets: [{
-          name: config.targetService,
-          type: 'infrastructure',
-          selector: {
-            type: 'label',
-            criteria: { service: config.targetService }
+        targets: [
+          {
+            name: config.targetService,
+            type: 'infrastructure',
+            selector: {
+              type: 'label',
+              criteria: { service: config.targetService },
+            },
+            configuration: {
+              memory_mb: config.memoryMB,
+              allocation_pattern: 'linear',
+            },
           },
-          configuration: {
-            memory_mb: config.memoryMB,
-            allocation_pattern: 'linear'
-          }
-        }],
+        ],
         parameters: {
           memory_size: config.memoryMB,
-          duration: config.duration
+          duration: config.duration,
         },
         safeguards: [
           {
             name: 'memory_limit',
             type: 'resource_limit',
             configuration: { max_memory_percentage: 90 },
-            enabled: true
+            enabled: true,
           },
           {
             name: 'oom_protection',
             type: 'circuit_breaker',
             configuration: { swap_threshold: 80 },
-            enabled: true
-          }
-        ]
+            enabled: true,
+          },
+        ],
       },
       steadyState: {
         title: 'Memory usage is sustainable',
@@ -804,24 +822,30 @@ export class ChaosExperimentLibrary {
             name: 'memory_usage_check',
             type: 'metric',
             configuration: {
-              query: 'memory_usage_percentage{service="' + config.targetService + '"}'
+              query:
+                'memory_usage_percentage{service="' +
+                config.targetService +
+                '"}',
             },
             tolerance: { max: 95 },
             frequency: 5,
             timeout: 5,
-            retries: 1
+            retries: 1,
           },
           {
             name: 'oom_events_check',
             type: 'metric',
             configuration: {
-              query: 'increase(oom_kills_total{service="' + config.targetService + '"}[1m])'
+              query:
+                'increase(oom_kills_total{service="' +
+                config.targetService +
+                '"}[1m])',
             },
             tolerance: { max: 0 },
             frequency: 10,
             timeout: 5,
-            retries: 1
-          }
+            retries: 1,
+          },
         ],
         tolerance: {
           failureThreshold: 15,
@@ -831,10 +855,10 @@ export class ChaosExperimentLibrary {
             {
               name: 'no_oom_kills',
               validator: (metrics) => metrics.custom.oom_kills === 0,
-              critical: true
-            }
-          ]
-        }
+              critical: true,
+            },
+          ],
+        },
       },
       method: [
         {
@@ -846,16 +870,16 @@ export class ChaosExperimentLibrary {
           arguments: {
             size: `${config.memoryMB}MB`,
             workers: 1,
-            timeout: config.duration
+            timeout: config.duration,
           },
           configuration: {
             timeout: config.duration + 30,
             retries: 2,
             background: true,
             continueOnFailure: false,
-            rollbackOnFailure: true
-          }
-        }
+            rollbackOnFailure: true,
+          },
+        },
       ],
       rollback: {
         enabled: true,
@@ -863,12 +887,12 @@ export class ChaosExperimentLibrary {
         conditions: [
           {
             type: 'steady_state_violation',
-            threshold: 30
+            threshold: 30,
           },
           {
             type: 'custom',
-            validator: (metrics) => metrics.system.memory_usage > 95
-          }
+            validator: (metrics) => metrics.system.memory_usage > 95,
+          },
         ],
         methods: [
           {
@@ -878,18 +902,18 @@ export class ChaosExperimentLibrary {
             module: 'stress',
             function: 'stop',
             arguments: {
-              signal: 'SIGTERM'
+              signal: 'SIGTERM',
             },
             configuration: {
               timeout: 30,
               retries: 3,
               background: false,
               continueOnFailure: false,
-              rollbackOnFailure: false
-            }
-          }
+              rollbackOnFailure: false,
+            },
+          },
         ],
-        timeout: 60
+        timeout: 60,
       },
       monitoring: {
         enabled: true,
@@ -897,17 +921,19 @@ export class ChaosExperimentLibrary {
           {
             name: 'memory_utilization',
             source: 'prometheus',
-            query: '(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100',
+            query:
+              '(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100',
             aggregation: 'avg',
-            threshold: { warning: 80, critical: 95 }
+            threshold: { warning: 80, critical: 95 },
           },
           {
             name: 'swap_usage',
             source: 'prometheus',
-            query: '(1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100',
+            query:
+              '(1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100',
             aggregation: 'avg',
-            threshold: { warning: 50, critical: 80 }
-          }
+            threshold: { warning: 50, critical: 80 },
+          },
         ],
         alerts: [
           {
@@ -915,18 +941,18 @@ export class ChaosExperimentLibrary {
             condition: 'memory_utilization > 90',
             severity: 'warning',
             channels: ['slack-alerts'],
-            suppressDuration: 5
+            suppressDuration: 5,
           },
           {
             name: 'oom_risk',
             condition: 'memory_utilization > 95 AND swap_usage > 70',
             severity: 'critical',
             channels: ['pagerduty'],
-            suppressDuration: 1
-          }
+            suppressDuration: 1,
+          },
         ],
         dashboards: ['memory-monitoring'],
-        notifications: []
+        notifications: [],
       },
       metadata: {
         author: 'performance-team',
@@ -935,8 +961,8 @@ export class ChaosExperimentLibrary {
         tags: ['memory', 'performance', 'oom', 'stress-test'],
         createdAt: new Date(),
         version: '1.8.0',
-        riskLevel: config.memoryMB > 1000 ? 'high' : 'medium'
-      }
+        riskLevel: config.memoryMB > 1000 ? 'high' : 'medium',
+      },
     }),
 
     /**
@@ -952,7 +978,7 @@ export class ChaosExperimentLibrary {
       const ioSettings = {
         light: { workers: 1, blockSize: '1M', operations: 100 },
         moderate: { workers: 4, blockSize: '4M', operations: 500 },
-        heavy: { workers: 8, blockSize: '8M', operations: 1000 }
+        heavy: { workers: 8, blockSize: '8M', operations: 1000 },
       };
 
       const settings = ioSettings[config.ioIntensity];
@@ -971,38 +997,40 @@ export class ChaosExperimentLibrary {
           parallel: false,
           dryRun: false,
           environment: config.environment,
-          targets: [{
-            name: config.targetService,
-            type: 'infrastructure',
-            selector: {
-              type: 'label',
-              criteria: { service: config.targetService }
+          targets: [
+            {
+              name: config.targetService,
+              type: 'infrastructure',
+              selector: {
+                type: 'label',
+                criteria: { service: config.targetService },
+              },
+              configuration: {
+                filesystem: config.filesystem,
+                intensity: config.ioIntensity,
+                ...settings,
+              },
             },
-            configuration: {
-              filesystem: config.filesystem,
-              intensity: config.ioIntensity,
-              ...settings
-            }
-          }],
+          ],
           parameters: {
             io_intensity: config.ioIntensity,
             filesystem: config.filesystem,
-            duration: config.duration
+            duration: config.duration,
           },
           safeguards: [
             {
               name: 'disk_space_protection',
               type: 'resource_limit',
               configuration: { min_free_space_gb: 5 },
-              enabled: true
+              enabled: true,
             },
             {
               name: 'io_wait_protection',
               type: 'circuit_breaker',
               configuration: { max_io_wait_percentage: 80 },
-              enabled: true
-            }
-          ]
+              enabled: true,
+            },
+          ],
         },
         steadyState: {
           title: 'Disk I/O performance is acceptable',
@@ -1012,31 +1040,31 @@ export class ChaosExperimentLibrary {
               name: 'disk_response_time',
               type: 'metric',
               configuration: {
-                query: 'avg_over_time(node_disk_io_time_seconds_total[1m])'
+                query: 'avg_over_time(node_disk_io_time_seconds_total[1m])',
               },
               tolerance: { max: 0.5 },
               frequency: 10,
               timeout: 5,
-              retries: 2
+              retries: 2,
             },
             {
               name: 'disk_utilization',
               type: 'metric',
               configuration: {
-                query: 'rate(node_disk_io_time_seconds_total[5m]) * 100'
+                query: 'rate(node_disk_io_time_seconds_total[5m]) * 100',
               },
               tolerance: { max: 85 },
               frequency: 15,
               timeout: 5,
-              retries: 1
-            }
+              retries: 1,
+            },
           ],
           tolerance: {
             failureThreshold: 25,
             responseTimeThreshold: 6000,
             errorRateThreshold: 5,
-            customTolerances: []
-          }
+            customTolerances: [],
+          },
         },
         method: [
           {
@@ -1050,16 +1078,16 @@ export class ChaosExperimentLibrary {
               block_size: settings.blockSize,
               operations: settings.operations,
               filesystem: config.filesystem,
-              timeout: config.duration
+              timeout: config.duration,
             },
             configuration: {
               timeout: config.duration + 60,
               retries: 2,
               background: true,
               continueOnFailure: false,
-              rollbackOnFailure: true
-            }
-          }
+              rollbackOnFailure: true,
+            },
+          },
         ],
         rollback: {
           enabled: true,
@@ -1067,12 +1095,12 @@ export class ChaosExperimentLibrary {
           conditions: [
             {
               type: 'steady_state_violation',
-              threshold: 40
+              threshold: 40,
             },
             {
               type: 'custom',
-              validator: (metrics) => metrics.system.disk_io > 90
-            }
+              validator: (metrics) => metrics.system.disk_io > 90,
+            },
           ],
           methods: [
             {
@@ -1082,15 +1110,15 @@ export class ChaosExperimentLibrary {
               module: 'stress',
               function: 'stop',
               arguments: {
-                signal: 'SIGTERM'
+                signal: 'SIGTERM',
               },
               configuration: {
                 timeout: 30,
                 retries: 3,
                 background: false,
                 continueOnFailure: false,
-                rollbackOnFailure: false
-              }
+                rollbackOnFailure: false,
+              },
             },
             {
               name: 'cleanup_test_files',
@@ -1100,18 +1128,18 @@ export class ChaosExperimentLibrary {
               function: 'cleanup',
               arguments: {
                 path: '/tmp/chaos-*',
-                force: true
+                force: true,
               },
               configuration: {
                 timeout: 30,
                 retries: 2,
                 background: false,
                 continueOnFailure: true,
-                rollbackOnFailure: false
-              }
-            }
+                rollbackOnFailure: false,
+              },
+            },
           ],
-          timeout: 90
+          timeout: 90,
         },
         monitoring: {
           enabled: true,
@@ -1121,22 +1149,22 @@ export class ChaosExperimentLibrary {
               source: 'prometheus',
               query: 'rate(node_disk_io_time_seconds_total[5m]) * 100',
               aggregation: 'avg',
-              threshold: { warning: 70, critical: 85 }
+              threshold: { warning: 70, critical: 85 },
             },
             {
               name: 'disk_queue_depth',
               source: 'prometheus',
               query: 'node_disk_io_now',
               aggregation: 'avg',
-              threshold: { warning: 10, critical: 20 }
+              threshold: { warning: 10, critical: 20 },
             },
             {
               name: 'io_wait_time',
               source: 'prometheus',
               query: 'rate(node_cpu_seconds_total{mode="iowait"}[5m]) * 100',
               aggregation: 'avg',
-              threshold: { warning: 20, critical: 50 }
-            }
+              threshold: { warning: 20, critical: 50 },
+            },
           ],
           alerts: [
             {
@@ -1144,18 +1172,18 @@ export class ChaosExperimentLibrary {
               condition: 'io_wait_time > 40',
               severity: 'warning',
               channels: ['slack-performance'],
-              suppressDuration: 10
+              suppressDuration: 10,
             },
             {
               name: 'disk_saturation',
               condition: 'disk_io_utilization > 85',
               severity: 'critical',
               channels: ['pagerduty'],
-              suppressDuration: 5
-            }
+              suppressDuration: 5,
+            },
           ],
           dashboards: ['disk-performance'],
-          notifications: []
+          notifications: [],
         },
         metadata: {
           author: 'storage-team',
@@ -1164,17 +1192,16 @@ export class ChaosExperimentLibrary {
           tags: ['disk', 'io', 'performance', 'storage'],
           createdAt: new Date(),
           version: '1.6.0',
-          riskLevel: config.ioIntensity === 'heavy' ? 'high' : 'medium'
-        }
+          riskLevel: config.ioIntensity === 'heavy' ? 'high' : 'medium',
+        },
       };
-    }
+    },
   };
 
   /**
    * Service degradation experiments
    */
   static serviceDegradation = {
-    
     /**
      * Kill random pods
      */
@@ -1198,35 +1225,37 @@ export class ChaosExperimentLibrary {
         parallel: false,
         dryRun: false,
         environment: config.environment,
-        targets: [{
-          name: config.serviceName,
-          type: 'service',
-          selector: {
-            type: 'label',
-            criteria: { 
-              'app.kubernetes.io/name': config.serviceName,
-              ...(config.namespace && { namespace: config.namespace })
-            }
+        targets: [
+          {
+            name: config.serviceName,
+            type: 'service',
+            selector: {
+              type: 'label',
+              criteria: {
+                'app.kubernetes.io/name': config.serviceName,
+                ...(config.namespace && { namespace: config.namespace }),
+              },
+            },
+            percentage: config.killPercentage,
+            configuration: {
+              kill_mode: 'random',
+              grace_period: 0,
+            },
           },
-          percentage: config.killPercentage,
-          configuration: {
-            kill_mode: 'random',
-            grace_period: 0
-          }
-        }],
+        ],
         parameters: {
           kill_percentage: config.killPercentage,
           interval: 30, // seconds between kills
-          grace_period: 0
+          grace_period: 0,
         },
         safeguards: [
           {
             name: 'minimum_replicas',
             type: 'resource_limit',
             configuration: { min_healthy_replicas: 1 },
-            enabled: true
-          }
-        ]
+            enabled: true,
+          },
+        ],
       },
       steadyState: {
         title: 'Service availability is maintained',
@@ -1238,33 +1267,33 @@ export class ChaosExperimentLibrary {
             configuration: {
               url: `https://${config.serviceName}.${config.environment}.intelgraph.io/health`,
               expectedStatus: [200, 503], // Allow some degradation
-              timeout: 10
+              timeout: 10,
             },
-            tolerance: { 
-              custom: (result) => [200, 503].includes(result.status)
+            tolerance: {
+              custom: (result) => [200, 503].includes(result.status),
             },
             frequency: 15,
             timeout: 10,
-            retries: 3
+            retries: 3,
           },
           {
             name: 'healthy_replicas_count',
             type: 'metric',
             configuration: {
-              query: `kube_deployment_status_replicas_available{deployment="${config.serviceName}"}`
+              query: `kube_deployment_status_replicas_available{deployment="${config.serviceName}"}`,
             },
             tolerance: { min: 1 },
             frequency: 10,
             timeout: 5,
-            retries: 2
-          }
+            retries: 2,
+          },
         ],
         tolerance: {
           failureThreshold: config.killPercentage + 5,
           responseTimeThreshold: 5000,
           errorRateThreshold: config.killPercentage,
-          customTolerances: []
-        }
+          customTolerances: [],
+        },
       },
       method: [
         {
@@ -1278,27 +1307,27 @@ export class ChaosExperimentLibrary {
             namespace: config.namespace || 'default',
             qty: config.killPercentage,
             mode: 'percentage',
-            grace_period: 0
+            grace_period: 0,
           },
           configuration: {
             timeout: 60,
             retries: 3,
             background: true,
             continueOnFailure: true, // Continue even if some kills fail
-            rollbackOnFailure: false // No rollback needed for pod kills
+            rollbackOnFailure: false, // No rollback needed for pod kills
           },
           pauses: {
             before: 10,
-            after: 30
-          }
-        }
+            after: 30,
+          },
+        },
       ],
       rollback: {
         enabled: false, // Pod kills don't need rollback - Kubernetes will restart
         automatic: false,
         conditions: [],
         methods: [],
-        timeout: 0
+        timeout: 0,
       },
       monitoring: {
         enabled: true,
@@ -1308,22 +1337,22 @@ export class ChaosExperimentLibrary {
             source: 'prometheus',
             query: `rate(kube_pod_container_status_restarts_total{pod=~"${config.serviceName}-.*"}[5m])`,
             aggregation: 'sum',
-            threshold: { warning: 0.1, critical: 0.5 }
+            threshold: { warning: 0.1, critical: 0.5 },
           },
           {
             name: 'service_error_rate',
             source: 'prometheus',
             query: `rate(http_requests_total{service="${config.serviceName}",status=~"5.."}[5m])`,
             aggregation: 'avg',
-            threshold: { warning: 0.01, critical: 0.05 }
+            threshold: { warning: 0.01, critical: 0.05 },
           },
           {
             name: 'deployment_available_replicas',
             source: 'prometheus',
             query: `kube_deployment_status_replicas_available{deployment="${config.serviceName}"}`,
             aggregation: 'min',
-            threshold: { warning: 2, critical: 1 }
-          }
+            threshold: { warning: 2, critical: 1 },
+          },
         ],
         alerts: [
           {
@@ -1331,15 +1360,15 @@ export class ChaosExperimentLibrary {
             condition: 'deployment_available_replicas < 1',
             severity: 'critical',
             channels: ['pagerduty', 'slack-critical'],
-            suppressDuration: 2
+            suppressDuration: 2,
           },
           {
             name: 'high_restart_rate',
             condition: 'pod_restart_rate > 0.3',
             severity: 'warning',
             channels: ['slack-alerts'],
-            suppressDuration: 10
-          }
+            suppressDuration: 10,
+          },
         ],
         dashboards: ['kubernetes-workloads', 'service-health'],
         notifications: [
@@ -1347,11 +1376,11 @@ export class ChaosExperimentLibrary {
             type: 'slack',
             configuration: {
               webhook_url: '${SLACK_WEBHOOK_URL}',
-              channel: '#chaos-experiments'
+              channel: '#chaos-experiments',
             },
-            events: ['experiment_started', 'pod_killed', 'service_degraded']
-          }
-        ]
+            events: ['experiment_started', 'pod_killed', 'service_degraded'],
+          },
+        ],
       },
       metadata: {
         author: 'kubernetes-team',
@@ -1360,16 +1389,15 @@ export class ChaosExperimentLibrary {
         tags: ['kubernetes', 'pod', 'availability', 'resilience'],
         createdAt: new Date(),
         version: '3.2.0',
-        riskLevel: config.killPercentage > 50 ? 'high' : 'medium'
-      }
-    })
+        riskLevel: config.killPercentage > 50 ? 'high' : 'medium',
+      },
+    }),
   };
 
   /**
    * Database chaos experiments
    */
   static database = {
-    
     /**
      * Database connection exhaustion
      */
@@ -1392,31 +1420,35 @@ export class ChaosExperimentLibrary {
         parallel: false,
         dryRun: false,
         environment: config.environment,
-        targets: [{
-          name: config.databaseHost,
-          type: 'database',
-          selector: {
-            type: 'name',
-            criteria: { host: config.databaseHost }
+        targets: [
+          {
+            name: config.databaseHost,
+            type: 'database',
+            selector: {
+              type: 'name',
+              criteria: { host: config.databaseHost },
+            },
+            configuration: {
+              max_connections: config.maxConnections,
+              connection_hold_time: config.duration,
+            },
           },
-          configuration: {
-            max_connections: config.maxConnections,
-            connection_hold_time: config.duration
-          }
-        }],
+        ],
         parameters: {
           host: config.databaseHost,
           max_connections: config.maxConnections,
-          duration: config.duration
+          duration: config.duration,
         },
         safeguards: [
           {
             name: 'connection_limit',
             type: 'resource_limit',
-            configuration: { max_connections_consumed: config.maxConnections * 0.8 },
-            enabled: true
-          }
-        ]
+            configuration: {
+              max_connections_consumed: config.maxConnections * 0.8,
+            },
+            enabled: true,
+          },
+        ],
       },
       steadyState: {
         title: 'Database connectivity is functional',
@@ -1428,14 +1460,14 @@ export class ChaosExperimentLibrary {
             configuration: {
               host: config.databaseHost,
               query: 'SELECT 1',
-              timeout: 5
+              timeout: 5,
             },
-            tolerance: { 
-              custom: (result) => result.query_time < 1000 
+            tolerance: {
+              custom: (result) => result.query_time < 1000,
             },
             frequency: 10,
             timeout: 5,
-            retries: 3
+            retries: 3,
           },
           {
             name: 'active_connections',
@@ -1443,20 +1475,20 @@ export class ChaosExperimentLibrary {
             configuration: {
               host: config.databaseHost,
               query: 'SELECT COUNT(*) FROM pg_stat_activity',
-              timeout: 5
+              timeout: 5,
             },
             tolerance: { max: config.maxConnections * 0.9 },
             frequency: 5,
             timeout: 5,
-            retries: 2
-          }
+            retries: 2,
+          },
         ],
         tolerance: {
           failureThreshold: 15,
           responseTimeThreshold: 3000,
           errorRateThreshold: 10,
-          customTolerances: []
-        }
+          customTolerances: [],
+        },
       },
       method: [
         {
@@ -1469,16 +1501,16 @@ export class ChaosExperimentLibrary {
             host: config.databaseHost,
             port: 5432,
             target_connections: config.maxConnections,
-            hold_duration: config.duration
+            hold_duration: config.duration,
           },
           configuration: {
             timeout: config.duration + 60,
             retries: 2,
             background: true,
             continueOnFailure: false,
-            rollbackOnFailure: true
-          }
-        }
+            rollbackOnFailure: true,
+          },
+        },
       ],
       rollback: {
         enabled: true,
@@ -1486,8 +1518,8 @@ export class ChaosExperimentLibrary {
         conditions: [
           {
             type: 'steady_state_violation',
-            threshold: 30
-          }
+            threshold: 30,
+          },
         ],
         methods: [
           {
@@ -1499,18 +1531,18 @@ export class ChaosExperimentLibrary {
             arguments: {
               host: config.databaseHost,
               port: 5432,
-              pattern: 'chaos_*'
+              pattern: 'chaos_*',
             },
             configuration: {
               timeout: 30,
               retries: 3,
               background: false,
               continueOnFailure: false,
-              rollbackOnFailure: false
-            }
-          }
+              rollbackOnFailure: false,
+            },
+          },
         ],
-        timeout: 60
+        timeout: 60,
       },
       monitoring: {
         enabled: true,
@@ -1520,27 +1552,31 @@ export class ChaosExperimentLibrary {
             source: 'prometheus',
             query: 'pg_stat_database_numbackends{datname="postgres"}',
             aggregation: 'sum',
-            threshold: { warning: config.maxConnections * 0.8, critical: config.maxConnections * 0.95 }
+            threshold: {
+              warning: config.maxConnections * 0.8,
+              critical: config.maxConnections * 0.95,
+            },
           },
           {
             name: 'connection_errors',
             source: 'prometheus',
             query: 'rate(postgresql_connection_errors_total[5m])',
             aggregation: 'sum',
-            threshold: { warning: 0.1, critical: 1.0 }
-          }
+            threshold: { warning: 0.1, critical: 1.0 },
+          },
         ],
         alerts: [
           {
             name: 'connection_pool_exhausted',
-            condition: 'database_connections >= ' + (config.maxConnections * 0.95),
+            condition:
+              'database_connections >= ' + config.maxConnections * 0.95,
             severity: 'critical',
             channels: ['pagerduty'],
-            suppressDuration: 5
-          }
+            suppressDuration: 5,
+          },
         ],
         dashboards: ['database-performance'],
-        notifications: []
+        notifications: [],
       },
       metadata: {
         author: 'database-team',
@@ -1549,8 +1585,8 @@ export class ChaosExperimentLibrary {
         tags: ['database', 'postgresql', 'connections', 'exhaustion'],
         createdAt: new Date(),
         version: '1.4.0',
-        riskLevel: 'high'
-      }
-    })
+        riskLevel: 'high',
+      },
+    }),
   };
 }

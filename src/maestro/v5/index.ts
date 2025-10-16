@@ -1,6 +1,6 @@
 // Maestro Conductor v0.5 - "Evaluate, Trust, and Ship" — Autonomous Release Train to Production
-// Sprint Goal: Graduate from fast/cheap PRs to evaluation‑gated progressive delivery 
-// with measurable trust: every agent change is scored by an eval harness and shipped 
+// Sprint Goal: Graduate from fast/cheap PRs to evaluation‑gated progressive delivery
+// with measurable trust: every agent change is scored by an eval harness and shipped
 // via canary/rollout when scores clear thresholds.
 
 export { MaestroConductorV5 } from './conductor';

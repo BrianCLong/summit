@@ -7,7 +7,9 @@
 import { Pool } from 'pg';
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/provenance'
+  connectionString:
+    process.env.DATABASE_URL ||
+    'postgres://postgres:postgres@localhost:5432/provenance',
 });
 
 const migrations = [
@@ -29,7 +31,7 @@ const migrations = [
       CREATE INDEX IF NOT EXISTS idx_claims_hash ON claims(hash);
       CREATE INDEX IF NOT EXISTS idx_claims_created_at ON claims(created_at);
       CREATE INDEX IF NOT EXISTS idx_claims_authority ON claims(authority_id);
-    `
+    `,
   },
   {
     name: '002_create_provenance_chains_table',
@@ -46,7 +48,7 @@ const migrations = [
 
       CREATE INDEX IF NOT EXISTS idx_provenance_claim_id ON provenance_chains(claim_id);
       CREATE INDEX IF NOT EXISTS idx_provenance_created_at ON provenance_chains(created_at);
-    `
+    `,
   },
   {
     name: '003_create_transform_chain_table',
@@ -63,7 +65,7 @@ const migrations = [
 
       CREATE INDEX IF NOT EXISTS idx_transform_source ON transform_chain(source_claim_id);
       CREATE INDEX IF NOT EXISTS idx_transform_target ON transform_chain(target_claim_id);
-    `
+    `,
   },
   {
     name: '004_create_licenses_table',
@@ -82,7 +84,7 @@ const migrations = [
 
       CREATE INDEX IF NOT EXISTS idx_licenses_claim_id ON licenses(claim_id);
       CREATE INDEX IF NOT EXISTS idx_licenses_type ON licenses(license_type);
-    `
+    `,
   },
   {
     name: '005_create_hashes_table',
@@ -98,8 +100,8 @@ const migrations = [
 
       CREATE INDEX IF NOT EXISTS idx_hashes_value ON hashes(hash_value);
       CREATE INDEX IF NOT EXISTS idx_hashes_verified_at ON hashes(verified_at);
-    `
-  }
+    `,
+  },
 ];
 
 async function runMigrations() {

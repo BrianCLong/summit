@@ -24,7 +24,10 @@ describe('workflow engine', () => {
   });
 
   test('start to transition to review', async () => {
-    await request(app).post('/wf/start').send({ id: '1', definition: 'test' }).expect(200);
+    await request(app)
+      .post('/wf/start')
+      .send({ id: '1', definition: 'test' })
+      .expect(200);
     const res = await request(app)
       .post('/wf/transition')
       .send({ id: '1', transition: 'review', reason: 'need review' })
@@ -40,7 +43,10 @@ describe('workflow engine', () => {
   });
 
   test('sanitizes checklist to avoid xss', async () => {
-    await request(app).post('/wf/start').send({ id: '2', definition: 'test' }).expect(200);
+    await request(app)
+      .post('/wf/start')
+      .send({ id: '2', definition: 'test' })
+      .expect(200);
     const res = await request(app).get('/wf/cases/2').expect(200);
     expect(res.body.checklist[0].text).toBe('scriptxss/script');
   });

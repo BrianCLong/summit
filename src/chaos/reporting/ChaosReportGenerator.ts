@@ -5,15 +5,19 @@
  */
 
 import { EventEmitter } from 'events';
-import { ExperimentResult, ExperimentInsight, ChaosExperiment } from '../core/ChaosEngine.js';
+import {
+  ExperimentResult,
+  ExperimentInsight,
+  ChaosExperiment,
+} from '../core/ChaosEngine.js';
 
 /**
  * Report types and formats
  */
-export type ReportType = 
-  | 'experiment_summary' 
-  | 'trend_analysis' 
-  | 'resilience_scorecard' 
+export type ReportType =
+  | 'experiment_summary'
+  | 'trend_analysis'
+  | 'resilience_scorecard'
   | 'executive_summary'
   | 'technical_details'
   | 'compliance_audit';
@@ -114,7 +118,12 @@ export interface CriticalIssue {
  * Business impact assessment
  */
 export interface BusinessImpact {
-  category: 'availability' | 'performance' | 'security' | 'data_integrity' | 'compliance';
+  category:
+    | 'availability'
+    | 'performance'
+    | 'security'
+    | 'data_integrity'
+    | 'compliance';
   estimatedDowntimeMinutes?: number;
   estimatedRevenueLoss?: number;
   customerImpact: 'none' | 'minimal' | 'moderate' | 'significant' | 'severe';
@@ -283,7 +292,7 @@ export class ChaosReportGenerator extends EventEmitter {
       retentionDays: number;
       enableEncryption: boolean;
       watermarkReports: boolean;
-    }
+    },
   ) {
     super();
     this.initializeTemplates();
@@ -295,10 +304,10 @@ export class ChaosReportGenerator extends EventEmitter {
    */
   async generateReport(
     experiments: ExperimentResult[],
-    reportConfig: ReportConfig
+    reportConfig: ReportConfig,
   ): Promise<ChaosReport> {
     const reportId = this.generateReportId(reportConfig);
-    
+
     const report: ChaosReport = {
       id: reportId,
       type: reportConfig.type,
@@ -309,7 +318,7 @@ export class ChaosReportGenerator extends EventEmitter {
       summary: await this.generateSummary(experiments, reportConfig),
       sections: await this.generateSections(experiments, reportConfig),
       appendices: await this.generateAppendices(experiments, reportConfig),
-      metadata: this.generateMetadata(reportConfig)
+      metadata: this.generateMetadata(reportConfig),
     };
 
     // Store report
@@ -333,7 +342,7 @@ export class ChaosReportGenerator extends EventEmitter {
    */
   async generateExperimentSummary(
     experiments: ExperimentResult[],
-    config?: Partial<ReportConfig>
+    config?: Partial<ReportConfig>,
   ): Promise<ChaosReport> {
     const reportConfig: ReportConfig = {
       type: 'experiment_summary',
@@ -343,7 +352,7 @@ export class ChaosReportGenerator extends EventEmitter {
       includeCharts: true,
       includeRawData: false,
       confidentialityLevel: 'internal',
-      ...config
+      ...config,
     };
 
     return this.generateReport(experiments, reportConfig);
@@ -354,7 +363,7 @@ export class ChaosReportGenerator extends EventEmitter {
    */
   async generateResilienceScorecard(
     experiments: ExperimentResult[],
-    config?: Partial<ReportConfig>
+    config?: Partial<ReportConfig>,
   ): Promise<ChaosReport> {
     const reportConfig: ReportConfig = {
       type: 'resilience_scorecard',
@@ -364,11 +373,11 @@ export class ChaosReportGenerator extends EventEmitter {
       includeCharts: true,
       includeRawData: false,
       confidentialityLevel: 'internal',
-      ...config
+      ...config,
     };
 
     const report = await this.generateReport(experiments, reportConfig);
-    
+
     // Add resilience scorecard specific data
     const scorecard = await this.calculateResilienceScorecard(experiments);
     report.sections.unshift({
@@ -378,8 +387,8 @@ export class ChaosReportGenerator extends EventEmitter {
       content: {
         type: 'metrics',
         data: scorecard,
-        analysis: this.generateScorecardAnalysis(scorecard)
-      }
+        analysis: this.generateScorecardAnalysis(scorecard),
+      },
     });
 
     return report;
@@ -390,7 +399,7 @@ export class ChaosReportGenerator extends EventEmitter {
    */
   async generateExecutiveSummary(
     experiments: ExperimentResult[],
-    config?: Partial<ReportConfig>
+    config?: Partial<ReportConfig>,
   ): Promise<ChaosReport> {
     const reportConfig: ReportConfig = {
       type: 'executive_summary',
@@ -400,15 +409,15 @@ export class ChaosReportGenerator extends EventEmitter {
       includeCharts: true,
       includeRawData: false,
       confidentialityLevel: 'confidential',
-      ...config
+      ...config,
     };
 
     const report = await this.generateReport(experiments, reportConfig);
-    
+
     // Customize for executive audience
     report.title = 'System Resilience Executive Summary';
     report.subtitle = 'Chaos Engineering Assessment';
-    
+
     return report;
   }
 
@@ -417,20 +426,20 @@ export class ChaosReportGenerator extends EventEmitter {
    */
   async generateTrendAnalysis(
     experiments: ExperimentResult[],
-    config?: Partial<ReportConfig>
+    config?: Partial<ReportConfig>,
   ): Promise<ChaosReport> {
     const reportConfig: ReportConfig = {
       type: 'trend_analysis',
       format: 'html',
       timeRange: {
         start: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), // 90 days ago
-        end: new Date()
+        end: new Date(),
       },
       filters: {},
       includeCharts: true,
       includeRawData: true,
       confidentialityLevel: 'internal',
-      ...config
+      ...config,
     };
 
     return this.generateReport(experiments, reportConfig);
@@ -439,15 +448,12 @@ export class ChaosReportGenerator extends EventEmitter {
   /**
    * Schedule recurring report generation
    */
-  scheduleReport(
-    reportConfig: ReportConfig,
-    schedule: ScheduleConfig
-  ): string {
+  scheduleReport(reportConfig: ReportConfig, schedule: ScheduleConfig): string {
     const scheduleId = `schedule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     this.scheduledReports.set(scheduleId, {
       ...schedule,
-      reportConfig
+      reportConfig,
     } as any);
 
     this.emit('report:scheduled', { scheduleId, schedule });
@@ -474,17 +480,19 @@ export class ChaosReportGenerator extends EventEmitter {
 
     if (filters) {
       if (filters.type) {
-        reports = reports.filter(r => r.type === filters.type);
+        reports = reports.filter((r) => r.type === filters.type);
       }
       if (filters.startDate) {
-        reports = reports.filter(r => r.generatedAt >= filters.startDate!);
+        reports = reports.filter((r) => r.generatedAt >= filters.startDate!);
       }
       if (filters.endDate) {
-        reports = reports.filter(r => r.generatedAt <= filters.endDate!);
+        reports = reports.filter((r) => r.generatedAt <= filters.endDate!);
       }
     }
 
-    return reports.sort((a, b) => b.generatedAt.getTime() - a.generatedAt.getTime());
+    return reports.sort(
+      (a, b) => b.generatedAt.getTime() - a.generatedAt.getTime(),
+    );
   }
 
   /**
@@ -492,17 +500,23 @@ export class ChaosReportGenerator extends EventEmitter {
    */
   private async generateSummary(
     experiments: ExperimentResult[],
-    config: ReportConfig
+    config: ReportConfig,
   ): Promise<ReportSummary> {
     const totalExperiments = experiments.length;
-    const successfulExperiments = experiments.filter(e => e.status === 'completed').length;
-    const failedExperiments = experiments.filter(e => e.status === 'failed').length;
-    
+    const successfulExperiments = experiments.filter(
+      (e) => e.status === 'completed',
+    ).length;
+    const failedExperiments = experiments.filter(
+      (e) => e.status === 'failed',
+    ).length;
+
     const scores = experiments
-      .map(e => this.calculateExperimentScore(e))
-      .filter(s => s > 0);
-    const averageScore = scores.length > 0 ? 
-      scores.reduce((sum, score) => sum + score, 0) / scores.length : 0;
+      .map((e) => this.calculateExperimentScore(e))
+      .filter((s) => s > 0);
+    const averageScore =
+      scores.length > 0
+        ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+        : 0;
 
     const keyFindings = await this.extractKeyFindings(experiments);
     const criticalIssues = await this.identifyCriticalIssues(experiments);
@@ -517,7 +531,7 @@ export class ChaosReportGenerator extends EventEmitter {
       keyFindings,
       criticalIssues,
       recommendations,
-      trendsObserved
+      trendsObserved,
     };
   }
 
@@ -526,44 +540,47 @@ export class ChaosReportGenerator extends EventEmitter {
    */
   private async generateSections(
     experiments: ExperimentResult[],
-    config: ReportConfig
+    config: ReportConfig,
   ): Promise<ReportSection[]> {
     const sections: ReportSection[] = [];
 
     switch (config.type) {
       case 'experiment_summary':
         sections.push(
-          ...(await this.generateExperimentSummarySections(experiments, config))
+          ...(await this.generateExperimentSummarySections(
+            experiments,
+            config,
+          )),
         );
         break;
 
       case 'trend_analysis':
         sections.push(
-          ...(await this.generateTrendAnalysisSections(experiments, config))
+          ...(await this.generateTrendAnalysisSections(experiments, config)),
         );
         break;
 
       case 'resilience_scorecard':
         sections.push(
-          ...(await this.generateScorecardSections(experiments, config))
+          ...(await this.generateScorecardSections(experiments, config)),
         );
         break;
 
       case 'executive_summary':
         sections.push(
-          ...(await this.generateExecutiveSections(experiments, config))
+          ...(await this.generateExecutiveSections(experiments, config)),
         );
         break;
 
       case 'technical_details':
         sections.push(
-          ...(await this.generateTechnicalSections(experiments, config))
+          ...(await this.generateTechnicalSections(experiments, config)),
         );
         break;
 
       case 'compliance_audit':
         sections.push(
-          ...(await this.generateComplianceSections(experiments, config))
+          ...(await this.generateComplianceSections(experiments, config)),
         );
         break;
     }
@@ -576,7 +593,7 @@ export class ChaosReportGenerator extends EventEmitter {
    */
   private async generateExperimentSummarySections(
     experiments: ExperimentResult[],
-    config: ReportConfig
+    config: ReportConfig,
   ): Promise<ReportSection[]> {
     return [
       {
@@ -589,10 +606,11 @@ export class ChaosReportGenerator extends EventEmitter {
             totalExperiments: experiments.length,
             successRate: this.calculateSuccessRate(experiments),
             averageDuration: this.calculateAverageDuration(experiments),
-            environmentBreakdown: this.getEnvironmentBreakdown(experiments)
+            environmentBreakdown: this.getEnvironmentBreakdown(experiments),
           },
-          analysis: 'Summary of chaos experiments conducted during the reporting period.'
-        }
+          analysis:
+            'Summary of chaos experiments conducted during the reporting period.',
+        },
       },
       {
         id: 'experiment_results',
@@ -600,15 +618,15 @@ export class ChaosReportGenerator extends EventEmitter {
         order: 2,
         content: {
           type: 'table',
-          data: experiments.map(e => ({
+          data: experiments.map((e) => ({
             name: e.experimentId,
             status: e.status,
             duration: e.duration,
             score: this.calculateExperimentScore(e),
-            insights: e.insights.length
+            insights: e.insights.length,
           })),
-          analysis: 'Detailed results for each experiment executed.'
-        }
+          analysis: 'Detailed results for each experiment executed.',
+        },
       },
       {
         id: 'insights_analysis',
@@ -618,9 +636,10 @@ export class ChaosReportGenerator extends EventEmitter {
           type: 'text',
           data: this.aggregateInsights(experiments),
           keyPoints: this.extractInsightKeyPoints(experiments),
-          analysis: 'Key insights discovered through chaos engineering experiments.'
-        }
-      }
+          analysis:
+            'Key insights discovered through chaos engineering experiments.',
+        },
+      },
     ];
   }
 
@@ -629,10 +648,10 @@ export class ChaosReportGenerator extends EventEmitter {
    */
   private async generateTrendAnalysisSections(
     experiments: ExperimentResult[],
-    config: ReportConfig
+    config: ReportConfig,
   ): Promise<ReportSection[]> {
     const timeSeriesData = this.prepareTimeSeriesData(experiments);
-    
+
     return [
       {
         id: 'trend_overview',
@@ -648,10 +667,11 @@ export class ChaosReportGenerator extends EventEmitter {
             yAxis: 'Resilience Score',
             colors: ['#007bff', '#28a745', '#dc3545'],
             showLegend: true,
-            showGrid: true
+            showGrid: true,
           },
-          analysis: 'Trending analysis of system resilience over the reporting period.'
-        }
+          analysis:
+            'Trending analysis of system resilience over the reporting period.',
+        },
       },
       {
         id: 'performance_trends',
@@ -667,11 +687,12 @@ export class ChaosReportGenerator extends EventEmitter {
             yAxis: 'Metrics',
             colors: ['#ffc107', '#dc3545'],
             showLegend: true,
-            showGrid: true
+            showGrid: true,
           },
-          analysis: 'Performance metrics trending over time during chaos experiments.'
-        }
-      }
+          analysis:
+            'Performance metrics trending over time during chaos experiments.',
+        },
+      },
     ];
   }
 
@@ -679,7 +700,7 @@ export class ChaosReportGenerator extends EventEmitter {
    * Calculate resilience scorecard
    */
   private async calculateResilienceScorecard(
-    experiments: ExperimentResult[]
+    experiments: ExperimentResult[],
   ): Promise<ResilienceScorecard> {
     const availability = this.calculateAvailabilityScore(experiments);
     const performance = this.calculatePerformanceScore(experiments);
@@ -687,13 +708,12 @@ export class ChaosReportGenerator extends EventEmitter {
     const recovery = this.calculateRecoveryScore(experiments);
     const monitoring = this.calculateMonitoringScore(experiments);
 
-    const overallScore = (
+    const overallScore =
       availability.score * 0.25 +
-      performance.score * 0.20 +
-      errorHandling.score * 0.20 +
-      recovery.score * 0.20 +
-      monitoring.score * 0.15
-    );
+      performance.score * 0.2 +
+      errorHandling.score * 0.2 +
+      recovery.score * 0.2 +
+      monitoring.score * 0.15;
 
     return {
       overallScore: Math.round(overallScore),
@@ -702,25 +722,27 @@ export class ChaosReportGenerator extends EventEmitter {
         performance,
         errorHandling,
         recovery,
-        monitoring
+        monitoring,
       },
       trends: {
         thirtyDays: this.calculateTrendScore(experiments, 30),
         ninetyDays: this.calculateTrendScore(experiments, 90),
-        oneYear: this.calculateTrendScore(experiments, 365)
+        oneYear: this.calculateTrendScore(experiments, 365),
       },
       benchmarks: {
         industry: 75, // Industry benchmark
         internal: 80, // Internal target
-        target: 85   // Aspirational target
-      }
+        target: 85, // Aspirational target
+      },
     };
   }
 
   /**
    * Extract key findings from experiments
    */
-  private async extractKeyFindings(experiments: ExperimentResult[]): Promise<string[]> {
+  private async extractKeyFindings(
+    experiments: ExperimentResult[],
+  ): Promise<string[]> {
     const findings: string[] = [];
 
     // Success rate finding
@@ -728,22 +750,29 @@ export class ChaosReportGenerator extends EventEmitter {
     if (successRate < 80) {
       findings.push(`Low success rate observed: ${successRate.toFixed(1)}%`);
     } else if (successRate > 95) {
-      findings.push(`Excellent success rate achieved: ${successRate.toFixed(1)}%`);
+      findings.push(
+        `Excellent success rate achieved: ${successRate.toFixed(1)}%`,
+      );
     }
 
     // High-impact insights
     const criticalInsights = experiments
-      .flatMap(e => e.insights)
-      .filter(i => i.severity === 'critical' || i.severity === 'high');
+      .flatMap((e) => e.insights)
+      .filter((i) => i.severity === 'critical' || i.severity === 'high');
 
     if (criticalInsights.length > 0) {
-      findings.push(`${criticalInsights.length} critical system weaknesses discovered`);
+      findings.push(
+        `${criticalInsights.length} critical system weaknesses discovered`,
+      );
     }
 
     // Recovery time analysis
     const avgRecoveryTime = this.calculateAverageRecoveryTime(experiments);
-    if (avgRecoveryTime > 300000) { // 5 minutes
-      findings.push(`Slow recovery times observed: average ${(avgRecoveryTime / 1000).toFixed(1)}s`);
+    if (avgRecoveryTime > 300000) {
+      // 5 minutes
+      findings.push(
+        `Slow recovery times observed: average ${(avgRecoveryTime / 1000).toFixed(1)}s`,
+      );
     }
 
     return findings;
@@ -752,15 +781,20 @@ export class ChaosReportGenerator extends EventEmitter {
   /**
    * Identify critical issues from experiments
    */
-  private async identifyCriticalIssues(experiments: ExperimentResult[]): Promise<CriticalIssue[]> {
+  private async identifyCriticalIssues(
+    experiments: ExperimentResult[],
+  ): Promise<CriticalIssue[]> {
     const issues: CriticalIssue[] = [];
     const issueMap = new Map<string, ExperimentInsight[]>();
 
     // Group insights by type
-    experiments.forEach(experiment => {
+    experiments.forEach((experiment) => {
       experiment.insights
-        .filter(insight => insight.severity === 'critical' || insight.severity === 'high')
-        .forEach(insight => {
+        .filter(
+          (insight) =>
+            insight.severity === 'critical' || insight.severity === 'high',
+        )
+        .forEach((insight) => {
           const key = insight.title;
           if (!issueMap.has(key)) {
             issueMap.set(key, []);
@@ -771,25 +805,33 @@ export class ChaosReportGenerator extends EventEmitter {
 
     // Convert to critical issues
     for (const [title, insights] of issueMap.entries()) {
-      if (insights.length >= 2) { // Issue appears in multiple experiments
+      if (insights.length >= 2) {
+        // Issue appears in multiple experiments
         const issue: CriticalIssue = {
           id: `issue_${title.replace(/\s+/g, '_').toLowerCase()}`,
           title,
           description: insights[0].description,
           severity: insights[0].severity as 'high' | 'critical',
-          affectedSystems: [...new Set(insights.flatMap(i => 
-            i.evidence.map(e => e.source)
-          ))],
-          firstObserved: new Date(Math.min(...insights.map(i => 
-            i.evidence[0]?.timestamp.getTime() || Date.now()
-          ))),
+          affectedSystems: [
+            ...new Set(
+              insights.flatMap((i) => i.evidence.map((e) => e.source)),
+            ),
+          ],
+          firstObserved: new Date(
+            Math.min(
+              ...insights.map(
+                (i) => i.evidence[0]?.timestamp.getTime() || Date.now(),
+              ),
+            ),
+          ),
           frequency: insights.length,
           businessImpact: {
             category: this.categorizeIssue(title),
             customerImpact: this.assessCustomerImpact(insights),
-            reputationRisk: insights[0].severity === 'critical' ? 'high' : 'medium'
+            reputationRisk:
+              insights[0].severity === 'critical' ? 'high' : 'medium',
           },
-          mitigation: this.generateMitigationPlan(insights)
+          mitigation: this.generateMitigationPlan(insights),
         };
 
         issues.push(issue);
@@ -802,31 +844,36 @@ export class ChaosReportGenerator extends EventEmitter {
   /**
    * Generate recommendations based on experiments
    */
-  private async generateRecommendations(experiments: ExperimentResult[]): Promise<Recommendation[]> {
+  private async generateRecommendations(
+    experiments: ExperimentResult[],
+  ): Promise<Recommendation[]> {
     const recommendations: Recommendation[] = [];
 
     // Analyze experiment patterns for recommendations
-    const failedExperiments = experiments.filter(e => e.status === 'failed');
-    const lowScoreExperiments = experiments.filter(e => this.calculateExperimentScore(e) < 70);
+    const failedExperiments = experiments.filter((e) => e.status === 'failed');
+    const lowScoreExperiments = experiments.filter(
+      (e) => this.calculateExperimentScore(e) < 70,
+    );
 
     if (failedExperiments.length > experiments.length * 0.2) {
       recommendations.push({
         id: 'improve_reliability',
         category: 'architecture',
         title: 'Improve System Reliability',
-        description: 'High failure rate in chaos experiments indicates reliability issues',
+        description:
+          'High failure rate in chaos experiments indicates reliability issues',
         rationale: `${failedExperiments.length} out of ${experiments.length} experiments failed`,
         implementationSteps: [
           'Implement circuit breaker patterns',
           'Add retry mechanisms with exponential backoff',
           'Improve error handling and graceful degradation',
-          'Enhance monitoring and alerting'
+          'Enhance monitoring and alerting',
         ],
         estimatedBenefit: 'Reduce system downtime by 40-60%',
         effort: 'high',
         priority: 'high',
         owner: 'architecture-team',
-        timeline: '3-6 months'
+        timeline: '3-6 months',
       });
     }
 
@@ -841,13 +888,13 @@ export class ChaosReportGenerator extends EventEmitter {
           'Implement distributed tracing',
           'Add business metrics monitoring',
           'Set up proactive alerting',
-          'Create runbook automation'
+          'Create runbook automation',
         ],
         estimatedBenefit: 'Reduce MTTR by 50%',
         effort: 'medium',
         priority: 'medium',
         owner: 'sre-team',
-        timeline: '2-4 months'
+        timeline: '2-4 months',
       });
     }
 
@@ -857,29 +904,41 @@ export class ChaosReportGenerator extends EventEmitter {
   /**
    * Analyze trends in experiment data
    */
-  private async analyzeTrends(experiments: ExperimentResult[]): Promise<TrendObservation[]> {
+  private async analyzeTrends(
+    experiments: ExperimentResult[],
+  ): Promise<TrendObservation[]> {
     const trends: TrendObservation[] = [];
 
     // Success rate trend
     const successRateTrend = this.calculateSuccessRateTrend(experiments);
     trends.push({
       metric: 'Success Rate',
-      trend: successRateTrend > 5 ? 'improving' : successRateTrend < -5 ? 'degrading' : 'stable',
+      trend:
+        successRateTrend > 5
+          ? 'improving'
+          : successRateTrend < -5
+            ? 'degrading'
+            : 'stable',
       changePercent: successRateTrend,
       timeframe: '30 days',
       significance: Math.abs(successRateTrend) > 10 ? 'high' : 'medium',
-      analysis: `Success rate has ${successRateTrend > 0 ? 'improved' : 'declined'} by ${Math.abs(successRateTrend).toFixed(1)}%`
+      analysis: `Success rate has ${successRateTrend > 0 ? 'improved' : 'declined'} by ${Math.abs(successRateTrend).toFixed(1)}%`,
     });
 
     // Response time trend
     const responseTimeTrend = this.calculateResponseTimeTrend(experiments);
     trends.push({
       metric: 'Average Response Time',
-      trend: responseTimeTrend < -5 ? 'improving' : responseTimeTrend > 5 ? 'degrading' : 'stable',
+      trend:
+        responseTimeTrend < -5
+          ? 'improving'
+          : responseTimeTrend > 5
+            ? 'degrading'
+            : 'stable',
       changePercent: responseTimeTrend,
       timeframe: '30 days',
       significance: Math.abs(responseTimeTrend) > 15 ? 'high' : 'medium',
-      analysis: `Response time has ${responseTimeTrend < 0 ? 'improved' : 'degraded'} by ${Math.abs(responseTimeTrend).toFixed(1)}%`
+      analysis: `Response time has ${responseTimeTrend < 0 ? 'improved' : 'degraded'} by ${Math.abs(responseTimeTrend).toFixed(1)}%`,
     });
 
     return trends;
@@ -913,8 +972,9 @@ export class ChaosReportGenerator extends EventEmitter {
     }
 
     // Add points for successful insights
-    const positiveInsights = experiment.insights
-      .filter(i => i.type === 'resilience_confirmed').length;
+    const positiveInsights = experiment.insights.filter(
+      (i) => i.type === 'resilience_confirmed',
+    ).length;
     score += positiveInsights * 5;
 
     return Math.max(0, Math.min(100, score));
@@ -923,29 +983,38 @@ export class ChaosReportGenerator extends EventEmitter {
   /**
    * Helper methods for calculations
    */
-  
+
   private calculateSuccessRate(experiments: ExperimentResult[]): number {
     if (experiments.length === 0) return 0;
-    const successful = experiments.filter(e => e.status === 'completed').length;
+    const successful = experiments.filter(
+      (e) => e.status === 'completed',
+    ).length;
     return (successful / experiments.length) * 100;
   }
 
   private calculateAverageDuration(experiments: ExperimentResult[]): number {
     if (experiments.length === 0) return 0;
     const totalDuration = experiments
-      .filter(e => e.duration)
+      .filter((e) => e.duration)
       .reduce((sum, e) => sum + (e.duration || 0), 0);
     return totalDuration / experiments.length;
   }
 
-  private calculateAverageRecoveryTime(experiments: ExperimentResult[]): number {
+  private calculateAverageRecoveryTime(
+    experiments: ExperimentResult[],
+  ): number {
     // Mock implementation - would calculate actual recovery times
-    return experiments.reduce((sum, e) => sum + (e.duration || 0), 0) / experiments.length;
+    return (
+      experiments.reduce((sum, e) => sum + (e.duration || 0), 0) /
+      experiments.length
+    );
   }
 
-  private getEnvironmentBreakdown(experiments: ExperimentResult[]): Record<string, number> {
+  private getEnvironmentBreakdown(
+    experiments: ExperimentResult[],
+  ): Record<string, number> {
     const breakdown: Record<string, number> = {};
-    experiments.forEach(e => {
+    experiments.forEach((e) => {
       // Would extract environment from experiment metadata
       const env = 'staging'; // Mock
       breakdown[env] = (breakdown[env] || 0) + 1;
@@ -960,7 +1029,7 @@ export class ChaosReportGenerator extends EventEmitter {
       resilience_scorecard: 'System Resilience Scorecard',
       executive_summary: 'Executive Summary',
       technical_details: 'Technical Analysis Report',
-      compliance_audit: 'Compliance Audit Report'
+      compliance_audit: 'Compliance Audit Report',
     };
 
     return typeNames[config.type] || 'Chaos Engineering Report';
@@ -977,20 +1046,21 @@ export class ChaosReportGenerator extends EventEmitter {
       generatedBy: 'Chaos Engineering Platform',
       version: '2.1.0',
       sources: ['Chaos Toolkit', 'Prometheus', 'Application Logs'],
-      methodology: 'Chaos engineering experiments following principles of chaos engineering',
+      methodology:
+        'Chaos engineering experiments following principles of chaos engineering',
       limitations: [
         'Results based on synthetic failure injection',
         'May not capture all real-world failure scenarios',
-        'Limited to tested components and failure modes'
+        'Limited to tested components and failure modes',
       ],
       confidentialityLevel: config.confidentialityLevel,
-      distributionList: config.recipients
+      distributionList: config.recipients,
     };
   }
 
   private generateAppendices(
     experiments: ExperimentResult[],
-    config: ReportConfig
+    config: ReportConfig,
   ): Promise<ReportAppendix[]> {
     const appendices: ReportAppendix[] = [];
 
@@ -999,7 +1069,7 @@ export class ChaosReportGenerator extends EventEmitter {
         id: 'raw_data',
         title: 'Raw Experiment Data',
         content: experiments,
-        type: 'raw_data'
+        type: 'raw_data',
       });
     }
 
@@ -1007,7 +1077,7 @@ export class ChaosReportGenerator extends EventEmitter {
       id: 'methodology',
       title: 'Methodology',
       content: this.getMethodologyDescription(),
-      type: 'methodology'
+      type: 'methodology',
     });
 
     return Promise.resolve(appendices);
@@ -1028,12 +1098,18 @@ export class ChaosReportGenerator extends EventEmitter {
     `;
   }
 
-  private async outputReport(report: ChaosReport, config: ReportConfig): Promise<void> {
+  private async outputReport(
+    report: ChaosReport,
+    config: ReportConfig,
+  ): Promise<void> {
     // Implementation would generate actual files
     console.log(`Generated ${config.format} report: ${report.title}`);
   }
 
-  private async distributeReport(report: ChaosReport, config: ReportConfig): Promise<void> {
+  private async distributeReport(
+    report: ChaosReport,
+    config: ReportConfig,
+  ): Promise<void> {
     // Implementation would send reports to recipients
     console.log(`Distributed report to: ${config.recipients?.join(', ')}`);
   }
@@ -1045,9 +1121,12 @@ export class ChaosReportGenerator extends EventEmitter {
 
   private startScheduledReports(): void {
     if (this.config.enableScheduling) {
-      setInterval(() => {
-        this.processScheduledReports();
-      }, 60 * 60 * 1000); // Check every hour
+      setInterval(
+        () => {
+          this.processScheduledReports();
+        },
+        60 * 60 * 1000,
+      ); // Check every hour
     }
   }
 
@@ -1068,35 +1147,40 @@ export class ChaosReportGenerator extends EventEmitter {
 
   // Additional helper methods would be implemented here
   private aggregateInsights(experiments: ExperimentResult[]): any {
-    return experiments.flatMap(e => e.insights);
+    return experiments.flatMap((e) => e.insights);
   }
 
   private extractInsightKeyPoints(experiments: ExperimentResult[]): string[] {
     return experiments
-      .flatMap(e => e.insights)
-      .map(i => i.title)
+      .flatMap((e) => e.insights)
+      .map((i) => i.title)
       .slice(0, 5);
   }
 
   private prepareTimeSeriesData(experiments: ExperimentResult[]): any[] {
-    return experiments.map(e => ({
+    return experiments.map((e) => ({
       timestamp: e.startTime,
-      score: this.calculateExperimentScore(e)
+      score: this.calculateExperimentScore(e),
     }));
   }
 
   private preparePerformanceTrends(experiments: ExperimentResult[]): any[] {
-    return experiments.map(e => ({
+    return experiments.map((e) => ({
       timestamp: e.startTime,
       responseTime: e.metrics.application.response_time,
-      errorRate: e.metrics.application.error_rate * 100
+      errorRate: e.metrics.application.error_rate * 100,
     }));
   }
 
-  private calculateAvailabilityScore(experiments: ExperimentResult[]): ScorecardCategory {
-    const avgHealth = experiments.reduce((sum, e) => 
-      sum + e.steady_state.after.overall_health, 0) / experiments.length;
-    
+  private calculateAvailabilityScore(
+    experiments: ExperimentResult[],
+  ): ScorecardCategory {
+    const avgHealth =
+      experiments.reduce(
+        (sum, e) => sum + e.steady_state.after.overall_health,
+        0,
+      ) / experiments.length;
+
     return {
       score: avgHealth,
       weight: 0.25,
@@ -1107,43 +1191,59 @@ export class ChaosReportGenerator extends EventEmitter {
           target: 99.9,
           unit: '%',
           trend: 2.1,
-          status: avgHealth > 95 ? 'good' : avgHealth > 90 ? 'warning' : 'critical'
-        }
+          status:
+            avgHealth > 95 ? 'good' : avgHealth > 90 ? 'warning' : 'critical',
+        },
       ],
-      trend: 'stable'
+      trend: 'stable',
     };
   }
 
-  private calculatePerformanceScore(experiments: ExperimentResult[]): ScorecardCategory {
+  private calculatePerformanceScore(
+    experiments: ExperimentResult[],
+  ): ScorecardCategory {
     // Implementation would calculate performance scores
     return {
       score: 85,
-      weight: 0.20,
+      weight: 0.2,
       metrics: [],
-      trend: 'improving'
+      trend: 'improving',
     };
   }
 
-  private calculateErrorHandlingScore(experiments: ExperimentResult[]): ScorecardCategory {
-    return { score: 80, weight: 0.20, metrics: [], trend: 'stable' };
+  private calculateErrorHandlingScore(
+    experiments: ExperimentResult[],
+  ): ScorecardCategory {
+    return { score: 80, weight: 0.2, metrics: [], trend: 'stable' };
   }
 
-  private calculateRecoveryScore(experiments: ExperimentResult[]): ScorecardCategory {
-    return { score: 75, weight: 0.20, metrics: [], trend: 'improving' };
+  private calculateRecoveryScore(
+    experiments: ExperimentResult[],
+  ): ScorecardCategory {
+    return { score: 75, weight: 0.2, metrics: [], trend: 'improving' };
   }
 
-  private calculateMonitoringScore(experiments: ExperimentResult[]): ScorecardCategory {
+  private calculateMonitoringScore(
+    experiments: ExperimentResult[],
+  ): ScorecardCategory {
     return { score: 90, weight: 0.15, metrics: [], trend: 'stable' };
   }
 
-  private calculateTrendScore(experiments: ExperimentResult[], days: number): number {
+  private calculateTrendScore(
+    experiments: ExperimentResult[],
+    days: number,
+  ): number {
     // Implementation would calculate trend scores
     return 78;
   }
 
   private generateScorecardAnalysis(scorecard: ResilienceScorecard): string {
     return `Overall resilience score is ${scorecard.overallScore}/100, indicating ${
-      scorecard.overallScore > 80 ? 'good' : scorecard.overallScore > 60 ? 'acceptable' : 'concerning'
+      scorecard.overallScore > 80
+        ? 'good'
+        : scorecard.overallScore > 60
+          ? 'acceptable'
+          : 'concerning'
     } system resilience.`;
   }
 
@@ -1155,22 +1255,29 @@ export class ChaosReportGenerator extends EventEmitter {
     return 'availability';
   }
 
-  private assessCustomerImpact(insights: ExperimentInsight[]): BusinessImpact['customerImpact'] {
+  private assessCustomerImpact(
+    insights: ExperimentInsight[],
+  ): BusinessImpact['customerImpact'] {
     const severity = insights[0].severity;
     if (severity === 'critical') return 'severe';
     if (severity === 'high') return 'significant';
     return 'moderate';
   }
 
-  private generateMitigationPlan(insights: ExperimentInsight[]): MitigationPlan {
+  private generateMitigationPlan(
+    insights: ExperimentInsight[],
+  ): MitigationPlan {
     return {
-      immediateActions: ['Monitor system closely', 'Prepare rollback procedures'],
+      immediateActions: [
+        'Monitor system closely',
+        'Prepare rollback procedures',
+      ],
       shortTermActions: ['Implement circuit breakers', 'Add retry logic'],
       longTermActions: ['Redesign for resilience', 'Add comprehensive testing'],
       owner: 'sre-team',
       timeline: '1-3 months',
       estimatedEffort: 'medium',
-      priority: insights[0].severity === 'critical' ? 'critical' : 'high'
+      priority: insights[0].severity === 'critical' ? 'critical' : 'high',
     };
   }
 
@@ -1184,29 +1291,47 @@ export class ChaosReportGenerator extends EventEmitter {
     return -1.8;
   }
 
-  private async generateExperimentSummarySections(experiments: ExperimentResult[], config: ReportConfig): Promise<ReportSection[]> {
+  private async generateExperimentSummarySections(
+    experiments: ExperimentResult[],
+    config: ReportConfig,
+  ): Promise<ReportSection[]> {
     // Implementation already provided above
     return [];
   }
 
-  private async generateTrendAnalysisSections(experiments: ExperimentResult[], config: ReportConfig): Promise<ReportSection[]> {
+  private async generateTrendAnalysisSections(
+    experiments: ExperimentResult[],
+    config: ReportConfig,
+  ): Promise<ReportSection[]> {
     // Implementation already provided above
     return [];
   }
 
-  private async generateScorecardSections(experiments: ExperimentResult[], config: ReportConfig): Promise<ReportSection[]> {
+  private async generateScorecardSections(
+    experiments: ExperimentResult[],
+    config: ReportConfig,
+  ): Promise<ReportSection[]> {
     return [];
   }
 
-  private async generateExecutiveSections(experiments: ExperimentResult[], config: ReportConfig): Promise<ReportSection[]> {
+  private async generateExecutiveSections(
+    experiments: ExperimentResult[],
+    config: ReportConfig,
+  ): Promise<ReportSection[]> {
     return [];
   }
 
-  private async generateTechnicalSections(experiments: ExperimentResult[], config: ReportConfig): Promise<ReportSection[]> {
+  private async generateTechnicalSections(
+    experiments: ExperimentResult[],
+    config: ReportConfig,
+  ): Promise<ReportSection[]> {
     return [];
   }
 
-  private async generateComplianceSections(experiments: ExperimentResult[], config: ReportConfig): Promise<ReportSection[]> {
+  private async generateComplianceSections(
+    experiments: ExperimentResult[],
+    config: ReportConfig,
+  ): Promise<ReportSection[]> {
     return [];
   }
 }

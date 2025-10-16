@@ -64,7 +64,7 @@ export class AutoTriageBot extends EventEmitter {
   private replayCache: Map<string, ReplayCache> = new Map();
   private tiaAnalyzer: TestImpactAnalyzerV2;
   private graphService: FederatedGraphService;
-  
+
   private config: {
     maxConcurrentBisects: number;
     bisectTimeout: number;
@@ -74,13 +74,13 @@ export class AutoTriageBot extends EventEmitter {
     costBudget: number; // USD per hour
     offPeakOnly: boolean;
   };
-  
+
   private metrics = {
     totalTriages: 0,
     successfulIsolations: 0,
     avgTimeToIsolate: 0,
     bisectCacheHitRate: 0,
-    computeCostSpent: 0
+    computeCostSpent: 0,
   };
 
   constructor(
@@ -94,10 +94,10 @@ export class AutoTriageBot extends EventEmitter {
       enableTiaGuided?: boolean;
       costBudget?: number;
       offPeakOnly?: boolean;
-    } = {}
+    } = {},
   ) {
     super();
-    
+
     this.tiaAnalyzer = tiaAnalyzer;
     this.graphService = graphService;
     this.config = {
@@ -107,24 +107,28 @@ export class AutoTriageBot extends EventEmitter {
       maxBisectDepth: config.maxBisectDepth || 10,
       enableTiaGuided: config.enableTiaGuided !== false,
       costBudget: config.costBudget || 50, // $50/hour
-      offPeakOnly: config.offPeakOnly || false
+      offPeakOnly: config.offPeakOnly || false,
     };
-    
+
     // Clean up expired cache entries periodically
     setInterval(() => this.cleanupReplayCache(), 3600000); // hourly
-    
-    console.log('🔍 Auto-Triage Bot initialized - intelligent failure isolation ready');
+
+    console.log(
+      '🔍 Auto-Triage Bot initialized - intelligent failure isolation ready',
+    );
   }
 
   /**
    * Start automatic triage for a build failure
    */
   async triageBuildFailure(failure: BuildFailure): Promise<TriageResult> {
-    console.log(`🔍 Starting auto-triage for build ${failure.buildId} (commit: ${failure.commitHash.slice(0, 8)})`);
-    
+    console.log(
+      `🔍 Starting auto-triage for build ${failure.buildId} (commit: ${failure.commitHash.slice(0, 8)})`,
+    );
+
     const startTime = performance.now();
     this.metrics.totalTriages++;
-    
+
     // Check if we should defer to off-peak hours
     if (this.config.offPeakOnly && this.isPeakHours()) {
       console.log('⏰ Deferring bisect to off-peak hours');
@@ -136,47 +140,55 @@ export class AutoTriageBot extends EventEmitter {
         reproSteps: ['Build deferred to off-peak hours'],
         fixHints: ['Will auto-triage during off-peak hours (after 6 PM)'],
         suspectedOwners: [failure.author],
-        relatedIssues: []
+        relatedIssues: [],
       };
     }
-    
+
     // Check concurrent session limits
     if (this.activeSessions.size >= this.config.maxConcurrentBisects) {
       console.log('⏳ Max concurrent bisects reached, queuing...');
       await this.waitForAvailableSlot();
     }
-    
+
     try {
       // Step 1: Fast log-based analysis
       const quickAnalysis = await this.performQuickAnalysis(failure);
-      
+
       if (quickAnalysis.confidence > 0.8) {
         console.log('✅ High confidence from quick analysis');
         return this.finalizeTriageResult(failure, quickAnalysis, startTime);
       }
-      
+
       // Step 2: TIA-guided narrowing
       let narrowedTargets = failure.failedTargets;
       if (this.config.enableTiaGuided && failure.failedTargets.length > 3) {
         narrowedTargets = await this.narrowTargetsWithTIA(failure);
-        console.log(`🎯 TIA narrowed targets: ${narrowedTargets.length}/${failure.failedTargets.length}`);
+        console.log(
+          `🎯 TIA narrowed targets: ${narrowedTargets.length}/${failure.failedTargets.length}`,
+        );
       }
-      
+
       // Step 3: Binary search bisection
-      const bisectResult = await this.performBisectAnalysis(failure, narrowedTargets);
-      
-      const result = this.finalizeTriageResult(failure, bisectResult, startTime);
-      
+      const bisectResult = await this.performBisectAnalysis(
+        failure,
+        narrowedTargets,
+      );
+
+      const result = this.finalizeTriageResult(
+        failure,
+        bisectResult,
+        startTime,
+      );
+
       // Step 4: Generate PR comment
       if (failure.prNumber) {
         await this.postTriageComment(failure.prNumber, result);
       }
-      
+
       return result;
-      
     } catch (error) {
       console.error(`❌ Triage failed for build ${failure.buildId}:`, error);
-      
+
       return {
         buildId: failure.buildId,
         confidence: 0.1,
@@ -185,7 +197,7 @@ export class AutoTriageBot extends EventEmitter {
         reproSteps: ['Triage failed - manual investigation required'],
         fixHints: [`Error: ${error}`],
         suspectedOwners: [failure.author],
-        relatedIssues: []
+        relatedIssues: [],
       };
     }
   }
@@ -193,70 +205,74 @@ export class AutoTriageBot extends EventEmitter {
   /**
    * Perform quick log-based analysis for obvious failures
    */
-  private async performQuickAnalysis(failure: BuildFailure): Promise<Partial<TriageResult>> {
+  private async performQuickAnalysis(
+    failure: BuildFailure,
+  ): Promise<Partial<TriageResult>> {
     console.log('🔍 Performing quick log analysis...');
-    
+
     const errorPatterns = [
       {
         pattern: /Cannot resolve module ['"]([^'"]+)['"]/,
         type: 'missing_dependency',
         confidence: 0.9,
-        hint: 'Add missing dependency to package.json or check import path'
+        hint: 'Add missing dependency to package.json or check import path',
       },
       {
         pattern: /Error: spawn ENOENT/,
         type: 'missing_binary',
         confidence: 0.85,
-        hint: 'Required binary not found in PATH - check tool installation'
+        hint: 'Required binary not found in PATH - check tool installation',
       },
       {
         pattern: /FATAL ERROR: Ineffective mark-compacts near heap limit/,
         type: 'memory_limit',
         confidence: 0.9,
-        hint: 'Increase Node.js memory limit with --max-old-space-size'
+        hint: 'Increase Node.js memory limit with --max-old-space-size',
       },
       {
         pattern: /TypeError: Cannot read propert(?:y|ies) .* of undefined/,
         type: 'null_reference',
         confidence: 0.7,
-        hint: 'Add null/undefined checks before property access'
+        hint: 'Add null/undefined checks before property access',
       },
       {
         pattern: /Port \d+ is already in use/,
         type: 'port_conflict',
         confidence: 0.95,
-        hint: 'Use a different port or kill the process using this port'
-      }
+        hint: 'Use a different port or kill the process using this port',
+      },
     ];
-    
+
     for (const errorPattern of errorPatterns) {
       const match = failure.buildLogs.match(errorPattern.pattern);
       if (match) {
-        console.log(`✅ Detected ${errorPattern.type} with ${errorPattern.confidence} confidence`);
-        
+        console.log(
+          `✅ Detected ${errorPattern.type} with ${errorPattern.confidence} confidence`,
+        );
+
         return {
           confidence: errorPattern.confidence,
           isolationMethod: 'log_analysis',
           culpritTest: failure.failedTests[0],
           reproSteps: [
             'Run the same build command locally',
-            `Look for: ${match[0]}`
+            `Look for: ${match[0]}`,
           ],
           fixHints: [errorPattern.hint],
-          suspectedOwners: await this.findOwnersForFailure(failure)
+          suspectedOwners: await this.findOwnersForFailure(failure),
         };
       }
     }
-    
+
     // Check for flaky test patterns
     if (failure.failedTests.length > 0) {
       const flakyPatterns = [
         /timeout/i,
         /connection refused/i,
         /temporary failure/i,
-        /race condition/i
+        /race condition/i,
       ];
-      
+
       for (const pattern of flakyPatterns) {
         if (pattern.test(failure.buildLogs)) {
           return {
@@ -264,19 +280,21 @@ export class AutoTriageBot extends EventEmitter {
             isolationMethod: 'log_analysis',
             culpritTest: failure.failedTests[0],
             reproSteps: ['Re-run the failing test multiple times'],
-            fixHints: ['This appears to be a flaky test - consider adding retry logic or fixing timing issues'],
-            suspectedOwners: await this.findOwnersForFailure(failure)
+            fixHints: [
+              'This appears to be a flaky test - consider adding retry logic or fixing timing issues',
+            ],
+            suspectedOwners: await this.findOwnersForFailure(failure),
           };
         }
       }
     }
-    
+
     return {
       confidence: 0.3,
       isolationMethod: 'log_analysis',
       reproSteps: ['Manual investigation required'],
       fixHints: ['No obvious pattern detected in logs'],
-      suspectedOwners: [failure.author]
+      suspectedOwners: [failure.author],
     };
   }
 
@@ -287,17 +305,20 @@ export class AutoTriageBot extends EventEmitter {
     try {
       // Get the commit diff
       const changedFiles = await this.getCommitDiff(failure.commitHash);
-      
+
       // Use TIA to find potentially affected targets
       const impactAnalysis = await this.tiaAnalyzer.analyzeV2(changedFiles);
-      
+
       // Intersect with failed targets
-      const relevantTargets = failure.failedTargets.filter(target =>
-        impactAnalysis.testsToRun.some(test => test.includes(target) || target.includes(test))
+      const relevantTargets = failure.failedTargets.filter((target) =>
+        impactAnalysis.testsToRun.some(
+          (test) => test.includes(target) || target.includes(test),
+        ),
       );
-      
-      return relevantTargets.length > 0 ? relevantTargets : failure.failedTargets.slice(0, 3);
-      
+
+      return relevantTargets.length > 0
+        ? relevantTargets
+        : failure.failedTargets.slice(0, 3);
     } catch (error) {
       console.warn('⚠️ TIA narrowing failed, using all targets:', error);
       return failure.failedTargets;
@@ -309,39 +330,51 @@ export class AutoTriageBot extends EventEmitter {
    */
   private async performBisectAnalysis(
     failure: BuildFailure,
-    targetsList: string[]
+    targetsList: string[],
   ): Promise<Partial<TriageResult>> {
     console.log('🔍 Starting bisect analysis...');
-    
+
     // Find a good commit to bisect from
-    const goodCommit = await this.findGoodCommit(failure.commitHash, failure.branch);
-    
+    const goodCommit = await this.findGoodCommit(
+      failure.commitHash,
+      failure.branch,
+    );
+
     if (!goodCommit) {
       return {
         confidence: 0.2,
         isolationMethod: 'bisect',
         reproSteps: ['Could not find a recent good commit for bisection'],
-        fixHints: ['Manual investigation required - no recent passing builds found'],
-        suspectedOwners: [failure.author]
+        fixHints: [
+          'Manual investigation required - no recent passing builds found',
+        ],
+        suspectedOwners: [failure.author],
       };
     }
-    
+
     // Get commit range for bisection
-    const commitRange = await this.getCommitRange(goodCommit, failure.commitHash);
-    
+    const commitRange = await this.getCommitRange(
+      goodCommit,
+      failure.commitHash,
+    );
+
     if (commitRange.length <= 1) {
       return {
         confidence: 0.9,
         isolationMethod: 'bisect',
         culpritCommit: failure.commitHash,
-        reproSteps: [`This is the only commit since last good build (${goodCommit.slice(0, 8)})`],
+        reproSteps: [
+          `This is the only commit since last good build (${goodCommit.slice(0, 8)})`,
+        ],
         fixHints: ['Review changes in this commit'],
-        suspectedOwners: [failure.author]
+        suspectedOwners: [failure.author],
       };
     }
-    
-    console.log(`🔍 Bisecting ${commitRange.length} commits between ${goodCommit.slice(0, 8)} (good) and ${failure.commitHash.slice(0, 8)} (bad)`);
-    
+
+    console.log(
+      `🔍 Bisecting ${commitRange.length} commits between ${goodCommit.slice(0, 8)} (good) and ${failure.commitHash.slice(0, 8)} (bad)`,
+    );
+
     // Create bisect session
     const session: BisectSession = {
       id: `bisect_${failure.buildId}`,
@@ -351,21 +384,24 @@ export class AutoTriageBot extends EventEmitter {
       candidates: commitRange,
       tested: new Map(),
       startTime: Date.now(),
-      status: 'running'
+      status: 'running',
     };
-    
+
     this.activeSessions.set(session.id, session);
-    
+
     try {
-      const culpritCommit = await this.binarySearchCommits(session, targetsList);
-      
+      const culpritCommit = await this.binarySearchCommits(
+        session,
+        targetsList,
+      );
+
       session.status = 'completed';
-      
+
       if (culpritCommit) {
         console.log(`✅ Bisect isolated culprit: ${culpritCommit.slice(0, 8)}`);
-        
+
         const commitInfo = await this.getCommitInfo(culpritCommit);
-        
+
         return {
           confidence: 0.85,
           isolationMethod: 'bisect',
@@ -373,38 +409,38 @@ export class AutoTriageBot extends EventEmitter {
           reproSteps: [
             `Check out commit: git checkout ${culpritCommit}`,
             `Run failing targets: ${targetsList.join(', ')}`,
-            'Compare with previous commit to see the difference'
+            'Compare with previous commit to see the difference',
           ],
           fixHints: [
             'Review the changes in this commit',
             'Check if any new dependencies or configuration changes were introduced',
-            'Look for syntax errors or breaking changes'
+            'Look for syntax errors or breaking changes',
           ],
           suspectedOwners: [commitInfo.author, failure.author],
-          relatedIssues: await this.findRelatedIssues(culpritCommit)
+          relatedIssues: await this.findRelatedIssues(culpritCommit),
         };
       } else {
         return {
           confidence: 0.4,
           isolationMethod: 'bisect',
           reproSteps: ['Bisect could not isolate a specific commit'],
-          fixHints: ['The failure might be non-deterministic or infrastructure related'],
-          suspectedOwners: [failure.author]
+          fixHints: [
+            'The failure might be non-deterministic or infrastructure related',
+          ],
+          suspectedOwners: [failure.author],
         };
       }
-      
     } catch (error) {
       console.error('❌ Bisect failed:', error);
       session.status = 'failed';
-      
+
       return {
         confidence: 0.2,
         isolationMethod: 'bisect',
         reproSteps: ['Bisect analysis failed'],
         fixHints: [`Bisect error: ${error}`],
-        suspectedOwners: [failure.author]
+        suspectedOwners: [failure.author],
       };
-      
     } finally {
       this.activeSessions.delete(session.id);
     }
@@ -415,21 +451,23 @@ export class AutoTriageBot extends EventEmitter {
    */
   private async binarySearchCommits(
     session: BisectSession,
-    targetsList: string[]
+    targetsList: string[],
   ): Promise<string | null> {
     let left = 0;
     let right = session.candidates.length - 1;
-    
+
     while (left < right) {
       const mid = Math.floor((left + right) / 2);
       const candidate = session.candidates[mid];
-      
-      console.log(`🔍 Testing commit ${candidate.slice(0, 8)} (${mid + 1}/${session.candidates.length})`);
-      
+
+      console.log(
+        `🔍 Testing commit ${candidate.slice(0, 8)} (${mid + 1}/${session.candidates.length})`,
+      );
+
       // Check if we've already tested this commit
       const cached = session.tested.get(candidate);
       let result: 'good' | 'bad' | 'skip';
-      
+
       if (cached) {
         result = cached;
         console.log(`📦 Using cached result: ${result}`);
@@ -437,7 +475,7 @@ export class AutoTriageBot extends EventEmitter {
         result = await this.testCommit(candidate, targetsList);
         session.tested.set(candidate, result);
       }
-      
+
       if (result === 'good') {
         left = mid + 1;
       } else if (result === 'bad') {
@@ -446,47 +484,54 @@ export class AutoTriageBot extends EventEmitter {
         // Skip this commit, try the next one
         left = mid + 1;
       }
-      
+
       // Check timeout
       if (Date.now() - session.startTime > this.config.bisectTimeout) {
         console.warn('⏰ Bisect timeout reached');
         session.status = 'timeout';
         break;
       }
-      
+
       // Check depth limit
       if (session.tested.size > this.config.maxBisectDepth) {
         console.warn('⚠️ Max bisect depth reached');
         break;
       }
     }
-    
+
     return left < session.candidates.length ? session.candidates[left] : null;
   }
 
   /**
    * Test a specific commit with replay caching
    */
-  private async testCommit(commit: string, targets: string[]): Promise<'good' | 'bad' | 'skip'> {
+  private async testCommit(
+    commit: string,
+    targets: string[],
+  ): Promise<'good' | 'bad' | 'skip'> {
     for (const target of targets) {
       const cacheKey = `${commit}:${target}`;
-      
+
       // Check replay cache first
       const cached = this.replayCache.get(cacheKey);
-      if (cached && (Date.now() - cached.timestamp) < this.config.replayCacheTtl) {
+      if (
+        cached &&
+        Date.now() - cached.timestamp < this.config.replayCacheTtl
+      ) {
         console.log(`📦 Replay cache hit for ${commit.slice(0, 8)}:${target}`);
-        this.metrics.bisectCacheHitRate = (this.metrics.bisectCacheHitRate + 1) / 2; // Running average
+        this.metrics.bisectCacheHitRate =
+          (this.metrics.bisectCacheHitRate + 1) / 2; // Running average
         return cached.result === 'pass' ? 'good' : 'bad';
       }
-      
+
       // Execute test
       console.log(`🧪 Testing ${target} at commit ${commit.slice(0, 8)}`);
-      
+
       try {
         const startTime = performance.now();
         const testResult = await this.executeTest(commit, target);
         const duration = performance.now() - startTime;
-        
+
         // Cache the result
         this.replayCache.set(cacheKey, {
           commitHash: commit,
@@ -495,86 +540,103 @@ export class AutoTriageBot extends EventEmitter {
           output: testResult.output,
           duration,
           timestamp: Date.now(),
-          ttl: this.config.replayCacheTtl
+          ttl: this.config.replayCacheTtl,
         });
-        
+
         if (!testResult.success) {
           return 'bad';
         }
-        
       } catch (error) {
-        console.warn(`⚠️ Test execution failed for ${commit.slice(0, 8)}:${target}, skipping:`, error);
+        console.warn(
+          `⚠️ Test execution failed for ${commit.slice(0, 8)}:${target}, skipping:`,
+          error,
+        );
         return 'skip';
       }
     }
-    
+
     return 'good'; // All targets passed
   }
 
   /**
    * Execute a test at a specific commit
    */
-  private async executeTest(commit: string, target: string): Promise<{ success: boolean; output: string }> {
+  private async executeTest(
+    commit: string,
+    target: string,
+  ): Promise<{ success: boolean; output: string }> {
     // This would integrate with the actual build system
     // For now, simulate with some realistic behavior
-    
+
     await this.delay(2000 + Math.random() * 3000); // 2-5 second simulation
-    
+
     // Simulate different outcomes based on commit hash
     const hash = this.hashString(`${commit}:${target}`);
     const success = hash % 10 < 7; // 70% success rate for simulation
-    
+
     return {
       success,
-      output: success ? 'All tests passed' : `Test failed: ${target} at ${commit.slice(0, 8)}`
+      output: success
+        ? 'All tests passed'
+        : `Test failed: ${target} at ${commit.slice(0, 8)}`,
     };
   }
 
   /**
    * Find a recent good commit for bisection baseline
    */
-  private async findGoodCommit(badCommit: string, branch: string): Promise<string | null> {
+  private async findGoodCommit(
+    badCommit: string,
+    branch: string,
+  ): Promise<string | null> {
     // This would query the actual build history
     // For simulation, return a plausible good commit
-    
+
     const commits = await this.getRecentCommits(branch, 10);
-    
+
     // Find the first commit before badCommit that has a successful build
     for (const commit of commits) {
       if (commit === badCommit) continue;
-      
+
       // Check if this commit has a successful build record
       if (await this.hasSuccessfulBuild(commit)) {
         return commit;
       }
     }
-    
+
     return null;
   }
 
   /**
    * Get commit range for bisection
    */
-  private async getCommitRange(goodCommit: string, badCommit: string): Promise<string[]> {
+  private async getCommitRange(
+    goodCommit: string,
+    badCommit: string,
+  ): Promise<string[]> {
     // This would use git to get the actual commit range
     // For simulation, generate some commits
-    
+
     const commits = [];
     for (let i = 0; i < 5; i++) {
-      commits.push(`commit_${goodCommit.slice(0, 4)}_to_${badCommit.slice(0, 4)}_${i}`);
+      commits.push(
+        `commit_${goodCommit.slice(0, 4)}_to_${badCommit.slice(0, 4)}_${i}`,
+      );
     }
-    
+
     return commits;
   }
 
   /**
    * Get information about a commit
    */
-  private async getCommitInfo(commit: string): Promise<{ author: string; message: string }> {
+  private async getCommitInfo(
+    commit: string,
+  ): Promise<{ author: string; message: string }> {
     // This would query git for actual commit info
     return {
       author: 'developer-' + (this.hashString(commit) % 5),
-      message: `Commit ${commit.slice(0, 8)} - simulated commit message`
+      message: `Commit ${commit.slice(0, 8)} - simulated commit message`,
     };
   }
 
@@ -584,11 +646,11 @@ export class AutoTriageBot extends EventEmitter {
   private async findRelatedIssues(commit: string): Promise<string[]> {
     // This would search for related GitHub issues, JIRA tickets, etc.
     const issues = [];
-    
+
     if (this.hashString(commit) % 3 === 0) {
       issues.push(`ISSUE-${this.hashString(commit) % 1000}`);
     }
-    
+
     return issues;
   }
 
@@ -597,11 +659,12 @@ export class AutoTriageBot extends EventEmitter {
    */
   private async findOwnersForFailure(failure: BuildFailure): Promise<string[]> {
     const owners = [failure.author];
-    
+
     // This would parse CODEOWNERS and find owners for changed files
     const changedFiles = await this.getCommitDiff(failure.commitHash);
-    
-    for (const file of changedFiles.slice(0, 3)) { // Check top 3 files
+
+    for (const file of changedFiles.slice(0, 3)) {
+      // Check top 3 files
       if (file.startsWith('src/auth/')) {
         owners.push('auth-team');
       } else if (file.startsWith('src/api/')) {
@@ -610,7 +673,7 @@ export class AutoTriageBot extends EventEmitter {
         owners.push('qa-team');
       }
     }
-    
+
     return [...new Set(owners)]; // Remove duplicates
   }
 
@@ -623,19 +686,22 @@ export class AutoTriageBot extends EventEmitter {
       'src/app.ts',
       'src/components/Button.tsx',
       'src/utils/helpers.ts',
-      'test/app.test.ts'
+      'test/app.test.ts',
     ];
   }
 
   /**
    * Post triage results as a PR comment
    */
-  private async postTriageComment(prNumber: number, result: TriageResult): Promise<void> {
+  private async postTriageComment(
+    prNumber: number,
+    result: TriageResult,
+  ): Promise<void> {
     const comment = this.generateTriageComment(result);
-    
+
     console.log(`📝 Posting triage comment to PR #${prNumber}:`);
     console.log(comment);
-    
+
     // This would integrate with GitHub API to post the actual comment
     this.emit('triage_comment_posted', { prNumber, comment, result });
   }
@@ -645,22 +711,23 @@ export class AutoTriageBot extends EventEmitter {
    */
   private generateTriageComment(result: TriageResult): string {
     const confidence = Math.round(result.confidence * 100);
-    const confidenceEmoji = confidence > 80 ? '🎯' : confidence > 60 ? '🔍' : '❓';
-    
+    const confidenceEmoji =
+      confidence > 80 ? '🎯' : confidence > 60 ? '🔍' : '❓';
+
     let comment = `## ${confidenceEmoji} Auto-Triage Results\n\n`;
     comment += `**Confidence:** ${confidence}% (${result.isolationMethod})\n`;
     comment += `**Time to isolate:** ${(result.timeToIsolate / 1000).toFixed(1)}s\n\n`;
-    
+
     if (result.culpritCommit) {
       comment += `### 🎯 Culprit Commit\n`;
       comment += `\`${result.culpritCommit.slice(0, 8)}\`\n\n`;
     }
-    
+
     if (result.culpritTest) {
       comment += `### 🧪 Failing Test\n`;
       comment += `\`${result.culpritTest}\`\n\n`;
     }
-    
+
     if (result.reproSteps.length > 0) {
       comment += `### 🔄 Repro Steps\n`;
       result.reproSteps.forEach((step, i) => {
@@ -668,45 +735,45 @@ export class AutoTriageBot extends EventEmitter {
       });
       comment += '\n';
     }
-    
+
     if (result.fixHints.length > 0) {
       comment += `### 💡 Fix Hints\n`;
-      result.fixHints.forEach(hint => {
+      result.fixHints.forEach((hint) => {
         comment += `- ${hint}\n`;
       });
       comment += '\n';
     }
-    
+
     if (result.suspectedOwners.length > 0) {
       comment += `### 👥 Suspected Owners\n`;
-      result.suspectedOwners.forEach(owner => {
+      result.suspectedOwners.forEach((owner) => {
         comment += `- @${owner}\n`;
       });
       comment += '\n';
     }
-    
+
     if (result.relatedIssues.length > 0) {
       comment += `### 🔗 Related Issues\n`;
-      result.relatedIssues.forEach(issue => {
+      result.relatedIssues.forEach((issue) => {
         comment += `- ${issue}\n`;
       });
     }
-    
+
     comment += '\n---\n*Generated by Composer Auto-Triage Bot*';
-    
+
     return comment;
   }
 
   // Helper methods
   private async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private hashString(str: string): number {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
@@ -718,7 +785,7 @@ export class AutoTriageBot extends EventEmitter {
   }
 
   private async waitForAvailableSlot(): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const checkSlot = () => {
         if (this.activeSessions.size < this.config.maxConcurrentBisects) {
           resolve();
@@ -730,7 +797,10 @@ export class AutoTriageBot extends EventEmitter {
     });
   }
 
-  private async getRecentCommits(branch: string, count: number): Promise<string[]> {
+  private async getRecentCommits(
+    branch: string,
+    count: number,
+  ): Promise<string[]> {
     // Simulate getting recent commits
     const commits = [];
     for (let i = 0; i < count; i++) {
@@ -747,14 +817,14 @@ export class AutoTriageBot extends EventEmitter {
   private cleanupReplayCache(): void {
     const now = Date.now();
     let cleaned = 0;
-    
+
     for (const [key, cache] of this.replayCache.entries()) {
       if (now - cache.timestamp > cache.ttl) {
         this.replayCache.delete(key);
         cleaned++;
       }
     }
-    
+
     if (cleaned > 0) {
       console.log(`🧹 Cleaned up ${cleaned} expired replay cache entries`);
     }
@@ -763,16 +833,17 @@ export class AutoTriageBot extends EventEmitter {
   private finalizeTriageResult(
     failure: BuildFailure,
     partialResult: Partial<TriageResult>,
-    startTime: number
+    startTime: number,
   ): TriageResult {
     const timeToIsolate = performance.now() - startTime;
-    
+
     if (partialResult.confidence && partialResult.confidence > 0.7) {
       this.metrics.successfulIsolations++;
     }
-    
-    this.metrics.avgTimeToIsolate = (this.metrics.avgTimeToIsolate + timeToIsolate) / 2;
-    
+
+    this.metrics.avgTimeToIsolate =
+      (this.metrics.avgTimeToIsolate + timeToIsolate) / 2;
+
     return {
       buildId: failure.buildId,
       confidence: 0.1,
@@ -782,7 +853,7 @@ export class AutoTriageBot extends EventEmitter {
       fixHints: [],
       suspectedOwners: [],
       relatedIssues: [],
-      ...partialResult
+      ...partialResult,
     };
   }
 
@@ -798,9 +869,10 @@ export class AutoTriageBot extends EventEmitter {
       ...this.metrics,
       activeBisects: this.activeSessions.size,
       cacheSize: this.replayCache.size,
-      successRate: this.metrics.totalTriages > 0 
-        ? this.metrics.successfulIsolations / this.metrics.totalTriages 
-        : 0
+      successRate:
+        this.metrics.totalTriages > 0
+          ? this.metrics.successfulIsolations / this.metrics.totalTriages
+          : 0,
     };
   }
 
@@ -813,15 +885,15 @@ export class AutoTriageBot extends EventEmitter {
 
   async shutdown(): Promise<void> {
     console.log('🛑 Shutting down auto-triage bot...');
-    
+
     // Cancel active sessions
     for (const session of this.activeSessions.values()) {
       session.status = 'failed';
     }
-    
+
     this.activeSessions.clear();
     this.replayCache.clear();
-    
+
     console.log('✅ Auto-triage bot shut down');
   }
 }
@@ -830,7 +902,7 @@ export class AutoTriageBot extends EventEmitter {
 export function createAutoTriageBot(
   tiaAnalyzer: TestImpactAnalyzerV2,
   graphService: FederatedGraphService,
-  config?: any
+  config?: any,
 ): AutoTriageBot {
   return new AutoTriageBot(tiaAnalyzer, graphService, config);
 }

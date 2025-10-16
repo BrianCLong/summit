@@ -136,10 +136,10 @@ export interface StageAction {
 
 /**
  * Maestro Integration Orchestrator v5-v10
- * 
+ *
  * Integrates all Maestro sprint systems into a unified autonomous release train:
  * - v5: Advanced Risk Analysis Engine
- * - v6: Intelligent Rollback System  
+ * - v6: Intelligent Rollback System
  * - v7: Cross-Service Orchestration
  * - v8: AI-Powered Testing Strategy
  * - v9: Advanced Monitoring & Observability
@@ -164,7 +164,7 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
   constructor(
     logger: Logger,
     metricsCollector: MetricsCollector,
-    config: MaestroConfig
+    config: MaestroConfig,
   ) {
     super();
     this.logger = logger;
@@ -177,7 +177,9 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
    */
   async initialize(): Promise<void> {
     try {
-      this.logger.info(`Initializing Maestro Integration Orchestrator v${this.config.version}...`);
+      this.logger.info(
+        `Initializing Maestro Integration Orchestrator v${this.config.version}...`,
+      );
 
       // Initialize sprint systems based on feature flags
       await this.initializeSprintSystems();
@@ -192,15 +194,19 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       this.setupMonitoring();
 
       this.isInitialized = true;
-      this.logger.info('Maestro Integration Orchestrator initialized successfully');
-      
+      this.logger.info(
+        'Maestro Integration Orchestrator initialized successfully',
+      );
+
       this.emit('initialized', {
         version: this.config.version,
-        features: this.config.features
+        features: this.config.features,
       });
-
     } catch (error) {
-      this.logger.error('Failed to initialize Maestro Integration Orchestrator:', error);
+      this.logger.error(
+        'Failed to initialize Maestro Integration Orchestrator:',
+        error,
+      );
       throw error;
     }
   }
@@ -220,14 +226,14 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
     metrics: Record<string, number>;
   }> {
     this.logger.info(`Executing deployment pipeline: ${pipeline.name}`);
-    
+
     const startTime = Date.now();
     const results = {
       pipelineId: pipeline.id,
       status: 'success' as const,
       stages: [] as { stageId: string; status: string; duration: number }[],
       rollbackExecuted: false,
-      metrics: {} as Record<string, number>
+      metrics: {} as Record<string, number>,
     };
 
     try {
@@ -235,7 +241,9 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       this.activePipelines.set(pipeline.id, pipeline);
 
       // Start observability tracing
-      const trace = this.observabilityEngine?.startTrace(`deployment_pipeline_${pipeline.id}`);
+      const trace = this.observabilityEngine?.startTrace(
+        `deployment_pipeline_${pipeline.id}`,
+      );
 
       // Stage 1: Risk Assessment (v5)
       if (this.config.features.riskAnalysis && this.riskAnalysisEngine) {
@@ -245,8 +253,10 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
 
         // Check if risk is too high
         if (riskStage.result?.riskScore > pipeline.riskThreshold) {
-          this.logger.warn(`Risk score ${riskStage.result.riskScore} exceeds threshold ${pipeline.riskThreshold}`);
-          
+          this.logger.warn(
+            `Risk score ${riskStage.result.riskScore} exceeds threshold ${pipeline.riskThreshold}`,
+          );
+
           if (riskStage.result.riskScore > 0.8) {
             throw new Error('Risk score too high for deployment');
           }
@@ -254,7 +264,11 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       }
 
       // Stage 2: AI-Powered Testing (v8)
-      if (this.config.features.aiTesting && this.testingStrategy && pipeline.testingRequired) {
+      if (
+        this.config.features.aiTesting &&
+        this.testingStrategy &&
+        pipeline.testingRequired
+      ) {
         const testStage = await this.executeTestingStage(pipeline);
         results.stages.push(testStage);
         results.testResults = testStage.result;
@@ -266,14 +280,20 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       }
 
       // Stage 3: Compliance Verification (v10)
-      if (this.config.features.complianceGovernance && this.complianceEngine && pipeline.complianceRequired) {
+      if (
+        this.config.features.complianceGovernance &&
+        this.complianceEngine &&
+        pipeline.complianceRequired
+      ) {
         const complianceStage = await this.executeComplianceStage(pipeline);
         results.stages.push(complianceStage);
         results.complianceResults = complianceStage.result;
 
         // Check compliance
         if (complianceStage.result?.violations?.length > 0) {
-          const criticalViolations = complianceStage.result.violations.filter((v: any) => v.severity === 'critical');
+          const criticalViolations = complianceStage.result.violations.filter(
+            (v: any) => v.severity === 'critical',
+          );
           if (criticalViolations.length > 0) {
             throw new Error('Critical compliance violations detected');
           }
@@ -281,7 +301,10 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       }
 
       // Stage 4: Cross-Service Deployment (v7)
-      if (this.config.features.crossServiceOrchestration && this.serviceOrchestrator) {
+      if (
+        this.config.features.crossServiceOrchestration &&
+        this.serviceOrchestrator
+      ) {
         const deploymentStage = await this.executeDeploymentStage(pipeline);
         results.stages.push(deploymentStage);
         results.deploymentResults = deploymentStage.result;
@@ -293,7 +316,10 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       }
 
       // Stage 5: Post-Deployment Monitoring (v9)
-      if (this.config.features.advancedObservability && this.observabilityEngine) {
+      if (
+        this.config.features.advancedObservability &&
+        this.observabilityEngine
+      ) {
         await this.setupPostDeploymentMonitoring(pipeline);
       }
 
@@ -306,20 +332,22 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       results.metrics.totalDuration = duration;
       results.metrics.stageCount = results.stages.length;
 
-      this.logger.info(`Deployment pipeline completed successfully: ${pipeline.name}`, {
-        duration,
-        stages: results.stages.length,
-        riskScore: results.riskAssessment?.riskScore
-      });
+      this.logger.info(
+        `Deployment pipeline completed successfully: ${pipeline.name}`,
+        {
+          duration,
+          stages: results.stages.length,
+          riskScore: results.riskAssessment?.riskScore,
+        },
+      );
 
       this.emit('pipelineCompleted', results);
       return results;
-
     } catch (error) {
       this.logger.error(`Deployment pipeline failed: ${pipeline.name}`, error);
-      
+
       results.status = 'failure';
-      
+
       // Execute rollback if available (v6)
       if (this.config.features.intelligentRollback && this.rollbackSystem) {
         try {
@@ -332,11 +360,10 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
 
       this.emit('pipelineFailed', { results, error });
       return results;
-
     } finally {
       // Clean up
       this.activePipelines.delete(pipeline.id);
-      
+
       // Record metrics
       this.recordPipelineMetrics(pipeline, results);
     }
@@ -361,9 +388,9 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
     metrics: Record<string, number>;
   }> {
     const uptime = process.uptime();
-    
+
     const systems: any = {};
-    
+
     // Collect status from each system
     if (this.riskAnalysisEngine) {
       systems.riskAnalysis = {
@@ -404,7 +431,7 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       uptime,
       systems,
       activePipelines: this.activePipelines.size,
-      metrics
+      metrics,
     };
   }
 
@@ -468,12 +495,12 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
         await this.rollbackSystem?.registerDeployment(event.deploymentId, {
           services: event.services || [],
           environment: event.environment || 'production',
-          rollbackStrategy: 'immediate'
+          rollbackStrategy: 'immediate',
         });
       });
     }
 
-    // Testing → Risk Analysis integration  
+    // Testing → Risk Analysis integration
     if (this.testingStrategy && this.riskAnalysisEngine) {
       this.testingStrategy.on('testsFailed', async (event) => {
         // Increase risk score based on test failures
@@ -506,7 +533,7 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
         name: 'maestro.deployments.started',
         value: 1,
         type: 'counter',
-        tags: { pipeline: event.pipelineId }
+        tags: { pipeline: event.pipelineId },
       });
 
       this.complianceEngine?.recordAuditEvent({
@@ -517,7 +544,7 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           id: 'maestro_orchestrator',
           type: 'system',
           name: 'Maestro Orchestrator',
-          roles: ['deployment']
+          roles: ['deployment'],
         },
         resource: {
           id: event.pipelineId,
@@ -525,7 +552,7 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           name: event.pipelineName,
           location: 'maestro',
           sensitivity: 'internal',
-          tags: { version: this.config.version }
+          tags: { version: this.config.version },
         },
         action: 'deployment_initiated',
         outcome: 'success',
@@ -535,8 +562,8 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           source: 'maestro_orchestrator',
           retention: 2555, // 7 years
           encrypted: false,
-          signed: false
-        }
+          signed: false,
+        },
       });
     });
 
@@ -564,7 +591,9 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
   /**
    * Execute risk assessment stage
    */
-  private async executeRiskAssessmentStage(pipeline: DeploymentPipeline): Promise<{
+  private async executeRiskAssessmentStage(
+    pipeline: DeploymentPipeline,
+  ): Promise<{
     stageId: string;
     status: string;
     duration: number;
@@ -591,28 +620,28 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           complexity: 15,
           duplications: 2,
           securityVulnerabilities: 0,
-          performanceImpact: 0.1
+          performanceImpact: 0.1,
         },
         testCoverage: 85,
-        previousDeployments: []
+        previousDeployments: [],
       };
 
-      const riskAssessment = await this.riskAnalysisEngine.assessDeploymentRisk(context);
+      const riskAssessment =
+        await this.riskAnalysisEngine.assessDeploymentRisk(context);
 
       return {
         stageId: 'risk_assessment',
         status: riskAssessment.riskScore > 0.8 ? 'warning' : 'success',
         duration: Date.now() - startTime,
-        result: riskAssessment
+        result: riskAssessment,
       };
-
     } catch (error) {
       this.logger.error('Risk assessment stage failed:', error);
       return {
         stageId: 'risk_assessment',
         status: 'failed',
         duration: Date.now() - startTime,
-        result: { error: error.message }
+        result: { error: error.message },
       };
     }
   }
@@ -637,9 +666,9 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       // Select optimal tests for the deployment
       const testSelection = await this.testingStrategy.selectOptimalTests(
         600000, // 10 minutes available
-        pipeline.services.map(s => `${s}.ts`), // Changed files
+        pipeline.services.map((s) => `${s}.ts`), // Changed files
         ['unit', 'integration'], // Test types
-        'medium' // Priority level
+        'medium', // Priority level
       );
 
       // Execute selected tests
@@ -649,14 +678,19 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           parallel: true,
           maxParallelism: 4,
           collectCoverage: true,
-          collectPerformanceMetrics: true
-        }
+          collectPerformanceMetrics: true,
+        },
       );
 
-      const success = testExecutions.every(e => e.status === 'completed');
-      const totalTests = testExecutions.reduce((sum, e) => sum + e.results.length, 0);
-      const passedTests = testExecutions.reduce((sum, e) => 
-        sum + e.results.filter(r => r.status === 'passed').length, 0);
+      const success = testExecutions.every((e) => e.status === 'completed');
+      const totalTests = testExecutions.reduce(
+        (sum, e) => sum + e.results.length,
+        0,
+      );
+      const passedTests = testExecutions.reduce(
+        (sum, e) => sum + e.results.filter((r) => r.status === 'passed').length,
+        0,
+      );
 
       return {
         stageId: 'ai_testing',
@@ -668,17 +702,16 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           passedTests,
           failedTests: totalTests - passedTests,
           coverage: testSelection.expectedCoverage,
-          executions: testExecutions
-        }
+          executions: testExecutions,
+        },
       };
-
     } catch (error) {
       this.logger.error('Testing stage failed:', error);
       return {
         stageId: 'ai_testing',
         status: 'failed',
         duration: Date.now() - startTime,
-        result: { error: error.message, success: false }
+        result: { error: error.message, success: false },
       };
     }
   }
@@ -701,15 +734,19 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       }
 
       // Detect policy violations for the deployment
-      const violations = await this.complianceEngine.detectViolations(undefined, {
-        services: pipeline.services,
-        environments: [pipeline.environment]
-      });
+      const violations = await this.complianceEngine.detectViolations(
+        undefined,
+        {
+          services: pipeline.services,
+          environments: [pipeline.environment],
+        },
+      );
 
       // Get compliance overview
       const overview = await this.complianceEngine.getComplianceOverview();
 
-      const success = violations.filter(v => v.severity === 'critical').length === 0;
+      const success =
+        violations.filter((v) => v.severity === 'critical').length === 0;
 
       return {
         stageId: 'compliance_verification',
@@ -719,18 +756,19 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           success,
           violations,
           overview,
-          criticalViolations: violations.filter(v => v.severity === 'critical'),
-          warnings: violations.filter(v => v.severity === 'warning')
-        }
+          criticalViolations: violations.filter(
+            (v) => v.severity === 'critical',
+          ),
+          warnings: violations.filter((v) => v.severity === 'warning'),
+        },
       };
-
     } catch (error) {
       this.logger.error('Compliance stage failed:', error);
       return {
         stageId: 'compliance_verification',
         status: 'failed',
         duration: Date.now() - startTime,
-        result: { error: error.message, success: false }
+        result: { error: error.message, success: false },
       };
     }
   }
@@ -753,15 +791,19 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       }
 
       // Create orchestration plan
-      const plan = await this.serviceOrchestrator.createOrchestrationPlan(pipeline.services, {
-        strategy: 'safe',
-        maxParallelism: 3,
-        canaryEnabled: pipeline.strategy === 'canary',
-        autoRollback: true
-      });
+      const plan = await this.serviceOrchestrator.createOrchestrationPlan(
+        pipeline.services,
+        {
+          strategy: 'safe',
+          maxParallelism: 3,
+          canaryEnabled: pipeline.strategy === 'canary',
+          autoRollback: true,
+        },
+      );
 
       // Execute the plan
-      const execution = await this.serviceOrchestrator.executeOrchestrationPlan(plan);
+      const execution =
+        await this.serviceOrchestrator.executeOrchestrationPlan(plan);
 
       const success = execution.status === 'completed';
 
@@ -775,17 +817,16 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           planId: plan.id,
           executionId: execution.id,
           servicesDeployed: execution.serviceStatuses.size,
-          errors: execution.errors
-        }
+          errors: execution.errors,
+        },
       };
-
     } catch (error) {
       this.logger.error('Deployment stage failed:', error);
       return {
         stageId: 'cross_service_deployment',
         status: 'failed',
         duration: Date.now() - startTime,
-        result: { error: error.message, success: false }
+        result: { error: error.message, success: false },
       };
     }
   }
@@ -793,7 +834,10 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
   /**
    * Execute rollback stage
    */
-  private async executeRollbackStage(pipeline: DeploymentPipeline, originalError: any): Promise<void> {
+  private async executeRollbackStage(
+    pipeline: DeploymentPipeline,
+    originalError: any,
+  ): Promise<void> {
     this.logger.warn('Executing intelligent rollback stage...');
 
     try {
@@ -814,16 +858,15 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           estimatedDowntime: 300, // 5 minutes
           userImpact: 0.05, // 5% of users
           dataLoss: 'none' as const,
-          rollbackComplexity: 'medium' as const
+          rollbackComplexity: 'medium' as const,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Execute rollback
       await this.rollbackSystem.executeRollback(decision);
 
       this.logger.info('Rollback executed successfully');
-
     } catch (error) {
       this.logger.error('Rollback execution failed:', error);
       throw error;
@@ -833,7 +876,9 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
   /**
    * Setup post-deployment monitoring
    */
-  private async setupPostDeploymentMonitoring(pipeline: DeploymentPipeline): Promise<void> {
+  private async setupPostDeploymentMonitoring(
+    pipeline: DeploymentPipeline,
+  ): Promise<void> {
     if (!this.observabilityEngine) return;
 
     this.logger.info('Setting up post-deployment monitoring...');
@@ -853,15 +898,15 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           thresholds: {
             target: 0.999,
             warning: 0.99,
-            critical: 0.95
-          }
+            critical: 0.95,
+          },
         },
         objectives: [
           {
             period: '24h',
             target: 0.999,
-            description: '99.9% availability over 24 hours'
-          }
+            description: '99.9% availability over 24 hours',
+          },
         ],
         alerting: {
           enabled: true,
@@ -869,8 +914,8 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
             {
               type: 'webhook',
               config: { url: '/api/alerts/webhook' },
-              enabled: true
-            }
+              enabled: true,
+            },
           ],
           conditions: [
             {
@@ -878,20 +923,20 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
               operator: '<',
               threshold: 0.99,
               duration: 300,
-              severity: 'critical'
-            }
+              severity: 'critical',
+            },
           ],
           escalation: {
             levels: [
               {
                 delay: 300,
                 channels: ['webhook'],
-                condition: 'critical'
-              }
+                condition: 'critical',
+              },
             ],
             autoResolve: true,
-            maxEscalations: 3
-          }
+            maxEscalations: 3,
+          },
         },
         errorBudget: {
           current: 0.001, // 0.1% error budget
@@ -902,23 +947,28 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
             {
               threshold: 50, // Alert at 50% budget consumption
               burnRateWindow: 60,
-              alertSent: false
-            }
-          ]
+              alertSent: false,
+            },
+          ],
         },
         compliance: {
           frameworks: ['SOC2'],
           requirements: [],
           auditTrail: true,
-          retention: 365
-        }
+          retention: 365,
+        },
       });
     }
 
     // Start performance profiling
     for (const service of pipeline.services) {
-      const profilingId = await this.observabilityEngine.startProfiling(service, 300000); // 5 minutes
-      this.logger.info(`Started performance profiling for ${service}: ${profilingId}`);
+      const profilingId = await this.observabilityEngine.startProfiling(
+        service,
+        300000,
+      ); // 5 minutes
+      this.logger.info(
+        `Started performance profiling for ${service}: ${profilingId}`,
+      );
     }
   }
 
@@ -930,20 +980,22 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
 
     // Setup tracing for all major operations
     const originalEmit = this.emit.bind(this);
-    this.emit = function(event: string | symbol, ...args: any[]) {
+    this.emit = function (event: string | symbol, ...args: any[]) {
       // Create trace span for significant events
-      if (typeof event === 'string' && 
-          ['pipelineStarted', 'stageStarted', 'stageCompleted'].includes(event)) {
+      if (
+        typeof event === 'string' &&
+        ['pipelineStarted', 'stageStarted', 'stageCompleted'].includes(event)
+      ) {
         const span = this.observabilityEngine?.startTrace(`maestro_${event}`);
         if (span) {
           this.observabilityEngine?.addSpanTags(span, {
             event: event.toString(),
-            data: JSON.stringify(args[0])
+            data: JSON.stringify(args[0]),
           });
           // Span will be finished when the operation completes
         }
       }
-      
+
       return originalEmit(event, ...args);
     };
   }
@@ -964,7 +1016,7 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           id: 'maestro_system',
           type: 'system',
           name: 'Maestro Orchestrator',
-          roles: ['deployment_automation']
+          roles: ['deployment_automation'],
         },
         resource: {
           id: event.pipelineId,
@@ -972,7 +1024,7 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           name: event.pipelineName,
           location: 'maestro_orchestrator',
           sensitivity: 'internal',
-          tags: { environment: event.environment }
+          tags: { environment: event.environment },
         },
         action: 'pipeline_execution_started',
         outcome: 'success',
@@ -982,8 +1034,8 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
           source: 'maestro_orchestrator',
           retention: 2555, // 7 years for audit compliance
           encrypted: false,
-          signed: true
-        }
+          signed: true,
+        },
       });
     });
 
@@ -993,7 +1045,9 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
   /**
    * Calculate overall system health
    */
-  private calculateOverallHealth(systems: any): 'healthy' | 'degraded' | 'critical' {
+  private calculateOverallHealth(
+    systems: any,
+  ): 'healthy' | 'degraded' | 'critical' {
     // Logic to determine overall health based on individual system status
     const systemStatuses = Object.values(systems).map((system: any) => {
       if (system.errors > 0 || system.failedExecutions > 0) return 'critical';
@@ -1001,8 +1055,10 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       return 'healthy';
     });
 
-    if (systemStatuses.some(status => status === 'critical')) return 'critical';
-    if (systemStatuses.some(status => status === 'degraded')) return 'degraded';
+    if (systemStatuses.some((status) => status === 'critical'))
+      return 'critical';
+    if (systemStatuses.some((status) => status === 'degraded'))
+      return 'degraded';
     return 'healthy';
   }
 
@@ -1014,7 +1070,8 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       uptime: process.uptime(),
       memoryUsage: process.memoryUsage().heapUsed / 1024 / 1024, // MB
       activePipelines: this.activePipelines.size,
-      systemsInitialized: Object.values(this.config.features).filter(Boolean).length
+      systemsInitialized: Object.values(this.config.features).filter(Boolean)
+        .length,
     };
 
     // Collect metrics from each system
@@ -1025,7 +1082,8 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
     }
 
     if (this.serviceOrchestrator) {
-      const orchestrationStats = this.serviceOrchestrator.getOrchestrationStats();
+      const orchestrationStats =
+        this.serviceOrchestrator.getOrchestrationStats();
       metrics.totalServices = orchestrationStats.totalServices;
       metrics.executingPlans = orchestrationStats.executingPlans;
     }
@@ -1036,9 +1094,12 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
   /**
    * Record pipeline metrics
    */
-  private recordPipelineMetrics(pipeline: DeploymentPipeline, results: any): void {
+  private recordPipelineMetrics(
+    pipeline: DeploymentPipeline,
+    results: any,
+  ): void {
     this.metricsCollector.incrementCounter('maestro.pipelines.total');
-    
+
     if (results.status === 'success') {
       this.metricsCollector.incrementCounter('maestro.pipelines.success');
     } else {
@@ -1049,11 +1110,15 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
       this.metricsCollector.incrementCounter('maestro.rollbacks.executed');
     }
 
-    this.metricsCollector.recordHistogram('maestro.pipeline.duration', 
-      results.metrics.totalDuration / 1000);
-    
-    this.metricsCollector.recordGauge('maestro.pipeline.stages', 
-      results.stages.length);
+    this.metricsCollector.recordHistogram(
+      'maestro.pipeline.duration',
+      results.metrics.totalDuration / 1000,
+    );
+
+    this.metricsCollector.recordGauge(
+      'maestro.pipeline.stages',
+      results.stages.length,
+    );
   }
 
   /**
@@ -1062,7 +1127,7 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
   private async performHealthCheck(): Promise<void> {
     try {
       const status = await this.getSystemStatus();
-      
+
       if (status.overall === 'critical') {
         this.logger.error('System health is critical', status);
         this.emit('healthCritical', status);
@@ -1070,7 +1135,6 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
         this.logger.warn('System health is degraded', status);
         this.emit('healthDegraded', status);
       }
-
     } catch (error) {
       this.logger.error('Health check failed:', error);
     }
@@ -1082,11 +1146,10 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
   private async collectAndRecordMetrics(): Promise<void> {
     try {
       const metrics = await this.collectSystemMetrics();
-      
+
       Object.entries(metrics).forEach(([name, value]) => {
         this.metricsCollector.recordGauge(`maestro.${name}`, value);
       });
-
     } catch (error) {
       this.logger.error('Metrics collection failed:', error);
     }
@@ -1129,25 +1192,25 @@ export class MaestroIntegrationOrchestrator extends EventEmitter {
     if (this.complianceEngine) {
       shutdownPromises.push(this.complianceEngine.shutdown());
     }
-    
+
     if (this.observabilityEngine) {
       shutdownPromises.push(this.observabilityEngine.shutdown());
     }
-    
+
     if (this.testingStrategy) {
       shutdownPromises.push(this.testingStrategy.shutdown());
     }
-    
+
     if (this.serviceOrchestrator) {
       shutdownPromises.push(this.serviceOrchestrator.shutdown());
     }
-    
+
     if (this.rollbackSystem) {
       shutdownPromises.push(this.rollbackSystem.shutdown());
     }
 
     // Risk analysis engine doesn't have shutdown method in our implementation
-    
+
     await Promise.all(shutdownPromises);
 
     this.isInitialized = false;

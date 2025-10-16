@@ -11,11 +11,11 @@ import { TenantDatabaseManager } from '../../tenancy/database/TenantDatabaseMana
 /**
  * Migration strategy types
  */
-export type MigrationStrategy = 
-  | 'expand_contract' 
-  | 'blue_green' 
-  | 'rolling' 
-  | 'immediate' 
+export type MigrationStrategy =
+  | 'expand_contract'
+  | 'blue_green'
+  | 'rolling'
+  | 'immediate'
   | 'gradual_cutover';
 
 /**
@@ -26,24 +26,24 @@ export type MigrationPhase = 'expand' | 'migrate' | 'contract' | 'cleanup';
 /**
  * Migration status
  */
-export type MigrationStatus = 
-  | 'pending' 
-  | 'running' 
-  | 'completed' 
-  | 'failed' 
-  | 'rolled_back' 
+export type MigrationStatus =
+  | 'pending'
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'rolled_back'
   | 'cancelled';
 
 /**
  * Migration type classification
  */
-export type MigrationType = 
-  | 'schema_change' 
-  | 'data_migration' 
-  | 'index_creation' 
-  | 'constraint_change' 
-  | 'table_rename' 
-  | 'column_change' 
+export type MigrationType =
+  | 'schema_change'
+  | 'data_migration'
+  | 'index_creation'
+  | 'constraint_change'
+  | 'table_rename'
+  | 'column_change'
   | 'partition_change';
 
 /**
@@ -113,7 +113,12 @@ export interface RollbackPlan {
  * Rollback condition
  */
 export interface RollbackCondition {
-  type: 'timeout' | 'error_rate' | 'performance_degradation' | 'data_integrity' | 'manual';
+  type:
+    | 'timeout'
+    | 'error_rate'
+    | 'performance_degradation'
+    | 'data_integrity'
+    | 'manual';
   threshold: number;
   window: number; // minutes
   enabled: boolean;
@@ -270,7 +275,12 @@ export interface CompatibilityCheck {
  * Breaking change definition
  */
 export interface BreakingChange {
-  type: 'column_removed' | 'table_removed' | 'constraint_added' | 'type_changed' | 'null_constraint_added';
+  type:
+    | 'column_removed'
+    | 'table_removed'
+    | 'constraint_added'
+    | 'type_changed'
+    | 'null_constraint_added';
   table: string;
   column?: string;
   old_value: string;
@@ -299,7 +309,7 @@ export class MigrationManager extends EventEmitter {
       parallelExecutionEnabled: boolean;
       rollbackOnFailure: boolean;
       compatibilityCheckEnabled: boolean;
-    }
+    },
   ) {
     super();
     this.backupManager = new BackupManager();
@@ -319,7 +329,10 @@ export class MigrationManager extends EventEmitter {
     // Perform compatibility analysis
     if (this.config.compatibilityCheckEnabled) {
       const compatibility = await this.checkSchemaCompatibility(migration);
-      if (!compatibility.backward_compatible && migration.riskLevel !== 'critical') {
+      if (
+        !compatibility.backward_compatible &&
+        migration.riskLevel !== 'critical'
+      ) {
         migration.riskLevel = 'high';
       }
     }
@@ -328,7 +341,7 @@ export class MigrationManager extends EventEmitter {
     const checksum = this.generateMigrationChecksum(migration);
     migration.metadata = {
       ...migration.metadata,
-      checksum
+      checksum,
     };
 
     // Store migration
@@ -344,7 +357,7 @@ export class MigrationManager extends EventEmitter {
    */
   async executeMigration(
     migrationId: string,
-    context: Partial<MigrationContext>
+    context: Partial<MigrationContext>,
   ): Promise<MigrationResult> {
     const migration = this.migrations.get(migrationId);
     if (!migration) {
@@ -360,7 +373,7 @@ export class MigrationManager extends EventEmitter {
       executedBy: 'system',
       startTime: new Date(),
       metadata: {},
-      ...context
+      ...context,
     };
 
     // Check if migration is already running
@@ -386,7 +399,7 @@ export class MigrationManager extends EventEmitter {
       affectedRows: 0,
       warnings: [],
       errors: [],
-      context: fullContext
+      context: fullContext,
     };
 
     // Mark migration as active
@@ -399,12 +412,14 @@ export class MigrationManager extends EventEmitter {
       if (!fullContext.skipValidation) {
         const preValidation = await this.executeValidationChecks(
           migration.validation.pre_migration,
-          fullContext
+          fullContext,
         );
         result.validationResults.push(...preValidation);
 
         // Check for critical validation failures
-        const criticalFailures = preValidation.filter(v => v.critical && v.status === 'fail');
+        const criticalFailures = preValidation.filter(
+          (v) => v.critical && v.status === 'fail',
+        );
         if (criticalFailures.length > 0 && !fullContext.forceExecute) {
           result.status = 'failed';
           result.errors.push('Critical pre-migration validation failures');
@@ -413,22 +428,30 @@ export class MigrationManager extends EventEmitter {
       }
 
       // Execute migration phases
-      result.phasesExecuted = await this.executeMigrationPhases(migration, fullContext);
+      result.phasesExecuted = await this.executeMigrationPhases(
+        migration,
+        fullContext,
+      );
 
       // Execute post-migration validation
       if (!fullContext.skipValidation) {
         const postValidation = await this.executeValidationChecks(
           migration.validation.post_migration,
-          fullContext
+          fullContext,
         );
         result.validationResults.push(...postValidation);
 
         // Check for validation failures
-        const failures = postValidation.filter(v => v.status === 'fail');
+        const failures = postValidation.filter((v) => v.status === 'fail');
         if (failures.length > 0) {
-          result.warnings.push(`${failures.length} post-migration validation failures`);
-          
-          if (failures.some(f => f.critical) && this.config.rollbackOnFailure) {
+          result.warnings.push(
+            `${failures.length} post-migration validation failures`,
+          );
+
+          if (
+            failures.some((f) => f.critical) &&
+            this.config.rollbackOnFailure
+          ) {
             await this.executeRollback(migration, fullContext);
             result.status = 'rolled_back';
             return result;
@@ -437,8 +460,9 @@ export class MigrationManager extends EventEmitter {
       }
 
       // Calculate affected rows
-      result.affectedRows = result.phasesExecuted.reduce((sum, phase) => 
-        sum + phase.affectedRows, 0
+      result.affectedRows = result.phasesExecuted.reduce(
+        (sum, phase) => sum + phase.affectedRows,
+        0,
       );
 
       result.status = 'completed';
@@ -449,7 +473,6 @@ export class MigrationManager extends EventEmitter {
       await this.recordMigrationHistory(migration, result);
 
       this.emit('migration:completed', { migration, result });
-
     } catch (error) {
       result.status = 'failed';
       result.errors.push(error.message);
@@ -459,7 +482,10 @@ export class MigrationManager extends EventEmitter {
       // Attempt rollback if configured
       if (this.config.rollbackOnFailure && migration.rollbackPlan.automatic) {
         try {
-          result.rollbackResults = await this.executeRollback(migration, fullContext);
+          result.rollbackResults = await this.executeRollback(
+            migration,
+            fullContext,
+          );
           result.status = 'rolled_back';
         } catch (rollbackError) {
           result.errors.push(`Rollback failed: ${rollbackError.message}`);
@@ -467,7 +493,6 @@ export class MigrationManager extends EventEmitter {
       }
 
       this.emit('migration:failed', { migration, result, error });
-
     } finally {
       // Clean up
       this.activeMigrations.delete(migrationId);
@@ -486,7 +511,7 @@ export class MigrationManager extends EventEmitter {
    */
   async rollbackMigration(
     migrationId: string,
-    context: Partial<MigrationContext>
+    context: Partial<MigrationContext>,
   ): Promise<RollbackResult[]> {
     const migration = this.migrations.get(migrationId);
     if (!migration) {
@@ -502,10 +527,13 @@ export class MigrationManager extends EventEmitter {
       executedBy: 'system',
       startTime: new Date(),
       metadata: {},
-      ...context
+      ...context,
     };
 
-    this.emit('migration:rollback_started', { migration, context: fullContext });
+    this.emit('migration:rollback_started', {
+      migration,
+      context: fullContext,
+    });
 
     try {
       const results = await this.executeRollback(migration, fullContext);
@@ -513,7 +541,6 @@ export class MigrationManager extends EventEmitter {
       this.emit('migration:rollback_completed', { migration, results });
 
       return results;
-
     } catch (error) {
       this.emit('migration:rollback_failed', { migration, error });
       throw error;
@@ -525,11 +552,11 @@ export class MigrationManager extends EventEmitter {
    */
   async dryRunMigration(
     migrationId: string,
-    context: Partial<MigrationContext>
+    context: Partial<MigrationContext>,
   ): Promise<MigrationResult> {
     const dryRunContext = {
       ...context,
-      dryRun: true
+      dryRun: true,
     };
 
     return this.executeMigration(migrationId, dryRunContext);
@@ -538,7 +565,10 @@ export class MigrationManager extends EventEmitter {
   /**
    * Get migration status and history
    */
-  getMigrationStatus(migrationId: string, tenantId?: string): {
+  getMigrationStatus(
+    migrationId: string,
+    tenantId?: string,
+  ): {
     migration: Migration | undefined;
     history: MigrationHistoryEntry[];
     isActive: boolean;
@@ -554,7 +584,7 @@ export class MigrationManager extends EventEmitter {
       migration,
       history,
       isActive,
-      lastExecution
+      lastExecution,
     };
   }
 
@@ -563,23 +593,27 @@ export class MigrationManager extends EventEmitter {
    */
   getPendingMigrations(environment: string, tenantId?: string): Migration[] {
     const appliedMigrations = new Set<string>();
-    
+
     // Get all applied migrations for this environment/tenant
     for (const [key, history] of this.migrationHistory.entries()) {
-      const matchesContext = tenantId ? key.includes(tenantId) : !key.includes(':');
-      
+      const matchesContext = tenantId
+        ? key.includes(tenantId)
+        : !key.includes(':');
+
       if (matchesContext) {
         history
-          .filter(h => h.environment === environment && h.status === 'completed')
-          .forEach(h => appliedMigrations.add(h.migrationId));
+          .filter(
+            (h) => h.environment === environment && h.status === 'completed',
+          )
+          .forEach((h) => appliedMigrations.add(h.migrationId));
       }
     }
 
     // Return migrations not yet applied
     return Array.from(this.migrations.values())
-      .filter(m => 
-        !appliedMigrations.has(m.id) && 
-        m.environments.includes(environment)
+      .filter(
+        (m) =>
+          !appliedMigrations.has(m.id) && m.environments.includes(environment),
       )
       .sort((a, b) => a.version.localeCompare(b.version));
   }
@@ -589,16 +623,16 @@ export class MigrationManager extends EventEmitter {
    */
   private async executeMigrationPhases(
     migration: Migration,
-    context: MigrationContext
+    context: MigrationContext,
   ): Promise<PhaseResult[]> {
     const results: PhaseResult[] = [];
-    
+
     // Sort phases by order
     const sortedPhases = migration.phases.sort((a, b) => a.order - b.order);
 
     for (const phaseDefinition of sortedPhases) {
       context.currentPhase = phaseDefinition.phase;
-      
+
       const phaseResult = await this.executePhase(phaseDefinition, context);
       results.push(phaseResult);
 
@@ -616,10 +650,10 @@ export class MigrationManager extends EventEmitter {
    */
   private async executePhase(
     phase: MigrationPhaseDefinition,
-    context: MigrationContext
+    context: MigrationContext,
   ): Promise<PhaseResult> {
     const startTime = new Date();
-    
+
     const result: PhaseResult = {
       phase: phase.phase,
       name: phase.name,
@@ -629,7 +663,7 @@ export class MigrationManager extends EventEmitter {
       duration: 0,
       affectedRows: 0,
       errors: [],
-      warnings: []
+      warnings: [],
     };
 
     this.emit('migration:phase_started', { phase, context });
@@ -643,10 +677,12 @@ export class MigrationManager extends EventEmitter {
         result.warnings.push('Dry run mode - SQL not executed');
       } else {
         const client = await this.getDatabaseClient(context);
-        
+
         try {
           // Set timeout for phase execution
-          await client.query(`SET statement_timeout = '${phase.timeout * 60}s'`);
+          await client.query(
+            `SET statement_timeout = '${phase.timeout * 60}s'`,
+          );
 
           // Execute the SQL
           const sqlResult = await client.query(phase.sql);
@@ -660,7 +696,6 @@ export class MigrationManager extends EventEmitter {
               result.warnings.push(`Validation query failed: ${error.message}`);
             }
           }
-
         } finally {
           client.release();
         }
@@ -670,7 +705,6 @@ export class MigrationManager extends EventEmitter {
       result.duration = result.endTime.getTime() - startTime.getTime();
 
       this.emit('migration:phase_completed', { phase, result, context });
-
     } catch (error) {
       result.status = 'failed';
       result.errors.push(error.message);
@@ -688,7 +722,7 @@ export class MigrationManager extends EventEmitter {
    */
   private async executeValidationChecks(
     checks: ValidationCheck[],
-    context: MigrationContext
+    context: MigrationContext,
   ): Promise<ValidationResult[]> {
     const results: ValidationResult[] = [];
 
@@ -705,7 +739,7 @@ export class MigrationManager extends EventEmitter {
    */
   private async executeValidationCheck(
     check: ValidationCheck,
-    context: MigrationContext
+    context: MigrationContext,
   ): Promise<ValidationResult> {
     const result: ValidationResult = {
       checkName: check.name,
@@ -714,7 +748,7 @@ export class MigrationManager extends EventEmitter {
       actual: null,
       message: '',
       critical: check.critical,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     try {
@@ -725,30 +759,30 @@ export class MigrationManager extends EventEmitter {
       }
 
       const client = await this.getDatabaseClient(context);
-      
+
       try {
         // Set timeout
         await client.query(`SET statement_timeout = '${check.timeout}s'`);
 
         // Execute validation query
         const queryResult = await client.query(check.query);
-        result.actual = queryResult.rows.length > 0 ? queryResult.rows[0] : null;
+        result.actual =
+          queryResult.rows.length > 0 ? queryResult.rows[0] : null;
 
         // Compare with expected result
         const passed = this.compareValidationResult(
           result.actual,
           check.expected_result,
-          check.operator
+          check.operator,
         );
 
         result.status = passed ? 'pass' : 'fail';
-        result.message = passed ? 'Validation passed' : 
-          `Expected ${check.expected_result}, got ${JSON.stringify(result.actual)}`;
-
+        result.message = passed
+          ? 'Validation passed'
+          : `Expected ${check.expected_result}, got ${JSON.stringify(result.actual)}`;
       } finally {
         client.release();
       }
-
     } catch (error) {
       result.status = 'fail';
       result.message = `Validation error: ${error.message}`;
@@ -760,23 +794,27 @@ export class MigrationManager extends EventEmitter {
   /**
    * Compare validation result with expected value
    */
-  private compareValidationResult(actual: any, expected: any, operator: string): boolean {
+  private compareValidationResult(
+    actual: any,
+    expected: any,
+    operator: string,
+  ): boolean {
     switch (operator) {
       case 'equals':
         return JSON.stringify(actual) === JSON.stringify(expected);
-      
+
       case 'not_equals':
         return JSON.stringify(actual) !== JSON.stringify(expected);
-      
+
       case 'greater_than':
         return typeof actual === 'number' && actual > expected;
-      
+
       case 'less_than':
         return typeof actual === 'number' && actual < expected;
-      
+
       case 'contains':
         return typeof actual === 'string' && actual.includes(expected);
-      
+
       default:
         return false;
     }
@@ -787,7 +825,7 @@ export class MigrationManager extends EventEmitter {
    */
   private async executeRollback(
     migration: Migration,
-    context: MigrationContext
+    context: MigrationContext,
   ): Promise<RollbackResult[]> {
     const results: RollbackResult[] = [];
 
@@ -804,8 +842,13 @@ export class MigrationManager extends EventEmitter {
         results.push(result);
 
         // Wait between phases if not the last one
-        if (rollbackPhase !== migration.rollbackPlan.rollbackPhases[migration.rollbackPlan.rollbackPhases.length - 1]) {
-          await new Promise(resolve => setTimeout(resolve, 30000)); // 30 second delay
+        if (
+          rollbackPhase !==
+          migration.rollbackPlan.rollbackPhases[
+            migration.rollbackPlan.rollbackPhases.length - 1
+          ]
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 30000)); // 30 second delay
         }
       }
     }
@@ -818,24 +861,26 @@ export class MigrationManager extends EventEmitter {
    */
   private async executeRollbackPhase(
     phase: RollbackPhase,
-    context: MigrationContext
+    context: MigrationContext,
   ): Promise<RollbackResult> {
     const startTime = Date.now();
-    
+
     const result: RollbackResult = {
       phase: phase.name,
       status: 'completed',
       duration: 0,
-      errors: []
+      errors: [],
     };
 
     try {
       if (!context.dryRun) {
         const client = await this.getDatabaseClient(context);
-        
+
         try {
           // Set timeout
-          await client.query(`SET statement_timeout = '${phase.timeout * 60}s'`);
+          await client.query(
+            `SET statement_timeout = '${phase.timeout * 60}s'`,
+          );
 
           // Execute rollback SQL
           await client.query(phase.sql);
@@ -845,17 +890,17 @@ export class MigrationManager extends EventEmitter {
             try {
               await client.query(validationQuery);
             } catch (error) {
-              result.errors.push(`Rollback validation failed: ${error.message}`);
+              result.errors.push(
+                `Rollback validation failed: ${error.message}`,
+              );
             }
           }
-
         } finally {
           client.release();
         }
       }
 
       result.duration = Date.now() - startTime;
-
     } catch (error) {
       result.status = 'failed';
       result.errors.push(error.message);
@@ -870,20 +915,25 @@ export class MigrationManager extends EventEmitter {
    */
   private async checkMigrationPrerequisites(
     migration: Migration,
-    context: MigrationContext
+    context: MigrationContext,
   ): Promise<void> {
     // Check dependencies
     for (const dependencyId of migration.dependencies) {
       const status = this.getMigrationStatus(dependencyId, context.tenantId);
-      
-      if (!status.lastExecution || status.lastExecution.status !== 'completed') {
+
+      if (
+        !status.lastExecution ||
+        status.lastExecution.status !== 'completed'
+      ) {
         throw new Error(`Migration dependency not satisfied: ${dependencyId}`);
       }
     }
 
     // Check environment compatibility
     if (!migration.environments.includes(context.environment)) {
-      throw new Error(`Migration not compatible with environment: ${context.environment}`);
+      throw new Error(
+        `Migration not compatible with environment: ${context.environment}`,
+      );
     }
 
     // Check if already applied
@@ -898,7 +948,7 @@ export class MigrationManager extends EventEmitter {
    */
   private async checkPhasePrerequisites(
     phase: MigrationPhaseDefinition,
-    context: MigrationContext
+    context: MigrationContext,
   ): Promise<void> {
     // Check if required phases are completed
     // Implementation would check phase dependencies
@@ -907,7 +957,9 @@ export class MigrationManager extends EventEmitter {
   /**
    * Validate migration definition
    */
-  private async validateMigrationDefinition(migration: Migration): Promise<void> {
+  private async validateMigrationDefinition(
+    migration: Migration,
+  ): Promise<void> {
     // Validate required fields
     if (!migration.id || !migration.name || !migration.sql) {
       throw new Error('Migration must have id, name, and sql');
@@ -941,21 +993,27 @@ export class MigrationManager extends EventEmitter {
     }
 
     // Check for version conflicts
-    const existingVersions = Array.from(this.migrations.values())
-      .map(m => m.version);
-    
+    const existingVersions = Array.from(this.migrations.values()).map(
+      (m) => m.version,
+    );
+
     if (existingVersions.includes(migration.version)) {
-      throw new Error(`Migration with version ${migration.version} already exists`);
+      throw new Error(
+        `Migration with version ${migration.version} already exists`,
+      );
     }
 
     // Check for table conflicts
     const affectedTables = new Set(migration.metadata.targetTables);
     for (const [, existingMigration] of this.migrations) {
-      const overlap = existingMigration.metadata.targetTables
-        .some(table => affectedTables.has(table));
-      
+      const overlap = existingMigration.metadata.targetTables.some((table) =>
+        affectedTables.has(table),
+      );
+
       if (overlap && existingMigration.id !== migration.id) {
-        console.warn(`Migration ${migration.id} affects same tables as ${existingMigration.id}`);
+        console.warn(
+          `Migration ${migration.id} affects same tables as ${existingMigration.id}`,
+        );
       }
     }
   }
@@ -963,21 +1021,26 @@ export class MigrationManager extends EventEmitter {
   /**
    * Check schema compatibility
    */
-  private async checkSchemaCompatibility(migration: Migration): Promise<CompatibilityCheck> {
+  private async checkSchemaCompatibility(
+    migration: Migration,
+  ): Promise<CompatibilityCheck> {
     const breakingChanges: BreakingChange[] = [];
     const warnings: string[] = [];
-    
+
     // Analyze SQL for breaking changes
     // This is a simplified implementation - would use SQL parser in production
-    const sql = migration.phases.map(p => p.sql).join(' ').toLowerCase();
-    
+    const sql = migration.phases
+      .map((p) => p.sql)
+      .join(' ')
+      .toLowerCase();
+
     if (sql.includes('drop column')) {
       breakingChanges.push({
         type: 'column_removed',
         table: 'unknown', // Would parse actual table name
         impact: 'high',
         old_value: 'column',
-        new_value: 'none'
+        new_value: 'none',
       });
     }
 
@@ -987,7 +1050,7 @@ export class MigrationManager extends EventEmitter {
         table: 'unknown',
         impact: 'critical',
         old_value: 'table',
-        new_value: 'none'
+        new_value: 'none',
       });
     }
 
@@ -997,7 +1060,7 @@ export class MigrationManager extends EventEmitter {
         table: 'unknown',
         impact: 'medium',
         old_value: 'nullable',
-        new_value: 'not null'
+        new_value: 'not null',
       });
     }
 
@@ -1005,26 +1068,27 @@ export class MigrationManager extends EventEmitter {
       backward_compatible: breakingChanges.length === 0,
       forward_compatible: true, // Would need more sophisticated analysis
       breaking_changes: breakingChanges,
-      warnings
+      warnings,
     };
   }
 
   /**
    * Create pre-migration backup
    */
-  private async createPreMigrationBackup(context: MigrationContext): Promise<string> {
+  private async createPreMigrationBackup(
+    context: MigrationContext,
+  ): Promise<string> {
     const backupId = `backup_${context.migrationId}_${Date.now()}`;
-    
+
     try {
       await this.backupManager.createBackup(backupId, {
         context,
         tables: [], // Would specify affected tables
         compression: true,
-        encryption: true
+        encryption: true,
       });
 
       return backupId;
-
     } catch (error) {
       throw new Error(`Failed to create backup: ${error.message}`);
     }
@@ -1035,11 +1099,11 @@ export class MigrationManager extends EventEmitter {
    */
   private async recordMigrationHistory(
     migration: Migration,
-    result: MigrationResult
+    result: MigrationResult,
   ): Promise<void> {
-    const key = result.context.tenantId ? 
-      `${migration.id}:${result.context.tenantId}` : 
-      migration.id;
+    const key = result.context.tenantId
+      ? `${migration.id}:${result.context.tenantId}`
+      : migration.id;
 
     const historyEntry: MigrationHistoryEntry = {
       id: `${migration.id}_${Date.now()}`,
@@ -1052,7 +1116,7 @@ export class MigrationManager extends EventEmitter {
       executedBy: result.context.executedBy,
       duration: result.duration || 0,
       checksum: this.generateMigrationChecksum(migration),
-      rollbackAvailable: migration.rollbackPlan.rollbackPhases.length > 0
+      rollbackAvailable: migration.rollbackPlan.rollbackPhases.length > 0,
     };
 
     const history = this.migrationHistory.get(key) || [];
@@ -1068,7 +1132,9 @@ export class MigrationManager extends EventEmitter {
   /**
    * Get database client for context
    */
-  private async getDatabaseClient(context: MigrationContext): Promise<PoolClient> {
+  private async getDatabaseClient(
+    context: MigrationContext,
+  ): Promise<PoolClient> {
     if (context.tenantId) {
       // Get tenant-specific database connection
       return this.databaseManager.getConnection(context.tenantId);
@@ -1086,7 +1152,10 @@ export class MigrationManager extends EventEmitter {
     const content = JSON.stringify({
       id: migration.id,
       version: migration.version,
-      phases: migration.phases.map(p => ({ sql: p.sql, rollbackSql: p.rollbackSql }))
+      phases: migration.phases.map((p) => ({
+        sql: p.sql,
+        rollbackSql: p.rollbackSql,
+      })),
     });
 
     return require('crypto').createHash('sha256').update(content).digest('hex');
@@ -1112,7 +1181,7 @@ class BackupManager {
     this.backups.set(backupId, {
       id: backupId,
       createdAt: new Date(),
-      ...options
+      ...options,
     });
 
     console.log(`Backup created: ${backupId}`);

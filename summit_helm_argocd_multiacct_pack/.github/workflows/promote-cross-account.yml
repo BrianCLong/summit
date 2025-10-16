@@ -2,9 +2,10 @@ name: Promote Image Across AWS Accounts
 on:
   workflow_dispatch:
     inputs:
-      from_env:   { description: "dev|staging", required: true, default: "dev" }
-      to_env:     { description: "staging|prod", required: true, default: "staging" }
-      image_tag:  { description: "Image tag or SHA to promote", required: true }
+      from_env: { description: 'dev|staging', required: true, default: 'dev' }
+      to_env:
+        { description: 'staging|prod', required: true, default: 'staging' }
+      image_tag: { description: 'Image tag or SHA to promote', required: true }
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
 jobs:

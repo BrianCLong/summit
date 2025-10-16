@@ -124,7 +124,7 @@ export class TenantDatabaseManager extends EventEmitter {
       cacheTtlSeconds: number;
       enablePerformanceTracking: boolean;
       maxPoolsPerTenant: number;
-    }
+    },
   ) {
     super();
     this.startMaintenanceTasks();
@@ -135,7 +135,7 @@ export class TenantDatabaseManager extends EventEmitter {
    */
   async initializeTenant(
     tenantConfig: TenantConfig,
-    databaseConfig?: Partial<TenantDatabaseConfig>
+    databaseConfig?: Partial<TenantDatabaseConfig>,
   ): Promise<TenantDatabaseConfig> {
     const dbConfig: TenantDatabaseConfig = {
       tenantId: tenantConfig.tenantId,
@@ -150,9 +150,9 @@ export class TenantDatabaseManager extends EventEmitter {
         enabled: true,
         schedule: '0 2 * * *', // Daily at 2 AM
         retentionDays: this.getRetentionDaysForTier(tenantConfig.tier),
-        encryptBackups: tenantConfig.security.encryptionAtRest
+        encryptBackups: tenantConfig.security.encryptionAtRest,
       },
-      ...databaseConfig
+      ...databaseConfig,
     };
 
     // Validate configuration
@@ -172,7 +172,7 @@ export class TenantDatabaseManager extends EventEmitter {
 
     this.emit('tenant:database:initialized', {
       tenantId: dbConfig.tenantId,
-      strategy: dbConfig.strategy
+      strategy: dbConfig.strategy,
     });
 
     return dbConfig;
@@ -189,7 +189,7 @@ export class TenantDatabaseManager extends EventEmitter {
       useCache?: boolean;
       priority?: 'low' | 'normal' | 'high';
       timeout?: number;
-    } = {}
+    } = {},
   ): Promise<QueryResult<T>> {
     const startTime = Date.now();
     const queryHash = this.generateQueryHash(query, params, context.tenantId);
@@ -202,23 +202,31 @@ export class TenantDatabaseManager extends EventEmitter {
           return {
             ...cached,
             executionTimeMs: Date.now() - startTime,
-            fromCache: true
+            fromCache: true,
           };
         }
       }
 
       // Get database connection
       const client = await this.getConnection(context.tenantId);
-      
+
       // Apply tenant isolation
       await this.applyTenantContext(client, context);
 
       // Set query timeout
-      const timeout = options.timeout || context.timeoutMs || 
-                     this.configurations.get(context.tenantId)?.queryTimeoutMs || 60000;
+      const timeout =
+        options.timeout ||
+        context.timeoutMs ||
+        this.configurations.get(context.tenantId)?.queryTimeoutMs ||
+        60000;
 
       // Execute query with timeout
-      const result = await this.executeWithTimeout(client, query, params, timeout);
+      const result = await this.executeWithTimeout(
+        client,
+        query,
+        params,
+        timeout,
+      );
 
       // Calculate execution time
       const executionTimeMs = Date.now() - startTime;
@@ -232,16 +240,19 @@ export class TenantDatabaseManager extends EventEmitter {
         fromCache: false,
         metadata: {
           tenantId: context.tenantId,
-          strategy: this.configurations.get(context.tenantId)?.strategy || 'row_level',
+          strategy:
+            this.configurations.get(context.tenantId)?.strategy || 'row_level',
           connectionId: (client as any).processID?.toString() || 'unknown',
-          warnings: []
-        }
+          warnings: [],
+        },
       };
 
       // Cache result if applicable
-      if (this.globalConfig.enableQueryCache && 
-          options.useCache !== false && 
-          !context.readOnly) {
+      if (
+        this.globalConfig.enableQueryCache &&
+        options.useCache !== false &&
+        !context.readOnly
+      ) {
         this.cacheResult(queryHash, queryResult, context.tenantId);
       }
 
@@ -259,7 +270,6 @@ export class TenantDatabaseManager extends EventEmitter {
       await this.releaseConnection(context.tenantId, client);
 
       return queryResult;
-
     } catch (error) {
       const executionTimeMs = Date.now() - startTime;
 
@@ -267,7 +277,7 @@ export class TenantDatabaseManager extends EventEmitter {
       console.error(`Query execution failed for tenant ${context.tenantId}:`, {
         query: query.substring(0, 200),
         error: error.message,
-        executionTimeMs
+        executionTimeMs,
       });
 
       // Emit error event
@@ -275,7 +285,7 @@ export class TenantDatabaseManager extends EventEmitter {
         tenantId: context.tenantId,
         query,
         error,
-        executionTimeMs
+        executionTimeMs,
       });
 
       throw error;
@@ -294,7 +304,7 @@ export class TenantDatabaseManager extends EventEmitter {
     options: {
       isolationLevel?: 'READ_COMMITTED' | 'REPEATABLE_READ' | 'SERIALIZABLE';
       timeout?: number;
-    } = {}
+    } = {},
   ): Promise<QueryResult<T>[]> {
     const client = await this.getConnection(context.tenantId);
     const results: QueryResult<T>[] = [];
@@ -305,7 +315,9 @@ export class TenantDatabaseManager extends EventEmitter {
 
       // Set isolation level if specified
       if (options.isolationLevel) {
-        await client.query(`SET TRANSACTION ISOLATION LEVEL ${options.isolationLevel}`);
+        await client.query(
+          `SET TRANSACTION ISOLATION LEVEL ${options.isolationLevel}`,
+        );
       }
 
       // Apply tenant context
@@ -317,7 +329,7 @@ export class TenantDatabaseManager extends EventEmitter {
           context,
           operation.query,
           operation.params,
-          { timeout: options.timeout }
+          { timeout: options.timeout },
         );
         results.push(result);
       }
@@ -327,11 +339,10 @@ export class TenantDatabaseManager extends EventEmitter {
 
       this.emit('transaction:committed', {
         tenantId: context.tenantId,
-        operationCount: operations.length
+        operationCount: operations.length,
       });
 
       return results;
-
     } catch (error) {
       // Rollback on error
       try {
@@ -342,7 +353,7 @@ export class TenantDatabaseManager extends EventEmitter {
 
       this.emit('transaction:rolled_back', {
         tenantId: context.tenantId,
-        error: error.message
+        error: error.message,
       });
 
       throw error;
@@ -362,7 +373,7 @@ export class TenantDatabaseManager extends EventEmitter {
       up: string;
       down?: string;
       description?: string;
-    }
+    },
   ): Promise<MigrationRecord> {
     const startTime = Date.now();
     const context: DatabaseQueryContext = {
@@ -370,13 +381,15 @@ export class TenantDatabaseManager extends EventEmitter {
       sessionId: `migration-${migration.id}`,
       isolationLevel: 'SERIALIZABLE',
       readOnly: false,
-      tags: ['migration']
+      tags: ['migration'],
     };
 
     try {
       // Check if migration already applied
       const existingMigrations = this.migrationHistory.get(tenantId) || [];
-      const existing = existingMigrations.find(m => m.migrationId === migration.id);
+      const existing = existingMigrations.find(
+        (m) => m.migrationId === migration.id,
+      );
 
       if (existing) {
         throw new Error(`Migration ${migration.id} already applied`);
@@ -386,8 +399,8 @@ export class TenantDatabaseManager extends EventEmitter {
       await this.executeTransaction(context, [
         {
           query: migration.up,
-          params: []
-        }
+          params: [],
+        },
       ]);
 
       // Record migration
@@ -398,7 +411,7 @@ export class TenantDatabaseManager extends EventEmitter {
         appliedAt: new Date(),
         rollbackScript: migration.down,
         checksum: this.generateChecksum(migration.up),
-        executionTimeMs: Date.now() - startTime
+        executionTimeMs: Date.now() - startTime,
       };
 
       existingMigrations.push(record);
@@ -406,16 +419,15 @@ export class TenantDatabaseManager extends EventEmitter {
 
       this.emit('migration:applied', {
         tenantId,
-        migration: record
+        migration: record,
       });
 
       return record;
-
     } catch (error) {
       this.emit('migration:failed', {
         tenantId,
         migrationId: migration.id,
-        error: error.message
+        error: error.message,
       });
 
       throw error;
@@ -425,16 +437,21 @@ export class TenantDatabaseManager extends EventEmitter {
   /**
    * Rollback migration for tenant
    */
-  async rollbackMigration(tenantId: string, migrationId: string): Promise<void> {
+  async rollbackMigration(
+    tenantId: string,
+    migrationId: string,
+  ): Promise<void> {
     const migrations = this.migrationHistory.get(tenantId) || [];
-    const migration = migrations.find(m => m.migrationId === migrationId);
+    const migration = migrations.find((m) => m.migrationId === migrationId);
 
     if (!migration) {
       throw new Error(`Migration not found: ${migrationId}`);
     }
 
     if (!migration.rollbackScript) {
-      throw new Error(`No rollback script available for migration: ${migrationId}`);
+      throw new Error(
+        `No rollback script available for migration: ${migrationId}`,
+      );
     }
 
     const context: DatabaseQueryContext = {
@@ -442,7 +459,7 @@ export class TenantDatabaseManager extends EventEmitter {
       sessionId: `rollback-${migrationId}`,
       isolationLevel: 'SERIALIZABLE',
       readOnly: false,
-      tags: ['migration', 'rollback']
+      tags: ['migration', 'rollback'],
     };
 
     try {
@@ -450,24 +467,25 @@ export class TenantDatabaseManager extends EventEmitter {
       await this.executeTransaction(context, [
         {
           query: migration.rollbackScript,
-          params: []
-        }
+          params: [],
+        },
       ]);
 
       // Remove from migration history
-      const updatedMigrations = migrations.filter(m => m.migrationId !== migrationId);
+      const updatedMigrations = migrations.filter(
+        (m) => m.migrationId !== migrationId,
+      );
       this.migrationHistory.set(tenantId, updatedMigrations);
 
       this.emit('migration:rolled_back', {
         tenantId,
-        migrationId
+        migrationId,
       });
-
     } catch (error) {
       this.emit('migration:rollback_failed', {
         tenantId,
         migrationId,
-        error: error.message
+        error: error.message,
       });
 
       throw error;
@@ -484,19 +502,22 @@ export class TenantDatabaseManager extends EventEmitter {
     }
 
     const metrics = this.performanceMetrics.get(tenantId) || [];
-    const recentMetrics = metrics.filter(m => 
-      Date.now() - m.timestamp < 60000 // Last minute
+    const recentMetrics = metrics.filter(
+      (m) => Date.now() - m.timestamp < 60000, // Last minute
     );
 
-    const avgQueryTime = recentMetrics.length > 0 
-      ? recentMetrics.reduce((sum, m) => sum + m.executionTime, 0) / recentMetrics.length
-      : 0;
+    const avgQueryTime =
+      recentMetrics.length > 0
+        ? recentMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+          recentMetrics.length
+        : 0;
 
     const queriesPerSecond = recentMetrics.length / 60;
-    
+
     // Calculate cache hit ratio
-    const cacheHits = recentMetrics.filter(m => m.fromCache).length;
-    const cacheHitRatio = recentMetrics.length > 0 ? (cacheHits / recentMetrics.length) * 100 : 0;
+    const cacheHits = recentMetrics.filter((m) => m.fromCache).length;
+    const cacheHitRatio =
+      recentMetrics.length > 0 ? (cacheHits / recentMetrics.length) * 100 : 0;
 
     return {
       tenantId,
@@ -507,7 +528,7 @@ export class TenantDatabaseManager extends EventEmitter {
       avgQueryTime,
       queriesPerSecond,
       cacheHitRatio,
-      lastActivity: new Date()
+      lastActivity: new Date(),
     };
   }
 
@@ -537,7 +558,7 @@ export class TenantDatabaseManager extends EventEmitter {
         issues.push('Connection pool not found');
       } else {
         connectionPool = true;
-        
+
         if (pool.totalCount === 0) {
           issues.push('No active connections in pool');
         }
@@ -550,7 +571,7 @@ export class TenantDatabaseManager extends EventEmitter {
           sessionId: `health-check-${Date.now()}`,
           isolationLevel: 'READ_COMMITTED',
           readOnly: true,
-          tags: ['health-check']
+          tags: ['health-check'],
         };
 
         await this.executeQuery(context, 'SELECT 1 as health_check', []);
@@ -561,21 +582,29 @@ export class TenantDatabaseManager extends EventEmitter {
 
       // Get performance metrics
       const metrics = this.performanceMetrics.get(tenantId) || [];
-      const recentMetrics = metrics.filter(m => 
-        Date.now() - m.timestamp < 300000 // Last 5 minutes
+      const recentMetrics = metrics.filter(
+        (m) => Date.now() - m.timestamp < 300000, // Last 5 minutes
       );
 
-      const avgResponseTime = recentMetrics.length > 0
-        ? recentMetrics.reduce((sum, m) => sum + m.executionTime, 0) / recentMetrics.length
-        : 0;
+      const avgResponseTime =
+        recentMetrics.length > 0
+          ? recentMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+            recentMetrics.length
+          : 0;
 
-      const slowQueries = recentMetrics.filter(m => m.executionTime > 1000).length;
-      const errorQueries = recentMetrics.filter(m => m.error).length;
-      const errorRate = recentMetrics.length > 0 ? (errorQueries / recentMetrics.length) * 100 : 0;
+      const slowQueries = recentMetrics.filter(
+        (m) => m.executionTime > 1000,
+      ).length;
+      const errorQueries = recentMetrics.filter((m) => m.error).length;
+      const errorRate =
+        recentMetrics.length > 0
+          ? (errorQueries / recentMetrics.length) * 100
+          : 0;
 
       // Get last migration
       const migrations = this.migrationHistory.get(tenantId) || [];
-      const lastMigration = migrations.length > 0 ? migrations[migrations.length - 1] : undefined;
+      const lastMigration =
+        migrations.length > 0 ? migrations[migrations.length - 1] : undefined;
 
       return {
         healthy: connectionPool && queryExecution && issues.length === 0,
@@ -585,14 +614,13 @@ export class TenantDatabaseManager extends EventEmitter {
         performance: {
           avgResponseTime,
           slowQueries,
-          errorRate
+          errorRate,
         },
-        issues
+        issues,
       };
-
     } catch (error) {
       issues.push(`Health check failed: ${error.message}`);
-      
+
       return {
         healthy: false,
         connectionPool,
@@ -600,9 +628,9 @@ export class TenantDatabaseManager extends EventEmitter {
         performance: {
           avgResponseTime: 0,
           slowQueries: 0,
-          errorRate: 100
+          errorRate: 100,
         },
-        issues
+        issues,
       };
     }
   }
@@ -616,7 +644,7 @@ export class TenantDatabaseManager extends EventEmitter {
       includeData?: boolean;
       compress?: boolean;
       encrypt?: boolean;
-    } = {}
+    } = {},
   ): Promise<{
     backupId: string;
     location: string;
@@ -626,31 +654,36 @@ export class TenantDatabaseManager extends EventEmitter {
   }> {
     const config = this.configurations.get(tenantId);
     if (!config) {
-      throw new Error(`Database configuration not found for tenant: ${tenantId}`);
+      throw new Error(
+        `Database configuration not found for tenant: ${tenantId}`,
+      );
     }
 
     const backupId = `backup_${tenantId}_${Date.now()}`;
 
     try {
       // In real implementation, would use pg_dump or similar
-      const backupResult = await this.performBackup(tenantId, backupId, options);
+      const backupResult = await this.performBackup(
+        tenantId,
+        backupId,
+        options,
+      );
 
       this.emit('backup:created', {
         tenantId,
         backupId,
-        ...backupResult
+        ...backupResult,
       });
 
       return {
         backupId,
-        ...backupResult
+        ...backupResult,
       };
-
     } catch (error) {
       this.emit('backup:failed', {
         tenantId,
         backupId,
-        error: error.message
+        error: error.message,
       });
 
       throw error;
@@ -660,12 +693,16 @@ export class TenantDatabaseManager extends EventEmitter {
   /**
    * Validate database configuration
    */
-  private async validateDatabaseConfig(config: TenantDatabaseConfig): Promise<void> {
+  private async validateDatabaseConfig(
+    config: TenantDatabaseConfig,
+  ): Promise<void> {
     // Validate strategy-specific requirements
     switch (config.strategy) {
       case 'database':
         if (!config.connectionString) {
-          throw new Error('Connection string required for database-per-tenant strategy');
+          throw new Error(
+            'Connection string required for database-per-tenant strategy',
+          );
         }
         break;
 
@@ -689,7 +726,9 @@ export class TenantDatabaseManager extends EventEmitter {
   /**
    * Set up database isolation based on strategy
    */
-  private async setupDatabaseIsolation(config: TenantDatabaseConfig): Promise<void> {
+  private async setupDatabaseIsolation(
+    config: TenantDatabaseConfig,
+  ): Promise<void> {
     switch (config.strategy) {
       case 'database':
         await this.setupDatabasePerTenant(config);
@@ -708,19 +747,27 @@ export class TenantDatabaseManager extends EventEmitter {
   /**
    * Set up database-per-tenant isolation
    */
-  private async setupDatabasePerTenant(config: TenantDatabaseConfig): Promise<void> {
+  private async setupDatabasePerTenant(
+    config: TenantDatabaseConfig,
+  ): Promise<void> {
     // Create dedicated database for tenant
-    const masterPool = new Pool({ connectionString: this.globalConfig.masterConnectionString });
+    const masterPool = new Pool({
+      connectionString: this.globalConfig.masterConnectionString,
+    });
 
     try {
       const databaseName = `tenant_${config.tenantId}`;
-      
-      // Create database
-      await masterPool.query(`CREATE DATABASE "${databaseName}" WITH ENCODING 'UTF8'`);
-      
-      // Update connection string
-      config.connectionString = config.connectionString?.replace(/\/[^/]*$/, `/${databaseName}`);
 
+      // Create database
+      await masterPool.query(
+        `CREATE DATABASE "${databaseName}" WITH ENCODING 'UTF8'`,
+      );
+
+      // Update connection string
+      config.connectionString = config.connectionString?.replace(
+        /\/[^/]*$/,
+        `/${databaseName}`,
+      );
     } catch (error) {
       if (!error.message.includes('already exists')) {
         throw error;
@@ -733,8 +780,12 @@ export class TenantDatabaseManager extends EventEmitter {
   /**
    * Set up schema-per-tenant isolation
    */
-  private async setupSchemaPerTenant(config: TenantDatabaseConfig): Promise<void> {
-    const pool = new Pool({ connectionString: this.globalConfig.masterConnectionString });
+  private async setupSchemaPerTenant(
+    config: TenantDatabaseConfig,
+  ): Promise<void> {
+    const pool = new Pool({
+      connectionString: this.globalConfig.masterConnectionString,
+    });
 
     try {
       const schemaName = config.schemaName || `tenant_${config.tenantId}`;
@@ -744,10 +795,15 @@ export class TenantDatabaseManager extends EventEmitter {
 
       // Create tenant user with schema access
       const tenantUser = `user_${config.tenantId}`;
-      await pool.query(`CREATE USER "${tenantUser}" WITH PASSWORD 'secure_password'`);
-      await pool.query(`GRANT USAGE ON SCHEMA "${schemaName}" TO "${tenantUser}"`);
-      await pool.query(`GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA "${schemaName}" TO "${tenantUser}"`);
-      
+      await pool.query(
+        `CREATE USER "${tenantUser}" WITH PASSWORD 'secure_password'`,
+      );
+      await pool.query(
+        `GRANT USAGE ON SCHEMA "${schemaName}" TO "${tenantUser}"`,
+      );
+      await pool.query(
+        `GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA "${schemaName}" TO "${tenantUser}"`,
+      );
     } catch (error) {
       if (!error.message.includes('already exists')) {
         throw error;
@@ -760,8 +816,12 @@ export class TenantDatabaseManager extends EventEmitter {
   /**
    * Set up row-level security isolation
    */
-  private async setupRowLevelSecurity(config: TenantDatabaseConfig): Promise<void> {
-    const pool = new Pool({ connectionString: this.globalConfig.masterConnectionString });
+  private async setupRowLevelSecurity(
+    config: TenantDatabaseConfig,
+  ): Promise<void> {
+    const pool = new Pool({
+      connectionString: this.globalConfig.masterConnectionString,
+    });
 
     try {
       // Enable RLS on tenant tables (example for a generic table)
@@ -774,7 +834,6 @@ export class TenantDatabaseManager extends EventEmitter {
         CREATE ROLE IF NOT EXISTS tenant_user;
         GRANT SELECT, INSERT, UPDATE, DELETE ON tenant_data TO tenant_user;
       `);
-
     } catch (error) {
       console.warn('Row-level security setup warning:', error.message);
     } finally {
@@ -785,20 +844,26 @@ export class TenantDatabaseManager extends EventEmitter {
   /**
    * Create connection pool for tenant
    */
-  private async createConnectionPool(config: TenantDatabaseConfig): Promise<void> {
-    const connectionString = config.connectionString || this.globalConfig.masterConnectionString;
+  private async createConnectionPool(
+    config: TenantDatabaseConfig,
+  ): Promise<void> {
+    const connectionString =
+      config.connectionString || this.globalConfig.masterConnectionString;
 
     const pool = new Pool({
       connectionString,
       max: config.maxConnections,
       idleTimeoutMillis: config.idleTimeoutMs,
       connectionTimeoutMillis: 10000,
-      ssl: config.sslMode !== 'disable' ? { rejectUnauthorized: false } : false
+      ssl: config.sslMode !== 'disable' ? { rejectUnauthorized: false } : false,
     });
 
     // Handle pool errors
     pool.on('error', (error) => {
-      console.error(`Connection pool error for tenant ${config.tenantId}:`, error);
+      console.error(
+        `Connection pool error for tenant ${config.tenantId}:`,
+        error,
+      );
       this.emit('pool:error', { tenantId: config.tenantId, error });
     });
 
@@ -826,36 +891,51 @@ export class TenantDatabaseManager extends EventEmitter {
     try {
       return await pool.connect();
     } catch (error) {
-      throw new Error(`Failed to get connection for tenant ${tenantId}: ${error.message}`);
+      throw new Error(
+        `Failed to get connection for tenant ${tenantId}: ${error.message}`,
+      );
     }
   }
 
   /**
    * Release database connection
    */
-  private async releaseConnection(tenantId: string, client: PoolClient): Promise<void> {
+  private async releaseConnection(
+    tenantId: string,
+    client: PoolClient,
+  ): Promise<void> {
     try {
       client.release();
     } catch (error) {
-      console.error(`Failed to release connection for tenant ${tenantId}:`, error);
+      console.error(
+        `Failed to release connection for tenant ${tenantId}:`,
+        error,
+      );
     }
   }
 
   /**
    * Apply tenant context to connection
    */
-  private async applyTenantContext(client: PoolClient, context: DatabaseQueryContext): Promise<void> {
+  private async applyTenantContext(
+    client: PoolClient,
+    context: DatabaseQueryContext,
+  ): Promise<void> {
     const config = this.configurations.get(context.tenantId);
     if (!config) return;
 
     try {
       switch (config.strategy) {
         case 'schema':
-          await client.query(`SET search_path TO "${config.schemaName}", public`);
+          await client.query(
+            `SET search_path TO "${config.schemaName}", public`,
+          );
           break;
 
         case 'row_level':
-          await client.query(`SET app.current_tenant_id = '${context.tenantId}'`);
+          await client.query(
+            `SET app.current_tenant_id = '${context.tenantId}'`,
+          );
           if (context.userId) {
             await client.query(`SET app.current_user_id = '${context.userId}'`);
           }
@@ -867,14 +947,18 @@ export class TenantDatabaseManager extends EventEmitter {
       }
 
       // Set session variables
-      await client.query(`SET application_name = 'intelgraph_tenant_${context.tenantId}'`);
-      
+      await client.query(
+        `SET application_name = 'intelgraph_tenant_${context.tenantId}'`,
+      );
+
       if (context.readOnly) {
         await client.query('SET default_transaction_read_only = on');
       }
-
     } catch (error) {
-      console.error(`Failed to apply tenant context for ${context.tenantId}:`, error);
+      console.error(
+        `Failed to apply tenant context for ${context.tenantId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -886,19 +970,20 @@ export class TenantDatabaseManager extends EventEmitter {
     client: PoolClient,
     query: string,
     params: any[],
-    timeoutMs: number
+    timeoutMs: number,
   ): Promise<any> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         reject(new Error(`Query timeout after ${timeoutMs}ms`));
       }, timeoutMs);
 
-      client.query(query, params)
-        .then(result => {
+      client
+        .query(query, params)
+        .then((result) => {
           clearTimeout(timeout);
           resolve(result);
         })
-        .catch(error => {
+        .catch((error) => {
           clearTimeout(timeout);
           reject(error);
         });
@@ -908,7 +993,11 @@ export class TenantDatabaseManager extends EventEmitter {
   /**
    * Generate query hash for caching
    */
-  private generateQueryHash(query: string, params: any[], tenantId: string): string {
+  private generateQueryHash(
+    query: string,
+    params: any[],
+    tenantId: string,
+  ): string {
     const content = `${tenantId}:${query}:${JSON.stringify(params)}`;
     return require('crypto').createHash('md5').update(content).digest('hex');
   }
@@ -930,7 +1019,11 @@ export class TenantDatabaseManager extends EventEmitter {
   /**
    * Cache query result
    */
-  private cacheResult(queryHash: string, result: QueryResult, tenantId: string): void {
+  private cacheResult(
+    queryHash: string,
+    result: QueryResult,
+    tenantId: string,
+  ): void {
     // Don't cache if at max size
     if (this.queryCache.size >= this.globalConfig.cacheMaxSize) {
       // Remove oldest entry
@@ -938,14 +1031,16 @@ export class TenantDatabaseManager extends EventEmitter {
       this.queryCache.delete(oldestKey);
     }
 
-    const expiry = new Date(Date.now() + this.globalConfig.cacheTtlSeconds * 1000);
+    const expiry = new Date(
+      Date.now() + this.globalConfig.cacheTtlSeconds * 1000,
+    );
 
     this.queryCache.set(queryHash, {
       queryHash,
       result,
       expiry,
       hitCount: 0,
-      tenantId
+      tenantId,
     });
   }
 
@@ -955,17 +1050,17 @@ export class TenantDatabaseManager extends EventEmitter {
   private async recordQueryMetrics(
     tenantId: string,
     result: QueryResult,
-    query: string
+    query: string,
   ): Promise<void> {
     const metrics = this.performanceMetrics.get(tenantId) || [];
-    
+
     metrics.push({
       timestamp: Date.now(),
       executionTime: result.executionTimeMs,
       rowCount: result.rowCount,
       fromCache: result.fromCache,
       queryType: this.getQueryType(query),
-      queryHash: result.queryHash
+      queryHash: result.queryHash,
     });
 
     // Keep only last 1000 metrics per tenant
@@ -983,7 +1078,7 @@ export class TenantDatabaseManager extends EventEmitter {
     context: DatabaseQueryContext,
     query: string,
     params: any[],
-    result: QueryResult
+    result: QueryResult,
   ): Promise<void> {
     const logEntry = {
       timestamp: new Date(),
@@ -991,10 +1086,11 @@ export class TenantDatabaseManager extends EventEmitter {
       userId: context.userId,
       sessionId: context.sessionId,
       query: query.substring(0, 500), // Truncate long queries
-      params: params.length > 0 ? JSON.stringify(params).substring(0, 200) : null,
+      params:
+        params.length > 0 ? JSON.stringify(params).substring(0, 200) : null,
       executionTimeMs: result.executionTimeMs,
       rowCount: result.rowCount,
-      success: true
+      success: true,
     };
 
     // In production, would send to centralized logging system
@@ -1006,7 +1102,7 @@ export class TenantDatabaseManager extends EventEmitter {
    */
   private getQueryType(query: string): string {
     const normalizedQuery = query.trim().toLowerCase();
-    
+
     if (normalizedQuery.startsWith('select')) return 'SELECT';
     if (normalizedQuery.startsWith('insert')) return 'INSERT';
     if (normalizedQuery.startsWith('update')) return 'UPDATE';
@@ -1014,7 +1110,7 @@ export class TenantDatabaseManager extends EventEmitter {
     if (normalizedQuery.startsWith('create')) return 'CREATE';
     if (normalizedQuery.startsWith('alter')) return 'ALTER';
     if (normalizedQuery.startsWith('drop')) return 'DROP';
-    
+
     return 'OTHER';
   }
 
@@ -1026,7 +1122,7 @@ export class TenantDatabaseManager extends EventEmitter {
       starter: 5,
       professional: 15,
       enterprise: 50,
-      government: 100
+      government: 100,
     };
 
     return limits[tier as keyof typeof limits] || 5;
@@ -1040,7 +1136,7 @@ export class TenantDatabaseManager extends EventEmitter {
       starter: 7,
       professional: 30,
       enterprise: 90,
-      government: 2555 // 7 years
+      government: 2555, // 7 years
     };
 
     return retention[tier as keyof typeof retention] || 7;
@@ -1059,17 +1155,22 @@ export class TenantDatabaseManager extends EventEmitter {
   private async performBackup(
     tenantId: string,
     backupId: string,
-    options: any
-  ): Promise<{ location: string; size: number; createdAt: Date; encrypted: boolean }> {
+    options: any,
+  ): Promise<{
+    location: string;
+    size: number;
+    createdAt: Date;
+    encrypted: boolean;
+  }> {
     // Mock backup implementation
     const location = `/backups/tenant_${tenantId}/${backupId}.sql${options.compress ? '.gz' : ''}`;
     const size = Math.floor(Math.random() * 1000000); // Random size for demo
-    
+
     return {
       location,
       size,
       createdAt: new Date(),
-      encrypted: options.encrypt || false
+      encrypted: options.encrypt || false,
     };
   }
 
@@ -1078,9 +1179,12 @@ export class TenantDatabaseManager extends EventEmitter {
    */
   private startMaintenanceTasks(): void {
     // Clean up expired cache entries every 5 minutes
-    setInterval(() => {
-      this.cleanupCache();
-    }, 5 * 60 * 1000);
+    setInterval(
+      () => {
+        this.cleanupCache();
+      },
+      5 * 60 * 1000,
+    );
 
     // Collect performance metrics every minute
     setInterval(() => {
@@ -1088,9 +1192,12 @@ export class TenantDatabaseManager extends EventEmitter {
     }, 60 * 1000);
 
     // Health checks every 10 minutes
-    setInterval(() => {
-      this.performHealthChecks();
-    }, 10 * 60 * 1000);
+    setInterval(
+      () => {
+        this.performHealthChecks();
+      },
+      10 * 60 * 1000,
+    );
   }
 
   /**
@@ -1106,7 +1213,7 @@ export class TenantDatabaseManager extends EventEmitter {
       }
     }
 
-    expiredKeys.forEach(key => this.queryCache.delete(key));
+    expiredKeys.forEach((key) => this.queryCache.delete(key));
 
     if (expiredKeys.length > 0) {
       console.log(`Cleaned up ${expiredKeys.length} expired cache entries`);
@@ -1122,7 +1229,10 @@ export class TenantDatabaseManager extends EventEmitter {
         const stats = await this.getPoolStats(tenantId);
         this.emit('metrics:collected', { tenantId, stats });
       } catch (error) {
-        console.error(`Failed to collect metrics for tenant ${tenantId}:`, error);
+        console.error(
+          `Failed to collect metrics for tenant ${tenantId}:`,
+          error,
+        );
       }
     }
   }
@@ -1134,7 +1244,7 @@ export class TenantDatabaseManager extends EventEmitter {
     for (const [tenantId] of this.configurations) {
       try {
         const health = await this.healthCheck(tenantId);
-        
+
         if (!health.healthy) {
           this.emit('health:warning', { tenantId, health });
         }
@@ -1170,7 +1280,6 @@ export class TenantDatabaseManager extends EventEmitter {
       this.configurations.delete(tenantId);
 
       this.emit('tenant:cleaned_up', { tenantId });
-
     } catch (error) {
       console.error(`Failed to cleanup tenant ${tenantId}:`, error);
       throw error;

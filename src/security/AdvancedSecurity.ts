@@ -97,7 +97,11 @@ export interface SecurityMetrics {
 export interface AISecurityModel {
   id: string;
   name: string;
-  type: 'ANOMALY_DETECTION' | 'THREAT_CLASSIFICATION' | 'BEHAVIORAL_ANALYSIS' | 'PREDICTIVE';
+  type:
+    | 'ANOMALY_DETECTION'
+    | 'THREAT_CLASSIFICATION'
+    | 'BEHAVIORAL_ANALYSIS'
+    | 'PREDICTIVE';
   accuracy: number;
   lastTrained: Date;
   features: string[];
@@ -122,9 +126,9 @@ export class AdvancedSecurityEngine extends EventEmitter {
       averageResponseTime: 0,
       incidentsClosed: 0,
       securityScore: 0,
-      vulnerabilities: { critical: 0, high: 0, medium: 0, low: 0 }
+      vulnerabilities: { critical: 0, high: 0, medium: 0, low: 0 },
     };
-    
+
     this.initializeDefaultPolicies();
     this.initializeAIModels();
   }
@@ -134,10 +138,9 @@ export class AdvancedSecurityEngine extends EventEmitter {
       await this.loadSecurityPolicies();
       await this.startThreatMonitoring();
       await this.initializeAIModels();
-      
+
       this.isActive = true;
       this.emit('initialized', { timestamp: new Date() });
-      
     } catch (error) {
       this.emit('error', { error, context: 'initialization' });
       throw error;
@@ -146,22 +149,25 @@ export class AdvancedSecurityEngine extends EventEmitter {
 
   async detectThreats(data: any): Promise<ThreatVector[]> {
     const detectedThreats: ThreatVector[] = [];
-    
+
     try {
       const aiThreats = await this.runAIThreatDetection(data);
       const signatureThreats = await this.runSignatureDetection(data);
       const behavioralThreats = await this.runBehavioralAnalysis(data);
-      
-      detectedThreats.push(...aiThreats, ...signatureThreats, ...behavioralThreats);
-      
+
+      detectedThreats.push(
+        ...aiThreats,
+        ...signatureThreats,
+        ...behavioralThreats,
+      );
+
       for (const threat of detectedThreats) {
         this.threats.set(threat.id, threat);
         this.metrics.threatsDetected++;
         this.emit('threatDetected', threat);
       }
-      
+
       return detectedThreats;
-      
     } catch (error) {
       this.emit('error', { error, context: 'threat-detection' });
       return [];
@@ -180,25 +186,27 @@ export class AdvancedSecurityEngine extends EventEmitter {
       severity: threat.severity,
       status: 'OPEN',
       source: threat,
-      timeline: [{
-        timestamp: new Date(),
-        type: 'INCIDENT_CREATED',
-        actor: 'AdvancedSecurityEngine',
-        description: `Incident created for threat ${threatId}`,
-        evidence: []
-      }],
+      timeline: [
+        {
+          timestamp: new Date(),
+          type: 'INCIDENT_CREATED',
+          actor: 'AdvancedSecurityEngine',
+          description: `Incident created for threat ${threatId}`,
+          evidence: [],
+        },
+      ],
       impactAssessment: await this.assessImpact(threat),
       responseActions: [],
-      artifacts: []
+      artifacts: [],
     };
 
     this.incidents.set(incident.id, incident);
-    
+
     const responseActions = await this.generateResponsePlan(threat, incident);
     incident.responseActions = responseActions;
-    
+
     await this.executeResponsePlan(incident);
-    
+
     this.emit('incidentCreated', incident);
     return incident;
   }
@@ -211,24 +219,23 @@ export class AdvancedSecurityEngine extends EventEmitter {
 
     try {
       let shouldBlock = false;
-      
+
       for (const rule of policy.rules) {
         const ruleResult = await this.evaluateRule(rule, context);
-        
+
         if (ruleResult && rule.action === 'DENY') {
           shouldBlock = true;
           break;
         }
       }
-      
+
       if (shouldBlock && policy.enforcement === 'BLOCK') {
         this.metrics.threatsBlocked++;
         this.emit('policyViolation', { policy, context, action: 'BLOCKED' });
         return false;
       }
-      
+
       return true;
-      
     } catch (error) {
       this.emit('error', { error, context: 'policy-enforcement' });
       return false;
@@ -240,31 +247,39 @@ export class AdvancedSecurityEngine extends EventEmitter {
       timestamp: new Date(),
       summary: {
         totalThreats: this.threats.size,
-        activeIncidents: Array.from(this.incidents.values()).filter(i => i.status !== 'CLOSED').length,
+        activeIncidents: Array.from(this.incidents.values()).filter(
+          (i) => i.status !== 'CLOSED',
+        ).length,
         securityScore: this.calculateSecurityScore(),
-        riskLevel: this.calculateRiskLevel()
+        riskLevel: this.calculateRiskLevel(),
       },
       threats: {
         byType: this.groupThreatsByType(),
         bySeverity: this.groupThreatsBySeverity(),
         recent: Array.from(this.threats.values())
-          .filter(t => Date.now() - t.timestamp.getTime() < 24 * 60 * 60 * 1000)
-          .slice(0, 10)
+          .filter(
+            (t) => Date.now() - t.timestamp.getTime() < 24 * 60 * 60 * 1000,
+          )
+          .slice(0, 10),
       },
       incidents: {
-        open: Array.from(this.incidents.values()).filter(i => i.status === 'OPEN'),
-        resolved: Array.from(this.incidents.values()).filter(i => i.status === 'RESOLVED'),
-        averageResolutionTime: this.calculateAverageResolutionTime()
+        open: Array.from(this.incidents.values()).filter(
+          (i) => i.status === 'OPEN',
+        ),
+        resolved: Array.from(this.incidents.values()).filter(
+          (i) => i.status === 'RESOLVED',
+        ),
+        averageResolutionTime: this.calculateAverageResolutionTime(),
       },
       aiModels: {
-        performance: Array.from(this.aiModels.values()).map(model => ({
+        performance: Array.from(this.aiModels.values()).map((model) => ({
           name: model.name,
           accuracy: model.accuracy,
-          status: model.status
-        }))
+          status: model.status,
+        })),
       },
       recommendations: await this.generateSecurityRecommendations(),
-      compliance: await this.assessCompliance()
+      compliance: await this.assessCompliance(),
     };
 
     this.emit('reportGenerated', report);
@@ -282,12 +297,12 @@ export class AdvancedSecurityEngine extends EventEmitter {
             id: 'detect-quantum-signatures',
             condition: 'hasQuantumSignatures(input)',
             action: 'ALERT',
-            parameters: { alertLevel: 'HIGH' }
-          }
+            parameters: { alertLevel: 'HIGH' },
+          },
         ],
         enforcement: 'BLOCK',
         scope: ['*'],
-        priority: 1
+        priority: 1,
       },
       {
         id: 'anomaly-detection-policy',
@@ -297,13 +312,13 @@ export class AdvancedSecurityEngine extends EventEmitter {
             id: 'detect-anomalies',
             condition: 'anomalyScore > 0.8',
             action: 'LOG',
-            parameters: { logLevel: 'WARN' }
-          }
+            parameters: { logLevel: 'WARN' },
+          },
         ],
         enforcement: 'WARN',
         scope: ['api', 'build', 'deployment'],
-        priority: 2
-      }
+        priority: 2,
+      },
     ];
 
     for (const policy of defaultPolicies) {
@@ -327,17 +342,16 @@ export class AdvancedSecurityEngine extends EventEmitter {
         networkTraffic: Math.random() * 1000,
         apiCalls: Math.floor(Math.random() * 100),
         failedLogins: Math.floor(Math.random() * 5),
-        unusualPatterns: Math.random() > 0.9
+        unusualPatterns: Math.random() > 0.9,
       };
 
       const threats = await this.detectThreats(monitoringData);
-      
+
       for (const threat of threats) {
         if (threat.severity === 'CRITICAL' || threat.severity === 'HIGH') {
           await this.respondToThreat(threat.id);
         }
       }
-      
     } catch (error) {
       this.emit('error', { error, context: 'continuous-monitoring' });
     }
@@ -357,7 +371,7 @@ export class AdvancedSecurityEngine extends EventEmitter {
         lastTrained: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
         features: ['network_patterns', 'api_usage', 'user_behavior'],
         threshold: 0.85,
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       },
       {
         id: 'threat-classifier',
@@ -365,9 +379,13 @@ export class AdvancedSecurityEngine extends EventEmitter {
         type: 'THREAT_CLASSIFICATION',
         accuracy: 0.91,
         lastTrained: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-        features: ['payload_analysis', 'source_reputation', 'behavioral_signals'],
-        threshold: 0.80,
-        status: 'ACTIVE'
+        features: [
+          'payload_analysis',
+          'source_reputation',
+          'behavioral_signals',
+        ],
+        threshold: 0.8,
+        status: 'ACTIVE',
       },
       {
         id: 'behavioral-analyzer',
@@ -377,7 +395,7 @@ export class AdvancedSecurityEngine extends EventEmitter {
         lastTrained: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
         features: ['access_patterns', 'time_analysis', 'resource_usage'],
         threshold: 0.75,
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       },
       {
         id: 'predictive-model',
@@ -386,9 +404,9 @@ export class AdvancedSecurityEngine extends EventEmitter {
         accuracy: 0.86,
         lastTrained: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
         features: ['threat_trends', 'vulnerability_data', 'attack_patterns'],
-        threshold: 0.70,
-        status: 'ACTIVE'
-      }
+        threshold: 0.7,
+        status: 'ACTIVE',
+      },
     ];
 
     for (const model of models) {
@@ -398,9 +416,10 @@ export class AdvancedSecurityEngine extends EventEmitter {
 
   private async runAIThreatDetection(data: any): Promise<ThreatVector[]> {
     const threats: ThreatVector[] = [];
-    
+
     // Mock AI-based threat detection
-    if (Math.random() > 0.95) { // 5% chance of detecting a threat
+    if (Math.random() > 0.95) {
+      // 5% chance of detecting a threat
       const threat: ThreatVector = {
         id: `ai-threat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         type: Math.random() > 0.7 ? 'QUANTUM' : 'CLASSICAL',
@@ -411,23 +430,24 @@ export class AdvancedSecurityEngine extends EventEmitter {
         indicators: [
           'unusual_network_pattern',
           'anomalous_api_usage',
-          'suspicious_user_behavior'
+          'suspicious_user_behavior',
         ],
         timestamp: new Date(),
-        mitigation: ['isolate_component', 'increase_monitoring']
+        mitigation: ['isolate_component', 'increase_monitoring'],
       };
-      
+
       threats.push(threat);
     }
-    
+
     return threats;
   }
 
   private async runSignatureDetection(data: any): Promise<ThreatVector[]> {
     const threats: ThreatVector[] = [];
-    
+
     // Mock signature-based detection
-    if (Math.random() > 0.98) { // 2% chance
+    if (Math.random() > 0.98) {
+      // 2% chance
       const threat: ThreatVector = {
         id: `sig-threat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         type: 'CLASSICAL',
@@ -435,25 +455,23 @@ export class AdvancedSecurityEngine extends EventEmitter {
         confidence: 0.95,
         source: 'SIGNATURE_ENGINE',
         target: 'network_traffic',
-        indicators: [
-          'known_malware_signature',
-          'suspicious_payload_pattern'
-        ],
+        indicators: ['known_malware_signature', 'suspicious_payload_pattern'],
         timestamp: new Date(),
-        mitigation: ['block_traffic', 'quarantine_source']
+        mitigation: ['block_traffic', 'quarantine_source'],
       };
-      
+
       threats.push(threat);
     }
-    
+
     return threats;
   }
 
   private async runBehavioralAnalysis(data: any): Promise<ThreatVector[]> {
     const threats: ThreatVector[] = [];
-    
+
     // Mock behavioral analysis
-    if (Math.random() > 0.97) { // 3% chance
+    if (Math.random() > 0.97) {
+      // 3% chance
       const threat: ThreatVector = {
         id: `behav-threat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         type: 'HYBRID',
@@ -464,42 +482,67 @@ export class AdvancedSecurityEngine extends EventEmitter {
         indicators: [
           'unusual_access_pattern',
           'privilege_escalation_attempt',
-          'off_hours_activity'
+          'off_hours_activity',
         ],
         timestamp: new Date(),
-        mitigation: ['require_additional_auth', 'increase_session_monitoring']
+        mitigation: ['require_additional_auth', 'increase_session_monitoring'],
       };
-      
+
       threats.push(threat);
     }
-    
+
     return threats;
   }
 
   private async assessImpact(threat: ThreatVector): Promise<ImpactAssessment> {
     // Mock impact assessment based on threat characteristics
     const severityImpact = {
-      'LOW': { confidentiality: 'NONE', integrity: 'LOW', availability: 'NONE' },
-      'MEDIUM': { confidentiality: 'LOW', integrity: 'MEDIUM', availability: 'LOW' },
-      'HIGH': { confidentiality: 'MEDIUM', integrity: 'HIGH', availability: 'MEDIUM' },
-      'CRITICAL': { confidentiality: 'HIGH', integrity: 'HIGH', availability: 'HIGH' }
+      LOW: { confidentiality: 'NONE', integrity: 'LOW', availability: 'NONE' },
+      MEDIUM: {
+        confidentiality: 'LOW',
+        integrity: 'MEDIUM',
+        availability: 'LOW',
+      },
+      HIGH: {
+        confidentiality: 'MEDIUM',
+        integrity: 'HIGH',
+        availability: 'MEDIUM',
+      },
+      CRITICAL: {
+        confidentiality: 'HIGH',
+        integrity: 'HIGH',
+        availability: 'HIGH',
+      },
     };
 
     const impact = severityImpact[threat.severity] || severityImpact['LOW'];
-    
+
     return {
       confidentiality: impact.confidentiality as any,
       integrity: impact.integrity as any,
       availability: impact.availability as any,
       scope: ['build_system', 'api', 'data_storage'],
-      estimatedLoss: threat.severity === 'CRITICAL' ? 100000 : threat.severity === 'HIGH' ? 50000 : 10000,
-      recoveryTime: threat.severity === 'CRITICAL' ? '4-8 hours' : threat.severity === 'HIGH' ? '2-4 hours' : '30-60 minutes'
+      estimatedLoss:
+        threat.severity === 'CRITICAL'
+          ? 100000
+          : threat.severity === 'HIGH'
+            ? 50000
+            : 10000,
+      recoveryTime:
+        threat.severity === 'CRITICAL'
+          ? '4-8 hours'
+          : threat.severity === 'HIGH'
+            ? '2-4 hours'
+            : '30-60 minutes',
     };
   }
 
-  private async generateResponsePlan(threat: ThreatVector, incident: SecurityIncident): Promise<ResponseAction[]> {
+  private async generateResponsePlan(
+    threat: ThreatVector,
+    incident: SecurityIncident,
+  ): Promise<ResponseAction[]> {
     const actions: ResponseAction[] = [];
-    
+
     // Automated containment
     actions.push({
       id: `action-contain-${Date.now()}`,
@@ -508,9 +551,9 @@ export class AdvancedSecurityEngine extends EventEmitter {
       status: 'PENDING',
       executor: 'AutomatedResponseSystem',
       success: false,
-      details: 'Automated containment of identified threat vector'
+      details: 'Automated containment of identified threat vector',
     });
-    
+
     // Investigation
     actions.push({
       id: `action-investigate-${Date.now()}`,
@@ -519,9 +562,9 @@ export class AdvancedSecurityEngine extends EventEmitter {
       status: 'PENDING',
       executor: 'ForensicsEngine',
       success: false,
-      details: 'Automated forensic investigation and evidence collection'
+      details: 'Automated forensic investigation and evidence collection',
     });
-    
+
     // Notification
     actions.push({
       id: `action-notify-${Date.now()}`,
@@ -530,9 +573,9 @@ export class AdvancedSecurityEngine extends EventEmitter {
       status: 'PENDING',
       executor: 'NotificationService',
       success: false,
-      details: 'Notify security team and relevant stakeholders'
+      details: 'Notify security team and relevant stakeholders',
     });
-    
+
     return actions;
   }
 
@@ -541,20 +584,21 @@ export class AdvancedSecurityEngine extends EventEmitter {
       try {
         action.status = 'EXECUTING';
         action.startTime = new Date();
-        
+
         // Mock action execution
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000));
-        
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.random() * 2000 + 1000),
+        );
+
         action.status = 'COMPLETED';
         action.completionTime = new Date();
         action.success = Math.random() > 0.1; // 90% success rate
-        
+
         if (action.success) {
           this.emit('actionCompleted', { incident, action });
         } else {
           this.emit('actionFailed', { incident, action });
         }
-        
       } catch (error) {
         action.status = 'FAILED';
         action.success = false;
@@ -562,22 +606,27 @@ export class AdvancedSecurityEngine extends EventEmitter {
         this.emit('actionFailed', { incident, action, error });
       }
     }
-    
+
     // Update incident status
-    const successfulActions = incident.responseActions.filter(a => a.success).length;
+    const successfulActions = incident.responseActions.filter(
+      (a) => a.success,
+    ).length;
     const totalActions = incident.responseActions.length;
-    
+
     if (successfulActions === totalActions) {
       incident.status = 'RESOLVED';
       this.metrics.incidentsClosed++;
     } else if (successfulActions > 0) {
       incident.status = 'CONTAINED';
     }
-    
+
     this.emit('incidentUpdated', incident);
   }
 
-  private async evaluateRule(rule: SecurityRule, context: any): Promise<boolean> {
+  private async evaluateRule(
+    rule: SecurityRule,
+    context: any,
+  ): Promise<boolean> {
     // Mock rule evaluation
     try {
       // Simple condition evaluation (in real implementation, would use proper expression parser)
@@ -585,13 +634,12 @@ export class AdvancedSecurityEngine extends EventEmitter {
         const anomalyScore = Math.random();
         return anomalyScore > 0.8;
       }
-      
+
       if (rule.condition.includes('hasQuantumSignatures')) {
         return Math.random() > 0.95;
       }
-      
+
       return Math.random() > 0.9;
-      
     } catch (error) {
       this.emit('error', { error, context: 'rule-evaluation', rule });
       return false;
@@ -601,15 +649,16 @@ export class AdvancedSecurityEngine extends EventEmitter {
   private calculateSecurityScore(): number {
     const base = 100;
     const threatPenalty = Math.min(this.threats.size * 2, 30);
-    const incidentPenalty = Array.from(this.incidents.values())
-      .filter(i => i.status === 'OPEN').length * 5;
-    
+    const incidentPenalty =
+      Array.from(this.incidents.values()).filter((i) => i.status === 'OPEN')
+        .length * 5;
+
     return Math.max(base - threatPenalty - incidentPenalty, 0);
   }
 
   private calculateRiskLevel(): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     const score = this.calculateSecurityScore();
-    
+
     if (score >= 90) return 'LOW';
     if (score >= 70) return 'MEDIUM';
     if (score >= 50) return 'HIGH';
@@ -618,91 +667,109 @@ export class AdvancedSecurityEngine extends EventEmitter {
 
   private groupThreatsByType(): Record<string, number> {
     const groups: Record<string, number> = {};
-    
+
     for (const threat of this.threats.values()) {
       groups[threat.type] = (groups[threat.type] || 0) + 1;
     }
-    
+
     return groups;
   }
 
   private groupThreatsBySeverity(): Record<string, number> {
     const groups: Record<string, number> = {};
-    
+
     for (const threat of this.threats.values()) {
       groups[threat.severity] = (groups[threat.severity] || 0) + 1;
     }
-    
+
     return groups;
   }
 
   private calculateAverageResolutionTime(): number {
-    const resolvedIncidents = Array.from(this.incidents.values())
-      .filter(i => i.status === 'RESOLVED' && i.responseActions.length > 0);
-    
+    const resolvedIncidents = Array.from(this.incidents.values()).filter(
+      (i) => i.status === 'RESOLVED' && i.responseActions.length > 0,
+    );
+
     if (resolvedIncidents.length === 0) return 0;
-    
+
     const totalTime = resolvedIncidents.reduce((sum, incident) => {
       const firstAction = incident.responseActions[0];
-      const lastAction = incident.responseActions[incident.responseActions.length - 1];
-      
+      const lastAction =
+        incident.responseActions[incident.responseActions.length - 1];
+
       if (firstAction.startTime && lastAction.completionTime) {
-        return sum + (lastAction.completionTime.getTime() - firstAction.startTime.getTime());
+        return (
+          sum +
+          (lastAction.completionTime.getTime() -
+            firstAction.startTime.getTime())
+        );
       }
-      
+
       return sum;
     }, 0);
-    
+
     return totalTime / resolvedIncidents.length / 1000; // Return in seconds
   }
 
   private async generateSecurityRecommendations(): Promise<string[]> {
     const recommendations: string[] = [];
-    
+
     // Analyze current security posture and generate recommendations
-    const criticalThreats = Array.from(this.threats.values())
-      .filter(t => t.severity === 'CRITICAL').length;
-    
+    const criticalThreats = Array.from(this.threats.values()).filter(
+      (t) => t.severity === 'CRITICAL',
+    ).length;
+
     if (criticalThreats > 5) {
-      recommendations.push('Implement additional automated response capabilities for critical threats');
+      recommendations.push(
+        'Implement additional automated response capabilities for critical threats',
+      );
     }
-    
-    const oldIncidents = Array.from(this.incidents.values())
-      .filter(i => i.status === 'OPEN' && 
-        Date.now() - i.timeline[0].timestamp.getTime() > 24 * 60 * 60 * 1000);
-    
+
+    const oldIncidents = Array.from(this.incidents.values()).filter(
+      (i) =>
+        i.status === 'OPEN' &&
+        Date.now() - i.timeline[0].timestamp.getTime() > 24 * 60 * 60 * 1000,
+    );
+
     if (oldIncidents.length > 0) {
       recommendations.push('Review and escalate long-running open incidents');
     }
-    
-    const modelAccuracy = Array.from(this.aiModels.values())
-      .reduce((sum, model) => sum + model.accuracy, 0) / this.aiModels.size;
-    
+
+    const modelAccuracy =
+      Array.from(this.aiModels.values()).reduce(
+        (sum, model) => sum + model.accuracy,
+        0,
+      ) / this.aiModels.size;
+
     if (modelAccuracy < 0.85) {
-      recommendations.push('Retrain AI security models to improve detection accuracy');
+      recommendations.push(
+        'Retrain AI security models to improve detection accuracy',
+      );
     }
-    
+
     recommendations.push('Regular security policy review and updates');
-    recommendations.push('Implement continuous security training for development teams');
-    
+    recommendations.push(
+      'Implement continuous security training for development teams',
+    );
+
     return recommendations;
   }
 
   private async assessCompliance(): Promise<Record<string, any>> {
     return {
       frameworks: {
-        'NIST': { score: 87, status: 'COMPLIANT' },
-        'ISO27001': { score: 91, status: 'COMPLIANT' },
-        'SOX': { score: 94, status: 'COMPLIANT' },
-        'PCI-DSS': { score: 89, status: 'COMPLIANT' }
+        NIST: { score: 87, status: 'COMPLIANT' },
+        ISO27001: { score: 91, status: 'COMPLIANT' },
+        SOX: { score: 94, status: 'COMPLIANT' },
+        'PCI-DSS': { score: 89, status: 'COMPLIANT' },
       },
       gaps: [
         'Enhanced logging for forensic analysis',
         'Automated compliance reporting',
-        'Third-party risk assessments'
+        'Third-party risk assessments',
       ],
       lastAssessment: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-      nextAssessment: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)
+      nextAssessment: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
     };
   }
 
@@ -716,7 +783,9 @@ export class AdvancedSecurityEngine extends EventEmitter {
   }
 
   getActiveIncidents(): SecurityIncident[] {
-    return Array.from(this.incidents.values()).filter(i => i.status !== 'CLOSED');
+    return Array.from(this.incidents.values()).filter(
+      (i) => i.status !== 'CLOSED',
+    );
   }
 
   getPolicyCount(): number {

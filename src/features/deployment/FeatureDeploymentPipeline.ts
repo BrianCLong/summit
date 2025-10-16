@@ -5,7 +5,11 @@
  */
 
 import { EventEmitter } from 'events';
-import { FeatureFlagManager, FeatureFlag, RolloutPhase } from '../core/FeatureFlagManager.js';
+import {
+  FeatureFlagManager,
+  FeatureFlag,
+  RolloutPhase,
+} from '../core/FeatureFlagManager.js';
 
 /**
  * Deployment environment configuration
@@ -47,7 +51,12 @@ export interface PromotionRule {
  * Promotion condition
  */
 export interface PromotionCondition {
-  type: 'time_based' | 'metric_threshold' | 'test_results' | 'approval' | 'flag_status';
+  type:
+    | 'time_based'
+    | 'metric_threshold'
+    | 'test_results'
+    | 'approval'
+    | 'flag_status';
   parameters: Record<string, any>;
   required: boolean;
 }
@@ -97,7 +106,12 @@ export interface DeploymentPipeline {
  * CI/CD integration configuration
  */
 export interface CIIntegration {
-  provider: 'jenkins' | 'github_actions' | 'azure_devops' | 'gitlab_ci' | 'circleci';
+  provider:
+    | 'jenkins'
+    | 'github_actions'
+    | 'azure_devops'
+    | 'gitlab_ci'
+    | 'circleci';
   webhookUrl: string;
   apiKey?: string;
   repository: string;
@@ -167,7 +181,14 @@ export interface DeploymentRequest {
   requestedBy: string;
   requestedAt: Date;
   approvals: DeploymentApproval[];
-  status: 'pending' | 'approved' | 'rejected' | 'deploying' | 'completed' | 'failed' | 'rolled_back';
+  status:
+    | 'pending'
+    | 'approved'
+    | 'rejected'
+    | 'deploying'
+    | 'completed'
+    | 'failed'
+    | 'rolled_back';
   rolloutPlan: RolloutPlan;
   healthCheckResults: HealthCheckResult[];
   deploymentLog: DeploymentLogEntry[];
@@ -286,7 +307,7 @@ export class FeatureDeploymentPipeline extends EventEmitter {
         enableEmail: boolean;
         enablePagerDuty: boolean;
       };
-    }
+    },
   ) {
     super();
     this.initializePipeline();
@@ -297,13 +318,13 @@ export class FeatureDeploymentPipeline extends EventEmitter {
    * Create deployment pipeline
    */
   async createPipeline(
-    pipelineConfig: Omit<DeploymentPipeline, 'id'>
+    pipelineConfig: Omit<DeploymentPipeline, 'id'>,
   ): Promise<DeploymentPipeline> {
     const id = this.generatePipelineId();
-    
+
     const pipeline: DeploymentPipeline = {
       id,
-      ...pipelineConfig
+      ...pipelineConfig,
     };
 
     // Validate pipeline configuration
@@ -327,13 +348,13 @@ export class FeatureDeploymentPipeline extends EventEmitter {
     flagKey: string,
     targetEnvironment: string,
     requestedBy: string,
-    rolloutPlan?: Partial<RolloutPlan>
+    rolloutPlan?: Partial<RolloutPlan>,
   ): Promise<DeploymentRequest> {
     // Get flag
     const flag = await this.flagManager.evaluateFlag(flagKey, {
       user: { id: 'system', attributes: {} },
       request: { timestamp: new Date() },
-      environment: 'system'
+      environment: 'system',
     });
 
     if (!flag) {
@@ -343,12 +364,18 @@ export class FeatureDeploymentPipeline extends EventEmitter {
     // Find pipeline for target environment
     const pipeline = this.findPipelineForEnvironment(targetEnvironment);
     if (!pipeline) {
-      throw new Error(`No pipeline configured for environment: ${targetEnvironment}`);
+      throw new Error(
+        `No pipeline configured for environment: ${targetEnvironment}`,
+      );
     }
 
-    const environment = pipeline.environments.find(env => env.name === targetEnvironment);
+    const environment = pipeline.environments.find(
+      (env) => env.name === targetEnvironment,
+    );
     if (!environment) {
-      throw new Error(`Environment not found in pipeline: ${targetEnvironment}`);
+      throw new Error(
+        `Environment not found in pipeline: ${targetEnvironment}`,
+      );
     }
 
     // Create deployment request
@@ -363,14 +390,14 @@ export class FeatureDeploymentPipeline extends EventEmitter {
       status: 'pending',
       rolloutPlan: await this.createRolloutPlan(environment, rolloutPlan),
       healthCheckResults: [],
-      deploymentLog: []
+      deploymentLog: [],
     };
 
     // Add initial log entry
     this.addDeploymentLog(request, 'info', 'Deployment request created', {
       flagKey,
       targetEnvironment,
-      requestedBy
+      requestedBy,
     });
 
     // Check if approval is required
@@ -395,7 +422,7 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   async approveDeployment(
     requestId: string,
     approver: string,
-    comment?: string
+    comment?: string,
   ): Promise<void> {
     const request = this.deploymentRequests.get(requestId);
     if (!request) {
@@ -411,21 +438,27 @@ export class FeatureDeploymentPipeline extends EventEmitter {
       approver,
       decision: 'approved',
       comment,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Check if enough approvals
-    const pipeline = this.findPipelineForEnvironment(request.targetEnvironment)!;
-    const environment = pipeline.environments.find(env => env.name === request.targetEnvironment)!;
-    
+    const pipeline = this.findPipelineForEnvironment(
+      request.targetEnvironment,
+    )!;
+    const environment = pipeline.environments.find(
+      (env) => env.name === request.targetEnvironment,
+    )!;
+
     const requiredApprovals = environment.approvers.length;
-    const approvals = request.approvals.filter(a => a.decision === 'approved').length;
+    const approvals = request.approvals.filter(
+      (a) => a.decision === 'approved',
+    ).length;
 
     if (approvals >= requiredApprovals) {
       request.status = 'approved';
       this.addDeploymentLog(request, 'info', 'Deployment approved', {
         approver,
-        totalApprovals: approvals
+        totalApprovals: approvals,
       });
 
       await this.startDeployment(request);
@@ -442,7 +475,7 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   async rejectDeployment(
     requestId: string,
     approver: string,
-    reason: string
+    reason: string,
   ): Promise<void> {
     const request = this.deploymentRequests.get(requestId);
     if (!request) {
@@ -454,12 +487,12 @@ export class FeatureDeploymentPipeline extends EventEmitter {
       approver,
       decision: 'rejected',
       comment: reason,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     this.addDeploymentLog(request, 'warning', 'Deployment rejected', {
       approver,
-      reason
+      reason,
     });
 
     this.deploymentRequests.set(requestId, request);
@@ -475,7 +508,7 @@ export class FeatureDeploymentPipeline extends EventEmitter {
     this.activeDeployments.set(request.id, request);
 
     this.addDeploymentLog(request, 'info', 'Starting deployment', {
-      rolloutStrategy: request.rolloutPlan.strategy
+      rolloutStrategy: request.rolloutPlan.strategy,
     });
 
     try {
@@ -483,21 +516,28 @@ export class FeatureDeploymentPipeline extends EventEmitter {
       await this.executeRolloutPlan(request);
 
       request.status = 'completed';
-      this.addDeploymentLog(request, 'info', 'Deployment completed successfully');
+      this.addDeploymentLog(
+        request,
+        'info',
+        'Deployment completed successfully',
+      );
 
       this.activeDeployments.delete(request.id);
 
       this.emit('deployment:completed', { request });
-
     } catch (error) {
       request.status = 'failed';
       this.addDeploymentLog(request, 'error', 'Deployment failed', {
-        error: error.message
+        error: error.message,
       });
 
       // Trigger rollback if configured
-      const pipeline = this.findPipelineForEnvironment(request.targetEnvironment)!;
-      const environment = pipeline.environments.find(env => env.name === request.targetEnvironment)!;
+      const pipeline = this.findPipelineForEnvironment(
+        request.targetEnvironment,
+      )!;
+      const environment = pipeline.environments.find(
+        (env) => env.name === request.targetEnvironment,
+      )!;
 
       if (environment.rollbackOnFailure) {
         await this.executeRollback(request, 'Deployment failed');
@@ -519,32 +559,45 @@ export class FeatureDeploymentPipeline extends EventEmitter {
 
     this.addDeploymentLog(request, 'info', 'Executing rollout plan', {
       strategy: rolloutPlan.strategy,
-      phaseCount: rolloutPlan.phases.length
+      phaseCount: rolloutPlan.phases.length,
     });
 
     for (let i = 0; i < rolloutPlan.phases.length; i++) {
       const phase = rolloutPlan.phases[i];
-      
-      this.addDeploymentLog(request, 'info', `Starting phase ${i + 1}: ${phase.name}`, {
-        percentage: phase.percentage,
-        duration: phase.duration
-      });
+
+      this.addDeploymentLog(
+        request,
+        'info',
+        `Starting phase ${i + 1}: ${phase.name}`,
+        {
+          percentage: phase.percentage,
+          duration: phase.duration,
+        },
+      );
 
       try {
         // Execute phase
         await this.executeDeploymentPhase(request, phase);
 
-        this.addDeploymentLog(request, 'info', `Phase ${i + 1} completed successfully`);
-
+        this.addDeploymentLog(
+          request,
+          'info',
+          `Phase ${i + 1} completed successfully`,
+        );
       } catch (error) {
         this.addDeploymentLog(request, 'error', `Phase ${i + 1} failed`, {
-          error: error.message
+          error: error.message,
         });
 
         // Check if rollback should be triggered
-        const shouldRollback = await this.evaluateRollbackTriggers(request, phase);
+        const shouldRollback = await this.evaluateRollbackTriggers(
+          request,
+          phase,
+        );
         if (shouldRollback) {
-          throw new Error(`Phase ${i + 1} failed, triggering rollback: ${error.message}`);
+          throw new Error(
+            `Phase ${i + 1} failed, triggering rollback: ${error.message}`,
+          );
         }
 
         throw error;
@@ -557,7 +610,7 @@ export class FeatureDeploymentPipeline extends EventEmitter {
    */
   private async executeDeploymentPhase(
     request: DeploymentRequest,
-    phase: DeploymentPhase
+    phase: DeploymentPhase,
   ): Promise<void> {
     // Update traffic splitting
     if (request.rolloutPlan.trafficSplitting.enabled) {
@@ -569,7 +622,11 @@ export class FeatureDeploymentPipeline extends EventEmitter {
 
     // Wait for phase duration
     if (phase.duration > 0) {
-      this.addDeploymentLog(request, 'info', `Waiting for phase duration: ${phase.duration} minutes`);
+      this.addDeploymentLog(
+        request,
+        'info',
+        `Waiting for phase duration: ${phase.duration} minutes`,
+      );
       await this.sleep(phase.duration * 60 * 1000);
     }
 
@@ -581,7 +638,11 @@ export class FeatureDeploymentPipeline extends EventEmitter {
 
     // Check for auto-promotion
     if (phase.autoPromotion) {
-      this.addDeploymentLog(request, 'info', 'Phase auto-promotion criteria met');
+      this.addDeploymentLog(
+        request,
+        'info',
+        'Phase auto-promotion criteria met',
+      );
     }
   }
 
@@ -590,24 +651,35 @@ export class FeatureDeploymentPipeline extends EventEmitter {
    */
   private async updateTrafficSplitting(
     request: DeploymentRequest,
-    percentage: number
+    percentage: number,
   ): Promise<void> {
-    const pipeline = this.findPipelineForEnvironment(request.targetEnvironment)!;
-    const environment = pipeline.environments.find(env => env.name === request.targetEnvironment)!;
+    const pipeline = this.findPipelineForEnvironment(
+      request.targetEnvironment,
+    )!;
+    const environment = pipeline.environments.find(
+      (env) => env.name === request.targetEnvironment,
+    )!;
 
     if (!environment.loadBalancer?.trafficSplitCapable) {
-      this.addDeploymentLog(request, 'warning', 'Traffic splitting not available for this environment');
+      this.addDeploymentLog(
+        request,
+        'warning',
+        'Traffic splitting not available for this environment',
+      );
       return;
     }
 
     this.addDeploymentLog(request, 'info', 'Updating traffic splitting', {
       percentage,
-      endpoint: environment.loadBalancer.endpoint
+      endpoint: environment.loadBalancer.endpoint,
     });
 
     // Implementation would integrate with load balancer API
     // e.g., AWS ALB, NGINX, Istio, etc.
-    await this.mockTrafficSplitUpdate(environment.loadBalancer.endpoint, percentage);
+    await this.mockTrafficSplitUpdate(
+      environment.loadBalancer.endpoint,
+      percentage,
+    );
   }
 
   /**
@@ -615,11 +687,11 @@ export class FeatureDeploymentPipeline extends EventEmitter {
    */
   private async updateFlagTargeting(
     request: DeploymentRequest,
-    percentage: number
+    percentage: number,
   ): Promise<void> {
     this.addDeploymentLog(request, 'info', 'Updating flag targeting', {
       flagKey: request.flagKey,
-      percentage
+      percentage,
     });
 
     // Update flag with rollout percentage
@@ -631,39 +703,49 @@ export class FeatureDeploymentPipeline extends EventEmitter {
    */
   private async executePhaseHealthChecks(
     request: DeploymentRequest,
-    phase: DeploymentPhase
+    phase: DeploymentPhase,
   ): Promise<void> {
-    const pipeline = this.findPipelineForEnvironment(request.targetEnvironment)!;
-    const environment = pipeline.environments.find(env => env.name === request.targetEnvironment)!;
+    const pipeline = this.findPipelineForEnvironment(
+      request.targetEnvironment,
+    )!;
+    const environment = pipeline.environments.find(
+      (env) => env.name === request.targetEnvironment,
+    )!;
 
-    const healthChecks = environment.healthChecks.filter(hc => 
-      phase.healthChecks.includes(hc.name)
+    const healthChecks = environment.healthChecks.filter((hc) =>
+      phase.healthChecks.includes(hc.name),
     );
 
     if (healthChecks.length === 0) {
-      this.addDeploymentLog(request, 'info', 'No health checks configured for this phase');
+      this.addDeploymentLog(
+        request,
+        'info',
+        'No health checks configured for this phase',
+      );
       return;
     }
 
     this.addDeploymentLog(request, 'info', 'Executing health checks', {
-      checkCount: healthChecks.length
+      checkCount: healthChecks.length,
     });
 
     const results = await Promise.all(
-      healthChecks.map(check => this.executeHealthCheck(check))
+      healthChecks.map((check) => this.executeHealthCheck(check)),
     );
 
     // Add results to request
     request.healthCheckResults.push(...results);
 
     // Check if any health checks failed
-    const failedChecks = results.filter(r => r.status === 'fail');
+    const failedChecks = results.filter((r) => r.status === 'fail');
     if (failedChecks.length > 0) {
       this.addDeploymentLog(request, 'error', 'Health checks failed', {
-        failedChecks: failedChecks.map(r => r.checkName)
+        failedChecks: failedChecks.map((r) => r.checkName),
       });
 
-      throw new Error(`Health checks failed: ${failedChecks.map(r => r.checkName).join(', ')}`);
+      throw new Error(
+        `Health checks failed: ${failedChecks.map((r) => r.checkName).join(', ')}`,
+      );
     }
 
     this.addDeploymentLog(request, 'info', 'All health checks passed');
@@ -672,7 +754,9 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Execute individual health check
    */
-  private async executeHealthCheck(healthCheck: HealthCheck): Promise<HealthCheckResult> {
+  private async executeHealthCheck(
+    healthCheck: HealthCheck,
+  ): Promise<HealthCheckResult> {
     const startTime = Date.now();
 
     try {
@@ -688,7 +772,9 @@ export class FeatureDeploymentPipeline extends EventEmitter {
           break;
 
         case 'custom':
-          passed = healthCheck.customCheck ? await healthCheck.customCheck() : false;
+          passed = healthCheck.customCheck
+            ? await healthCheck.customCheck()
+            : false;
           break;
 
         case 'metric':
@@ -706,10 +792,9 @@ export class FeatureDeploymentPipeline extends EventEmitter {
         duration: Date.now() - startTime,
         details: {
           type: healthCheck.type,
-          endpoint: healthCheck.endpoint
-        }
+          endpoint: healthCheck.endpoint,
+        },
       };
-
     } catch (error) {
       return {
         checkName: healthCheck.name,
@@ -717,7 +802,7 @@ export class FeatureDeploymentPipeline extends EventEmitter {
         timestamp: new Date(),
         duration: Date.now() - startTime,
         details: {},
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -725,20 +810,21 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Execute HTTP health check
    */
-  private async executeHttpHealthCheck(healthCheck: HealthCheck): Promise<boolean> {
+  private async executeHttpHealthCheck(
+    healthCheck: HealthCheck,
+  ): Promise<boolean> {
     if (!healthCheck.endpoint) {
       throw new Error('HTTP health check requires endpoint');
     }
 
     const fetch = (await import('node-fetch')).default;
-    
+
     try {
       const response = await fetch(healthCheck.endpoint, {
-        timeout: healthCheck.timeout
+        timeout: healthCheck.timeout,
       });
 
       return response.status === (healthCheck.expectedStatus || 200);
-
     } catch (error) {
       return false;
     }
@@ -747,7 +833,9 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Execute TCP health check
    */
-  private async executeTcpHealthCheck(healthCheck: HealthCheck): Promise<boolean> {
+  private async executeTcpHealthCheck(
+    healthCheck: HealthCheck,
+  ): Promise<boolean> {
     // Implementation would check TCP connectivity
     return true; // Placeholder
   }
@@ -755,7 +843,9 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Execute metric-based health check
    */
-  private async executeMetricHealthCheck(healthCheck: HealthCheck): Promise<boolean> {
+  private async executeMetricHealthCheck(
+    healthCheck: HealthCheck,
+  ): Promise<boolean> {
     if (!healthCheck.metricQuery) {
       throw new Error('Metric health check requires metric query');
     }
@@ -770,11 +860,11 @@ export class FeatureDeploymentPipeline extends EventEmitter {
    */
   private async evaluatePhaseConditions(
     request: DeploymentRequest,
-    phase: DeploymentPhase
+    phase: DeploymentPhase,
   ): Promise<void> {
     for (const condition of phase.conditions) {
       const met = await this.evaluatePhaseCondition(condition);
-      
+
       if (!met) {
         throw new Error(`Phase condition not met: ${condition.type}`);
       }
@@ -784,7 +874,9 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Evaluate individual phase condition
    */
-  private async evaluatePhaseCondition(condition: PhaseCondition): Promise<boolean> {
+  private async evaluatePhaseCondition(
+    condition: PhaseCondition,
+  ): Promise<boolean> {
     switch (condition.type) {
       case 'time':
         // Wait for specified time
@@ -813,7 +905,9 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Check metric threshold condition
    */
-  private async checkMetricThreshold(parameters: Record<string, any>): Promise<boolean> {
+  private async checkMetricThreshold(
+    parameters: Record<string, any>,
+  ): Promise<boolean> {
     // Implementation would query monitoring system
     // and check if metric meets threshold
     return true; // Placeholder
@@ -824,16 +918,21 @@ export class FeatureDeploymentPipeline extends EventEmitter {
    */
   private async evaluateRollbackTriggers(
     request: DeploymentRequest,
-    phase: DeploymentPhase
+    phase: DeploymentPhase,
   ): Promise<boolean> {
     for (const trigger of phase.rollbackTriggers) {
       if (trigger.autoExecute) {
         const shouldTrigger = await this.evaluateRollbackTrigger(trigger);
         if (shouldTrigger) {
-          this.addDeploymentLog(request, 'warning', 'Rollback trigger activated', {
-            triggerType: trigger.type,
-            threshold: trigger.threshold
-          });
+          this.addDeploymentLog(
+            request,
+            'warning',
+            'Rollback trigger activated',
+            {
+              triggerType: trigger.type,
+              threshold: trigger.threshold,
+            },
+          );
           return true;
         }
       }
@@ -845,7 +944,9 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Evaluate individual rollback trigger
    */
-  private async evaluateRollbackTrigger(trigger: RollbackTrigger): Promise<boolean> {
+  private async evaluateRollbackTrigger(
+    trigger: RollbackTrigger,
+  ): Promise<boolean> {
     switch (trigger.type) {
       case 'error_rate':
         // Check error rate metric
@@ -857,7 +958,10 @@ export class FeatureDeploymentPipeline extends EventEmitter {
 
       case 'health_check':
         // Check health check failure rate
-        return await this.checkHealthCheckFailures(trigger.threshold, trigger.window);
+        return await this.checkHealthCheckFailures(
+          trigger.threshold,
+          trigger.window,
+        );
 
       case 'manual':
         // Manual triggers are handled separately
@@ -871,7 +975,10 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Check error rate for rollback trigger
    */
-  private async checkErrorRate(threshold: number, window: number): Promise<boolean> {
+  private async checkErrorRate(
+    threshold: number,
+    window: number,
+  ): Promise<boolean> {
     // Implementation would query monitoring system
     // for error rate in the specified window
     return false; // Placeholder - no rollback needed
@@ -880,7 +987,10 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Check response time for rollback trigger
    */
-  private async checkResponseTime(threshold: number, window: number): Promise<boolean> {
+  private async checkResponseTime(
+    threshold: number,
+    window: number,
+  ): Promise<boolean> {
     // Implementation would query monitoring system
     // for response time metrics
     return false; // Placeholder - no rollback needed
@@ -889,7 +999,10 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Check health check failures for rollback trigger
    */
-  private async checkHealthCheckFailures(threshold: number, window: number): Promise<boolean> {
+  private async checkHealthCheckFailures(
+    threshold: number,
+    window: number,
+  ): Promise<boolean> {
     // Implementation would check recent health check results
     // from the cache or database
     return false; // Placeholder - no rollback needed
@@ -898,10 +1011,13 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Execute rollback procedure
    */
-  private async executeRollback(request: DeploymentRequest, reason: string): Promise<void> {
+  private async executeRollback(
+    request: DeploymentRequest,
+    reason: string,
+  ): Promise<void> {
     this.addDeploymentLog(request, 'warning', 'Initiating rollback', {
       reason,
-      strategy: request.rolloutPlan.rollbackPlan.strategy
+      strategy: request.rolloutPlan.rollbackPlan.strategy,
     });
 
     try {
@@ -909,7 +1025,11 @@ export class FeatureDeploymentPipeline extends EventEmitter {
 
       // Wait for notification delay
       if (rollbackPlan.notificationDelay > 0) {
-        this.addDeploymentLog(request, 'info', `Waiting ${rollbackPlan.notificationDelay} seconds before rollback`);
+        this.addDeploymentLog(
+          request,
+          'info',
+          `Waiting ${rollbackPlan.notificationDelay} seconds before rollback`,
+        );
         await this.sleep(rollbackPlan.notificationDelay * 1000);
       }
 
@@ -924,7 +1044,9 @@ export class FeatureDeploymentPipeline extends EventEmitter {
           break;
 
         default:
-          throw new Error(`Unknown rollback strategy: ${rollbackPlan.strategy}`);
+          throw new Error(
+            `Unknown rollback strategy: ${rollbackPlan.strategy}`,
+          );
       }
 
       // Execute post-rollback actions
@@ -934,10 +1056,9 @@ export class FeatureDeploymentPipeline extends EventEmitter {
       this.addDeploymentLog(request, 'info', 'Rollback completed successfully');
 
       this.emit('deployment:rolled_back', { request, reason });
-
     } catch (error) {
       this.addDeploymentLog(request, 'error', 'Rollback failed', {
-        error: error.message
+        error: error.message,
       });
 
       this.emit('deployment:rollback_failed', { request, error });
@@ -948,7 +1069,9 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Execute immediate rollback
    */
-  private async executeImmediateRollback(request: DeploymentRequest): Promise<void> {
+  private async executeImmediateRollback(
+    request: DeploymentRequest,
+  ): Promise<void> {
     // Immediately revert traffic and flag configuration
     await this.updateTrafficSplitting(request, 0);
     await this.updateFlagTargeting(request, 0);
@@ -957,10 +1080,12 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Execute gradual rollback
    */
-  private async executeGradualRollback(request: DeploymentRequest): Promise<void> {
+  private async executeGradualRollback(
+    request: DeploymentRequest,
+  ): Promise<void> {
     // Gradually reduce traffic over time
     const phases = [75, 50, 25, 0];
-    
+
     for (const percentage of phases) {
       await this.updateTrafficSplitting(request, percentage);
       await this.updateFlagTargeting(request, percentage);
@@ -971,16 +1096,23 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Execute post-rollback actions
    */
-  private async executePostRollbackActions(request: DeploymentRequest): Promise<void> {
+  private async executePostRollbackActions(
+    request: DeploymentRequest,
+  ): Promise<void> {
     const { rollbackPlan } = request.rolloutPlan;
 
     for (const action of rollbackPlan.postRollbackActions) {
       try {
         await this.executePostRollbackAction(action, request);
       } catch (error) {
-        this.addDeploymentLog(request, 'warning', `Post-rollback action failed: ${action}`, {
-          error: error.message
-        });
+        this.addDeploymentLog(
+          request,
+          'warning',
+          `Post-rollback action failed: ${action}`,
+          {
+            error: error.message,
+          },
+        );
       }
     }
   }
@@ -988,7 +1120,10 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   /**
    * Execute individual post-rollback action
    */
-  private async executePostRollbackAction(action: string, request: DeploymentRequest): Promise<void> {
+  private async executePostRollbackAction(
+    action: string,
+    request: DeploymentRequest,
+  ): Promise<void> {
     switch (action) {
       case 'notify_team':
         await this.notifyTeam(request, 'Rollback completed');
@@ -1003,7 +1138,11 @@ export class FeatureDeploymentPipeline extends EventEmitter {
         break;
 
       default:
-        this.addDeploymentLog(request, 'warning', `Unknown post-rollback action: ${action}`);
+        this.addDeploymentLog(
+          request,
+          'warning',
+          `Unknown post-rollback action: ${action}`,
+        );
     }
   }
 
@@ -1012,7 +1151,7 @@ export class FeatureDeploymentPipeline extends EventEmitter {
    */
   private async createRolloutPlan(
     environment: DeploymentEnvironment,
-    customPlan?: Partial<RolloutPlan>
+    customPlan?: Partial<RolloutPlan>,
   ): Promise<RolloutPlan> {
     const defaultPlan: RolloutPlan = {
       strategy: 'gradual',
@@ -1022,45 +1161,45 @@ export class FeatureDeploymentPipeline extends EventEmitter {
           name: 'Initial Rollout',
           percentage: 10,
           duration: 15,
-          healthChecks: environment.healthChecks.map(hc => hc.name),
+          healthChecks: environment.healthChecks.map((hc) => hc.name),
           conditions: [],
           autoPromotion: true,
-          rollbackTriggers: []
+          rollbackTriggers: [],
         },
         {
           id: 'phase2',
           name: 'Expanded Rollout',
           percentage: 50,
           duration: 30,
-          healthChecks: environment.healthChecks.map(hc => hc.name),
+          healthChecks: environment.healthChecks.map((hc) => hc.name),
           conditions: [],
           autoPromotion: true,
-          rollbackTriggers: []
+          rollbackTriggers: [],
         },
         {
           id: 'phase3',
           name: 'Full Rollout',
           percentage: 100,
           duration: 0,
-          healthChecks: environment.healthChecks.map(hc => hc.name),
+          healthChecks: environment.healthChecks.map((hc) => hc.name),
           conditions: [],
           autoPromotion: true,
-          rollbackTriggers: []
-        }
+          rollbackTriggers: [],
+        },
       ],
       rollbackPlan: {
         strategy: 'immediate',
         targetState: 'previous_version',
         notificationDelay: 5,
-        postRollbackActions: ['notify_team', 'create_incident']
+        postRollbackActions: ['notify_team', 'create_incident'],
       },
       trafficSplitting: {
         enabled: environment.loadBalancer?.trafficSplitCapable || false,
         initialPercentage: 10,
         incrementPercentage: 20,
         maxPercentage: 100,
-        duration: 15
-      }
+        duration: 15,
+      },
     };
 
     return { ...defaultPlan, ...customPlan };
@@ -1071,10 +1210,10 @@ export class FeatureDeploymentPipeline extends EventEmitter {
    */
   private async requestApproval(
     request: DeploymentRequest,
-    environment: DeploymentEnvironment
+    environment: DeploymentEnvironment,
   ): Promise<void> {
     this.addDeploymentLog(request, 'info', 'Requesting approval', {
-      approvers: environment.approvers
+      approvers: environment.approvers,
     });
 
     // Send notifications to approvers
@@ -1088,19 +1227,23 @@ export class FeatureDeploymentPipeline extends EventEmitter {
    */
   private async sendApprovalRequest(
     request: DeploymentRequest,
-    approver: string
+    approver: string,
   ): Promise<void> {
     // Implementation would send email, Slack message, etc.
-    console.log(`Approval request sent to ${approver} for deployment ${request.id}`);
+    console.log(
+      `Approval request sent to ${approver} for deployment ${request.id}`,
+    );
   }
 
   /**
    * Utility functions
    */
 
-  private findPipelineForEnvironment(environment: string): DeploymentPipeline | undefined {
+  private findPipelineForEnvironment(
+    environment: string,
+  ): DeploymentPipeline | undefined {
     for (const [, pipeline] of this.pipelines) {
-      if (pipeline.environments.some(env => env.name === environment)) {
+      if (pipeline.environments.some((env) => env.name === environment)) {
         return pipeline;
       }
     }
@@ -1111,19 +1254,19 @@ export class FeatureDeploymentPipeline extends EventEmitter {
     request: DeploymentRequest,
     level: DeploymentLogEntry['level'],
     message: string,
-    context: Record<string, any> = {}
+    context: Record<string, any> = {},
   ): void {
     request.deploymentLog.push({
       timestamp: new Date(),
       level,
       message,
       context,
-      source: 'deployment_pipeline'
+      source: 'deployment_pipeline',
     });
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private generatePipelineId(): string {
@@ -1134,28 +1277,41 @@ export class FeatureDeploymentPipeline extends EventEmitter {
     return `deploy_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private async validatePipelineConfig(pipeline: DeploymentPipeline): Promise<void> {
+  private async validatePipelineConfig(
+    pipeline: DeploymentPipeline,
+  ): Promise<void> {
     if (!pipeline.environments || pipeline.environments.length === 0) {
       throw new Error('Pipeline must have at least one environment');
     }
 
     // Validate environment configurations
     for (const env of pipeline.environments) {
-      if (env.approvalRequired && (!env.approvers || env.approvers.length === 0)) {
-        throw new Error(`Environment ${env.name} requires approval but no approvers configured`);
+      if (
+        env.approvalRequired &&
+        (!env.approvers || env.approvers.length === 0)
+      ) {
+        throw new Error(
+          `Environment ${env.name} requires approval but no approvers configured`,
+        );
       }
     }
   }
 
-  private async initializePipelineIntegrations(pipeline: DeploymentPipeline): Promise<void> {
+  private async initializePipelineIntegrations(
+    pipeline: DeploymentPipeline,
+  ): Promise<void> {
     // Initialize CI integration
     if (pipeline.integrations.ci) {
-      console.log(`Initializing CI integration: ${pipeline.integrations.ci.provider}`);
+      console.log(
+        `Initializing CI integration: ${pipeline.integrations.ci.provider}`,
+      );
     }
 
     // Initialize monitoring integration
     if (pipeline.integrations.monitoring) {
-      console.log(`Initializing monitoring integration: ${pipeline.integrations.monitoring.provider}`);
+      console.log(
+        `Initializing monitoring integration: ${pipeline.integrations.monitoring.provider}`,
+      );
     }
 
     // Initialize messaging integration
@@ -1175,9 +1331,12 @@ export class FeatureDeploymentPipeline extends EventEmitter {
     }, 60000); // Check every minute
 
     // Cleanup completed deployments
-    setInterval(() => {
-      this.cleanupCompletedDeployments();
-    }, 24 * 60 * 60 * 1000); // Daily cleanup
+    setInterval(
+      () => {
+        this.cleanupCompletedDeployments();
+      },
+      24 * 60 * 60 * 1000,
+    ); // Daily cleanup
   }
 
   private async monitorActiveDeployments(): Promise<void> {
@@ -1185,14 +1344,15 @@ export class FeatureDeploymentPipeline extends EventEmitter {
       try {
         // Check deployment timeout
         const deploymentAge = Date.now() - request.requestedAt.getTime();
-        const pipeline = this.findPipelineForEnvironment(request.targetEnvironment)!;
+        const pipeline = this.findPipelineForEnvironment(
+          request.targetEnvironment,
+        )!;
         const timeout = pipeline.globalSettings.deploymentTimeout * 60 * 1000;
 
         if (deploymentAge > timeout) {
           this.addDeploymentLog(request, 'error', 'Deployment timed out');
           await this.executeRollback(request, 'Deployment timeout');
         }
-
       } catch (error) {
         console.error(`Failed to monitor deployment ${requestId}:`, error);
       }
@@ -1200,23 +1360,35 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   }
 
   private cleanupCompletedDeployments(): void {
-    const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days ago
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days ago
 
     for (const [requestId, request] of this.deploymentRequests) {
-      if (request.requestedAt.getTime() < cutoff && 
-          ['completed', 'failed', 'rolled_back'].includes(request.status)) {
+      if (
+        request.requestedAt.getTime() < cutoff &&
+        ['completed', 'failed', 'rolled_back'].includes(request.status)
+      ) {
         this.deploymentRequests.delete(requestId);
       }
     }
   }
 
   // Mock implementations for external integrations
-  private async mockTrafficSplitUpdate(endpoint: string, percentage: number): Promise<void> {
-    console.log(`Mock: Updating traffic split on ${endpoint} to ${percentage}%`);
+  private async mockTrafficSplitUpdate(
+    endpoint: string,
+    percentage: number,
+  ): Promise<void> {
+    console.log(
+      `Mock: Updating traffic split on ${endpoint} to ${percentage}%`,
+    );
   }
 
-  private async notifyTeam(request: DeploymentRequest, message: string): Promise<void> {
-    console.log(`Mock: Notifying team about deployment ${request.id}: ${message}`);
+  private async notifyTeam(
+    request: DeploymentRequest,
+    message: string,
+  ): Promise<void> {
+    console.log(
+      `Mock: Notifying team about deployment ${request.id}: ${message}`,
+    );
   }
 
   private async createIncident(request: DeploymentRequest): Promise<void> {

@@ -36,20 +36,30 @@ export class CapabilityRouter {
       name: 'small',
       costPerToken: 0.0001,
       maxTokens: 8192,
-      capabilities: ['basic_analysis', 'simple_fixes', 'lint_checks']
+      capabilities: ['basic_analysis', 'simple_fixes', 'lint_checks'],
     },
     {
       name: 'medium',
       costPerToken: 0.0005,
       maxTokens: 32768,
-      capabilities: ['code_review', 'complex_analysis', 'refactoring', 'test_generation']
+      capabilities: [
+        'code_review',
+        'complex_analysis',
+        'refactoring',
+        'test_generation',
+      ],
     },
     {
       name: 'large',
       costPerToken: 0.002,
       maxTokens: 128000,
-      capabilities: ['architectural_review', 'security_analysis', 'performance_optimization', 'complex_refactoring']
-    }
+      capabilities: [
+        'architectural_review',
+        'security_analysis',
+        'performance_optimization',
+        'complex_refactoring',
+      ],
+    },
   ];
 
   private promptCache: Map<string, any> = new Map();
@@ -58,17 +68,19 @@ export class CapabilityRouter {
     totalRequests: 0,
     cacheHits: 0,
     cacheMisses: 0,
-    avgResponseTime: 0
+    avgResponseTime: 0,
   };
 
-  constructor(private budgetLimits: { maxUsdPerPR: number; maxPromptTokens: number }) {}
+  constructor(
+    private budgetLimits: { maxUsdPerPR: number; maxPromptTokens: number },
+  ) {}
 
   /**
    * Pick the most appropriate model based on task complexity and remaining budget
    */
   pickModel(context: TaskContext, remainingBudget: number): string {
     // Budget-based downshift logic
-    if (remainingBudget < 0.10) {
+    if (remainingBudget < 0.1) {
       return 'small';
     }
 
@@ -91,13 +103,16 @@ export class CapabilityRouter {
   /**
    * Make routing decision with detailed rationale
    */
-  makeRoutingDecision(context: TaskContext, remainingBudget: number): RoutingDecision {
+  makeRoutingDecision(
+    context: TaskContext,
+    remainingBudget: number,
+  ): RoutingDecision {
     const selectedModel = this.pickModel(context, remainingBudget);
     const estimatedCost = this.estimateCost(selectedModel, context.tokens);
-    
+
     let rationale = `Selected ${selectedModel} model. `;
-    
-    if (remainingBudget < 0.10) {
+
+    if (remainingBudget < 0.1) {
       rationale += 'Budget constraint: less than $0.10 remaining. ';
     } else if (context.risk > 0.7) {
       rationale += `High risk (${context.risk}) requires advanced model. `;
@@ -110,9 +125,9 @@ export class CapabilityRouter {
     }
 
     if (context.requiredCapabilities) {
-      const modelSpec = this.models.find(m => m.name === selectedModel);
+      const modelSpec = this.models.find((m) => m.name === selectedModel);
       const missingCaps = context.requiredCapabilities.filter(
-        cap => !modelSpec?.capabilities.includes(cap)
+        (cap) => !modelSpec?.capabilities.includes(cap),
       );
       if (missingCaps.length > 0) {
         rationale += `Warning: Missing capabilities [${missingCaps.join(', ')}]. `;
@@ -123,7 +138,7 @@ export class CapabilityRouter {
       selectedModel,
       rationale,
       estimatedCost,
-      budgetRemaining: remainingBudget - estimatedCost
+      budgetRemaining: remainingBudget - estimatedCost,
     };
   }
 
@@ -132,10 +147,10 @@ export class CapabilityRouter {
    */
   async getCachedResponse(prompt: string, model: string): Promise<any | null> {
     this.cacheStats.totalRequests++;
-    
+
     const cacheKey = this.generateCacheKey(prompt, model);
     const cached = this.promptCache.get(cacheKey);
-    
+
     if (cached && !this.isCacheExpired(cached)) {
       this.cacheStats.cacheHits++;
       this.updateCacheStats();
@@ -150,13 +165,17 @@ export class CapabilityRouter {
   /**
    * Cache response for future use
    */
-  async cacheResponse(prompt: string, model: string, response: any): Promise<void> {
+  async cacheResponse(
+    prompt: string,
+    model: string,
+    response: any,
+  ): Promise<void> {
     const cacheKey = this.generateCacheKey(prompt, model);
     this.promptCache.set(cacheKey, {
       response,
       timestamp: Date.now(),
       model,
-      ttl: 3600000 // 1 hour TTL
+      ttl: 3600000, // 1 hour TTL
     });
   }
 
@@ -171,7 +190,7 @@ export class CapabilityRouter {
    * Estimate cost for a given model and token count
    */
   private estimateCost(modelName: string, tokens: number): number {
-    const model = this.models.find(m => m.name === modelName);
+    const model = this.models.find((m) => m.name === modelName);
     if (!model) {
       throw new Error(`Unknown model: ${modelName}`);
     }
@@ -200,7 +219,7 @@ export class CapabilityRouter {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return hash.toString(36);
@@ -218,7 +237,7 @@ export class CapabilityRouter {
    */
   private updateCacheStats(): void {
     if (this.cacheStats.totalRequests > 0) {
-      this.cacheStats.hitRate = 
+      this.cacheStats.hitRate =
         (this.cacheStats.cacheHits / this.cacheStats.totalRequests) * 100;
     }
   }
@@ -247,14 +266,17 @@ export class CapabilityRouter {
       modelsAvailable: this.models.length,
       cacheSize: this.promptCache.size,
       cacheStats: this.cacheStats,
-      budgetLimits: this.budgetLimits
+      budgetLimits: this.budgetLimits,
     };
   }
 
   /**
    * Update budget limits
    */
-  updateBudgetLimits(limits: { maxUsdPerPR?: number; maxPromptTokens?: number }): void {
+  updateBudgetLimits(limits: {
+    maxUsdPerPR?: number;
+    maxPromptTokens?: number;
+  }): void {
     if (limits.maxUsdPerPR !== undefined) {
       this.budgetLimits.maxUsdPerPR = limits.maxUsdPerPR;
     }

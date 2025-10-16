@@ -54,7 +54,7 @@ export class JWSResponseService {
 
     const { publicKey, privateKey } = await generateKeyPairAsync('ed25519', {
       publicKeyEncoding: { type: 'spki', format: 'pem' },
-      privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
 
     this.privateKey = await jose.importPKCS8(privateKey, 'EdDSA');
@@ -82,7 +82,7 @@ export class JWSResponseService {
       provDagId?: string;
       model?: string;
       cost?: number;
-    } = {}
+    } = {},
   ): Promise<JWSToken> {
     if (!this.privateKey) {
       throw new Error('JWS service not initialized');
@@ -94,7 +94,7 @@ export class JWSResponseService {
       timestamp: new Date().toISOString(),
       inputHash: this.createHash(inputData),
       outputHash: this.createHash(outputData),
-      ...metadata
+      ...metadata,
     };
 
     // Create JWS with detached payload
@@ -102,7 +102,7 @@ export class JWSResponseService {
       .setProtectedHeader({
         alg: 'EdDSA',
         typ: 'JWT',
-        kid: this.keyId
+        kid: this.keyId,
       })
       .setIssuedAt()
       .setExpirationTime('24h')
@@ -113,7 +113,7 @@ export class JWSResponseService {
     return {
       token: jwt,
       payload,
-      verified: await this.verifyToken(jwt, inputData, outputData)
+      verified: await this.verifyToken(jwt, inputData, outputData),
     };
   }
 
@@ -123,7 +123,7 @@ export class JWSResponseService {
   async verifyToken(
     token: string,
     inputData: string,
-    outputData: string
+    outputData: string,
   ): Promise<boolean> {
     if (!this.publicKey) {
       throw new Error('JWS service not initialized');
@@ -132,7 +132,7 @@ export class JWSResponseService {
     try {
       const { payload } = await jose.jwtVerify(token, this.publicKey, {
         issuer: 'mc-platform-v035',
-        audience: 'mc-clients'
+        audience: 'mc-clients',
       });
 
       const claims = payload as ResponsePayload;
@@ -145,7 +145,6 @@ export class JWSResponseService {
         claims.inputHash === expectedInputHash &&
         claims.outputHash === expectedOutputHash
       );
-
     } catch (error) {
       console.error('JWS verification failed:', error);
       return false;
@@ -163,21 +162,26 @@ export class JWSResponseService {
     const jwk = await jose.exportJWK(this.publicKey);
 
     return {
-      keys: [{
-        kty: jwk.kty!,
-        use: 'sig',
-        kid: this.keyId,
-        alg: 'EdDSA',
-        crv: jwk.crv!,
-        x: jwk.x!
-      }]
+      keys: [
+        {
+          kty: jwk.kty!,
+          use: 'sig',
+          kid: this.keyId,
+          alg: 'EdDSA',
+          crv: jwk.crv!,
+          x: jwk.x!,
+        },
+      ],
     };
   }
 
   /**
    * Create a client verifier instance
    */
-  static async createVerifier(jwks: JWKS, keyId: string): Promise<JWSClientVerifier> {
+  static async createVerifier(
+    jwks: JWKS,
+    keyId: string,
+  ): Promise<JWSClientVerifier> {
     return new JWSClientVerifier(jwks, keyId);
   }
 }
@@ -189,7 +193,10 @@ export class JWSClientVerifier {
   private publicKey: jose.KeyLike | null = null;
   private keyId: string;
 
-  constructor(private jwks: JWKS, keyId: string) {
+  constructor(
+    private jwks: JWKS,
+    keyId: string,
+  ) {
     this.keyId = keyId;
   }
 
@@ -197,7 +204,7 @@ export class JWSClientVerifier {
    * Initialize verifier with public key from JWKS
    */
   async initialize(): Promise<void> {
-    const key = this.jwks.keys.find(k => k.kid === this.keyId);
+    const key = this.jwks.keys.find((k) => k.kid === this.keyId);
     if (!key) {
       throw new Error(`Key ${this.keyId} not found in JWKS`);
     }
@@ -212,7 +219,7 @@ export class JWSClientVerifier {
   async verifyResponse(
     token: string,
     inputData: string,
-    outputData: string
+    outputData: string,
   ): Promise<{
     valid: boolean;
     payload?: ResponsePayload;
@@ -225,30 +232,31 @@ export class JWSClientVerifier {
     try {
       const { payload } = await jose.jwtVerify(token, this.publicKey, {
         issuer: 'mc-platform-v035',
-        audience: 'mc-clients'
+        audience: 'mc-clients',
       });
 
       const claims = payload as ResponsePayload;
 
       // Verify hashes
-      const inputHash = createHash('sha256').update(inputData, 'utf8').digest('hex');
-      const outputHash = createHash('sha256').update(outputData, 'utf8').digest('hex');
+      const inputHash = createHash('sha256')
+        .update(inputData, 'utf8')
+        .digest('hex');
+      const outputHash = createHash('sha256')
+        .update(outputData, 'utf8')
+        .digest('hex');
 
-      const valid = (
-        claims.inputHash === inputHash &&
-        claims.outputHash === outputHash
-      );
+      const valid =
+        claims.inputHash === inputHash && claims.outputHash === outputHash;
 
       return {
         valid,
         payload: claims,
-        error: valid ? undefined : 'Hash verification failed'
+        error: valid ? undefined : 'Hash verification failed',
       };
-
     } catch (error) {
       return {
         valid: false,
-        error: `Verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        error: `Verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
@@ -259,7 +267,7 @@ export class JWSClientVerifier {
  */
 async function demonstrateJWS(): Promise<void> {
   console.log('🔐 MC Platform v0.3.5 - JWS Response Token Demo');
-  console.log('=' .repeat(60));
+  console.log('='.repeat(60));
 
   // Initialize JWS service
   const jwsService = new JWSResponseService();
@@ -269,7 +277,8 @@ async function demonstrateJWS(): Promise<void> {
   const requestId = 'req_' + Date.now();
   const tenantId = 'TENANT_001';
   const inputData = 'What is the status of our security posture?';
-  const outputData = 'Security posture is excellent with 99.97% availability and all privacy gates operational.';
+  const outputData =
+    'Security posture is excellent with 99.97% availability and all privacy gates operational.';
 
   // Sign response
   console.log('\n📝 Signing response...');
@@ -281,15 +290,19 @@ async function demonstrateJWS(): Promise<void> {
     {
       provDagId: 'dag_12345_security_query',
       model: 'claude-3.5-sonnet',
-      cost: 0.0234
-    }
+      cost: 0.0234,
+    },
   );
 
   console.log(`  • Token length: ${signedResponse.token.length} chars`);
   console.log(`  • Self-verified: ${signedResponse.verified ? '✅' : '❌'}`);
   console.log(`  • Request ID: ${signedResponse.payload.requestId}`);
-  console.log(`  • Input hash: ${signedResponse.payload.inputHash.substring(0, 16)}...`);
-  console.log(`  • Output hash: ${signedResponse.payload.outputHash.substring(0, 16)}...`);
+  console.log(
+    `  • Input hash: ${signedResponse.payload.inputHash.substring(0, 16)}...`,
+  );
+  console.log(
+    `  • Output hash: ${signedResponse.payload.outputHash.substring(0, 16)}...`,
+  );
 
   // Generate JWKS
   console.log('\n🔑 Generating JWKS...');
@@ -300,16 +313,21 @@ async function demonstrateJWS(): Promise<void> {
 
   // Client verification
   console.log('\n🔍 Client verification...');
-  const verifier = await JWSResponseService.createVerifier(jwks, jwks.keys[0].kid);
+  const verifier = await JWSResponseService.createVerifier(
+    jwks,
+    jwks.keys[0].kid,
+  );
   await verifier.initialize();
 
   const verification = await verifier.verifyResponse(
     signedResponse.token,
     inputData,
-    outputData
+    outputData,
   );
 
-  console.log(`  • Verification result: ${verification.valid ? '✅ VALID' : '❌ INVALID'}`);
+  console.log(
+    `  • Verification result: ${verification.valid ? '✅ VALID' : '❌ INVALID'}`,
+  );
   if (verification.payload) {
     console.log(`  • Tenant: ${verification.payload.tenantId}`);
     console.log(`  • Timestamp: ${verification.payload.timestamp}`);
@@ -324,16 +342,18 @@ async function demonstrateJWS(): Promise<void> {
   const tamperedVerification = await verifier.verifyResponse(
     signedResponse.token,
     inputData,
-    tamperedOutput
+    tamperedOutput,
   );
 
-  console.log(`  • Tampered verification: ${tamperedVerification.valid ? '❌ FAILED TO DETECT' : '✅ DETECTED'}`);
+  console.log(
+    `  • Tampered verification: ${tamperedVerification.valid ? '❌ FAILED TO DETECT' : '✅ DETECTED'}`,
+  );
   console.log(`  • Error: ${tamperedVerification.error}`);
 
   return {
     token: signedResponse.token,
     jwks,
-    verification
+    verification,
   };
 }
 

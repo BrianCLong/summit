@@ -4,7 +4,10 @@ export interface DiffResult<T> {
   changed: { before: T; after: T }[];
 }
 
-export function diffById<T extends { id: string }>(before: T[], after: T[]): DiffResult<T> {
+export function diffById<T extends { id: string }>(
+  before: T[],
+  after: T[],
+): DiffResult<T> {
   const beforeMap = new Map(before.map((e) => [e.id, e]));
   const afterMap = new Map(after.map((e) => [e.id, e]));
 

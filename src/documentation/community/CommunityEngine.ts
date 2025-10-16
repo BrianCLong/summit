@@ -1,6 +1,6 @@
 /**
  * Community Contribution Systems and Collaborative Workflows
- * 
+ *
  * Enables community-driven documentation with:
  * - Contribution workflow management
  * - Review and approval processes
@@ -40,11 +40,24 @@ export interface ReviewRequirements {
 
 export interface Contribution {
   id: string;
-  type: 'new_content' | 'edit_content' | 'fix_typo' | 'add_example' | 'translation' | 'style_improvement';
+  type:
+    | 'new_content'
+    | 'edit_content'
+    | 'fix_typo'
+    | 'add_example'
+    | 'translation'
+    | 'style_improvement';
   title: string;
   description: string;
   author: Contributor;
-  status: 'draft' | 'submitted' | 'under_review' | 'approved' | 'merged' | 'rejected' | 'closed';
+  status:
+    | 'draft'
+    | 'submitted'
+    | 'under_review'
+    | 'approved'
+    | 'merged'
+    | 'rejected'
+    | 'closed';
   files: ContributionFile[];
   reviewers: ContributionReview[];
   discussions: Discussion[];
@@ -245,7 +258,6 @@ export class CommunityEngine extends EventEmitter {
 
       console.log('✅ Community engine initialized');
       this.emit('initialized');
-
     } catch (error) {
       console.error('❌ Failed to initialize community engine:', error);
       throw error;
@@ -255,7 +267,9 @@ export class CommunityEngine extends EventEmitter {
   /**
    * Submit a new contribution
    */
-  public async submitContribution(contributionData: Partial<Contribution>): Promise<Contribution> {
+  public async submitContribution(
+    contributionData: Partial<Contribution>,
+  ): Promise<Contribution> {
     const contribution: Contribution = {
       id: this.generateContributionId(),
       type: contributionData.type || 'edit_content',
@@ -272,24 +286,26 @@ export class CommunityEngine extends EventEmitter {
         estimatedTime: 0,
         tags: [],
         relatedIssues: [],
-        ...contributionData.metadata
+        ...contributionData.metadata,
       },
       timestamps: {
         created: new Date(),
         submitted: new Date(),
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       },
       metrics: {
         viewCount: 0,
         commentCount: 0,
-        reactionCount: 0
-      }
+        reactionCount: 0,
+      },
     };
 
     // Run style checks
     const styleViolations = await this.checkStyle(contribution);
     if (styleViolations.length > 0 && this.config.styleGuide.warningsAsErrors) {
-      throw new Error(`Style violations found: ${styleViolations.map(v => v.message).join(', ')}`);
+      throw new Error(
+        `Style violations found: ${styleViolations.map((v) => v.message).join(', ')}`,
+      );
     }
 
     // Assign reviewers
@@ -315,7 +331,7 @@ export class CommunityEngine extends EventEmitter {
   public async submitReview(
     contributionId: string,
     reviewerId: string,
-    review: Partial<ContributionReview>
+    review: Partial<ContributionReview>,
   ): Promise<ContributionReview> {
     const contribution = this.contributions.get(contributionId);
     if (!contribution) {
@@ -334,7 +350,7 @@ export class CommunityEngine extends EventEmitter {
       comments: review.comments || [],
       overallFeedback: review.overallFeedback,
       rating: review.rating || 3,
-      submittedAt: new Date()
+      submittedAt: new Date(),
     };
 
     contribution.reviewers.push(contributionReview);
@@ -347,7 +363,10 @@ export class CommunityEngine extends EventEmitter {
     this.updateReviewerStats(reviewer, contributionReview);
 
     // Send notifications
-    await this.notificationManager.notifyReviewSubmitted(contribution, contributionReview);
+    await this.notificationManager.notifyReviewSubmitted(
+      contribution,
+      contributionReview,
+    );
 
     this.emit('review_submitted', contributionId, contributionReview);
     return contributionReview;
@@ -361,26 +380,28 @@ export class CommunityEngine extends EventEmitter {
     initiator: Contributor,
     title: string,
     initialMessage: string,
-    type: Discussion['type'] = 'general'
+    type: Discussion['type'] = 'general',
   ): Promise<Discussion> {
     const discussion: Discussion = {
       id: this.generateDiscussionId(),
       title,
       author: initiator,
-      messages: [{
-        id: this.generateMessageId(),
-        author: initiator,
-        content: initialMessage,
-        mentions: [],
-        attachments: [],
-        reactions: [],
-        timestamp: new Date()
-      }],
+      messages: [
+        {
+          id: this.generateMessageId(),
+          author: initiator,
+          content: initialMessage,
+          mentions: [],
+          attachments: [],
+          reactions: [],
+          timestamp: new Date(),
+        },
+      ],
       tags: [],
       type,
       status: 'open',
       createdAt: new Date(),
-      lastActivity: new Date()
+      lastActivity: new Date(),
     };
 
     // Add to contribution if specified
@@ -400,14 +421,17 @@ export class CommunityEngine extends EventEmitter {
   /**
    * Award badge to contributor
    */
-  public async awardBadge(contributorId: string, badgeId: string): Promise<void> {
+  public async awardBadge(
+    contributorId: string,
+    badgeId: string,
+  ): Promise<void> {
     const contributor = this.contributors.get(contributorId);
     if (!contributor) {
       throw new Error(`Contributor ${contributorId} not found`);
     }
 
     // Check if badge already awarded
-    if (contributor.badges.some(b => b.id === badgeId)) {
+    if (contributor.badges.some((b) => b.id === badgeId)) {
       return;
     }
 
@@ -433,21 +457,21 @@ export class CommunityEngine extends EventEmitter {
   public getCommunityLeaderboard(
     metric: 'contributions' | 'quality' | 'reviews' | 'reputation',
     timeframe: 'week' | 'month' | 'quarter' | 'year' | 'all',
-    limit: number = 10
+    limit: number = 10,
   ): LeaderboardEntry[] {
     const contributors = Array.from(this.contributors.values());
 
     return contributors
-      .map(contributor => ({
+      .map((contributor) => ({
         contributor,
-        score: this.calculateLeaderboardScore(contributor, metric, timeframe)
+        score: this.calculateLeaderboardScore(contributor, metric, timeframe),
       }))
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map((entry, index) => ({
         rank: index + 1,
         contributor: entry.contributor,
-        score: entry.score
+        score: entry.score,
       }));
   }
 
@@ -456,13 +480,16 @@ export class CommunityEngine extends EventEmitter {
    */
   public async generateCommunityAnalytics(
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<CommunityAnalytics> {
-    const contributions = Array.from(this.contributions.values())
-      .filter(c => c.timestamps.created >= startDate && c.timestamps.created <= endDate);
+    const contributions = Array.from(this.contributions.values()).filter(
+      (c) =>
+        c.timestamps.created >= startDate && c.timestamps.created <= endDate,
+    );
 
-    const contributors = Array.from(this.contributors.values())
-      .filter(c => c.joinDate >= startDate && c.joinDate <= endDate);
+    const contributors = Array.from(this.contributors.values()).filter(
+      (c) => c.joinDate >= startDate && c.joinDate <= endDate,
+    );
 
     return {
       period: { start: startDate, end: endDate },
@@ -472,9 +499,12 @@ export class CommunityEngine extends EventEmitter {
       averageReviewTime: this.calculateAverageReviewTime(contributions),
       contributionsByType: this.groupContributionsByType(contributions),
       qualityMetrics: await this.calculateQualityMetrics(contributions),
-      engagementMetrics: await this.calculateEngagementMetrics(startDate, endDate),
+      engagementMetrics: await this.calculateEngagementMetrics(
+        startDate,
+        endDate,
+      ),
       topContributors: this.getCommunityLeaderboard('contributions', 'all', 5),
-      trends: await this.calculateCommunityTrends(startDate, endDate)
+      trends: await this.calculateCommunityTrends(startDate, endDate),
     };
   }
 
@@ -485,7 +515,7 @@ export class CommunityEngine extends EventEmitter {
     contentId: string,
     moderatorId: string,
     action: 'approve' | 'reject' | 'edit' | 'flag',
-    reason?: string
+    reason?: string,
   ): Promise<ModerationAction> {
     const moderator = this.contributors.get(moderatorId);
     if (!moderator) {
@@ -503,7 +533,7 @@ export class CommunityEngine extends EventEmitter {
       moderator,
       action,
       reason,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     // Apply moderation action
@@ -518,14 +548,14 @@ export class CommunityEngine extends EventEmitter {
    */
   public async exportCommunityData(
     format: 'json' | 'csv',
-    includePersonalData: boolean = false
+    includePersonalData: boolean = false,
   ): Promise<string> {
     const data = {
-      contributors: Array.from(this.contributors.values()).map(c => 
-        includePersonalData ? c : this.sanitizeContributorData(c)
+      contributors: Array.from(this.contributors.values()).map((c) =>
+        includePersonalData ? c : this.sanitizeContributorData(c),
       ),
       contributions: Array.from(this.contributions.values()),
-      discussions: Array.from(this.discussions.values())
+      discussions: Array.from(this.discussions.values()),
     };
 
     if (format === 'json') {
@@ -556,15 +586,17 @@ export class CommunityEngine extends EventEmitter {
     return 'mod_' + Math.random().toString(36).substring(2, 15);
   }
 
-  private async checkStyle(contribution: Contribution): Promise<StyleViolation[]> {
+  private async checkStyle(
+    contribution: Contribution,
+  ): Promise<StyleViolation[]> {
     return this.styleChecker.check(contribution);
   }
 
   private async assignReviewers(contribution: Contribution): Promise<void> {
     // Implementation for automatic reviewer assignment
     const eligibleReviewers = Array.from(this.contributors.values())
-      .filter(c => this.hasPermission(c, 'review', 'contributions'))
-      .filter(c => c.id !== contribution.author.id);
+      .filter((c) => this.hasPermission(c, 'review', 'contributions'))
+      .filter((c) => c.id !== contribution.author.id);
 
     // Simple assignment logic - in real implementation, this would be more sophisticated
     const reviewersNeeded = this.config.reviewRequirements.minimumReviewers;
@@ -577,22 +609,24 @@ export class CommunityEngine extends EventEmitter {
         status: 'pending',
         comments: [],
         rating: 0,
-        submittedAt: new Date()
+        submittedAt: new Date(),
       };
       contribution.reviewers.push(review);
     }
   }
 
-  private async updateContributionStatus(contribution: Contribution): Promise<void> {
+  private async updateContributionStatus(
+    contribution: Contribution,
+  ): Promise<void> {
     const reviews = contribution.reviewers;
-    const approvals = reviews.filter(r => r.status === 'approved').length;
-    const rejections = reviews.filter(r => r.status === 'rejected').length;
+    const approvals = reviews.filter((r) => r.status === 'approved').length;
+    const rejections = reviews.filter((r) => r.status === 'rejected').length;
 
     if (rejections > 0) {
       contribution.status = 'rejected';
     } else if (approvals >= this.config.reviewRequirements.requiredApprovals) {
       contribution.status = 'approved';
-      
+
       if (this.config.reviewRequirements.automaticMergeEnabled) {
         await this.mergeContribution(contribution);
       }
@@ -611,18 +645,27 @@ export class CommunityEngine extends EventEmitter {
     await this.checkAndAwardBadges(contribution.author);
   }
 
-  private updateReviewerStats(reviewer: Contributor, review: ContributionReview): void {
+  private updateReviewerStats(
+    reviewer: Contributor,
+    review: ContributionReview,
+  ): void {
     reviewer.statistics.reviewsGiven++;
     // Update other review-related statistics
   }
 
-  private updateContributorStats(contributor: Contributor, contribution: Contribution): void {
+  private updateContributorStats(
+    contributor: Contributor,
+    contribution: Contribution,
+  ): void {
     contributor.statistics.totalContributions++;
     contributor.statistics.mergedContributions++;
-    
-    const linesAdded = contribution.files.reduce((sum, file) => sum + file.linesChanged, 0);
+
+    const linesAdded = contribution.files.reduce(
+      (sum, file) => sum + file.linesChanged,
+      0,
+    );
     contributor.statistics.linesAdded += linesAdded;
-    
+
     contributor.statistics.filesChanged += contribution.files.length;
   }
 
@@ -630,9 +673,13 @@ export class CommunityEngine extends EventEmitter {
     // Implementation for automatic badge awarding based on achievements
   }
 
-  private hasPermission(contributor: Contributor, action: string, resource: string): boolean {
-    return contributor.permissions.some(p => 
-      p.action === action && p.resource === resource
+  private hasPermission(
+    contributor: Contributor,
+    action: string,
+    resource: string,
+  ): boolean {
+    return contributor.permissions.some(
+      (p) => p.action === action && p.resource === resource,
     );
   }
 
@@ -647,7 +694,7 @@ export class CommunityEngine extends EventEmitter {
       uncommon: 25,
       rare: 50,
       epic: 100,
-      legendary: 250
+      legendary: 250,
     };
     return rarityPoints[badge.rarity] || 10;
   }
@@ -655,7 +702,7 @@ export class CommunityEngine extends EventEmitter {
   private calculateLeaderboardScore(
     contributor: Contributor,
     metric: string,
-    timeframe: string
+    timeframe: string,
   ): number {
     switch (metric) {
       case 'contributions':
@@ -672,39 +719,53 @@ export class CommunityEngine extends EventEmitter {
   }
 
   private getActiveContributors(startDate: Date, endDate: Date): Contributor[] {
-    return Array.from(this.contributors.values())
-      .filter(c => c.lastActive >= startDate && c.lastActive <= endDate);
+    return Array.from(this.contributors.values()).filter(
+      (c) => c.lastActive >= startDate && c.lastActive <= endDate,
+    );
   }
 
   private calculateAverageReviewTime(contributions: Contribution[]): number {
     const reviewTimes = contributions
-      .flatMap(c => c.reviewers)
-      .map(r => r.submittedAt.getTime())
-      .filter(time => time > 0);
+      .flatMap((c) => c.reviewers)
+      .map((r) => r.submittedAt.getTime())
+      .filter((time) => time > 0);
 
-    return reviewTimes.length > 0 
+    return reviewTimes.length > 0
       ? reviewTimes.reduce((sum, time) => sum + time, 0) / reviewTimes.length
       : 0;
   }
 
-  private groupContributionsByType(contributions: Contribution[]): { [type: string]: number } {
-    return contributions.reduce((acc, c) => {
-      acc[c.type] = (acc[c.type] || 0) + 1;
-      return acc;
-    }, {} as { [type: string]: number });
+  private groupContributionsByType(contributions: Contribution[]): {
+    [type: string]: number;
+  } {
+    return contributions.reduce(
+      (acc, c) => {
+        acc[c.type] = (acc[c.type] || 0) + 1;
+        return acc;
+      },
+      {} as { [type: string]: number },
+    );
   }
 
-  private async calculateQualityMetrics(contributions: Contribution[]): Promise<any> {
+  private async calculateQualityMetrics(
+    contributions: Contribution[],
+  ): Promise<any> {
     // Implementation for quality metrics calculation
     return {};
   }
 
-  private async calculateEngagementMetrics(startDate: Date, endDate: Date): Promise<any> {
+  private async calculateEngagementMetrics(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<any> {
     // Implementation for engagement metrics calculation
     return {};
   }
 
-  private async calculateCommunityTrends(startDate: Date, endDate: Date): Promise<any> {
+  private async calculateCommunityTrends(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<any> {
     // Implementation for trend analysis
     return {};
   }
@@ -746,7 +807,10 @@ class StyleChecker {
 
     for (const file of contribution.files) {
       for (const rule of this.config.rules) {
-        const ruleViolations = rule.validator(file.newContent, { file, contribution });
+        const ruleViolations = rule.validator(file.newContent, {
+          file,
+          contribution,
+        });
         violations.push(...ruleViolations);
       }
     }
@@ -766,11 +830,17 @@ class NotificationManager {
     // Send notification about new contribution
   }
 
-  async notifyReviewSubmitted(contribution: Contribution, review: ContributionReview): Promise<void> {
+  async notifyReviewSubmitted(
+    contribution: Contribution,
+    review: ContributionReview,
+  ): Promise<void> {
     // Send notification about new review
   }
 
-  async notifyBadgeAwarded(contributor: Contributor, badge: Badge): Promise<void> {
+  async notifyBadgeAwarded(
+    contributor: Contributor,
+    badge: Badge,
+  ): Promise<void> {
     // Send notification about badge award
   }
 }

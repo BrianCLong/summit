@@ -14,11 +14,19 @@ describe('time slice', () => {
     expect(res.status).toBe(200);
     const q1 = await request(app)
       .post('/api/v1/query/cypher')
-      .send({ id: 't1', time: '2021-06-01T00:00:00.000Z', cypher: 'MATCH (n) RETURN n' });
+      .send({
+        id: 't1',
+        time: '2021-06-01T00:00:00.000Z',
+        cypher: 'MATCH (n) RETURN n',
+      });
     expect(q1.body.entity.id).toBe('t1');
     const q2 = await request(app)
       .post('/api/v1/query/cypher')
-      .send({ id: 't1', time: '2023-01-01T00:00:00.000Z', cypher: 'MATCH (n) RETURN n' });
+      .send({
+        id: 't1',
+        time: '2023-01-01T00:00:00.000Z',
+        cypher: 'MATCH (n) RETURN n',
+      });
     expect(q2.body.entity).toBeNull();
   });
 });

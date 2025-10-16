@@ -137,13 +137,13 @@ export class RemoteBuildExecutor extends EventEmitter {
     // Check for cached result first
     const cacheKey = this.generateCacheKey(task);
     const cachedResult = await this.checkCachedResult(cacheKey);
-    
+
     if (cachedResult) {
       console.log(`📦 Cache hit for task ${task.id}`);
       return {
         ...cachedResult,
         taskId: task.id,
-        cacheHit: true
+        cacheHit: true,
       };
     }
 
@@ -154,14 +154,14 @@ export class RemoteBuildExecutor extends EventEmitter {
     }
 
     const startTime = performance.now();
-    
+
     try {
       // Execute on remote worker
       const result = await this.executeOnWorker(worker, task, inputUploads);
-      
+
       // Download outputs from CAS
       await this.downloadOutputsFromCAS(result.outputs);
-      
+
       // Cache successful result
       if (result.success) {
         await this.cacheResult(cacheKey, result);
@@ -171,13 +171,14 @@ export class RemoteBuildExecutor extends EventEmitter {
       result.duration = duration;
 
       this.emit('taskCompleted', result);
-      console.log(`✅ Remote task completed: ${task.id} (${Math.round(duration)}ms)`);
+      console.log(
+        `✅ Remote task completed: ${task.id} (${Math.round(duration)}ms)`,
+      );
 
       return result;
-
     } catch (error) {
       console.error(`❌ Remote task failed: ${task.id}`, error);
-      
+
       const failedResult: RemoteResult = {
         taskId: task.id,
         success: false,
@@ -186,9 +187,13 @@ export class RemoteBuildExecutor extends EventEmitter {
         stdout: '',
         stderr: error instanceof Error ? error.message : 'Unknown error',
         outputs: [],
-        worker: { id: worker.id, region: worker.region, instanceType: worker.instanceType || 'unknown' },
+        worker: {
+          id: worker.id,
+          region: worker.region,
+          instanceType: worker.instanceType || 'unknown',
+        },
         cacheHit: false,
-        retries: 0
+        retries: 0,
       };
 
       this.emit('taskFailed', failedResult);
@@ -205,19 +210,24 @@ export class RemoteBuildExecutor extends EventEmitter {
     utilization: number;
     avgTaskDuration: number;
     queueDepth: number;
-    regionStats: Record<string, { workers: number; busy: number; }>;
+    regionStats: Record<string, { workers: number; busy: number }>;
   } {
     const totalWorkers = this.workerStats.size;
-    const busyWorkers = Array.from(this.workerStats.values())
-      .filter(w => w.status === 'busy').length;
-    
-    const utilization = totalWorkers > 0 ? (busyWorkers / totalWorkers) * 100 : 0;
-    
-    const avgTaskDuration = Array.from(this.workerStats.values())
-      .reduce((sum, w) => sum + w.avgTaskDuration, 0) / totalWorkers;
+    const busyWorkers = Array.from(this.workerStats.values()).filter(
+      (w) => w.status === 'busy',
+    ).length;
+
+    const utilization =
+      totalWorkers > 0 ? (busyWorkers / totalWorkers) * 100 : 0;
+
+    const avgTaskDuration =
+      Array.from(this.workerStats.values()).reduce(
+        (sum, w) => sum + w.avgTaskDuration,
+        0,
+      ) / totalWorkers;
 
     // Region breakdown
-    const regionStats: Record<string, { workers: number; busy: number; }> = {};
+    const regionStats: Record<string, { workers: number; busy: number }> = {};
     for (const worker of this.workerStats.values()) {
       if (!regionStats[worker.region]) {
         regionStats[worker.region] = { workers: 0, busy: 0 };
@@ -234,7 +244,7 @@ export class RemoteBuildExecutor extends EventEmitter {
       utilization,
       avgTaskDuration,
       queueDepth: this.taskQueue.length,
-      regionStats
+      regionStats,
     };
   }
 
@@ -243,7 +253,7 @@ export class RemoteBuildExecutor extends EventEmitter {
    */
   async scaleWorkers(targetCount: number): Promise<void> {
     const currentCount = this.workerStats.size;
-    
+
     console.log(`📈 Scaling workers: ${currentCount} -> ${targetCount}`);
 
     if (targetCount > currentCount) {
@@ -257,61 +267,79 @@ export class RemoteBuildExecutor extends EventEmitter {
     }
   }
 
-  private async uploadInputsToCAS(inputs: InputSpec[]): Promise<Array<{ path: string; casUrl: string; }>> {
-    const uploads: Array<{ path: string; casUrl: string; }> = [];
+  private async uploadInputsToCAS(
+    inputs: InputSpec[],
+  ): Promise<Array<{ path: string; casUrl: string }>> {
+    const uploads: Array<{ path: string; casUrl: string }> = [];
 
     for (const input of inputs) {
       // In real implementation, this would upload to remote CAS
       // For demo, we simulate with local file operations
       const casUrl = `${this.config.casEndpoint}/blobs/${input.digest}`;
-      
+
       // Simulate upload
       console.log(`📤 Uploading ${input.path} to CAS (${input.size} bytes)`);
-      
+
       uploads.push({
         path: input.path,
-        casUrl
+        casUrl,
       });
     }
 
     return uploads;
   }
 
-  private async downloadOutputsFromCAS(outputs: Array<{ path: string; digest: string; size: number; }>): Promise<void> {
+  private async downloadOutputsFromCAS(
+    outputs: Array<{ path: string; digest: string; size: number }>,
+  ): Promise<void> {
     for (const output of outputs) {
-      console.log(`📥 Downloading ${output.path} from CAS (${output.size} bytes)`);
+      console.log(
+        `📥 Downloading ${output.path} from CAS (${output.size} bytes)`,
+      );
       // In real implementation, download from remote CAS
       // For demo, simulate local file creation
-      await fs.writeFile(output.path, `simulated-output-${output.digest}`, 'utf8');
+      await fs.writeFile(
+        output.path,
+        `simulated-output-${output.digest}`,
+        'utf8',
+      );
     }
   }
 
   private generateCacheKey(task: RemoteTask): string {
     const hasher = crypto.createHash('sha256');
-    hasher.update(JSON.stringify({
-      command: task.command,
-      inputs: task.inputs.map(i => ({ path: i.path, digest: i.digest })),
-      environment: task.environment,
-      platform: task.platform
-    }));
+    hasher.update(
+      JSON.stringify({
+        command: task.command,
+        inputs: task.inputs.map((i) => ({ path: i.path, digest: i.digest })),
+        environment: task.environment,
+        platform: task.platform,
+      }),
+    );
     return hasher.digest('hex');
   }
 
-  private async checkCachedResult(cacheKey: string): Promise<RemoteResult | null> {
+  private async checkCachedResult(
+    cacheKey: string,
+  ): Promise<RemoteResult | null> {
     // In real implementation, check CAS for cached result
     // For demo, simulate cache miss most of the time
     return Math.random() > 0.8 ? null : null; // Always miss for demo
   }
 
-  private async cacheResult(cacheKey: string, result: RemoteResult): Promise<void> {
+  private async cacheResult(
+    cacheKey: string,
+    result: RemoteResult,
+  ): Promise<void> {
     // In real implementation, store result in CAS
     console.log(`💾 Caching result for key: ${cacheKey.substring(0, 8)}...`);
   }
 
   private async allocateWorker(task: RemoteTask): Promise<WorkerStats | null> {
     // Find best worker based on affinity and availability
-    const availableWorkers = Array.from(this.workerStats.values())
-      .filter(w => w.status === 'idle');
+    const availableWorkers = Array.from(this.workerStats.values()).filter(
+      (w) => w.status === 'idle',
+    );
 
     if (availableWorkers.length === 0) {
       // Auto-scale if needed
@@ -334,13 +362,13 @@ export class RemoteBuildExecutor extends EventEmitter {
   private async executeOnWorker(
     worker: WorkerStats,
     task: RemoteTask,
-    inputs: Array<{ path: string; casUrl: string; }>
+    inputs: Array<{ path: string; casUrl: string }>,
   ): Promise<RemoteResult> {
     const startTime = performance.now();
 
     // Simulate remote execution
     const executionTime = Math.random() * 5000 + 1000; // 1-6 seconds
-    await new Promise(resolve => setTimeout(resolve, executionTime));
+    await new Promise((resolve) => setTimeout(resolve, executionTime));
 
     // Update worker stats
     worker.tasksCompleted++;
@@ -350,10 +378,10 @@ export class RemoteBuildExecutor extends EventEmitter {
     worker.currentTask = undefined;
 
     // Simulate outputs
-    const outputs = task.outputs.map(output => ({
+    const outputs = task.outputs.map((output) => ({
       path: output.path,
       digest: crypto.randomBytes(16).toString('hex'),
-      size: Math.floor(Math.random() * 10000) + 1000
+      size: Math.floor(Math.random() * 10000) + 1000,
     }));
 
     return {
@@ -367,16 +395,16 @@ export class RemoteBuildExecutor extends EventEmitter {
       worker: {
         id: worker.id,
         region: worker.region,
-        instanceType: 'c5.large'
+        instanceType: 'c5.large',
       },
       cacheHit: false,
-      retries: 0
+      retries: 0,
     };
   }
 
   private async initializeK8sWorkers(): Promise<void> {
     console.log('🚢 Initializing Kubernetes workers...');
-    
+
     // Create initial worker pool
     for (let i = 0; i < 3; i++) {
       const worker = this.createSimulatedWorker();
@@ -386,7 +414,7 @@ export class RemoteBuildExecutor extends EventEmitter {
 
   private async initializeAWSBatch(): Promise<void> {
     console.log('☁️ Initializing AWS Batch workers...');
-    
+
     // Create initial worker pool
     for (let i = 0; i < 3; i++) {
       const worker = this.createSimulatedWorker();
@@ -396,7 +424,7 @@ export class RemoteBuildExecutor extends EventEmitter {
 
   private async initializeLocalWorkers(): Promise<void> {
     console.log('💻 Initializing local workers...');
-    
+
     // Create local worker pool
     for (let i = 0; i < 2; i++) {
       const worker = this.createSimulatedWorker();
@@ -406,9 +434,12 @@ export class RemoteBuildExecutor extends EventEmitter {
   }
 
   private createSimulatedWorker(): WorkerStats {
-    const regions = this.config.regions.length > 0 ? this.config.regions : ['us-west-2', 'us-east-1'];
+    const regions =
+      this.config.regions.length > 0
+        ? this.config.regions
+        : ['us-west-2', 'us-east-1'];
     const region = regions[Math.floor(Math.random() * regions.length)];
-    
+
     return {
       id: `worker-${crypto.randomBytes(4).toString('hex')}`,
       region,
@@ -417,32 +448,32 @@ export class RemoteBuildExecutor extends EventEmitter {
       totalRuntime: 0,
       avgTaskDuration: 0,
       cpuUtilization: Math.random() * 20 + 10, // 10-30%
-      memoryUtilization: Math.random() * 30 + 20 // 20-50%
+      memoryUtilization: Math.random() * 30 + 20, // 20-50%
     };
   }
 
   private async addWorkers(count: number): Promise<void> {
     console.log(`➕ Adding ${count} workers...`);
-    
+
     for (let i = 0; i < count; i++) {
       const worker = this.createSimulatedWorker();
       this.workerStats.set(worker.id, worker);
     }
-    
+
     console.log(`✅ Added ${count} workers`);
   }
 
   private async removeWorkers(count: number): Promise<void> {
     console.log(`➖ Removing ${count} workers...`);
-    
+
     const idleWorkers = Array.from(this.workerStats.entries())
       .filter(([_, w]) => w.status === 'idle')
       .slice(0, count);
-    
+
     for (const [workerId] of idleWorkers) {
       this.workerStats.delete(workerId);
     }
-    
+
     console.log(`✅ Removed ${idleWorkers.length} workers`);
   }
 
@@ -451,21 +482,23 @@ export class RemoteBuildExecutor extends EventEmitter {
    */
   async shutdown(): Promise<void> {
     console.log('🛑 Shutting down RBE...');
-    
+
     // Wait for running tasks to complete
     while (this.runningTasks.size > 0) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
-    
+
     // Clean up workers
     this.workerStats.clear();
-    
+
     console.log('✅ RBE shutdown complete');
   }
 }
 
 // Factory function
-export function createRemoteBuildExecutor(config: RBEConfig): RemoteBuildExecutor {
+export function createRemoteBuildExecutor(
+  config: RBEConfig,
+): RemoteBuildExecutor {
   return new RemoteBuildExecutor(config);
 }
 
@@ -477,7 +510,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     maxConcurrentJobs: 4,
     timeout: 300000,
     casEndpoint: 'http://localhost:9000',
-    regions: ['us-west-2', 'us-east-1']
+    regions: ['us-west-2', 'us-east-1'],
   };
 
   const rbe = createRemoteBuildExecutor(config);
@@ -487,33 +520,32 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     id: 'test-compile-1',
     command: ['gcc', '-c', 'main.c', '-o', 'main.o'],
     workingDir: '/tmp/build',
-    inputs: [
-      { path: 'main.c', digest: 'abc123', size: 1024 }
-    ],
-    outputs: [
-      { path: 'main.o', required: true }
-    ],
+    inputs: [{ path: 'main.c', digest: 'abc123', size: 1024 }],
+    outputs: [{ path: 'main.o', required: true }],
     environment: { CC: 'gcc' },
     platform: { arch: 'amd64', os: 'linux' },
     resources: { cpu: 1, memory: '1Gi' },
     timeout: 30000,
-    retries: 2
+    retries: 2,
   };
 
   // Execute test task
-  rbe.executeRemote(testTask).then(result => {
-    console.log('✅ Test task completed:', result);
-    
-    // Show utilization stats
-    const stats = rbe.getWorkerUtilization();
-    console.log('\n📊 Worker Utilization:');
-    console.log(`   Total workers: ${stats.totalWorkers}`);
-    console.log(`   Utilization: ${stats.utilization.toFixed(1)}%`);
-    console.log(`   Queue depth: ${stats.queueDepth}`);
-    
-    rbe.shutdown();
-  }).catch(error => {
-    console.error('❌ Test task failed:', error);
-    process.exit(1);
-  });
+  rbe
+    .executeRemote(testTask)
+    .then((result) => {
+      console.log('✅ Test task completed:', result);
+
+      // Show utilization stats
+      const stats = rbe.getWorkerUtilization();
+      console.log('\n📊 Worker Utilization:');
+      console.log(`   Total workers: ${stats.totalWorkers}`);
+      console.log(`   Utilization: ${stats.utilization.toFixed(1)}%`);
+      console.log(`   Queue depth: ${stats.queueDepth}`);
+
+      rbe.shutdown();
+    })
+    .catch((error) => {
+      console.error('❌ Test task failed:', error);
+      process.exit(1);
+    });
 }

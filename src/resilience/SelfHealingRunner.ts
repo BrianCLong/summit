@@ -75,7 +75,7 @@ export class SelfHealingRunner extends EventEmitter {
   private snapshots: Map<string, SandboxSnapshot> = new Map();
   private healthStatus: InfrastructureHealth;
   private chaosMode: boolean = false;
-  
+
   private config: {
     enableSnapshots: boolean;
     snapshotTtl: number;
@@ -84,14 +84,14 @@ export class SelfHealingRunner extends EventEmitter {
     maxConcurrentRetries: number;
     defaultRetryPolicy: RetryPolicy;
   };
-  
+
   private metrics = {
     totalExecutions: 0,
     successfulExecutions: 0,
     healingActionsTriggered: 0,
     fallbacksToLocal: 0,
     deterministicMatches: 0,
-    avgHealingTime: 0
+    avgHealingTime: 0,
   };
 
   constructor(
@@ -103,10 +103,10 @@ export class SelfHealingRunner extends EventEmitter {
       rbeHealthThreshold?: number;
       maxConcurrentRetries?: number;
       defaultRetryPolicy?: Partial<RetryPolicy>;
-    } = {}
+    } = {},
   ) {
     super();
-    
+
     this.rbeExecutor = rbeExecutor;
     this.config = {
       enableSnapshots: config.enableSnapshots !== false,
@@ -125,18 +125,18 @@ export class SelfHealingRunner extends EventEmitter {
           'ENOTFOUND',
           'socket hang up',
           'temporary failure',
-          'rate limit exceeded'
+          'rate limit exceeded',
         ],
         nonRetryableErrors: [
           'compilation error',
           'syntax error',
           'test assertion failed',
-          'permission denied'
+          'permission denied',
         ],
-        ...config.defaultRetryPolicy
-      }
+        ...config.defaultRetryPolicy,
+      },
     };
-    
+
     this.healthStatus = {
       rbeAvailable: true,
       rbeLatency: 0,
@@ -144,74 +144,95 @@ export class SelfHealingRunner extends EventEmitter {
       localResourcesAvailable: true,
       diskSpace: 0,
       memoryAvailable: 0,
-      lastHealthCheck: Date.now()
+      lastHealthCheck: Date.now(),
     };
-    
+
     // Start health monitoring
-    setInterval(() => this.performHealthCheck(), this.config.healthCheckInterval);
-    
+    setInterval(
+      () => this.performHealthCheck(),
+      this.config.healthCheckInterval,
+    );
+
     // Clean up expired snapshots
     setInterval(() => this.cleanupSnapshots(), this.config.snapshotTtl);
-    
-    console.log('🔄 Self-Healing Runner initialized - resilient execution ready');
+
+    console.log(
+      '🔄 Self-Healing Runner initialized - resilient execution ready',
+    );
   }
 
   /**
    * Execute a task with self-healing capabilities
    */
-  async executeWithHealing(context: ExecutionContext): Promise<ExecutionResult> {
+  async executeWithHealing(
+    context: ExecutionContext,
+  ): Promise<ExecutionResult> {
     console.log(`🔄 Self-healing execution: ${context.taskId}`);
-    
+
     const startTime = performance.now();
     this.metrics.totalExecutions++;
-    
+
     const healingActions: HealingAction[] = [];
     let attempt = 0;
     let lastError: any;
-    
+
     // Take initial snapshot if enabled
     let snapshot: SandboxSnapshot | undefined;
     if (this.config.enableSnapshots) {
       snapshot = await this.createSnapshot(context);
       console.log(`📸 Created snapshot: ${snapshot.id}`);
     }
-    
-    const retryPolicy = { ...this.config.defaultRetryPolicy, ...context.retryPolicy };
-    
+
+    const retryPolicy = {
+      ...this.config.defaultRetryPolicy,
+      ...context.retryPolicy,
+    };
+
     while (attempt < retryPolicy.maxAttempts) {
       attempt++;
       console.log(`🔄 Attempt ${attempt}/${retryPolicy.maxAttempts}`);
-      
+
       try {
         // Perform pre-execution healing if needed
         await this.performPreExecutionHealing(context, healingActions);
-        
+
         // Choose execution strategy based on infrastructure health
-        const result = await this.executeWithStrategy(context, attempt, healingActions);
-        
+        const result = await this.executeWithStrategy(
+          context,
+          attempt,
+          healingActions,
+        );
+
         // Verify deterministic execution if required
         if (context.deterministicMode && attempt > 1) {
-          result.deterministic = await this.verifyDeterministicExecution(result, context);
+          result.deterministic = await this.verifyDeterministicExecution(
+            result,
+            context,
+          );
           if (result.deterministic) {
             this.metrics.deterministicMatches++;
           }
         }
-        
+
         if (result.success) {
-          console.log(`✅ Self-healing execution succeeded on attempt ${attempt}`);
+          console.log(
+            `✅ Self-healing execution succeeded on attempt ${attempt}`,
+          );
           this.metrics.successfulExecutions++;
-          
+
           result.healingActions = healingActions;
           result.attempt = attempt;
           result.duration = performance.now() - startTime;
-          
+
           return result;
         } else {
-          lastError = new Error(`Exit code ${result.exitCode}: ${result.stderr}`);
-          
+          lastError = new Error(
+            `Exit code ${result.exitCode}: ${result.stderr}`,
+          );
+
           // Check if this is a retryable error
           const isRetryable = this.isRetryableError(result.stderr, retryPolicy);
-          
+
           if (!isRetryable || attempt >= retryPolicy.maxAttempts) {
             console.log(`❌ Non-retryable error or max attempts reached`);
             result.healingActions = healingActions;
@@ -219,31 +240,36 @@ export class SelfHealingRunner extends EventEmitter {
             result.duration = performance.now() - startTime;
             return result;
           }
-          
+
           // Perform healing actions before retry
-          await this.performHealingActions(context, result, healingActions, snapshot);
-          
+          await this.performHealingActions(
+            context,
+            result,
+            healingActions,
+            snapshot,
+          );
+
           // Wait before retry with exponential backoff
           const delay = Math.min(
-            retryPolicy.initialDelay * Math.pow(retryPolicy.backoffMultiplier, attempt - 1),
-            retryPolicy.maxDelay
+            retryPolicy.initialDelay *
+              Math.pow(retryPolicy.backoffMultiplier, attempt - 1),
+            retryPolicy.maxDelay,
           );
-          
+
           console.log(`⏳ Waiting ${delay}ms before retry...`);
           await this.delay(delay);
         }
-        
       } catch (error) {
         console.error(`❌ Execution error on attempt ${attempt}:`, error);
         lastError = error;
-        
+
         // Check if we should retry
         const isRetryable = this.isRetryableError(error.message, retryPolicy);
-        
+
         if (!isRetryable || attempt >= retryPolicy.maxAttempts) {
           break;
         }
-        
+
         // Attempt sandbox restoration if available
         if (snapshot) {
           await this.restoreSnapshot(snapshot, context);
@@ -251,15 +277,15 @@ export class SelfHealingRunner extends EventEmitter {
             type: 'sandbox_restore',
             reason: 'Execution error - restoring sandbox',
             timestamp: Date.now(),
-            successful: true
+            successful: true,
           });
         }
       }
     }
-    
+
     // All attempts failed
     console.error(`❌ Self-healing execution failed after ${attempt} attempts`);
-    
+
     return {
       success: false,
       exitCode: 1,
@@ -268,18 +294,20 @@ export class SelfHealingRunner extends EventEmitter {
       duration: performance.now() - startTime,
       attempt,
       healingActions,
-      deterministic: false
+      deterministic: false,
     };
   }
 
   /**
    * Create a snapshot of the current sandbox state
    */
-  private async createSnapshot(context: ExecutionContext): Promise<SandboxSnapshot> {
+  private async createSnapshot(
+    context: ExecutionContext,
+  ): Promise<SandboxSnapshot> {
     const snapshotId = crypto.randomUUID();
     const inputs = new Map<string, string>();
     const outputs = new Map<string, string>();
-    
+
     // Hash all input files
     for (const inputPath of context.inputs) {
       const fullPath = path.resolve(context.workingDir, inputPath);
@@ -291,14 +319,17 @@ export class SelfHealingRunner extends EventEmitter {
         console.warn(`⚠️ Could not snapshot input ${inputPath}:`, error);
       }
     }
-    
+
     // Create checksum for entire snapshot
     const checksumData = JSON.stringify({
       inputs: Object.fromEntries(inputs),
-      environment: context.environment
+      environment: context.environment,
     });
-    const checksum = crypto.createHash('sha256').update(checksumData).digest('hex');
-    
+    const checksum = crypto
+      .createHash('sha256')
+      .update(checksumData)
+      .digest('hex');
+
     const snapshot: SandboxSnapshot = {
       id: snapshotId,
       timestamp: Date.now(),
@@ -306,9 +337,9 @@ export class SelfHealingRunner extends EventEmitter {
       inputs,
       outputs,
       environment: { ...context.environment },
-      checksum
+      checksum,
     };
-    
+
     this.snapshots.set(snapshotId, snapshot);
     return snapshot;
   }
@@ -316,32 +347,39 @@ export class SelfHealingRunner extends EventEmitter {
   /**
    * Restore sandbox from snapshot
    */
-  private async restoreSnapshot(snapshot: SandboxSnapshot, context: ExecutionContext): Promise<void> {
+  private async restoreSnapshot(
+    snapshot: SandboxSnapshot,
+    context: ExecutionContext,
+  ): Promise<void> {
     console.log(`🔄 Restoring snapshot: ${snapshot.id}`);
-    
+
     try {
       // Restore environment variables
       for (const [key, value] of Object.entries(snapshot.environment)) {
         process.env[key] = value;
       }
-      
+
       // Verify input files match snapshot hashes
       for (const [inputPath, expectedHash] of snapshot.inputs) {
         const fullPath = path.resolve(context.workingDir, inputPath);
         try {
           const content = await fs.readFile(fullPath);
-          const actualHash = crypto.createHash('sha256').update(content).digest('hex');
-          
+          const actualHash = crypto
+            .createHash('sha256')
+            .update(content)
+            .digest('hex');
+
           if (actualHash !== expectedHash) {
-            console.warn(`⚠️ Input file ${inputPath} has changed since snapshot`);
+            console.warn(
+              `⚠️ Input file ${inputPath} has changed since snapshot`,
+            );
           }
         } catch (error) {
           console.warn(`⚠️ Could not verify input ${inputPath}:`, error);
         }
       }
-      
+
       console.log(`✅ Snapshot ${snapshot.id} restored`);
-      
     } catch (error) {
       console.error(`❌ Failed to restore snapshot ${snapshot.id}:`, error);
       throw error;
@@ -353,38 +391,39 @@ export class SelfHealingRunner extends EventEmitter {
    */
   private async performPreExecutionHealing(
     context: ExecutionContext,
-    healingActions: HealingAction[]
+    healingActions: HealingAction[],
   ): Promise<void> {
     // Check if environment needs reset
     if (this.needsEnvironmentReset()) {
       console.log('🔄 Resetting environment variables...');
-      
+
       // Reset to clean environment
       const cleanEnv = this.getCleanEnvironment();
       for (const [key, value] of Object.entries(context.environment)) {
         process.env[key] = value;
       }
-      
+
       healingActions.push({
         type: 'env_reset',
         reason: 'Environment variables reset for clean state',
         timestamp: Date.now(),
-        successful: true
+        successful: true,
       });
     }
-    
+
     // Check disk space
     const diskSpace = await this.checkDiskSpace(context.workingDir);
-    if (diskSpace < 1024 * 1024 * 1024) { // Less than 1GB
+    if (diskSpace < 1024 * 1024 * 1024) {
+      // Less than 1GB
       console.warn('⚠️ Low disk space detected, attempting cleanup...');
-      
+
       await this.performDiskCleanup(context.workingDir);
-      
+
       healingActions.push({
         type: 'cache_clear',
         reason: 'Low disk space - performed cleanup',
         timestamp: Date.now(),
-        successful: true
+        successful: true,
       });
     }
   }
@@ -395,42 +434,43 @@ export class SelfHealingRunner extends EventEmitter {
   private async executeWithStrategy(
     context: ExecutionContext,
     attempt: number,
-    healingActions: HealingAction[]
+    healingActions: HealingAction[],
   ): Promise<ExecutionResult> {
     // Check if RBE is healthy and available
-    if (this.healthStatus.rbeAvailable && 
-        this.healthStatus.rbeErrorRate < (1 - this.config.rbeHealthThreshold)) {
-      
+    if (
+      this.healthStatus.rbeAvailable &&
+      this.healthStatus.rbeErrorRate < 1 - this.config.rbeHealthThreshold
+    ) {
       console.log('🚀 Using RBE execution strategy');
-      
+
       try {
         const result = await this.executeOnRBE(context);
         return this.normalizeExecutionResult(result);
       } catch (error) {
         console.warn('⚠️ RBE execution failed, falling back to local:', error);
-        
+
         healingActions.push({
           type: 'fallback',
           reason: `RBE execution failed: ${error.message}`,
           timestamp: Date.now(),
-          successful: false
+          successful: false,
         });
-        
+
         this.metrics.fallbacksToLocal++;
       }
     }
-    
+
     console.log('💻 Using local execution strategy');
-    
+
     const result = await this.executeLocally(context);
-    
+
     healingActions.push({
       type: 'fallback',
       reason: 'RBE unavailable or unhealthy - executed locally',
       timestamp: Date.now(),
-      successful: result.success
+      successful: result.success,
     });
-    
+
     return result;
   }
 
@@ -443,39 +483,41 @@ export class SelfHealingRunner extends EventEmitter {
       command: context.command,
       inputs: context.inputs,
       outputs: context.outputs,
-      env: context.environment
+      env: context.environment,
     };
-    
+
     return await this.rbeExecutor.executeRemote(remoteTask);
   }
 
   /**
    * Execute task locally
    */
-  private async executeLocally(context: ExecutionContext): Promise<ExecutionResult> {
+  private async executeLocally(
+    context: ExecutionContext,
+  ): Promise<ExecutionResult> {
     const { spawn } = await import('child_process');
-    
+
     return new Promise((resolve) => {
       const startTime = performance.now();
       const [command, ...args] = context.command.split(' ');
-      
+
       const child = spawn(command, args, {
         cwd: context.workingDir,
         env: { ...process.env, ...context.environment },
-        stdio: ['pipe', 'pipe', 'pipe']
+        stdio: ['pipe', 'pipe', 'pipe'],
       });
-      
+
       let stdout = '';
       let stderr = '';
-      
+
       child.stdout?.on('data', (data) => {
         stdout += data.toString();
       });
-      
+
       child.stderr?.on('data', (data) => {
         stderr += data.toString();
       });
-      
+
       child.on('close', (code) => {
         resolve({
           success: code === 0,
@@ -485,10 +527,10 @@ export class SelfHealingRunner extends EventEmitter {
           duration: performance.now() - startTime,
           attempt: 1,
           healingActions: [],
-          deterministic: false
+          deterministic: false,
         });
       });
-      
+
       child.on('error', (error) => {
         resolve({
           success: false,
@@ -498,7 +540,7 @@ export class SelfHealingRunner extends EventEmitter {
           duration: performance.now() - startTime,
           attempt: 1,
           healingActions: [],
-          deterministic: false
+          deterministic: false,
         });
       });
     });
@@ -511,70 +553,74 @@ export class SelfHealingRunner extends EventEmitter {
     context: ExecutionContext,
     result: ExecutionResult,
     healingActions: HealingAction[],
-    snapshot?: SandboxSnapshot
+    snapshot?: SandboxSnapshot,
   ): Promise<void> {
     this.metrics.healingActionsTriggered++;
     const healingStartTime = performance.now();
-    
+
     console.log('🔧 Performing healing actions...');
-    
+
     // Clear caches if out-of-memory error
-    if (result.stderr.includes('out of memory') || result.stderr.includes('ENOMEM')) {
+    if (
+      result.stderr.includes('out of memory') ||
+      result.stderr.includes('ENOMEM')
+    ) {
       console.log('🧹 Clearing caches due to memory issues...');
-      
+
       await this.clearCaches(context.workingDir);
-      
+
       healingActions.push({
         type: 'cache_clear',
         reason: 'Out of memory error - cleared caches',
         timestamp: Date.now(),
-        successful: true
+        successful: true,
       });
     }
-    
+
     // Restore snapshot if available and execution was flaky
     if (snapshot && this.isInfrastructureError(result.stderr)) {
       console.log('🔄 Infrastructure error detected, restoring snapshot...');
-      
+
       try {
         await this.restoreSnapshot(snapshot, context);
-        
+
         healingActions.push({
           type: 'sandbox_restore',
           reason: 'Infrastructure error - restored sandbox',
           timestamp: Date.now(),
-          successful: true
+          successful: true,
         });
       } catch (error) {
         healingActions.push({
           type: 'sandbox_restore',
           reason: 'Failed to restore snapshot',
           timestamp: Date.now(),
-          successful: false
+          successful: false,
         });
       }
     }
-    
+
     // Reset environment if environment-related error
     if (this.isEnvironmentError(result.stderr)) {
       console.log('🔄 Environment error detected, resetting...');
-      
+
       const cleanEnv = this.getCleanEnvironment();
       for (const [key, value] of Object.entries(context.environment)) {
         process.env[key] = value;
       }
-      
+
       healingActions.push({
         type: 'env_reset',
         reason: 'Environment error - reset environment',
         timestamp: Date.now(),
-        successful: true
+        successful: true,
       });
     }
-    
+
     const healingTime = performance.now() - healingStartTime;
-    this.metrics.avgHealingTime = (this.metrics.avgHealingTime + healingTime) / 2;
-    
+    this.metrics.avgHealingTime =
+      (this.metrics.avgHealingTime + healingTime) / 2;
+
     console.log(`🔧 Healing actions completed in ${healingTime.toFixed(1)}ms`);
   }
 
@@ -583,35 +629,40 @@ export class SelfHealingRunner extends EventEmitter {
    */
   private async verifyDeterministicExecution(
     result: ExecutionResult,
-    context: ExecutionContext
+    context: ExecutionContext,
   ): Promise<boolean> {
     if (!result.success) return false;
-    
+
     try {
       // Create checksum of all output files
       const outputHashes: string[] = [];
-      
+
       for (const outputPath of context.outputs) {
         const fullPath = path.resolve(context.workingDir, outputPath);
         try {
           const content = await fs.readFile(fullPath);
-          
+
           // Filter out non-deterministic metadata (timestamps, etc.)
-          const filteredContent = this.filterNonDeterministicContent(content.toString());
-          const hash = crypto.createHash('sha256').update(filteredContent).digest('hex');
-          
+          const filteredContent = this.filterNonDeterministicContent(
+            content.toString(),
+          );
+          const hash = crypto
+            .createHash('sha256')
+            .update(filteredContent)
+            .digest('hex');
+
           outputHashes.push(hash);
         } catch (error) {
           console.warn(`⚠️ Could not verify output ${outputPath}:`, error);
           return false;
         }
       }
-      
+
       const combinedHash = crypto
         .createHash('sha256')
         .update(outputHashes.join(''))
         .digest('hex');
-      
+
       // Compare with previous execution if available
       if (result.outputChecksum) {
         return result.outputChecksum === combinedHash;
@@ -619,7 +670,6 @@ export class SelfHealingRunner extends EventEmitter {
         result.outputChecksum = combinedHash;
         return true; // First execution, assume deterministic
       }
-      
     } catch (error) {
       console.error('❌ Failed to verify deterministic execution:', error);
       return false;
@@ -632,7 +682,10 @@ export class SelfHealingRunner extends EventEmitter {
   private filterNonDeterministicContent(content: string): string {
     return content
       .replace(/timestamp:\s*\d+/gi, 'timestamp: FILTERED')
-      .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g, 'TIMESTAMP_FILTERED')
+      .replace(
+        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/g,
+        'TIMESTAMP_FILTERED',
+      )
       .replace(/build time:\s*\d+\.\d+s/gi, 'build time: FILTERED')
       .replace(/duration:\s*\d+ms/gi, 'duration: FILTEREDms')
       .replace(/pid:\s*\d+/gi, 'pid: FILTERED');
@@ -641,23 +694,26 @@ export class SelfHealingRunner extends EventEmitter {
   /**
    * Check if error is retryable
    */
-  private isRetryableError(errorMessage: string, retryPolicy: RetryPolicy): boolean {
+  private isRetryableError(
+    errorMessage: string,
+    retryPolicy: RetryPolicy,
+  ): boolean {
     const lowerError = errorMessage.toLowerCase();
-    
+
     // Check non-retryable errors first
     for (const nonRetryable of retryPolicy.nonRetryableErrors) {
       if (lowerError.includes(nonRetryable.toLowerCase())) {
         return false;
       }
     }
-    
+
     // Check retryable errors
     for (const retryable of retryPolicy.retryableErrors) {
       if (lowerError.includes(retryable.toLowerCase())) {
         return true;
       }
     }
-    
+
     return false; // Default to non-retryable
   }
 
@@ -671,11 +727,11 @@ export class SelfHealingRunner extends EventEmitter {
       'temporary failure',
       'service unavailable',
       'internal server error',
-      'rate limit exceeded'
+      'rate limit exceeded',
     ];
-    
+
     const lowerError = errorMessage.toLowerCase();
-    return infraErrors.some(error => lowerError.includes(error));
+    return infraErrors.some((error) => lowerError.includes(error));
   }
 
   /**
@@ -687,11 +743,11 @@ export class SelfHealingRunner extends EventEmitter {
       'permission denied',
       'no such file or directory',
       'environment variable',
-      'path not found'
+      'path not found',
     ];
-    
+
     const lowerError = errorMessage.toLowerCase();
-    return envErrors.some(error => lowerError.includes(error));
+    return envErrors.some((error) => lowerError.includes(error));
   }
 
   /**
@@ -699,14 +755,14 @@ export class SelfHealingRunner extends EventEmitter {
    */
   private async performHealthCheck(): Promise<void> {
     const startTime = performance.now();
-    
+
     try {
       // Check RBE health
       const rbeHealth = await this.checkRBEHealth();
-      
+
       // Check local resources
       const localHealth = await this.checkLocalHealth();
-      
+
       this.healthStatus = {
         rbeAvailable: rbeHealth.available,
         rbeLatency: rbeHealth.latency,
@@ -714,14 +770,15 @@ export class SelfHealingRunner extends EventEmitter {
         localResourcesAvailable: localHealth.available,
         diskSpace: localHealth.diskSpace,
         memoryAvailable: localHealth.memory,
-        lastHealthCheck: Date.now()
+        lastHealthCheck: Date.now(),
       };
-      
+
       const healthCheckDuration = performance.now() - startTime;
-      console.log(`💓 Health check completed in ${healthCheckDuration.toFixed(1)}ms`);
-      
+      console.log(
+        `💓 Health check completed in ${healthCheckDuration.toFixed(1)}ms`,
+      );
+
       this.emit('health_check_completed', this.healthStatus);
-      
     } catch (error) {
       console.error('❌ Health check failed:', error);
     }
@@ -730,25 +787,32 @@ export class SelfHealingRunner extends EventEmitter {
   /**
    * Check RBE health status
    */
-  private async checkRBEHealth(): Promise<{ available: boolean; latency: number; errorRate: number }> {
+  private async checkRBEHealth(): Promise<{
+    available: boolean;
+    latency: number;
+    errorRate: number;
+  }> {
     try {
       const startTime = performance.now();
-      
+
       // Perform a lightweight health check on RBE
       const stats = await this.rbeExecutor.getStats();
       const latency = performance.now() - startTime;
-      
+
       return {
         available: true,
         latency,
-        errorRate: 1 - (stats.tasksExecuted > 0 ? stats.successfulTasks / stats.tasksExecuted : 1)
+        errorRate:
+          1 -
+          (stats.tasksExecuted > 0
+            ? stats.successfulTasks / stats.tasksExecuted
+            : 1),
       };
-      
     } catch (error) {
       return {
         available: false,
         latency: Infinity,
-        errorRate: 1.0
+        errorRate: 1.0,
       };
     }
   }
@@ -756,29 +820,33 @@ export class SelfHealingRunner extends EventEmitter {
   /**
    * Check local system health
    */
-  private async checkLocalHealth(): Promise<{ available: boolean; diskSpace: number; memory: number }> {
+  private async checkLocalHealth(): Promise<{
+    available: boolean;
+    diskSpace: number;
+    memory: number;
+  }> {
     try {
       const diskSpace = await this.checkDiskSpace(process.cwd());
       const memoryAvailable = this.getAvailableMemory();
-      
+
       return {
-        available: diskSpace > 512 * 1024 * 1024 && memoryAvailable > 512 * 1024 * 1024, // 512MB minimums
+        available:
+          diskSpace > 512 * 1024 * 1024 && memoryAvailable > 512 * 1024 * 1024, // 512MB minimums
         diskSpace,
-        memory: memoryAvailable
+        memory: memoryAvailable,
       };
-      
     } catch (error) {
       return {
         available: false,
         diskSpace: 0,
-        memory: 0
+        memory: 0,
       };
     }
   }
 
   // Helper methods
   private async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private needsEnvironmentReset(): boolean {
@@ -789,13 +857,13 @@ export class SelfHealingRunner extends EventEmitter {
   private getCleanEnvironment(): Record<string, string> {
     const essential = ['PATH', 'HOME', 'USER', 'NODE_ENV'];
     const cleanEnv: Record<string, string> = {};
-    
+
     for (const key of essential) {
       if (process.env[key]) {
         cleanEnv[key] = process.env[key]!;
       }
     }
-    
+
     return cleanEnv;
   }
 
@@ -816,23 +884,23 @@ export class SelfHealingRunner extends EventEmitter {
 
   private async performDiskCleanup(workingDir: string): Promise<void> {
     console.log('🧹 Performing disk cleanup...');
-    
+
     // Would implement actual cleanup logic
     await this.delay(1000); // Simulate cleanup time
-    
+
     console.log('✅ Disk cleanup completed');
   }
 
   private async clearCaches(workingDir: string): Promise<void> {
     console.log('🧹 Clearing caches...');
-    
+
     const cacheDirs = [
       path.join(workingDir, 'node_modules/.cache'),
       path.join(workingDir, '.cache'),
       path.join(workingDir, 'dist'),
-      path.join(workingDir, 'build')
+      path.join(workingDir, 'build'),
     ];
-    
+
     for (const cacheDir of cacheDirs) {
       try {
         await fs.rm(cacheDir, { recursive: true, force: true });
@@ -840,7 +908,7 @@ export class SelfHealingRunner extends EventEmitter {
         // Ignore errors - directory might not exist
       }
     }
-    
+
     console.log('✅ Caches cleared');
   }
 
@@ -853,21 +921,21 @@ export class SelfHealingRunner extends EventEmitter {
       duration: rbeResult.duration || 0,
       attempt: 1,
       healingActions: [],
-      deterministic: false
+      deterministic: false,
     };
   }
 
   private cleanupSnapshots(): void {
     const now = Date.now();
     let cleaned = 0;
-    
+
     for (const [id, snapshot] of this.snapshots.entries()) {
       if (now - snapshot.timestamp > this.config.snapshotTtl) {
         this.snapshots.delete(id);
         cleaned++;
       }
     }
-    
+
     if (cleaned > 0) {
       console.log(`🧹 Cleaned up ${cleaned} expired snapshots`);
     }
@@ -893,9 +961,10 @@ export class SelfHealingRunner extends EventEmitter {
       ...this.metrics,
       healthStatus: this.healthStatus,
       activeSnapshots: this.snapshots.size,
-      successRate: this.metrics.totalExecutions > 0 
-        ? this.metrics.successfulExecutions / this.metrics.totalExecutions 
-        : 0
+      successRate:
+        this.metrics.totalExecutions > 0
+          ? this.metrics.successfulExecutions / this.metrics.totalExecutions
+          : 0,
     };
   }
 
@@ -908,10 +977,10 @@ export class SelfHealingRunner extends EventEmitter {
 
   async shutdown(): Promise<void> {
     console.log('🛑 Shutting down self-healing runner...');
-    
+
     // Clear all snapshots
     this.snapshots.clear();
-    
+
     console.log('✅ Self-healing runner shut down');
   }
 }
@@ -919,7 +988,7 @@ export class SelfHealingRunner extends EventEmitter {
 // Factory function
 export function createSelfHealingRunner(
   rbeExecutor: RemoteBuildExecutor,
-  config?: any
+  config?: any,
 ): SelfHealingRunner {
   return new SelfHealingRunner(rbeExecutor, config);
 }

@@ -131,7 +131,7 @@ export class TenantManager extends EventEmitter {
       usageRetentionDays: number;
       defaultTier: string;
       isolationMode: 'database' | 'schema' | 'row';
-    }
+    },
   ) {
     super();
     this.initializeDefaultPolicies();
@@ -142,7 +142,7 @@ export class TenantManager extends EventEmitter {
    * Create new tenant with comprehensive setup
    */
   async createTenant(
-    tenantData: Omit<TenantConfig, 'tenantId' | 'createdAt' | 'updatedAt'>
+    tenantData: Omit<TenantConfig, 'tenantId' | 'createdAt' | 'updatedAt'>,
   ): Promise<TenantConfig> {
     const tenantId = this.generateTenantId();
     const now = new Date();
@@ -154,7 +154,7 @@ export class TenantManager extends EventEmitter {
       ...tenantData,
       limits: this.getDefaultLimitsForTier(tenantData.tier),
       features: this.getDefaultFeaturesForTier(tenantData.tier),
-      security: this.getDefaultSecurityConfig(tenantData.tier)
+      security: this.getDefaultSecurityConfig(tenantData.tier),
     };
 
     // Validate tenant configuration
@@ -210,7 +210,7 @@ export class TenantManager extends EventEmitter {
    */
   async updateTenant(
     tenantId: string,
-    updates: Partial<TenantConfig>
+    updates: Partial<TenantConfig>,
   ): Promise<TenantConfig> {
     const tenant = await this.getTenant(tenantId);
     if (!tenant) {
@@ -220,17 +220,17 @@ export class TenantManager extends EventEmitter {
     const updatedTenant = {
       ...tenant,
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     await this.validateTenantConfig(updatedTenant);
     this.tenants.set(tenantId, updatedTenant);
 
-    this.emit('tenant:updated', { 
-      tenantId, 
-      updates, 
+    this.emit('tenant:updated', {
+      tenantId,
+      updates,
       tenant: updatedTenant,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return updatedTenant;
@@ -242,7 +242,7 @@ export class TenantManager extends EventEmitter {
   createTenantContext(
     tenantId: string,
     userId?: string,
-    additionalContext?: Partial<TenantContext>
+    additionalContext?: Partial<TenantContext>,
   ): TenantContext {
     return {
       tenantId,
@@ -251,7 +251,7 @@ export class TenantManager extends EventEmitter {
       permissions: [],
       metadata: {},
       isolationLevel: 'strict',
-      ...additionalContext
+      ...additionalContext,
     };
   }
 
@@ -261,7 +261,7 @@ export class TenantManager extends EventEmitter {
   async validateResourceUsage(
     tenantId: string,
     resourceType: keyof ResourceLimits,
-    requestedAmount: number = 1
+    requestedAmount: number = 1,
   ): Promise<boolean> {
     const tenant = await this.getTenant(tenantId);
     if (!tenant) {
@@ -270,9 +270,12 @@ export class TenantManager extends EventEmitter {
 
     const currentUsage = await this.getCurrentUsage(tenantId);
     const limit = tenant.limits[resourceType] as number;
-    const current = currentUsage.metrics[resourceType as keyof typeof currentUsage.metrics] as number || 0;
+    const current =
+      (currentUsage.metrics[
+        resourceType as keyof typeof currentUsage.metrics
+      ] as number) || 0;
 
-    const wouldExceed = (current + requestedAmount) > limit;
+    const wouldExceed = current + requestedAmount > limit;
 
     if (wouldExceed) {
       this.emit('tenant:limitExceeded', {
@@ -281,7 +284,7 @@ export class TenantManager extends EventEmitter {
         current,
         limit,
         requested: requestedAmount,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -310,10 +313,10 @@ export class TenantManager extends EventEmitter {
           queriesExecuted: 0,
           apiCalls: 0,
           analysisJobsRunning: 0,
-          bandwidthUsed: 0
+          bandwidthUsed: 0,
         },
         limits: tenant?.limits || this.getDefaultLimitsForTier('starter'),
-        utilization: {}
+        utilization: {},
       };
     }
 
@@ -325,7 +328,7 @@ export class TenantManager extends EventEmitter {
    */
   async recordUsage(
     tenantId: string,
-    metrics: Partial<ResourceUsage['metrics']>
+    metrics: Partial<ResourceUsage['metrics']>,
   ): Promise<void> {
     const tenant = await this.getTenant(tenantId);
     if (!tenant) {
@@ -349,19 +352,26 @@ export class TenantManager extends EventEmitter {
       timestamp: new Date(),
       metrics: newMetrics,
       limits: tenant.limits,
-      utilization
+      utilization,
     };
 
     const usageHistory = this.usageTracking.get(tenantId) || [];
     usageHistory.push(usage);
 
     // Maintain retention policy
-    const retentionCutoff = Date.now() - (this.config.usageRetentionDays * 24 * 60 * 60 * 1000);
-    const filteredHistory = usageHistory.filter(u => u.timestamp.getTime() > retentionCutoff);
+    const retentionCutoff =
+      Date.now() - this.config.usageRetentionDays * 24 * 60 * 60 * 1000;
+    const filteredHistory = usageHistory.filter(
+      (u) => u.timestamp.getTime() > retentionCutoff,
+    );
 
     this.usageTracking.set(tenantId, filteredHistory);
 
-    this.emit('tenant:usageRecorded', { tenantId, usage, timestamp: new Date() });
+    this.emit('tenant:usageRecorded', {
+      tenantId,
+      usage,
+      timestamp: new Date(),
+    });
 
     // Check for limit violations
     Object.entries(utilization).forEach(([resource, percent]) => {
@@ -370,7 +380,7 @@ export class TenantManager extends EventEmitter {
           tenantId,
           resource,
           utilization: percent,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
     });
@@ -382,7 +392,9 @@ export class TenantManager extends EventEmitter {
   private generateTenantId(): string {
     const timestamp = Date.now().toString(36);
     const randomBytes = randomUUID().replace(/-/g, '');
-    const hash = createHash('sha256').update(`${timestamp}-${randomBytes}`).digest('hex');
+    const hash = createHash('sha256')
+      .update(`${timestamp}-${randomBytes}`)
+      .digest('hex');
     return `tenant_${hash.substring(0, 16)}`;
   }
 
@@ -401,7 +413,7 @@ export class TenantManager extends EventEmitter {
         maxConcurrentSessions: 5,
         maxApiCallsPerMinute: 100,
         maxAnalysisJobs: 1,
-        retentionDays: 30
+        retentionDays: 30,
       },
       professional: {
         maxUsers: 25,
@@ -413,7 +425,7 @@ export class TenantManager extends EventEmitter {
         maxConcurrentSessions: 25,
         maxApiCallsPerMinute: 1000,
         maxAnalysisJobs: 5,
-        retentionDays: 90
+        retentionDays: 90,
       },
       enterprise: {
         maxUsers: 1000,
@@ -425,7 +437,7 @@ export class TenantManager extends EventEmitter {
         maxConcurrentSessions: 1000,
         maxApiCallsPerMinute: 10000,
         maxAnalysisJobs: 50,
-        retentionDays: 365
+        retentionDays: 365,
       },
       government: {
         maxUsers: 10000,
@@ -437,8 +449,8 @@ export class TenantManager extends EventEmitter {
         maxConcurrentSessions: 10000,
         maxApiCallsPerMinute: 100000,
         maxAnalysisJobs: 500,
-        retentionDays: 2555 // 7 years
-      }
+        retentionDays: 2555, // 7 years
+      },
     };
 
     return limits[tier as keyof typeof limits] || limits.starter;
@@ -459,7 +471,7 @@ export class TenantManager extends EventEmitter {
         mfa: false,
         dataExport: true,
         whiteLabeling: false,
-        prioritySupport: false
+        prioritySupport: false,
       },
       professional: {
         advancedAnalytics: true,
@@ -471,7 +483,7 @@ export class TenantManager extends EventEmitter {
         mfa: true,
         dataExport: true,
         whiteLabeling: false,
-        prioritySupport: false
+        prioritySupport: false,
       },
       enterprise: {
         advancedAnalytics: true,
@@ -483,7 +495,7 @@ export class TenantManager extends EventEmitter {
         mfa: true,
         dataExport: true,
         whiteLabeling: true,
-        prioritySupport: true
+        prioritySupport: true,
       },
       government: {
         advancedAnalytics: true,
@@ -495,8 +507,8 @@ export class TenantManager extends EventEmitter {
         mfa: true,
         dataExport: true,
         whiteLabeling: true,
-        prioritySupport: true
-      }
+        prioritySupport: true,
+      },
     };
 
     return features[tier as keyof typeof features] || features.starter;
@@ -519,9 +531,9 @@ export class TenantManager extends EventEmitter {
           requireLowercase: true,
           requireNumbers: true,
           requireSpecialChars: false,
-          maxAge: 90
+          maxAge: 90,
         },
-        auditLevel: 'basic' as const
+        auditLevel: 'basic' as const,
       },
       professional: {
         encryptionAtRest: true,
@@ -535,9 +547,9 @@ export class TenantManager extends EventEmitter {
           requireLowercase: true,
           requireNumbers: true,
           requireSpecialChars: true,
-          maxAge: 60
+          maxAge: 60,
         },
-        auditLevel: 'detailed' as const
+        auditLevel: 'detailed' as const,
       },
       enterprise: {
         encryptionAtRest: true,
@@ -551,9 +563,9 @@ export class TenantManager extends EventEmitter {
           requireLowercase: true,
           requireNumbers: true,
           requireSpecialChars: true,
-          maxAge: 30
+          maxAge: 30,
         },
-        auditLevel: 'comprehensive' as const
+        auditLevel: 'comprehensive' as const,
       },
       government: {
         encryptionAtRest: true,
@@ -567,10 +579,10 @@ export class TenantManager extends EventEmitter {
           requireLowercase: true,
           requireNumbers: true,
           requireSpecialChars: true,
-          maxAge: 15
+          maxAge: 15,
         },
-        auditLevel: 'comprehensive' as const
-      }
+        auditLevel: 'comprehensive' as const,
+      },
     };
 
     return configs[tier as keyof typeof configs] || configs.starter;
@@ -653,14 +665,14 @@ export class TenantManager extends EventEmitter {
     this.isolationPolicies.set('crossTenantAccess', {
       enabled: true,
       strictMode: true,
-      allowedExceptions: []
+      allowedExceptions: [],
     });
 
     // Data sharing policies
     this.isolationPolicies.set('dataSharing', {
       enabled: false,
       requireExplicitConsent: true,
-      auditSharing: true
+      auditSharing: true,
     });
   }
 
@@ -694,7 +706,10 @@ export class TenantManager extends EventEmitter {
         const mockMetrics = await this.collectTenantMetrics(tenantId);
         await this.recordUsage(tenantId, mockMetrics);
       } catch (error) {
-        console.error(`Failed to collect metrics for tenant ${tenantId}:`, error);
+        console.error(
+          `Failed to collect metrics for tenant ${tenantId}:`,
+          error,
+        );
       }
     }
   }
@@ -702,7 +717,9 @@ export class TenantManager extends EventEmitter {
   /**
    * Collect actual metrics for a specific tenant
    */
-  private async collectTenantMetrics(tenantId: string): Promise<Partial<ResourceUsage['metrics']>> {
+  private async collectTenantMetrics(
+    tenantId: string,
+  ): Promise<Partial<ResourceUsage['metrics']>> {
     // Mock implementation - in reality, would query actual usage
     return {
       activeUsers: Math.floor(Math.random() * 10),
@@ -710,23 +727,25 @@ export class TenantManager extends EventEmitter {
       totalEdges: Math.floor(Math.random() * 5000),
       storageUsed: Math.floor(Math.random() * 1024 * 1024 * 50),
       queriesExecuted: Math.floor(Math.random() * 100),
-      apiCalls: Math.floor(Math.random() * 50)
+      apiCalls: Math.floor(Math.random() * 50),
     };
   }
 
   /**
    * Get corresponding limit key for a metric
    */
-  private getCorrespondingLimit(metricKey: string): keyof ResourceLimits | null {
+  private getCorrespondingLimit(
+    metricKey: string,
+  ): keyof ResourceLimits | null {
     const mapping: Record<string, keyof ResourceLimits> = {
-      'activeUsers': 'maxUsers',
-      'totalNodes': 'maxNodes',
-      'totalEdges': 'maxEdges',
-      'totalGraphs': 'maxGraphs',
-      'queriesExecuted': 'maxQueries',
-      'storageUsed': 'maxStorage',
-      'apiCalls': 'maxApiCallsPerMinute',
-      'analysisJobsRunning': 'maxAnalysisJobs'
+      activeUsers: 'maxUsers',
+      totalNodes: 'maxNodes',
+      totalEdges: 'maxEdges',
+      totalGraphs: 'maxGraphs',
+      queriesExecuted: 'maxQueries',
+      storageUsed: 'maxStorage',
+      apiCalls: 'maxApiCallsPerMinute',
+      analysisJobsRunning: 'maxAnalysisJobs',
     };
 
     return mapping[metricKey] || null;
@@ -738,5 +757,5 @@ export const tenantManager = new TenantManager({
   enableUsageTracking: true,
   usageRetentionDays: 90,
   defaultTier: 'starter',
-  isolationMode: 'schema'
+  isolationMode: 'schema',
 });

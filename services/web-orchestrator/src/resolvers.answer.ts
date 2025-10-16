@@ -22,7 +22,9 @@ export const resolversAnswer = {
       const domains = await domainCandidates('qna');
       const bandit = new CtxBandit(domains);
       // naive plan: choose 3 domains
-      const picks = Array.from(new Set([bandit.choose(), bandit.choose(), bandit.choose()]));
+      const picks = Array.from(
+        new Set([bandit.choose(), bandit.choose(), bandit.choose()]),
+      );
       // enqueue jobs for relevant paths derived by a simple router (placeholder)
       for (const d of picks) {
         await publishFetch({
@@ -35,7 +37,11 @@ export const resolversAnswer = {
           extractor: 'article_v2',
         });
       }
-      const results = await gatherResults({ contextId, max: picks.length, timeoutMs: 4000 });
+      const results = await gatherResults({
+        contextId,
+        max: picks.length,
+        timeoutMs: 4000,
+      });
       const out = await synthesize({ question, results, contextId });
       return { id, ...out };
     },

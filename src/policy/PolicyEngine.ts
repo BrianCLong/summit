@@ -99,7 +99,7 @@ export class PolicyEngine {
 
   private findOpaExecutable(): string {
     const paths = ['opa', '/usr/local/bin/opa', '/usr/bin/opa'];
-    
+
     for (const opaPath of paths) {
       try {
         execSync(`${opaPath} version`, { stdio: 'ignore' });
@@ -108,8 +108,10 @@ export class PolicyEngine {
         continue;
       }
     }
-    
-    throw new Error('OPA (Open Policy Agent) not found. Please install OPA: https://www.openpolicyagent.org/docs/latest/#running-opa');
+
+    throw new Error(
+      'OPA (Open Policy Agent) not found. Please install OPA: https://www.openpolicyagent.org/docs/latest/#running-opa',
+    );
   }
 
   /**
@@ -117,22 +119,22 @@ export class PolicyEngine {
    */
   async evaluate(input: PolicyInput): Promise<PolicyResult> {
     console.log('🔍 Evaluating build policies...');
-    
+
     const startTime = Date.now();
     const violations: PolicyViolation[] = [];
     let rulesEvaluated = 0;
-    
+
     // Create OPA data file
     const inputFile = await this.createOpaInput(input);
-    
+
     try {
       for (const [ruleId, rule] of this.rules) {
         if (this.config.excludeRules.includes(ruleId)) {
           continue;
         }
-        
+
         rulesEvaluated++;
-        
+
         try {
           const ruleViolations = await this.evaluateRule(rule, inputFile);
           violations.push(...ruleViolations);
@@ -144,45 +146,49 @@ export class PolicyEngine {
       // Cleanup temp file
       await fs.unlink(inputFile);
     }
-    
+
     const evaluationTime = Date.now() - startTime;
-    
+
     // Calculate stats
     const stats = {
       rulesEvaluated,
-      errors: violations.filter(v => v.severity === 'error').length,
-      warnings: violations.filter(v => v.severity === 'warning').length,
-      infos: violations.filter(v => v.severity === 'info').length
+      errors: violations.filter((v) => v.severity === 'error').length,
+      warnings: violations.filter((v) => v.severity === 'warning').length,
+      infos: violations.filter((v) => v.severity === 'info').length,
     };
-    
-    const passed = stats.errors === 0 && (stats.warnings === 0 || !this.config.failOnWarning);
-    
-    console.log(`${passed ? '✅' : '❌'} Policy evaluation: ${stats.errors} errors, ${stats.warnings} warnings (${evaluationTime}ms)`);
-    
+
+    const passed =
+      stats.errors === 0 &&
+      (stats.warnings === 0 || !this.config.failOnWarning);
+
+    console.log(
+      `${passed ? '✅' : '❌'} Policy evaluation: ${stats.errors} errors, ${stats.warnings} warnings (${evaluationTime}ms)`,
+    );
+
     return {
       passed,
       violations,
       stats,
-      evaluationTime
+      evaluationTime,
     };
   }
 
   private async loadRules(): Promise<void> {
     console.log('📋 Loading policy rules...');
-    
+
     // Load built-in rules
     await this.loadBuiltinRules();
-    
+
     // Load custom rules from directory
     if (await this.directoryExists(this.config.rulesDirectory)) {
       await this.loadRulesFromDirectory(this.config.rulesDirectory);
     }
-    
+
     // Add custom rules from config
     for (const rule of this.config.customRules) {
       this.rules.set(rule.id, rule);
     }
-    
+
     console.log(`📚 Loaded ${this.rules.size} policy rules`);
   }
 
@@ -205,11 +211,12 @@ export class PolicyEngine {
         `,
         remediation: {
           description: 'Add a non-root user to your Dockerfile',
-          action: 'Add "RUN adduser -D -s /bin/sh appuser" and "USER appuser" to Dockerfile',
-          automatable: true
-        }
+          action:
+            'Add "RUN adduser -D -s /bin/sh appuser" and "USER appuser" to Dockerfile',
+          automatable: true,
+        },
       },
-      
+
       {
         id: 'pinned-base-images',
         name: 'Pinned Base Images',
@@ -229,9 +236,10 @@ export class PolicyEngine {
         `,
         remediation: {
           description: 'Pin base images to specific versions or digests',
-          action: 'Replace "FROM node" with "FROM node:18-alpine" or "FROM node@sha256:..."',
-          automatable: true
-        }
+          action:
+            'Replace "FROM node" with "FROM node:18-alpine" or "FROM node@sha256:..."',
+          automatable: true,
+        },
       },
 
       {
@@ -257,9 +265,10 @@ export class PolicyEngine {
         `,
         remediation: {
           description: 'Use secret management instead of environment variables',
-          action: 'Move secrets to vault, K8s secrets, or secure environment injection',
-          automatable: false
-        }
+          action:
+            'Move secrets to vault, K8s secrets, or secure environment injection',
+          automatable: false,
+        },
       },
 
       {
@@ -288,9 +297,10 @@ export class PolicyEngine {
         `,
         remediation: {
           description: 'Use images from approved registries only',
-          action: 'Replace with equivalent image from docker.io, gcr.io, ghcr.io, or public.ecr.aws',
-          automatable: false
-        }
+          action:
+            'Replace with equivalent image from docker.io, gcr.io, ghcr.io, or public.ecr.aws',
+          automatable: false,
+        },
       },
 
       {
@@ -311,8 +321,8 @@ export class PolicyEngine {
         remediation: {
           description: 'Disable network access for build steps',
           action: 'Set networkAccess: false in build step configuration',
-          automatable: true
-        }
+          automatable: true,
+        },
       },
 
       {
@@ -338,9 +348,10 @@ export class PolicyEngine {
         `,
         remediation: {
           description: 'Review dependency licenses and replace if necessary',
-          action: 'Check dependency license and find MIT/Apache alternative if needed',
-          automatable: false
-        }
+          action:
+            'Check dependency license and find MIT/Apache alternative if needed',
+          automatable: false,
+        },
       },
 
       {
@@ -359,9 +370,10 @@ export class PolicyEngine {
         `,
         remediation: {
           description: 'Set SOURCE_DATE_EPOCH for reproducible builds',
-          action: 'Add SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) to build environment',
-          automatable: true
-        }
+          action:
+            'Add SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) to build environment',
+          automatable: true,
+        },
       },
 
       {
@@ -382,9 +394,9 @@ export class PolicyEngine {
         remediation: {
           description: 'Remove privileged mode from container configuration',
           action: 'Set privileged: false or remove privileged flag',
-          automatable: true
-        }
-      }
+          automatable: true,
+        },
+      },
     ];
 
     for (const rule of builtinRules) {
@@ -395,7 +407,7 @@ export class PolicyEngine {
   private async loadRulesFromDirectory(directory: string): Promise<void> {
     try {
       const files = await fs.readdir(directory);
-      
+
       for (const file of files) {
         if (file.endsWith('.rego') || file.endsWith('.json')) {
           const filePath = path.join(directory, file);
@@ -410,7 +422,7 @@ export class PolicyEngine {
   private async loadRuleFile(filePath: string): Promise<void> {
     try {
       const content = await fs.readFile(filePath, 'utf8');
-      
+
       if (filePath.endsWith('.json')) {
         const rule = JSON.parse(content) as PolicyRule;
         this.rules.set(rule.id, rule);
@@ -427,10 +439,10 @@ export class PolicyEngine {
           remediation: {
             description: 'See rule documentation',
             action: 'Manual remediation required',
-            automatable: false
-          }
+            automatable: false,
+          },
         };
-        
+
         this.rules.set(rule.id, rule);
       }
     } catch (error) {
@@ -438,22 +450,25 @@ export class PolicyEngine {
     }
   }
 
-  private async evaluateRule(rule: PolicyRule, inputFile: string): Promise<PolicyViolation[]> {
+  private async evaluateRule(
+    rule: PolicyRule,
+    inputFile: string,
+  ): Promise<PolicyViolation[]> {
     // Create temporary Rego file
     const regoFile = `/tmp/policy-${rule.id}.rego`;
     await fs.writeFile(regoFile, rule.rego);
-    
+
     try {
       // Run OPA evaluation
       const opaCommand = `${this.opaPath} eval -d "${regoFile}" -i "${inputFile}" "data.policies"`;
-      const output = execSync(opaCommand, { 
+      const output = execSync(opaCommand, {
         encoding: 'utf8',
-        timeout: 10000 // 10 second timeout
+        timeout: 10000, // 10 second timeout
       });
-      
+
       const result = JSON.parse(output);
       const violations: PolicyViolation[] = [];
-      
+
       // Parse OPA results
       if (result.result && Array.isArray(result.result)) {
         for (const violation of result.result) {
@@ -467,28 +482,29 @@ export class PolicyEngine {
               location: {
                 file: violation.file,
                 line: violation.line,
-                path: violation.path || [rule.category, rule.id]
+                path: violation.path || [rule.category, rule.id],
               },
               remediation: {
                 description: rule.remediation.description,
                 suggestion: rule.remediation.action,
-                autofix: rule.remediation.automatable ? this.generateAutofix(rule, violation) : undefined
+                autofix: rule.remediation.automatable
+                  ? this.generateAutofix(rule, violation)
+                  : undefined,
               },
-              metadata: violation
+              metadata: violation,
             });
           }
         }
       }
-      
+
       return violations;
-      
     } catch (error) {
       // OPA evaluation failed - might indicate no violations or error
       if (error instanceof Error && error.message.includes('exit code 1')) {
         // Exit code 1 often means no violations found
         return [];
       }
-      
+
       throw error;
     } finally {
       // Cleanup temporary Rego file
@@ -500,9 +516,12 @@ export class PolicyEngine {
     }
   }
 
-  private generateAutofix(rule: PolicyRule, violation: any): string | undefined {
+  private generateAutofix(
+    rule: PolicyRule,
+    violation: any,
+  ): string | undefined {
     if (!rule.remediation.automatable) return undefined;
-    
+
     switch (rule.id) {
       case 'no-root-user':
         return `
@@ -510,19 +529,19 @@ export class PolicyEngine {
 RUN adduser -D -s /bin/sh appuser
 USER appuser
         `.trim();
-      
+
       case 'pinned-base-images':
         return 'Replace "FROM image" with "FROM image:specific-tag" or use digest';
-      
+
       case 'build-reproducibility':
         return 'export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)';
-      
+
       case 'no-network-in-build':
         return 'Set "networkAccess: false" in build step configuration';
-      
+
       case 'no-privileged-containers':
         return 'Remove "privileged: true" or set "privileged: false"';
-      
+
       default:
         return undefined;
     }
@@ -530,17 +549,17 @@ USER appuser
 
   private async createOpaInput(input: PolicyInput): Promise<string> {
     const inputFile = `/tmp/opa-input-${Date.now()}.json`;
-    
+
     // Enhance input with additional context
     const enrichedInput = {
       ...input,
       timestamp: Date.now(),
       metadata: {
         version: '1.0.0',
-        evaluator: 'maestro-policy-engine'
-      }
+        evaluator: 'maestro-policy-engine',
+      },
     };
-    
+
     await fs.writeFile(inputFile, JSON.stringify(enrichedInput, null, 2));
     return inputFile;
   }
@@ -559,47 +578,54 @@ USER appuser
    */
   generateReport(result: PolicyResult): string {
     let report = '# 🔍 Policy Evaluation Report\n\n';
-    
+
     report += `**Status**: ${result.passed ? '✅ PASSED' : '❌ FAILED'}\n`;
     report += `**Evaluation Time**: ${result.evaluationTime}ms\n`;
     report += `**Rules Evaluated**: ${result.stats.rulesEvaluated}\n\n`;
-    
+
     report += '## Summary\n\n';
     report += `- **Errors**: ${result.stats.errors}\n`;
     report += `- **Warnings**: ${result.stats.warnings}\n`;
     report += `- **Info**: ${result.stats.infos}\n\n`;
-    
+
     if (result.violations.length > 0) {
       report += '## Violations\n\n';
-      
-      const groupedViolations = result.violations.reduce((groups, violation) => {
-        const key = violation.category;
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(violation);
-        return groups;
-      }, {} as Record<string, PolicyViolation[]>);
-      
+
+      const groupedViolations = result.violations.reduce(
+        (groups, violation) => {
+          const key = violation.category;
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(violation);
+          return groups;
+        },
+        {} as Record<string, PolicyViolation[]>,
+      );
+
       for (const [category, violations] of Object.entries(groupedViolations)) {
         report += `### ${category.toUpperCase()}\n\n`;
-        
+
         for (const violation of violations) {
-          const icon = violation.severity === 'error' ? '❌' : 
-                      violation.severity === 'warning' ? '⚠️' : 'ℹ️';
-          
+          const icon =
+            violation.severity === 'error'
+              ? '❌'
+              : violation.severity === 'warning'
+                ? '⚠️'
+                : 'ℹ️';
+
           report += `${icon} **${violation.ruleName}**\n`;
           report += `   ${violation.message}\n`;
-          
+
           if (violation.location.file) {
             report += `   📁 File: ${violation.location.file}\n`;
           }
-          
+
           report += `   💡 **Fix**: ${violation.remediation.suggestion}\n`;
-          
+
           if (violation.remediation.autofix) {
             report += `   🔧 **Autofix**:\n`;
             report += `   \`\`\`\n   ${violation.remediation.autofix}\n   \`\`\`\n`;
           }
-          
+
           report += '\n';
         }
       }
@@ -607,7 +633,7 @@ USER appuser
       report += '## ✅ No Policy Violations Found\n\n';
       report += 'All policies passed successfully!\n';
     }
-    
+
     return report;
   }
 
@@ -617,53 +643,67 @@ USER appuser
   async applyAutofixes(violations: PolicyViolation[]): Promise<{
     applied: number;
     failed: number;
-    results: Array<{ violation: PolicyViolation; success: boolean; error?: string }>;
+    results: Array<{
+      violation: PolicyViolation;
+      success: boolean;
+      error?: string;
+    }>;
   }> {
     if (!this.config.enableAutofix) {
       return { applied: 0, failed: 0, results: [] };
     }
-    
+
     console.log('🔧 Applying automatic fixes...');
-    
-    const results: Array<{ violation: PolicyViolation; success: boolean; error?: string }> = [];
+
+    const results: Array<{
+      violation: PolicyViolation;
+      success: boolean;
+      error?: string;
+    }> = [];
     let applied = 0;
     let failed = 0;
-    
+
     for (const violation of violations) {
       if (!violation.remediation.autofix) continue;
-      
+
       try {
         await this.applyAutofix(violation);
         results.push({ violation, success: true });
         applied++;
         console.log(`✅ Applied autofix for ${violation.ruleName}`);
       } catch (error) {
-        results.push({ 
-          violation, 
-          success: false, 
-          error: error instanceof Error ? error.message : 'Unknown error'
+        results.push({
+          violation,
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
         failed++;
-        console.warn(`❌ Failed to apply autofix for ${violation.ruleName}:`, error);
+        console.warn(
+          `❌ Failed to apply autofix for ${violation.ruleName}:`,
+          error,
+        );
       }
     }
-    
+
     console.log(`🔧 Autofix complete: ${applied} applied, ${failed} failed`);
-    
+
     return { applied, failed, results };
   }
 
   private async applyAutofix(violation: PolicyViolation): Promise<void> {
     // Implementation would depend on the specific autofix
     // This is a simplified example
-    
-    if (violation.ruleId === 'build-reproducibility' && violation.remediation.autofix) {
+
+    if (
+      violation.ruleId === 'build-reproducibility' &&
+      violation.remediation.autofix
+    ) {
       // Apply SOURCE_DATE_EPOCH fix
       const envFile = '.env.build';
       const content = violation.remediation.autofix;
       await fs.appendFile(envFile, `\n${content}\n`);
     }
-    
+
     // Other autofixes would be implemented based on rule type
   }
 
@@ -677,16 +717,18 @@ USER appuser
   } {
     const rulesByCategory: Record<string, number> = {};
     const rulesBySeverity: Record<string, number> = {};
-    
+
     for (const rule of this.rules.values()) {
-      rulesByCategory[rule.category] = (rulesByCategory[rule.category] || 0) + 1;
-      rulesBySeverity[rule.severity] = (rulesBySeverity[rule.severity] || 0) + 1;
+      rulesByCategory[rule.category] =
+        (rulesByCategory[rule.category] || 0) + 1;
+      rulesBySeverity[rule.severity] =
+        (rulesBySeverity[rule.severity] || 0) + 1;
     }
-    
+
     return {
       totalRules: this.rules.size,
       rulesByCategory,
-      rulesBySeverity
+      rulesBySeverity,
     };
   }
 }
@@ -703,11 +745,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     enableAutofix: true,
     failOnWarning: false,
     excludeRules: [],
-    customRules: []
+    customRules: [],
   };
-  
+
   const engine = createPolicyEngine(config);
-  
+
   const mockInput: PolicyInput = {
     buildConfig: {
       dockerfile: `
@@ -720,21 +762,21 @@ RUN npm install
       buildArgs: {},
       environment: {
         NODE_ENV: 'production',
-        API_SECRET: 'supersecret123'
+        API_SECRET: 'supersecret123',
       },
       toolchain: {
         node: '18.0.0',
         docker: '20.10.0',
         dependencies: {
-          'express': '^4.18.0',
-          'some-gpl-package': '^1.0.0'
-        }
-      }
+          express: '^4.18.0',
+          'some-gpl-package': '^1.0.0',
+        },
+      },
     },
     repository: {
       branch: 'main',
       files: ['src/app.ts', 'Dockerfile', 'package.json'],
-      secrets: []
+      secrets: [],
     },
     pipeline: {
       steps: [
@@ -742,51 +784,55 @@ RUN npm install
           name: 'build',
           command: 'docker build .',
           networkAccess: true,
-          privileged: false
+          privileged: false,
         },
         {
           name: 'test',
           command: 'npm test',
           networkAccess: false,
-          privileged: true
-        }
+          privileged: true,
+        },
       ],
-      artifacts: ['dist/app.js']
-    }
+      artifacts: ['dist/app.js'],
+    },
   };
-  
-  engine.evaluate(mockInput).then(async result => {
-    console.log('\n📊 Policy Evaluation Results:');
-    console.log(`   Status: ${result.passed ? '✅ PASSED' : '❌ FAILED'}`);
-    console.log(`   Errors: ${result.stats.errors}`);
-    console.log(`   Warnings: ${result.stats.warnings}`);
-    console.log(`   Time: ${result.evaluationTime}ms`);
-    
-    if (result.violations.length > 0) {
-      console.log('\n🔍 Violations:');
-      for (const violation of result.violations) {
-        console.log(`   ${violation.severity === 'error' ? '❌' : '⚠️'} ${violation.message}`);
+
+  engine
+    .evaluate(mockInput)
+    .then(async (result) => {
+      console.log('\n📊 Policy Evaluation Results:');
+      console.log(`   Status: ${result.passed ? '✅ PASSED' : '❌ FAILED'}`);
+      console.log(`   Errors: ${result.stats.errors}`);
+      console.log(`   Warnings: ${result.stats.warnings}`);
+      console.log(`   Time: ${result.evaluationTime}ms`);
+
+      if (result.violations.length > 0) {
+        console.log('\n🔍 Violations:');
+        for (const violation of result.violations) {
+          console.log(
+            `   ${violation.severity === 'error' ? '❌' : '⚠️'} ${violation.message}`,
+          );
+        }
+
+        // Generate report
+        const report = engine.generateReport(result);
+        console.log('\n📋 Full Report:');
+        console.log(report.substring(0, 800) + '...');
+
+        // Try autofixes
+        const autofixResult = await engine.applyAutofixes(result.violations);
+        if (autofixResult.applied > 0) {
+          console.log(`\n🔧 Applied ${autofixResult.applied} automatic fixes`);
+        }
       }
-      
-      // Generate report
-      const report = engine.generateReport(result);
-      console.log('\n📋 Full Report:');
-      console.log(report.substring(0, 800) + '...');
-      
-      // Try autofixes
-      const autofixResult = await engine.applyAutofixes(result.violations);
-      if (autofixResult.applied > 0) {
-        console.log(`\n🔧 Applied ${autofixResult.applied} automatic fixes`);
-      }
-    }
-    
-    const stats = engine.getStats();
-    console.log('\n📈 Policy Engine Stats:');
-    console.log(`   Total rules: ${stats.totalRules}`);
-    console.log(`   By category: ${JSON.stringify(stats.rulesByCategory)}`);
-    console.log(`   By severity: ${JSON.stringify(stats.rulesBySeverity)}`);
-    
-  }).catch(error => {
-    console.error('❌ Policy evaluation failed:', error);
-  });
+
+      const stats = engine.getStats();
+      console.log('\n📈 Policy Engine Stats:');
+      console.log(`   Total rules: ${stats.totalRules}`);
+      console.log(`   By category: ${JSON.stringify(stats.rulesByCategory)}`);
+      console.log(`   By severity: ${JSON.stringify(stats.rulesBySeverity)}`);
+    })
+    .catch((error) => {
+      console.error('❌ Policy evaluation failed:', error);
+    });
 }

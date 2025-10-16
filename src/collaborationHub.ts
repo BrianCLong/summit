@@ -1,1 +1,3 @@
-export function collaborationHub(config) { return { hub: 'Collaboration Hub Placeholder' }; }
+export function collaborationHub(config) {
+  return { hub: 'Collaboration Hub Placeholder' };
+}

@@ -59,7 +59,13 @@ export interface TriggerCondition {
 }
 
 export interface KillSwitchAction {
-  type: 'stop-deployment' | 'rollback' | 'circuit-breaker' | 'alert' | 'scale-down' | 'redirect-traffic';
+  type:
+    | 'stop-deployment'
+    | 'rollback'
+    | 'circuit-breaker'
+    | 'alert'
+    | 'scale-down'
+    | 'redirect-traffic';
   parameters: { [key: string]: any };
   priority: number;
   timeout: number;
@@ -104,7 +110,9 @@ export class SLOBudgetManager extends EventEmitter {
   private metrics: SLOMetrics[] = [];
   private monitoringInterval: NodeJS.Timeout | null = null;
 
-  async defineSLO(sloConfig: Partial<ServiceLevelObjective>): Promise<ServiceLevelObjective> {
+  async defineSLO(
+    sloConfig: Partial<ServiceLevelObjective>,
+  ): Promise<ServiceLevelObjective> {
     const slo: ServiceLevelObjective = {
       id: sloConfig.id || `slo-${Date.now()}`,
       name: sloConfig.name || 'Unnamed SLO',
@@ -116,7 +124,7 @@ export class SLOBudgetManager extends EventEmitter {
       alertThreshold: sloConfig.alertThreshold || 0.2,
       escalationThreshold: sloConfig.escalationThreshold || 0.1,
       killSwitchThreshold: sloConfig.killSwitchThreshold || 0.02,
-      status: 'healthy'
+      status: 'healthy',
     };
 
     this.slos.set(slo.id, slo);
@@ -129,7 +137,7 @@ export class SLOBudgetManager extends EventEmitter {
       remainingBudget: this.calculateTotalBudget(slo),
       burnRate: 0,
       projectedExhaustion: null,
-      violations: []
+      violations: [],
     };
 
     this.budgets.set(slo.id, budget);
@@ -144,20 +152,22 @@ export class SLOBudgetManager extends EventEmitter {
       name: config.name || 'Emergency Kill Switch',
       trigger: config.trigger || {
         type: 'slo-budget',
-        conditions: [{ metric: 'budget-remaining', operator: '<', threshold: 0.05 }],
-        operator: 'AND'
+        conditions: [
+          { metric: 'budget-remaining', operator: '<', threshold: 0.05 },
+        ],
+        operator: 'AND',
       },
       actions: config.actions || [
         {
           type: 'stop-deployment',
           parameters: {},
           priority: 1,
-          timeout: 300
-        }
+          timeout: 300,
+        },
       ],
       status: 'armed',
       triggerCount: 0,
-      cooldownPeriod: config.cooldownPeriod || 3600 // 1 hour default
+      cooldownPeriod: config.cooldownPeriod || 3600, // 1 hour default
     };
 
     this.killSwitches.set(killSwitch.id, killSwitch);
@@ -171,11 +181,11 @@ export class SLOBudgetManager extends EventEmitter {
 
     // Keep only recent metrics (last 30 days)
     const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    this.metrics = this.metrics.filter(m => m.timestamp > cutoff);
+    this.metrics = this.metrics.filter((m) => m.timestamp > cutoff);
 
     // Update relevant SLOs
     const relevantSLOs = Array.from(this.slos.values()).filter(
-      slo => slo.service === metric.service && slo.metric === metric.metric
+      (slo) => slo.service === metric.service && slo.metric === metric.metric,
     );
 
     for (const slo of relevantSLOs) {
@@ -185,40 +195,47 @@ export class SLOBudgetManager extends EventEmitter {
     this.emit('metric-recorded', metric);
   }
 
-  async updateSLOBudget(slo: ServiceLevelObjective, metric: SLOMetrics): Promise<void> {
+  async updateSLOBudget(
+    slo: ServiceLevelObjective,
+    metric: SLOMetrics,
+  ): Promise<void> {
     const budget = this.budgets.get(slo.id);
     if (!budget) return;
 
     // Calculate if this metric represents a budget violation
     const isViolation = !metric.success || metric.value < slo.target;
-    
+
     if (isViolation) {
       const impact = this.calculateBudgetImpact(slo, metric);
-      
+
       budget.consumedBudget += impact;
       budget.remainingBudget = budget.totalBudget - budget.consumedBudget;
-      
+
       const violation: BudgetViolation = {
         timestamp: metric.timestamp,
         impact,
         duration: 1, // Simplified - would calculate actual duration
         cause: `${metric.metric} violation: ${metric.value}`,
         severity: this.determineSeverity(impact, budget.totalBudget),
-        resolved: false
+        resolved: false,
       };
-      
+
       budget.violations.push(violation);
     }
 
     // Update burn rate (violations per hour over last 24 hours)
     const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const recentViolations = budget.violations.filter(v => v.timestamp > last24h);
+    const recentViolations = budget.violations.filter(
+      (v) => v.timestamp > last24h,
+    );
     budget.burnRate = recentViolations.reduce((sum, v) => sum + v.impact, 0);
 
     // Project budget exhaustion
     if (budget.burnRate > 0) {
       const hoursToExhaustion = budget.remainingBudget / budget.burnRate;
-      budget.projectedExhaustion = new Date(Date.now() + hoursToExhaustion * 60 * 60 * 1000);
+      budget.projectedExhaustion = new Date(
+        Date.now() + hoursToExhaustion * 60 * 60 * 1000,
+      );
     } else {
       budget.projectedExhaustion = null;
     }
@@ -233,7 +250,10 @@ export class SLOBudgetManager extends EventEmitter {
     this.emit('budget-updated', { slo, budget });
   }
 
-  async evaluateKillSwitches(slo?: ServiceLevelObjective, budget?: ErrorBudget): Promise<void> {
+  async evaluateKillSwitches(
+    slo?: ServiceLevelObjective,
+    budget?: ErrorBudget,
+  ): Promise<void> {
     const currentTime = Date.now();
 
     for (const killSwitch of this.killSwitches.values()) {
@@ -241,11 +261,16 @@ export class SLOBudgetManager extends EventEmitter {
 
       // Check cooldown
       if (killSwitch.lastTriggered) {
-        const timeSinceLastTrigger = (currentTime - killSwitch.lastTriggered.getTime()) / 1000;
+        const timeSinceLastTrigger =
+          (currentTime - killSwitch.lastTriggered.getTime()) / 1000;
         if (timeSinceLastTrigger < killSwitch.cooldownPeriod) continue;
       }
 
-      const shouldTrigger = await this.evaluateTriggerConditions(killSwitch.trigger, slo, budget);
+      const shouldTrigger = await this.evaluateTriggerConditions(
+        killSwitch.trigger,
+        slo,
+        budget,
+      );
 
       if (shouldTrigger) {
         await this.triggerKillSwitch(killSwitch);
@@ -261,7 +286,9 @@ export class SLOBudgetManager extends EventEmitter {
     this.emit('killswitch-triggered', killSwitch);
 
     // Execute actions in priority order
-    const sortedActions = [...killSwitch.actions].sort((a, b) => a.priority - b.priority);
+    const sortedActions = [...killSwitch.actions].sort(
+      (a, b) => a.priority - b.priority,
+    );
 
     for (const action of sortedActions) {
       try {
@@ -281,7 +308,9 @@ export class SLOBudgetManager extends EventEmitter {
     }, 60000); // Re-arm after 1 minute
   }
 
-  private async executeKillSwitchAction(action: KillSwitchAction): Promise<void> {
+  private async executeKillSwitchAction(
+    action: KillSwitchAction,
+  ): Promise<void> {
     switch (action.type) {
       case 'stop-deployment':
         await this.stopDeployment(action.parameters);
@@ -320,7 +349,7 @@ export class SLOBudgetManager extends EventEmitter {
         slo,
         budget,
         trend,
-        riskLevel
+        riskLevel,
       });
 
       // Update overall health
@@ -331,20 +360,27 @@ export class SLOBudgetManager extends EventEmitter {
       }
 
       // Generate recommendations
-      if (budget.projectedExhaustion && budget.projectedExhaustion < new Date(Date.now() + 24 * 60 * 60 * 1000)) {
-        recommendedActions.push(`Urgent: ${slo.name} budget will be exhausted within 24 hours`);
+      if (
+        budget.projectedExhaustion &&
+        budget.projectedExhaustion < new Date(Date.now() + 24 * 60 * 60 * 1000)
+      ) {
+        recommendedActions.push(
+          `Urgent: ${slo.name} budget will be exhausted within 24 hours`,
+        );
       } else if (slo.budgetRemaining < slo.alertThreshold) {
-        recommendedActions.push(`Monitor: ${slo.name} is approaching budget threshold`);
+        recommendedActions.push(
+          `Monitor: ${slo.name} is approaching budget threshold`,
+        );
       }
     }
 
-    const budgetTrends = summaries.map(s => ({
+    const budgetTrends = summaries.map((s) => ({
       sloId: s.slo.id,
       timeframe: period,
       startBudget: s.budget.totalBudget,
       endBudget: s.budget.remainingBudget,
       avgBurnRate: s.budget.burnRate,
-      maxBurnRate: s.budget.burnRate * 1.5 // Simplified estimation
+      maxBurnRate: s.budget.burnRate * 1.5, // Simplified estimation
     }));
 
     return {
@@ -352,7 +388,7 @@ export class SLOBudgetManager extends EventEmitter {
       slos: summaries,
       overallHealth,
       recommendedActions,
-      budgetTrends
+      budgetTrends,
     };
   }
 
@@ -389,9 +425,15 @@ export class SLOBudgetManager extends EventEmitter {
       const budget = this.budgets.get(slo.id);
       if (!budget) continue;
 
-      if (slo.budgetRemaining < slo.escalationThreshold && slo.status !== 'emergency') {
+      if (
+        slo.budgetRemaining < slo.escalationThreshold &&
+        slo.status !== 'emergency'
+      ) {
         this.emit('budget-escalation', { slo, budget });
-      } else if (slo.budgetRemaining < slo.alertThreshold && slo.status === 'healthy') {
+      } else if (
+        slo.budgetRemaining < slo.alertThreshold &&
+        slo.status === 'healthy'
+      ) {
         this.emit('budget-alert', { slo, budget });
       }
     }
@@ -403,27 +445,33 @@ export class SLOBudgetManager extends EventEmitter {
     // Calculate error budget based on SLO target and time window
     const availabilityTarget = slo.target;
     const allowedFailureRate = 1 - availabilityTarget;
-    
+
     // Convert time window to budget units
     const timeMultipliers: { [key: string]: number } = {
-      '1d': 24 * 60,      // 1440 minutes
-      '7d': 7 * 24 * 60,  // 10080 minutes
-      '30d': 30 * 24 * 60 // 43200 minutes
+      '1d': 24 * 60, // 1440 minutes
+      '7d': 7 * 24 * 60, // 10080 minutes
+      '30d': 30 * 24 * 60, // 43200 minutes
     };
 
     const totalTime = timeMultipliers[slo.timeWindow] || timeMultipliers['30d'];
     return allowedFailureRate * totalTime;
   }
 
-  private calculateBudgetImpact(slo: ServiceLevelObjective, metric: SLOMetrics): number {
+  private calculateBudgetImpact(
+    slo: ServiceLevelObjective,
+    metric: SLOMetrics,
+  ): number {
     // Simplified impact calculation - would be more sophisticated in practice
     if (!metric.success) return 1.0; // 1 minute of downtime
-    
+
     const shortfall = slo.target - metric.value;
     return Math.max(0, shortfall * 60); // Convert to minutes
   }
 
-  private determineSeverity(impact: number, totalBudget: number): 'low' | 'medium' | 'high' | 'critical' {
+  private determineSeverity(
+    impact: number,
+    totalBudget: number,
+  ): 'low' | 'medium' | 'high' | 'critical' {
     const ratio = impact / totalBudget;
     if (ratio > 0.1) return 'critical';
     if (ratio > 0.05) return 'high';
@@ -446,7 +494,7 @@ export class SLOBudgetManager extends EventEmitter {
   private async evaluateTriggerConditions(
     trigger: KillSwitchTrigger,
     slo?: ServiceLevelObjective,
-    budget?: ErrorBudget
+    budget?: ErrorBudget,
   ): Promise<boolean> {
     const conditionResults: boolean[] = [];
 
@@ -455,7 +503,9 @@ export class SLOBudgetManager extends EventEmitter {
 
       switch (condition.metric) {
         case 'budget-remaining':
-          actualValue = budget ? budget.remainingBudget / budget.totalBudget : 1.0;
+          actualValue = budget
+            ? budget.remainingBudget / budget.totalBudget
+            : 1.0;
           break;
         case 'burn-rate':
           actualValue = budget ? budget.burnRate : 0;
@@ -471,35 +521,47 @@ export class SLOBudgetManager extends EventEmitter {
       conditionResults.push(conditionMet);
     }
 
-    return trigger.operator === 'AND' 
-      ? conditionResults.every(r => r)
-      : conditionResults.some(r => r);
+    return trigger.operator === 'AND'
+      ? conditionResults.every((r) => r)
+      : conditionResults.some((r) => r);
   }
 
-  private evaluateCondition(value: number, condition: TriggerCondition): boolean {
+  private evaluateCondition(
+    value: number,
+    condition: TriggerCondition,
+  ): boolean {
     switch (condition.operator) {
-      case '>': return value > condition.threshold;
-      case '<': return value < condition.threshold;
-      case '>=': return value >= condition.threshold;
-      case '<=': return value <= condition.threshold;
-      case '==': return Math.abs(value - condition.threshold) < 0.001;
-      default: return false;
+      case '>':
+        return value > condition.threshold;
+      case '<':
+        return value < condition.threshold;
+      case '>=':
+        return value >= condition.threshold;
+      case '<=':
+        return value <= condition.threshold;
+      case '==':
+        return Math.abs(value - condition.threshold) < 0.001;
+      default:
+        return false;
     }
   }
 
   private calculateCurrentErrorRate(): number {
     // Calculate error rate from recent metrics
     const recentMetrics = this.metrics.filter(
-      m => m.timestamp > new Date(Date.now() - 60 * 60 * 1000) // Last hour
+      (m) => m.timestamp > new Date(Date.now() - 60 * 60 * 1000), // Last hour
     );
 
     if (recentMetrics.length === 0) return 0;
 
-    const failures = recentMetrics.filter(m => !m.success).length;
+    const failures = recentMetrics.filter((m) => !m.success).length;
     return failures / recentMetrics.length;
   }
 
-  private calculateBudgetTrend(slo: ServiceLevelObjective, period: string): 'improving' | 'stable' | 'degrading' {
+  private calculateBudgetTrend(
+    slo: ServiceLevelObjective,
+    period: string,
+  ): 'improving' | 'stable' | 'degrading' {
     const budget = this.budgets.get(slo.id);
     if (!budget) return 'stable';
 
@@ -509,7 +571,10 @@ export class SLOBudgetManager extends EventEmitter {
     return 'stable';
   }
 
-  private assessRiskLevel(slo: ServiceLevelObjective, budget: ErrorBudget): 'low' | 'medium' | 'high' | 'critical' {
+  private assessRiskLevel(
+    slo: ServiceLevelObjective,
+    budget: ErrorBudget,
+  ): 'low' | 'medium' | 'high' | 'critical' {
     if (slo.budgetRemaining < slo.killSwitchThreshold) return 'critical';
     if (slo.budgetRemaining < slo.escalationThreshold) return 'high';
     if (slo.budgetRemaining < slo.alertThreshold) return 'medium';

@@ -12,9 +12,9 @@ import { performance } from 'perf_hooks';
 /**
  * Chaos experiment types and categories
  */
-export type ChaosExperimentType = 
+export type ChaosExperimentType =
   | 'network_partition'
-  | 'service_degradation' 
+  | 'service_degradation'
   | 'resource_exhaustion'
   | 'dependency_failure'
   | 'data_corruption'
@@ -25,7 +25,7 @@ export type ChaosExperimentType =
 /**
  * Experiment target types
  */
-export type ExperimentTarget = 
+export type ExperimentTarget =
   | 'service'
   | 'database'
   | 'network'
@@ -38,7 +38,7 @@ export type ExperimentTarget =
 /**
  * Chaos experiment status
  */
-export type ExperimentStatus = 
+export type ExperimentStatus =
   | 'pending'
   | 'running'
   | 'completed'
@@ -49,7 +49,12 @@ export type ExperimentStatus =
 /**
  * Blast radius scope
  */
-export type BlastRadius = 'single_instance' | 'service' | 'zone' | 'region' | 'global';
+export type BlastRadius =
+  | 'single_instance'
+  | 'service'
+  | 'zone'
+  | 'region'
+  | 'global';
 
 /**
  * Chaos experiment definition
@@ -118,7 +123,14 @@ export interface TargetSelector {
  */
 export interface SelectorFilter {
   field: string;
-  operator: 'equals' | 'not_equals' | 'in' | 'not_in' | 'regex' | 'greater_than' | 'less_than';
+  operator:
+    | 'equals'
+    | 'not_equals'
+    | 'in'
+    | 'not_in'
+    | 'regex'
+    | 'greater_than'
+    | 'less_than';
   value: any;
 }
 
@@ -238,7 +250,12 @@ export interface RollbackConfiguration {
  * Rollback condition
  */
 export interface RollbackCondition {
-  type: 'steady_state_violation' | 'timeout' | 'manual' | 'error_threshold' | 'custom';
+  type:
+    | 'steady_state_violation'
+    | 'timeout'
+    | 'manual'
+    | 'error_threshold'
+    | 'custom';
   threshold?: number;
   duration?: number; // seconds
   validator?: (metrics: ExperimentMetrics) => boolean;
@@ -323,7 +340,12 @@ export interface ScheduleRestriction {
  */
 export interface SafeguardConfiguration {
   name: string;
-  type: 'circuit_breaker' | 'rate_limit' | 'resource_limit' | 'time_limit' | 'approval_gate';
+  type:
+    | 'circuit_breaker'
+    | 'rate_limit'
+    | 'resource_limit'
+    | 'time_limit'
+    | 'approval_gate';
   configuration: Record<string, any>;
   enabled: boolean;
 }
@@ -471,7 +493,11 @@ export interface MetricTimeline {
  * Experiment insight
  */
 export interface ExperimentInsight {
-  type: 'weakness_discovered' | 'resilience_confirmed' | 'improvement_opportunity' | 'false_positive';
+  type:
+    | 'weakness_discovered'
+    | 'resilience_confirmed'
+    | 'improvement_opportunity'
+    | 'false_positive';
   title: string;
   description: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -509,7 +535,7 @@ export class ChaosEngine extends EventEmitter {
       defaultTimeout: number; // minutes
       monitoringEnabled: boolean;
       notificationsEnabled: boolean;
-    }
+    },
   ) {
     super();
     this.initializeChaosEngine();
@@ -533,7 +559,9 @@ export class ChaosEngine extends EventEmitter {
 
     this.emit('experiment:registered', { experiment });
 
-    console.log(`Chaos experiment registered: ${experiment.id} (${experiment.name})`);
+    console.log(
+      `Chaos experiment registered: ${experiment.id} (${experiment.name})`,
+    );
   }
 
   /**
@@ -546,7 +574,7 @@ export class ChaosEngine extends EventEmitter {
       environment?: string;
       skipSteadyState?: boolean;
       notifyOnCompletion?: boolean;
-    } = {}
+    } = {},
   ): Promise<ExperimentResult> {
     const experiment = this.experiments.get(experimentId);
     if (!experiment) {
@@ -577,15 +605,15 @@ export class ChaosEngine extends EventEmitter {
           timestamp: new Date(),
           probes: [],
           overall_health: 100,
-          deviations: []
+          deviations: [],
         },
         after: {
           status: 'passed',
           timestamp: new Date(),
           probes: [],
           overall_health: 100,
-          deviations: []
-        }
+          deviations: [],
+        },
       },
       method_results: [],
       metrics: {
@@ -596,7 +624,7 @@ export class ChaosEngine extends EventEmitter {
           network_io: 0,
           process_count: 0,
           load_average: [],
-          uptime: 0
+          uptime: 0,
         },
         application: {
           response_time: 0,
@@ -604,21 +632,21 @@ export class ChaosEngine extends EventEmitter {
           throughput: 0,
           active_connections: 0,
           queue_depth: 0,
-          cache_hit_rate: 0
+          cache_hit_rate: 0,
         },
         network: {
           latency: 0,
           packet_loss: 0,
           bandwidth_utilization: 0,
           connections_dropped: 0,
-          dns_resolution_time: 0
+          dns_resolution_time: 0,
         },
         custom: {},
-        timeline: []
+        timeline: [],
       },
       insights: [],
       errors: [],
-      warnings: []
+      warnings: [],
     };
 
     try {
@@ -630,7 +658,12 @@ export class ChaosEngine extends EventEmitter {
       }
 
       // Execute experiment phases
-      await this.executeExperimentPhases(experiment, execution, result, options);
+      await this.executeExperimentPhases(
+        experiment,
+        execution,
+        result,
+        options,
+      );
 
       result.status = 'completed';
       result.endTime = new Date();
@@ -650,7 +683,6 @@ export class ChaosEngine extends EventEmitter {
       if (options.notifyOnCompletion && this.config.notificationsEnabled) {
         await this.sendExperimentNotifications(experiment, result);
       }
-
     } catch (error) {
       result.status = 'failed';
       result.errors.push(error.message);
@@ -660,14 +692,16 @@ export class ChaosEngine extends EventEmitter {
       // Attempt rollback if configured
       if (experiment.rollback.enabled && experiment.rollback.automatic) {
         try {
-          result.rollback_results = await this.executeRollback(experiment, execution);
+          result.rollback_results = await this.executeRollback(
+            experiment,
+            execution,
+          );
         } catch (rollbackError) {
           result.errors.push(`Rollback failed: ${rollbackError.message}`);
         }
       }
 
       this.emit('experiment:failed', { experiment, result, error });
-
     } finally {
       // Clean up
       this.activeExperiments.delete(experimentId);
@@ -705,7 +739,6 @@ export class ChaosEngine extends EventEmitter {
       execution.status = 'aborted';
 
       this.emit('experiment:aborted', { experimentId, reason });
-
     } finally {
       this.activeExperiments.delete(experimentId);
     }
@@ -730,7 +763,7 @@ export class ChaosEngine extends EventEmitter {
       isActive: !!execution,
       currentPhase: execution?.currentPhase,
       progress: execution?.progress,
-      results
+      results,
     };
   }
 
@@ -747,13 +780,17 @@ export class ChaosEngine extends EventEmitter {
 
     if (filters) {
       if (filters.type) {
-        experiments = experiments.filter(e => e.type === filters.type);
+        experiments = experiments.filter((e) => e.type === filters.type);
       }
       if (filters.environment) {
-        experiments = experiments.filter(e => e.metadata.environment === filters.environment);
+        experiments = experiments.filter(
+          (e) => e.metadata.environment === filters.environment,
+        );
       }
       if (filters.riskLevel) {
-        experiments = experiments.filter(e => e.metadata.riskLevel === filters.riskLevel);
+        experiments = experiments.filter(
+          (e) => e.metadata.riskLevel === filters.riskLevel,
+        );
       }
     }
 
@@ -784,14 +821,14 @@ export class ChaosEngine extends EventEmitter {
         parallel: false,
         dryRun: false,
         environment: 'staging',
-        targets: config.targets.map(target => ({
+        targets: config.targets.map((target) => ({
           name: target,
           type: 'network' as ExperimentTarget,
           selector: {
             type: 'name',
-            criteria: { name: target }
+            criteria: { name: target },
           },
-          configuration: config.parameters
+          configuration: config.parameters,
         })),
         parameters: config.parameters,
         safeguards: [
@@ -799,9 +836,9 @@ export class ChaosEngine extends EventEmitter {
             name: 'timeout_safeguard',
             type: 'time_limit',
             configuration: { max_duration: config.duration * 2 },
-            enabled: true
-          }
-        ]
+            enabled: true,
+          },
+        ],
       },
       steadyState: {
         title: 'System is healthy',
@@ -812,22 +849,22 @@ export class ChaosEngine extends EventEmitter {
             type: 'http',
             configuration: {
               url: 'http://localhost/health',
-              expectedStatus: [200]
+              expectedStatus: [200],
             },
             tolerance: {
-              exact: 200
+              exact: 200,
             },
             frequency: 5,
             timeout: 10,
-            retries: 3
-          }
+            retries: 3,
+          },
         ],
         tolerance: {
           failureThreshold: 5, // 5% of probes can fail
           responseTimeThreshold: 2000, // 2 seconds max response time
           errorRateThreshold: 1, // 1% error rate max
-          customTolerances: []
-        }
+          customTolerances: [],
+        },
       },
       method: [
         {
@@ -842,9 +879,9 @@ export class ChaosEngine extends EventEmitter {
             retries: 3,
             background: false,
             continueOnFailure: false,
-            rollbackOnFailure: true
-          }
-        }
+            rollbackOnFailure: true,
+          },
+        },
       ],
       rollback: {
         enabled: true,
@@ -852,11 +889,11 @@ export class ChaosEngine extends EventEmitter {
         conditions: [
           {
             type: 'steady_state_violation',
-            threshold: 50 // If health drops below 50%
+            threshold: 50, // If health drops below 50%
           },
           {
-            type: 'timeout'
-          }
+            type: 'timeout',
+          },
         ],
         methods: [
           {
@@ -871,11 +908,11 @@ export class ChaosEngine extends EventEmitter {
               retries: 5,
               background: false,
               continueOnFailure: false,
-              rollbackOnFailure: false
-            }
-          }
+              rollbackOnFailure: false,
+            },
+          },
         ],
-        timeout: 60
+        timeout: 60,
       },
       monitoring: {
         enabled: true,
@@ -887,8 +924,8 @@ export class ChaosEngine extends EventEmitter {
             aggregation: 'avg',
             threshold: {
               warning: 1.0,
-              critical: 2.0
-            }
+              critical: 2.0,
+            },
           },
           {
             name: 'error_rate',
@@ -897,9 +934,9 @@ export class ChaosEngine extends EventEmitter {
             aggregation: 'avg',
             threshold: {
               warning: 0.01,
-              critical: 0.05
-            }
-          }
+              critical: 0.05,
+            },
+          },
         ],
         alerts: [
           {
@@ -907,8 +944,8 @@ export class ChaosEngine extends EventEmitter {
             condition: 'error_rate > 0.05',
             severity: 'critical',
             channels: ['slack-alerts'],
-            suppressDuration: 5
-          }
+            suppressDuration: 5,
+          },
         ],
         dashboards: ['chaos-experiments'],
         notifications: [
@@ -916,11 +953,15 @@ export class ChaosEngine extends EventEmitter {
             type: 'slack',
             configuration: {
               webhook_url: process.env.SLACK_WEBHOOK_URL,
-              channel: '#chaos-engineering'
+              channel: '#chaos-engineering',
             },
-            events: ['experiment_started', 'experiment_completed', 'experiment_failed']
-          }
-        ]
+            events: [
+              'experiment_started',
+              'experiment_completed',
+              'experiment_failed',
+            ],
+          },
+        ],
       },
       metadata: {
         author: 'chaos-team',
@@ -929,8 +970,8 @@ export class ChaosEngine extends EventEmitter {
         tags: ['network', 'partition', 'resilience'],
         createdAt: new Date(),
         version: '1.0.0',
-        riskLevel: 'medium'
-      }
+        riskLevel: 'medium',
+      },
     };
   }
 
@@ -949,7 +990,7 @@ export class ChaosEngine extends EventEmitter {
       targets: [config.service],
       duration: config.duration,
       partitionType: 'delay',
-      parameters: { intensity: config.intensity }
+      parameters: { intensity: config.intensity },
     });
 
     experiment.type = 'service_degradation';
@@ -974,16 +1015,17 @@ export class ChaosEngine extends EventEmitter {
       targets: [config.target],
       duration: config.duration,
       partitionType: 'delay',
-      parameters: { 
+      parameters: {
         resource: config.resource,
-        level: config.exhaustionLevel 
-      }
+        level: config.exhaustionLevel,
+      },
     });
 
     experiment.type = 'resource_exhaustion';
     experiment.target = 'infrastructure';
     experiment.hypothesis = `System should handle ${config.resource} exhaustion at ${config.exhaustionLevel}% level`;
-    experiment.metadata.riskLevel = config.exhaustionLevel > 80 ? 'high' : 'medium';
+    experiment.metadata.riskLevel =
+      config.exhaustionLevel > 80 ? 'high' : 'medium';
 
     return experiment;
   }
@@ -995,13 +1037,13 @@ export class ChaosEngine extends EventEmitter {
     experiment: ChaosExperiment,
     execution: ExperimentExecution,
     result: ExperimentResult,
-    options: any
+    options: any,
   ): Promise<void> {
     // Phase 1: Pre-experiment steady state check
     if (!options.skipSteadyState) {
       execution.currentPhase = 'pre_steady_state';
       result.steady_state.before = await this.checkSteadyState(experiment);
-      
+
       if (result.steady_state.before.status === 'failed') {
         throw new Error('Pre-experiment steady state check failed');
       }
@@ -1009,7 +1051,11 @@ export class ChaosEngine extends EventEmitter {
 
     // Phase 2: Execute chaos methods
     execution.currentPhase = 'chaos_execution';
-    result.method_results = await this.executeChaosMethods(experiment, execution, options);
+    result.method_results = await this.executeChaosMethods(
+      experiment,
+      execution,
+      options,
+    );
 
     // Phase 3: Monitor during experiment
     if (experiment.configuration.duration > 0) {
@@ -1024,22 +1070,30 @@ export class ChaosEngine extends EventEmitter {
     }
 
     // Phase 5: Rollback if needed
-    if (experiment.rollback.enabled && this.shouldRollback(experiment, result)) {
+    if (
+      experiment.rollback.enabled &&
+      this.shouldRollback(experiment, result)
+    ) {
       execution.currentPhase = 'rollback';
-      result.rollback_results = await this.executeRollback(experiment, execution);
+      result.rollback_results = await this.executeRollback(
+        experiment,
+        execution,
+      );
     }
   }
 
   /**
    * Check steady state using defined probes
    */
-  private async checkSteadyState(experiment: ChaosExperiment): Promise<SteadyStateResult> {
+  private async checkSteadyState(
+    experiment: ChaosExperiment,
+  ): Promise<SteadyStateResult> {
     const result: SteadyStateResult = {
       status: 'passed',
       timestamp: new Date(),
       probes: [],
       overall_health: 0,
-      deviations: []
+      deviations: [],
     };
 
     let totalProbes = 0;
@@ -1056,11 +1110,12 @@ export class ChaosEngine extends EventEmitter {
     }
 
     // Calculate overall health
-    result.overall_health = totalProbes > 0 ? (passedProbes / totalProbes) * 100 : 100;
+    result.overall_health =
+      totalProbes > 0 ? (passedProbes / totalProbes) * 100 : 100;
 
     // Determine overall status
     const failureThreshold = experiment.steadyState.tolerance.failureThreshold;
-    if (result.overall_health < (100 - failureThreshold)) {
+    if (result.overall_health < 100 - failureThreshold) {
       result.status = 'failed';
     } else if (result.overall_health < 100) {
       result.status = 'degraded';
@@ -1074,7 +1129,7 @@ export class ChaosEngine extends EventEmitter {
    */
   private async executeProbe(probe: HealthProbe): Promise<ProbeResult> {
     const startTime = performance.now();
-    
+
     const result: ProbeResult = {
       name: probe.name,
       status: 'passed',
@@ -1082,7 +1137,7 @@ export class ChaosEngine extends EventEmitter {
       expected: null,
       duration: 0,
       message: '',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     try {
@@ -1115,10 +1170,15 @@ export class ChaosEngine extends EventEmitter {
       }
 
       // Check tolerance
-      const withinTolerance = this.checkProbeTolerance(result.value, probe.tolerance);
+      const withinTolerance = this.checkProbeTolerance(
+        result.value,
+        probe.tolerance,
+      );
       result.status = withinTolerance ? 'passed' : 'failed';
-      result.message = result.status === 'passed' ? 'Probe passed' : 'Probe failed tolerance check';
-
+      result.message =
+        result.status === 'passed'
+          ? 'Probe passed'
+          : 'Probe failed tolerance check';
     } catch (error) {
       result.status = 'error';
       result.message = error.message;
@@ -1133,17 +1193,17 @@ export class ChaosEngine extends EventEmitter {
    */
   private async executeHttpProbe(probe: HealthProbe): Promise<any> {
     const fetch = (await import('node-fetch')).default;
-    
+
     const response = await fetch(probe.configuration.url!, {
       method: probe.configuration.method || 'GET',
       headers: probe.configuration.headers,
-      timeout: probe.timeout * 1000
+      timeout: probe.timeout * 1000,
     });
 
     return {
       status: response.status,
       ok: response.ok,
-      responseTime: 0 // Would measure actual response time
+      responseTime: 0, // Would measure actual response time
     };
   }
 
@@ -1152,7 +1212,7 @@ export class ChaosEngine extends EventEmitter {
    */
   private async executeTcpProbe(probe: HealthProbe): Promise<any> {
     const net = require('net');
-    
+
     return new Promise((resolve, reject) => {
       const socket = new net.Socket();
       const timeout = setTimeout(() => {
@@ -1160,11 +1220,15 @@ export class ChaosEngine extends EventEmitter {
         reject(new Error('TCP probe timeout'));
       }, probe.timeout * 1000);
 
-      socket.connect(probe.configuration.port!, probe.configuration.host!, () => {
-        clearTimeout(timeout);
-        socket.destroy();
-        resolve({ connected: true });
-      });
+      socket.connect(
+        probe.configuration.port!,
+        probe.configuration.host!,
+        () => {
+          clearTimeout(timeout);
+          socket.destroy();
+          resolve({ connected: true });
+        },
+      );
 
       socket.on('error', (error) => {
         clearTimeout(timeout);
@@ -1192,10 +1256,15 @@ export class ChaosEngine extends EventEmitter {
   /**
    * Check if probe result is within tolerance
    */
-  private checkProbeTolerance(value: any, tolerance: ProbeToleranceConfig): boolean {
+  private checkProbeTolerance(
+    value: any,
+    tolerance: ProbeToleranceConfig,
+  ): boolean {
     if (tolerance.exact !== undefined) {
-      return value === tolerance.exact || 
-             (typeof value === 'object' && value.status === tolerance.exact);
+      return (
+        value === tolerance.exact ||
+        (typeof value === 'object' && value.status === tolerance.exact)
+      );
     }
 
     if (typeof value === 'number') {
@@ -1219,12 +1288,13 @@ export class ChaosEngine extends EventEmitter {
    */
   private async executeChaosMethodsUsingToolkit(
     experiment: ChaosExperiment,
-    execution: ExperimentExecution
+    execution: ExperimentExecution,
   ): Promise<MethodResult[]> {
     const results: MethodResult[] = [];
 
     // Generate Chaos Toolkit experiment file
-    const experimentFile = await this.generateChaosToolkitExperiment(experiment);
+    const experimentFile =
+      await this.generateChaosToolkitExperiment(experiment);
 
     // Execute using Chaos Toolkit CLI
     return new Promise((resolve, reject) => {
@@ -1234,7 +1304,7 @@ export class ChaosEngine extends EventEmitter {
       }
 
       execution.chaosProcess = spawn(this.config.chaosToolkitPath, args, {
-        stdio: ['pipe', 'pipe', 'pipe']
+        stdio: ['pipe', 'pipe', 'pipe'],
       });
 
       let stdout = '';
@@ -1254,7 +1324,9 @@ export class ChaosEngine extends EventEmitter {
           const methodResults = this.parseChaosToolkitOutput(stdout);
           resolve(methodResults);
         } else {
-          reject(new Error(`Chaos Toolkit failed with code ${code}: ${stderr}`));
+          reject(
+            new Error(`Chaos Toolkit failed with code ${code}: ${stderr}`),
+          );
         }
       });
 
@@ -1267,12 +1339,14 @@ export class ChaosEngine extends EventEmitter {
   /**
    * Execute chaos methods (simplified version)
    */
-  private async executeChaosMethodsFallback(experiment: ChaosExperiment): Promise<MethodResult[]> {
+  private async executeChaosMethodsFallback(
+    experiment: ChaosExperiment,
+  ): Promise<MethodResult[]> {
     const results: MethodResult[] = [];
 
     for (const method of experiment.method) {
       const startTime = new Date();
-      
+
       const result: MethodResult = {
         name: method.name,
         type: method.type,
@@ -1280,16 +1354,15 @@ export class ChaosEngine extends EventEmitter {
         startTime,
         endTime: startTime,
         duration: 0,
-        output: {}
+        output: {},
       };
 
       try {
         // Execute method based on provider and function
         result.output = await this.executeMethod(method);
-        
+
         result.endTime = new Date();
         result.duration = result.endTime.getTime() - startTime.getTime();
-
       } catch (error) {
         result.status = 'failed';
         result.error = error.message;
@@ -1303,15 +1376,25 @@ export class ChaosEngine extends EventEmitter {
     return results;
   }
 
-  private async executeChaosMethod(experiment: ChaosExperiment, execution: ExperimentExecution, options: any): Promise<MethodResult[]> {
+  private async executeChaosMethod(
+    experiment: ChaosExperiment,
+    execution: ExperimentExecution,
+    options: any,
+  ): Promise<MethodResult[]> {
     if (this.config.chaosToolkitPath && !options.dryRun) {
       try {
-        return await this.executeChaosMethodsUsingToolkit(experiment, execution);
+        return await this.executeChaosMethodsUsingToolkit(
+          experiment,
+          execution,
+        );
       } catch (error) {
-        console.warn('Chaos Toolkit execution failed, falling back to internal implementation:', error.message);
+        console.warn(
+          'Chaos Toolkit execution failed, falling back to internal implementation:',
+          error.message,
+        );
       }
     }
-    
+
     return await this.executeChaosMethodsFallback(experiment);
   }
 
@@ -1319,17 +1402,19 @@ export class ChaosEngine extends EventEmitter {
    * Simplified method execution for fallback
    */
   private async executeMethod(method: ExperimentMethod): Promise<any> {
-    console.log(`Executing chaos method: ${method.name} (${method.provider}.${method.module}.${method.function})`);
-    
+    console.log(
+      `Executing chaos method: ${method.name} (${method.provider}.${method.module}.${method.function})`,
+    );
+
     // Simulate method execution
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     return {
       method: method.name,
       provider: method.provider,
       function: method.function,
       arguments: method.arguments,
-      simulated: true
+      simulated: true,
     };
   }
 
@@ -1339,18 +1424,21 @@ export class ChaosEngine extends EventEmitter {
   private async monitorExperiment(
     experiment: ChaosExperiment,
     execution: ExperimentExecution,
-    result: ExperimentResult
+    result: ExperimentResult,
   ): Promise<void> {
     const monitoringDuration = experiment.configuration.duration * 1000; // Convert to milliseconds
     const monitoringInterval = 5000; // 5 seconds
     const startTime = Date.now();
 
-    while ((Date.now() - startTime) < monitoringDuration && execution.status === 'running') {
+    while (
+      Date.now() - startTime < monitoringDuration &&
+      execution.status === 'running'
+    ) {
       // Collect metrics
       const metrics = await this.collectMetrics(experiment);
       result.metrics.timeline.push({
         timestamp: new Date(),
-        metrics: this.flattenMetrics(metrics)
+        metrics: this.flattenMetrics(metrics),
       });
 
       // Check rollback conditions
@@ -1359,16 +1447,21 @@ export class ChaosEngine extends EventEmitter {
       }
 
       // Update progress
-      execution.progress = Math.min(100, ((Date.now() - startTime) / monitoringDuration) * 100);
+      execution.progress = Math.min(
+        100,
+        ((Date.now() - startTime) / monitoringDuration) * 100,
+      );
 
-      await new Promise(resolve => setTimeout(resolve, monitoringInterval));
+      await new Promise((resolve) => setTimeout(resolve, monitoringInterval));
     }
   }
 
   /**
    * Collect system and application metrics
    */
-  private async collectMetrics(experiment: ChaosExperiment): Promise<ExperimentMetrics> {
+  private async collectMetrics(
+    experiment: ChaosExperiment,
+  ): Promise<ExperimentMetrics> {
     // Mock implementation - in reality would query monitoring systems
     return {
       system: {
@@ -1378,7 +1471,7 @@ export class ChaosEngine extends EventEmitter {
         network_io: Math.random() * 1000,
         process_count: Math.floor(Math.random() * 200),
         load_average: [Math.random(), Math.random(), Math.random()],
-        uptime: Date.now() - (Math.random() * 86400000)
+        uptime: Date.now() - Math.random() * 86400000,
       },
       application: {
         response_time: Math.random() * 2000,
@@ -1386,17 +1479,17 @@ export class ChaosEngine extends EventEmitter {
         throughput: Math.random() * 1000,
         active_connections: Math.floor(Math.random() * 100),
         queue_depth: Math.floor(Math.random() * 50),
-        cache_hit_rate: 0.8 + (Math.random() * 0.2)
+        cache_hit_rate: 0.8 + Math.random() * 0.2,
       },
       network: {
         latency: Math.random() * 100,
         packet_loss: Math.random() * 0.01,
         bandwidth_utilization: Math.random() * 0.8,
         connections_dropped: Math.floor(Math.random() * 10),
-        dns_resolution_time: Math.random() * 50
+        dns_resolution_time: Math.random() * 50,
       },
       custom: {},
-      timeline: []
+      timeline: [],
     };
   }
 
@@ -1408,26 +1501,36 @@ export class ChaosEngine extends EventEmitter {
       ...metrics.system,
       ...metrics.application,
       ...metrics.network,
-      ...metrics.custom
+      ...metrics.custom,
     };
   }
 
   /**
    * Check if rollback should be triggered
    */
-  private shouldRollback(experiment: ChaosExperiment, result: ExperimentResult): boolean {
+  private shouldRollback(
+    experiment: ChaosExperiment,
+    result: ExperimentResult,
+  ): boolean {
     for (const condition of experiment.rollback.conditions) {
       switch (condition.type) {
         case 'steady_state_violation':
-          if (result.steady_state.during && 
-              result.steady_state.during.overall_health < (condition.threshold || 50)) {
+          if (
+            result.steady_state.during &&
+            result.steady_state.during.overall_health <
+              (condition.threshold || 50)
+          ) {
             return true;
           }
           break;
 
         case 'error_threshold':
-          const latestMetrics = result.metrics.timeline[result.metrics.timeline.length - 1];
-          if (latestMetrics && latestMetrics.metrics.error_rate > (condition.threshold || 0.1)) {
+          const latestMetrics =
+            result.metrics.timeline[result.metrics.timeline.length - 1];
+          if (
+            latestMetrics &&
+            latestMetrics.metrics.error_rate > (condition.threshold || 0.1)
+          ) {
             return true;
           }
           break;
@@ -1448,24 +1551,23 @@ export class ChaosEngine extends EventEmitter {
    */
   private async executeRollback(
     experiment: ChaosExperiment,
-    execution: ExperimentExecution
+    execution: ExperimentExecution,
   ): Promise<RollbackResult[]> {
     const results: RollbackResult[] = [];
 
     for (const method of experiment.rollback.methods) {
       const startTime = Date.now();
-      
+
       const result: RollbackResult = {
         method: method.name,
         status: 'completed',
         duration: 0,
-        output: {}
+        output: {},
       };
 
       try {
         result.output = await this.executeMethod(method);
         result.duration = Date.now() - startTime;
-
       } catch (error) {
         result.status = 'failed';
         result.error = error.message;
@@ -1483,7 +1585,7 @@ export class ChaosEngine extends EventEmitter {
    */
   private async generateInsights(
     experiment: ChaosExperiment,
-    result: ExperimentResult
+    result: ExperimentResult,
   ): Promise<ExperimentInsight[]> {
     const insights: ExperimentInsight[] = [];
 
@@ -1496,21 +1598,22 @@ export class ChaosEngine extends EventEmitter {
         type: 'weakness_discovered',
         title: 'System resilience degraded',
         description: `System health dropped from ${beforeHealth}% to ${afterHealth}% during experiment`,
-        severity: afterHealth < 50 ? 'critical' : afterHealth < 75 ? 'high' : 'medium',
+        severity:
+          afterHealth < 50 ? 'critical' : afterHealth < 75 ? 'high' : 'medium',
         evidence: [
           {
             type: 'metric',
             source: 'steady_state_check',
             data: { before: beforeHealth, after: afterHealth },
-            timestamp: result.steady_state.after.timestamp
-          }
+            timestamp: result.steady_state.after.timestamp,
+          },
         ],
         recommendations: [
           'Investigate root cause of health degradation',
           'Implement additional monitoring for early detection',
-          'Consider implementing circuit breakers'
+          'Consider implementing circuit breakers',
         ],
-        confidence: 90
+        confidence: 90,
       });
     } else if (afterHealth >= beforeHealth) {
       insights.push({
@@ -1523,21 +1626,25 @@ export class ChaosEngine extends EventEmitter {
             type: 'metric',
             source: 'steady_state_check',
             data: { before: beforeHealth, after: afterHealth },
-            timestamp: result.steady_state.after.timestamp
-          }
+            timestamp: result.steady_state.after.timestamp,
+          },
         ],
         recommendations: [
           'Consider increasing experiment intensity to find breaking points',
-          'Extend experiment duration to test sustained chaos'
+          'Extend experiment duration to test sustained chaos',
         ],
-        confidence: 85
+        confidence: 85,
       });
     }
 
     // Analyze performance metrics
-    const avgResponseTime = result.metrics.timeline.length > 0 ?
-      result.metrics.timeline.reduce((sum, m) => sum + m.metrics.response_time, 0) / result.metrics.timeline.length :
-      0;
+    const avgResponseTime =
+      result.metrics.timeline.length > 0
+        ? result.metrics.timeline.reduce(
+            (sum, m) => sum + m.metrics.response_time,
+            0,
+          ) / result.metrics.timeline.length
+        : 0;
 
     if (avgResponseTime > 2000) {
       insights.push({
@@ -1550,15 +1657,15 @@ export class ChaosEngine extends EventEmitter {
             type: 'metric',
             source: 'performance_monitoring',
             data: { avg_response_time: avgResponseTime },
-            timestamp: new Date()
-          }
+            timestamp: new Date(),
+          },
         ],
         recommendations: [
           'Optimize critical path performance',
           'Implement caching strategies',
-          'Consider horizontal scaling'
+          'Consider horizontal scaling',
         ],
-        confidence: 80
+        confidence: 80,
       });
     }
 
@@ -1580,14 +1687,25 @@ export class ChaosEngine extends EventEmitter {
     }
 
     // Validate steady state probes
-    if (!experiment.steadyState.probes || experiment.steadyState.probes.length === 0) {
+    if (
+      !experiment.steadyState.probes ||
+      experiment.steadyState.probes.length === 0
+    ) {
       throw new Error('Experiment must have at least one steady state probe');
     }
 
     // Validate safeguards for high-risk experiments
-    if (experiment.metadata.riskLevel === 'high' || experiment.metadata.riskLevel === 'critical') {
-      if (!experiment.configuration.safeguards || experiment.configuration.safeguards.length === 0) {
-        throw new Error('High-risk experiments must have safeguards configured');
+    if (
+      experiment.metadata.riskLevel === 'high' ||
+      experiment.metadata.riskLevel === 'critical'
+    ) {
+      if (
+        !experiment.configuration.safeguards ||
+        experiment.configuration.safeguards.length === 0
+      ) {
+        throw new Error(
+          'High-risk experiments must have safeguards configured',
+        );
       }
     }
   }
@@ -1620,7 +1738,9 @@ export class ChaosEngine extends EventEmitter {
           // Validate experiment duration
           const maxDuration = safeguard.configuration.max_duration || 3600;
           if (experiment.configuration.duration > maxDuration) {
-            throw new Error(`Experiment duration exceeds safeguard limit: ${maxDuration}s`);
+            throw new Error(
+              `Experiment duration exceeds safeguard limit: ${maxDuration}s`,
+            );
           }
           break;
       }
@@ -1634,7 +1754,9 @@ export class ChaosEngine extends EventEmitter {
     if (!experiment.schedule?.enabled) return;
 
     // Implementation would integrate with job scheduler (cron, Kubernetes CronJob, etc.)
-    console.log(`Scheduling experiment: ${experiment.id} with ${experiment.schedule.frequency.type}`);
+    console.log(
+      `Scheduling experiment: ${experiment.id} with ${experiment.schedule.frequency.type}`,
+    );
   }
 
   /**
@@ -1642,7 +1764,7 @@ export class ChaosEngine extends EventEmitter {
    */
   private async sendExperimentNotifications(
     experiment: ChaosExperiment,
-    result: ExperimentResult
+    result: ExperimentResult,
   ): Promise<void> {
     for (const notification of experiment.monitoring.notifications) {
       try {
@@ -1659,7 +1781,7 @@ export class ChaosEngine extends EventEmitter {
   private async sendNotification(
     notification: NotificationConfiguration,
     experiment: ChaosExperiment,
-    result: ExperimentResult
+    result: ExperimentResult,
   ): Promise<void> {
     const message = this.formatNotificationMessage(experiment, result);
 
@@ -1691,23 +1813,27 @@ export class ChaosEngine extends EventEmitter {
    */
   private formatNotificationMessage(
     experiment: ChaosExperiment,
-    result: ExperimentResult
+    result: ExperimentResult,
   ): string {
     const status = result.status === 'completed' ? 'completed' : 'failed';
     const healthBefore = result.steady_state.before.overall_health;
     const healthAfter = result.steady_state.after.overall_health;
-    
-    return `Chaos Experiment "${experiment.name}" ${status}.\n` +
-           `Hypothesis: ${experiment.hypothesis}\n` +
-           `Health: ${healthBefore}% → ${healthAfter}%\n` +
-           `Duration: ${result.duration}ms\n` +
-           `Insights: ${result.insights.length} generated`;
+
+    return (
+      `Chaos Experiment "${experiment.name}" ${status}.\n` +
+      `Hypothesis: ${experiment.hypothesis}\n` +
+      `Health: ${healthBefore}% → ${healthAfter}%\n` +
+      `Duration: ${result.duration}ms\n` +
+      `Insights: ${result.insights.length} generated`
+    );
   }
 
   /**
    * Generate Chaos Toolkit experiment file
    */
-  private async generateChaosToolkitExperiment(experiment: ChaosExperiment): Promise<string> {
+  private async generateChaosToolkitExperiment(
+    experiment: ChaosExperiment,
+  ): Promise<string> {
     const chaosExperiment = {
       version: '1.0.0',
       title: experiment.name,
@@ -1715,45 +1841,48 @@ export class ChaosEngine extends EventEmitter {
       tags: experiment.metadata.tags,
       'steady-state-hypothesis': {
         title: experiment.steadyState.title,
-        probes: experiment.steadyState.probes.map(probe => ({
+        probes: experiment.steadyState.probes.map((probe) => ({
           name: probe.name,
           type: 'probe',
           provider: {
             type: probe.type,
-            ...probe.configuration
+            ...probe.configuration,
           },
-          tolerance: probe.tolerance
-        }))
+          tolerance: probe.tolerance,
+        })),
       },
-      method: experiment.method.map(method => ({
+      method: experiment.method.map((method) => ({
         type: method.type,
         name: method.name,
         provider: {
           type: method.provider,
           module: method.module,
           func: method.function,
-          arguments: method.arguments
+          arguments: method.arguments,
         },
-        pauses: method.pauses
+        pauses: method.pauses,
       })),
-      rollbacks: experiment.rollback.methods.map(method => ({
+      rollbacks: experiment.rollback.methods.map((method) => ({
         type: method.type,
         name: method.name,
         provider: {
           type: method.provider,
           module: method.module,
           func: method.function,
-          arguments: method.arguments
-        }
-      }))
+          arguments: method.arguments,
+        },
+      })),
     };
 
     // Write to temporary file
     const fs = require('fs').promises;
     const path = require('path');
-    const filename = path.join(this.config.experimentDirectory, `${experiment.id}.json`);
+    const filename = path.join(
+      this.config.experimentDirectory,
+      `${experiment.id}.json`,
+    );
     await fs.writeFile(filename, JSON.stringify(chaosExperiment, null, 2));
-    
+
     return filename;
   }
 
@@ -1772,7 +1901,7 @@ export class ChaosEngine extends EventEmitter {
         startTime: new Date(run.start),
         endTime: new Date(run.end),
         duration: new Date(run.end).getTime() - new Date(run.start).getTime(),
-        output: run.output
+        output: run.output,
       }));
     } catch (error) {
       console.error('Failed to parse Chaos Toolkit output:', error);
@@ -1798,9 +1927,12 @@ export class ChaosEngine extends EventEmitter {
    */
   private startBackgroundTasks(): void {
     // Clean up old experiment results
-    setInterval(() => {
-      this.cleanupOldResults();
-    }, 24 * 60 * 60 * 1000); // Daily
+    setInterval(
+      () => {
+        this.cleanupOldResults();
+      },
+      24 * 60 * 60 * 1000,
+    ); // Daily
 
     // Check scheduled experiments
     if (this.config.enableScheduling) {
@@ -1819,10 +1951,12 @@ export class ChaosEngine extends EventEmitter {
    * Clean up old experiment results
    */
   private cleanupOldResults(): void {
-    const cutoff = Date.now() - (30 * 24 * 60 * 60 * 1000); // 30 days ago
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 days ago
 
     for (const [experimentId, results] of this.experimentResults.entries()) {
-      const filteredResults = results.filter(r => r.startTime.getTime() > cutoff);
+      const filteredResults = results.filter(
+        (r) => r.startTime.getTime() > cutoff,
+      );
       if (filteredResults.length !== results.length) {
         this.experimentResults.set(experimentId, filteredResults);
       }
@@ -1847,21 +1981,33 @@ export class ChaosEngine extends EventEmitter {
       const timeout = this.config.defaultTimeout * 60 * 1000;
 
       if (runtime > timeout) {
-        console.warn(`Experiment ${experimentId} has exceeded timeout, aborting...`);
+        console.warn(
+          `Experiment ${experimentId} has exceeded timeout, aborting...`,
+        );
         await this.abortExperiment(experimentId, 'Timeout exceeded');
       }
     }
   }
 
-  private async executeChaosMethod(experiment: ChaosExperiment, execution: ExperimentExecution, options: any): Promise<MethodResult[]> {
+  private async executeChaosMethod(
+    experiment: ChaosExperiment,
+    execution: ExperimentExecution,
+    options: any,
+  ): Promise<MethodResult[]> {
     if (this.config.chaosToolkitPath && !options.dryRun) {
       try {
-        return await this.executeChaosMethodsUsingToolkit(experiment, execution);
+        return await this.executeChaosMethodsUsingToolkit(
+          experiment,
+          execution,
+        );
       } catch (error) {
-        console.warn('Chaos Toolkit execution failed, falling back to internal implementation:', error.message);
+        console.warn(
+          'Chaos Toolkit execution failed, falling back to internal implementation:',
+          error.message,
+        );
       }
     }
-    
+
     return await this.executeChaosMethodsFallback(experiment);
   }
 }
@@ -1878,6 +2024,6 @@ class ExperimentExecution {
 
   constructor(
     public experiment: ChaosExperiment,
-    public options: any
+    public options: any,
   ) {}
 }

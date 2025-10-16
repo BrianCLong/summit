@@ -19,6 +19,6 @@ export const safeLogPayload = (payload: unknown): RedactionResult => {
   const sanitized = redactSensitive(serialized);
   return {
     sanitized,
-    wasRedacted: sanitized !== serialized
+    wasRedacted: sanitized !== serialized,
   };
 };

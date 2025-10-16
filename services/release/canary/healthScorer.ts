@@ -1,4 +1,9 @@
-import { ComponentWeights, HealthMetrics, HealthSample, ThresholdPolicy } from "./types";
+import {
+  ComponentWeights,
+  HealthMetrics,
+  HealthSample,
+  ThresholdPolicy,
+} from './types';
 
 export interface ScoreBreakdown {
   compositeScore: number;
@@ -41,9 +46,10 @@ export class HealthScorer {
   private readonly policy: ThresholdPolicy;
 
   constructor(weights: ComponentWeights, policy: ThresholdPolicy) {
-    const totalWeight = weights.errorRate + weights.latency + weights.saturation + weights.probes;
+    const totalWeight =
+      weights.errorRate + weights.latency + weights.saturation + weights.probes;
     if (totalWeight <= 0) {
-      throw new Error("Component weights must sum to a positive value");
+      throw new Error('Component weights must sum to a positive value');
     }
     const normalizedWeights: ComponentWeights = {
       errorRate: weights.errorRate / totalWeight,
@@ -57,11 +63,26 @@ export class HealthScorer {
 
   public evaluate(sample: HealthSample): ScoreBreakdown {
     const { metrics, baseline } = sample;
-    const errorScore = normalize(metrics.errorRate, baseline.errorRate, this.policy.maxErrorRate);
-    const latencyScore = normalize(metrics.latencyP95, baseline.latencyP95, this.policy.maxLatencyP95);
-    const saturationScore = normalize(metrics.saturation, baseline.saturation, this.policy.maxSaturation);
+    const errorScore = normalize(
+      metrics.errorRate,
+      baseline.errorRate,
+      this.policy.maxErrorRate,
+    );
+    const latencyScore = normalize(
+      metrics.latencyP95,
+      baseline.latencyP95,
+      this.policy.maxLatencyP95,
+    );
+    const saturationScore = normalize(
+      metrics.saturation,
+      baseline.saturation,
+      this.policy.maxSaturation,
+    );
     const successRate = this.computeProbeSuccessRate(metrics);
-    const probeScore = computeProbeScore(successRate, this.policy.minProbeSuccess);
+    const probeScore = computeProbeScore(
+      successRate,
+      this.policy.minProbeSuccess,
+    );
 
     const componentScores: Record<string, number> = {
       errorRate: errorScore,
@@ -93,7 +114,10 @@ export class HealthScorer {
     return successCount / metrics.probes.length;
   }
 
-  private collectBreaches(metrics: HealthMetrics, probeSuccessRate: number): string[] {
+  private collectBreaches(
+    metrics: HealthMetrics,
+    probeSuccessRate: number,
+  ): string[] {
     const breaches: string[] = [];
     if (metrics.errorRate > this.policy.maxErrorRate) {
       breaches.push(
@@ -120,10 +144,16 @@ export class HealthScorer {
 }
 
 export function summarizeSyntheticFailures(sample: HealthSample): string[] {
-  return sample.syntheticChecks.filter((check) => !check.passed).map((check) => check.name);
+  return sample.syntheticChecks
+    .filter((check) => !check.passed)
+    .map((check) => check.name);
 }
 
-export function withinBakeWindow(startedAt: string | undefined, minBakeSeconds: number, now: Date): boolean {
+export function withinBakeWindow(
+  startedAt: string | undefined,
+  minBakeSeconds: number,
+  now: Date,
+): boolean {
   if (!startedAt) {
     return true;
   }

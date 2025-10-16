@@ -86,25 +86,25 @@ export class SystemHealthEngine extends EventEmitter {
     // Initialize system metrics collector
     const systemCollector = new SystemMetricsCollector({
       interval: this.config.metrics.collection.interval,
-      metrics: ['cpu', 'memory', 'disk', 'network']
+      metrics: ['cpu', 'memory', 'disk', 'network'],
     });
 
     // Initialize application metrics collector
     const appCollector = new ApplicationMetricsCollector({
       interval: this.config.metrics.collection.interval,
-      metrics: ['requests', 'responses', 'errors', 'latency']
+      metrics: ['requests', 'responses', 'errors', 'latency'],
     });
 
     // Initialize documentation metrics collector
     const docCollector = new DocumentationMetricsCollector({
       interval: this.config.metrics.collection.interval,
-      metrics: ['pageviews', 'searches', 'downloads', 'feedback']
+      metrics: ['pageviews', 'searches', 'downloads', 'feedback'],
     });
 
     // Initialize database metrics collector
     const dbCollector = new DatabaseMetricsCollector({
       interval: this.config.metrics.collection.interval,
-      metrics: ['connections', 'queries', 'performance']
+      metrics: ['connections', 'queries', 'performance'],
     });
 
     this.collectors.set('system', systemCollector);
@@ -126,25 +126,28 @@ export class SystemHealthEngine extends EventEmitter {
   /**
    * Process incoming metrics
    */
-  private async processMetrics(source: string, metrics: RawMetric[]): Promise<void> {
+  private async processMetrics(
+    source: string,
+    metrics: RawMetric[],
+  ): Promise<void> {
     for (const metric of metrics) {
       const processedMetric = await this.processMetric(source, metric);
-      
+
       // Store metric
       const metricKey = `${source}.${metric.name}`;
       const metricData = this.metrics.get(metricKey) || [];
       metricData.push(processedMetric);
-      
+
       // Apply retention policy
       const retentionLimit = this.config.retention.metrics;
       const cutoffTime = Date.now() - retentionLimit;
-      const filteredData = metricData.filter(m => m.timestamp >= cutoffTime);
-      
+      const filteredData = metricData.filter((m) => m.timestamp >= cutoffTime);
+
       this.metrics.set(metricKey, filteredData);
-      
+
       // Check alert rules
       await this.checkAlertRules(metricKey, processedMetric);
-      
+
       // Update health status
       await this.updateComponentHealth(source, metric);
     }
@@ -155,7 +158,10 @@ export class SystemHealthEngine extends EventEmitter {
   /**
    * Process individual metric
    */
-  private async processMetric(source: string, rawMetric: RawMetric): Promise<MetricData> {
+  private async processMetric(
+    source: string,
+    rawMetric: RawMetric,
+  ): Promise<MetricData> {
     const processed: MetricData = {
       name: rawMetric.name,
       value: rawMetric.value,
@@ -164,7 +170,7 @@ export class SystemHealthEngine extends EventEmitter {
       labels: rawMetric.labels || {},
       type: rawMetric.type || 'gauge',
       unit: rawMetric.unit,
-      metadata: rawMetric.metadata || {}
+      metadata: rawMetric.metadata || {},
     };
 
     // Apply processing transformations
@@ -200,7 +206,10 @@ export class SystemHealthEngine extends EventEmitter {
   /**
    * Check alert rules against metric
    */
-  private async checkAlertRules(metricKey: string, metric: MetricData): Promise<void> {
+  private async checkAlertRules(
+    metricKey: string,
+    metric: MetricData,
+  ): Promise<void> {
     for (const rule of this.config.alerting.rules) {
       if (this.matchesRuleConditions(rule, metricKey, metric)) {
         await this.evaluateAlertRule(rule, metric);
@@ -211,7 +220,10 @@ export class SystemHealthEngine extends EventEmitter {
   /**
    * Evaluate alert rule
    */
-  private async evaluateAlertRule(rule: AlertRule, metric: MetricData): Promise<void> {
+  private async evaluateAlertRule(
+    rule: AlertRule,
+    metric: MetricData,
+  ): Promise<void> {
     const alertKey = `${rule.id}-${metric.source}`;
     const existingAlert = this.alerts.get(alertKey);
 
@@ -224,7 +236,11 @@ export class SystemHealthEngine extends EventEmitter {
       this.alerts.set(alertKey, alert);
       await this.triggerAlert(alert);
       this.emit('alert:triggered', alert);
-    } else if (!conditionMet && existingAlert && existingAlert.status === 'firing') {
+    } else if (
+      !conditionMet &&
+      existingAlert &&
+      existingAlert.status === 'firing'
+    ) {
       // Resolve alert
       existingAlert.status = 'resolved';
       existingAlert.resolvedAt = new Date();
@@ -253,12 +269,12 @@ export class SystemHealthEngine extends EventEmitter {
    * Run all health checks
    */
   private async runHealthChecks(): Promise<void> {
-    const healthPromises = this.config.health.checks.map(check => 
-      this.runHealthCheck(check)
+    const healthPromises = this.config.health.checks.map((check) =>
+      this.runHealthCheck(check),
     );
 
     const results = await Promise.allSettled(healthPromises);
-    
+
     results.forEach((result, index) => {
       const check = this.config.health.checks[index];
       if (result.status === 'fulfilled') {
@@ -267,7 +283,7 @@ export class SystemHealthEngine extends EventEmitter {
         this.updateHealthStatus(check.component, {
           status: 'unhealthy',
           lastCheck: new Date(),
-          error: result.reason.message
+          error: result.reason.message,
         });
       }
     });
@@ -289,7 +305,7 @@ export class SystemHealthEngine extends EventEmitter {
         lastCheck: new Date(),
         duration,
         details: result.details,
-        metrics: result.metrics
+        metrics: result.metrics,
       };
     } catch (error) {
       return {
@@ -297,7 +313,7 @@ export class SystemHealthEngine extends EventEmitter {
         status: 'unhealthy',
         lastCheck: new Date(),
         duration: Date.now() - startTime,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -314,17 +330,20 @@ export class SystemHealthEngine extends EventEmitter {
       details: health.details,
       metrics: health.metrics,
       error: health.error,
-      history: []
+      history: [],
     };
 
     // Add to history
     const existingHealth = this.healthStatus.get(component);
     if (existingHealth) {
-      componentHealth.history = [...existingHealth.history, {
-        status: existingHealth.status,
-        timestamp: existingHealth.lastCheck,
-        duration: existingHealth.duration
-      }].slice(-100); // Keep last 100 entries
+      componentHealth.history = [
+        ...existingHealth.history,
+        {
+          status: existingHealth.status,
+          timestamp: existingHealth.lastCheck,
+          duration: existingHealth.duration,
+        },
+      ].slice(-100); // Keep last 100 entries
     }
 
     this.healthStatus.set(component, componentHealth);
@@ -343,15 +362,15 @@ export class SystemHealthEngine extends EventEmitter {
         totalComponents: this.healthStatus.size,
         healthyComponents: 0,
         unhealthyComponents: 0,
-        degradedComponents: 0
+        degradedComponents: 0,
       },
       alerts: {
         total: this.alerts.size,
         critical: 0,
         warning: 0,
-        info: 0
+        info: 0,
       },
-      sla: await this.calculateSLAMetrics()
+      sla: await this.calculateSLAMetrics(),
     };
 
     // Process component health
@@ -361,7 +380,7 @@ export class SystemHealthEngine extends EventEmitter {
         status: health.status,
         lastCheck: health.lastCheck,
         uptime: await this.calculateUptime(component),
-        responseTime: health.duration
+        responseTime: health.duration,
       });
 
       switch (health.status) {
@@ -418,10 +437,13 @@ export class SystemHealthEngine extends EventEmitter {
       reliability: await this.generateReliabilityReport(startTime, endTime),
       security: await this.generateSecurityReport(startTime, endTime),
       capacity: await this.generateCapacityReport(startTime, endTime),
-      recommendations: await this.generateRecommendations(startTime, endTime)
+      recommendations: await this.generateRecommendations(startTime, endTime),
     };
 
-    this.emit('report:generated', { period, componentsCount: report.performance.components.length });
+    this.emit('report:generated', {
+      period,
+      componentsCount: report.performance.components.length,
+    });
     return report;
   }
 
@@ -439,7 +461,7 @@ export class SystemHealthEngine extends EventEmitter {
       autoRefresh: config.autoRefresh || false,
       refreshInterval: config.refreshInterval || 60000,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Create widgets
@@ -470,15 +492,21 @@ export class SystemHealthEngine extends EventEmitter {
   /**
    * Execute automated remediation
    */
-  async executeRemediation(alert: Alert, automation: AutomationRule): Promise<RemediationResult> {
+  async executeRemediation(
+    alert: Alert,
+    automation: AutomationRule,
+  ): Promise<RemediationResult> {
     const remediationId = this.generateRemediationId();
     const startTime = Date.now();
 
     this.emit('remediation:started', { remediationId, alertId: alert.id });
 
     try {
-      const result = await this.runRemediationActions(automation.actions, alert);
-      
+      const result = await this.runRemediationActions(
+        automation.actions,
+        alert,
+      );
+
       const remediation: RemediationResult = {
         id: remediationId,
         alertId: alert.id,
@@ -488,12 +516,11 @@ export class SystemHealthEngine extends EventEmitter {
         endTime: new Date(),
         duration: Date.now() - startTime,
         actions: result.actions,
-        outcome: result.outcome
+        outcome: result.outcome,
       };
 
       this.emit('remediation:completed', remediation);
       return remediation;
-
     } catch (error) {
       const remediation: RemediationResult = {
         id: remediationId,
@@ -504,7 +531,7 @@ export class SystemHealthEngine extends EventEmitter {
         endTime: new Date(),
         duration: Date.now() - startTime,
         actions: [],
-        error: error.message
+        error: error.message,
       };
 
       this.emit('remediation:failed', remediation);
@@ -518,7 +545,7 @@ export class SystemHealthEngine extends EventEmitter {
   async getRealtimeMetrics(components: string[]): Promise<RealtimeMetrics> {
     const metrics: RealtimeMetrics = {
       timestamp: new Date(),
-      components: {}
+      components: {},
     };
 
     for (const component of components) {
@@ -540,7 +567,10 @@ export class SystemHealthEngine extends EventEmitter {
   }
 
   // Private utility methods
-  private applyTransformation(value: number, processor: ProcessingTransformation): number {
+  private applyTransformation(
+    value: number,
+    processor: ProcessingTransformation,
+  ): number {
     switch (processor.type) {
       case 'multiply':
         return value * processor.factor;
@@ -555,13 +585,20 @@ export class SystemHealthEngine extends EventEmitter {
     }
   }
 
-  private matchesRuleConditions(rule: AlertRule, metricKey: string, metric: MetricData): boolean {
+  private matchesRuleConditions(
+    rule: AlertRule,
+    metricKey: string,
+    metric: MetricData,
+  ): boolean {
     return rule.metric === metricKey || rule.metric === `${metric.source}.*`;
   }
 
-  private evaluateCondition(condition: AlertCondition, metric: MetricData): boolean {
+  private evaluateCondition(
+    condition: AlertCondition,
+    metric: MetricData,
+  ): boolean {
     const { operator, threshold } = condition;
-    
+
     switch (operator) {
       case 'gt':
         return metric.value > threshold;
@@ -580,7 +617,10 @@ export class SystemHealthEngine extends EventEmitter {
     }
   }
 
-  private async createAlert(rule: AlertRule, metric: MetricData): Promise<Alert> {
+  private async createAlert(
+    rule: AlertRule,
+    metric: MetricData,
+  ): Promise<Alert> {
     return {
       id: this.generateAlertId(),
       rule: rule.id,
@@ -593,7 +633,7 @@ export class SystemHealthEngine extends EventEmitter {
       threshold: rule.condition.threshold,
       firedAt: new Date(),
       labels: { ...rule.labels, ...metric.labels },
-      annotations: rule.annotations || {}
+      annotations: rule.annotations || {},
     };
   }
 
@@ -618,7 +658,9 @@ export class SystemHealthEngine extends EventEmitter {
     }
   }
 
-  private async executeHealthCheck(check: HealthCheck): Promise<{ healthy: boolean; details?: any; metrics?: any }> {
+  private async executeHealthCheck(
+    check: HealthCheck,
+  ): Promise<{ healthy: boolean; details?: any; metrics?: any }> {
     switch (check.type) {
       case 'http':
         return this.httpHealthCheck(check.config);
@@ -633,22 +675,30 @@ export class SystemHealthEngine extends EventEmitter {
     }
   }
 
-  private async httpHealthCheck(config: any): Promise<{ healthy: boolean; details?: any }> {
+  private async httpHealthCheck(
+    config: any,
+  ): Promise<{ healthy: boolean; details?: any }> {
     // Implement HTTP health check
     return { healthy: true };
   }
 
-  private async tcpHealthCheck(config: any): Promise<{ healthy: boolean; details?: any }> {
+  private async tcpHealthCheck(
+    config: any,
+  ): Promise<{ healthy: boolean; details?: any }> {
     // Implement TCP health check
     return { healthy: true };
   }
 
-  private async databaseHealthCheck(config: any): Promise<{ healthy: boolean; details?: any }> {
+  private async databaseHealthCheck(
+    config: any,
+  ): Promise<{ healthy: boolean; details?: any }> {
     // Implement database health check
     return { healthy: true };
   }
 
-  private async customHealthCheck(config: any): Promise<{ healthy: boolean; details?: any }> {
+  private async customHealthCheck(
+    config: any,
+  ): Promise<{ healthy: boolean; details?: any }> {
     // Implement custom health check
     return { healthy: true };
   }
@@ -666,7 +716,7 @@ export class SystemHealthEngine extends EventEmitter {
       '1h': 3600000,
       '24h': 86400000,
       '7d': 604800000,
-      '30d': 2592000000
+      '30d': 2592000000,
     };
     return durations[period] || durations['24h'];
   }
@@ -676,84 +726,138 @@ export class SystemHealthEngine extends EventEmitter {
   private async processAlertRule(rule: AlertRule): Promise<void> {}
   private async setupAlertChannel(channel: AlertChannel): Promise<void> {}
   private async setupHealthCheck(check: HealthCheck): Promise<void> {}
-  private async calculateUptime(component: string): Promise<number> { return 99.9; }
-  private async calculateSLAMetrics(): Promise<SLAMetrics> { 
-    return { availability: 99.9, performance: 95.0, quality: 98.5 }; 
+  private async calculateUptime(component: string): Promise<number> {
+    return 99.9;
   }
-  private async generateExecutiveSummary(start: number, end: number): Promise<ExecutiveSummary> {
+  private async calculateSLAMetrics(): Promise<SLAMetrics> {
+    return { availability: 99.9, performance: 95.0, quality: 98.5 };
+  }
+  private async generateExecutiveSummary(
+    start: number,
+    end: number,
+  ): Promise<ExecutiveSummary> {
     return { availability: 99.9, incidents: 2, mttr: 300, recommendations: [] };
   }
-  private async generatePerformanceReport(start: number, end: number): Promise<PerformanceReport> {
+  private async generatePerformanceReport(
+    start: number,
+    end: number,
+  ): Promise<PerformanceReport> {
     return { components: [], trends: [], bottlenecks: [] };
   }
-  private async generateReliabilityReport(start: number, end: number): Promise<ReliabilityReport> {
+  private async generateReliabilityReport(
+    start: number,
+    end: number,
+  ): Promise<ReliabilityReport> {
     return { uptime: 99.9, incidents: [], mtbf: 720, mttr: 300 };
   }
-  private async generateSecurityReport(start: number, end: number): Promise<SecurityReport> {
+  private async generateSecurityReport(
+    start: number,
+    end: number,
+  ): Promise<SecurityReport> {
     return { events: [], vulnerabilities: [], compliance: 95.0 };
   }
-  private async generateCapacityReport(start: number, end: number): Promise<CapacityReport> {
+  private async generateCapacityReport(
+    start: number,
+    end: number,
+  ): Promise<CapacityReport> {
     return { utilization: {}, forecast: [], recommendations: [] };
   }
-  private async generateRecommendations(start: number, end: number): Promise<string[]> {
+  private async generateRecommendations(
+    start: number,
+    end: number,
+  ): Promise<string[]> {
     return ['Increase monitoring frequency', 'Add more health checks'];
   }
   private async createDashboardWidget(config: any): Promise<DashboardWidget> {
-    return { id: 'widget-1', type: 'chart', title: 'Sample Widget', configuration: {} };
+    return {
+      id: 'widget-1',
+      type: 'chart',
+      title: 'Sample Widget',
+      configuration: {},
+    };
   }
-  private async setupAutomationRule(automation: AutomationRule): Promise<void> {}
-  private async runRemediationActions(actions: RemediationAction[], alert: Alert): Promise<{ actions: any[]; outcome: string }> {
+  private async setupAutomationRule(
+    automation: AutomationRule,
+  ): Promise<void> {}
+  private async runRemediationActions(
+    actions: RemediationAction[],
+    alert: Alert,
+  ): Promise<{ actions: any[]; outcome: string }> {
     return { actions: [], outcome: 'success' };
   }
-  private async getComponentMetrics(component: string): Promise<any> { return {}; }
+  private async getComponentMetrics(component: string): Promise<any> {
+    return {};
+  }
   private async setupIntegration(integration: string): Promise<void> {}
-  private async sendAlertToChannel(alert: Alert, channel: AlertChannel): Promise<void> {}
-  private async sendResolutionToChannel(alert: Alert, channel: AlertChannel): Promise<void> {}
+  private async sendAlertToChannel(
+    alert: Alert,
+    channel: AlertChannel,
+  ): Promise<void> {}
+  private async sendResolutionToChannel(
+    alert: Alert,
+    channel: AlertChannel,
+  ): Promise<void> {}
 }
 
 // Metric Collectors
 class SystemMetricsCollector extends EventEmitter {
-  constructor(private config: any) { super(); }
+  constructor(private config: any) {
+    super();
+  }
   async start(): Promise<void> {
     setInterval(() => {
       const metrics = this.collectSystemMetrics();
       this.emit('metrics', metrics);
     }, this.config.interval);
   }
-  private collectSystemMetrics(): RawMetric[] { return []; }
+  private collectSystemMetrics(): RawMetric[] {
+    return [];
+  }
 }
 
 class ApplicationMetricsCollector extends EventEmitter {
-  constructor(private config: any) { super(); }
+  constructor(private config: any) {
+    super();
+  }
   async start(): Promise<void> {
     setInterval(() => {
       const metrics = this.collectAppMetrics();
       this.emit('metrics', metrics);
     }, this.config.interval);
   }
-  private collectAppMetrics(): RawMetric[] { return []; }
+  private collectAppMetrics(): RawMetric[] {
+    return [];
+  }
 }
 
 class DocumentationMetricsCollector extends EventEmitter {
-  constructor(private config: any) { super(); }
+  constructor(private config: any) {
+    super();
+  }
   async start(): Promise<void> {
     setInterval(() => {
       const metrics = this.collectDocMetrics();
       this.emit('metrics', metrics);
     }, this.config.interval);
   }
-  private collectDocMetrics(): RawMetric[] { return []; }
+  private collectDocMetrics(): RawMetric[] {
+    return [];
+  }
 }
 
 class DatabaseMetricsCollector extends EventEmitter {
-  constructor(private config: any) { super(); }
+  constructor(private config: any) {
+    super();
+  }
   async start(): Promise<void> {
     setInterval(() => {
       const metrics = this.collectDbMetrics();
       this.emit('metrics', metrics);
     }, this.config.interval);
   }
-  private collectDbMetrics(): RawMetric[] { return []; }
+  private collectDbMetrics(): RawMetric[] {
+    return [];
+  }
 }
 
 abstract class MetricCollector extends EventEmitter {

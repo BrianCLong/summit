@@ -83,7 +83,7 @@ const GraphUIV2: React.FC<GraphUIV2Props> = ({
   incidents,
   onNodeSelect,
   onIncidentSelect,
-  className = ''
+  className = '',
 }) => {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [incidentView, setIncidentView] = useState<IncidentView>({
@@ -93,48 +93,64 @@ const GraphUIV2: React.FC<GraphUIV2Props> = ({
     filters: {
       severity: ['critical', 'major', 'minor'],
       status: ['active', 'investigating'],
-      affectedServices: []
-    }
+      affectedServices: [],
+    },
   });
 
-  const [viewMode, setViewMode] = useState<'graph' | 'incidents' | 'hybrid'>('hybrid');
+  const [viewMode, setViewMode] = useState<'graph' | 'incidents' | 'hybrid'>(
+    'hybrid',
+  );
   const [animationSpeed, setAnimationSpeed] = useState(1.0);
   const [showMetrics, setShowMetrics] = useState(true);
-  
+
   const incidentTimelineRef = useRef<HTMLDivElement>(null);
 
   // Filter incidents based on current filters
-  const filteredIncidents = incidents.filter(incident => {
-    return incidentView.filters.severity.includes(incident.severity) &&
-           incidentView.filters.status.includes(incident.status) &&
-           (incidentView.filters.affectedServices.length === 0 ||
-            incident.affectedNodes.some(node => incidentView.filters.affectedServices.includes(node)));
+  const filteredIncidents = incidents.filter((incident) => {
+    return (
+      incidentView.filters.severity.includes(incident.severity) &&
+      incidentView.filters.status.includes(incident.status) &&
+      (incidentView.filters.affectedServices.length === 0 ||
+        incident.affectedNodes.some((node) =>
+          incidentView.filters.affectedServices.includes(node),
+        ))
+    );
   });
 
   // Get active incidents for real-time visualization
-  const activeIncidents = incidents.filter(i => i.status === 'active' || i.status === 'investigating');
+  const activeIncidents = incidents.filter(
+    (i) => i.status === 'active' || i.status === 'investigating',
+  );
 
-  const handleNodeClick = useCallback((nodeId: string) => {
-    setSelectedNode(nodeId);
-    onNodeSelect?.(nodeId);
+  const handleNodeClick = useCallback(
+    (nodeId: string) => {
+      setSelectedNode(nodeId);
+      onNodeSelect?.(nodeId);
 
-    // Auto-select related incidents
-    const nodeIncidents = incidents.filter(i => i.affectedNodes.includes(nodeId));
-    if (nodeIncidents.length > 0 && nodeIncidents[0]) {
-      setIncidentView(prev => ({
+      // Auto-select related incidents
+      const nodeIncidents = incidents.filter((i) =>
+        i.affectedNodes.includes(nodeId),
+      );
+      if (nodeIncidents.length > 0 && nodeIncidents[0]) {
+        setIncidentView((prev) => ({
+          ...prev,
+          selectedIncident: nodeIncidents[0].id,
+        }));
+      }
+    },
+    [incidents, onNodeSelect],
+  );
+
+  const handleIncidentSelect = useCallback(
+    (incidentId: string) => {
+      setIncidentView((prev) => ({
         ...prev,
-        selectedIncident: nodeIncidents[0].id
+        selectedIncident: incidentId,
       }));
-    }
-  }, [incidents, onNodeSelect]);
-
-  const handleIncidentSelect = useCallback((incidentId: string) => {
-    setIncidentView(prev => ({
-      ...prev,
-      selectedIncident: incidentId
-    }));
-    onIncidentSelect?.(incidentId);
-  }, [onIncidentSelect]);
+      onIncidentSelect?.(incidentId);
+    },
+    [onIncidentSelect],
+  );
 
   return (
     <div className={`graph-ui-v2 ${className}`}>
@@ -166,10 +182,13 @@ const GraphUIV2: React.FC<GraphUIV2Props> = ({
             multiple
             value={incidentView.filters.severity}
             onChange={(e) => {
-              const selected = Array.from(e.target.selectedOptions, option => option.value) as ('critical' | 'major' | 'minor')[];
-              setIncidentView(prev => ({
+              const selected = Array.from(
+                e.target.selectedOptions,
+                (option) => option.value,
+              ) as ('critical' | 'major' | 'minor')[];
+              setIncidentView((prev) => ({
                 ...prev,
-                filters: { ...prev.filters, severity: selected }
+                filters: { ...prev.filters, severity: selected },
               }));
             }}
           >
@@ -207,17 +226,23 @@ const GraphUIV2: React.FC<GraphUIV2Props> = ({
               camera={{ position: [0, 0, 10], fov: 75 }}
               style={{ height: viewMode === 'hybrid' ? '60vh' : '80vh' }}
             >
-              <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+              <OrbitControls
+                enablePan={true}
+                enableZoom={true}
+                enableRotate={true}
+              />
               <ambientLight intensity={0.6} />
               <pointLight position={[10, 10, 10]} intensity={1} />
 
               {/* Render Nodes */}
-              {nodes.map(node => (
+              {nodes.map((node) => (
                 <NodeVisualization
                   key={node.id}
                   node={node}
                   selected={selectedNode === node.id}
-                  hasActiveIncidents={activeIncidents.some(i => i.affectedNodes.includes(node.id))}
+                  hasActiveIncidents={activeIncidents.some((i) =>
+                    i.affectedNodes.includes(node.id),
+                  )}
                   showMetrics={showMetrics}
                   animationSpeed={animationSpeed}
                   onClick={() => handleNodeClick(node.id)}
@@ -229,18 +254,20 @@ const GraphUIV2: React.FC<GraphUIV2Props> = ({
                 <EdgeVisualization
                   key={`${edge.from}-${edge.to}-${index}`}
                   edge={edge}
-                  fromNode={nodes.find(n => n.id === edge.from)}
-                  toNode={nodes.find(n => n.id === edge.to)}
+                  fromNode={nodes.find((n) => n.id === edge.from)}
+                  toNode={nodes.find((n) => n.id === edge.to)}
                   animationSpeed={animationSpeed}
                 />
               ))}
 
               {/* Incident Impact Visualization */}
-              {activeIncidents.map(incident => (
+              {activeIncidents.map((incident) => (
                 <IncidentImpactVisualization
                   key={incident.id}
                   incident={incident}
-                  nodes={nodes.filter(n => incident.affectedNodes.includes(n.id))}
+                  nodes={nodes.filter((n) =>
+                    incident.affectedNodes.includes(n.id),
+                  )}
                   animationSpeed={animationSpeed}
                 />
               ))}
@@ -249,8 +276,10 @@ const GraphUIV2: React.FC<GraphUIV2Props> = ({
             {/* Node Details Panel */}
             {selectedNode && (
               <NodeDetailsPanel
-                node={nodes.find(n => n.id === selectedNode)}
-                incidents={incidents.filter(i => i.affectedNodes.includes(selectedNode))}
+                node={nodes.find((n) => n.id === selectedNode)}
+                incidents={incidents.filter((i) =>
+                  i.affectedNodes.includes(selectedNode),
+                )}
                 onClose={() => setSelectedNode(null)}
               />
             )}
@@ -264,13 +293,25 @@ const GraphUIV2: React.FC<GraphUIV2Props> = ({
               <h3>Incident Management</h3>
               <div className="incident-stats">
                 <span className="stat critical">
-                  {filteredIncidents.filter(i => i.severity === 'critical').length} Critical
+                  {
+                    filteredIncidents.filter((i) => i.severity === 'critical')
+                      .length
+                  }{' '}
+                  Critical
                 </span>
                 <span className="stat major">
-                  {filteredIncidents.filter(i => i.severity === 'major').length} Major
+                  {
+                    filteredIncidents.filter((i) => i.severity === 'major')
+                      .length
+                  }{' '}
+                  Major
                 </span>
                 <span className="stat minor">
-                  {filteredIncidents.filter(i => i.severity === 'minor').length} Minor
+                  {
+                    filteredIncidents.filter((i) => i.severity === 'minor')
+                      .length
+                  }{' '}
+                  Minor
                 </span>
               </div>
             </div>
@@ -297,31 +338,40 @@ const GraphUIV2: React.FC<GraphUIV2Props> = ({
               )}
 
               {/* Incident Details */}
-              {incidentView.mode === 'details' && incidentView.selectedIncident && (
-                <IncidentDetails
-                  incident={incidents.find(i => i.id === incidentView.selectedIncident)}
-                  nodes={nodes}
-                />
-              )}
+              {incidentView.mode === 'details' &&
+                incidentView.selectedIncident && (
+                  <IncidentDetails
+                    incident={incidents.find(
+                      (i) => i.id === incidentView.selectedIncident,
+                    )}
+                    nodes={nodes}
+                  />
+                )}
             </div>
 
             {/* Incident View Controls */}
             <div className="incident-controls">
               <button
                 className={incidentView.mode === 'timeline' ? 'active' : ''}
-                onClick={() => setIncidentView(prev => ({ ...prev, mode: 'timeline' }))}
+                onClick={() =>
+                  setIncidentView((prev) => ({ ...prev, mode: 'timeline' }))
+                }
               >
                 Timeline
               </button>
               <button
                 className={incidentView.mode === 'impact' ? 'active' : ''}
-                onClick={() => setIncidentView(prev => ({ ...prev, mode: 'impact' }))}
+                onClick={() =>
+                  setIncidentView((prev) => ({ ...prev, mode: 'impact' }))
+                }
               >
                 Impact Matrix
               </button>
               <button
                 className={incidentView.mode === 'details' ? 'active' : ''}
-                onClick={() => setIncidentView(prev => ({ ...prev, mode: 'details' }))}
+                onClick={() =>
+                  setIncidentView((prev) => ({ ...prev, mode: 'details' }))
+                }
               >
                 Details
               </button>
@@ -341,9 +391,16 @@ const NodeVisualization: React.FC<{
   showMetrics: boolean;
   animationSpeed: number;
   onClick: () => void;
-}> = ({ node, selected, hasActiveIncidents, showMetrics, animationSpeed, onClick }) => {
+}> = ({
+  node,
+  selected,
+  hasActiveIncidents,
+  showMetrics,
+  animationSpeed,
+  onClick,
+}) => {
   const meshRef = useRef<THREE.Mesh>(null);
-  
+
   useEffect(() => {
     if (meshRef.current && hasActiveIncidents) {
       // Animate nodes with active incidents
@@ -360,10 +417,14 @@ const NodeVisualization: React.FC<{
   const getNodeColor = () => {
     if (hasActiveIncidents) return '#ff4444';
     switch (node.status) {
-      case 'critical': return '#ff6b6b';
-      case 'warning': return '#ffa726';
-      case 'healthy': return '#4caf50';
-      default: return '#757575';
+      case 'critical':
+        return '#ff6b6b';
+      case 'warning':
+        return '#ffa726';
+      case 'healthy':
+        return '#4caf50';
+      default:
+        return '#757575';
     }
   };
 
@@ -424,19 +485,28 @@ const EdgeVisualization: React.FC<{
 
   const getEdgeColor = () => {
     switch (edge.status) {
-      case 'failed': return '#ff4444';
-      case 'degraded': return '#ffa726';
-      case 'healthy': return '#4caf50';
-      default: return '#757575';
+      case 'failed':
+        return '#ff4444';
+      case 'degraded':
+        return '#ffa726';
+      case 'healthy':
+        return '#4caf50';
+      default:
+        return '#757575';
     }
   };
 
-  const direction = new THREE.Vector3()
-    .subVectors(new THREE.Vector3(...toNode.position), new THREE.Vector3(...fromNode.position));
-  
+  const direction = new THREE.Vector3().subVectors(
+    new THREE.Vector3(...toNode.position),
+    new THREE.Vector3(...fromNode.position),
+  );
+
   const distance = direction.length();
   const midpoint = new THREE.Vector3()
-    .addVectors(new THREE.Vector3(...fromNode.position), new THREE.Vector3(...toNode.position))
+    .addVectors(
+      new THREE.Vector3(...fromNode.position),
+      new THREE.Vector3(...toNode.position),
+    )
     .divideScalar(2);
 
   return (
@@ -457,22 +527,26 @@ const IncidentImpactVisualization: React.FC<{
 }> = ({ incident, nodes, animationSpeed }) => {
   const getSeverityColor = () => {
     switch (incident.severity) {
-      case 'critical': return '#ff1744';
-      case 'major': return '#ff9800';
-      case 'minor': return '#ffeb3b';
-      default: return '#757575';
+      case 'critical':
+        return '#ff1744';
+      case 'major':
+        return '#ff9800';
+      case 'minor':
+        return '#ffeb3b';
+      default:
+        return '#757575';
     }
   };
 
   return (
     <group>
-      {nodes.map(node => (
+      {nodes.map((node) => (
         <mesh key={node.id} position={[...node.position, 0]}>
           <ringGeometry args={[2, 2.5, 16]} />
-          <meshBasicMaterial 
-            color={getSeverityColor()} 
-            opacity={0.3} 
-            transparent 
+          <meshBasicMaterial
+            color={getSeverityColor()}
+            opacity={0.3}
+            transparent
           />
         </mesh>
       ))}
@@ -494,7 +568,7 @@ const NodeDetailsPanel: React.FC<{
         <h4>{node.label}</h4>
         <button onClick={onClose}>×</button>
       </div>
-      
+
       <div className="panel-content">
         <div className="node-status">
           <span className={`status-indicator ${node.status}`}>
@@ -509,7 +583,9 @@ const NodeDetailsPanel: React.FC<{
           </div>
           <div className="metric">
             <label>Memory Usage</label>
-            <div className="metric-value">{node.metrics.memory.toFixed(1)}%</div>
+            <div className="metric-value">
+              {node.metrics.memory.toFixed(1)}%
+            </div>
           </div>
           <div className="metric">
             <label>Latency</label>
@@ -517,15 +593,20 @@ const NodeDetailsPanel: React.FC<{
           </div>
           <div className="metric">
             <label>Error Rate</label>
-            <div className="metric-value">{node.metrics.errorRate.toFixed(2)}%</div>
+            <div className="metric-value">
+              {node.metrics.errorRate.toFixed(2)}%
+            </div>
           </div>
         </div>
 
         {incidents.length > 0 && (
           <div className="related-incidents">
             <h5>Related Incidents</h5>
-            {incidents.map(incident => (
-              <div key={incident.id} className={`incident-item ${incident.severity}`}>
+            {incidents.map((incident) => (
+              <div
+                key={incident.id}
+                className={`incident-item ${incident.severity}`}
+              >
                 <span className="incident-title">{incident.title}</span>
                 <span className="incident-status">{incident.status}</span>
               </div>
@@ -538,17 +619,20 @@ const NodeDetailsPanel: React.FC<{
 };
 
 // Incident Timeline Component
-const IncidentTimeline = React.forwardRef<HTMLDivElement, {
-  incidents: Incident[];
-  selectedIncident: string | null;
-  timeRange: [Date, Date];
-  onIncidentSelect: (incidentId: string) => void;
-}>(({ incidents, selectedIncident, timeRange, onIncidentSelect }, ref) => {
+const IncidentTimeline = React.forwardRef<
+  HTMLDivElement,
+  {
+    incidents: Incident[];
+    selectedIncident: string | null;
+    timeRange: [Date, Date];
+    onIncidentSelect: (incidentId: string) => void;
+  }
+>(({ incidents, selectedIncident, timeRange, onIncidentSelect }, ref) => {
   return (
     <div ref={ref} className="incident-timeline">
       {incidents
         .sort((a, b) => b.startTime.getTime() - a.startTime.getTime())
-        .map(incident => (
+        .map((incident) => (
           <div
             key={incident.id}
             className={`timeline-item ${incident.severity} ${
@@ -586,7 +670,7 @@ const IncidentImpactMatrix: React.FC<{
     <div className="incident-impact-matrix">
       <div className="matrix-header">
         <div className="service-header">Services</div>
-        {incidents.map(incident => (
+        {incidents.map((incident) => (
           <div key={incident.id} className="incident-header">
             <span className={`severity-indicator ${incident.severity}`} />
             {incident.title}
@@ -595,10 +679,10 @@ const IncidentImpactMatrix: React.FC<{
       </div>
 
       <div className="matrix-body">
-        {nodes.map(node => (
+        {nodes.map((node) => (
           <div key={node.id} className="matrix-row">
             <div className="service-label">{node.label}</div>
-            {incidents.map(incident => (
+            {incidents.map((incident) => (
               <div
                 key={`${node.id}-${incident.id}`}
                 className={`impact-cell ${
@@ -625,7 +709,9 @@ const IncidentDetails: React.FC<{
 }> = ({ incident, nodes }) => {
   if (!incident) return null;
 
-  const affectedServices = nodes.filter(n => incident.affectedNodes.includes(n.id));
+  const affectedServices = nodes.filter((n) =>
+    incident.affectedNodes.includes(n.id),
+  );
 
   return (
     <div className="incident-details">
@@ -660,7 +746,7 @@ const IncidentDetails: React.FC<{
       <div className="affected-services">
         <h5>Affected Services</h5>
         <div className="services-list">
-          {affectedServices.map(service => (
+          {affectedServices.map((service) => (
             <div key={service.id} className={`service-item ${service.status}`}>
               <span className="service-name">{service.label}</span>
               <span className="service-status">{service.status}</span>
@@ -683,9 +769,7 @@ const IncidentDetails: React.FC<{
                 {event.user && (
                   <div className="event-user">by {event.user}</div>
                 )}
-                {event.automated && (
-                  <span className="automated-tag">AUTO</span>
-                )}
+                {event.automated && <span className="automated-tag">AUTO</span>}
               </div>
             ))}
         </div>

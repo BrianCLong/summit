@@ -7,10 +7,10 @@ module.exports = {
   globals: {
     'ts-jest': {
       useESM: true,
-      tsconfig: '<rootDir>/../../tsconfig.json'
-    }
+      tsconfig: '<rootDir>/../../tsconfig.json',
+    },
   },
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1'
-  }
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
 };
