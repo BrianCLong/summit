@@ -2,8 +2,15 @@
 import { execSync } from 'node:child_process';
 const run = (c) => execSync(c, { stdio: 'pipe' }).toString().trim();
 const step = (name, cmd) => {
-  try { run(cmd); console.log(`✅ ${name}`); }
-  catch (e) { console.error(`❌ ${name}\n${e.stdout?.toString?.()||''}${e.stderr?.toString?.()||e}`); process.exit(1); }
+  try {
+    run(cmd);
+    console.log(`✅ ${name}`);
+  } catch (e) {
+    console.error(
+      `❌ ${name}\n${e.stdout?.toString?.() || ''}${e.stderr?.toString?.() || e}`,
+    );
+    process.exit(1);
+  }
 };
 
 console.log('🔎 IntelGraph Doctor');
