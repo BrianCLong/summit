@@ -159,7 +159,134 @@ Intelligence and analytics teams require immersive, explainable spatio-temporal 
 | Causal Flow Maps | As a researcher, I visualize causal pathways across regions/time. | Animated flows encode effect size and uncertainty; clicking shows evidence and sensitivity analysis; timeline scrubber animates transitions. |
 | Provenance Ledger | As a compliance officer, I replay analyses with tamper evidence. | Every action signed and timestamped; replay regenerates identical outputs; tampering detection alerts via checksum mismatch. |
 
-## 9. Technical Architecture & Code References
+### Given/When/Then Validation Highlights
+- **Space-Time Hypercube**
+  - *Given* a dataset exceeding 5M points indexed by H3 resolution 8, *when* an analyst slices along time with the scrubber, *then* the scene updates within 500 ms and the inspector surfaces the top-three SHAP features with signed citations.
+  - *Given* a counterfactual intervention toggled in the UI, *when* the user selects "Compare", *then* the delta layer renders with uncertainty deltas and a generated narrative summary referencing the policy toggles.
+- **Meta-Visualization Switchboard**
+  - *Given* telemetry indicating three consecutive acceptances of the same recommendation, *when* the advisor is next invoked, *then* the recommendation confidence is boosted ≥0.1 and persisted to the feature store.
+  - *Given* an analyst rejects a suggestion twice, *when* the advisor surfaces that view again, *then* the rationale must include an updated explanation referencing new data density or goal context.
+- **Provenance Ledger & Audit Lens**
+  - *Given* an export occurs, *when* Audit Lens is triggered, *then* it reconstructs the exported artifact byte-for-byte and surfaces a verification badge within the UI.
+  - *Given* any event signature fails verification, *when* the ledger view loads, *then* the affected row is highlighted and a webhook triggers to compliance tooling within 60 seconds.
+
+## 9. Data Contracts & Schemas
+- **ObservedSignal (core layer):**
+  | Field | Type | Description |
+  | --- | --- | --- |
+  | `signal_id` | UUID | Primary identifier for individual observations. |
+  | `lat` / `lon` | Float | WGS84 coordinates snapped to H3 resolution 8. |
+  | `ts` | ISO 8601 | Event timestamp with millisecond precision. |
+  | `value` | Float | Normalized analytic value (e.g., risk score). |
+  | `uncertainty` | Float (0–1) | Aggregated epistemic/aleatoric error. |
+  | `freshness_sec` | Integer | Seconds since last raw ingest. |
+  | `source_refs` | Array<URI> | Signed URIs pointing to raw evidence. |
+
+- **ModalityAsset (multimodal fusion):**
+  | Field | Type | Notes |
+  | --- | --- | --- |
+  | `asset_id` | UUID | Links to raw text/image/audio payloads. |
+  | `modality` | Enum(`text`,`image`,`audio`,`sensor`,`video`) | Drives alignment pipelines. |
+  | `embedding` | Vector<float32, 1024> | Stored in Milvus/pgvector for retrieval. |
+  | `alignment_window` | [ts_start, ts_end] | Derived by latent alignment service. |
+  | `confidence` | Float (0–1) | Posterior probability of alignment correctness. |
+
+- **ScenarioRun (counterfactual twin):**
+  | Field | Type | Description |
+  | --- | --- | --- |
+  | `scenario_id` | UUID | Links actual vs. counterfactual run. |
+  | `policy_toggles` | JSONB | Feature flags and parameter adjustments. |
+  | `delta_metrics` | Map<string,float> | KPI deltas (coverage, risk, cost). |
+  | `pareto_frontier` | Array<GeoJSON> | Polygons representing non-dominated solutions. |
+
+- **ProvenanceEvent (ledger/audit):**
+  | Field | Type | Description |
+  | --- | --- | --- |
+  | `event_id` | UUID | Tamper-evident event identifier. |
+  | `actor_id` | String | Human or service principal. |
+  | `action` | Enum | `view`, `filter`, `intervention`, `export`, etc. |
+  | `payload_hash` | SHA-256 | Hash of serialized parameters. |
+  | `sig` | Sigstore bundle | Cosign signature + certificate chain. |
+  | `replay_pointer` | URI | Pointer to deterministic replay artifact (e.g., parquet snapshot). |
+
+### JSON Schema (ObservedSignal excerpt)
+```json
+{
+  "$id": "https://schemas.summit.io/viz/observed-signal.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["signal_id", "lat", "lon", "ts", "value", "uncertainty", "source_refs"],
+  "properties": {
+    "signal_id": { "type": "string", "format": "uuid" },
+    "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+    "lon": { "type": "number", "minimum": -180, "maximum": 180 },
+    "ts": { "type": "string", "format": "date-time" },
+    "value": { "type": "number" },
+    "uncertainty": { "type": "number", "minimum": 0, "maximum": 1 },
+    "freshness_sec": { "type": "integer", "minimum": 0 },
+    "source_refs": {
+      "type": "array",
+      "items": { "type": "string", "format": "uri" },
+      "minItems": 1
+    }
+  }
+}
+```
+
+## 10. API Surface & Integration Points
+- **REST**
+  | Endpoint | Method | Description | Request Contract | Response |
+  | --- | --- | --- | --- | --- |
+  | `/api/v1/signals` | `POST` | Batch ingest ObservedSignal entities | `observed-signal.json` | 207 multi-status with per-record sigstore receipt |
+  | `/api/v1/scenario-runs/{id}` | `PUT` | Launch counterfactual run | `ScenarioRun` payload | Run handle + WebSocket channel |
+  | `/api/v1/provenance/export/{id}` | `GET` | Download signed narrative bundle | Query `format=pdf&#124;html&#124;zip` | Binary artifact + provenance manifest |
+
+- **GraphQL (read path)**
+  ```graphql
+  query AnalystWorkspace($bbox: BBoxInput!, $window: TimeWindowInput!) {
+    observedSignals(bbox: $bbox, window: $window) {
+      signalId
+      coordinates { lat lon }
+      ts
+      value
+      uncertainty
+      topAttributions(limit: 3) { feature weight }
+      sourceRefs { uri label signed }
+    }
+    scenarioRuns(window: $window) {
+      scenarioId
+      policyToggles
+      deltaMetrics { key value }
+      paretoFrontierGeojson
+    }
+  }
+  ```
+
+- **Event Topics (Kafka/Flink)**
+  | Topic | Producer | Consumer | Notes |
+  | --- | --- | --- | --- |
+  | `viz.observed-signal.raw` | Connectors | Fusion service | Raw ingest, schema enforced via Confluent schema registry. |
+  | `viz.counterfactual.completed` | Simulation service | Narrative generator | Contains signed metrics + drift comparisons. |
+  | `viz.meta-telemetry` | Client apps | Switchboard learner | Captures accept/reject actions with context. |
+
+## 11. Telemetry & Learning Loop
+- **Client Events:** `view_loaded`, `advisor_recommended`, `advisor_decision`, `slice_interaction`, `scenario_commit`, all with anonymized session + role metadata.
+- **Feature Store Signals:** Rolling acceptance rate, task completion delta, anomaly detection on interaction latency (for auto-scaling triggers).
+- **Model Update Cadence:**
+  - Switchboard policy retrain nightly with differential privacy noise.
+  - Uncertainty calibration weekly using holdout ground truth and reliability diagrams.
+- **Success Dashboards:** Grafana boards wiring OpenTelemetry traces with narrative export counts, replay success %, SBOM issuance time.
+
+## 12. Testing & Validation Strategy
+- **Automated Pyramid:**
+  - Unit: React Testing Library for timeline, deck.gl layers; PyTest for fusion services.
+  - Integration: Cypress/Playwright XR-compatible tests, contract tests against JSON schemas.
+  - Simulation: Golden scenario notebooks verifying counterfactual deltas + Pareto correctness.
+- **Performance Gates:** Lighthouse XR mode, deck.gl frame budget (≥55 FPS on RTX 3070, ≥30 FPS on Intel Iris).
+- **Security & Compliance:** OPA policy regression tests, cosign signature verification in CI, SBOM diff scan per release.
+- **Human Validation:** Analyst ride-alongs, compliance dry-runs, XR usability labs with accessibility accommodations.
+
+## 13. Technical Architecture & Code References
 - **Frontend:** React + deck.gl/Kepler.gl for geo layers, Three.js/react-three-fiber for 3D volume, Cytoscape.js or AntV G6 for graphs, Zustand/Recoil for state, Recharts/Plotly for supporting charts.
 - **Rendering Pipelines:** WebGL instancing for million-point datasets; H3 hex indexing; progressive loading via Apache Arrow streams.
 - **Backend Services:** Python ST-GNN & transformer services (PyTorch Geometric, HuggingFace), probabilistic forecasting (Pyro, TensorFlow Probability), causal inference (DoWhy/EconML).
@@ -170,19 +297,23 @@ Intelligence and analytics teams require immersive, explainable spatio-temporal 
 ### Code Skeletons
 - **Spatio-temporal hex layer (deck.gl):** `docs/snippets/spatiotemporal-hex.tsx`
 - **3D slicing plane (react-three-fiber):** `docs/snippets/volume-slice.tsx`
+- **Time window control (React/visx):** `docs/snippets/timeline-control.tsx`
+- **Meta-switchboard policy advisor:** `docs/snippets/meta-switchboard-advisor.ts`
 - **ST-GNN baseline (PyTorch Geometric):** `docs/snippets/stgnn.py`
 - **SHAP attachment pipeline:** `docs/snippets/shap_attach.py`
+- **Provenance ledger schema:** `docs/snippets/provenance-ledger-schema.sql`
+- **REST/OpenAPI excerpt:** `docs/snippets/api-surface.yaml`
 
-*(See section 11 for snippet contents.)*
+*(See section 15 for snippet contents.)*
 
-## 10. Implementation Blueprint (90-Day)
+## 14. Implementation Blueprint (90-Day)
 1. **Weeks 0–2:** finalize schemas, upgrade ingestion (Kafka topics, Arrow contracts); scaffold React shells and timeline controls.
 2. **Weeks 2–5:** deliver Event Fields MVP, Hypercube base, and narrative export skeleton; integrate MC Dropout uncertainty.
 3. **Weeks 4–8:** build scenario twin, meta-switchboard heuristics, provenance ledger with cosign signing; onboard ST-GNN forecasting service.
 4. **Weeks 6–10:** add multimodal alignment, graph explainability overlays, generative forecast theater; start patent prior-art sweeps & drafting.
 5. **Weeks 10–12:** accessibility & performance hardening, final SBOM/provenance packaging, red-team XR module, prepare GA launch assets.
 
-## 11. Snippet Library
+## 15. Snippet Library
 ```tsx
 // docs/snippets/spatiotemporal-hex.tsx
 import { DeckGL } from '@deck.gl/react';
@@ -290,9 +421,11 @@ import shap
 def attach_shap(model, feature_frame, metadata):
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(feature_frame)
+    baseline = explainer.expected_value
     return [
         {
             **meta,
+            "baseline": baseline.tolist() if hasattr(baseline, "tolist") else baseline,
             "shap": values.tolist(),
             "top_attribution": sorted(
                 zip(feature_frame.columns, values),
@@ -303,21 +436,353 @@ def attach_shap(model, feature_frame, metadata):
         for meta, values in zip(metadata, shap_values)
     ]
 ```
+```tsx
+// docs/snippets/timeline-control.tsx
+import { useMemo } from 'react';
+import { scaleLinear } from '@visx/scale';
+import { Brush } from '@visx/brush';
+import { LinePath } from '@visx/shape';
+import { Group } from '@visx/group';
+import { localPoint } from '@visx/event';
 
-## 12. IP & Patent Strategy
+export type TimeSeriesPoint = {
+  ts: number;
+  value: number;
+};
+
+export type TimelineControlProps = {
+  width: number;
+  height: number;
+  series: TimeSeriesPoint[];
+  window: [number, number];
+  onWindowChange: (window: [number, number]) => void;
+};
+
+export function TimelineControl({ width, height, series, window, onWindowChange }: TimelineControlProps) {
+  const padding = 16;
+  const xScale = useMemo(
+    () =>
+      scaleLinear<number>({
+        domain: [Math.min(...series.map((d) => d.ts)), Math.max(...series.map((d) => d.ts))],
+        range: [padding, width - padding]
+      }),
+    [series, width]
+  );
+
+  const yScale = useMemo(
+    () =>
+      scaleLinear<number>({
+        domain: [0, Math.max(...series.map((d) => d.value || 0)) || 1],
+        range: [height - padding, padding]
+      }),
+    [series, height]
+  );
+
+  const handleBrushChange = (domain: { x0: number; x1: number } | null) => {
+    if (!domain) return;
+    const next: [number, number] = [xScale.invert(domain.x0), xScale.invert(domain.x1)];
+    onWindowChange(next);
+  };
+
+  const initialBrushPosition = useMemo(() => {
+    return {
+      start: { x: xScale(window[0]), y: padding },
+      end: { x: xScale(window[1]), y: height - padding }
+    };
+  }, [window, xScale, height]);
+
+  return (
+    <svg width={width} height={height} role="img" aria-label="Timeline control">
+      <Group>
+        <LinePath
+          data={series}
+          x={(d) => xScale(d.ts)}
+          y={(d) => yScale(d.value)}
+          stroke="#2563eb"
+          strokeWidth={2}
+          curve={null}
+        />
+        <Brush
+          width={width - padding * 2}
+          height={height - padding * 2}
+          margin={{ top: padding, left: padding, bottom: padding, right: padding }}
+          resizeTriggerAreas={['left', 'right']}
+          selectedBoxStyle={{ fill: '#2563eb33', stroke: '#2563eb' }}
+          handleSize={8}
+          initialBrushPosition={initialBrushPosition}
+          onChange={handleBrushChange}
+          onMouseMove={(brush) => {
+            const point = localPoint(brush.event);
+            if (point) {
+              brush.updateBrush((prev) => ({
+                ...prev,
+                extent: {
+                  x0: Math.min(point.x, prev.extent.x0),
+                  x1: Math.max(point.x, prev.extent.x1),
+                  y0: prev.extent.y0,
+                  y1: prev.extent.y1
+                }
+              }));
+            }
+          }}
+        />
+      </Group>
+    </svg>
+  );
+}
+```
+```ts
+// docs/snippets/meta-switchboard-advisor.ts
+export type AdvisorContext = {
+  modalityCount: number;
+  seriesDensity: 'sparse' | 'medium' | 'dense';
+  requiresCausality: boolean;
+  geoSpreadKm: number;
+  userIntent: 'explore' | 'explain' | 'counterfactual' | 'narrative';
+  acceptedRecommendations: number;
+  rejectedRecommendations: number;
+};
+
+export type VisualizationRecommendation = {
+  id: string;
+  label: string;
+  rationale: string;
+  confidence: number;
+};
+
+const VIEW_PRIORS: Record<string, VisualizationRecommendation> = {
+  hypercube: {
+    id: 'hypercube',
+    label: 'Space-Time Hypercube',
+    rationale: 'Immersive 3D slice through time and space',
+    confidence: 0.6
+  },
+  eventField: {
+    id: 'eventField',
+    label: 'Uncertainty Event Field',
+    rationale: 'Layered reliability and drift overlays',
+    confidence: 0.55
+  },
+  graphCanvas: {
+    id: 'graphCanvas',
+    label: 'Explainability Graph Canvas',
+    rationale: 'Temporal attribution trail across entities',
+    confidence: 0.5
+  },
+  scenarioTwin: {
+    id: 'scenarioTwin',
+    label: 'Scenario Twin Dashboard',
+    rationale: 'Counterfactual deltas and Pareto surfaces',
+    confidence: 0.5
+  },
+  narrative: {
+    id: 'narrative',
+    label: 'Narrative Map Generator',
+    rationale: 'Auto-generated brief with citations',
+    confidence: 0.45
+  }
+};
+
+export function recommendVisualization(context: AdvisorContext): VisualizationRecommendation {
+  const recommendation = { ...VIEW_PRIORS.hypercube };
+  let score = recommendation.confidence;
+
+  if (context.userIntent === 'counterfactual') {
+    return { ...VIEW_PRIORS.scenarioTwin, confidence: 0.75 };
+  }
+
+  if (context.requiresCausality) {
+    score += 0.15;
+  }
+
+  if (context.modalityCount > 2) {
+    return { ...VIEW_PRIORS.eventField, confidence: 0.7 };
+  }
+
+  if (context.seriesDensity === 'dense' || context.geoSpreadKm > 500) {
+    score += 0.1;
+  }
+
+  const totalRecommendations = context.acceptedRecommendations + context.rejectedRecommendations;
+  const acceptanceRatio = totalRecommendations === 0 ? 0.5 : context.acceptedRecommendations / totalRecommendations;
+  const calibratedConfidence = Math.min(0.9, Math.max(0.2, score * (0.8 + acceptanceRatio * 0.4)));
+
+  if (context.userIntent === 'narrative') {
+    return { ...VIEW_PRIORS.narrative, confidence: calibratedConfidence };
+  }
+
+  if (context.requiresCausality) {
+    return { ...VIEW_PRIORS.graphCanvas, confidence: calibratedConfidence };
+  }
+
+  return { ...recommendation, confidence: calibratedConfidence };
+}
+```
+```sql
+-- docs/snippets/provenance-ledger-schema.sql
+CREATE TABLE IF NOT EXISTS provenance_event (
+  event_id UUID PRIMARY KEY,
+  actor_id TEXT NOT NULL,
+  actor_type TEXT NOT NULL CHECK (actor_type IN ('human', 'service')),
+  action TEXT NOT NULL,
+  action_context JSONB NOT NULL,
+  occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  payload_hash TEXT NOT NULL,
+  signature BYTEA NOT NULL,
+  certificate_chain BYTEA NOT NULL,
+  replay_pointer TEXT NOT NULL,
+  session_id UUID NOT NULL,
+  INDEX idx_provenance_actor_time (actor_id, occurred_at),
+  INDEX idx_provenance_action (action)
+);
+
+CREATE TABLE IF NOT EXISTS provenance_replay_artifact (
+  artifact_id UUID PRIMARY KEY,
+  event_id UUID REFERENCES provenance_event(event_id) ON DELETE CASCADE,
+  artifact_type TEXT NOT NULL CHECK (artifact_type IN ('parquet', 'json', 'pdf', 'html', 'zip')),
+  storage_uri TEXT NOT NULL,
+  checksum TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS provenance_session_digest AS
+SELECT
+  session_id,
+  MIN(occurred_at) AS session_start,
+  MAX(occurred_at) AS session_end,
+  COUNT(*) AS event_count,
+  COUNT(DISTINCT action) AS unique_actions,
+  bool_and(signature IS NOT NULL) AS all_signed
+FROM provenance_event
+GROUP BY session_id;
+```
+```yaml
+# docs/snippets/api-surface.yaml
+openapi: 3.1.0
+info:
+  title: Summit Visualization Platform
+  version: "0.1.0"
+paths:
+  /api/v1/signals:
+    post:
+      summary: Ingest observed signals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'https://schemas.summit.io/viz/observed-signal.json#/$defs/batch'
+      responses:
+        '207':
+          description: Multi-status response with per-record receipts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  receipts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        signal_id:
+                          type: string
+                          format: uuid
+                        status:
+                          type: string
+                          enum: [accepted, rejected]
+                        signature:
+                          type: string
+                        message:
+                          type: string
+  /api/v1/scenario-runs/{id}:
+    put:
+      summary: Launch a counterfactual simulation run
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                policy_toggles:
+                  type: object
+                start_ts:
+                  type: string
+                  format: date-time
+                end_ts:
+                  type: string
+                  format: date-time
+      responses:
+        '202':
+          description: Simulation accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scenario_id:
+                    type: string
+                    format: uuid
+                  websocket_channel:
+                    type: string
+  /api/v1/provenance/export/{id}:
+    get:
+      summary: Download signed narrative bundle
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum: [pdf, html, zip]
+      responses:
+        '200':
+          description: Signed artifact
+          headers:
+            x-summit-sigstore-bundle:
+              schema:
+                type: string
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            text/html:
+              schema:
+                type: string
+```
+
+## 16. IP & Patent Strategy
 1. Conduct prior-art sweeps around counterfactual spatio-temporal visualization, provenance-signing workflows, and adaptive visualization policy engines.
 2. Draft provisional claims for each module focusing on explainability integration, multimodal alignment visualization, and replayable provenance bundles.
 3. Create claim charts referencing UI flows, data structures, and signing mechanisms; collaborate with counsel to prioritize filings aligned with roadmap milestones.
 4. Establish invention disclosure pipeline within 6 weeks, capturing diagrams, interaction mockups, and algorithm descriptions.
 
-## 13. Delivery Resources & Next Steps
+## 17. Delivery Resources & Next Steps
 - **Design:** Figma prototypes for Hypercube, Event Fields, and Scenario Dashboard (ETA Week 2).
 - **Data:** Curate three demo datasets (synthetic incident fusion, mobility+sensor drift, multimodal OSINT) with sharing agreements.
 - **Engineering Kits:** Turbo monorepo template with React/Node/Python services, GitHub Actions (OIDC, SLSA, cosign), IaC modules for AWS GPU workloads.
 - **Operations:** Define governance policies (OPA), retention schedules, SBOM automation, and compliance checklists.
 - **Enablement:** Produce playbooks, demo scripts, and narrative templates for sales, analysts, and partner ecosystems.
 
-## 14. Immediate Actions
+## 18. Immediate Actions
 1. Socialize PRD with leadership; secure resourcing for XR experimentation and causal inference SMEs.
 2. Begin prototype spikes: deck.gl Event Fields, Three.js hypercube slicing, SHAP-based attribution overlays.
 3. Kick off patentability assessments and invention disclosures per module.
