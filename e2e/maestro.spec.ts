@@ -23,12 +23,10 @@ test.describe('Maestro UI - Core routes', () => {
         const u = new URL(url);
         // On raw IP targets, SPA fallback for deep routes may not be configured; only enforce root.
         if (isIpHost(u) && path !== '/') {
-          test
-            .info()
-            .annotations.push({
-              type: 'route-skip',
-              description: `Skipping ${path} on IP host (status ${resp!.status()})`,
-            });
+          test.info().annotations.push({
+            type: 'route-skip',
+            description: `Skipping ${path} on IP host (status ${resp!.status()})`,
+          });
           test.skip();
         }
         expect(
@@ -119,12 +117,10 @@ test.describe('GraphQL endpoint probe', () => {
     // Minimal structural checks
     expect(firstOk!.json).toBeTruthy();
     expect(firstOk!.json.data || firstOk!.json.errors).toBeTruthy();
-    test
-      .info()
-      .annotations.push({
-        type: 'graphql-endpoint',
-        description: firstOk!.path,
-      });
+    test.info().annotations.push({
+      type: 'graphql-endpoint',
+      description: firstOk!.path,
+    });
   });
 });
 

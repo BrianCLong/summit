@@ -36,6 +36,7 @@ Your `age.key` (private key) is the master key to decrypt your secrets. Its comp
 The `.sops.yaml` file defines the encryption rules for your repository. It specifies which files to encrypt and which keys to use.
 
 1.  **Create/Update `.sops.yaml`:**
+
     ```yaml
     # .sops.yaml
     creation_rules:

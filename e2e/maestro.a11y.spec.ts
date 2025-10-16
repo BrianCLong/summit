@@ -28,12 +28,10 @@ test.describe('Maestro — Axe accessibility', () => {
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
       .analyze();
 
-    test
-      .info()
-      .annotations.push({
-        type: 'a11y-violations',
-        description: String(results.violations?.length || 0),
-      });
+    test.info().annotations.push({
+      type: 'a11y-violations',
+      description: String(results.violations?.length || 0),
+    });
 
     // Log all violations for debugging
     if (results.violations && results.violations.length > 0) {

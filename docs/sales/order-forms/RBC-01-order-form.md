@@ -1,7 +1,7 @@
 # Order Form – RBC-01 Runbook-as-Code Starter
 
-**Customer:** ********************\_********************  
-**Date:** ********************\_********************  
+**Customer:** ********\*\*\*\*********\_********\*\*\*\*********  
+**Date:** ********\*\*\*\*********\_********\*\*\*\*********  
 **Prepared by:** Summit Revenue Ops  
 **Engagement Term:** Initial 6-month subscription (renews monthly thereafter).
 

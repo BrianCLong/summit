@@ -20,7 +20,7 @@ const IGNORE = [
   '.github/workflows/compliance-automation.yml',
   'v4/archive/**',
   '.venv/**',
-  'venv/**'
+  'venv/**',
 ];
 
 export default [

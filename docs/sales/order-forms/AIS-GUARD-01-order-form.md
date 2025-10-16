@@ -1,7 +1,7 @@
 # Order Form – AIS-GUARD-01 Prompt Safelist & Output Guard
 
-**Customer:** ********************\_********************  
-**Date:** ********************\_********************  
+**Customer:** ********\*\*\*\*********\_********\*\*\*\*********  
+**Date:** ********\*\*\*\*********\_********\*\*\*\*********  
 **Prepared by:** Summit Revenue Ops  
 **Engagement Term:** Initial 90-day subscription (auto-renews monthly).
 

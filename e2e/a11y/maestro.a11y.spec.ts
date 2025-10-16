@@ -19,12 +19,10 @@ test.describe('Maestro A11y Checks', () => {
     const critical = (results.violations || []).filter(
       (v) => v.impact === 'critical',
     );
-    test
-      .info()
-      .annotations.push({
-        type: 'a11y-violations',
-        description: String(results.violations?.length || 0),
-      });
+    test.info().annotations.push({
+      type: 'a11y-violations',
+      description: String(results.violations?.length || 0),
+    });
     expect(critical).toEqual([]);
   });
 });
