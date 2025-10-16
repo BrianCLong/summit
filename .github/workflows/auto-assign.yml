@@ -5,6 +5,7 @@ on:
 
 jobs:
   auto-assign:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
