@@ -1168,7 +1168,13 @@ services:
       - '7474:7474'
       - '7687:7687'
     healthcheck:
-      test: ['CMD', 'bash', '-lc', "cypher-shell -u neo4j -p test 'RETURN 1' || exit 1"]
+      test:
+        [
+          'CMD',
+          'bash',
+          '-lc',
+          "cypher-shell -u neo4j -p test 'RETURN 1' || exit 1",
+        ]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -1655,7 +1661,12 @@ tests:
   - vars: { q: 'Paths from A to B excluding classified edges' }
 providers:
   - id: openai:gateway
-    config: { apiBaseUrl: 'http://127.0.0.1:4000/v1', apiKey: 'local', model: 'local/ollama-coder' }
+    config:
+      {
+        apiBaseUrl: 'http://127.0.0.1:4000/v1',
+        apiKey: 'local',
+        model: 'local/ollama-coder',
+      }
 ```
 
 Add Just recipe:
