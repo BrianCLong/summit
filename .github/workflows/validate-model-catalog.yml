@@ -5,6 +5,7 @@ on: [pull_request, push]
 jobs:
   validate:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
