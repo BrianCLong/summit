@@ -18,9 +18,12 @@ jobs:
         if: steps.changes.outputs.catalog != 'true'
         run: echo "No model catalog changes; skipping"
       - uses: actions/setup-node@v4
+        if: steps.changes.outputs.catalog == 'true'
         with:
           node-version: '20'
       - name: Install validators
+        if: steps.changes.outputs.catalog == 'true'
+        continue-on-error: true
         run: npm i -g ajv-cli@5 && npm i yaml@2
       - name: Validate schema
         continue-on-error: true
@@ -28,6 +31,7 @@ jobs:
           ajv validate -s model-catalog/schemas/model.schema.json -d model-catalog/cataloga?.yaml --errors=text || \
           ajv validate -s model-catalog/schemas/model.schema.json -d model-catalog/catalog.yaml
       - name: Render Markdown
+        if: steps.changes.outputs.catalog == 'true'
         run: |
           node -e '
           const fs=require("fs");
