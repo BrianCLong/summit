@@ -60,7 +60,7 @@ This pack scaffolds starter artifacts for the 8 parallel workstreams. Copy files
 ## Risks & Mitigations
 
 - [ ] Risk:  
-      Mitigation:
+       Mitigation:
 
 ## Definition of Done
 
