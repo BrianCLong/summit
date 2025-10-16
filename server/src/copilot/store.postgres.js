@@ -395,6 +395,10 @@ class CopilotPostgresStore {
    * Get run statistics for monitoring
    */
   async getRunStats(timeRange = '24 hours') {
+    const allowedTimeRanges = ['1 hour', '24 hours', '7 days', '30 days'];
+    if (!allowedTimeRanges.includes(timeRange)) {
+      throw new Error('Invalid timeRange');
+    }
     const query = `
       SELECT 
         status,

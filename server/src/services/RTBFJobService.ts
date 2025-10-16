@@ -629,8 +629,16 @@ export class RTBFJobService extends EventEmitter {
     return totalEstimate;
   }
 
+  private validateIdentifier(identifier: string): void {
+    if (!/^[a-zA-Z0-9_]+$/.test(identifier)) {
+      throw new Error(`Invalid identifier: ${identifier}`);
+    }
+  }
+
   private buildCountQuery(table: string, target: RTBFTarget): { sql: string; params: any[] } {
     const { field, value, operator } = target.identifier;
+    this.validateIdentifier(table);
+    this.validateIdentifier(field);
     let whereClause = '';
     const params: any[] = [];
 
@@ -773,6 +781,8 @@ export class RTBFJobService extends EventEmitter {
 
   private buildSelectQuery(table: string, target: RTBFTarget): { sql: string; params: any[] } {
     const { field, value, operator } = target.identifier;
+    this.validateIdentifier(table);
+    this.validateIdentifier(field);
     let whereClause = '';
     const params: any[] = [];
 
@@ -1180,6 +1190,7 @@ class RTBFWorker {
   }
 
   private async processRecord(table: string, target: RTBFTarget, recordId: string): Promise<boolean> {
+    this.validateIdentifier(table);
     switch (target.strategy) {
       case 'hard_delete':
         await this.db.query(`DELETE FROM ${table} WHERE id = $1`, [recordId]);
@@ -1203,6 +1214,7 @@ class RTBFWorker {
   }
 
   private async anonymizeRecord(table: string, recordId: string): Promise<void> {
+    this.validateIdentifier(table);
     // Anonymize PII fields - this would be customizable based on table schema
     const anonymizeFields = {
       email: 'anonymous@example.com',
@@ -1222,6 +1234,7 @@ class RTBFWorker {
   }
 
   private async archiveRecord(table: string, recordId: string): Promise<void> {
+    this.validateIdentifier(table);
     // Move record to archive table
     await this.db.query(`
       INSERT INTO ${table}_archive SELECT * FROM ${table} WHERE id = $1

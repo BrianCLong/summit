@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "npm run test:jest && npm run test:vitest",
-    "test:jest": "jest",
+    "test:jest": "node node_modules/jest/bin/jest.js --config jest.config.cjs",
     "test:vitest": "vitest",
     "test:e2e": "playwright test",
     "test:golden-path": "playwright test golden-path-ci-gate.spec.ts",
