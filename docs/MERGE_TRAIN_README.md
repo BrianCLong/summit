@@ -68,16 +68,16 @@ make -f Makefile.merge-train mt-express-lane
 
 Run `make -f Makefile.merge-train help` for full list. Key commands:
 
-| Command | Description | Typical Use |
-|---------|-------------|-------------|
-| `mt-health` | Quick health check | Daily morning check |
-| `mt-triage` | Triage conflicting PRs | When conflict rate >50% |
-| `mt-hotspots` | Identify hot files | Weekly, before CODEOWNERS update |
-| `mt-close-stale` | Close old drafts | Weekly cleanup |
-| `mt-metrics` | Detailed metrics | Weekly review meeting |
-| `mt-express-lane` | List auto-merge ready | Identify quick wins |
-| `mt-standard-lane` | List review-ready PRs | Weekly sprint |
-| `mt-manual-lane` | List complex PRs | Monthly deep dive |
+| Command            | Description            | Typical Use                      |
+| ------------------ | ---------------------- | -------------------------------- |
+| `mt-health`        | Quick health check     | Daily morning check              |
+| `mt-triage`        | Triage conflicting PRs | When conflict rate >50%          |
+| `mt-hotspots`      | Identify hot files     | Weekly, before CODEOWNERS update |
+| `mt-close-stale`   | Close old drafts       | Weekly cleanup                   |
+| `mt-metrics`       | Detailed metrics       | Weekly review meeting            |
+| `mt-express-lane`  | List auto-merge ready  | Identify quick wins              |
+| `mt-standard-lane` | List review-ready PRs  | Weekly sprint                    |
+| `mt-manual-lane`   | List complex PRs       | Monthly deep dive                |
 
 ---
 
@@ -163,6 +163,7 @@ make -f Makefile.merge-train mt-close-stale
 **Action:** Automatically regenerates lockfiles when conflicts detected
 
 **Example:**
+
 ```yaml
 # PR #12345 has conflict in package-lock.json
 # Workflow detects, regenerates, commits, pushes
@@ -176,6 +177,7 @@ make -f Makefile.merge-train mt-close-stale
 **Trigger:** Daily at 2 AM UTC (or manual)
 
 **Action:**
+
 1. Runs health dashboard script
 2. Uploads report artifact
 3. Creates GitHub issue if score <60
@@ -183,6 +185,7 @@ make -f Makefile.merge-train mt-close-stale
 5. Comments on blocking PRs
 
 **Setup Slack (optional):**
+
 ```bash
 # Add repository secret
 gh secret set SLACK_MERGE_TRAIN_WEBHOOK --body "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
@@ -304,6 +307,7 @@ Or query GitHub Actions artifacts API.
 **Q: Why isn't my PR auto-merging?**
 
 A: Check if it meets express lane criteria:
+
 - <100 LOC
 - Green CI (fast lane)
 - No conflicts
