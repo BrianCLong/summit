@@ -1,9 +1,8 @@
 """
 Copilot Natural Language Query Schema - GA Core Implementation
 Canonical NL→Cypher service with guardrails and audit trail
-"""
-enum # Enums
-RiskLevel {
+""" # Enums
+enum RiskLevel {
   LOW
   MEDIUM
   HIGH

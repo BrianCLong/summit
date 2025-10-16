@@ -1,7 +1,7 @@
 # Order Form – GH-CERT-01 GitHub Compliance Badges
 
-**Customer:** ********\*\*\*\*********\_********\*\*\*\*********  
-**Date:** ********\*\*\*\*********\_********\*\*\*\*********  
+**Customer:** **\*\*\*\***\*\*\*\***\*\*\*\***\_**\*\*\*\***\*\*\*\***\*\*\*\***  
+**Date:** **\*\*\*\***\*\*\*\***\*\*\*\***\_**\*\*\*\***\*\*\*\***\*\*\*\***  
 **Prepared by:** Summit Revenue Ops  
 **Engagement Term:** Initial 12-month subscription (renews monthly thereafter).
 

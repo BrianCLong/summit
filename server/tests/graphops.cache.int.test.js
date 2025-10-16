@@ -33,12 +33,10 @@ maybe('GraphOps cache integration (Redis)', () => {
     });
 
     // Mock GraphOpsService to count calls
-    expandMock = jest
-      .fn()
-      .mockResolvedValue({
-        nodes: [{ id: 'n1', label: 'N1', type: 'Entity', tags: [] }],
-        edges: [],
-      });
+    expandMock = jest.fn().mockResolvedValue({
+      nodes: [{ id: 'n1', label: 'N1', type: 'Entity', tags: [] }],
+      edges: [],
+    });
     jest.doMock('../src/services/GraphOpsService', () => ({
       expandNeighborhood: expandMock,
     }));

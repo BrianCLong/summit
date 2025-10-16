@@ -62,7 +62,9 @@ describe('ModelManagementDashboard', () => {
 
     // Switch to training jobs
     await user.click(screen.getByText(/🏋️ Training Jobs/));
-    expect(screen.getByText(/Training Jobs/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /Training Jobs/ }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Training Job job-001/)).toBeInTheDocument();
 
     // Switch to experiments
@@ -206,10 +208,12 @@ describe('ModelManagementDashboard', () => {
     await user.click(screen.getByText('Entity Resolution Neural Network'));
 
     // Should show performance metrics
-    expect(screen.getByText(/Accuracy: 94.2%/)).toBeInTheDocument();
-    expect(screen.getByText(/Precision: 92.8%/)).toBeInTheDocument();
-    expect(screen.getByText(/Recall: 95.6%/)).toBeInTheDocument();
-    expect(screen.getByText(/F1 Score: 94.2%/)).toBeInTheDocument();
+    const hasText = (t: string) => (_: string, node: Element | null) =>
+      !!node && node.textContent?.includes(t);
+    expect(screen.getByText(hasText('Accuracy: 94.2%'))).toBeInTheDocument();
+    expect(screen.getByText(hasText('Precision: 92.8%'))).toBeInTheDocument();
+    expect(screen.getByText(hasText('Recall: 95.6%'))).toBeInTheDocument();
+    expect(screen.getByText(hasText('F1 Score: 94.2%'))).toBeInTheDocument();
   });
 
   it('displays model environment information', async () => {

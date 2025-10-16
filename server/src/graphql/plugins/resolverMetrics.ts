@@ -6,7 +6,7 @@ import {
 } from '../../monitoring/metrics.js';
 
 const resolverMetricsPlugin: ApolloServerPlugin = {
-  requestDidStart() {
+  async requestDidStart() {
     return {
       executionDidStart() {
         return {

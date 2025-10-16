@@ -118,12 +118,10 @@ export async function requireAuthority(
   }).then((r) => r.json());
 
   if (decision?.result?.allow === true) return next();
-  return res
-    .status(403)
-    .json({
-      blocked: true,
-      why: decision?.result?.why ?? 'Policy denies request',
-    });
+  return res.status(403).json({
+    blocked: true,
+    why: decision?.result?.why ?? 'Policy denies request',
+  });
 }
 ```
 

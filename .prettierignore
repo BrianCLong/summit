@@ -12,3 +12,4 @@ v4/archive/**
 **/.vite/**
 tools/testing/flaky-detector.ts
 **/v24_modules/**
+tools/pm/wsjf_rice.ts

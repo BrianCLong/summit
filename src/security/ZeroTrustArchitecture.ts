@@ -907,9 +907,7 @@ export class ZeroTrustArchitecture extends EventEmitter {
     }
   }
 
-  private async assessRisk(
-    request: AccessRequest,
-  ): Promise<{
+  private async assessRisk(request: AccessRequest): Promise<{
     level: 'LOW' | 'MEDIUM' | 'HIGH';
     confidence: number;
     factors: string[];

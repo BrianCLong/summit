@@ -29,13 +29,13 @@
 
 ## 2-Week Pilot SOW (Template)
 
-**Customer:** **********\_\_********** **Start Date:** ****\_\_**** **Pilot Fee:** $****\_\_\_\_****
+**Customer:** ****\*\*****\_\_****\*\***** **Start Date:** \***\*\_\_\*\*** **Pilot Fee:** $\***\*\_\_\_\_\*\***
 
 **Scope Overview:** Deliver DP-01 + SEC-02 (core) with optional add-ons marked below.
 
 - [ ] DP-01 Disclosure Pack Generator (baseline)
 - [ ] SEC-02 SBOM/SLSA for GitHub (baseline)
-- [ ] ************\_\_\_\_************ (optional)
+- [ ] ****\*\*\*\*****\_\_\_\_****\*\*\*\***** (optional)
 
 ### Objectives & Success Criteria
 
@@ -76,6 +76,6 @@
 
 **Signatures**
 
-Customer Representative: ************\_\_\_\_************ Date: ****\_\_****
+Customer Representative: ****\*\*\*\*****\_\_\_\_****\*\*\*\***** Date: \***\*\_\_\*\***
 
-Summit Representative: **************\_************** Date: ****\_\_****
+Summit Representative: ******\*\*******\_******\*\******* Date: \***\*\_\_\*\***

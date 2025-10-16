@@ -16,7 +16,8 @@ export async function emitInvalidation(patterns: string[]): Promise<void> {
     const toDelete = new Set<string>();
     for (const pat of patterns || []) {
       const [prefix, rest] = String(pat).split(':');
-      const idxKey = rest && rest !== '*' ? `idx:${prefix}:${rest}` : `idx:${prefix}`;
+      const idxKey =
+        rest && rest !== '*' ? `idx:${prefix}:${rest}` : `idx:${prefix}`;
       try {
         const members = await redis.sMembers(idxKey);
         for (const k of members || []) toDelete.add(k);

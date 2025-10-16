@@ -37,7 +37,7 @@ export function dlpPlugin(options: DLPPluginOptions = {}): ApolloServerPlugin {
   const config = { ...defaultOptions, ...options };
 
   return {
-    requestDidStart(): GraphQLRequestListener<any> {
+    async requestDidStart(): Promise<GraphQLRequestListener<any>> {
       return {
         async didResolveOperation(requestContext: GraphQLRequestContext<any>) {
           if (!config.enabled) return;

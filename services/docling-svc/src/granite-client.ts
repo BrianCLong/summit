@@ -267,16 +267,14 @@ const synthesizeFindings = (
   }
   if (targets.includes('cve')) {
     const cveMatches = text.match(/CVE-\d{4}-\d{4,7}/gi) || [];
-    cveMatches
-      .slice(0, 5)
-      .forEach((match, index) =>
-        findings.push({
-          id: `cve-${index}`,
-          label: 'cve',
-          value: match,
-          confidence: 0.65,
-        }),
-      );
+    cveMatches.slice(0, 5).forEach((match, index) =>
+      findings.push({
+        id: `cve-${index}`,
+        label: 'cve',
+        value: match,
+        confidence: 0.65,
+      }),
+    );
   }
   if (targets.includes('owner')) {
     const ownerMatch = text.match(/owner[:\s]+([A-Za-z\s]+)/i);

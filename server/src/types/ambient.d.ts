@@ -13,7 +13,10 @@ declare module 'graphql-subscriptions' {
   }
   export function withFilter<TPayload = any, TVariables = any>(
     asyncIteratorFn: (args?: any) => AsyncIterableIterator<TPayload>,
-    filterFn: (payload: TPayload, variables: TVariables) => boolean | Promise<boolean>
+    filterFn: (
+      payload: TPayload,
+      variables: TVariables,
+    ) => boolean | Promise<boolean>,
   ): (args?: any) => AsyncIterableIterator<TPayload>;
 }
 

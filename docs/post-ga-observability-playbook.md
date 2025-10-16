@@ -963,9 +963,9 @@ if __name__ == '__main__':
 
 ### Sign-off
 
-- [ ] SRE Lead: ********\_\_\_******** Date: **\_\_\_**
-- [ ] Engineering Manager: ****\_**** Date: **\_\_\_**
-- [ ] Product Owner: ******\_\_****** Date: **\_\_\_**
+- [ ] SRE Lead: **\*\*\*\***\_\_\_**\*\*\*\*** Date: **\_\_\_**
+- [ ] Engineering Manager: \***\*\_\*\*** Date: **\_\_\_**
+- [ ] Product Owner: **\*\***\_\_**\*\*** Date: **\_\_\_**
 ```
 
 ---

@@ -243,50 +243,50 @@ class FederationMesh:
         self.save_mesh_config(self.mesh_config)
     
     def health_check_peer(self, peer_id: str) -> bool:
-        \"\"\"Check if peer is healthy\"\"\"
+        """Check if peer is healthy"""
         if peer_id not in self.peers:
             return False
         
         peer = self.peers[peer_id]
         try:
             resp = requests.get(
-                f\"{peer['url']}/health\",
+                f"{peer['url']}/health",
                 timeout=5
             )
             
             if resp.status_code == 200:
-                peer[\"failure_count\"] = 0
-                peer[\"last_seen\"] = datetime.now(timezone.utc).isoformat()
-                peer[\"status\"] = \"active\"
+                peer["failure_count"] = 0
+                peer["last_seen"] = datetime.now(timezone.utc).isoformat()
+                peer["status"] = "active"
                 return True
             else:
-                peer[\"failure_count\"] = peer.get(\"failure_count\", 0) + 1
-                if peer[\"failure_count\"] >= self.mesh_config.get(\"load_balancing\", {}).get(\"failure_threshold\", 3):
-                    peer[\"status\"] = \"failed\"
+                peer["failure_count"] = peer.get("failure_count", 0) + 1
+                if peer["failure_count"] >= self.mesh_config.get("load_balancing", {}).get("failure_threshold", 3):
+                    peer["status"] = "failed"
                 return False
         except Exception:
-            peer[\"failure_count\"] = peer.get(\"failure_count\", 0) + 1
-            if peer[\"failure_count\"] >= 3:
-                peer[\"status\"] = \"failed\"
+            peer["failure_count"] = peer.get("failure_count", 0) + 1
+            if peer["failure_count"] >= 3:
+                peer["status"] = "failed"
             return False
     
     def get_best_node_for_task(self, task_type: str, requirements: Dict = None) -> Optional[str]:
-        \"\"\"Select best node for task using intelligent load balancing\"\"\"
+        """Select best node for task using intelligent load balancing"""
         candidates = []
         
         # Include self as candidate
         self_load = self.calculate_load_score()
         if self_load < 90:  # Only if not overloaded
             candidates.append({
-                \"node_id\": self.node_id,
-                \"load_score\": self_load,
-                \"is_local\": True,
-                \"capabilities\": self.capabilities
+                "node_id": self.node_id,
+                "load_score": self_load,
+                "is_local": True,
+                "capabilities": self.capabilities
             })
         
         # Check healthy peers
         for peer_id, peer_info in self.peers.items():
-            if peer_info.get(\"status\") != \"active\":
+            if peer_info.get("status") != "active":
                 continue
                 
             if not self.health_check_peer(peer_id):
@@ -295,19 +295,19 @@ class FederationMesh:
             try:
                 # Get peer capabilities
                 resp = requests.get(
-                    f\"{peer_info['url']}/node/capabilities\",
+                    f"{peer_info['url']}/node/capabilities",
                     timeout=3
                 )
                 if resp.status_code == 200:
                     peer_caps = resp.json()
-                    load_score = peer_caps.get(\"load_metrics\", {}).get(\"load_score\", 50)
+                    load_score = peer_caps.get("load_metrics", {}).get("load_score", 50)
                     
                     candidates.append({
-                        \"node_id\": peer_id,
-                        \"load_score\": load_score,
-                        \"is_local\": False,
-                        \"capabilities\": peer_caps,
-                        \"url\": peer_info[\"url\"]
+                        "node_id": peer_id,
+                        "load_score": load_score,
+                        "is_local": False,
+                        "capabilities": peer_caps,
+                        "url": peer_info["url"]
                     })
             except Exception:
                 pass
@@ -317,32 +317,32 @@ class FederationMesh:
         
         # Score candidates based on multiple factors
         for candidate in candidates:
-            score = 100 - candidate[\"load_score\"]  # Lower load = higher score
+            score = 100 - candidate["load_score"]  # Lower load = higher score
             
             # Local preference bonus
-            if candidate[\"is_local\"]:
+            if candidate["is_local"]:
                 score += 20
             
             # Task-specific specialization bonus
-            specializations = candidate[\"capabilities\"].get(\"specializations\", [])
+            specializations = candidate["capabilities"].get("specializations", [])
             if task_type in specializations:
                 score += 15
             
             # Model availability bonus
-            available_models = candidate[\"capabilities\"].get(\"available_models\", [])
+            available_models = candidate["capabilities"].get("available_models", [])
             if len(available_models) > 3:
                 score += 10
             
-            candidate[\"final_score\"] = score
+            candidate["final_score"] = score
         
         # Select best candidate
-        best_candidate = max(candidates, key=lambda x: x[\"final_score\"])
-        return best_candidate[\"node_id\"]
+        best_candidate = max(candidates, key=lambda x: x["final_score"])
+        return best_candidate["node_id"]
     
     def execute_remote_task(self, peer_id: str, task_data: Dict) -> Dict:
-        \"\"\"Execute task on remote peer node\"\"\"
+        """Execute task on remote peer node"""
         if peer_id not in self.peers:
-            return {\"error\": \"Peer not found\"}
+            return {"error": "Peer not found"}
         
         peer = self.peers[peer_id]
         
@@ -353,14 +353,14 @@ class FederationMesh:
             signature = self.create_hmac_signature(payload, timestamp)
             
             headers = {
-                \"Content-Type\": \"application/json\",
-                \"X-Timestamp\": timestamp,
-                \"X-Signature\": signature,
-                \"X-Node-ID\": self.node_id
+                "Content-Type": "application/json",
+                "X-Timestamp": timestamp,
+                "X-Signature": signature,
+                "X-Node-ID": self.node_id
             }
             
             resp = requests.post(
-                f\"{peer['url']}/task/execute\",
+                f"{peer['url']}/task/execute",
                 data=payload,
                 headers=headers,
                 timeout=300  # 5 minutes for task execution
@@ -370,14 +370,14 @@ class FederationMesh:
                 return resp.json()
             else:
                 return {
-                    \"error\": f\"Remote execution failed: {resp.status_code}\",
-                    \"response\": resp.text[:200]
+                    "error": f"Remote execution failed: {resp.status_code}",
+                    "response": resp.text[:200]
                 }
         except Exception as e:
-            return {\"error\": f\"Remote execution error: {str(e)}\"}
+            return {"error": f"Remote execution error: {str(e)}"}
     
     def start_mesh_server(self):
-        \"\"\"Start federation mesh server\"\"\"
+        """Start federation mesh server"""
         from http.server import HTTPServer, BaseHTTPRequestHandler
         import threading
         
@@ -387,32 +387,32 @@ class FederationMesh:
                 super().__init__(*args, **kwargs)
             
             def do_GET(self):
-                if self.path == \"/health\":
+                if self.path == "/health":
                     self.send_response(200)
-                    self.send_header(\"Content-Type\", \"application/json\")
+                    self.send_header("Content-Type", "application/json")
                     self.end_headers()
                     response = {
-                        \"status\": \"healthy\",
-                        \"node_id\": self.mesh.node_id,
-                        \"timestamp\": datetime.now(timezone.utc).isoformat()
+                        "status": "healthy",
+                        "node_id": self.mesh.node_id,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     }
                     self.wfile.write(json.dumps(response).encode())
                     
-                elif self.path == \"/node/info\":
+                elif self.path == "/node/info":
                     self.send_response(200)
-                    self.send_header(\"Content-Type\", \"application/json\")
+                    self.send_header("Content-Type", "application/json")
                     self.end_headers()
                     response = {
-                        \"node_id\": self.mesh.node_id,
-                        \"capabilities\": self.mesh.capabilities,
-                        \"mesh_version\": \"2.0\",
-                        \"timestamp\": datetime.now(timezone.utc).isoformat()
+                        "node_id": self.mesh.node_id,
+                        "capabilities": self.mesh.capabilities,
+                        "mesh_version": "2.0",
+                        "timestamp": datetime.now(timezone.utc).isoformat()
                     }
                     self.wfile.write(json.dumps(response).encode())
                     
-                elif self.path == \"/node/capabilities\":
+                elif self.path == "/node/capabilities":
                     self.send_response(200)
-                    self.send_header(\"Content-Type\", \"application/json\")
+                    self.send_header("Content-Type", "application/json")
                     self.end_headers()
                     caps = self.mesh.load_node_capabilities()  # Fresh data
                     self.wfile.write(json.dumps(caps).encode())
@@ -421,17 +421,17 @@ class FederationMesh:
                     self.end_headers()
             
             def do_POST(self):
-                if self.path == \"/task/execute\":
+                if self.path == "/task/execute":
                     # Handle remote task execution
-                    content_length = int(self.headers.get(\"Content-Length\", 0))
+                    content_length = int(self.headers.get("Content-Length", 0))
                     post_data = self.rfile.read(content_length)
                     
                     # Verify HMAC if required
-                    timestamp = self.headers.get(\"X-Timestamp\")
-                    signature = self.headers.get(\"X-Signature\")
-                    node_id = self.headers.get(\"X-Node-ID\")
+                    timestamp = self.headers.get("X-Timestamp")
+                    signature = self.headers.get("X-Signature")
+                    node_id = self.headers.get("X-Node-ID")
                     
-                    if self.mesh.mesh_config.get(\"security\", {}).get(\"require_hmac\", True):
+                    if self.mesh.mesh_config.get("security", {}).get("require_hmac", True):
                         if not timestamp or not signature or not node_id:
                             self.send_response(401)
                             self.end_headers()
@@ -442,7 +442,7 @@ class FederationMesh:
                             self.end_headers()
                             return
                         
-                        peer_secret = self.mesh.peers[node_id].get(\"secret_key\", \"\")
+                        peer_secret = self.mesh.peers[node_id].get("secret_key", "")
                         if not self.mesh.verify_hmac_signature(post_data, timestamp, signature, peer_secret):
                             self.send_response(401)
                             self.end_headers()
@@ -453,23 +453,23 @@ class FederationMesh:
                         
                         # Execute task locally (simplified)
                         result = {
-                            \"status\": \"completed\",
-                            \"node_id\": self.mesh.node_id,
-                            \"task_id\": task_data.get(\"task_id\", \"unknown\"),
-                            \"result\": \"Task executed successfully\",
-                            \"timestamp\": datetime.now(timezone.utc).isoformat()
+                            "status": "completed",
+                            "node_id": self.mesh.node_id,
+                            "task_id": task_data.get("task_id", "unknown"),
+                            "result": "Task executed successfully",
+                            "timestamp": datetime.now(timezone.utc).isoformat()
                         }
                         
                         self.send_response(200)
-                        self.send_header(\"Content-Type\", \"application/json\")
+                        self.send_header("Content-Type", "application/json")
                         self.end_headers()
                         self.wfile.write(json.dumps(result).encode())
                         
                     except Exception as e:
                         self.send_response(500)
-                        self.send_header(\"Content-Type\", \"application/json\")
+                        self.send_header("Content-Type", "application/json")
                         self.end_headers()
-                        error_response = {\"error\": str(e)}
+                        error_response = {"error": str(e)}
                         self.wfile.write(json.dumps(error_response).encode())
                 else:
                     self.send_response(404)
@@ -478,11 +478,11 @@ class FederationMesh:
         # Create handler with mesh instance
         handler = lambda *args, **kwargs: MeshHandler(*args, mesh_instance=self, **kwargs)
         
-        port = self.mesh_config.get(\"mesh_port\", 8900)
-        server = HTTPServer((\"\", port), handler)
+        port = self.mesh_config.get("mesh_port", 8900)
+        server = HTTPServer(("", port), handler)
         
         def run_server():
-            print(f\"🌐 Federation mesh server starting on port {port}\")
+            print(f"🌐 Federation mesh server starting on port {port}")
             server.serve_forever()
         
         server_thread = threading.Thread(target=run_server, daemon=True)
@@ -491,23 +491,23 @@ class FederationMesh:
         return server
     
     def mesh_status(self) -> Dict:
-        \"\"\"Get comprehensive mesh status\"\"\"
+        """Get comprehensive mesh status"""
         return {
-            \"node_id\": self.node_id,
-            \"mesh_version\": \"2.0\",
-            \"capabilities\": self.capabilities,
-            \"peers\": {
+            "node_id": self.node_id,
+            "mesh_version": "2.0",
+            "capabilities": self.capabilities,
+            "peers": {
                 peer_id: {
-                    \"status\": peer_info.get(\"status\", \"unknown\"),
-                    \"last_seen\": peer_info.get(\"last_seen\"),
-                    \"failure_count\": peer_info.get(\"failure_count\", 0)
+                    "status": peer_info.get("status", "unknown"),
+                    "last_seen": peer_info.get("last_seen"),
+                    "failure_count": peer_info.get("failure_count", 0)
                 }
                 for peer_id, peer_info in self.peers.items()
             },
-            \"active_peers\": len([p for p in self.peers.values() if p.get(\"status\") == \"active\"]),
-            \"total_peers\": len(self.peers),
-            \"load_metrics\": self.get_current_load(),
-            \"timestamp\": datetime.now(timezone.utc).isoformat()
+            "active_peers": len([p for p in self.peers.values() if p.get("status") == "active"]),
+            "total_peers": len(self.peers),
+            "load_metrics": self.get_current_load(),
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
 def main():
@@ -516,55 +516,55 @@ def main():
     mesh = FederationMesh()
     
     if len(sys.argv) < 2:
-        print(\"Usage: federation_mesh.py [status|discover|start_server|add_peer|execute]\")
+        print("Usage: federation_mesh.py [status|discover|start_server|add_peer|execute]")
         return
     
     command = sys.argv[1]
     
-    if command == \"status\":
+    if command == "status":
         status = mesh.mesh_status()
         print(json.dumps(status, indent=2))
     
-    elif command == \"discover\":
-        print(\"🔍 Discovering peers on local network...\")
+    elif command == "discover":
+        print("🔍 Discovering peers on local network...")
         discovered = mesh.discover_peers()
         if discovered:
-            print(f\"Found {len(discovered)} potential peers:\")
+            print(f"Found {len(discovered)} potential peers:")
             for peer_id, info in discovered.items():
-                print(f\"  {peer_id}: {info['url']}\")
+                print(f"  {peer_id}: {info['url']}")
         else:
-            print(\"No peers discovered on local network\")
+            print("No peers discovered on local network")
     
-    elif command == \"start_server\":
+    elif command == "start_server":
         server = mesh.start_mesh_server()
-        print(\"Mesh server started. Press Ctrl+C to stop.\")
+        print("Mesh server started. Press Ctrl+C to stop.")
         try:
             while True:
                 time.sleep(1)
         except KeyboardInterrupt:
-            print(\"\\nStopping mesh server...\")
+            print("\\nStopping mesh server...")
     
-    elif command == \"add_peer\" and len(sys.argv) >= 4:
+    elif command == "add_peer" and len(sys.argv) >= 4:
         peer_id = sys.argv[2]
         peer_url = sys.argv[3]
         peer_secret = sys.argv[4] if len(sys.argv) > 4 else mesh.generate_secret()
         
         mesh.register_peer(peer_id, peer_url, peer_secret)
-        print(f\"✅ Registered peer {peer_id} at {peer_url}\")
+        print(f"✅ Registered peer {peer_id} at {peer_url}")
     
-    elif command == \"execute\" and len(sys.argv) >= 4:
+    elif command == "execute" and len(sys.argv) >= 4:
         peer_id = sys.argv[2]
         task_type = sys.argv[3]
         
         task_data = {
-            \"task_id\": f\"task_{int(time.time())}\",
-            \"task_type\": task_type,
-            \"parameters\": {},
-            \"timestamp\": datetime.now(timezone.utc).isoformat()
+            "task_id": f"task_{int(time.time())}",
+            "task_type": task_type,
+            "parameters": {},
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
         result = mesh.execute_remote_task(peer_id, task_data)
         print(json.dumps(result, indent=2))
 
-if __name__ == \"__main__\":
+if __name__ == "__main__":
     main()

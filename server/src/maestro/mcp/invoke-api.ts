@@ -85,12 +85,10 @@ router.post(
         } catch {}
         span.setAttribute('error', true);
         span.end();
-        res
-          .status(500)
-          .json({
-            error: 'invoke_failed',
-            message: err?.message || 'Unknown error',
-          });
+        res.status(500).json({
+          error: 'invoke_failed',
+          message: err?.message || 'Unknown error',
+        });
       }
     });
   },

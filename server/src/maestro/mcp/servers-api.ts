@@ -62,12 +62,10 @@ router.post('/servers', requireAdminMCP, async (req, res) => {
       .json({ error: 'url must be ws:// or wss:// WebSocket endpoint' });
   }
   if (!isHostAllowed(url)) {
-    return res
-      .status(400)
-      .json({
-        error: 'host_not_allowed',
-        message: 'URL host not in MCP_ALLOWED_HOSTS',
-      });
+    return res.status(400).json({
+      error: 'host_not_allowed',
+      message: 'URL host not in MCP_ALLOWED_HOSTS',
+    });
   }
   try {
     const created = await mcpServersRepo.create({
@@ -133,12 +131,10 @@ router.put('/servers/:id', requireAdminMCP, async (req, res) => {
       .json({ error: 'url must be ws:// or wss:// WebSocket endpoint' });
   }
   if (url && !isHostAllowed(url)) {
-    return res
-      .status(400)
-      .json({
-        error: 'host_not_allowed',
-        message: 'URL host not in MCP_ALLOWED_HOSTS',
-      });
+    return res.status(400).json({
+      error: 'host_not_allowed',
+      message: 'URL host not in MCP_ALLOWED_HOSTS',
+    });
   }
   try {
     const updated = await mcpServersRepo.update(req.params.id, {

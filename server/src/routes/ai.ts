@@ -634,12 +634,10 @@ router.post(
       logger.error(
         `Error processing deception feedback: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
-      res
-        .status(500)
-        .json({
-          error: 'Failed to process feedback',
-          message: 'Internal server error',
-        });
+      res.status(500).json({
+        error: 'Failed to process feedback',
+        message: 'Internal server error',
+      });
     }
   },
 );

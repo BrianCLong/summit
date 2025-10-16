@@ -1,5 +1,5 @@
 import { getNeo4jDriver, isNeo4jMockMode } from '../../db/neo4j.js';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 import pino from 'pino';
 import {
   pubsub,

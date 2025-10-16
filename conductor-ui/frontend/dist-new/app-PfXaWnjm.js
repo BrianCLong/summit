@@ -59555,28 +59555,26 @@ function Oue() {
             title: 'Live Runs',
             children: h.jsx('div', {
               className: 'text-sm text-slate-600',
-              children: t?.runs
-                ?.slice(0, 5)
-                .map((r) =>
-                  h.jsxs(
-                    'div',
-                    {
-                      className:
-                        'flex items-center justify-between border-b py-2 last:border-0',
-                      children: [
-                        h.jsx('span', {
-                          className: 'font-mono text-xs',
-                          children: r.id,
-                        }),
-                        h.jsx('span', {
-                          className: 'rounded bg-slate-100 px-2 py-0.5 text-xs',
-                          children: r.status,
-                        }),
-                      ],
-                    },
-                    r.id,
-                  ),
+              children: t?.runs?.slice(0, 5).map((r) =>
+                h.jsxs(
+                  'div',
+                  {
+                    className:
+                      'flex items-center justify-between border-b py-2 last:border-0',
+                    children: [
+                      h.jsx('span', {
+                        className: 'font-mono text-xs',
+                        children: r.id,
+                      }),
+                      h.jsx('span', {
+                        className: 'rounded bg-slate-100 px-2 py-0.5 text-xs',
+                        children: r.status,
+                      }),
+                    ],
+                  },
+                  r.id,
                 ),
+              ),
             }),
           }),
           h.jsx(jr, {
@@ -59593,36 +59591,34 @@ function Oue() {
         footer: 'Provenance and diffs are recorded for each change.',
         children: h.jsx('div', {
           className: 'text-sm text-slate-600',
-          children: t?.changes
-            ?.slice(0, 6)
-            .map((r, n) =>
-              h.jsxs(
-                'div',
-                {
-                  className:
-                    'grid grid-cols-[140px_1fr] gap-3 border-b py-2 last:border-0',
-                  children: [
-                    h.jsx('span', {
-                      className: 'font-mono text-xs text-slate-500',
-                      children: r.at,
-                    }),
-                    h.jsxs('div', {
-                      children: [
-                        h.jsx('div', {
-                          className: 'text-slate-800',
-                          children: r.title,
-                        }),
-                        h.jsx('div', {
-                          className: 'text-xs text-slate-500',
-                          children: r.by,
-                        }),
-                      ],
-                    }),
-                  ],
-                },
-                n,
-              ),
+          children: t?.changes?.slice(0, 6).map((r, n) =>
+            h.jsxs(
+              'div',
+              {
+                className:
+                  'grid grid-cols-[140px_1fr] gap-3 border-b py-2 last:border-0',
+                children: [
+                  h.jsx('span', {
+                    className: 'font-mono text-xs text-slate-500',
+                    children: r.at,
+                  }),
+                  h.jsxs('div', {
+                    children: [
+                      h.jsx('div', {
+                        className: 'text-slate-800',
+                        children: r.title,
+                      }),
+                      h.jsx('div', {
+                        className: 'text-xs text-slate-500',
+                        children: r.by,
+                      }),
+                    ],
+                  }),
+                ],
+              },
+              n,
             ),
+          ),
         }),
       }),
     ],

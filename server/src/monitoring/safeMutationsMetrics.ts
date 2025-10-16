@@ -3,13 +3,11 @@
  * Comprehensive observability for budget enforcement, rate limiting, and rollbacks
  */
 
-import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
-import { metrics } from '@opentelemetry/api';
+import { SpanStatusCode, SpanKind, tracer } from '../observability/telemetry.js';
 import { register, Counter, Histogram, Gauge } from 'prom-client';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
-// OTEL tracer for safe mutations
-const tracer = trace.getTracer('intelgraph-safe-mutations', '1.0.0');
+// No-op tracer provided by observability/telemetry.ts
 
 // Prometheus metrics
 const budgetDenialsTotal = new Counter({

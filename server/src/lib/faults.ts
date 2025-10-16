@@ -454,12 +454,10 @@ export function createFaultControlMiddleware() {
         FaultScenarios[scenario as keyof typeof FaultScenarios]();
         res.json({ success: true, scenario, stats: getFaultStats() });
       } else {
-        res
-          .status(400)
-          .json({
-            error: 'Unknown scenario',
-            availableScenarios: Object.keys(FaultScenarios),
-          });
+        res.status(400).json({
+          error: 'Unknown scenario',
+          availableScenarios: Object.keys(FaultScenarios),
+        });
       }
     } else {
       next();

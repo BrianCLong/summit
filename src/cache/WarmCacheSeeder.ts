@@ -97,30 +97,42 @@ export class WarmCacheSeeder extends EventEmitter {
     this.loadHistoricalData();
   }
 
-  async generateSeedingPlan(targets: string[], buildContext: any): Promise<SeedingPlan> {
+  async generateSeedingPlan(
+    targets: string[],
+    buildContext: any,
+  ): Promise<SeedingPlan> {
     this.emit('status', 'Generating cache seeding plan...');
 
     // Step 1: Analyze historical cache usage
     const historicalEntries = await this.analyzeHistoricalUsage(targets);
-    
+
     // Step 2: Use predictive model to identify likely cache needs
-    const predictedEntries = await this.predictCacheNeeds(targets, buildContext);
-    
+    const predictedEntries = await this.predictCacheNeeds(
+      targets,
+      buildContext,
+    );
+
     // Step 3: Merge and prioritize entries
-    const allEntries = this.mergeAndPrioritizeEntries(historicalEntries, predictedEntries);
-    
+    const allEntries = this.mergeAndPrioritizeEntries(
+      historicalEntries,
+      predictedEntries,
+    );
+
     // Step 4: Apply quota constraints
     const constrainedEntries = await this.applyQuotaConstraints(allEntries);
-    
+
     // Step 5: Organize into phases
     const phases = this.organizeSeedingPhases(constrainedEntries);
 
     const plan: SeedingPlan = {
       entries: constrainedEntries,
       totalSize: constrainedEntries.reduce((sum, entry) => sum + entry.size, 0),
-      estimatedTime: phases.reduce((sum, phase) => sum + phase.estimatedDuration, 0),
+      estimatedTime: phases.reduce(
+        (sum, phase) => sum + phase.estimatedDuration,
+        0,
+      ),
       quotaUtilization: this.calculateQuotaUtilization(constrainedEntries),
-      phases
+      phases,
     };
 
     this.emit('plan-generated', plan);
@@ -129,7 +141,7 @@ export class WarmCacheSeeder extends EventEmitter {
 
   async executeSeedingPlan(plan: SeedingPlan): Promise<SeedingMetrics> {
     this.emit('seeding-start', plan);
-    
+
     const startTime = Date.now();
     const metrics: SeedingMetrics = {
       totalSeeded: 0,
@@ -138,18 +150,18 @@ export class WarmCacheSeeder extends EventEmitter {
       successRate: 0,
       avgSeedTime: 0,
       cacheHitImprovement: 0,
-      buildSpeedupRatio: 1.0
+      buildSpeedupRatio: 1.0,
     };
 
     try {
       for (const phase of plan.phases) {
         await this.executePhase(phase, metrics);
-        
+
         // Check quota after each phase
         if (this.currentQuotaUsage > this.quotaConfig.dailyQuota * 0.9) {
           this.emit('quota-warning', {
             usage: this.currentQuotaUsage,
-            limit: this.quotaConfig.dailyQuota
+            limit: this.quotaConfig.dailyQuota,
           });
         }
       }
@@ -160,14 +172,15 @@ export class WarmCacheSeeder extends EventEmitter {
 
       this.emit('seeding-complete', metrics);
       return metrics;
-
     } catch (error) {
       this.emit('seeding-error', error);
       throw error;
     }
   }
 
-  async trainPredictiveModel(historicalBuilds?: HistoricalBuild[]): Promise<void> {
+  async trainPredictiveModel(
+    historicalBuilds?: HistoricalBuild[],
+  ): Promise<void> {
     this.emit('status', 'Training predictive cache model...');
 
     const trainingData = historicalBuilds || this.historicalBuilds;
@@ -176,21 +189,21 @@ export class WarmCacheSeeder extends EventEmitter {
     }
 
     // Feature extraction: convert builds to feature vectors
-    const features = trainingData.map(build => this.extractFeatures(build));
-    
+    const features = trainingData.map((build) => this.extractFeatures(build));
+
     // Simple pattern-based model (in production, would use ML libraries)
     const patterns = this.identifyUsagePatterns(features);
-    
+
     this.predictiveModel = {
       name: 'cache-usage-predictor-v1',
       accuracy: await this.evaluateModelAccuracy(patterns, trainingData),
       predictions: [],
-      trainingData
+      trainingData,
     };
 
     this.emit('model-trained', {
       accuracy: this.predictiveModel.accuracy,
-      patterns: patterns.length
+      patterns: patterns.length,
     });
   }
 
@@ -204,56 +217,65 @@ export class WarmCacheSeeder extends EventEmitter {
       ...this.quotaConfig,
       dailyQuota: Math.max(
         recommendations.recommendedDailyQuota,
-        this.quotaConfig.dailyQuota * 0.8 // Don't reduce by more than 20%
+        this.quotaConfig.dailyQuota * 0.8, // Don't reduce by more than 20%
       ),
       hourlyQuota: Math.min(
         recommendations.recommendedHourlyQuota,
-        this.quotaConfig.hourlyQuota * 1.2 // Don't increase by more than 20%
-      )
+        this.quotaConfig.hourlyQuota * 1.2, // Don't increase by more than 20%
+      ),
     };
 
     this.emit('quota-optimized', {
       original: this.quotaConfig,
       optimized: optimizedConfig,
-      recommendations
+      recommendations,
     });
 
     return optimizedConfig;
   }
 
-  async measureCacheImpact(beforeMetrics: any, afterMetrics: any): Promise<number> {
-    const buildTimeImprovement = (beforeMetrics.avgBuildTime - afterMetrics.avgBuildTime) / beforeMetrics.avgBuildTime;
-    const cacheHitRateImprovement = afterMetrics.cacheHitRate - beforeMetrics.cacheHitRate;
-    const queueTimeReduction = (beforeMetrics.avgQueueTime - afterMetrics.avgQueueTime) / beforeMetrics.avgQueueTime;
+  async measureCacheImpact(
+    beforeMetrics: any,
+    afterMetrics: any,
+  ): Promise<number> {
+    const buildTimeImprovement =
+      (beforeMetrics.avgBuildTime - afterMetrics.avgBuildTime) /
+      beforeMetrics.avgBuildTime;
+    const cacheHitRateImprovement =
+      afterMetrics.cacheHitRate - beforeMetrics.cacheHitRate;
+    const queueTimeReduction =
+      (beforeMetrics.avgQueueTime - afterMetrics.avgQueueTime) /
+      beforeMetrics.avgQueueTime;
 
-    const overallImpact = (
+    const overallImpact =
       buildTimeImprovement * 0.4 +
       cacheHitRateImprovement * 0.4 +
-      queueTimeReduction * 0.2
-    );
+      queueTimeReduction * 0.2;
 
     this.emit('impact-measured', {
       buildTimeImprovement,
       cacheHitRateImprovement,
       queueTimeReduction,
-      overallImpact
+      overallImpact,
     });
 
     return overallImpact;
   }
 
-  private async analyzeHistoricalUsage(targets: string[]): Promise<CacheEntry[]> {
+  private async analyzeHistoricalUsage(
+    targets: string[],
+  ): Promise<CacheEntry[]> {
     const entries: CacheEntry[] = [];
     const targetSet = new Set(targets);
 
     for (const build of this.historicalBuilds) {
       // Find builds that used similar targets
-      const relevantTargets = build.targets.filter(t => targetSet.has(t));
+      const relevantTargets = build.targets.filter((t) => targetSet.has(t));
       if (relevantTargets.length === 0) continue;
 
       // Extract cache entries from successful cache hits
       for (const hit of build.cacheHits) {
-        const existing = entries.find(e => e.key === hit);
+        const existing = entries.find((e) => e.key === hit);
         if (existing) {
           existing.hitCount++;
           existing.lastAccessed = build.timestamp;
@@ -266,7 +288,7 @@ export class WarmCacheSeeder extends EventEmitter {
             hitCount: 1,
             buildTargets: relevantTargets,
             dependencies: this.extractDependencies(hit),
-            priority: this.calculatePriority(hit, relevantTargets)
+            priority: this.calculatePriority(hit, relevantTargets),
           });
         }
       }
@@ -274,25 +296,34 @@ export class WarmCacheSeeder extends EventEmitter {
 
     // Sort by hit count and recency
     return entries.sort((a, b) => {
-      const scoreA = a.hitCount * (1 / Math.max(1, Date.now() - a.lastAccessed.getTime()));
-      const scoreB = b.hitCount * (1 / Math.max(1, Date.now() - b.lastAccessed.getTime()));
+      const scoreA =
+        a.hitCount * (1 / Math.max(1, Date.now() - a.lastAccessed.getTime()));
+      const scoreB =
+        b.hitCount * (1 / Math.max(1, Date.now() - b.lastAccessed.getTime()));
       return scoreB - scoreA;
     });
   }
 
-  private async predictCacheNeeds(targets: string[], buildContext: any): Promise<CacheEntry[]> {
+  private async predictCacheNeeds(
+    targets: string[],
+    buildContext: any,
+  ): Promise<CacheEntry[]> {
     if (!this.predictiveModel) {
       await this.trainPredictiveModel();
     }
 
     const predictions: CacheEntry[] = [];
-    
+
     // Analyze build context for cache prediction
-    const contextFeatures = this.extractBuildContextFeatures(targets, buildContext);
-    
+    const contextFeatures = this.extractBuildContextFeatures(
+      targets,
+      buildContext,
+    );
+
     // Use pattern matching to predict likely cache needs
     for (const pattern of this.predictiveModel?.predictions || []) {
-      if (pattern.probability > 0.7) { // High confidence threshold
+      if (pattern.probability > 0.7) {
+        // High confidence threshold
         predictions.push({
           key: pattern.targetPath,
           size: pattern.expectedSize,
@@ -301,7 +332,7 @@ export class WarmCacheSeeder extends EventEmitter {
           hitCount: 0,
           buildTargets: targets,
           dependencies: this.extractDependencies(pattern.targetPath),
-          priority: pattern.priority
+          priority: pattern.priority,
         });
       }
     }
@@ -309,7 +340,10 @@ export class WarmCacheSeeder extends EventEmitter {
     return predictions;
   }
 
-  private mergeAndPrioritizeEntries(historical: CacheEntry[], predicted: CacheEntry[]): CacheEntry[] {
+  private mergeAndPrioritizeEntries(
+    historical: CacheEntry[],
+    predicted: CacheEntry[],
+  ): CacheEntry[] {
     const keyMap = new Map<string, CacheEntry>();
 
     // Add historical entries
@@ -338,7 +372,9 @@ export class WarmCacheSeeder extends EventEmitter {
     });
   }
 
-  private async applyQuotaConstraints(entries: CacheEntry[]): Promise<CacheEntry[]> {
+  private async applyQuotaConstraints(
+    entries: CacheEntry[],
+  ): Promise<CacheEntry[]> {
     const availableQuota = this.quotaConfig.dailyQuota - this.currentQuotaUsage;
     const constrainedEntries: CacheEntry[] = [];
     let usedQuota = 0;
@@ -350,7 +386,10 @@ export class WarmCacheSeeder extends EventEmitter {
       if (usedQuota + entry.size <= workingQuota) {
         constrainedEntries.push(entry);
         usedQuota += entry.size;
-      } else if (entry.priority === 'critical' && usedQuota + entry.size <= availableQuota) {
+      } else if (
+        entry.priority === 'critical' &&
+        usedQuota + entry.size <= availableQuota
+      ) {
         // Use emergency quota for critical entries
         constrainedEntries.push(entry);
         usedQuota += entry.size;
@@ -364,55 +403,62 @@ export class WarmCacheSeeder extends EventEmitter {
 
   private organizeSeedingPhases(entries: CacheEntry[]): SeedingPhase[] {
     const phases: SeedingPhase[] = [];
-    
+
     // Phase 1: Critical and high priority entries
-    const criticalEntries = entries.filter(e => e.priority === 'critical' || e.priority === 'high');
+    const criticalEntries = entries.filter(
+      (e) => e.priority === 'critical' || e.priority === 'high',
+    );
     if (criticalEntries.length > 0) {
       phases.push({
         name: 'critical-seeding',
         entries: criticalEntries,
         parallelism: 8,
         estimatedDuration: this.estimatePhaseDuration(criticalEntries, 8),
-        dependencies: []
+        dependencies: [],
       });
     }
 
     // Phase 2: Medium priority entries
-    const mediumEntries = entries.filter(e => e.priority === 'medium');
+    const mediumEntries = entries.filter((e) => e.priority === 'medium');
     if (mediumEntries.length > 0) {
       phases.push({
         name: 'medium-seeding',
         entries: mediumEntries,
         parallelism: 4,
         estimatedDuration: this.estimatePhaseDuration(mediumEntries, 4),
-        dependencies: phases.length > 0 ? ['critical-seeding'] : []
+        dependencies: phases.length > 0 ? ['critical-seeding'] : [],
       });
     }
 
     // Phase 3: Low priority entries
-    const lowEntries = entries.filter(e => e.priority === 'low');
+    const lowEntries = entries.filter((e) => e.priority === 'low');
     if (lowEntries.length > 0) {
       phases.push({
         name: 'low-seeding',
         entries: lowEntries,
         parallelism: 2,
         estimatedDuration: this.estimatePhaseDuration(lowEntries, 2),
-        dependencies: phases.map(p => p.name).filter(name => name !== 'low-seeding')
+        dependencies: phases
+          .map((p) => p.name)
+          .filter((name) => name !== 'low-seeding'),
       });
     }
 
     return phases;
   }
 
-  private async executePhase(phase: SeedingPhase, metrics: SeedingMetrics): Promise<void> {
+  private async executePhase(
+    phase: SeedingPhase,
+    metrics: SeedingMetrics,
+  ): Promise<void> {
     this.emit('phase-start', phase);
 
-    const jobs: SeedingJob[] = phase.entries.map(entry => ({
+    const jobs: SeedingJob[] = phase.entries.map((entry) => ({
       id: `${phase.name}-${entry.key}`,
       phase: phase.name,
       entry,
       status: 'pending',
-      retryCount: 0
+      retryCount: 0,
     }));
 
     // Execute jobs with controlled parallelism
@@ -421,7 +467,7 @@ export class WarmCacheSeeder extends EventEmitter {
 
     const executeJob = async (): Promise<void> => {
       if (jobIndex >= jobs.length) return;
-      
+
       const job = jobs[jobIndex++];
       this.seedingJobs.set(job.id, job);
 
@@ -440,7 +486,6 @@ export class WarmCacheSeeder extends EventEmitter {
         this.currentQuotaUsage += job.entry.size;
 
         this.emit('job-complete', job);
-
       } catch (error) {
         job.error = error instanceof Error ? error.message : 'Unknown error';
         job.status = 'failed';
@@ -457,24 +502,26 @@ export class WarmCacheSeeder extends EventEmitter {
     };
 
     // Start parallel execution
-    await Promise.all(semaphore.map(async () => {
-      while (jobIndex < jobs.length) {
-        await executeJob();
-      }
-    }));
+    await Promise.all(
+      semaphore.map(async () => {
+        while (jobIndex < jobs.length) {
+          await executeJob();
+        }
+      }),
+    );
 
     this.emit('phase-complete', {
       phase,
-      completed: jobs.filter(j => j.status === 'completed').length,
-      failed: jobs.filter(j => j.status === 'failed').length
+      completed: jobs.filter((j) => j.status === 'completed').length,
+      failed: jobs.filter((j) => j.status === 'failed').length,
     });
   }
 
   private async seedCacheEntry(entry: CacheEntry): Promise<void> {
     // Simulate cache seeding operation
-    const seedTime = Math.max(100, entry.size / 1024 / 1024 * 50); // 50ms per MB
-    
-    await new Promise(resolve => setTimeout(resolve, seedTime));
+    const seedTime = Math.max(100, (entry.size / 1024 / 1024) * 50); // 50ms per MB
+
+    await new Promise((resolve) => setTimeout(resolve, seedTime));
 
     // Simulate occasional failures
     if (Math.random() < 0.05) {
@@ -487,14 +534,20 @@ export class WarmCacheSeeder extends EventEmitter {
     return totalSize / this.quotaConfig.dailyQuota;
   }
 
-  private estimatePhaseDuration(entries: CacheEntry[], parallelism: number): number {
-    const totalWork = entries.reduce((sum, entry) => sum + this.estimateSeedTime(entry), 0);
+  private estimatePhaseDuration(
+    entries: CacheEntry[],
+    parallelism: number,
+  ): number {
+    const totalWork = entries.reduce(
+      (sum, entry) => sum + this.estimateSeedTime(entry),
+      0,
+    );
     return Math.ceil(totalWork / parallelism);
   }
 
   private estimateSeedTime(entry: CacheEntry): number {
     // Base time + size-dependent time
-    return 500 + (entry.size / 1024 / 1024 * 100); // 100ms per MB
+    return 500 + (entry.size / 1024 / 1024) * 100; // 100ms per MB
   }
 
   private estimateCacheEntrySize(key: string): number {
@@ -516,15 +569,25 @@ export class WarmCacheSeeder extends EventEmitter {
     return parts.slice(0, -1); // All but the last part
   }
 
-  private calculatePriority(key: string, targets: string[]): 'critical' | 'high' | 'medium' | 'low' {
+  private calculatePriority(
+    key: string,
+    targets: string[],
+  ): 'critical' | 'high' | 'medium' | 'low' {
     if (key.includes('core') || key.includes('main')) return 'critical';
-    if (targets.some(t => key.includes(t))) return 'high';
+    if (targets.some((t) => key.includes(t))) return 'high';
     if (key.includes('test') || key.includes('spec')) return 'medium';
     return 'low';
   }
 
-  private upgradePriority(current: 'critical' | 'high' | 'medium' | 'low'): 'critical' | 'high' | 'medium' | 'low' {
-    const upgradeMap = { low: 'medium', medium: 'high', high: 'critical', critical: 'critical' };
+  private upgradePriority(
+    current: 'critical' | 'high' | 'medium' | 'low',
+  ): 'critical' | 'high' | 'medium' | 'low' {
+    const upgradeMap = {
+      low: 'medium',
+      medium: 'high',
+      high: 'critical',
+      critical: 'critical',
+    };
     return upgradeMap[current];
   }
 
@@ -536,7 +599,7 @@ export class WarmCacheSeeder extends EventEmitter {
       build.duration,
       build.success ? 1 : 0,
       build.timestamp.getHours(), // Time of day
-      build.timestamp.getDay()    // Day of week
+      build.timestamp.getDay(), // Day of week
     ];
   }
 
@@ -545,11 +608,14 @@ export class WarmCacheSeeder extends EventEmitter {
     return [
       { pattern: 'morning-builds', frequency: 0.3 },
       { pattern: 'test-heavy', frequency: 0.2 },
-      { pattern: 'deploy-builds', frequency: 0.1 }
+      { pattern: 'deploy-builds', frequency: 0.1 },
     ];
   }
 
-  private async evaluateModelAccuracy(patterns: any[], testData: HistoricalBuild[]): Promise<number> {
+  private async evaluateModelAccuracy(
+    patterns: any[],
+    testData: HistoricalBuild[],
+  ): Promise<number> {
     // Simulate model accuracy evaluation
     return Math.random() * 0.3 + 0.7; // 70-100% accuracy
   }
@@ -557,10 +623,10 @@ export class WarmCacheSeeder extends EventEmitter {
   private extractBuildContextFeatures(targets: string[], context: any): any {
     return {
       targetCount: targets.length,
-      hasTests: targets.some(t => t.includes('test')),
-      hasDocs: targets.some(t => t.includes('doc')),
+      hasTests: targets.some((t) => t.includes('test')),
+      hasDocs: targets.some((t) => t.includes('doc')),
       timeOfDay: new Date().getHours(),
-      dayOfWeek: new Date().getDay()
+      dayOfWeek: new Date().getDay(),
     };
   }
 
@@ -568,14 +634,14 @@ export class WarmCacheSeeder extends EventEmitter {
     return {
       avgDailyUsage: this.quotaConfig.dailyQuota * 0.75,
       peakHourlyUsage: this.quotaConfig.hourlyQuota * 0.9,
-      efficiency: 0.82
+      efficiency: 0.82,
     };
   }
 
   private generateQuotaRecommendations(usage: any): any {
     return {
       recommendedDailyQuota: usage.avgDailyUsage * 1.2,
-      recommendedHourlyQuota: usage.peakHourlyUsage * 1.1
+      recommendedHourlyQuota: usage.peakHourlyUsage * 1.1,
     };
   }
 
@@ -585,12 +651,17 @@ export class WarmCacheSeeder extends EventEmitter {
     for (let i = 0; i < 100; i++) {
       this.historicalBuilds.push({
         buildId: `build-${i}`,
-        timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-        targets: [`target-${Math.floor(Math.random() * 10)}`, `target-${Math.floor(Math.random() * 10)}`],
+        timestamp: new Date(
+          Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+        ),
+        targets: [
+          `target-${Math.floor(Math.random() * 10)}`,
+          `target-${Math.floor(Math.random() * 10)}`,
+        ],
         cacheHits: [`cache-${Math.floor(Math.random() * 20)}`],
         cacheMisses: [`cache-${Math.floor(Math.random() * 5)}`],
         duration: Math.random() * 1800 + 300,
-        success: Math.random() > 0.1
+        success: Math.random() > 0.1,
       });
     }
   }

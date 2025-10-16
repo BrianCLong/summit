@@ -158,7 +158,10 @@ export const createApp = async () => {
     formatError: (err) => {
       // Don't expose internal errors in production
       if (process.env.NODE_ENV === 'production') {
-        logger.error({ err, stack: (err as any).stack }, `GraphQL Error: ${err.message}`);
+        logger.error(
+          { err, stack: (err as any).stack },
+          `GraphQL Error: ${err.message}`,
+        );
         return new Error('Internal server error');
       }
       return err as any;

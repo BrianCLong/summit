@@ -333,10 +333,10 @@ kubectl scale deployment ai-insights --replicas=0 --namespace production
 
 ### **PDV Completion Sign-off**
 
-- [ ] **T+15min Validation**: ****\_**** (SRE On-Call) Date: **\_\_\_**
-- [ ] **T+2hr Validation**: ****\_**** (Platform Lead) Date: **\_\_\_**
-- [ ] **T+8hr Validation**: ****\_**** (Business Hours Team) Date: **\_\_\_**
-- [ ] **T+24hr Final PDV**: ****\_**** (Release Manager) Date: **\_\_\_**
+- [ ] **T+15min Validation**: \***\*\_\*\*** (SRE On-Call) Date: **\_\_\_**
+- [ ] **T+2hr Validation**: \***\*\_\*\*** (Platform Lead) Date: **\_\_\_**
+- [ ] **T+8hr Validation**: \***\*\_\*\*** (Business Hours Team) Date: **\_\_\_**
+- [ ] **T+24hr Final PDV**: \***\*\_\*\*** (Release Manager) Date: **\_\_\_**
 
 ### **Final Release Approval**
 
@@ -345,7 +345,7 @@ kubectl scale deployment ai-insights --replicas=0 --namespace production
 - [ ] **Stakeholder Notification**: Release notes sent to stakeholders
 - [ ] **Documentation Updated**: Runbooks reflect production reality
 
-**Final Approval**: ****\_**** (Maestro Conductor) Date: **\_\_\_**
+**Final Approval**: \***\*\_\*\*** (Maestro Conductor) Date: **\_\_\_**
 
 ---
 

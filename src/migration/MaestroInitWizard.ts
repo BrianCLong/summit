@@ -545,9 +545,7 @@ export class MaestroInitWizard extends EventEmitter {
     });
   }
 
-  private async runValidation(
-    validation: string,
-  ): Promise<{
+  private async runValidation(validation: string): Promise<{
     passed: boolean;
     suggestion?: string;
     autoFixable?: boolean;

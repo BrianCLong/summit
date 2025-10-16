@@ -60,12 +60,10 @@ export function tokenBucket({
       arguments: [String(now), String(capacity), String(refillPerSec)],
     })) as [number, number];
     if (r[0] === 1) return next();
-    res
-      .status(429)
-      .json({
-        error: 'rate_limited',
-        retryAfterSec: Math.ceil((1 - r[1]) / refillPerSec),
-      });
+    res.status(429).json({
+      error: 'rate_limited',
+      retryAfterSec: Math.ceil((1 - r[1]) / refillPerSec),
+    });
   };
 }
 ```

@@ -1,7 +1,7 @@
 # Order Form – FIN-01 FinOps Guard for LLM & GPU
 
-**Customer:** ********\*\*\*\*********\_********\*\*\*\*********  
-**Date:** ********\*\*\*\*********\_********\*\*\*\*********  
+**Customer:** **\*\*\*\***\*\*\*\***\*\*\*\***\_**\*\*\*\***\*\*\*\***\*\*\*\***  
+**Date:** **\*\*\*\***\*\*\*\***\*\*\*\***\_**\*\*\*\***\*\*\*\***\*\*\*\***  
 **Prepared by:** Summit Revenue Ops  
 **Engagement Term:** Month-to-month with 30-day cancellation notice.
 

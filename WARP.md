@@ -3,11 +3,13 @@
 This file provides guidance to WARP (warp.dev) when working with code in this repository.
 
 Project scope
+
 - Polyglot monorepo for the IntelGraph platform. Primary code is Node/TypeScript (client, server, gateway, apps) with Python services (ML, ingest, ER) and some Go tooling.
 - Development flows are package-scoped (no single root package.json for everything). Use per-package scripts below.
 - Top-level Makefiles focus on ops (stabilization, DB helpers, deployment), while day-to-day dev uses package-local scripts.
 
 Prereqs and versions
+
 - Node: 20.x (see .nvmrc)
 - Python: service-specific (e.g., ML uses 3.12). Use each service’s pyproject/requirements.
 - Docker + Docker Compose for local stacks, integration tests, and CI parity.
@@ -15,6 +17,7 @@ Prereqs and versions
 Common commands
 
 Golden path local stack
+
 - Quickstart (from README)
   ```bash path=null start=null
   make bootstrap
@@ -34,6 +37,7 @@ Golden path local stack
   ```
 
 Justfile (Conductor stack)
+
 - Boot/stop/status
   ```bash path=null start=null
   just conductor-up
@@ -47,6 +51,7 @@ Justfile (Conductor stack)
   ```
 
 Node/TypeScript
+
 - Server (GraphQL API)
   - Install
     ```bash path=null start=null
@@ -123,6 +128,7 @@ Node/TypeScript
     ```
 
 - Gateway (Apollo Federation)
+
   ```bash path=null start=null
   npm ci --prefix gateway
   npm run dev --prefix gateway
@@ -149,6 +155,7 @@ Node/TypeScript
     ```
 
 Aggregators and workspaces
+
 - intelgraph/ (aggregator for server+client)
   ```bash path=null start=null
   npm run dev --prefix intelgraph            # runs server:dev + client:dev
@@ -163,6 +170,7 @@ Aggregators and workspaces
   ```
 
 Python
+
 - ML service (Poetry)
   ```bash path=null start=null
   cd ml && poetry install
@@ -185,6 +193,7 @@ Python
   ```
 
 Go tooling
+
 - Run within module directories
   ```bash path=null start=null
   (cd libs/configguard/go && go build ./... && go test ./...)
@@ -192,6 +201,7 @@ Go tooling
   ```
 
 Databases and local env
+
 - DB helpers
   ```bash path=null start=null
   make -f Makefile.db db/up
@@ -208,6 +218,7 @@ Databases and local env
   ```
 
 E2E tests (central suite)
+
 ```bash path=null start=null
 npm run test --prefix tests/e2e
 npm run test:chromium --prefix tests/e2e
@@ -215,6 +226,7 @@ npm run report --prefix tests/e2e
 ```
 
 Release/deploy
+
 - Orchestrated via Makefile.release (staging then prod):
   ```bash path=null start=null
   make -f Makefile.release stage
@@ -222,12 +234,14 @@ Release/deploy
   ```
 
 Repository rules surfaced to agents
+
 - Copilot (.github/copilot-instructions.yml)
   - Triggers: /scaffold (suggest scaffolds/), /policy (reference policies/), /grafana (reference scaffolds/grafana-panel.json)
 - Claude (.claude/settings.local.json)
   - Allows selected Bash actions (limited npm/make/git). Keep actions idempotent.
 
 High-level architecture and structure
+
 - Big picture
   - React web client (Vite) communicates with a Node/TypeScript GraphQL API (Apollo Server/Apollo v4).
   - Primary data stores: Neo4j (graph), PostgreSQL (relational + pgvector), Redis (cache/pub-sub), TimescaleDB (time-series in some setups).
@@ -245,12 +259,13 @@ High-level architecture and structure
   - Makefile.release: Staging/production rollouts and SLO checks.
 
 - Data flow (essentials)
-  1) Client issues GraphQL queries/mutations to server.
-  2) Middleware handles authN/Z, validation, rate limiting.
-  3) Resolvers orchestrate Neo4j, PostgreSQL, Redis operations, with optional timeseries.
-  4) Subscriptions/WebSockets stream updates back to clients.
+  1. Client issues GraphQL queries/mutations to server.
+  2. Middleware handles authN/Z, validation, rate limiting.
+  3. Resolvers orchestrate Neo4j, PostgreSQL, Redis operations, with optional timeseries.
+  4. Subscriptions/WebSockets stream updates back to clients.
 
 Notes for future agents
+
 - Use per-package npm scripts (use --prefix from repo root). Prefer pnpm only where a workspace exists (intelgraph-mcp).
 - Single-test selection
   - Jest: npm test -- -- <path-or-pattern> and/or -t "name"

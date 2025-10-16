@@ -32,16 +32,14 @@ describe('graph analytics GraphQL resolvers', () => {
   });
 
   it('delegates to the service for community detection', async () => {
-    const detectCommunities = jest
-      .fn()
-      .mockResolvedValue([
-        {
-          communityId: 7,
-          size: 12,
-          algorithm: 'LOUVAIN',
-          nodes: [{ nodeId: 'n1', label: 'Node 1' }],
-        },
-      ]);
+    const detectCommunities = jest.fn().mockResolvedValue([
+      {
+        communityId: 7,
+        size: 12,
+        algorithm: 'LOUVAIN',
+        nodes: [{ nodeId: 'n1', label: 'Node 1' }],
+      },
+    ]);
     const context = {
       user: baseUser,
       services: {

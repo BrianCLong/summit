@@ -20,6 +20,7 @@ export interface OCRResult {
   };
   language: string;
   engine: string;
+  metadata?: Record<string, any>;
 }
 
 export interface OCROptions {

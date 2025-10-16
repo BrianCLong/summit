@@ -609,61 +609,59 @@ export default function ControlHub() {
               }),
               _jsx('div', {
                 className: 'space-y-2',
-                children: summary?.runs
-                  ?.slice(0, 5)
-                  .map((run) =>
-                    _jsxs(
-                      'div',
-                      {
-                        className:
-                          'flex items-center justify-between rounded-lg bg-slate-50 p-3',
-                        children: [
-                          _jsxs('div', {
-                            className: 'flex items-center gap-3',
-                            children: [
-                              _jsx('div', {
-                                className: `h-2 w-2 rounded-full ${
-                                  run.status === 'Running'
-                                    ? 'bg-blue-500 animate-pulse'
-                                    : run.status === 'Succeeded'
-                                      ? 'bg-green-500'
-                                      : 'bg-red-500'
-                                }`,
-                              }),
-                              _jsxs('div', {
-                                children: [
-                                  _jsx('div', {
-                                    className:
-                                      'text-sm font-medium text-slate-900',
-                                    children: _jsx(Link, {
-                                      to: `/maestro/runs/${run.id}`,
-                                      className: 'hover:text-indigo-600',
-                                      children: run.id,
-                                    }),
+                children: summary?.runs?.slice(0, 5).map((run) =>
+                  _jsxs(
+                    'div',
+                    {
+                      className:
+                        'flex items-center justify-between rounded-lg bg-slate-50 p-3',
+                      children: [
+                        _jsxs('div', {
+                          className: 'flex items-center gap-3',
+                          children: [
+                            _jsx('div', {
+                              className: `h-2 w-2 rounded-full ${
+                                run.status === 'Running'
+                                  ? 'bg-blue-500 animate-pulse'
+                                  : run.status === 'Succeeded'
+                                    ? 'bg-green-500'
+                                    : 'bg-red-500'
+                              }`,
+                            }),
+                            _jsxs('div', {
+                              children: [
+                                _jsx('div', {
+                                  className:
+                                    'text-sm font-medium text-slate-900',
+                                  children: _jsx(Link, {
+                                    to: `/maestro/runs/${run.id}`,
+                                    className: 'hover:text-indigo-600',
+                                    children: run.id,
                                   }),
-                                  _jsx('div', {
-                                    className: 'text-xs text-slate-600',
-                                    children: run.pipeline || 'build',
-                                  }),
-                                ],
-                              }),
-                            ],
-                          }),
-                          _jsx('span', {
-                            className: `rounded px-2 py-1 text-xs font-medium ${
-                              run.status === 'Running'
-                                ? 'bg-blue-100 text-blue-800'
-                                : run.status === 'Succeeded'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-red-100 text-red-800'
-                            }`,
-                            children: run.status,
-                          }),
-                        ],
-                      },
-                      run.id,
-                    ),
+                                }),
+                                _jsx('div', {
+                                  className: 'text-xs text-slate-600',
+                                  children: run.pipeline || 'build',
+                                }),
+                              ],
+                            }),
+                          ],
+                        }),
+                        _jsx('span', {
+                          className: `rounded px-2 py-1 text-xs font-medium ${
+                            run.status === 'Running'
+                              ? 'bg-blue-100 text-blue-800'
+                              : run.status === 'Succeeded'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                          }`,
+                          children: run.status,
+                        }),
+                      ],
+                    },
+                    run.id,
                   ),
+                ),
               }),
             ],
           }),
@@ -752,39 +750,37 @@ export default function ControlHub() {
           }),
           _jsx('div', {
             className: 'space-y-3',
-            children: summary?.changes
-              ?.slice(0, 6)
-              .map((change, i) =>
-                _jsxs(
-                  'div',
-                  {
-                    className: 'flex gap-4 border-b pb-3 last:border-0',
-                    children: [
-                      _jsx('div', {
-                        className: 'w-32 flex-shrink-0',
-                        children: _jsx('div', {
-                          className: 'text-xs font-mono text-slate-500',
-                          children: change.at,
+            children: summary?.changes?.slice(0, 6).map((change, i) =>
+              _jsxs(
+                'div',
+                {
+                  className: 'flex gap-4 border-b pb-3 last:border-0',
+                  children: [
+                    _jsx('div', {
+                      className: 'w-32 flex-shrink-0',
+                      children: _jsx('div', {
+                        className: 'text-xs font-mono text-slate-500',
+                        children: change.at,
+                      }),
+                    }),
+                    _jsxs('div', {
+                      className: 'flex-1 min-w-0',
+                      children: [
+                        _jsx('div', {
+                          className: 'text-sm text-slate-900',
+                          children: change.title,
                         }),
-                      }),
-                      _jsxs('div', {
-                        className: 'flex-1 min-w-0',
-                        children: [
-                          _jsx('div', {
-                            className: 'text-sm text-slate-900',
-                            children: change.title,
-                          }),
-                          _jsxs('div', {
-                            className: 'text-xs text-slate-600',
-                            children: ['by ', change.by],
-                          }),
-                        ],
-                      }),
-                    ],
-                  },
-                  i,
-                ),
+                        _jsxs('div', {
+                          className: 'text-xs text-slate-600',
+                          children: ['by ', change.by],
+                        }),
+                      ],
+                    }),
+                  ],
+                },
+                i,
               ),
+            ),
           }),
           _jsx('div', {
             className: 'mt-3 pt-3 border-t text-xs text-slate-500',

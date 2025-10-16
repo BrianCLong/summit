@@ -28,17 +28,32 @@ PHASE_DURATION_SECONDS = Summary('intelgraph_psyops_phase_duration_seconds', 'Du
 
 # --- Configuration ---
 
+def main():
+    # Start Prometheus metrics server
+    try:
+        start_http_server(8000)
+    except Exception as e:
+        logger.warning(f"Failed to start Prometheus metrics server: {e}")
+
+    # Load configuration
+    loader = ConfigLoader()
+    CONFIG = loader.load_all_config()
+
+    kafka_consumer = None
+    neo4j_client = None
+    postgres_client = None
+
     try:
         logger.info("--- Initializing IntelGraph Clients ---")
         kafka_consumer = IntelGraphKafkaConsumer(
             config={
                 'kafka_broker_url': CONFIG['KAFKA_BOOTSTRAP_SERVERS'],
-                'schema_registry_url': CONFIG['SCHEMA_REGISTRY_URL'],
+                'schema_registry_url': CONFIG.get('SCHEMA_REGISTRY_URL'),
                 'topic': CONFIG['KAFKA_TOPIC'],
                 'group_id': CONFIG['KAFKA_GROUP_ID'],
                 'sasl_username': CONFIG['KAFKA_SASL_USERNAME'],
                 'sasl_password': CONFIG['KAFKA_SASL_PASSWORD'],
-                'ssl_ca_location': CONFIG['KAFKA_SSL_CA_LOCATION']
+                'ssl_ca_location': CONFIG.get('KAFKA_SSL_CA_LOCATION')
             }
         )
         api_client = IntelGraphAPIClient(
@@ -70,13 +85,13 @@ PHASE_DURATION_SECONDS = Summary('intelgraph_psyops_phase_duration_seconds', 'Du
         psyops_engine = PsyOpsCounterEngine(api_client, neo4j_client, postgres_client)
 
         logger.info(f"--- Starting IntelGraph PsyOps Orchestrator ---")
-        logger.info(f"Consuming messages from Kafka topic: {CONFIG['kafka_topic']}")
+        logger.info(f"Consuming messages from Kafka topic: {CONFIG['KAFKA_TOPIC']}")
         logger.info("Press Ctrl+C to stop the orchestrator.")
 
         # Main consumption loop
         for message_data in kafka_consumer.consume_messages():
             if message_data:
-                current_task_id = str(uuid.uuid4()) # Generate a unique task ID for each message
+                current_task_id = str(uuid.uuid4())  # Generate a unique task ID for each message
                 logger.info(f"Processing new message (Task: {current_task_id}): {json.dumps(message_data, indent=2)}")
                 postgres_client.log_processing_event(
                     event_type="MESSAGE_RECEIVED",
@@ -103,7 +118,6 @@ PHASE_DURATION_SECONDS = Summary('intelgraph_psyops_phase_duration_seconds', 'Du
                     )
 
                     logger.info("\n--- Counter-Operation Complete ---")
-                    logger.info("--- Counter-Operation Complete ---")
                     postgres_client.log_processing_event(
                         event_type="COUNTER_OPERATION_COMPLETE",
                         narrative_id=narrative_analysis.get('intelgraph_narrative_id'),
@@ -111,17 +125,20 @@ PHASE_DURATION_SECONDS = Summary('intelgraph_psyops_phase_duration_seconds', 'Du
                         message="Full counter-operation cycle completed.",
                         metadata={"final_message": final_counter_message}
                     )
-                    logger.info("="*80) # Separator for clarity
+                    logger.info("=" * 80)  # Separator for clarity
 
                 except Exception as e:
                     narrative_id = message_data.get('intelgraph_narrative_id', f"unknown_narr_{hash(json.dumps(message_data))}")
-                    logger.error(f"An error occurred during processing for narrative {narrative_id} (Task: {current_task_id}): {e}", exc_info=True)
+                    logger.error(
+                        f"An error occurred during processing for narrative {narrative_id} (Task: {current_task_id}): {e}",
+                        exc_info=True,
+                    )
                     postgres_client.log_processing_event(
                         event_type="PROCESSING_ERROR",
                         narrative_id=narrative_id,
                         task_id=current_task_id,
                         message=f"Error during processing: {e}",
-                        metadata={"error": str(e), "message_data": message_data}
+                        metadata={"error": str(e), "message_data": message_data},
                     )
             else:
                 logger.info("No message received from Kafka within timeout. Polling again...")

@@ -41,9 +41,7 @@ interface SystemStatus {
 }
 
 // Ping helper function
-async function ping(
-  target: string,
-): Promise<{
+async function ping(target: string): Promise<{
   status: 'healthy' | 'unhealthy';
   response_time_ms: number;
   details?: any;
@@ -315,13 +313,11 @@ statusRouter.get('/ready', async (_req, res) => {
     const pool = getPostgresPool();
     await pool.query('SELECT 1');
   } catch (e) {
-    return res
-      .status(503)
-      .json({
-        status: 'unready',
-        component: 'postgres',
-        error: (e as any)?.message || String(e),
-      });
+    return res.status(503).json({
+      status: 'unready',
+      component: 'postgres',
+      error: (e as any)?.message || String(e),
+    });
   }
   try {
     const { getRedisClient } = await import('../config/database.js');
@@ -330,13 +326,11 @@ statusRouter.get('/ready', async (_req, res) => {
       await redis.ping();
     }
   } catch (e) {
-    return res
-      .status(503)
-      .json({
-        status: 'unready',
-        component: 'redis',
-        error: (e as any)?.message || String(e),
-      });
+    return res.status(503).json({
+      status: 'unready',
+      component: 'redis',
+      error: (e as any)?.message || String(e),
+    });
   }
   return res
     .status(200)

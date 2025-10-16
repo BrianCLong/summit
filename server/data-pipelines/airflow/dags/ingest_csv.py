@@ -6,9 +6,9 @@ Orchestrates CSV ingestion → validation → transformation → loading to Neo4
 import os
 import sys
 from datetime import datetime, timedelta
-
+import asyncio
+import inspect
 from airflow.operators.python import PythonOperator
-
 from airflow import DAG
 
 # Add data-pipelines directory to Python path
@@ -41,6 +41,12 @@ dag = DAG(
 )
 
 
+def maybe_await(result):
+    if inspect.isawaitable(result):
+        return asyncio.run(result)
+    return result
+
+
 def extract_csv_data(**context):
     """
     Task to extract data from CSV files
@@ -62,7 +68,7 @@ def extract_csv_data(**context):
 
     # Run ingestion
     output_path = get_staging_path("raw")
-    stats = await connector.ingest(batch_size=1000, output_path=output_path)
+    stats = maybe_await(connector.ingest(batch_size=1000, output_path=output_path))
 
     # Store stats in XCom for monitoring
     context["task_instance"].xcom_push(key="ingestion_stats", value=stats.__dict__)
@@ -223,7 +229,7 @@ def load_to_neo4j(**context):
         batch_size = 100
         for i in range(0, len(entities), batch_size):
             batch = entities[i : i + batch_size]
-            loaded_count = await loader.load_entities(batch)
+            loaded_count = maybe_await(loader.load_entities(batch))
             total_loaded += loaded_count
 
     # Store load stats

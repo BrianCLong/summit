@@ -7,8 +7,8 @@ import {
   Chip,
   IconButton,
   ListItem,
+  ListItemButton,
   ListItemText,
-  ListItemSecondaryAction,
   Divider,
 } from '@mui/material';
 import { MoreVert, OpenInNew } from '@mui/icons-material';
@@ -48,63 +48,64 @@ function EntityItem({
   return (
     <div style={style}>
       <ListItem
-        button
-        onClick={() => data.onSelect(entity)}
         sx={{ px: 2, py: 1 }}
+        secondaryAction={
+          <Box>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                data.onAction(entity, 'open');
+              }}
+            >
+              <OpenInNew fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                data.onAction(entity, 'menu');
+              }}
+            >
+              <MoreVert fontSize="small" />
+            </IconButton>
+          </Box>
+        }
       >
-        <ListItemText
-          primary={
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="subtitle2" noWrap>
-                {entity.label}
-              </Typography>
-              <Chip
-                size="small"
-                label={entity.type}
-                color="primary"
-                variant="outlined"
-                sx={{ fontSize: '0.7rem', height: 18 }}
-              />
-              {entity.score && (
+        <ListItemButton onClick={() => data.onSelect(entity)} sx={{ px: 0 }}>
+          <ListItemText
+            primary={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="subtitle2" noWrap>
+                  {entity.label}
+                </Typography>
                 <Chip
                   size="small"
-                  label={`${Math.round(entity.score * 100)}%`}
-                  color="secondary"
+                  label={entity.type}
+                  color="primary"
+                  variant="outlined"
                   sx={{ fontSize: '0.7rem', height: 18 }}
                 />
-              )}
-            </Box>
-          }
-          secondary={
-            <Typography variant="caption" color="text.secondary" noWrap>
-              {Object.entries(entity.properties)
-                .slice(0, 2)
-                .map(([key, value]) => `${key}: ${value}`)
-                .join(' • ')}
-            </Typography>
-          }
-        />
-
-        <ListItemSecondaryAction>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              data.onAction(entity, 'open');
-            }}
-          >
-            <OpenInNew fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              data.onAction(entity, 'menu');
-            }}
-          >
-            <MoreVert fontSize="small" />
-          </IconButton>
-        </ListItemSecondaryAction>
+                {entity.score && (
+                  <Chip
+                    size="small"
+                    label={`${Math.round(entity.score * 100)}%`}
+                    color="secondary"
+                    sx={{ fontSize: '0.7rem', height: 18 }}
+                  />
+                )}
+              </Box>
+            }
+            secondary={
+              <Typography variant="caption" color="text.secondary" noWrap>
+                {Object.entries(entity.properties)
+                  .slice(0, 2)
+                  .map(([key, value]) => `${key}: ${value}`)
+                  .join(' • ')}
+              </Typography>
+            }
+          />
+        </ListItemButton>
       </ListItem>
 
       {index < data.entities.length - 1 && <Divider />}

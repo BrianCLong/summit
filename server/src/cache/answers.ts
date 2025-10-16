@@ -7,6 +7,11 @@ function key(tenant: string, input: string) {
 export async function getCached(tenant: string, input: string) {
   return r.get(key(tenant, input));
 }
-export async function setCached(tenant: string, input: string, text: string, ttl = 60) {
+export async function setCached(
+  tenant: string,
+  input: string,
+  text: string,
+  ttl = 60,
+) {
   await r.setex(key(tenant, input), ttl, text);
 }

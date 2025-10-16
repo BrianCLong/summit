@@ -15,7 +15,6 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  ListItemSecondaryAction,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -409,7 +408,21 @@ function CommentSystem({
         <List>
           {filteredAndSortedComments.map((comment) => (
             <React.Fragment key={comment.id}>
-              <ListItem alignItems="flex-start" sx={{ py: 2 }}>
+              <ListItem
+                alignItems="flex-start"
+                sx={{ py: 2 }}
+                secondaryAction={
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      setMenuAnchor(e.currentTarget);
+                      setSelectedComment(comment);
+                    }}
+                  >
+                    <MoreVert />
+                  </IconButton>
+                }
+              >
                 <ListItemAvatar>
                   <Avatar sx={{ bgcolor: 'primary.main' }}>
                     {comment.author.firstName[0]}
@@ -570,17 +583,6 @@ function CommentSystem({
                     </Box>
                   }
                 />
-                <ListItemSecondaryAction>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      setMenuAnchor(e.currentTarget);
-                      setSelectedComment(comment);
-                    }}
-                  >
-                    <MoreVert />
-                  </IconButton>
-                </ListItemSecondaryAction>
               </ListItem>
 
               {/* Replies */}

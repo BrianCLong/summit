@@ -4,22 +4,20 @@ const {
 
 jest.mock('../src/config/database', () => {
   const tx = {
-    run: jest
-      .fn()
-      .mockResolvedValue({
-        records: [
-          {
-            get: () => ({
-              properties: {
-                id: 'id1',
-                investigationId: 'inv1',
-                fromEntity: { id: 'a' },
-                toEntity: { id: 'b' },
-              },
-            }),
-          },
-        ],
-      }),
+    run: jest.fn().mockResolvedValue({
+      records: [
+        {
+          get: () => ({
+            properties: {
+              id: 'id1',
+              investigationId: 'inv1',
+              fromEntity: { id: 'a' },
+              toEntity: { id: 'b' },
+            },
+          }),
+        },
+      ],
+    }),
     commit: jest.fn(),
     rollback: jest.fn(),
   };

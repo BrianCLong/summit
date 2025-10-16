@@ -7,9 +7,5 @@
     "types": ["node"],
     "skipLibCheck": true
   },
-  "files": [
-    "src/app.ts",
-    "src/types/ambient.d.ts",
-    "src/types/core-shims.d.ts"
-  ]
+  "files": ["src/app.ts", "src/types/ambient.d.ts", "src/types/core-shims.d.ts"]
 }

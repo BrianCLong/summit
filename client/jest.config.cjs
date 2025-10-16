@@ -5,6 +5,7 @@ const config = {
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js',
+    '^dompurify$': '<rootDir>/__mocks__/dompurify.js',
   },
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
@@ -48,6 +49,7 @@ const config = {
     '<rootDir>/src/__tests__/Dashboard.test.jsx',
     '<rootDir>/src/components/graph/__tests__/GraphContextMenu.test.jsx',
     '<rootDir>/src/components/graph/__tests__/AIInsightsPanel.test.jsx',
+    '<rootDir>/src/components/visualization/__tests__/InteractiveGraphCanvas.test.tsx',
   ],
 };
 

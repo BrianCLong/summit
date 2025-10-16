@@ -188,8 +188,8 @@ If acceptance fails or issues arise:
 
 ## Sign-Off
 
-**Verification Completed By:** ************\_************
-**Date:** ************\_************
+**Verification Completed By:** ****\*\*\*\*****\_****\*\*\*\*****
+**Date:** ****\*\*\*\*****\_****\*\*\*\*****
 **Septuple Matrix Result:** \_\_\_\_ / 7 PASS
 
 **Acceptance Decision:**
@@ -198,8 +198,8 @@ If acceptance fails or issues arise:
 - [ ] ⚠️ **GO WITH CONDITIONS** - Minor issues, document and proceed
 - [ ] ❌ **NO-GO** - Critical failures, execute rollback
 
-**Approver Signature:** ************\_************
-**Date:** ************\_************
+**Approver Signature:** ****\*\*\*\*****\_****\*\*\*\*****
+**Date:** ****\*\*\*\*****\_****\*\*\*\*****
 
 ---
 

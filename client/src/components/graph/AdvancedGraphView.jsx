@@ -334,22 +334,18 @@ export default function AdvancedGraphView({
     const onExploreSubgraph = () => {
       const sel = cy.elements(':selected');
       if (sel.length === 0) return;
-      const nodes = sel
-        .nodes()
-        .map((n) => ({
-          data: { ...n.data(), id: n.id() },
-          position: n.position(),
-        }));
-      const edges = sel
-        .edges()
-        .map((e) => ({
-          data: {
-            ...e.data(),
-            id: e.id(),
-            source: e.source().id(),
-            target: e.target().id(),
-          },
-        }));
+      const nodes = sel.nodes().map((n) => ({
+        data: { ...n.data(), id: n.id() },
+        position: n.position(),
+      }));
+      const edges = sel.edges().map((e) => ({
+        data: {
+          ...e.data(),
+          id: e.id(),
+          source: e.source().id(),
+          target: e.target().id(),
+        },
+      }));
       setSubgraphElements([...nodes, ...edges]);
       setSubgraphOpen(true);
     };

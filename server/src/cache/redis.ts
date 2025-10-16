@@ -4,7 +4,10 @@ export class RedisService {
   private pub: Redis;
   private sub: Redis;
 
-  constructor(urlOrOpts: string | { url: string } = process.env.REDIS_URL || 'redis://localhost:6379') {
+  constructor(
+    urlOrOpts: string | { url: string } = process.env.REDIS_URL ||
+      'redis://localhost:6379',
+  ) {
     const url = typeof urlOrOpts === 'string' ? urlOrOpts : urlOrOpts.url;
     this.pub = new Redis(url);
     this.sub = new Redis(url);
@@ -22,7 +25,11 @@ export class RedisService {
     return this.sub.hgetall(key);
   }
 
-  async hincrby(key: string, field: string, increment: number): Promise<number> {
+  async hincrby(
+    key: string,
+    field: string,
+    increment: number,
+  ): Promise<number> {
     return this.sub.hincrby(key, field, increment);
   }
 

@@ -1,10 +1,8 @@
 jest.mock('pg', () => ({
   Pool: jest.fn(() => ({
-    query: jest
-      .fn()
-      .mockResolvedValue({
-        rows: [{ id: 'plugin-1', name: 'x', version: '1', capabilities: {} }],
-      }),
+    query: jest.fn().mockResolvedValue({
+      rows: [{ id: 'plugin-1', name: 'x', version: '1', capabilities: {} }],
+    }),
   })),
 }));
 jest.mock('node:child_process', () => ({

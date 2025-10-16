@@ -216,12 +216,10 @@ router.get('/compliance/:framework', async (req, res) => {
     otelService.recordException(error);
 
     if (error.name === 'ZodError') {
-      res
-        .status(400)
-        .json({
-          error: 'Invalid framework',
-          supported: ['SOC2', 'ISO27001', 'HIPAA', 'PCI'],
-        });
+      res.status(400).json({
+        error: 'Invalid framework',
+        supported: ['SOC2', 'ISO27001', 'HIPAA', 'PCI'],
+      });
     } else {
       res
         .status(500)

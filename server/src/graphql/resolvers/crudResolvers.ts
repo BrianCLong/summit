@@ -1,5 +1,5 @@
 import { PubSub } from 'graphql-subscriptions';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 import {
   getNeo4jDriver,
   getPostgresPool,

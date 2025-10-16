@@ -256,8 +256,8 @@ groups:
 {
 "title": "IntelGraph — Build Platform SLOs",
 "panels": [
-{ "type": "timeseries", "title": "API p95 (ms)", "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_server_duration_seconds_bucket[5m])) by (le)) _ 1000" }] },
-{ "type": "timeseries", "title": "Error rate %", "targets": [{ "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) _ 100" }] },
+{ "type": "timeseries", "title": "API p95 (ms)", "targets": [{ "expr": "histogram*quantile(0.95, sum(rate(http_server_duration_seconds_bucket[5m])) by (le)) * 1000" }] },
+{ "type": "timeseries", "title": "Error rate %", "targets": [{ "expr": "sum(rate(http*requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100" }] },
 { "type": "timeseries", "title": "Queue Lag", "targets": [{ "expr": "kafka_consumergroup_lag" }] },
 { "type": "stat", "title": "Gatekeeper Violations", "targets": [{ "expr": "sum(gatekeeper_violations)" }] },
 { "type": "timeseries", "title": "Node CPU", "targets": [{ "expr": "avg(node_cpu_seconds_total{mode=\"idle\"})" }] }

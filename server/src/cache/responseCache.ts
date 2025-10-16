@@ -1,6 +1,11 @@
 import { getRedisClient } from '../config/database.js';
 import crypto from 'node:crypto';
-import { recHit, recMiss, recSet, cacheLocalSize } from '../metrics/cacheMetrics.js';
+import {
+  recHit,
+  recMiss,
+  recSet,
+  cacheLocalSize,
+} from '../metrics/cacheMetrics.js';
 
 const memoryCache = new Map<string, { ts: number; ttl: number; val: any }>();
 
@@ -16,7 +21,9 @@ export async function cached<T>(
 ): Promise<T> {
   const redisDisabled = process.env.REDIS_DISABLE === '1';
   const redis = redisDisabled ? null : getRedisClient();
-  const key = 'gql:' + crypto.createHash('sha1').update(JSON.stringify(keyParts)).digest('hex');
+  const key =
+    'gql:' +
+    crypto.createHash('sha1').update(JSON.stringify(keyParts)).digest('hex');
   const now = Date.now();
   const tenant = typeof keyParts?.[1] === 'string' ? keyParts[1] : 'unknown';
   const store = redis ? 'redis' : 'memory';
@@ -38,13 +45,17 @@ export async function cached<T>(
         return parsed;
       }
       const val = await fetcher();
-      await redis.set(key, JSON.stringify(val), { EX: ttlSec, NX: true } as any);
+      await redis.set(key, JSON.stringify(val), {
+        EX: ttlSec,
+        NX: true,
+      } as any);
       recSet('redis', op, tenant);
       // index by first part (prefix) and optional tenant
       try {
         const prefix = String(keyParts?.[0] ?? 'misc');
         await redis.sAdd(`idx:${prefix}`, key);
-        if (keyParts?.[1]) await redis.sAdd(`idx:${prefix}:${keyParts[1]}`, key);
+        if (keyParts?.[1])
+          await redis.sAdd(`idx:${prefix}:${keyParts[1]}`, key);
       } catch {}
       memoryCache.set(key, { ts: now, ttl: ttlSec, val });
       return val;

@@ -7,7 +7,7 @@ You are a senior release engineer. You must:
 Preflight rules:
 
 - Assume repo hygiene (gitattributes, gitignore, Husky/LFS); if missing, make a separate chore(repo): hygiene PR
-- Never commit: node_modules, dist, build, out, coverage, .gradle, target, data, datasets, logs, tmp, neo4j/**, **/_.db, \*\*/_.sqlite\*
+- Never commit: node*modules, dist, build, out, coverage, .gradle, target, data, datasets, logs, tmp, neo4j/**, **/*.db, \*\*/\_.sqlite\*
 - If a binary asset is needed, add a ≤50KB text fixture and document how to generate the real artifact
 - If large generated code or many files, split PR by apps/services/contracts/packages/infra
 

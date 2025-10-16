@@ -38,6 +38,7 @@ assignees:
 ### Hash-Chain Verification
 
 - [ ] **End-to-End Hash Chain Verified**
+
   ```bash
   # Verify latest 1000 entries
   node server/src/provenance/ledger.ts verify --db $LEDGER_DB_URL --limit 1000
@@ -50,6 +51,7 @@ assignees:
 ### SLSA Provenance
 
 - [ ] **CI Artifacts Attested**
+
   ```bash
   # Verify SLSA attestation
   slsa-verifier verify-image \
@@ -64,6 +66,7 @@ assignees:
 ### Cosign Verification
 
 - [ ] **Keyless Signatures Valid**
+
   ```bash
   # Verify cosign signatures
   cosign verify \
@@ -78,6 +81,7 @@ assignees:
 ### Daily Merkle Root
 
 - [ ] **Merkle Root Signed & Anchored**
+
   ```bash
   # Generate and verify daily root
   scripts/sign-ledger.sh --db $LEDGER_DB_URL --date $(date -u +%F)
@@ -147,6 +151,7 @@ assignees:
 ### Cost Forecasting
 
 - [ ] **Forecast Accuracy Validated**
+
   ```bash
   # Compare 24h forecast vs actuals
   node scripts/cost/backfillAndForecast.js \
@@ -231,6 +236,7 @@ assignees:
 ### Dry-Run Analysis
 
 - [ ] **Risk Assessment Working**
+
   ```bash
   # Test dry-run mode
   node server/src/services/RTBFJobService.ts dry-run \
@@ -248,6 +254,7 @@ assignees:
 ### Error Budget Tracking
 
 - [ ] **Burn Rate Monitoring Active**
+
   ```bash
   # Check multi-window burn rates
   curl $PROM_URL/api/v1/query?query=tenant_error_budget_burn_rate
@@ -277,6 +284,7 @@ assignees:
 ### Dashboard Rendering
 
 - [ ] **Grafana Dashboards Active**
+
   ```bash
   # Check dashboard rendering
   curl -H "Authorization: Bearer $GRAFANA_TOKEN" \
@@ -309,6 +317,7 @@ assignees:
 ### Grafana Configuration
 
 - [ ] **Dashboards Deployed**
+
   ```bash
   # Import dashboard
   curl -X POST -H "Content-Type: application/json" \
@@ -410,6 +419,7 @@ assignees:
 ### Performance Baseline
 
 - [ ] **SLO Compliance Verified**
+
   ```bash
   # Run performance tests
   k6 run tests/performance/baseline.js --env STAGE=staging

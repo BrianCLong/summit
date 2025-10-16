@@ -1864,9 +1864,7 @@ class AutoScaler {
     this.logger = new Logger('AutoScaler');
   }
 
-  async evaluatePolicy(
-    policy: AutoScalingPolicy,
-  ): Promise<{
+  async evaluatePolicy(policy: AutoScalingPolicy): Promise<{
     should_scale: boolean;
     action?: ScalingAction;
     reason?: string;

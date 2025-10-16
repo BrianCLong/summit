@@ -1,1 +1,11 @@
-{"nodes":[{"id":"person-0","type":"person"},{"id":"person-1","type":"person"},{"id":"org-0","type":"org"}],"edges":[{"from":"person-0","to":"org-0","type":"member_of"},{"from":"person-1","to":"org-0","type":"member_of"}]}
+{
+  "nodes": [
+    { "id": "person-0", "type": "person" },
+    { "id": "person-1", "type": "person" },
+    { "id": "org-0", "type": "org" }
+  ],
+  "edges": [
+    { "from": "person-0", "to": "org-0", "type": "member_of" },
+    { "from": "person-1", "to": "org-0", "type": "member_of" }
+  ]
+}

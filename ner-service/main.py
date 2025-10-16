@@ -12,14 +12,14 @@ except OSError:
 
 app = FastAPI()
 
-class TextRequest(BaseModel:
+class TextRequest(BaseModel):
     text: str
 
-class Entity(BaseModel:
+class Entity(BaseModel):
     text: str
     label: str
 
-class EntitiesResponse(BaseModel:
+class EntitiesResponse(BaseModel):
     entities: list[Entity]
 
 @app.post("/extract_entities", response_model=EntitiesResponse)

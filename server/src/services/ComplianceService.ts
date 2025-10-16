@@ -358,7 +358,7 @@ class ComplianceService {
             description:
               'Information about technical vulnerabilities shall be obtained and managed',
             priority: 'critical',
-            status: 'pending',
+            status: 'partial',
             controls: [
               {
                 id: 'iso27001-a-12-6-ctrl-1',
@@ -585,7 +585,8 @@ class ComplianceService {
     const evidence: ComplianceEvidence[] = [];
 
     switch (requirement.id) {
-      case 'gdpr-art-25': { // Data Protection by Design
+      case 'gdpr-art-25': {
+        // Data Protection by Design
         // Check DLP policies
         const dlpPolicies = dlpService.listPolicies();
         const piiPolicy = dlpPolicies.find(
@@ -674,7 +675,8 @@ class ComplianceService {
         return { status, findings, recommendations, evidence };
       }
 
-      case 'gdpr-art-30': { // Records of Processing
+      case 'gdpr-art-30': {
+        // Records of Processing
         // Check audit logging
         const auditLoggingEnabled =
           process.env.AUDIT_LOGGING_ENABLED !== 'false';
@@ -712,7 +714,8 @@ class ComplianceService {
         return { status, findings, recommendations, evidence };
       }
 
-      case 'gdpr-art-32': { // Security of Processing
+      case 'gdpr-art-32': {
+        // Security of Processing
         // Check TLS/HTTPS
         const tlsEnabled = process.env.TLS_ENABLED !== 'false';
         if (!tlsEnabled) {
@@ -786,7 +789,8 @@ class ComplianceService {
     const evidence: ComplianceEvidence[] = [];
 
     switch (requirement.id) {
-      case 'soc2-cc-6.1': { // Logical and Physical Access Controls
+      case 'soc2-cc-6.1': {
+        // Logical and Physical Access Controls
         // Check MFA configuration
         const mfaEnabled = process.env.MFA_ENABLED === 'true';
         if (!mfaEnabled) {
@@ -841,7 +845,8 @@ class ComplianceService {
         return { status, findings, recommendations, evidence };
       }
 
-      case 'soc2-cc-7.1': { // System Operations
+      case 'soc2-cc-7.1': {
+        // System Operations
         // Check monitoring
         const monitoringEnabled = process.env.MONITORING_ENABLED !== 'false';
         if (!monitoringEnabled) {
@@ -889,7 +894,8 @@ class ComplianceService {
     const evidence: ComplianceEvidence[] = [];
 
     switch (requirement.id) {
-      case 'iso27001-a-8-2': { // Information Classification
+      case 'iso27001-a-8-2': {
+        // Information Classification
         // Check data classification via DLP
         const dlpPolicies = dlpService.listPolicies();
         const classificationPolicies = dlpPolicies.filter(
@@ -933,7 +939,8 @@ class ComplianceService {
         return { status, findings, recommendations, evidence };
       }
 
-      case 'iso27001-a-12-6': { // Technical Vulnerability Management
+      case 'iso27001-a-12-6': {
+        // Technical Vulnerability Management
         // Check vulnerability scanning (placeholder - would integrate with actual scanning tools)
         const vulnScanningEnabled =
           process.env.VULN_SCANNING_ENABLED === 'true';

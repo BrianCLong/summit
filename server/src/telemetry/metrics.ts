@@ -448,7 +448,9 @@ export class IntelGraphMetrics {
     this.activeSessions.add(delta, { type: sessionType });
   }
 
-  public async shutdown(): Promise<void> { /* no-op */ }
+  public async shutdown(): Promise<void> {
+    /* no-op */
+  }
 }
 
 const metricsInstance = IntelGraphMetrics.getInstance();

@@ -11,7 +11,6 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  ListItemSecondaryAction,
   IconButton,
   Paper,
   Divider,
@@ -562,7 +561,26 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
               ) : (
                 <List>
                   {activeUsersData?.getActiveUsers?.map((user, index) => (
-                    <ListItem key={index}>
+                    <ListItem
+                      key={index}
+                      secondaryAction={
+                        <Tooltip
+                          title={
+                            user.selectedEntityId
+                              ? 'Viewing entity'
+                              : 'No selection'
+                          }
+                        >
+                          <IconButton size="small">
+                            {user.selectedEntityId ? (
+                              <Visibility />
+                            ) : (
+                              <VisibilityOff />
+                            )}
+                          </IconButton>
+                        </Tooltip>
+                      }
+                    >
                       <ListItemAvatar>
                         <Badge
                           overlap="circular"
@@ -597,23 +615,6 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                           </Box>
                         }
                       />
-                      <ListItemSecondaryAction>
-                        <Tooltip
-                          title={
-                            user.selectedEntityId
-                              ? 'Viewing entity'
-                              : 'No selection'
-                          }
-                        >
-                          <IconButton size="small">
-                            {user.selectedEntityId ? (
-                              <Visibility />
-                            ) : (
-                              <VisibilityOff />
-                            )}
-                          </IconButton>
-                        </Tooltip>
-                      </ListItemSecondaryAction>
                     </ListItem>
                   ))}
                 </List>
@@ -645,7 +646,27 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
               ) : (
                 <List>
                   {pendingEditsData?.getPendingEdits?.map((edit) => (
-                    <ListItem key={edit.id}>
+                    <ListItem
+                      key={edit.id}
+                      secondaryAction={
+                        <>
+                          <IconButton
+                            color="success"
+                            size="small"
+                            onClick={() => handleResolveEdit(edit.id, 'APPLIED')}
+                          >
+                            <Check />
+                          </IconButton>
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleResolveEdit(edit.id, 'REJECTED')}
+                          >
+                            <Close />
+                          </IconButton>
+                        </>
+                      }
+                    >
                       <ListItemAvatar>
                         <Avatar src={edit.user.avatar}>
                           {edit.user.name[0]}
@@ -672,22 +693,6 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                         }
                         secondary={formatTimeAgo(edit.timestamp)}
                       />
-                      <ListItemSecondaryAction>
-                        <IconButton
-                          color="success"
-                          size="small"
-                          onClick={() => handleResolveEdit(edit.id, 'APPLIED')}
-                        >
-                          <Check />
-                        </IconButton>
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => handleResolveEdit(edit.id, 'REJECTED')}
-                        >
-                          <Close />
-                        </IconButton>
-                      </ListItemSecondaryAction>
                     </ListItem>
                   ))}
                 </List>

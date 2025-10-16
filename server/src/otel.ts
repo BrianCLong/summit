@@ -6,10 +6,11 @@ import logger from './utils/logger.js';
 const resource = {
   attributes: {
     'service.name': 'intelgraph-server',
-    'service.version': process.env.GIT_SHA || process.env.npm_package_version || 'dev',
+    'service.version':
+      process.env.GIT_SHA || process.env.npm_package_version || 'dev',
     'service.namespace': 'intelgraph',
     'deployment.environment': process.env.NODE_ENV || 'local',
-  }
+  },
 } as any;
 
 // No-op exporters
@@ -35,14 +36,18 @@ export async function startOtel(): Promise<void> {
 
     // Graceful shutdown handling
     const shutdown = async () => {
-      try { await sdk.shutdown(); } catch {}
+      try {
+        await sdk.shutdown();
+      } catch {}
       process.exit(0);
     };
 
     process.on('SIGTERM', shutdown);
     process.on('SIGINT', shutdown);
   } catch (error) {
-    logger.warn('Continuing with no-op telemetry', { error: (error as Error).message });
+    logger.warn('Continuing with no-op telemetry', {
+      error: (error as Error).message,
+    });
   }
 }
 
@@ -57,7 +62,12 @@ export function createHealthSpan(_spanName: string = 'health-check') {
 
 // Export tracer for manual instrumentation (no-op)
 export function getTracer(_name: string = 'intelgraph') {
-  return { startSpan: (_n: string, _o?: any) => ({ end: () => {}, setAttributes: (_: any) => {} }) };
+  return {
+    startSpan: (_n: string, _o?: any) => ({
+      end: () => {},
+      setAttributes: (_: any) => {},
+    }),
+  };
 }
 
 // Environment validation

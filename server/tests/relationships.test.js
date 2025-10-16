@@ -2,13 +2,11 @@ const resolvers = require('../src/graphql/resolvers');
 
 jest.mock('../src/config/database', () => {
   const session = {
-    run: jest
-      .fn()
-      .mockResolvedValue({
-        records: [
-          { get: () => ({ properties: { id: 'rel1', label: 'RELATED_TO' } }) },
-        ],
-      }),
+    run: jest.fn().mockResolvedValue({
+      records: [
+        { get: () => ({ properties: { id: 'rel1', label: 'RELATED_TO' } }) },
+      ],
+    }),
     close: jest.fn(),
   };
   return {

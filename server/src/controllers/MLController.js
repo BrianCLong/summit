@@ -56,14 +56,12 @@ class MLController {
         'INSERT INTO ml_models (id, name, metrics, artifact_path, notes) VALUES ($1,$2,$3,$4,$5)',
         [id, name, metrics, artifactPath, notes || null],
       );
-      return res
-        .status(201)
-        .json({
-          success: true,
-          modelId: id,
-          metrics,
-          artifact: `/uploads/models/${id}.json`,
-        });
+      return res.status(201).json({
+        success: true,
+        modelId: id,
+        metrics,
+        artifact: `/uploads/models/${id}.json`,
+      });
     } catch (e) {
       return res.status(500).json({ success: false, error: e.message });
     }
