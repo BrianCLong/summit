@@ -44,8 +44,9 @@ describe('DsarReviewer', () => {
   it('shows request details when selected', () => {
     render(<DsarReviewer requests={baseRequests} />);
 
-    fireEvent.click(screen.getByText('sub-2'));
-    expect(screen.getByText(/Request ID:/)).toHaveTextContent('req-2');
+fireEvent.click(screen.getByText('sub-2'));
+    const idRow = screen.getByText(/Request ID:/).parentElement;
+    expect(idRow).toHaveTextContent('req-2');
     expect(screen.getByText(/Proofs/)).toBeInTheDocument();
   });
 });

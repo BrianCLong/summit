@@ -22,6 +22,31 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
 // Mock requestAnimationFrame
 global.requestAnimationFrame = jest.fn((cb) => setTimeout(cb, 16));
 
+// Mock canvas 2D context for jsdom
+const mockCtx = {
+  fillRect: jest.fn(),
+  clearRect: jest.fn(),
+  beginPath: jest.fn(),
+  arc: jest.fn(),
+  fill: jest.fn(),
+  stroke: jest.fn(),
+  moveTo: jest.fn(),
+  lineTo: jest.fn(),
+  strokeRect: jest.fn(),
+  fillText: jest.fn(),
+  measureText: jest.fn(() => ({ width: 50 })),
+  setLineDash: jest.fn(),
+  closePath: jest.fn(),
+  set font(_v) {},
+  set textAlign(_v) {},
+  set fillStyle(_v) {},
+  set strokeStyle(_v) {},
+  set lineWidth(_v) {},
+  set globalAlpha(_v) {},
+} as any;
+// @ts-ignore
+HTMLCanvasElement.prototype.getContext = jest.fn(() => mockCtx);
+
 // Minimal mock events to satisfy component requirements
 const mockEvents = [
   {
@@ -109,9 +134,9 @@ describe('TemporalAnalysis', () => {
       <TemporalAnalysis {...defaultProps} enableZoom={true} />,
     );
 
-    const viz = screen.getByTestId('timeline-visualization');
-    await user.wheel(viz, { deltaY: -100 });
-    await user.wheel(viz, { deltaY: 100 });
+const viz = screen.getByTestId('timeline-visualization');
+    fireEvent.wheel(viz, { deltaY: -100 });
+    fireEvent.wheel(viz, { deltaY: 100 });
     expect(viz).toBeInTheDocument();
   });
 

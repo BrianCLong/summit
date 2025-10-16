@@ -8,6 +8,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import Redis from 'ioredis';
+import { getRedisClient } from '../db/redis.js';
 import { PrometheusMetrics } from '../utils/metrics';
 import logger from '../utils/logger';
 import { tracer, Span } from '../utils/tracing';
@@ -52,7 +53,7 @@ interface ThrottleState {
 
 export class AbuseGuard {
   private config: AbuseGuardConfig;
-  private redis: ReturnType<typeof createClient>;
+  private redis: Redis;
   private metrics: PrometheusMetrics;
   private throttledTenants: Map<string, ThrottleState> = new Map();
 
@@ -68,9 +69,7 @@ export class AbuseGuard {
       ...config,
     };
 
-    this.redis = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-    });
+    this.redis = getRedisClient();
 
     this.metrics = new PrometheusMetrics('abuse_guard');
     this.initializeMetrics();
@@ -252,10 +251,7 @@ export class AbuseGuard {
         Date.now() / (this.config.windowSizeMinutes * 60 * 1000),
       );
 
-      await this.redis.zAdd(windowKey, {
-        score: currentWindow,
-        value: Date.now().toString(),
-      });
+      await this.redis.zadd(windowKey, currentWindow, Date.now().toString());
 
       // Set expiration for cleanup
       await this.redis.expire(
@@ -302,7 +298,7 @@ export class AbuseGuard {
       const windowStart = currentWindow - i;
       const windowEnd = windowStart + 1;
 
-      const count = await this.redis.zCount(
+      const count = await this.redis.zcount(
         windowKey,
         windowStart,
         windowEnd - 1,

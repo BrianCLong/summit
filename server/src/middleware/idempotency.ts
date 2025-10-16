@@ -5,14 +5,14 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { createHash } from 'crypto';
-import Redis from 'ioredis';
+import { getRedisClient } from '../db/redis.js';
 import logger from '../utils/logger';
 
 interface IdempotencyOptions {
   /**
    * Redis client instance (will create default if not provided)
    */
-  redisClient?: RedisClientType;
+  redisClient?: any;
 
   /**
    * TTL for idempotency keys in milliseconds
@@ -62,12 +62,12 @@ interface IdempotencyRecord {
 }
 
 class IdempotencyManager {
-  private redis: RedisClientType;
+  private redis: any;
   private options: Required<IdempotencyOptions>;
 
   constructor(options: IdempotencyOptions = {}) {
     this.options = {
-      redisClient: options.redisClient || this.createDefaultRedisClient(),
+      redisClient: options.redisClient || getRedisClient(),
       ttlMs: options.ttlMs || 10 * 60 * 1000, // 10 minutes
       includeBody: options.includeBody ?? true,
       includeQuery: options.includeQuery ?? true,
@@ -82,28 +82,6 @@ class IdempotencyManager {
     this.redis = this.options.redisClient;
   }
 
-  private createDefaultRedisClient(): RedisClientType {
-    const client = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-      socket: {
-        reconnectStrategy: (retries) => Math.min(retries * 50, 500),
-      },
-    });
-
-    client.on('error', (err) => {
-      logger.error('Redis client error in idempotency middleware', {
-        error: err,
-      });
-    });
-
-    client.connect().catch((err) => {
-      logger.error('Failed to connect Redis client for idempotency', {
-        error: err,
-      });
-    });
-
-    return client;
-  }
 
   /**
    * Generate deterministic hash for request signature
@@ -197,10 +175,9 @@ class IdempotencyManager {
           operationName,
           completed: false,
         } as IdempotencyRecord),
-        {
-          NX: true, // Only set if key doesn't exist
-          PX: this.options.ttlMs, // Set expiration in milliseconds
-        },
+        'PX',
+        this.options.ttlMs,
+        'NX',
       );
 
       if (!lockResult) {
@@ -310,10 +287,8 @@ class IdempotencyManager {
           };
 
           this.redis
-            .set(redisKey, JSON.stringify(record), {
-              PX: this.options.ttlMs,
-            })
-            .catch((error) => {
+            .psetex(redisKey, this.options.ttlMs, JSON.stringify(record))
+            .catch((error: any) => {
               logger.error('Failed to cache idempotency response', {
                 error,
                 redisKey,
@@ -341,23 +316,24 @@ class IdempotencyManager {
   async cleanup(): Promise<number> {
     try {
       const pattern = 'idempotency:*';
-      let cursor = 0;
+      let cursor = '0';
       let deletedCount = 0;
 
       do {
-        const scanResult = await this.redis.scan(cursor, {
-          MATCH: pattern,
-          COUNT: 100,
-        });
+        const [next, keys] = await this.redis.scan(
+          cursor,
+          'MATCH',
+          pattern,
+          'COUNT',
+          100,
+        );
+        cursor = next;
 
-        cursor = scanResult.cursor;
-        const keys = scanResult.keys;
-
-        if (keys.length > 0) {
-          const deleted = await this.redis.del(keys);
+        if (keys && keys.length > 0) {
+          const deleted = await this.redis.del(...keys);
           deletedCount += deleted;
         }
-      } while (cursor !== 0);
+      } while (cursor !== '0');
 
       logger.info('Idempotency cleanup completed', { deletedCount });
       return deletedCount;
@@ -377,19 +353,22 @@ class IdempotencyManager {
   }> {
     try {
       const pattern = 'idempotency:*';
-      let cursor = 0;
+      let cursor = '0';
       let activeKeys = 0;
       let completedKeys = 0;
 
       do {
-        const scanResult = await this.redis.scan(cursor, {
-          MATCH: pattern,
-          COUNT: 100,
-        });
+        const [next, keys] = await this.redis.scan(
+          cursor,
+          'MATCH',
+          pattern,
+          'COUNT',
+          100,
+        );
 
-        cursor = scanResult.cursor;
+        cursor = next;
 
-        for (const key of scanResult.keys) {
+        for (const key of keys) {
           const record = await this.redis.get(key);
           if (record) {
             try {
@@ -404,7 +383,7 @@ class IdempotencyManager {
             }
           }
         }
-      } while (cursor !== 0);
+      } while (cursor !== '0');
 
       return {
         activeKeys,

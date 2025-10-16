@@ -327,7 +327,12 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    let ctx: CanvasRenderingContext2D | null = null;
+    try {
+      ctx = canvas.getContext('2d');
+    } catch {
+      return;
+    }
     if (!ctx) return;
 
     // Clear canvas
@@ -606,7 +611,7 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
       </div>
 
       {/* Timeline Canvas */}
-      <div className="relative">
+      <div className="relative" data-testid="timeline-visualization" style={{ width: '100%' }}>
         <canvas
           ref={canvasRef}
           width={width}
@@ -643,7 +648,7 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
       </div>
 
       {/* Timeline Statistics */}
-      <div className="mt-4 grid grid-cols-4 gap-4 text-sm">
+      <div className="mt-4 grid grid-cols-4 gap-4 text-sm" data-testid="event-statistics">
         <div className="bg-white p-3 rounded-lg border">
           <div className="font-medium text-gray-900">Total Events</div>
           <div className="text-2xl font-bold text-blue-600">

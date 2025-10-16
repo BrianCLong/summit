@@ -215,10 +215,13 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
 
   // Auto-scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollTo({
-      top: messagesEndRef.current.scrollHeight,
-      behavior: 'smooth',
-    });
+    const el = messagesEndRef.current as any;
+    if (!el) return;
+    if (typeof el.scrollTo === 'function') {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
   }, [messages]);
 
   // ✅ subscribe exactly once per transport; no dependency on streamBuf

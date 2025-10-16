@@ -18,6 +18,9 @@ function collect(
 }
 
 test('fetch transport streams tokens then done', async () => {
+  // Polyfill TextEncoder for Node test environment
+  // @ts-ignore
+  global.TextEncoder = (global.TextEncoder || require('util').TextEncoder);
   const encoder = new TextEncoder();
   // Mock streaming fetch
   // @ts-ignore

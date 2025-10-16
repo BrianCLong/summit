@@ -3,6 +3,9 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 
+// Mock NotificationSystem to avoid Apollo/ApolloProvider dependency
+jest.mock('../components/NotificationSystem', () => ({ __esModule: true, default: () => null }));
+
 jest.mock('../services/socket.js', () => {
   const listeners = {};
   return {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { gql, useLazyQuery } from '@apollo/client';
-import { Drawer, List, ListItem, ListItemText, Button } from '@mui/material';
+import { Drawer, List, ListItem, ListItemText, Button, ListItemButton } from '@mui/material';
 
 const Q = gql`
   query ($id: ID!, $k: Int!) {
@@ -29,20 +29,20 @@ export default function SimilarDrawer({ open, onClose, entityId, cy }) {
         )}
         {data &&
           data.similarEntities.map((s) => (
-            <ListItem
-              key={s.id}
-              button
-              onClick={() => {
-                const n = cy.$(`node[id = "${s.id}"]`);
-                if (n.nonempty && n.nonempty()) {
-                  cy.animate({ center: { eles: n }, duration: 200 });
-                }
-              }}
-            >
-              <ListItemText
-                primary={s.id}
-                secondary={`Score ${(s.score * 100).toFixed(1)}%`}
-              />
+            <ListItem key={s.id} disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  const n = cy.$(`node[id = "${s.id}"]`);
+                  if (n.nonempty && n.nonempty()) {
+                    cy.animate({ center: { eles: n }, duration: 200 });
+                  }
+                }}
+              >
+                <ListItemText
+                  primary={s.id}
+                  secondary={`Score ${(s.score * 100).toFixed(1)}%`}
+                />
+              </ListItemButton>
             </ListItem>
           ))}
         <Button onClick={onClose}>Close</Button>

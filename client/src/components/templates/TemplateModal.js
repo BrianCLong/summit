@@ -8,6 +8,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  ListItemButton,
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material';
@@ -49,18 +50,18 @@ const TemplateModal = ({ open, onClose, onSelect }) => {
         </ToggleButtonGroup>
         <List>
           {templates.map((t) => (
-            <ListItem
-              button
-              key={t.id}
-              onClick={() => {
-                onSelect && onSelect(t);
-                onClose();
-              }}
-            >
-              <ListItemText
-                primary={t.name}
-                secondary={t.scope === 'org' ? 'Shared' : 'Personal'}
-              />
+            <ListItem key={t.id} disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  onSelect && onSelect(t);
+                  onClose();
+                }}
+              >
+                <ListItemText
+                  primary={t.name}
+                  secondary={t.scope === 'org' ? 'Shared' : 'Personal'}
+                />
+              </ListItemButton>
             </ListItem>
           ))}
         </List>

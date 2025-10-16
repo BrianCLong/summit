@@ -4,25 +4,24 @@ Adversarial Training Module for Adversarial Misinformation Defense Platform
 This module implements adversarial training techniques to improve detection capabilities
 by generating challenging samples and continuously updating detection models.
 """
-
 import json
 import logging
 import random
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from detection_modules.audio_detector import AudioDetector
-from detection_modules.deepfake_detector import DeepfakeDetector
-from detection_modules.image_detector import ImageDetector
-from detection_modules.meme_detector import MemeDetector
 
-# Import our detection modules
-from detection_modules.text_detector import TextDetector
-from detection_modules.video_detector import VideoDetector
+# Import our detection modules with relative imports
+from .detection_modules.audio_detector import AudioDetector
+from .detection_modules.deepfake_detector import DeepfakeDetector
+from .detection_modules.image_detector import ImageDetector
+from .detection_modules.meme_detector import MemeDetector
+from .detection_modules.text_detector import TextDetector
+from .detection_modules.video_detector import VideoDetector
 
 
 class GANTrainer:
@@ -46,16 +45,24 @@ class GANTrainer:
         self.discriminator.to(device)
 
         # Optimizers
-        self.g_optimizer = optim.Adam(self.generator.parameters(), lr=lr, betas=(0.5, 0.999))
-        self.d_optimizer = optim.Adam(self.discriminator.parameters(), lr=lr, betas=(0.5, 0.999))
+        self.g_optimizer = optim.Adam(
+            self.generator.parameters(), lr=lr, betas=(0.5, 0.999)
+        )
+        self.d_optimizer = optim.Adam(
+            self.discriminator.parameters(), lr=lr, betas=(0.5, 0.999)
+        )
 
         # Loss function
         self.criterion = nn.BCELoss()
 
         # Training history
-        self.training_history = {"generator_losses": [], "discriminator_losses": [], "epochs": []}
+        self.training_history = {
+            "generator_losses": [],
+            "discriminator_losses": [],
+            "epochs": [],
+        }
 
-    def train_step(self, real_data: torch.Tensor) -> tuple[float, float]:
+    def train_step(self, real_data: torch.Tensor) -> Tuple[float, float]:
         """
         Perform one training step
         """
@@ -135,7 +142,7 @@ class AdversarialTrainingEngine:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.logger.info(f"Using device: {self.device}")
 
-    def register_pattern_library(self, modality: str, patterns: list[str]):
+    def register_pattern_library(self, modality: str, patterns: List[str]):
         """
         Register pattern library for adversarial sample generation
         """
@@ -148,8 +155,8 @@ class AdversarialTrainingEngine:
             self.logger.warning(f"Invalid modality: {modality}")
 
     def generate_text_adversarial_samples(
-        self, base_texts: list[str], num_samples: int = 10
-    ) -> list[str]:
+        self, base_texts: List[str], num_samples: int = 10
+    ) -> List[str]:
         """
         Generate adversarial text samples using pattern libraries
         """
@@ -163,8 +170,8 @@ class AdversarialTrainingEngine:
         return adversarial_samples
 
     def generate_image_adversarial_samples(
-        self, base_images: list[str], num_samples: int = 5
-    ) -> list[str]:
+        self, base_images: List[str], num_samples: int = 5
+    ) -> List[str]:
         """
         Generate adversarial image samples
         """
@@ -181,8 +188,8 @@ class AdversarialTrainingEngine:
         return adversarial_samples
 
     def generate_audio_adversarial_samples(
-        self, base_audios: list[str], num_samples: int = 3
-    ) -> list[str]:
+        self, base_audios: List[str], num_samples: int = 3
+    ) -> List[str]:
         """
         Generate adversarial audio samples
         """
@@ -199,8 +206,8 @@ class AdversarialTrainingEngine:
         return adversarial_samples
 
     def generate_video_adversarial_samples(
-        self, base_videos: list[str], num_samples: int = 2
-    ) -> list[str]:
+        self, base_videos: List[str], num_samples: int = 2
+    ) -> List[str]:
         """
         Generate adversarial video samples
         """
@@ -217,8 +224,8 @@ class AdversarialTrainingEngine:
         return adversarial_samples
 
     def generate_meme_adversarial_samples(
-        self, base_memes: list[str], num_samples: int = 5
-    ) -> list[str]:
+        self, base_memes: List[str], num_samples: int = 5
+    ) -> List[str]:
         """
         Generate adversarial meme samples
         """
@@ -235,8 +242,8 @@ class AdversarialTrainingEngine:
         return adversarial_samples
 
     def generate_deepfake_adversarial_samples(
-        self, base_media: list[str], media_types: list[str], num_samples: int = 3
-    ) -> list[dict[str, Any]]:
+        self, base_media: List[str], media_types: List[str], num_samples: int = 3
+    ) -> List[Dict[str, Any]]:
         """
         Generate adversarial deepfake samples
         """
@@ -256,8 +263,12 @@ class AdversarialTrainingEngine:
         return adversarial_samples
 
     def train_modality_detector(
-        self, modality: str, training_data: list[Any], labels: list[int], epochs: int = 10
-    ) -> dict[str, Any]:
+        self,
+        modality: str,
+        training_data: List[Any],
+        labels: List[int],
+        epochs: int = 10,
+    ) -> Dict[str, Any]:
         """
         Train detector for a specific modality
         """
@@ -323,8 +334,8 @@ class AdversarialTrainingEngine:
         return training_results
 
     def generate_adversarial_samples_for_modality(
-        self, modality: str, base_data: list[Any], num_samples: int = 5
-    ) -> list[Any]:
+        self, modality: str, base_data: List[Any], num_samples: int = 5
+    ) -> List[Any]:
         """
         Generate adversarial samples for a specific modality
         """
@@ -352,9 +363,9 @@ class AdversarialTrainingEngine:
 
     def run_full_adversarial_training_cycle(
         self,
-        training_datasets: dict[str, tuple[list[Any], list[int]]],
+        training_datasets: Dict[str, Tuple[List[Any], List[int]]],
         epochs_per_modality: int = 10,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         Run full adversarial training cycle across all modalities
         """
@@ -376,20 +387,32 @@ class AdversarialTrainingEngine:
                     modality, training_data, labels, epochs_per_modality
                 )
                 cycle_results["modality_results"][modality] = modality_result
-                total_adversarial_samples += modality_result.get("adversarial_samples_generated", 0)
+                total_adversarial_samples += modality_result.get(
+                    "adversarial_samples_generated", 0
+                )
             except Exception as e:
                 self.logger.error(f"Error training {modality} modality: {str(e)}")
-                cycle_results["modality_results"][modality] = {"status": "failed", "error": str(e)}
+                cycle_results["modality_results"][modality] = {
+                    "status": "failed",
+                    "error": str(e),
+                }
 
-        cycle_results["end_time"] = datetime.now().isoformat()
+        # Record completion
+        training_cycle_end = datetime.now()
+        cycle_results["end_time"] = training_cycle_end.isoformat()
+        cycle_results["duration_seconds"] = (
+            training_cycle_end - datetime.fromisoformat(cycle_results["start_time"])
+        ).total_seconds()
         cycle_results["overall_status"] = "completed"
         cycle_results["generated_adversarial_samples"] = total_adversarial_samples
 
-        self.logger.info("Completed full adversarial training cycle")
+        self.logger.info(
+            f"Completed adversarial training cycle in {cycle_results['duration_seconds']:.2f} seconds"
+        )
         return cycle_results
 
     def update_detection_libraries_with_adversarial_samples(
-        self, training_datasets: dict[str, list[Any]]
+        self, training_datasets: Dict[str, List[Any]]
     ):
         """
         Update detection libraries with newly generated adversarial samples
@@ -409,13 +432,15 @@ class AdversarialTrainingEngine:
 
         # Update each detector with adversarial samples
         # In practice, you would integrate these samples into the training process
-        self.logger.info(f"Generated {total_samples} adversarial samples across all modalities")
+        self.logger.info(
+            f"Generated {total_samples} adversarial samples across all modalities"
+        )
 
         return adversarial_samples
 
     def evaluate_detector_improvement(
-        self, test_datasets: dict[str, tuple[list[Any], list[int]]]
-    ) -> dict[str, Any]:
+        self, test_datasets: Dict[str, Tuple[List[Any], List[int]]]
+    ) -> Dict[str, Any]:
         """
         Evaluate improvement in detection capabilities after adversarial training
         """
@@ -437,34 +462,41 @@ class AdversarialTrainingEngine:
 
         return evaluation_results
 
-    def save_training_history(self, filepath: str | Path):
+    def save_training_state(self, filepath: Union[str, Path]):
         """
-        Save training history to file
+        Save current training state to file
         """
+        state = {
+            "training_history": self.training_history,
+            "pattern_libraries": self.pattern_libraries,
+            "saved_at": datetime.now().isoformat(),
+        }
+
         try:
             with open(str(filepath), "w") as f:
-                json.dump(self.training_history, f, indent=2, default=str)
-            self.logger.info(f"Saved training history to {filepath}")
+                json.dump(state, f, indent=2, default=str)
+            self.logger.info(f"Saved training state to {filepath}")
         except Exception as e:
-            self.logger.error(f"Failed to save training history: {str(e)}")
+            self.logger.error(f"Error saving training state: {str(e)}")
 
-    def load_training_history(self, filepath: str | Path) -> dict[str, Any]:
+    def load_training_state(self, filepath: Union[str, Path]):
         """
-        Load training history from file
+        Load training state from file
         """
         try:
-            with open(str(filepath)) as f:
-                history = json.load(f)
-            self.training_history = history
-            self.logger.info(f"Loaded training history from {filepath}")
-            return history
+            with open(str(filepath), "r") as f:
+                state = json.load(f)
+
+            self.training_history = state.get("training_history", {})
+            self.pattern_libraries = state.get("pattern_libraries", {})
+
+            self.logger.info(f"Loaded training state from {filepath}")
         except Exception as e:
-            self.logger.error(f"Failed to load training history: {str(e)}")
-            return {}
+            self.logger.error(f"Error loading training state: {str(e)}")
 
 
 # Convenience function for easy usage
-def create_adversarial_trainer() -> AdversarialTrainingEngine:
+def create_adversarial_training_engine() -> AdversarialTrainingEngine:
     """
     Factory function to create and initialize the adversarial training engine
     """
