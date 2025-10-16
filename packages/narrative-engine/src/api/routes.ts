@@ -10,12 +10,10 @@ export function createNarrativeRouter(engine?: SimulationEngine): Router {
     const config = req.body as SimConfig;
     try {
       runtime.initialize(config);
-      res
-        .status(200)
-        .json({
-          status: 'initialized',
-          timestamp: runtime.getState().timestamp,
-        });
+      res.status(200).json({
+        status: 'initialized',
+        timestamp: runtime.getState().timestamp,
+      });
     } catch (error) {
       res
         .status(400)
