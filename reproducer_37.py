@@ -1,3 +1,3 @@
 # Minimal reproducer.
-policy = {'consent': 'analytics', 'geo': 'EU'}
-query = {'data': 'anonymous_data', 'location': 'JP'}
+policy = {"consent": "analytics", "geo": "EU"}
+query = {"data": "anonymous_data", "location": "JP"}

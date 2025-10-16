@@ -3,7 +3,7 @@
 
 // No-op tracer shim to avoid OTEL dependency
 // Azure SDK loaded dynamically to avoid type resolution requirement during typecheck
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+ 
 const azureBlob: any = (() => {
   try {
     return require('@azure/storage-blob');

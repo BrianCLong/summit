@@ -1,6 +1,6 @@
 import { graphqlResolverDurationSeconds, graphqlResolverErrorsTotal, graphqlResolverCallsTotal, } from '../../monitoring/metrics.js';
 const resolverMetricsPlugin = {
-    requestDidStart() {
+    async requestDidStart() {
         return {
             executionDidStart() {
                 return {

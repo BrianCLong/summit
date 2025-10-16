@@ -11,7 +11,7 @@
 
 import axios from 'axios';
 import { Request, Response, NextFunction } from 'express';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 import logger from '../config/logger';
 import { getPostgresPool } from '../config/database';
 import { writeAudit } from '../utils/audit.js';
@@ -143,7 +143,7 @@ export class OPAWithAppealsMiddleware {
           allowed: false,
           policy: 'system.fail_secure',
           reason: 'Policy evaluation failed - access denied for security',
-          decisionId: uuidv4(),
+decisionId: randomUUID(),
           timestamp: new Date().toISOString(),
           appeal: this.createAppealPath('SYSTEM_ERROR'),
         };
@@ -238,7 +238,7 @@ export class OPAWithAppealsMiddleware {
         allowed: opaResult.allow || false,
         policy: opaResult.policy || 'unknown',
         reason: opaResult.reason || 'Access denied by policy',
-        decisionId: uuidv4(),
+decisionId: randomUUID(),
         timestamp: new Date().toISOString(),
         ttl: this.cacheTtl,
         metadata: opaResult.metadata,
@@ -277,7 +277,7 @@ export class OPAWithAppealsMiddleware {
     policyInput?: PolicyInput,
     decisionId?: string,
   ): AppealPath {
-    const appealId = uuidv4();
+const appealId = randomUUID();
 
     // Determine if appeal is available based on policy type
     const appealable =
@@ -354,7 +354,7 @@ export class OPAWithAppealsMiddleware {
     const pool = getPostgresPool();
 
     const appealRequest: AppealRequest = {
-      id: uuidv4(),
+id: randomUUID(),
       decisionId,
       userId,
       justification,
@@ -534,7 +534,7 @@ export class OPAWithAppealsMiddleware {
         id, decision_id, user_id, approved_by, expires_at, created_at
       ) VALUES ($1, $2, $3, $4, $5, NOW())
     `,
-      [uuidv4(), decisionId, userId, approvedBy, expiresAt],
+[randomUUID(), decisionId, userId, approvedBy, expiresAt],
     );
 
     log.info(

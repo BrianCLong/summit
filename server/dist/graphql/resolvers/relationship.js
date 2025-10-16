@@ -1,5 +1,5 @@
 import { getNeo4jDriver } from '../../db/neo4j.js';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 import pino from 'pino';
 import { pubsub, RELATIONSHIP_CREATED, RELATIONSHIP_UPDATED, RELATIONSHIP_DELETED, tenantEvent, } from '../subscriptions.js';
 import { requireTenant } from '../../middleware/withTenant.js';
@@ -11,7 +11,7 @@ const relationshipResolvers = {
             const session = driver.session();
             try {
                 const tenantId = requireTenant(context);
-                const id = uuidv4();
+                const id = randomUUID();
                 const createdAt = new Date().toISOString();
                 const props = {
                     ...input.props,

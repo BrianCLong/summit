@@ -92,7 +92,8 @@ async function startDevServer() {
     console.log('')
     console.log('📋 Server Information:')
     console.log(`  - Local:   http://localhost:5173/maestro`)
-    console.log(`  - Network: http://${getLocalIP()}:5173/maestro`)
+    const ip = await getLocalIP()
+    console.log(`  - Network: http://${ip}:5173/maestro`)
     console.log('')
     console.log('🛠️  Development Features:')
     console.log('  - Hot Module Replacement (HMR) enabled')
@@ -162,7 +163,7 @@ function setupDevHelpers(server) {
   })
 }
 
-function getLocalIP() {
+async function getLocalIP() {
   const { networkInterfaces } = await import('os')
   const nets = networkInterfaces()
   

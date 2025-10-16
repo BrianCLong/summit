@@ -3,9 +3,10 @@ Setup script for Adversarial Misinformation Defense Platform
 
 This script sets up the package for installation and distribution.
 """
-from setuptools import setup, find_packages
+
 from pathlib import Path
 
+from setuptools import find_packages, setup
 
 # Read the README file
 README_PATH = Path(__file__).parent / "README.md"

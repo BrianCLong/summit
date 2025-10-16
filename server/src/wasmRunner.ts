@@ -15,6 +15,7 @@ export async function runWasmStep(
 ) {
   // Enforce simple capability gates by not wiring imports for FS/NET (default off)
   const wasi = new WASI({
+    version: 'preview1',
     args: [],
     env: {},
     preopens: caps.fs ? { '/': '/' } : {},

@@ -9,7 +9,7 @@ import { SpeechToTextEngine } from './engines/SpeechToTextEngine.js';
 import { FaceDetectionEngine } from './engines/FaceDetectionEngine.js';
 import { TextAnalysisEngine } from './engines/TextAnalysisEngine.js';
 import { EmbeddingService } from './services/EmbeddingService.js';
-import { MediaType } from '../services/MultimodalDataService.js';
+import { MediaType } from '../services/MediaUploadService.js';
 import {
   VideoFrameExtractor,
   ExtractedFrame,

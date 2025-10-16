@@ -3,12 +3,14 @@ Airflow DAG for CSV Data Ingestion
 Orchestrates CSV ingestion → validation → transformation → loading to Neo4j/Postgres
 """
 
+import asyncio
+import inspect
 import os
 import sys
 from datetime import datetime, timedelta
-import asyncio
-import inspect
+
 from airflow.operators.python import PythonOperator
+
 from airflow import DAG
 
 # Add data-pipelines directory to Python path

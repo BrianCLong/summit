@@ -4,7 +4,7 @@ import { randomUUID as uuid } from 'crypto';
 // Optional parquet writer (parquetjs-lite). Falls back to CSV if not present.
 let parquet: any = null;
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+   
   parquet = require('parquetjs-lite');
 } catch (_) {
   parquet = null;

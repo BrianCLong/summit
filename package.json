@@ -112,6 +112,22 @@
     "node": ">=18.18",
     "npm": ">=8.0.0"
   },
+  "pnpm": {
+    "overrides": {
+      "typescript": "^5.3.3",
+      "@opentelemetry/api": "1.7.0",
+      "@opentelemetry/sdk-node": "0.48.0",
+      "@opentelemetry/sdk-trace-base": "1.19.0",
+      "@opentelemetry/sdk-metrics": "1.19.0",
+      "@opentelemetry/resources": "1.19.0",
+      "@opentelemetry/propagator-b3": "1.19.0",
+      "@opentelemetry/propagator-jaeger": "1.19.0",
+      "@opentelemetry/exporter-trace-otlp-http": "0.48.0",
+      "@opentelemetry/exporter-metrics-otlp-http": "0.48.0",
+      "@opentelemetry/auto-instrumentations-node": "0.48.0",
+      "graphql-redis-subscriptions": "^3.6.0"
+    }
+  },
   "devDependencies": {
     "@apollo/client": "^4.0.7",
     "@commitlint/cli": "^19.8.1",
@@ -210,11 +226,6 @@
     "ws": "^8.18.3"
   },
   "private": true,
-  "pnpm": {
-    "overrides": {
-      "typescript": "^5.3.3"
-    }
-  },
   "packageManager": "pnpm@9.12.3",
   "type": "module"
 }

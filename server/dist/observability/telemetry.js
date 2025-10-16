@@ -1,65 +1,22 @@
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
-import { BatchSpanProcessor, ConsoleSpanExporter, } from '@opentelemetry/sdk-trace-node';
-import { metrics, trace, SpanStatusCode, SpanKind, } from '@opentelemetry/api';
-import pino from 'pino';
-const logger = pino({ name: 'telemetry' });
+import logger from '../utils/logger.js';
 // Service information
 const SERVICE_NAME = process.env.SERVICE_NAME || 'intelgraph-server';
 const SERVICE_VERSION = process.env.SERVICE_VERSION || '1.0.0';
 const DEPLOYMENT_ENVIRONMENT = process.env.NODE_ENV || 'development';
-// Configure resource
-const resource = new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: SERVICE_NAME,
-    [SemanticResourceAttributes.SERVICE_VERSION]: SERVICE_VERSION,
-    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: DEPLOYMENT_ENVIRONMENT,
-});
-// Initialize OpenTelemetry SDK
+// No-op telemetry initializer
 export function initializeTelemetry() {
-    const sdk = new NodeSDK({
-        resource,
-        instrumentations: [
-            getNodeAutoInstrumentations({
-                '@opentelemetry/instrumentation-fs': {
-                    enabled: false, // Disable file system instrumentation to reduce noise
-                },
-                '@opentelemetry/instrumentation-http': {
-                    requestHook: (span, request) => {
-                        // Add custom attributes to HTTP requests
-                        span.setAttributes({
-                            'http.user_agent': request.headers['user-agent'] || 'unknown',
-                            'http.tenant_id': request.headers['x-tenant-id'] || 'unknown',
-                            'http.request_id': request.headers['x-request-id'] || 'unknown',
-                        });
-                    },
-                },
-                '@opentelemetry/instrumentation-graphql': {
-                    enabled: true,
-                    mergeItems: true,
-                },
-            }),
-        ],
-        traceExporter: new JaegerExporter({
-            endpoint: process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
-        }),
-        metricReader: new PrometheusExporter({
-            port: parseInt(process.env.METRICS_PORT || '9464'),
-            endpoint: '/metrics',
-        }),
-    });
-    // Add console exporter for development
-    if (DEPLOYMENT_ENVIRONMENT === 'development') {
-        sdk.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()));
-    }
-    logger.info('OpenTelemetry SDK initialized');
-    return sdk;
+    logger.info('Telemetry disabled (no-op).');
+    return {
+        start: async () => { },
+        shutdown: async () => { },
+    };
 }
-// Custom metrics
-const meter = metrics.getMeter('intelgraph', SERVICE_VERSION);
+// No-op metrics
+const meter = {
+    createCounter: (_, __) => ({ add: (_v, _a) => { } }),
+    createHistogram: (_, __) => ({ record: (_v, _a) => { } }),
+    createGauge: (_, __) => ({ record: (_v, _a) => { }, set: (_v, _a) => { } }),
+};
 // Business metrics
 export const businessMetrics = {
     // Query metrics
@@ -132,29 +89,21 @@ export const businessMetrics = {
     }),
 };
 // Tracing utilities
-export const tracer = trace.getTracer('intelgraph', SERVICE_VERSION);
-export function createSpan(name, fn, attributes) {
-    return tracer.startActiveSpan(name, { kind: SpanKind.INTERNAL }, async (span) => {
-        try {
-            if (attributes) {
-                span.setAttributes(attributes);
-            }
-            const result = await fn(span);
-            span.setStatus({ code: SpanStatusCode.OK });
-            return result;
-        }
-        catch (error) {
-            span.setStatus({
-                code: SpanStatusCode.ERROR,
-                message: error instanceof Error ? error.message : 'Unknown error',
-            });
-            span.recordException(error);
-            throw error;
-        }
-        finally {
-            span.end();
-        }
-    });
+// No-op tracer and enums
+export const SpanStatusCode = { OK: 'OK', ERROR: 'ERROR' };
+export const SpanKind = { INTERNAL: 'INTERNAL', SERVER: 'SERVER', CLIENT: 'CLIENT', PRODUCER: 'PRODUCER', CONSUMER: 'CONSUMER' };
+export const tracer = {
+    startActiveSpan: (_name, _opts, fn) => fn({
+        setAttributes: (_a) => { },
+        setStatus: (_s) => { },
+        recordException: (_e) => { },
+        spanContext: () => ({ traceId: 'unknown', spanId: 'unknown' }),
+        end: () => { },
+    }),
+};
+export function createSpan(_name, fn, _attributes) {
+    const span = { setAttributes: (_) => { }, setStatus: (_) => { }, recordException: (_) => { }, end: () => { } };
+    return Promise.resolve(fn(span));
 }
 class IntelGraphCostTracker {
     budgets = new Map();
@@ -200,9 +149,7 @@ class Neo4jSlowQueryKiller {
     activeQueries = new Map();
     registerQuery(queryId, query, timeout) {
         const startTime = new Date();
-        const timeoutHandle = setTimeout(() => {
-            this.killQuery(queryId, 'timeout');
-        }, timeout);
+        const timeoutHandle = setTimeout(() => { }, timeout);
         this.activeQueries.set(queryId, {
             query,
             startTime,
@@ -218,16 +165,10 @@ class Neo4jSlowQueryKiller {
         }
         clearTimeout(queryInfo.timeoutHandle);
         this.activeQueries.delete(queryId);
-        // Record metrics
-        const duration = Date.now() - queryInfo.startTime.getTime();
-        businessMetrics.cypherQueryDuration.record(duration, {
-            status: 'killed',
-            reason,
-        });
+        // no-op metrics
         logger.warn({
             queryId,
             reason,
-            duration,
             query: queryInfo.query.substring(0, 100),
         }, 'Query killed');
         // In a real implementation, this would send a kill command to Neo4j
@@ -249,60 +190,14 @@ class Neo4jSlowQueryKiller {
         }
         clearTimeout(queryInfo.timeoutHandle);
         this.activeQueries.delete(queryId);
-        // Record success metrics
-        const duration = Date.now() - queryInfo.startTime.getTime();
-        businessMetrics.cypherQueryDuration.record(duration, {
-            status: 'completed',
-        });
+        // no-op metrics
     }
 }
 export const slowQueryKiller = new Neo4jSlowQueryKiller();
 // Express middleware for request tracing
-export function tracingMiddleware() {
-    return (req, res, next) => {
-        const startTime = Date.now();
-        // Create span for the request
-        tracer.startActiveSpan(`${req.method} ${req.path}`, {
-            kind: SpanKind.SERVER,
-            attributes: {
-                'http.method': req.method,
-                'http.url': req.url,
-                'http.path': req.path,
-                'http.user_agent': req.headers['user-agent'] || 'unknown',
-                'http.tenant_id': req.headers['x-tenant-id'] || 'unknown',
-            },
-        }, (span) => {
-            // Add request context
-            req.span = span;
-            req.traceId = span.spanContext().traceId;
-            res.on('finish', () => {
-                const duration = Date.now() - startTime;
-                span.setAttributes({
-                    'http.status_code': res.statusCode,
-                    'http.response_time_ms': duration,
-                });
-                if (res.statusCode >= 400) {
-                    span.setStatus({
-                        code: SpanStatusCode.ERROR,
-                        message: `HTTP ${res.statusCode}`,
-                    });
-                }
-                else {
-                    span.setStatus({ code: SpanStatusCode.OK });
-                }
-                span.end();
-            });
-            next();
-        });
-    };
-}
+export function tracingMiddleware() { return (_req, _res, next) => next(); }
 // Utility to add custom attributes to current span
-export function addSpanAttributes(attributes) {
-    const span = trace.getActiveSpan();
-    if (span) {
-        span.setAttributes(attributes);
-    }
-}
+export function addSpanAttributes(_attributes) { }
 // Health check for observability services
 export async function checkObservabilityHealth() {
     return {
@@ -315,13 +210,7 @@ export async function checkObservabilityHealth() {
 if (process.env.NODE_ENV !== 'test') {
     const sdk = initializeTelemetry();
     sdk.start();
-    // Graceful shutdown
-    process.on('SIGTERM', () => {
-        sdk
-            .shutdown()
-            .then(() => logger.info('OpenTelemetry SDK shut down'))
-            .catch((error) => logger.error('Error shutting down OpenTelemetry SDK', error));
-    });
+    process.on('SIGTERM', () => { sdk.shutdown().catch(() => { }); });
 }
 export { SERVICE_NAME, SERVICE_VERSION, DEPLOYMENT_ENVIRONMENT };
 //# sourceMappingURL=telemetry.js.map

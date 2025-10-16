@@ -19,7 +19,7 @@ async function tick() {
 }
 
 async function main() {
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
     await tick();
     await new Promise((r) =>

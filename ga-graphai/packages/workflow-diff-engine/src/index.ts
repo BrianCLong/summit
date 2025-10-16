@@ -51,7 +51,7 @@ function canonicalize(value: unknown): unknown {
     const sorted = Object.keys(value as Record<string, unknown>).sort();
     const result: Record<string, unknown> = {};
     for (const key of sorted) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       result[key] = canonicalize((value as Record<string, unknown>)[key]);
     }
     return result;

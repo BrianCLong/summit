@@ -160,7 +160,7 @@ export const MaestroSafeMutations = {
         return run;
       },
       // Rollback function - cancel the run if needed
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       async (run, _context) => {
         if (run.status === 'queued' || run.status === 'running') {
           await maestroApi.cancelRun(run.id);
@@ -194,7 +194,7 @@ export const MaestroSafeMutations = {
         return updatedPolicy;
       },
       // Rollback function - restore original policy
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       async (updatedPolicy, _context) => {
         const original = (updatedPolicy as { _original: PolicyUpdate })
           ._original;
@@ -212,7 +212,7 @@ export const MaestroSafeMutations = {
     return safeMutation(
       BudgetUpdateSchema,
       input,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       async (budget: BudgetUpdate, _context) => {
         // Get current budget for rollback
         const currentBudget = await maestroApi.getTenantBudget(budget.tenantId);
@@ -237,7 +237,7 @@ export const MaestroSafeMutations = {
         return updatedBudget;
       },
       // Rollback function
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       async (updatedBudget, _context) => {
         const original = (updatedBudget as { _original: BudgetUpdate })
           ._original;
@@ -297,7 +297,7 @@ export const MaestroSafeMutations = {
         return result;
       },
       // Rollback function - unpin the route
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       async (result, _context) => {
         await maestroApi.deleteRoutingPin(result.route);
       },
@@ -311,7 +311,7 @@ export const MaestroSafeMutations = {
     return safeMutation(
       z.object({ level: z.number().min(0).max(5) }),
       { level },
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       async ({ level }, _context) => {
         // Get current level for rollback
         const current = await maestroApi.getAutonomy();
@@ -334,7 +334,7 @@ export const MaestroSafeMutations = {
         return result;
       },
       // Rollback function
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       async (result, _context) => {
         const originalLevel = (result as { _originalLevel: number })
           ._originalLevel;

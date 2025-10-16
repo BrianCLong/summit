@@ -14,7 +14,7 @@ async function sha256(buf: Buffer) {
 }
 
 export async function hotReloadLoop(signal?: AbortSignal) {
-  // eslint-disable-next-line no-constant-condition
+   
   while (!signal?.aborted) {
     try {
       const dir = await fetchAndVerify({ url: PACK_URL });

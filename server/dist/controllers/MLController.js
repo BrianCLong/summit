@@ -42,9 +42,7 @@ class MLController {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
             await pool.query('INSERT INTO ml_models (id, name, metrics, artifact_path, notes) VALUES ($1,$2,$3,$4,$5)', [id, name, metrics, artifactPath, notes || null]);
-            return res
-                .status(201)
-                .json({
+            return res.status(201).json({
                 success: true,
                 modelId: id,
                 metrics,

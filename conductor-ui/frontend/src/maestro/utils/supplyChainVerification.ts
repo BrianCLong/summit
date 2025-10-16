@@ -400,7 +400,7 @@ export class SupplyChainVerifier {
   }
 
   private async validateSignature(
-    _artifact: string, // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _artifact: string,  
     signature: CosignSignature,
   ): Promise<boolean> {
     // In production, this would use cryptographic libraries to verify the signature
@@ -409,7 +409,7 @@ export class SupplyChainVerifier {
   }
 
   private async validateCertificate(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     _cert: string,
   ): Promise<boolean> {
     try {
@@ -458,7 +458,7 @@ export class SupplyChainVerifier {
   }
 
   private extractExtensions(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     _signature: CosignSignature,
   ): Record<string, unknown> {
     // Extract certificate extensions

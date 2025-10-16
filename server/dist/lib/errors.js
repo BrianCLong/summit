@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { randomUUID } from 'node:crypto';
 import pino from 'pino';
 import { ZodError } from 'zod';
 const logger = pino({ name: 'ErrorMapper' });
@@ -12,7 +12,7 @@ export class UserFacingError extends Error {
     }
 }
 export function mapGraphRAGError(error) {
-    const traceId = uuid();
+    const traceId = randomUUID();
     let summary = 'Unknown error';
     if (error instanceof ZodError) {
         summary = error.issues

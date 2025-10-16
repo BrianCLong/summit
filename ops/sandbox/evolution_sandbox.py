@@ -16,29 +16,27 @@ they can be approved and applied to the production system.
 """
 
 import asyncio
-import json
+import base64
 import hashlib
 import hmac
-import time
+import json
 import logging
-import subprocess
-import tempfile
-import os
-from typing import Dict, List, Any, Optional, Tuple
+import time
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
-from datetime import datetime, timedelta
-import base64
+from typing import Any
 
 # Configure sandbox logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - SANDBOX - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - SANDBOX - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
+
 class SandboxStatus(Enum):
     """Sandbox execution status"""
+
     INITIALIZING = "initializing"
     RUNNING_OPA_SIM = "running_opa_simulation"
     RUNNING_TESTS = "running_tests"
@@ -48,28 +46,34 @@ class SandboxStatus(Enum):
     COMPLETED = "completed"
     FAILED = "failed"
 
+
 class RiskLevel(Enum):
     """Risk assessment levels"""
+
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
     CRITICAL = "CRITICAL"
 
+
 @dataclass
 class EvolutionProposal:
     """Evolution proposal structure"""
+
     proposal_id: str
     title: str
     description: str
     strategy: str
-    target_capabilities: List[str]
+    target_capabilities: list[str]
     expected_improvement: float
     proposed_by: str
     created_at: datetime = field(default_factory=datetime.now)
 
+
 @dataclass
 class SandboxConfig:
     """Sandbox configuration parameters"""
+
     opa_endpoint: str = "http://localhost:8181"
     test_harness_path: str = "./tests"
     cse_stream_endpoint: str = "http://localhost:9090"
@@ -79,9 +83,11 @@ class SandboxConfig:
     required_test_coverage: float = 0.85
     required_cse_score: float = 0.99
 
+
 @dataclass
 class TestResults:
     """Test execution results"""
+
     total_tests: int = 0
     passed_tests: int = 0
     failed_tests: int = 0
@@ -90,9 +96,11 @@ class TestResults:
     execution_time_seconds: float = 0.0
     test_output: str = ""
 
+
 @dataclass
 class CSEValidation:
     """Compatibility Safety Equivalence validation results"""
+
     score: float = 0.0
     shadow_traffic_tests: int = 0
     equivalence_verified: bool = False
@@ -100,9 +108,11 @@ class CSEValidation:
     safety_maintained: bool = False
     validation_timestamp: datetime = field(default_factory=datetime.now)
 
+
 @dataclass
 class ZKFairnessProof:
     """Zero-knowledge fairness proof"""
+
     proof_id: str = ""
     fairness_score: float = 0.0
     demographic_parity: float = 0.0
@@ -114,9 +124,11 @@ class ZKFairnessProof:
     proof_data: str = ""
     generated_at: datetime = field(default_factory=datetime.now)
 
+
 @dataclass
 class SandboxResults:
     """Complete sandbox execution results"""
+
     proposal_id: str
     status: SandboxStatus
     opa_simulation_passed: bool = False
@@ -126,8 +138,9 @@ class SandboxResults:
     evidence_stub: str = ""
     signature: str = ""
     execution_start: datetime = field(default_factory=datetime.now)
-    execution_end: Optional[datetime] = None
+    execution_end: datetime | None = None
     error_message: str = ""
+
 
 class OPASimulator:
     """OPA policy simulation for evolution proposals"""
@@ -135,7 +148,9 @@ class OPASimulator:
     def __init__(self, opa_endpoint: str):
         self.opa_endpoint = opa_endpoint
 
-    async def simulate_policy(self, proposal: EvolutionProposal, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def simulate_policy(
+        self, proposal: EvolutionProposal, context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Simulate OPA policy evaluation for the evolution proposal"""
         logger.info(f"Running OPA simulation for proposal: {proposal.proposal_id}")
 
@@ -145,24 +160,25 @@ class OPASimulator:
                 "name": "applyEvolution",
                 "isMutation": True,
                 "isTranscendent": True,
-                "requires_testing": True
+                "requires_testing": True,
             },
-            "actor": context.get("actor", {
-                "role": "evolution-engineer",
-                "id": proposal.proposed_by,
-                "quantum_clearance": 3
-            }),
+            "actor": context.get(
+                "actor",
+                {"role": "evolution-engineer", "id": proposal.proposed_by, "quantum_clearance": 3},
+            ),
             "tenant": context.get("tenant", "TENANT_001"),
             "evolution_proposal": {
                 "id": proposal.proposal_id,
                 "strategy": proposal.strategy,
                 "risk_assessment": {
                     "overall_risk": self._assess_risk_level(proposal),
-                    "safety_score": 0.85
+                    "safety_score": 0.85,
                 },
-                "capability_weights": self._calculate_capability_weights(proposal.target_capabilities),
+                "capability_weights": self._calculate_capability_weights(
+                    proposal.target_capabilities
+                ),
                 "approval_status": "PENDING_REVIEW",
-                "sandbox_results": {"all_tests_passed": True}
+                "sandbox_results": {"all_tests_passed": True},
             },
             "sandbox_results": {
                 "opa_simulation_passed": True,
@@ -170,17 +186,11 @@ class OPASimulator:
                 "cse_score": 0.99,
                 "zk_fairness_proof": {"verified": True},
                 "evidence_stub": "sandbox_validation_stub",
-                "signature_valid": True
+                "signature_valid": True,
             },
-            "human_oversight": {
-                "enabled": True,
-                "operator_id": "sandbox_validator"
-            },
+            "human_oversight": {"enabled": True, "operator_id": "sandbox_validator"},
             "safety_score": 0.95,
-            "containment": {
-                "emergency_rollback_ready": True,
-                "kill_switch_armed": True
-            }
+            "containment": {"emergency_rollback_ready": True, "kill_switch_armed": True},
         }
 
         try:
@@ -221,7 +231,7 @@ class OPASimulator:
         else:
             return "LOW"
 
-    def _calculate_capability_weights(self, capabilities: List[str]) -> List[float]:
+    def _calculate_capability_weights(self, capabilities: list[str]) -> list[float]:
         """Calculate normalized weights for capabilities"""
         if not capabilities:
             return []
@@ -230,7 +240,7 @@ class OPASimulator:
         weight_per_capability = min(0.8 / len(capabilities), 0.3)
         return [weight_per_capability] * len(capabilities)
 
-    async def _evaluate_policy_conditions(self, opa_input: Dict[str, Any]) -> Dict[str, Any]:
+    async def _evaluate_policy_conditions(self, opa_input: dict[str, Any]) -> dict[str, Any]:
         """Evaluate key policy conditions for the proposal"""
         conditions = []
 
@@ -249,13 +259,17 @@ class OPASimulator:
         conditions.append(("safety_score_valid", safety_score_valid))
 
         # Check containment readiness
-        containment_ready = (opa_input["containment"]["emergency_rollback_ready"] and
-                           opa_input["containment"]["kill_switch_armed"])
+        containment_ready = (
+            opa_input["containment"]["emergency_rollback_ready"]
+            and opa_input["containment"]["kill_switch_armed"]
+        )
         conditions.append(("containment_ready", containment_ready))
 
         # Check sandbox validation
-        sandbox_valid = (opa_input["sandbox_results"]["opa_simulation_passed"] and
-                        opa_input["sandbox_results"]["test_coverage"] >= 0.85)
+        sandbox_valid = (
+            opa_input["sandbox_results"]["opa_simulation_passed"]
+            and opa_input["sandbox_results"]["test_coverage"] >= 0.85
+        )
         conditions.append(("sandbox_valid", sandbox_valid))
 
         # Overall decision
@@ -265,8 +279,9 @@ class OPASimulator:
             "allow": all_conditions_met,
             "conditions": dict(conditions),
             "policy_version": "v0.4.0",
-            "evaluation_timestamp": datetime.now().isoformat()
+            "evaluation_timestamp": datetime.now().isoformat(),
         }
+
 
 class TestHarness:
     """Test execution harness for evolution proposals"""
@@ -296,7 +311,9 @@ class TestHarness:
             # Simulate test output
             results.test_output = self._generate_test_output(results)
 
-            logger.info(f"Test execution complete: {results.passed_tests}/{results.total_tests} passed")
+            logger.info(
+                f"Test execution complete: {results.passed_tests}/{results.total_tests} passed"
+            )
             return results
 
         except Exception as e:
@@ -326,6 +343,7 @@ All critical safety tests: PASSED
 Evolution compatibility tests: PASSED
 Rollback mechanism tests: PASSED
 """
+
 
 class CSEValidator:
     """Compatibility Safety Equivalence validator"""
@@ -359,6 +377,7 @@ class CSEValidator:
             validation.safety_maintained = False
             return validation
 
+
 class ZKFairnessProofGenerator:
     """Zero-knowledge fairness proof generator"""
 
@@ -384,10 +403,10 @@ class ZKFairnessProofGenerator:
 
             # Calculate composite fairness score
             proof.fairness_score = (
-                proof.demographic_parity * 0.3 +
-                proof.equalized_odds * 0.3 +
-                proof.calibration * 0.2 +
-                proof.individual_fairness * 0.2
+                proof.demographic_parity * 0.3
+                + proof.equalized_odds * 0.3
+                + proof.calibration * 0.2
+                + proof.individual_fairness * 0.2
             )
 
             # Simulate proof generation and verification
@@ -408,20 +427,17 @@ class ZKFairnessProofGenerator:
         """Generate simulated zero-knowledge proof data"""
         proof_structure = {
             "circuit_id": "fairness_verification_v2",
-            "public_inputs": [
-                proof.fairness_score,
-                proof.demographic_parity,
-                proof.equalized_odds
-            ],
+            "public_inputs": [proof.fairness_score, proof.demographic_parity, proof.equalized_odds],
             "proof_elements": {
                 "pi_a": "simulated_proof_element_a",
                 "pi_b": "simulated_proof_element_b",
-                "pi_c": "simulated_proof_element_c"
+                "pi_c": "simulated_proof_element_c",
             },
             "verification_key": "simulated_vk_hash",
-            "proof_hash": hashlib.sha256(f"{proof.proof_id}_{time.time()}".encode()).hexdigest()
+            "proof_hash": hashlib.sha256(f"{proof.proof_id}_{time.time()}".encode()).hexdigest(),
         }
         return base64.b64encode(json.dumps(proof_structure).encode()).decode()
+
 
 class EvidenceGenerator:
     """Cryptographic evidence generator for sandbox results"""
@@ -429,7 +445,7 @@ class EvidenceGenerator:
     def __init__(self, signing_key: str):
         self.signing_key = signing_key or "default_sandbox_signing_key"
 
-    def generate_evidence_stub(self, results: SandboxResults) -> Tuple[str, str]:
+    def generate_evidence_stub(self, results: SandboxResults) -> tuple[str, str]:
         """Generate cryptographically signed evidence stub"""
         logger.info(f"Generating evidence stub for proposal: {results.proposal_id}")
 
@@ -439,33 +455,33 @@ class EvidenceGenerator:
             "sandbox_execution": {
                 "status": results.status.value,
                 "start_time": results.execution_start.isoformat(),
-                "end_time": results.execution_end.isoformat() if results.execution_end else None
+                "end_time": results.execution_end.isoformat() if results.execution_end else None,
             },
             "validation_results": {
                 "opa_simulation_passed": results.opa_simulation_passed,
                 "test_results": {
                     "total_tests": results.test_results.total_tests,
                     "passed_tests": results.test_results.passed_tests,
-                    "coverage": results.test_results.coverage
+                    "coverage": results.test_results.coverage,
                 },
                 "cse_score": results.cse_validation.score,
                 "cse_equivalence_verified": results.cse_validation.equivalence_verified,
                 "zk_fairness_proof": {
                     "proof_id": results.zk_fairness_proof.proof_id,
                     "fairness_score": results.zk_fairness_proof.fairness_score,
-                    "verification_passed": results.zk_fairness_proof.verification_passed
-                }
+                    "verification_passed": results.zk_fairness_proof.verification_passed,
+                },
             },
             "evidence_metadata": {
                 "generator": "evolution_sandbox_v040",
                 "version": "1.0.0",
                 "timestamp": datetime.now().isoformat(),
-                "signature_algorithm": "HMAC-SHA256"
-            }
+                "signature_algorithm": "HMAC-SHA256",
+            },
         }
 
         # Convert to canonical JSON
-        evidence_json = json.dumps(evidence_payload, sort_keys=True, separators=(',', ':'))
+        evidence_json = json.dumps(evidence_payload, sort_keys=True, separators=(",", ":"))
         evidence_stub = base64.b64encode(evidence_json.encode()).decode()
 
         # Generate cryptographic signature
@@ -477,11 +493,10 @@ class EvidenceGenerator:
     def _sign_evidence(self, evidence_stub: str) -> str:
         """Generate HMAC signature for evidence"""
         signature = hmac.new(
-            self.signing_key.encode(),
-            evidence_stub.encode(),
-            hashlib.sha256
+            self.signing_key.encode(), evidence_stub.encode(), hashlib.sha256
         ).hexdigest()
         return signature
+
 
 class EvolutionSandbox:
     """Main evolution sandbox orchestrator"""
@@ -494,14 +509,14 @@ class EvolutionSandbox:
         self.zk_proof_generator = ZKFairnessProofGenerator(config.zk_verifier_endpoint)
         self.evidence_generator = EvidenceGenerator(config.evidence_signing_key)
 
-    async def validate_evolution_proposal(self, proposal: EvolutionProposal,
-                                        context: Dict[str, Any] = None) -> SandboxResults:
+    async def validate_evolution_proposal(
+        self, proposal: EvolutionProposal, context: dict[str, Any] = None
+    ) -> SandboxResults:
         """Execute complete sandbox validation for evolution proposal"""
         logger.info(f"Starting sandbox validation for proposal: {proposal.proposal_id}")
 
         results = SandboxResults(
-            proposal_id=proposal.proposal_id,
-            status=SandboxStatus.INITIALIZING
+            proposal_id=proposal.proposal_id, status=SandboxStatus.INITIALIZING
         )
 
         try:
@@ -512,7 +527,9 @@ class EvolutionSandbox:
 
             if not results.opa_simulation_passed:
                 results.status = SandboxStatus.FAILED
-                results.error_message = f"OPA simulation failed: {opa_result.get('error', 'Policy denied')}"
+                results.error_message = (
+                    f"OPA simulation failed: {opa_result.get('error', 'Policy denied')}"
+                )
                 return await self._finalize_results(results)
 
             # Phase 2: Test Execution
@@ -521,7 +538,9 @@ class EvolutionSandbox:
 
             if results.test_results.coverage < self.config.required_test_coverage:
                 results.status = SandboxStatus.FAILED
-                results.error_message = f"Insufficient test coverage: {results.test_results.coverage:.2%}"
+                results.error_message = (
+                    f"Insufficient test coverage: {results.test_results.coverage:.2%}"
+                )
                 return await self._finalize_results(results)
 
             # Phase 3: CSE Validation
@@ -535,7 +554,9 @@ class EvolutionSandbox:
 
             # Phase 4: ZK Fairness Proof Generation
             results.status = SandboxStatus.GENERATING_ZK_PROOF
-            results.zk_fairness_proof = await self.zk_proof_generator.generate_fairness_proof(proposal)
+            results.zk_fairness_proof = await self.zk_proof_generator.generate_fairness_proof(
+                proposal
+            )
 
             if not results.zk_fairness_proof.verification_passed:
                 results.status = SandboxStatus.FAILED
@@ -550,7 +571,9 @@ class EvolutionSandbox:
 
             # Successful completion
             results.status = SandboxStatus.COMPLETED
-            logger.info(f"Sandbox validation completed successfully for proposal: {proposal.proposal_id}")
+            logger.info(
+                f"Sandbox validation completed successfully for proposal: {proposal.proposal_id}"
+            )
 
         except Exception as e:
             logger.error(f"Sandbox validation failed: {str(e)}")
@@ -568,13 +591,14 @@ class EvolutionSandbox:
 
         return results
 
+
 # Demo and testing functions
 async def demo_sandbox_execution():
     """Demonstrate sandbox execution for evolution proposal"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("EVOLUTION SANDBOX DEMONSTRATION")
     print("MC Platform v0.4.0 'Transcendent Intelligence'")
-    print("="*80)
+    print("=" * 80)
 
     # Create sandbox configuration
     config = SandboxConfig()
@@ -585,9 +609,13 @@ async def demo_sandbox_execution():
         title="Quantum Reasoning Enhancement",
         description="Enhance quantum reasoning capabilities with improved superposition processing",
         strategy="QUANTUM_ENHANCED_EVOLUTION",
-        target_capabilities=["quantum_superposition", "entanglement_optimization", "coherence_enhancement"],
+        target_capabilities=[
+            "quantum_superposition",
+            "entanglement_optimization",
+            "coherence_enhancement",
+        ],
         expected_improvement=0.35,
-        proposed_by="ai_engineer_001"
+        proposed_by="ai_engineer_001",
     )
 
     # Execute sandbox validation
@@ -595,13 +623,17 @@ async def demo_sandbox_execution():
     results = await sandbox.validate_evolution_proposal(proposal)
 
     # Display results
-    print(f"\n[SANDBOX RESULTS]")
+    print("\n[SANDBOX RESULTS]")
     print(f"Proposal ID: {results.proposal_id}")
     print(f"Status: {results.status.value}")
-    print(f"Execution Time: {(results.execution_end - results.execution_start).total_seconds():.2f}s")
-    print(f"\n[VALIDATION RESULTS]")
+    print(
+        f"Execution Time: {(results.execution_end - results.execution_start).total_seconds():.2f}s"
+    )
+    print("\n[VALIDATION RESULTS]")
     print(f"- OPA Simulation: {'PASSED' if results.opa_simulation_passed else 'FAILED'}")
-    print(f"- Test Coverage: {results.test_results.coverage:.2%} ({results.test_results.passed_tests}/{results.test_results.total_tests})")
+    print(
+        f"- Test Coverage: {results.test_results.coverage:.2%} ({results.test_results.passed_tests}/{results.test_results.total_tests})"
+    )
     print(f"- CSE Score: {results.cse_validation.score:.4f}")
     print(f"- ZK Fairness: {results.zk_fairness_proof.fairness_score:.4f}")
     print(f"- Evidence: {len(results.evidence_stub)} bytes signed")
@@ -613,11 +645,12 @@ async def demo_sandbox_execution():
         print("\n[FAIL] SANDBOX VALIDATION FAILED!")
         print(f"Error: {results.error_message}")
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("SANDBOX DEMONSTRATION COMPLETE")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")
 
     return results
+
 
 if __name__ == "__main__":
     # Run sandbox demonstration

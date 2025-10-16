@@ -7,7 +7,7 @@ import { SpeechToTextEngine } from './engines/SpeechToTextEngine.js';
 import { FaceDetectionEngine } from './engines/FaceDetectionEngine.js';
 import { TextAnalysisEngine } from './engines/TextAnalysisEngine.js';
 import { EmbeddingService } from './services/EmbeddingService.js';
-import { MediaType } from '../services/MultimodalDataService.js';
+import { MediaType } from '../services/MediaUploadService.js';
 import { VideoFrameExtractor, } from './engines/VideoFrameExtractor.js'; // WAR-GAMED SIMULATION - Import VideoFrameExtractor
 import ffmpegStatic from 'ffmpeg-static'; // WAR-GAMED SIMULATION - Import ffmpeg-static
 import ffprobeStatic from 'ffprobe-static'; // WAR-GAMED SIMULATION - Import ffprobe-static

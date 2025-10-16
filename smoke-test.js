@@ -101,7 +101,7 @@ async function runSmokeTests() {
 
   let passed = 0;
   for (const check of checks) {
-    // eslint-disable-next-line no-await-in-loop
+     
     if (await check()) {
       passed += 1;
     }

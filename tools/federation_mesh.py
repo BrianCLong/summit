@@ -4,20 +4,19 @@ Advanced Federation Mesh for Symphony Orchestra
 Enables secure, intelligent multi-node AI orchestration with load balancing
 """
 
-import json
-import hmac
 import hashlib
-import requests
-import asyncio
-import aiohttp
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
-import yaml
+import hmac
+import json
 import socket
 import subprocess
 import threading
 import time
+from datetime import datetime, timezone
+from pathlib import Path
+
+import requests
+import yaml
+
 
 class FederationMesh:
     def __init__(self):
@@ -28,7 +27,7 @@ class FederationMesh:
         self.peers = self.mesh_config.get("peers", {})
         self.capabilities = self.load_node_capabilities()
         
-    def load_mesh_config(self) -> Dict:
+    def load_mesh_config(self) -> dict:
         """Load federation mesh configuration"""
         if self.config_path.exists():
             with open(self.config_path) as f:
@@ -39,7 +38,7 @@ class FederationMesh:
             self.save_mesh_config(default_config)
             return default_config
     
-    def create_default_mesh_config(self) -> Dict:
+    def create_default_mesh_config(self) -> dict:
         """Create default mesh configuration"""
         return {
             "node_id": socket.gethostname(),
@@ -69,7 +68,7 @@ class FederationMesh:
             "peers": {}
         }
     
-    def save_mesh_config(self, config: Dict):
+    def save_mesh_config(self, config: dict):
         """Save mesh configuration"""
         with open(self.config_path, "w") as f:
             yaml.dump(config, f, indent=2)
@@ -79,7 +78,7 @@ class FederationMesh:
         import secrets
         return secrets.token_hex(32)
     
-    def load_node_capabilities(self) -> Dict:
+    def load_node_capabilities(self) -> dict:
         """Load current node capabilities"""
         # Get system information
         try:
@@ -119,7 +118,7 @@ class FederationMesh:
                 "last_updated": datetime.now(timezone.utc).isoformat()
             }
     
-    def get_current_load(self) -> Dict:
+    def get_current_load(self) -> dict:
         """Get current system load metrics"""
         try:
             import psutil
@@ -185,7 +184,7 @@ class FederationMesh:
         except:
             return False
     
-    def discover_peers(self) -> Dict[str, Dict]:
+    def discover_peers(self) -> dict[str, dict]:
         """Discover other Symphony nodes on the network"""
         discovered = {}
         
@@ -270,7 +269,7 @@ class FederationMesh:
                 peer["status"] = "failed"
             return False
     
-    def get_best_node_for_task(self, task_type: str, requirements: Dict = None) -> Optional[str]:
+    def get_best_node_for_task(self, task_type: str, requirements: dict = None) -> str | None:
         """Select best node for task using intelligent load balancing"""
         candidates = []
         
@@ -339,7 +338,7 @@ class FederationMesh:
         best_candidate = max(candidates, key=lambda x: x["final_score"])
         return best_candidate["node_id"]
     
-    def execute_remote_task(self, peer_id: str, task_data: Dict) -> Dict:
+    def execute_remote_task(self, peer_id: str, task_data: dict) -> dict:
         """Execute task on remote peer node"""
         if peer_id not in self.peers:
             return {"error": "Peer not found"}
@@ -378,8 +377,7 @@ class FederationMesh:
     
     def start_mesh_server(self):
         """Start federation mesh server"""
-        from http.server import HTTPServer, BaseHTTPRequestHandler
-        import threading
+        from http.server import BaseHTTPRequestHandler, HTTPServer
         
         class MeshHandler(BaseHTTPRequestHandler):
             def __init__(self, *args, mesh_instance=None, **kwargs):
@@ -490,7 +488,7 @@ class FederationMesh:
         
         return server
     
-    def mesh_status(self) -> Dict:
+    def mesh_status(self) -> dict:
         """Get comprehensive mesh status"""
         return {
             "node_id": self.node_id,

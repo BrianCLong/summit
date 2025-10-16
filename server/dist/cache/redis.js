@@ -2,7 +2,8 @@ import Redis from 'ioredis';
 export class RedisService {
     pub;
     sub;
-    constructor(urlOrOpts = process.env.REDIS_URL || 'redis://localhost:6379') {
+    constructor(urlOrOpts = process.env.REDIS_URL ||
+        'redis://localhost:6379') {
         const url = typeof urlOrOpts === 'string' ? urlOrOpts : urlOrOpts.url;
         this.pub = new Redis(url);
         this.sub = new Redis(url);

@@ -15,7 +15,7 @@ const __dirname = dirname(__filename)
 const root = resolve(__dirname, '..')
 const distDir = join(root, 'dist')
 
-function analyzeBundles() {
+async function analyzeBundles() {
   console.log('📊 Analyzing bundle composition...\n')
   
   if (!existsSync(distDir)) {

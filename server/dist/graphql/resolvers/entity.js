@@ -1,5 +1,4 @@
 import { getNeo4jDriver, isNeo4jMockMode } from '../../db/neo4j.js';
-import { v4 as uuidv4 } from 'uuid';
 import pino from 'pino';
 import { pubsub, ENTITY_CREATED, ENTITY_UPDATED, ENTITY_DELETED, tenantEvent, } from '../subscriptions.js';
 import { requireTenant } from '../../middleware/withTenant.js';

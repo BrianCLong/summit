@@ -678,7 +678,7 @@ export function api() {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   async function getTenantBudgetPolicy(tenant: string) {
     if (!base) return { tenant, type: 'hard', limit: 1000, grace: 0.1 }; // Mock policy
     // In a real scenario, this would fetch the actual policy from the backend
@@ -749,7 +749,7 @@ export function api() {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   async function billingExport(
     tenant: string,
     month: string,
@@ -1013,7 +1013,7 @@ export function api() {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   async function getRunComparePrevious(runId: string) {
     if (!base) return { durationDeltaMs: 0, costDelta: 0, changedNodes: [] };
     return j<unknown>(
@@ -1021,7 +1021,7 @@ export function api() {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   async function validatePipeline(id: string, body: unknown) {
     if (!base) return { valid: true, errors: [] };
     return j<unknown>(`${base}/pipelines/${encodeURIComponent(id)}/validate`, {
@@ -1030,13 +1030,13 @@ export function api() {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   async function getProviders() {
     if (!base) return { items: [] };
     return j<unknown>(`${base}/providers`);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   async function testProvider(id: string) {
     if (!base) throw new Error('gatewayBase not configured');
     return j<unknown>(`${base}/providers/${encodeURIComponent(id)}/test`, {
@@ -1159,7 +1159,7 @@ export function api() {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   async function routingPreview(payload: unknown) {
     if (!base)
       return {
@@ -1189,7 +1189,7 @@ export function api() {
     return j<unknown>(`${base}/pipelines/${encodeURIComponent(id)}`);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   async function planPipeline(id: string, body: unknown) {
     if (!base) return { changes: [], costEstimate: { delta: 0 } };
     return j<unknown>(`${base}/pipelines/${encodeURIComponent(id)}/plan`, {
@@ -1208,7 +1208,7 @@ export function api() {
     return j<unknown>(`${base}/runs/${encodeURIComponent(runId)}/evidence`);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   async function supplychainVerify(payload: {
     image?: string;
     digest?: string;
@@ -1229,7 +1229,7 @@ export function api() {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   async function supplychainSbomDiff(payload: {
     baseUrl: string;
     headUrl: string;
@@ -1306,11 +1306,11 @@ export function api() {
       getRoutingPins,
       putRoutingPin,
       deleteRoutingPin,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       routingPreview,
       getPipelinesAPI,
       getPipeline,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       planPipeline,
       getRunEvidence,
       getServingMetrics,
@@ -1356,21 +1356,21 @@ export function api() {
       actOnAgent,
       getIncidents,
       // The following are not used, but are kept for future reference
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       getTenantBudgetPolicy,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       billingExport,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       getRunComparePrevious,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       validatePipeline,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       getProviders,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       testProvider,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       supplychainVerify,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       
       supplychainSbomDiff,
     }),
     [],

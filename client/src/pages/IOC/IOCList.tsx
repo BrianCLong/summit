@@ -210,7 +210,7 @@ export default function IOCList() {
       {
         id: 'ioc6',
         type: 'REGISTRY',
-        // eslint-disable-next-line no-useless-escape
+         
         value:
           'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\SystemUpdater',
         risk: 80,

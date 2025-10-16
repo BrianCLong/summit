@@ -1,4 +1,4 @@
-/* eslint-disable indent */
+ 
 import React, { useEffect, useRef } from 'react';
 import cytoscape, { ElementDefinition } from 'cytoscape';
 import $ from 'jquery';

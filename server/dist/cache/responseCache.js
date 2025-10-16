@@ -1,6 +1,6 @@
 import { getRedisClient } from '../config/database.js';
 import crypto from 'node:crypto';
-import { recHit, recMiss, recSet, cacheLocalSize } from '../metrics/cacheMetrics.js';
+import { recHit, recMiss, recSet, cacheLocalSize, } from '../metrics/cacheMetrics.js';
 const memoryCache = new Map();
 export function flushLocalCache() {
     memoryCache.clear();
@@ -8,7 +8,8 @@ export function flushLocalCache() {
 export async function cached(keyParts, ttlSec, fetcher, op = 'generic') {
     const redisDisabled = process.env.REDIS_DISABLE === '1';
     const redis = redisDisabled ? null : getRedisClient();
-    const key = 'gql:' + crypto.createHash('sha1').update(JSON.stringify(keyParts)).digest('hex');
+    const key = 'gql:' +
+        crypto.createHash('sha1').update(JSON.stringify(keyParts)).digest('hex');
     const now = Date.now();
     const tenant = typeof keyParts?.[1] === 'string' ? keyParts[1] : 'unknown';
     const store = redis ? 'redis' : 'memory';
@@ -28,7 +29,10 @@ export async function cached(keyParts, ttlSec, fetcher, op = 'generic') {
                 return parsed;
             }
             const val = await fetcher();
-            await redis.set(key, JSON.stringify(val), { EX: ttlSec, NX: true });
+            await redis.set(key, JSON.stringify(val), {
+                EX: ttlSec,
+                NX: true,
+            });
             recSet('redis', op, tenant);
             // index by first part (prefix) and optional tenant
             try {

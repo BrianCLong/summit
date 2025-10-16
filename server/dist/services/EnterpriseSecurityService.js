@@ -9,7 +9,6 @@ const jwt = require('jsonwebtoken');
 let argon2;
 try {
     // Prefer native argon2 implementation when available
-    // eslint-disable-next-line global-require
     argon2 = require('argon2');
 }
 catch (error) {

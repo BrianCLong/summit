@@ -25,7 +25,7 @@ export function invalidationPlugin(map = defaultMap) {
             let patterns = [];
             let mutate = false;
             return {
-                didResolveOperation(ctx) {
+                async didResolveOperation(ctx) {
                     try {
                         if (ctx.operation?.operation !== 'mutation')
                             return;

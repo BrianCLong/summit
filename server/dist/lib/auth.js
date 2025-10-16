@@ -2,12 +2,12 @@ import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
 import { getPostgresPool } from '../db/postgres.js';
 import pino from 'pino';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 const logger = pino();
 const JWT_SECRET = process.env.JWT_SECRET ||
     'dev_jwt_secret_12345_very_long_secret_for_development';
 export const getContext = async ({ req, }) => {
-    const requestId = uuidv4();
+    const requestId = randomUUID();
     try {
         const token = extractToken(req);
         if (!token) {
