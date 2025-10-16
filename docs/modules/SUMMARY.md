@@ -1,4 +1,5 @@
 # Ticket Pack Summary
+
 - Workflows added: ci-node, ci-python, sbom-and-vulns, terraform, k8s-policy, codeql
 - Docs: SECURITY.md, CONTRIBUTING.md
 - Templates: Dependabot, Release Drafter, Issue templates, CODEOWNERS
