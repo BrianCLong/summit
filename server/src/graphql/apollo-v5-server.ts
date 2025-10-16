@@ -12,8 +12,7 @@ import { shield } from 'graphql-shield';
 import { applyMiddleware } from 'graphql-middleware';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { trace } from '@opentelemetry/api';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 
 // Import schemas and resolvers
 import { typeDefs } from './schema/index.js';
@@ -70,9 +69,6 @@ function createSecureSchema() {
 
 // Context function for Apollo v5
 async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
-  const tracer = trace.getActiveTracer();
-  const span = tracer.getActiveSpan();
-
   return {
     dataSources: {
       // Data sources will be injected here
@@ -84,8 +80,8 @@ async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
       userAgent: req.get('User-Agent')
     },
     telemetry: {
-      traceId: span?.spanContext().traceId || 'unknown',
-      spanId: span?.spanContext().spanId || 'unknown'
+      traceId: 'unknown',
+      spanId: 'unknown'
     }
   };
 }
