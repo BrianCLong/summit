@@ -844,12 +844,10 @@ export function consentChecker(
       : {};
     const ok = scoped && claims?.consent === true;
     if (!ok) {
-      res
-        .status(412)
-        .json({
-          error: 'consent_required',
-          details: { scoped, hasJwt: !!token },
-        });
+      res.status(412).json({
+        error: 'consent_required',
+        details: { scoped, hasJwt: !!token },
+      });
       return;
     }
     return next();
