@@ -9,10 +9,14 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
       - uses: dorny/paths-filter@v3
         id: changes
         continue-on-error: true
         with:
+          initial-fetch-depth: 0
           filters: |
             catalog:
               - 'model-catalog/**'
