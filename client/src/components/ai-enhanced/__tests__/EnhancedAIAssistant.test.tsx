@@ -410,7 +410,7 @@ describe('EnhancedAIAssistant', () => {
     const script: AssistantEvent[] = [
       { type: 'status', value: 'thinking' },
       { type: 'token', value: 'This is a response.' },
-      { type: 'done', cites: [] }, // No cites provided
+      { type: 'done' }, // No cites provided
     ];
     const transport = makeFakeTransport(script);
     const clock = makeFakeClock();

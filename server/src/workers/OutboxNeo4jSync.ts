@@ -5,7 +5,6 @@
  */
 
 import { Pool } from 'pg';
-import { Driver } from 'neo4j-driver';
 import logger from '../config/logger.js';
 
 const workerLogger = logger.child({ name: 'OutboxNeo4jSync' });
@@ -25,7 +24,7 @@ export class OutboxNeo4jSync {
 
   constructor(
     private pg: Pool,
-    private neo4j: Driver,
+    private neo4j: any,
     private config: {
       batchSize?: number;
       intervalMs?: number;
@@ -87,7 +86,7 @@ export class OutboxNeo4jSync {
 
     try {
       // Get unprocessed events with advisory lock to prevent concurrent processing
-      const { rows } = await client.query<OutboxEvent>(
+      const { rows } = await client.query(
         `SELECT id, topic, payload, created_at, attempts, last_error
          FROM outbox_events 
          WHERE processed_at IS NULL 

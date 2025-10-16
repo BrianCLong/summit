@@ -10,7 +10,7 @@ import { getPostgresPool } from '../config/database.js';
 import EmbeddingService from './EmbeddingService.js';
 import { otelService } from '../monitoring/opentelemetry.js';
 import pino from 'pino';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const logger = pino({ name: 'SimilarityService' });
 

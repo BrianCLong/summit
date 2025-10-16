@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppSelector } from '../../store/index.ts';
+import { useAppSelector } from '../../store/index';
 import { Card, CardContent, Stack, Typography, Skeleton } from '@mui/material';
 import {
   LineChart,

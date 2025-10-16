@@ -139,14 +139,14 @@ function EntityFilterPanel() {
             <DatePicker
               label="Start Date"
               value={startDate}
-              onChange={(date) => setStartDate(date)}
-              renderInput={(params) => <TextField {...params} />}
+              onChange={(date: Date | null) => setStartDate(date)}
+              renderInput={(params: any) => <TextField {...params} />}
             />
             <DatePicker
               label="End Date"
               value={endDate}
-              onChange={(date) => setEndDate(date)}
-              renderInput={(params) => <TextField {...params} />}
+              onChange={(date: Date | null) => setEndDate(date)}
+              renderInput={(params: any) => <TextField {...params} />}
             />
           </Stack>
         </LocalizationProvider>

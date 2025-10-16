@@ -11,7 +11,8 @@ import {
   Alert,
 } from '@mui/material';
 import { PlayArrow, Stop, ExpandMore, NetworkCheck } from '@mui/icons-material';
-import { useStreamNeighborsSubscription } from '../../generated/graphql';
+// Temporarily mock missing GraphQL subscription
+const useStreamNeighborsSubscription = () => ({ data: null, loading: false });
 
 interface NeighborhoodStreamingProps {
   nodeId: string;

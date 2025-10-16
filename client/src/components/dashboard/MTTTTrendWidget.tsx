@@ -434,7 +434,7 @@ export default function MTTTTrendWidget({
 
         {/* Summary Metrics */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={3}>
+          <Grid size={3}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" color="primary">
                 {formatTime(summary?.currentMTTT?.p50 || 0)}
@@ -460,7 +460,7 @@ export default function MTTTTrendWidget({
               </Box>
             </Box>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={3}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" color="warning.main">
                 {formatTime(summary?.currentMTTT?.p90 || 0)}
@@ -468,7 +468,7 @@ export default function MTTTTrendWidget({
               <Typography variant="caption">P90 MTTT</Typography>
             </Box>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={3}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" color="error.main">
                 {formatTime(summary?.currentMTTT?.p95 || 0)}
@@ -476,7 +476,7 @@ export default function MTTTTrendWidget({
               <Typography variant="caption">P95 MTTT</Typography>
             </Box>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={3}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography
                 variant="h4"
@@ -518,7 +518,7 @@ export default function MTTTTrendWidget({
             </Typography>
             <Grid container spacing={1}>
               {cohortBreakdown.map((cohort: any, index: number) => (
-                <Grid item xs={6} key={index}>
+                <Grid size={6} key={index}>
                   <Box
                     sx={{
                       p: 1,

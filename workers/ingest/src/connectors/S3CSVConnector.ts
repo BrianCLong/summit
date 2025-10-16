@@ -90,10 +90,11 @@ export class S3CSVConnector extends BaseConnector {
         } catch (error) {
           objectSpan.recordException(error as Error);
           objectSpan.setStatus({ code: 2, message: (error as Error).message }); // ERROR
-          this.logger.error('Failed to process S3 object', {
+          this.logger.error({
             bucket,
             key: obj.Key,
             error: (error as Error).message,
+            msg: 'Failed to process S3 object',
           });
         } finally {
           objectSpan.end();
@@ -114,11 +115,17 @@ export class S3CSVConnector extends BaseConnector {
   }
 
   private parseS3Url(url: string): { bucket: string; key: string } {
-    const match = url.match(/^s3:\/\/([^\/]+)\/(.+)$/);
-    if (!match) {
+    if (!url.startsWith('s3://')) {
       throw new Error(`Invalid S3 URL format: ${url}`);
     }
-    return { bucket: match[1], key: match[2] };
+    const rest = url.slice('s3://'.length);
+    const idx = rest.indexOf('/');
+    if (idx === -1) {
+      throw new Error(`Invalid S3 URL format: ${url}`);
+    }
+    const bucket = rest.slice(0, idx);
+    const key = rest.slice(idx + 1);
+    return { bucket, key };
   }
 
   private async listObjects(
@@ -141,7 +148,7 @@ export class S3CSVConnector extends BaseConnector {
     provenance: ProvenanceMetadata,
   ): AsyncGenerator<IngestRecord> {
     const command = new GetObjectCommand({ Bucket: bucket, Key: key });
-    const response = await this.s3Client.send(command);
+    const response = (await this.s3Client.send(command)) as GetObjectCommandOutput;
 
     if (!response.Body) {
       throw new Error(`Empty response body for s3://${bucket}/${key}`);
@@ -176,14 +183,35 @@ export class S3CSVConnector extends BaseConnector {
       }
 
       // Transform according to datasources.yaml configuration
-      const transformed = this.transformRecord(record);
+      if (typeof record !== 'object' || record === null || Array.isArray(record)) {
+        this.logger.warn({
+          msg: 'Skipping non-object CSV record',
+          record_number: recordCount,
+          type: typeof record,
+        });
+        continue;
+      }
+      const transformed = this.transformRecord(record as Record<string, unknown>);
+
+      const t = transformed as Record<string, unknown>;
+      const idVal = typeof t['entity_id'] === 'string'
+        ? (t['entity_id'] as string)
+        : `${key}-${recordCount}`;
+      const typeVal = typeof t['type'] === 'string'
+        ? (t['type'] as string)
+        : 'unknown';
+      const nameVal = typeof t['entity_name'] === 'string'
+        ? (t['entity_name'] as string)
+        : typeof t['name'] === 'string'
+          ? (t['name'] as string)
+          : '';
 
       yield {
-        id: transformed.entity_id || `${key}-${recordCount}`,
-        type: transformed.type || 'unknown',
-        name: transformed.entity_name || transformed.name || '',
-        attributes: transformed,
-        pii_flags: this.detectPII(transformed),
+        id: idVal,
+        type: typeVal,
+        name: nameVal,
+        attributes: transformed as Record<string, unknown>,
+        pii_flags: this.detectPII(transformed as Record<string, unknown>),
         source_id: `s3:${bucket}/${key}`,
         provenance,
         retention_tier: this.config.retention || 'standard-365d',
@@ -200,19 +228,23 @@ export class S3CSVConnector extends BaseConnector {
     });
   }
 
-  private transformRecord(record: any): any {
+  private transformRecord(record: Record<string, unknown>): Record<string, unknown> {
     // Apply transform rules from datasources.yaml
     const rules = this.config.transform_rules || {};
 
+    const idKey = rules.id_field || 'id';
+    const nameKey = rules.name_field || 'name';
+    const typeKey = rules.entity_type_field || 'type';
+
     return {
-      entity_id: record[rules.id_field || 'id'],
-      entity_name: record[rules.name_field || 'name'],
-      type: record[rules.entity_type_field || 'type'],
+      entity_id: record[idKey] as string | undefined,
+      entity_name: record[nameKey] as string | undefined,
+      type: record[typeKey] as string | undefined,
       ...record,
     };
   }
 
-  private detectPII(record: any): Record<string, boolean> {
+  private detectPII(record: Record<string, unknown>): Record<string, boolean> {
     const piiFields = ['name', 'email', 'phone', 'address', 'ssn'];
     const piiFlags: Record<string, boolean> = {};
 
@@ -234,7 +266,7 @@ export class S3CSVConnector extends BaseConnector {
     const lowerFieldName = fieldName.toLowerCase();
     return (
       piiFields.some((pii) => lowerFieldName.includes(pii)) ||
-      /\b[\w\.-]+@[\w\.-]+\.\w+\b/.test(value) || // Email pattern
+      /\b[\w.-]+@[\w.-]+\.\w+\b/.test(value) || // Email pattern
       /\b\d{3}-?\d{2}-?\d{4}\b/.test(value)
     ); // SSN pattern
   }

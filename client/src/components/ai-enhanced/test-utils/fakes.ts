@@ -4,13 +4,13 @@ import {
   Clock,
 } from '../EnhancedAIAssistant';
 
-export function makeFakeClock() {
-  const real = {
-    setTimeout: (fn: () => void, ms: number) => setTimeout(fn, ms),
-    clearTimeout: (id: number) => clearTimeout(id),
+export function makeFakeClock(): Clock {
+  const real: Clock = {
+    setTimeout: (fn: () => void, ms: number) => window.setTimeout(fn, ms),
+    clearTimeout: (id: number) => window.clearTimeout(id),
     now: () => Date.now(),
   };
-  return real as Clock;
+  return real;
 }
 
 type ScriptOptions = {

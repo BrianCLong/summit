@@ -28,7 +28,7 @@ test('chunking invariance (fuzz)', async () => {
         minLength: 0,
         maxLength: Math.min(8, target.length),
       }),
-      async (cuts) => {
+      async (cuts: number[]) => {
         const chunks = chunkByIndices(target, cuts);
         const script = [
           ...chunks.map((v) => ({ type: 'token', value: v }) as const),

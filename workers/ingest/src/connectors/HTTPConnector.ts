@@ -27,7 +27,7 @@ interface HTTPConfig extends ConnectorConfig {
 
 export class HTTPConnector extends BaseConnector {
   private httpClient: AxiosInstance;
-  private config: HTTPConfig;
+  protected config: HTTPConfig;
   private lastCheckpoint?: string;
   private requestCount = 0;
   private windowStart = Date.now();
@@ -218,7 +218,8 @@ export class HTTPConnector extends BaseConnector {
       return data.insights;
     }
 
-    this.logger.warn('Unexpected response format, treating as single record', {
+    this.logger.warn({
+      msg: 'Unexpected response format, treating as single record',
       data: typeof data,
       keys: Object.keys(data || {}),
     });
@@ -288,7 +289,7 @@ export class HTTPConnector extends BaseConnector {
           lowerKey.includes('email') ||
           lowerKey.includes('name') ||
           lowerKey.includes('address') ||
-          /\b[\w\.-]+@[\w\.-]+\.\w+\b/.test(value);
+          /\b[\w.-]+@[\w.-]+\.\w+\b/.test(value);
       }
     }
 
@@ -341,7 +342,7 @@ export class HTTPConnector extends BaseConnector {
     // Check if we've hit the limit
     if (this.requestCount >= this.config.rate_limiting.requests_per_minute) {
       const sleepTime = windowDuration - (now - this.windowStart);
-      this.logger.info('Rate limit reached, sleeping', { sleep_ms: sleepTime });
+      this.logger.info({ msg: 'Rate limit reached, sleeping', sleep_ms: sleepTime });
       await new Promise((resolve) => setTimeout(resolve, sleepTime));
       this.requestCount = 0;
       this.windowStart = Date.now();
@@ -398,7 +399,8 @@ export class HTTPConnector extends BaseConnector {
       const response = await this.httpClient.head(this.config.url);
       return response.status < 400;
     } catch (error) {
-      this.logger.error('HTTP health check failed', {
+      this.logger.error({
+        msg: 'HTTP health check failed',
         url: this.config.url,
         error: (error as Error).message,
       });

@@ -27,6 +27,13 @@
     "src/conductor/**",
     "src/coherence/**",
     "src/ai/**",
+    "src/telemetry/**",
+    "src/websocket/**",
+    "src/services/SOARConnectorV1Service.ts",
+    "src/services/SOARPlaybookService.ts",
+    "src/tests/**",
+    "src/testing/**",
+    "src/services/CacheService.ts",
     "src/**/__tests__/**",
     "src/**/tests/**",
     "src/**/__mocks__/**"

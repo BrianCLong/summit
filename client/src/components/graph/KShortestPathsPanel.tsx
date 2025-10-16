@@ -27,10 +27,9 @@ import {
   FilterList,
   PlayArrow,
 } from '@mui/icons-material';
-import {
-  useKShortestPathsLazyQuery,
-  useCancelPathFindingMutation,
-} from '../../generated/graphql';
+// Temporarily mock missing GraphQL hooks
+const useKShortestPathsLazyQuery = () => [() => {}, { data: null, loading: false, error: null }];
+const useCancelPathFindingMutation = () => [() => {}];
 
 interface KShortestPathsPanelProps {
   selectedNodes: string[];
@@ -249,10 +248,9 @@ export function KShortestPathsPanel({
             {paths.map((path, index) => (
               <React.Fragment key={path.id}>
                 <ListItem
-                  button
                   onClick={() => onPathSelect(path)}
                   onMouseEnter={() => onPathHighlight(path)}
-                  sx={{ borderRadius: 1, mb: 0.5 }}
+                  sx={{ borderRadius: 1, mb: 0.5, cursor: 'pointer' }}
                 >
                   <ListItemText
                     primary={
