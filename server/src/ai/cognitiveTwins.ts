@@ -1,5 +1,5 @@
-import { v4 as uuid } from 'uuid';
-import type { Driver } from 'neo4j-driver';
+import { randomUUID } from 'crypto';
+type Driver = any;
 import type { Pool } from 'pg';
 
 import { getPostgresPool } from '../db/postgres';
@@ -29,7 +29,7 @@ export class CognitiveTwinService {
 
   async generateTwin(entity: RealEntity): Promise<CognitiveTwin> {
     const twin: CognitiveTwin = {
-      id: uuid(),
+      id: randomUUID(),
       entityId: entity.id,
       name: `${entity.name}-twin`,
       behaviors: entity.behaviors,

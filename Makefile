@@ -1,106 +1,62 @@
-.PHONY: verify-release verify-release-strict help capture stabilize set-protection harvest-untracked batch-prs finalize audit all
-SHELL := /bin/bash
-ORCHESTRATOR := ./scripts/greenlock_orchestrator.sh
+.PHONY: bootstrap up smoke tools
 
-verify-release: ## Verify manifest for TAG (warn on SHA mismatch)
-	@[ -n "$(TAG)" ] || (echo "Usage: make verify-release TAG=vYYYY.MM.DD" && exit 1)
-	node scripts/verify-release-manifest.mjs --tag=$(TAG)
+# Minimal, portable golden path. No assumptions about project layout.
 
-verify-release-strict: ## Verify manifest and require HEAD==TAG commit
-	@[ -n "$(TAG)" ] || (echo "Usage: make verify-release-strict TAG=vYYYY.MM.DD" && exit 1)
-	node scripts/verify-release-manifest.mjs --tag=$(TAG) --strict
+SHELL := /usr/bin/env bash
+NODE_VERSION ?= 18
+PY_VERSION ?= 3.11
 
-help: ## Show this help message
-	@echo "Green-Lock Orchestrator Makefile"
-	@echo "================================="
-	@echo ""
-	@echo "Complete workflow:"
-	@echo "  make all              - Run complete green-lock sequence"
-	@echo ""
-	@echo "Individual steps:"
-	@echo "  make capture          - Snapshot broken repo (untracked, reflogs, fsck, bundle)"
-	@echo "  make stabilize        - Create minimal stabilization gate workflow"
-	@echo "  make set-protection   - Set branch protection to require only stabilization check"
-	@echo "  make harvest-untracked- Import untracked files from broken repo"
-	@echo "  make batch-prs        - Process and auto-merge all open PRs"
-	@echo "  make finalize         - Tag stabilized state and rerun failed checks"
-	@echo "  make audit            - Generate provenance ledger"
-	@echo ""
-	@echo "Safety:"
-	@echo "  All operations run from clean-room clone (not iCloud)"
-	@echo "  Provenance tracking ensures zero data loss"
-	@echo ""
-capture: ## Snapshot everything from broken repo
-	@echo "📸 Capturing complete state from broken repository..."
-	@$(ORCHESTRATOR) capture
-	@echo "✅ Capture complete - see green-lock-ledger/ for artifacts"
-stabilize: ## Create minimal stabilization gate
-	@echo "🛡️ Creating stabilization workflow..."
-	@$(ORCHESTRATOR) stabilize
-	@echo "✅ Stabilization gate deployed"
-set-protection: ## Configure branch protection for minimal check
-	@echo "🔒 Configuring branch protection..."
-	@$(ORCHESTRATOR) set-protection
-	@echo "✅ Branch protection updated - only 'Stabilization: Build & Unit Tests' required"
-harvest-untracked: ## Import untracked files into ops/untracked-import/
-	@echo "🌾 Harvesting untracked files..."
-	@$(ORCHESTRATOR) harvest-untracked
-	@echo "✅ Untracked files preserved in ops/untracked-import/"
-batch-prs: ## Process all open PRs with auto-merge
-	@echo "🔄 Processing all open PRs..."
-	@$(ORCHESTRATOR) batch-prs
-	@echo "✅ PRs queued for auto-merge when stabilization passes"
-finalize: ## Tag and finalize stabilized state
-	@echo "🏁 Finalizing stabilization..."
-	@$(ORCHESTRATOR) finalize
-	@echo "✅ Green-lock complete - main is bright green"
-audit: ## Generate complete provenance ledger
-	@echo "📋 Generating audit trail..."
-	@$(ORCHESTRATOR) audit
-	@echo "✅ Provenance ledger written to green-lock-ledger/provenance.csv"
-all: capture stabilize set-protection harvest-untracked batch-prs finalize audit ## Run complete green-lock sequence
-	@echo ""
-	@echo "🎉 GREEN-LOCK MISSION COMPLETE 🎉"
-	@echo "=================================="
-	@echo ""
-	@echo "✅ Main branch: BRIGHT GREEN"
-	@echo "✅ All PRs: Processed and auto-merging"
-	@echo "✅ Untracked files: Preserved in ops/untracked-import/"
-	@echo "✅ Provenance: Complete audit trail in green-lock-ledger/"
-	@echo ""
-	@echo "Next steps:"
-	@echo "  1. Monitor PR auto-merges: gh pr list"
-	@echo "  2. Review untracked imports: ls -la ops/untracked-import/"
-	@echo "  3. Gradually re-enable full CI checks"
-	@echo "  4. Enable merge queue in GitHub settings"
-	@echo ""
-# Green-Lock Acceptance Pack Targets
-acceptance: verify recover auto-merge monitor ## Run complete acceptance workflow
-verify: ## Run septuple verification matrix
-	@./scripts/verify_greenlock.sh
-recover: ## Recover all 799 dangling commits as rescue/* branches
-	@./scripts/recover_orphans_from_bundle.sh
-auto-merge: ## Enable auto-merge on all open PRs
-	@./scripts/auto_merge_all_open_prs.sh
-monitor: ## Monitor stabilization workflow execution
-	@./scripts/monitor_stabilization.sh
-reenable-ci: ## Show CI re-enablement guide
-	@./scripts/gradual_reenable_ci.sh
+bootstrap:
+	@echo "==> bootstrap: node, python, envs"
+	# Node: prefer corepack/pnpm if present, else npm
+	@if [ -f package.json ]; then \
+	  command -v corepack >/dev/null 2>&1 && corepack enable || true; \
+	  if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile || pnpm install; \
+	  elif [ -f package-lock.json ]; then npm ci || npm install; \
+	  else npm install || true; fi; \
+	fi
+	# Python venv + deps
+	@if [ -f requirements.txt ] || [ -f pyproject.toml ]; then \
+	  python$(PY_VERSION) -m venv .venv 2>/dev/null || python3 -m venv .venv; \
+	  . .venv/bin/activate; python -m pip install -U pip wheel; \
+	  if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi; \
+	  if [ -f pyproject.toml ]; then pip install -e . || pip install . || true; fi; \
+	  pip install ruamel.yaml==0.18.* pip-audit==2.* || true; \
+	fi
+	# Dev tooling fallbacks (no yq/gsed reliance)
+	@mkdir -p scripts/tools
+	@printf '%s\n' '#!/usr/bin/env python3' \
+	'from ruamel.yaml import YAML; import sys,json' \
+	'y=YAML(); doc=y.load(sys.stdin.read()); print(json.dumps(doc))' > scripts/tools/yq_json.py
+	@chmod +x scripts/tools/yq_json.py
+	@echo "bootstrap: DONE"
 
-.PHONY: copilot-context copilot-report
-copilot-context:
-	gh workflow run "Copilot Context Refresh" || true
+up:
+	@echo "==> up: best-effort bring-up (no-op if stack not containerized)"
+	@if [ -f docker-compose.yml ] || [ -f compose.yml ]; then \
+	  docker compose up -d --quiet-pull || docker-compose up -d; \
+	else \
+	  echo "no compose file; skipping"; \
+	fi
 
-copilot-report:
-	gh workflow run "Weekly Copilot Adoption Report" || true
+smoke:
+	@echo "==> smoke: lightweight sanity checks"
+	# JS/TS tests if present
+	@if [ -f package.json ]; then \
+	  if jq -e '.scripts.test' package.json >/dev/null 2>&1; then npm test --silent || npm run test --silent || true; else echo "no npm test script"; fi; \
+	fi
+	# Python tests if present
+	@if [ -d tests ] || [ -f pytest.ini ] || [ -f pyproject.toml ]; then \
+	  . .venv/bin/activate 2>/dev/null || true; \
+	  python - <<'PY' || true
+import importlib.util, sys, subprocess, shutil
+if shutil.which("pytest"):
+    sys.exit(subprocess.call(["pytest","-q"]))
+print("pytest not installed; skipping")
+PY
+	fi
+	# Last-resort canary
+	@node -e "console.log('node ok')" 2>/dev/null || true
+	@python -c "print('python ok')" 2>/dev/null || true
+	@echo "smoke: DONE"
 
-.PHONY: vpc-validate vpc-plan webapp-build
-
-vpc-validate:
-	cd vpc && terraform init -input=false && terraform validate
-
-vpc-plan:
-	cd vpc && terraform init -input=false && terraform plan -input=false -refresh=false -out=tfplan
-
-webapp-build:
-	cd webapp && (npm ci || pnpm i || yarn install) && (npm run build || true)

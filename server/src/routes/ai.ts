@@ -8,17 +8,16 @@ import { body, query, validationResult } from "express-validator";
 import rateLimit from "express-rate-limit";
 import pino from "pino";
 import EntityLinkingService from "../services/EntityLinkingService.js";
-import { Queue, QueueScheduler, Worker } from 'bullmq';
-import { Job } from 'bullmq'; // Import Job type for better typing
+import { Queue, Worker } from 'bullmq';
 
 import { ExtractionEngine } from '../ai/ExtractionEngine.js'; // WAR-GAMED SIMULATION - Import ExtractionEngine
 import { ExtractionEngineConfig, ExtractionRequest, ExtractionResult } from '../ai/ExtractionEngine.js'; // WAR-GAMED SIMULATION - Import types
 import { getNeo4jDriver } from '../db/neo4j.js'; // WAR-GAMED SIMULATION - For ExtractionEngine constructor
 import { getRedisClient } from '../db/redis.js'; // WAR-GAMED SIMULATION - For BullMQ
 import { Pool } from 'pg'; // WAR-GAMED SIMULATION - For ExtractionEngine constructor (assuming PG is used)
-import { v4 as uuidv4 } from 'uuid'; // WAR-GAMED SIMULATION - For job IDs
+import { randomUUID } from 'crypto'; // Use Node's built-in UUID for job IDs
 import AdversaryAgentService from '../ai/services/AdversaryAgentService.js';
-import { MediaType } from '../services/MultimodalDataService.js'; // WAR-GAMED SIMULATION - Import MediaType
+import { MediaType } from '../services/MediaUploadService.js'; // Import MediaType from MediaUploadService
 
 const logger = pino();
 const router = express.Router();
@@ -26,7 +25,6 @@ const router = express.Router();
 // WAR-GAMED SIMULATION - BullMQ setup for video analysis jobs
 const connection = getRedisClient(); // Use existing Redis client for BullMQ
 const videoAnalysisQueue = new Queue('videoAnalysisQueue', { connection });
-const videoAnalysisScheduler = new QueueScheduler('videoAnalysisQueue', { connection });
 
 // Feedback Queue for AI insights
 const feedbackQueue = new Queue('aiFeedbackQueue', { connection });
@@ -435,7 +433,7 @@ router.post(
   handleValidationErrors,
   async (req: Request, res: Response) => {
     const { mediaPath, mediaType, extractionMethods, options } = req.body;
-    const jobId = uuidv4(); // Generate a unique job ID
+const jobId = randomUUID(); // Generate a unique job ID
 
     try {
       // Add job to the queue
