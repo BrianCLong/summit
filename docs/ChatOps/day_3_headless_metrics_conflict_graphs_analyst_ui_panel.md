@@ -514,7 +514,9 @@ app.use('/api', uiapi);
       "type": "timeseries",
       "title": "Worker Latency",
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum(rate(worker_fetch_seconds_bucket[5m])) by (le))" }
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(worker_fetch_seconds_bucket[5m])) by (le))"
+        }
       ]
     }
   ]

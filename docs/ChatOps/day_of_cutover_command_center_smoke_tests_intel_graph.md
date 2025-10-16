@@ -175,7 +175,9 @@ const TOKEN = __ENV.TOKEN || 'REDACTED_JWT';
 const PERSISTED_ID = __ENV.PERSISTED_ID || 'op:healthQuery:v1';
 
 export function gateway() {
-  const res = http.get(`${BASE}/api/ping`, { headers: { Authorization: `Bearer ${TOKEN}` } });
+  const res = http.get(`${BASE}/api/ping`, {
+    headers: { Authorization: `Bearer ${TOKEN}` },
+  });
   check(res, { 200: (r) => r.status === 200 });
   sleep(0.1);
 }
@@ -183,7 +185,10 @@ export function gateway() {
 export function gql() {
   const payload = JSON.stringify({ id: PERSISTED_ID, variables: {} });
   const res = http.post(`${BASE}/graphql`, payload, {
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${TOKEN}`,
+    },
   });
   check(res, { 200: (r) => r.status === 200 });
   sleep(0.1);

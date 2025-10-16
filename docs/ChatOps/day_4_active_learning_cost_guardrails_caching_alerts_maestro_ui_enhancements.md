@@ -68,7 +68,8 @@ export async function checkAndIncrement(tenantId: string, bytes: number) {
   const reqPct = (r.requests / r.daily_request_limit) * 100;
   const bytePct = (r.bytes / r.daily_byte_limit) * 100;
   const softHit = Math.max(reqPct, bytePct) >= r.soft_threshold_pct;
-  const hardHit = r.requests > r.daily_request_limit || r.bytes > r.daily_byte_limit;
+  const hardHit =
+    r.requests > r.daily_request_limit || r.bytes > r.daily_byte_limit;
   return { softHit, hardHit, reqPct, bytePct };
 }
 ```
@@ -95,7 +96,12 @@ export async function getCached(target: string, path: string) {
   return data ? JSON.parse(data) : null;
 }
 
-export async function setCached(target: string, path: string, value: any, ttlSec = 3600) {
+export async function setCached(
+  target: string,
+  path: string,
+  value: any,
+  ttlSec = 3600,
+) {
   const key = await cacheKey(target, path);
   await redis.setex(key, ttlSec, JSON.stringify(value));
 }
@@ -120,7 +126,8 @@ export const resolvers = {
   Mutation: {
     enqueueWebFetch: async (_: any, { job }: any, ctx: any) => {
       const tenantId = ctx?.tenantId || 't_default';
-      if (circuitOpen(tenantId)) throw new Error('Budget circuit open; try later');
+      if (circuitOpen(tenantId))
+        throw new Error('Budget circuit open; try later');
 
       // cache check
       const cached = await getCached(job.target, job.path);
@@ -267,7 +274,9 @@ if (hardHit) {
   tripCircuit(tenantId, 5 * 60_000);
   notify(`Budget hard limit hit for ${tenantId}`);
 } else if (softHit) {
-  notify(`Budget soft ${reqPct.toFixed(0)}%/${bytePct.toFixed(0)}% for ${tenantId}`);
+  notify(
+    `Budget soft ${reqPct.toFixed(0)}%/${bytePct.toFixed(0)}% for ${tenantId}`,
+  );
 }
 ```
 
@@ -290,7 +299,9 @@ export function isPublicHost(host: string) {
     // block private ranges quickly
     const n = host.split('.').map((x) => +x);
     const priv =
-      n[0] === 10 || (n[0] === 192 && n[1] === 168) || (n[0] === 172 && n[1] >= 16 && n[1] <= 31);
+      n[0] === 10 ||
+      (n[0] === 192 && n[1] === 168) ||
+      (n[0] === 172 && n[1] >= 16 && n[1] <= 31);
     return !priv;
   }
   return true;
