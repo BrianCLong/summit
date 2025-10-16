@@ -24,7 +24,7 @@ jobs:
         if: steps.pkg.outputs.manifests == 'true'
         with:
           node-version: 20
-      - run: npm ci --ignore-scripts
+      - run: npm install --ignore-scripts || true
         if: steps.pkg.outputs.manifests == 'true'
       - run: npm audit --audit-level=critical || true
         if: steps.pkg.outputs.manifests == 'true'

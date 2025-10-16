@@ -4,6 +4,7 @@ on:
     types: [opened, synchronize]
 jobs:
   label:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
