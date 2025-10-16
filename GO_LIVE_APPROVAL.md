@@ -2,8 +2,8 @@
 
 **Release Version**: v1.0.0-GA
 **Deployment Target**: AWS EKS Production
-**Approval Date**: ******\_\_\_******
-**Go-Live Window**: ******\_\_\_******
+**Approval Date**: **\*\***\_\_\_**\*\***
+**Go-Live Window**: **\*\***\_\_\_**\*\***
 
 ---
 
@@ -56,7 +56,7 @@
 
 ### Canary Deployment (20% Traffic)
 
-- **Start Time**: ******\_\_\_******
+- **Start Time**: **\*\***\_\_\_**\*\***
 - **Health Validation**: ✅ / ❌
 - **Golden Transactions**: ✅ / ❌
   - OIDC Login: ✅ / ❌
@@ -73,7 +73,7 @@
 
 ### Post-Ramp Validation
 
-- **Evidence Snapshot**: Captured at ******\_\_\_******
+- **Evidence Snapshot**: Captured at **\*\***\_\_\_**\*\***
 - **SLO Compliance**: ✅ / ❌
   - Error Rate: \_\_\_\_% (Target: < 0.1%)
   - API p95 Latency: \_\_\_\_ms (Target: < 350ms)
@@ -127,21 +127,21 @@
 
 ### Technical Approval
 
-- [ ] **Platform Engineering**: ********\_******** (Name/Date)
-- [ ] **Site Reliability**: ********\_******** (Name/Date)
-- [ ] **Security Engineering**: ********\_******** (Name/Date)
-- [ ] **Database Administration**: ********\_******** (Name/Date)
+- [ ] **Platform Engineering**: **\*\*\*\***\_**\*\*\*\*** (Name/Date)
+- [ ] **Site Reliability**: **\*\*\*\***\_**\*\*\*\*** (Name/Date)
+- [ ] **Security Engineering**: **\*\*\*\***\_**\*\*\*\*** (Name/Date)
+- [ ] **Database Administration**: **\*\*\*\***\_**\*\*\*\*** (Name/Date)
 
 ### Business Approval
 
-- [ ] **Product Owner**: ********\_******** (Name/Date)
-- [ ] **Engineering Manager**: ********\_******** (Name/Date)
-- [ ] **CTO**: ********\_******** (Name/Date)
+- [ ] **Product Owner**: **\*\*\*\***\_**\*\*\*\*** (Name/Date)
+- [ ] **Engineering Manager**: **\*\*\*\***\_**\*\*\*\*** (Name/Date)
+- [ ] **CTO**: **\*\*\*\***\_**\*\*\*\*** (Name/Date)
 
 ### Compliance & Audit
 
-- [ ] **Security Officer**: ********\_******** (Name/Date)
-- [ ] **Compliance Manager**: ********\_******** (Name/Date)
+- [ ] **Security Officer**: **\*\*\*\***\_**\*\*\*\*** (Name/Date)
+- [ ] **Compliance Manager**: **\*\*\*\***\_**\*\*\*\*** (Name/Date)
 
 ---
 
@@ -157,14 +157,14 @@
 
 ### **APPROVAL AUTHORITY**
 
-**Primary Decision Maker**: ********\_********
-**Signature**: ********\_********
-**Date**: ********\_********
-**Time**: ********\_********
+**Primary Decision Maker**: **\*\*\*\***\_**\*\*\*\***
+**Signature**: **\*\*\*\***\_**\*\*\*\***
+**Date**: **\*\*\*\***\_**\*\*\*\***
+**Time**: **\*\*\*\***\_**\*\*\*\***
 
-**Secondary Approver**: ********\_********
-**Signature**: ********\_********
-**Date**: ********\_********
+**Secondary Approver**: **\*\*\*\***\_**\*\*\*\***
+**Signature**: **\*\*\*\***\_**\*\*\*\***
+**Date**: **\*\*\*\***\_**\*\*\*\***
 
 ---
 
