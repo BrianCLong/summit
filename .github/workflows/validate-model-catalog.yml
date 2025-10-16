@@ -7,6 +7,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            catalog:
+              - 'model-catalog/**'
+      - name: No catalog changes, skipping
+        if: steps.changes.outputs.catalog != 'true'
+        run: echo "No model catalog changes; skipping"
       - uses: actions/setup-node@v4
         with:
           node-version: '20'

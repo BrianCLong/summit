@@ -4,7 +4,7 @@ from __future__ import annotations
 from collections import Counter
 from pathlib import Path
 from typing import Sequence
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 
 from .lint import LintIssue
 

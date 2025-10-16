@@ -60,7 +60,7 @@ class GNNPredictor:
 
     def load(self) -> None:
         try:
-            state = torch.load(self.model_path)
+            state = torch.load(self.model_path, weights_only=True)
             self.model.load_state_dict(state)
             self._trained = True
         except FileNotFoundError:

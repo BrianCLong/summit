@@ -298,7 +298,7 @@ class DistributedGNNTrainer:
     def load_model(self, path: str):
         """Load model state"""
         unwrapped_model = self.accelerator.unwrap_model(self.model)
-        unwrapped_model.load_state_dict(torch.load(path, map_location=self.device))
+        unwrapped_model.load_state_dict(torch.load(path, map_location=self.device, weights_only=True))
         logger.info(f"Model loaded from {path}")
 
 

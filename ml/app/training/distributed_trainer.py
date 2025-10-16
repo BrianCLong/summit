@@ -485,7 +485,7 @@ class DistributedTrainingManager:
     
     def load_checkpoint(self, checkpoint_path: str) -> Dict[str, Any]:
         """Load training checkpoint"""
-        checkpoint = torch.load(checkpoint_path, map_location=self.accelerator.device)
+        checkpoint = torch.load(checkpoint_path, map_location=self.accelerator.device, weights_only=True)
         
         # Load model state
         unwrapped_model = self.accelerator.unwrap_model(self.model)

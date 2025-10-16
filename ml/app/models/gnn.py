@@ -552,7 +552,7 @@ class GNNModelManager:
             model_path = os.path.join(self.model_dir, f"{safe_name}.pt")
 
         try:
-            checkpoint = torch.load(model_path, map_location=self.device)
+            checkpoint = torch.load(model_path, map_location=self.device, weights_only=True)
 
             # Create model from config
             model = IntelGraphGNN(**checkpoint['config']).to(self.device)

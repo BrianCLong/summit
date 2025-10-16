@@ -171,15 +171,13 @@ jobs:
         pnpm run typecheck 2>&1 | tee typecheck.log
 
         # Check for build warnings
-        if grep -i "warning" build.log; then
+        if grep -i "warning" build.log;
           echo "⚠️ Build warnings detected"
           gh pr comment ${{ github.event.pull_request.number }} --body "
           ⚠️ **Build Warnings Detected**
 
           The build completed but with warnings. Please review:
-          \`\`\`
-          $(grep -i "warning" build.log | head -10)
-          \`\`\`
+          `$(grep -i "warning" build.log | head -10)`
           "
         fi
 
@@ -228,15 +226,15 @@ jobs:
         # Check for secrets in code
         echo "Scanning for potential secrets..."
         SECRET_PATTERNS=(
-          "password\s*[:=]\s*['\"][^'\"]+['\"]"
-          "api[_-]?key\s*[:=]\s*['\"][^'\"]+['\"]"
-          "secret\s*[:=]\s*['\"][^'\"]+['\"]"
-          "token\s*[:=]\s*['\"][^'\"]+['\"]"
+          "password\s*[:=]\s*['\"][^'\"]+['"]"
+          "api[_-]?key\s*[:=]\s*['\"][^'\"]+['"]"
+          "secret\s*[:=]\s*['\"][^'\"]+['"]"
+          "token\s*[:=]\s*['\"][^'\"]+['"]"
         )
 
         SECRETS_FOUND=false
-        for pattern in "${SECRET_PATTERNS[@]}"; do
-          if git diff ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E "$pattern" | grep -v test; then
+        for pattern in "${{ SECRET_PATTERNS[@] }}"; do
+          if git diff ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E "$pattern" | grep -v test;
             echo "⚠️ Potential secret found: $pattern"
             SECRETS_FOUND=true
           fi
@@ -284,6 +282,78 @@ jobs:
         sarif_file: gitleaks.sarif
         category: gitleaks
 
+    - name: Secret scan with TruffleHog
+      if: matrix.validation == 'security'
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: ${{ github.event.pull_request.base.sha }}
+        head: ${{ github.event.pull_request.head.sha }}
+        extra_args: --only-verified --json
+
+    - name: Generate SBOM (CycloneDX)
+      if: matrix.validation == 'security'
+      run: |
+        # For Node.js projects
+        if [[ -f "package.json" ]]; then
+          npx @cyclonedx/bom generate --output-file cyclonedx-node.json --output-format json
+        fi
+        # For Python projects
+        if [[ -f "requirements.txt" ]]; then
+          pip install cyclonedx-bom
+          cyclonedx-bom -r -o cyclonedx-python.json
+        fi
+        # For Go projects
+        if ls *.go &> /dev/null; then
+          go install github.com/CycloneDX/cyclonedx-go/cmd/cyclonedx-go@latest
+          cyclonedx-go -output cyclonedx-go.json
+        fi
+        # For Rust projects
+        if [[ -f "Cargo.toml" ]]; then
+          cargo install cyclonedx-bom
+          cyclonedx-bom -o cyclonedx-rust.json
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload SBOM Artifacts
+      if: matrix.validation == 'security' && always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: sbom-artifacts
+        path: |
+          cyclonedx-node.json
+          cyclonedx-python.json
+          cyclonedx-go.json
+          cyclonedx-rust.json
+        retention-days: 5
+
+    - name: Run npm audit
+      if: matrix.validation == 'security' && -f 'package.json'
+      run: npm audit --omit=dev --json > npm-audit.json || true
+
+    - name: Run pip-audit
+      if: matrix.validation == 'security' && -f 'requirements.txt'
+      run: |
+        python3.12 -m pip install pip-audit
+        pip-audit -r requirements.txt --json > pip-audit.json || true
+
+    - name: Run go vet
+      if: matrix.validation == 'security' && ls *.go &> /dev/null
+      run: go vet ./...
+
+    - name: Run cargo audit
+      if: matrix.validation == 'security' && -f 'Cargo.toml'
+      run: |
+        cargo install cargo-audit
+        cargo audit --json > cargo-audit.json || true
+
+    - name: Run gradle dependencyCheck
+      if: matrix.validation == 'security' && -f 'build.gradle'
+      run: |
+        ./gradlew dependencyCheckAnalyze
+        # Convert XML report to SARIF if possible
+
     - name: Generate security annotations
       if: matrix.validation == 'security' && always()
       run: |
@@ -325,11 +395,11 @@ jobs:
 
           Found $LINT_ERRORS linting errors that must be fixed:
 
-          \`\`\`
+          ```
           $(grep "error" lint.log | head -10)
-          \`\`\`
+          ```
 
-          Run \`pnpm run lint --fix\` to auto-fix some issues.
+          Run `pnpm run lint --fix` to auto-fix some issues.
           "
           exit 1
         fi
@@ -504,7 +574,7 @@ jobs:
           - Build: $BUILD_STATUS
           - Policy: $POLICY_STATUS
 
-          Use \`/merge-pr ${{ github.event.pull_request.number }} --dry-run\` to run Release Captain analysis.
+          Use `/merge-pr ${{ github.event.pull_request.number }} --dry-run` to run Release Captain analysis.
           "
           exit 1
         fi

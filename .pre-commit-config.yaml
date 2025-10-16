@@ -21,6 +21,15 @@ repos:
       - id: eslint
         additional_dependencies: [eslint, prettier, eslint-config-prettier]
         files: .(js|jsx|ts|tsx)$
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2
+    hooks:
+    -   id: gitleaks
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.63.0
+    hooks:
+    -   id: trufflehog
+        args: [--only-verified]
   - repo: https://github.com/okonet/lint-staged
     rev: v14.0.1
     hooks: [{ id: lint-staged }]

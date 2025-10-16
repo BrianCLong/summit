@@ -1,5 +1,4 @@
 import { GraphQLScalarType, GraphQLError } from 'graphql';
-import { trace, context } from '@opentelemetry/api';
 import { Pool } from 'pg';
 import neo4j from 'neo4j-driver';
 import { DateTimeResolver, JSONResolver } from 'graphql-scalars';
@@ -16,7 +15,15 @@ import type {
   ResolverContext,
 } from './types';
 
-const tracer = trace.getTracer('intelgraph-graphql-resolvers');
+// No-op tracer shim
+const tracer = {
+  startSpan: (_name: string, _opts?: any) => ({
+    setAttributes: (_a?: any) => {},
+    setStatus: (_s?: any) => {},
+    recordException: (_e?: any) => {},
+    end: () => {},
+  }),
+};
 
 export const resolvers = {
   DateTime: DateTimeResolver,
@@ -74,7 +81,7 @@ export const resolvers = {
           // Apply PII redaction based on user scopes
           const redactedEntity = await this.applyPIIRedaction(entity, context);
 
-          span.setAttributes({
+          span.setAttributes?.({
             'entity.type': entity.type,
             'entity.sources_count': sources.length,
             'pii.redacted': redactedEntity !== entity,
@@ -91,11 +98,11 @@ export const resolvers = {
         }
 
       } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
+        span.recordException?.(error as Error);
+        span.setStatus?.({ message: (error as Error).message });
         throw error;
       } finally {
-        span.end();
+        span.end?.();
       }
     },
 
@@ -187,7 +194,7 @@ export const resolvers = {
 
           const totalCount = countResult.records[0]?.get('total')?.toNumber() || 0;
 
-          span.setAttributes({
+          span.setAttributes?.({
             'search.results_count': entities.length,
             'search.total_count': totalCount,
           });
@@ -271,7 +278,7 @@ export const resolvers = {
             properties: record.get('properties') || {},
           }));
 
-          span.setAttributes({
+          span.setAttributes?.({
             'path.steps_count': pathSteps.length,
             'path.found': pathSteps.length > 0,
           });
@@ -370,7 +377,7 @@ export const resolvers = {
           const edgeCount = edges.length;
           const density = nodeCount > 1 ? (2 * edgeCount) / (nodeCount * (nodeCount - 1)) : 0;
 
-          span.setAttributes({
+          span.setAttributes?.({
             'graph.nodes_count': nodeCount,
             'graph.edges_count': edgeCount,
             'graph.density': density,

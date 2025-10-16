@@ -8,10 +8,10 @@
 
 import { EventEmitter } from 'events';
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
-import { PrometheusMetrics } from '../utils/metrics';
-import logger from '../utils/logger';
-import { tracer, Span } from '../utils/tracing';
-import { DatabaseService } from './DatabaseService';
+import { PrometheusMetrics } from '../utils/metrics.js';
+import logger from '../utils/logger.js';
+import { tracer } from '../observability/telemetry.js';
+import { DatabaseService } from './DatabaseService.js';
 
 // RTBF job configuration
 interface RTBFConfig {
@@ -284,7 +284,7 @@ export class RTBFJobService extends EventEmitter {
     });
 
     worker.on('error', (error) => {
-      logger.error('Worker error', { workerId, error: error.message });
+      logger.error('Worker error', { workerId, error: (error as Error).message });
       this.handleWorkerError(workerId, error);
     });
 
@@ -376,10 +376,10 @@ export class RTBFJobService extends EventEmitter {
     }
 
     // Record metrics
-    this.metrics.incrementCounter('rtbf_records_processed', recordsProcessed, {
+    this.metrics.incrementCounter('rtbf_records_processed', {
       tenant_id: job?.tenantId || 'unknown',
       result: 'success'
-    });
+    }, recordsProcessed);
 
     this.metrics.observeHistogram('rtbf_batch_size', recordsProcessed);
 
@@ -471,7 +471,7 @@ export class RTBFJobService extends EventEmitter {
 
   // Public API methods
   public async submitRTBFRequest(request: RTBFJobRequest): Promise<string> {
-    return tracer.startActiveSpan('rtbf_service.submit_request', async (span: Span) => {
+    return tracer.startActiveSpan('rtbf_service.submit_request', {}, async (span: any) => {
       span.setAttributes({
         'rtbf.tenant_id': request.tenantId,
         'rtbf.job_id': request.id,
@@ -533,7 +533,7 @@ export class RTBFJobService extends EventEmitter {
       } catch (error) {
         logger.error('Failed to submit RTBF request', {
           jobId: request.id,
-          error: error.message
+          error: (error as Error).message
         });
         span.recordException(error as Error);
         throw error;
@@ -618,7 +618,7 @@ export class RTBFJobService extends EventEmitter {
           logger.warn('Failed to estimate record count', {
             table,
             target: target.type,
-            error: error.message
+            error: (error as Error).message
           });
           // Use conservative estimate
           totalEstimate += 10000;
@@ -629,8 +629,16 @@ export class RTBFJobService extends EventEmitter {
     return totalEstimate;
   }
 
+  private validateIdentifier(identifier: string): void {
+    if (!/^[a-zA-Z0-9_]+$/.test(identifier)) {
+      throw new Error(`Invalid identifier: ${identifier}`);
+    }
+  }
+
   private buildCountQuery(table: string, target: RTBFTarget): { sql: string; params: any[] } {
     const { field, value, operator } = target.identifier;
+    this.validateIdentifier(table);
+    this.validateIdentifier(field);
     let whereClause = '';
     const params: any[] = [];
 
@@ -682,8 +690,8 @@ export class RTBFJobService extends EventEmitter {
       try {
         await this.startJob(job);
       } catch (error) {
-        logger.error('Failed to start job', { jobId: job.id, error: error.message });
-        await this.failJob(job, error.message);
+        logger.error('Failed to start job', { jobId: job.id, error: (error as Error).message });
+        await this.failJob(job, (error as Error).message);
       }
     }
 
@@ -707,10 +715,10 @@ export class RTBFJobService extends EventEmitter {
     await this.createJobBatches(job);
     
     // Update metrics
-    this.metrics.incrementCounter('rtbf_jobs_total', 1, {
+    this.metrics.incrementCounter('rtbf_jobs_total', {
       tenant_id: job.tenantId,
       status: 'started'
-    });
+    }, 1);
 
     await this.saveJob(job);
     this.emit('jobStarted', { job });
@@ -765,7 +773,7 @@ export class RTBFJobService extends EventEmitter {
       logger.error('Failed to get record IDs', {
         table,
         target: target.type,
-        error: error.message
+        error: (error as Error).message
       });
       return [];
     }
@@ -773,6 +781,8 @@ export class RTBFJobService extends EventEmitter {
 
   private buildSelectQuery(table: string, target: RTBFTarget): { sql: string; params: any[] } {
     const { field, value, operator } = target.identifier;
+    this.validateIdentifier(table);
+    this.validateIdentifier(field);
     let whereClause = '';
     const params: any[] = [];
 
@@ -856,10 +866,10 @@ export class RTBFJobService extends EventEmitter {
       this.performanceStats.totalJobsCompleted;
 
     // Record metrics
-    this.metrics.incrementCounter('rtbf_jobs_total', 1, {
+    this.metrics.incrementCounter('rtbf_jobs_total', {
       tenant_id: job.tenantId,
       status: 'completed'
-    });
+    }, 1);
 
     this.metrics.observeHistogram('rtbf_job_duration', jobDurationHours);
 
@@ -893,10 +903,10 @@ export class RTBFJobService extends EventEmitter {
     this.activeJobs.delete(job.id);
     this.metrics.setGauge('rtbf_jobs_active', this.activeJobs.size);
 
-    this.metrics.incrementCounter('rtbf_jobs_total', 1, {
+    this.metrics.incrementCounter('rtbf_jobs_total', {
       tenant_id: job.tenantId,
       status: 'failed'
-    });
+    }, 1);
 
     await this.saveJob(job);
 
@@ -927,7 +937,7 @@ export class RTBFJobService extends EventEmitter {
         job_data = $3, status = $4, updated_at = NOW()
       `, [job.id, job.tenantId, JSON.stringify(job), job.status]);
     } catch (error) {
-      logger.error('Failed to save job', { jobId: job.id, error: error.message });
+      logger.error('Failed to save job', { jobId: job.id, error: (error as Error).message });
     }
   }
 
@@ -971,7 +981,7 @@ export class RTBFJobService extends EventEmitter {
       
       return JSON.parse(result.rows[0].job_data);
     } catch (error) {
-      logger.error('Failed to get job', { jobId, error: error.message });
+      logger.error('Failed to get job', { jobId, error: (error as Error).message });
       return null;
     }
   }
@@ -1180,6 +1190,7 @@ class RTBFWorker {
   }
 
   private async processRecord(table: string, target: RTBFTarget, recordId: string): Promise<boolean> {
+    this.validateIdentifier(table);
     switch (target.strategy) {
       case 'hard_delete':
         await this.db.query(`DELETE FROM ${table} WHERE id = $1`, [recordId]);
@@ -1203,6 +1214,7 @@ class RTBFWorker {
   }
 
   private async anonymizeRecord(table: string, recordId: string): Promise<void> {
+    this.validateIdentifier(table);
     // Anonymize PII fields - this would be customizable based on table schema
     const anonymizeFields = {
       email: 'anonymous@example.com',
@@ -1222,6 +1234,7 @@ class RTBFWorker {
   }
 
   private async archiveRecord(table: string, recordId: string): Promise<void> {
+    this.validateIdentifier(table);
     // Move record to archive table
     await this.db.query(`
       INSERT INTO ${table}_archive SELECT * FROM ${table} WHERE id = $1

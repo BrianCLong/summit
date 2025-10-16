@@ -164,7 +164,7 @@ Keys are provisioned through the `CRYPTO_SIGNING_KEYS` environment variable. The
   {
     "id": "ledger-root",
     "algorithm": "EdDSA_ED25519",
-    "privateKeyPem": "-----BEGIN PRIVATE KEY-----...",
+    "privateKeyPem": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----",
     "publicKeyPem": "-----BEGIN PUBLIC KEY-----...",
     "certificateChain": ["-----BEGIN CERTIFICATE-----..."],
     "version": 1,

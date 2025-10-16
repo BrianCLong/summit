@@ -1,7 +1,18 @@
-frontend: { - 'apps/frontend/**' }
-backend: { - 'apps/api/**' }
-analytics: { - 'apps/worker/**' }
-graphql: { - 'packages/graphql/**' }
-db: { - 'packages/db/**' }
-neo4j: { - 'packages/neo4j/**' }
-infra: { - 'infra/**' }
+client:
+  - 'client/**'
+server:
+  - 'server/**'
+python:
+  - 'python/**'
+data-pipelines:
+  - 'server/data-pipelines/**'
+workflows:
+  - '.github/workflows/**'
+infra:
+  - 'infra/**'
+graphql:
+  - 'packages/graphql/**'
+db:
+  - 'packages/db/**'
+neo4j:
+  - 'packages/neo4j/**'

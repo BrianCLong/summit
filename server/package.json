@@ -17,6 +17,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "migrate": "ts-node scripts/migrate.ts up",
+    "db:migrate": "node scripts/db_migrate.cjs",
     "codegen": "graphql-codegen --config codegen.yml",
     "codegen:watch": "graphql-codegen --config codegen.yml --watch",
     "seed": "ts-node scripts/seed-data.ts",
