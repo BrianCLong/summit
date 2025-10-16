@@ -24,6 +24,7 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
+  ListItemButton, // <--- Added ListItemButton import
   Dialog,
   DialogTitle,
   DialogContent,
@@ -2236,7 +2237,7 @@ function EnhancedGraphExplorer() {
         <DialogTitle>Export Graph</DialogTitle>
         <DialogContent>
           <List>
-            <ListItem button onClick={() => handleExport('png')}>
+            <ListItemButton onClick={() => handleExport('png')}>
               <ListItemIcon>
                 <PhotoCamera />
               </ListItemIcon>
@@ -2244,14 +2245,14 @@ function EnhancedGraphExplorer() {
                 primary="PNG Image"
                 secondary="High resolution image"
               />
-            </ListItem>
-            <ListItem button onClick={() => handleExport('jpg')}>
+            </ListItemButton>
+            <ListItemButton onClick={() => handleExport('jpg')}>
               <ListItemIcon>
                 <PhotoCamera />
               </ListItemIcon>
               <ListItemText primary="JPG Image" secondary="Compressed image" />
-            </ListItem>
-            <ListItem button onClick={() => handleExport('json')}>
+            </ListItemButton>
+            <ListItemButton onClick={() => handleExport('json')}>
               <ListItemIcon>
                 <Description />
               </ListItemIcon>
@@ -2259,8 +2260,8 @@ function EnhancedGraphExplorer() {
                 primary="JSON Data"
                 secondary="Graph data structure"
               />
-            </ListItem>
-            <ListItem button onClick={() => handleExport('csv')}>
+            </ListItemButton>
+            <ListItemButton onClick={() => handleExport('csv')}>
               <ListItemIcon>
                 <Description />
               </ListItemIcon>
@@ -2268,8 +2269,8 @@ function EnhancedGraphExplorer() {
                 primary="CSV Data"
                 secondary="Nodes and edges tables"
               />
-            </ListItem>
-            <ListItem button onClick={() => handleExport('pdf')}>
+            </ListItemButton>
+            <ListItemButton onClick={() => handleExport('pdf')}>
               <ListItemIcon>
                 <Description />
               </ListItemIcon>
@@ -2277,7 +2278,7 @@ function EnhancedGraphExplorer() {
                 primary="PDF Summary"
                 secondary="Printable summary of graph"
               />
-            </ListItem>
+            </ListItemButton>
           </List>
         </DialogContent>
         <DialogActions>
