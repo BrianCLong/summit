@@ -31,16 +31,27 @@
     <div id="wrap">
       <div id="nav">
         <h3>Maestro APIs</h3>
-        <a href="#" onclick="load('/contracts/maestro/mcp.openapi.yaml'); return false;">MCP API</a>
-        <a href="#" onclick="load('/contracts/pipelines.openapi.yaml'); return false;"
+        <a
+          href="#"
+          onclick="load('/contracts/maestro/mcp.openapi.yaml'); return false;"
+          >MCP API</a
+        >
+        <a
+          href="#"
+          onclick="load('/contracts/pipelines.openapi.yaml'); return false;"
           >Pipelines API</a
         >
-        <a href="#" onclick="load('/contracts/executors.openapi.yaml'); return false;"
+        <a
+          href="#"
+          onclick="load('/contracts/executors.openapi.yaml'); return false;"
           >Executors API</a
         >
       </div>
       <div id="main">
-        <redoc id="redoc" spec-url="/contracts/maestro/mcp.openapi.yaml"></redoc>
+        <redoc
+          id="redoc"
+          spec-url="/contracts/maestro/mcp.openapi.yaml"
+        ></redoc>
       </div>
     </div>
     <script>

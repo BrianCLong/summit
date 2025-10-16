@@ -50,7 +50,7 @@ spec:
       containers:
         - name: otel-collector
           image: otel/opentelemetry-collector:0.102.0
-          args: ["--config=/conf/otel-collector.yaml"]
+          args: ['--config=/conf/otel-collector.yaml']
           ports:
             - { name: otlp-grpc, containerPort: 4317 }
             - { name: otlp-http, containerPort: 4318 }
