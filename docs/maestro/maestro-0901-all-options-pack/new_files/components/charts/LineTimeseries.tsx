@@ -37,13 +37,24 @@ export default function LineTimeseries({
       </section>
     );
   }
-  const { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } = Recharts;
+  const {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
+    CartesianGrid,
+  } = Recharts;
   return (
     <section className="border rounded p-3">
       {title && <h3 className="font-medium">{title}</h3>}
       <div role="img" aria-label={ariaLabel || title || 'timeseries'}>
         <ResponsiveContainer width="100%" height={height}>
-          <LineChart data={data} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
+          <LineChart
+            data={data}
+            margin={{ left: 8, right: 8, top: 8, bottom: 8 }}
+          >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={xKey} />
             <YAxis />

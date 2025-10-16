@@ -1,9 +1,6 @@
-
-
 ## Inventory - Top Level
 
-- dir   summit-main  (78084912 bytes)
-
+- dir summit-main (78084912 bytes)
 
 ## Found Key Files/Dirs
 
@@ -112,7 +109,6 @@
 - summit-main/graph_xai/docs
 - summit-main/prov-ledger/docs
 - summit-main/prov_ledger/docs
-
 
 ## Dockerfiles (snippets)
 
@@ -808,7 +804,6 @@ EXPOSE 4000
 CMD ["node", "dist/index.js"]
 
 ```
-
 
 ## Compose Files (snippets)
 
@@ -1511,7 +1506,6 @@ services:
 
 ```
 
-
 ## GitHub Workflows (snippets)
 
 ### summit-main/.github/workflows/api-docs.yml
@@ -2043,7 +2037,7 @@ jobs:
 
 ### summit-main/.github/workflows/cd.yml
 
-```
+````
 name: CD Pipeline
 on:
   workflow_run:
@@ -2182,7 +2176,7 @@ jobs:
         run: |
           aws eks update-kubeconfig \
             --region ${{ secrets.AWS_REG
-```
+````
 
 ### summit-main/.github/workflows/ci-client-tests.yml
 
@@ -2780,42 +2774,42 @@ jobs:
     outputs:
       security-score: ${{ steps.security-analysis.outputs.score }}
       critical-findings: ${{ steps.security-analysis.outputs.critical }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci --audit-level moderate
-        
+
       - name: Run npm audit
         id: npm-audit
         run: |
           npm audit --json > npm-audit-report.json || true
           echo "audit-report=$(cat npm-audit-report.json)" >> $GITHUB_OUTPUT
-          
+
       - name: Snyk security scan
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=medium --json-file-output=snyk-report.json
-          
+
       - name: CodeQL analysis
         uses: github/codeql-action/init@v3
         with:
           languages: typescript, javascript
           config-file: ./.github/codeql/codeql-config.yml
-          
+
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
-        
+
       - name: Run Semgrep SAST
         uses: returntocorp/semgrep-action@v1
         with:
@@ -2826,7 +2820,7 @@ jobs:
             p/nodejs
           publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
           publishDeployment: production
-          
+
       - name: Security analysis summary
         id: security-analysis
         run: |
@@ -2835,13 +2829,13 @@ jobs:
             --npm-audit npm-audit-report.json \
             --snyk snyk-report.json \
             --output security-summary.json
-          
+
           SCORE=$(jq -r '.overall_score' security-summary.json)
           CRITICAL=$(jq -r '.critical_count' security-summary.json)
-          
+
           echo "score=$SCORE" >> $GITHUB_OUTPUT
           echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
-          
+
       - name: Upload security reports
         uses: actions/upload-artifact@v4
         with:
@@ -2858,41 +2852,41 @@ jobs:
     outputs:
       policy-score: ${{ steps.opa-test.outputs.score }}
       policy-coverage: ${{ steps.opa-test.outputs.coverage }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Set up OPA
         uses: open-policy-agent/setup-opa@v2
         with:
           version: 'v0.58.0'
-          
+
       - name: Validate policy syntax
         run: |
           find policy/ -name "*.rego" -exec opa fmt --diff {} \;
           find policy/ -name "*.rego" -exec opa parse {} \;
-          
+
       - name: Run policy tests
         id: opa-test
         run: |
           # Run all policy tests
           opa test policy/ --coverage --format json > opa-test-results.json
-          
+
           # Calculate policy coverage and score
           COVERAGE=$(jq -r '.coverage.percentage' opa-test-results.json)
           PASS_COUNT=$(jq -r '.results | map(select(.pass == true)) | length' opa-test-results.json)
           TOTAL_COUNT=$(jq -r '.results | length' opa-test-results.json)
-          
+
           if [ "$TOTAL_COUNT" -eq 0 ]; then
             SCORE=0
           else
             SCORE=$(echo "scale=2; ($PASS_COUNT * 100) / $TOTAL_COUNT" | bc)
           fi
-          
+
           echo "score=$SCORE" >> $GITHUB_OUTPUT
           echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
-          
+
       - name: Policy simulation tests
         run: |
           # Test policies against historical data
@@ -2900,13 +2894,13 @@ jobs:
             --policy-dir policy/ \
             --test-data .github/test-data/access-patterns.json \
             --output policy-simulation.json
-            
+
       - name: Validate bundle integrity
         run: |
           # Create and verify policy bundle
           opa build policy/ --bundle
           tar -tf bundle.tar.gz | head -20
-          
+
       - name: Upload policy reports
         uses: actions/upload-artifact@v4
         with:
@@ -3113,7 +3107,7 @@ jobs:
         with:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           fail-build: true
-  
+
 ```
 
 ### summit-main/.github/workflows/contract-tests.yml
@@ -3699,14 +3693,14 @@ jobs:
       should-deploy: ${{ steps.changes.outputs.deploy }}
       image-tag: ${{ steps.meta.outputs.tags }}
       image-digest: ${{ steps.build.outputs.digest }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -3716,52 +3710,52 @@ jobs:
             package-lock.json
             server/package-lock.json
             client/package-lock.json
-            
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
           cache: 'pip'
-          
+
       - name: Install dependencies
         run: |
           npm ci
           cd server && npm ci
           cd ../client && npm ci
           pip install -r requirements.txt
-          
+
       - name: Run pre-commit hooks
         uses: pre-commit/action@v3.0.0
         with:
           extra_args: --all-files
-          
+
       - name: TypeScript compilation
         run: |
           cd server && npm run build
           cd ../client && npm run build
-          
+
       - name: Run tests with coverage
         run: |
           npm run test:coverage
           npm run e2e:headless
-          
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
-          
+
       - name: Security scan with CodeQL
         uses: github/codeql-action/analyze@v3
         with:
           languages: javascript,typescript,python
-          
+
       - name: Container security scan
         uses: aquasecurity/trivy-action@master
         with:
@@ -3769,13 +3763,13 @@ jobs:
           scan-ref: '.'
           format: 'sarif'
           output: 'trivy-results.sarif'
-          
+
       - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
-          
+
       - name: Detect changes
         id: changes
         uses: dorny/paths-filter@v2
@@ -3799,28 +3793,28 @@ jobs:
       image-tag: ${{ steps.meta.outputs.tags }}
       image-digest: ${{ steps.build.outputs.digest }}
       sbom-path: ${{ steps.sbom.outputs.sbom-path }}
-      
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        
+
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
-        
+
       - name: Install Syft for SBOM
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-          
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -3832,13 +3826,13 @@ jobs:
             type=sha,prefix={{branch}}-
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            
+
       - name: Build and push image
         id: build
         uses: docker/build-push-action@v5
         with:
           context: .
-         
+
 ```
 
 ### summit-main/.github/workflows/issue-auto-split.yml
@@ -3899,9 +3893,9 @@ jobs:
           M5=$(mid  "Assistant v1.1 — W5"   || echo "")
           M6=$(mid  "Assistant v1.1 — W6"   || echo "")
           case "$THEME" in
-            routing|citations) TARGET="$M12" ;; 
-            exports)           TARGET="$M34" ;; 
-            *)                 TARGET="$M5"  ;; 
+            routing|citations) TARGET="$M12" ;;
+            exports)           TARGET="$M34" ;;
+            *)                 TARGET="$M5"  ;;
           esac
           [ -n "$TARGET" ] && gh issue edit "$ISSUE_NUMBER" --milestone "$TARGET"
 
@@ -3920,10 +3914,10 @@ PY
           }
           ASG=""
           case "$THEME" in
-            routing)   ASG="${ROUTING_ASSIGNEES:-}"   ;; 
-            citations) ASG="${CITATIONS_ASSIGNEES:-}" ;; 
-            exports)   ASG="${EXPORTS_ASSIGNEES:-}"   ;; 
-            quality)   ASG="${QUALITY_ASSIGNEES:-}"   ;; 
+            routing)   ASG="${ROUTING_ASSIGNEES:-}"   ;;
+            citations) ASG="${CITATIONS_ASSIGNEES:-}" ;;
+            exports)   ASG="${EXPORTS_ASSIGNEES:-}"   ;;
+            quality)   ASG="${QUALITY_ASSIGNEES:-}"   ;;
           esac
           if [ -z "$ASG" ] && [ -f .github/assignees.yml ]; then
             ASG=$(assign_from_yaml "$THEME")
@@ -3934,14 +3928,14 @@ PY
           fi
 
           # Add to project and set status
-          PID=$(gh api graphql -f query=' 
+          PID=$(gh api graphql -f query='
             query($o:String!,$r:String!,$t:String!){
               repository(owner:$o,name:$r){ projectsV2(first:20, query:$t){ nodes { id title } } }
-            }' -F o="$(cut -d/ -f1 <<<"$OWNER_REPO")" -F r="$(cut -d/ -f2 <<<"$OWNER_REPO")" -F t="$PROJECT_TITLE" 
+            }' -F o="$(cut -d/ -f1 <<<"$OWNER_REPO")" -F r="$(cut -d/ -f2 <<<"$OWNER_REPO")" -F t="$PROJECT_TITLE"
             | jq -r '.data.repository.projectsV2.nodes[0].id')
           INID=$(gh api "repos/$OWNER_REPO/issues/$ISSUE_NUMBER" --jq .node_id)
           if [ -n "$PID" ] && [ -n "$INID" ]; then
-            gh api graphql -f query=' 
+            gh api graphql -f query='
               mutation($p:ID!,$c:ID!){
                 addProjectV2ItemById(input:{projectId:$p,contentId:$c}){ item { id } }
               }' \
@@ -4118,30 +4112,30 @@ jobs:
             if (reportFile) {
               const reportPath = path.join(resultsDir, reportFile);
               const manifest = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-              
+
               // Extract key metrics
               const scores = manifest[0]?.summary || {};
               const performance = Math.round(scores.performance * 100);
               const accessibility = Math.round(scores.accessibility * 100);
               const bestPractices = Math.round(scores['best-practices'] * 100);
               const seo = Math.round(scores.seo * 100);
-              
+
               const body = `## 🏋️‍♀️ Lighthouse CI Results
-              
+
               | Metric | Score | Status |
               |--------|-------|--------|
               | Performance | ${performance}/100 | ${performance >= 85 ? '✅' : '❌'} |
               | Accessibility | ${accessibility}/100 | ${accessibility >= 90 ? '✅' : '❌'} |
               | Best Practices | ${bestPractices}/100 | ${bestPractices >= 80 ? '✅' : '❌'} |
               | SEO | ${seo}/100 | ${seo >= 80 ? '✅' : '❌'} |
-              
+
               **Budget Requirements:**
               - Performance: ≥85 ${performance >= 85 ? '✅' : '❌'}
               - Accessibility: ≥90 ${accessibility >= 90 ? '✅' : '❌'}
-              
+
               ${performance < 85 || accessibility < 90 ? '⚠️ **Performance budget not met!**' : '✅ **All performance budgets passed!**'}
               `;
-              
+
               github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
@@ -4229,7 +4223,7 @@ jobs:
     name: Smoke Test
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.test_type == 'smoke')
-    
+
     services:
       postgres:
         image: postgres:14
@@ -4244,7 +4238,7 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      
+
       redis:
         image: redis:7-alpine
         options: >-
@@ -4254,23 +4248,23 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: server/package-lock.json
-      
+
       - name: Install dependencies
         run: |
           cd server
           npm ci
-      
+
       - name: Start Maestro server
         run: |
           cd server
@@ -4279,13 +4273,13 @@ jobs:
           REDIS_URL="redis://localhost:6379" \
           NODE_ENV=test \
           npm start &
-          
+
           # Wait for server to be ready
           timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
         env:
           JWT_SECRET: test-secret-key-for-ci
           CONDUCTOR_ENABLED: 'false'
-      
+
       - name: Install k6
         run: |
           sudo gpg -k
@@ -4293,7 +4287,7 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
           sudo apt-get install k6
-      
+
       - name: Run smoke test
         run: |
           cd tests/load
@@ -4305,7 +4299,7 @@ jobs:
     name: Load Test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && inputs.test_type == 'load')
-    
+
     services:
       postgres:
         image: postgres:14
@@ -4320,7 +4314,7 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      
+
       redis:
         image: redis:7-alpine
         options: >-
@@ -4330,23 +4324,23 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: server/package-lock.json
-      
+
       - name: Install dependencies
         run: |
           cd server
           npm ci
-      
+
       - name: Start Maestro server
         run: |
           cd server
@@ -4355,12 +4349,12 @@ jobs:
           REDIS_URL="redis://localhost:6379" \
           NODE_ENV=test \
           npm start &
-          
+
           timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
         env:
           JWT_SECRET: test-secret-key-for-ci
           CONDUCTOR_ENABLED: 'false'
-      
+
       - name: Install k6
         run: |
           sudo gpg -k
@@ -4846,11 +4840,11 @@ jobs:
             import json
             import os
             import sys
-            
+
             try:
                 with open('orchestration.yml') as f:
                     config = yaml.safe_load(f)
-                
+
                 # Check kill switch
                 kill_switch = config.get('env', {}).get('kill_switch', 0)
                 if kill_switch == 1:
@@ -4860,7 +4854,7 @@ jobs:
                 else:
                     print('✅ Orchestra kill switch is OFF - operations allowed')
                     print('kill-switch=false' >> os.environ['GITHUB_OUTPUT'])
-                
+
                 # Validate configuration structure
                 required_sections = ['defaults', 'routing', 'policies', 'observability']
                 missing = [s for s in required_sections if s not in config]
@@ -4868,7 +4862,7 @@ jobs:
                     print(f'❌ Missing required sections: {missing}')
                     print('config-valid=false' >> os.environ['GITHUB_OUTPUT'])
                     sys.exit(1)
-                
+
                 # Extract task type and models
                 task_type = os.environ.get('GITHUB_EVENT_NAME', 'push')
                 if task_type == 'pull_request':
@@ -4877,14 +4871,14 @@ jobs:
                     task_type = 'data_ingestion'
                 else:
                     task_type = '${{ inputs.task_type || \"code_review\" }}'
-                
+
                 models = config.get('defaults', {})
-                
+
                 print('✅ Orchestra configuration valid')
                 print('config-valid=true' >> os.environ['GITHUB_OUTPUT'])
                 print(f'task-type={task_type}' >> os.environ['GITHUB_OUTPUT'])
                 print(f'models={json.dumps(models)}' >> os.environ['GITHUB_OUTPUT'])
-                
+
             except Exception as e:
                 print(f'❌ Orchestra configuration error: {e}')
                 print('config-valid=false' >> os.environ['GITHUB_OUTPUT'])
@@ -5287,32 +5281,32 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Analyze changes
         id: analysis
         run: |
           # Get PR diff stats
           git diff --numstat origin/${{ github.base_ref }}..HEAD > diff_stats.txt
-          
+
           FILES_CHANGED=$(wc -l < diff_stats.txt)
           LINES_ADDED=$(awk '{sum+=$1} END {print sum}' diff_stats.txt)
           LINES_DELETED=$(awk '{sum+=$2} END {print sum}' diff_stats.txt)
-          
+
           # Calculate complexity score (0-100)
           COMPLEXITY=0
           if [ $FILES_CHANGED -gt 20 ]; then COMPLEXITY=$((COMPLEXITY + 30)); fi
           if [ $LINES_ADDED -gt 500 ]; then COMPLEXITY=$((COMPLEXITY + 25)); fi
           if [ $LINES_DELETED -gt 200 ]; then COMPLEXITY=$((COMPLEXITY + 20)); fi
-          
+
           # Check for high-risk patterns
           if git diff --name-only origin/${{ github.base_ref }}..HEAD | grep -E '\.(sql|migration|dockerfile|docker-compose)' > /dev/null; then
             COMPLEXITY=$((COMPLEXITY + 15))
           fi
-          
+
           if git diff --name-only origin/${{ github.base_ref }}..HEAD | grep -E 'package\.json|requirements\.txt|Cargo\.toml' > /dev/null; then
             COMPLEXITY=$((COMPLEXITY + 10))
           fi
-          
+
           # Determine review priority
           if [ $COMPLEXITY -gt 70 ]; then
             PRIORITY="HIGH"
@@ -5321,13 +5315,13 @@ jobs:
           else
             PRIORITY="LOW"
           fi
-          
+
           echo "files-changed=$FILES_CHANGED" >> $GITHUB_OUTPUT
           echo "lines-added=${LINES_ADDED:-0}" >> $GITHUB_OUTPUT
           echo "lines-deleted=${LINES_DELETED:-0}" >> $GITHUB_OUTPUT
           echo "complexity-score=$COMPLEXITY" >> $GITHUB_OUTPUT
           echo "review-priority=$PRIORITY" >> $GITHUB_OUTPUT
-          
+
           echo "📊 Change Analysis Results:"
           echo "Files: $FILES_CHANGED | Added: ${LINES_ADDED:-0} | Deleted: ${LINES_DELETED:-0}"
           echo "Complexity: $COMPLEXITY/100 | Priority: $PRIORITY"
@@ -5340,17 +5334,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Install security tools
         run: |
           # Install semgrep for security scanning
           pip install semgrep
-          
+
           # Install gitleaks for secret scanning
           wget -q https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz
           tar xzf gitleaks_8.18.4_linux_x64.tar.gz
           sudo mv gitleaks /usr/local/bin/
-      
+
       - name: Scan for secrets
         run: |
           echo "🔍 Scanning for secrets in PR changes..."
@@ -5358,7 +5352,7 @@ jobs:
             echo "⚠️ Potential secrets detected in PR"
             echo "SECURITY_ISSUES=secrets" >> $GITHUB_ENV
           }
-      
+
       - name: Scan for security vulnerabilities
         run: |
           echo "🔍 Scanning for security vulnerabilities..."
@@ -5366,7 +5360,7 @@ jobs:
             echo "⚠️ Security vulnerabilities detected"
             echo "SECURITY_ISSUES=${SECURITY_ISSUES:-}vulnerabilities" >> $GITHUB_ENV
           }
-      
+
       - name: Comment security findings
         if: env.SECURITY_ISSUES != ''
         uses: actions/github-script@v7
@@ -5374,17 +5368,17 @@ jobs:
           script: |
             const issues = process.env.SECURITY_ISSUES;
             let body = '## 🔒 Security Review Results\n\n';
-            
+
             if (issues.includes('secrets')) {
               body += '⚠️ **Potential secrets detected** - Please review the gitleaks output\n';
             }
-            
+
             if (issues.includes('vulnerabilities')) {
               body += '⚠️ **Security vulnerabilities found** - Please review the semgrep output\n';
             }
-            
+
             body += '\nPlease address these security concerns before merging.';
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -6208,7 +6202,7 @@ jobs:
 
 **GraphQL Schema Source:** ![${src}](https://img.shields.io/badge/schema-${src}-${color}?logo=graphql)
 
-**Persisted Ops:** 
+**Persisted Ops:**
 
 
             const { context, github } = require('@actions/github');
@@ -6235,7 +6229,7 @@ jobs:
           echo "### ${TITLE}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- Schema Source: ${SRC}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Persisted Ops: 
+          echo "- Persisted Ops:
 
 ```
 
@@ -6313,7 +6307,7 @@ jobs:
 
           echo "scan-matrix=$MATRIX" >> $GITHUB_OUTPUT
           echo "has-code=$HAS_CODE" >> $GITHUB_OUTPUT
-          echo "has-docker=$HAS_DOCKER" >> $GITHUB_OUTPUT  
+          echo "has-docker=$HAS_DOCKER" >> $GITHUB_OUTPUT
           echo "has-dependencies=$HAS_DEPENDENCIES" >> $GITHUB_OUTPUT
 
           echo "🔧 Security scan setup complete"
@@ -6413,7 +6407,7 @@ jobs:
 
       - name: Run Semgrep SAST
         run: |
-      
+
 ```
 
 ### summit-main/.github/workflows/security-and-ci.yml
@@ -7438,7 +7432,6 @@ jobs:
         continue-on-er
 ```
 
-
 ## Kubernetes Manifests (sample snippets)
 
 ### summit-main/deploy/alertmanager/alertmanager.yaml
@@ -7804,7 +7797,7 @@ data:
 
 ### summit-main/deploy/cron/qos-daily.yaml
 
-```
+````
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -7840,7 +7833,7 @@ spec:
             - name: repo
               emptyDir: {} # replace with your code mount strategy if needed
 
-```
+````
 
 ### summit-main/deploy/cron/qos-override-reminder.yaml
 
@@ -8316,7 +8309,7 @@ security:
   podSecurityStandards:
     enforce: restricted
     audit: restricted
-    warn: 
+    warn:
 ```
 
 ### summit-main/deploy/helm/intelgraph/values-staging.yaml
@@ -8592,7 +8585,7 @@ spec:
               topologyKey: kubernetes.io/hostname
       topologySpreadConstraints:
         - maxSkew: 1
-  
+
 ```
 
 ### summit-main/deploy/helm/intelgraph/templates/ingress.yaml
@@ -8806,7 +8799,7 @@ spec:
           port: {{ .Values.global.prometheus.port }}
   egress:
     # Allow communication to other services in same namespace
-  
+
 ```
 
 ### summit-main/deploy/helm/intelgraph/templates/service-api-gateway.yaml
@@ -8910,11 +8903,11 @@ spec:
           annotations:
             summary: "IntelGraph service has high error rate"
             description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.service }}"
-        
+
         # High response time
         - alert: IntelGraphHighLatency
           expr: |
-            histogram_quantile(0.95, 
+            histogram_quantile(0.95,
               sum(rate(http_request_duration_seconds_bucket{job=~".*intelgraph.*"}[5m])) by (le, service)
             ) > 2
           for: 10m
@@ -8923,7 +8916,7 @@ spec:
           annotations:
             summary: "IntelGraph service has high latency"
             description: "95th percentile latency is {{ $value }}s for {{ $labels.service }}"
-        
+
         # Pod crash loop
         - alert: IntelGraphPodCrashLooping
           expr: |

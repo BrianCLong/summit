@@ -28,25 +28,33 @@ export default function AlertCenterCorrelated() {
           className="border rounded px-2 py-1"
           placeholder="type"
           value={filters.type || ''}
-          onChange={(e) => setFilters({ ...filters, type: e.target.value || undefined })}
+          onChange={(e) =>
+            setFilters({ ...filters, type: e.target.value || undefined })
+          }
         />
         <input
           className="border rounded px-2 py-1"
           placeholder="severity"
           value={filters.severity || ''}
-          onChange={(e) => setFilters({ ...filters, severity: e.target.value || undefined })}
+          onChange={(e) =>
+            setFilters({ ...filters, severity: e.target.value || undefined })
+          }
         />
         <input
           className="border rounded px-2 py-1"
           placeholder="tenant"
           value={filters.tenant || ''}
-          onChange={(e) => setFilters({ ...filters, tenant: e.target.value || undefined })}
+          onChange={(e) =>
+            setFilters({ ...filters, tenant: e.target.value || undefined })
+          }
         />
         <input
           className="border rounded px-2 py-1"
           placeholder="provider"
           value={filters.provider || ''}
-          onChange={(e) => setFilters({ ...filters, provider: e.target.value || undefined })}
+          onChange={(e) =>
+            setFilters({ ...filters, provider: e.target.value || undefined })
+          }
         />
         <button className="border rounded px-3 py-1" onClick={load}>
           Refresh

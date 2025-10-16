@@ -155,7 +155,11 @@ Inject endpoints at runtime (no rebuild) via a window global in `index.html` or 
   window.__MAESTRO_CFG__ = {
     gatewayBase: 'http://localhost:4000/api/maestro/v1',
     grafanaBase: 'http://localhost:3000',
-    grafanaDashboards: { slo: 'maestro-slo', overview: 'maestro-overview', cost: 'maestro-cost' },
+    grafanaDashboards: {
+      slo: 'maestro-slo',
+      overview: 'maestro-overview',
+      cost: 'maestro-cost',
+    },
     authToken: '<optional bearer>',
   };
   // Navigate to /maestro

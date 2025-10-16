@@ -102,8 +102,13 @@ npx playwright test --project=chromium --grep @a11y
 ```json
 {
   "ci": {
-    "collect": { "url": ["http://localhost:5173/#/maestro/tenants/costs"], "numberOfRuns": 3 },
-    "assert": { "assertions": { "categories:performance": ["warn", { "minScore": 0.9 }] } }
+    "collect": {
+      "url": ["http://localhost:5173/#/maestro/tenants/costs"],
+      "numberOfRuns": 3
+    },
+    "assert": {
+      "assertions": { "categories:performance": ["warn", { "minScore": 0.9 }] }
+    }
   }
 }
 ```
