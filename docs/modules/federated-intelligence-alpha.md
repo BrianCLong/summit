@@ -278,7 +278,8 @@ compliance_frameworks:
 
   itar:
     status: 'COMPLIANT'
-    mechanisms: ['export_control', 'person_verification', 'dual_use_restrictions']
+    mechanisms:
+      ['export_control', 'person_verification', 'dual_use_restrictions']
 
   nato_standards:
     status: 'PENDING_CERTIFICATION'
