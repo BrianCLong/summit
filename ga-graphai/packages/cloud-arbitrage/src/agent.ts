@@ -1,6 +1,7 @@
 import { STRATEGIES } from './strategies.js';
 import type {
   CompositeMarketSnapshot,
+  CrossMarketAction,
   StrategyRecommendation,
   StrategySummary,
   WorkloadProfile
@@ -45,12 +46,50 @@ export class ArbitrageAgent {
       region: recommendation.region,
       blendedUnitPrice: recommendation.expectedUnitPrice,
       estimatedSavings: this.estimateSavings(recommendation),
-      confidence: Math.min(0.95, recommendation.totalScore / 3)
+      confidence: Math.min(0.95, recommendation.totalScore / 3),
+      hedgeEffectiveness: recommendation.hedgeEffectiveness,
+      crossMarketActionCount: recommendation.crossMarketActions.length
     }));
   }
 
   private estimateSavings(recommendation: StrategyRecommendation): number {
     const baseline = recommendation.expectedUnitPrice * 1.15;
     return baseline - recommendation.expectedUnitPrice;
+  }
+
+  discoverCrossMarketOpportunities(
+    snapshot: CompositeMarketSnapshot,
+    profile: WorkloadProfile
+  ): CrossMarketAction[] {
+    const recommendations = this.evaluate(snapshot, profile);
+    const merged = new Map<string, CrossMarketAction & { occurrences: number }>();
+
+    for (const recommendation of recommendations) {
+      for (const action of recommendation.crossMarketActions) {
+        const key = `${action.domain}:${action.description}`;
+        const current = merged.get(key);
+        if (current) {
+          const occurrences = current.occurrences + 1;
+          merged.set(key, {
+            ...current,
+            expectedValue:
+              (current.expectedValue * current.occurrences + action.expectedValue) / occurrences,
+            confidence:
+              (current.confidence * current.occurrences + action.confidence) / occurrences,
+            linkedAssets: Array.from(new Set([...current.linkedAssets, ...action.linkedAssets])),
+            occurrences
+          });
+        } else {
+          merged.set(key, { ...action, occurrences: 1 });
+        }
+      }
+    }
+
+    return [...merged.values()].map(({ occurrences, ...action }) => ({
+      ...action,
+      confidence: Math.min(0.99, action.confidence),
+      expectedValue: action.expectedValue,
+      linkedAssets: action.linkedAssets
+    }));
   }
 }
