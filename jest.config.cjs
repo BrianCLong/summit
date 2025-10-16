@@ -53,6 +53,8 @@ module.exports = {
     '^pg$': '<rootDir>/__mocks__/pg.js',
     '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
     '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
+    '^mysql2/promise$': '<rootDir>/__mocks__/mysql2/promise.js',
+    '^mongodb$': '<rootDir>/__mocks__/mongodb.js',
     '^@server/(.*)$': '<rootDir>/server/src/$1'
   },
   transformIgnorePatterns: [
