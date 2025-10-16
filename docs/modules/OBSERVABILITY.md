@@ -1,4 +1,5 @@
 # Observability Baseline
+
 - Health: /healthz, /readyz
 - Metrics: /metrics (Prometheus)
 - Traces: OTEL (OTLP)

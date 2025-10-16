@@ -14,11 +14,13 @@ Labels: track:mc, area:autonomy, area:agents
 ## Problem Statement & Goals
 
 **Drivers**
+
 - Manual spreadsheets for agent capabilities cause drift, conflicting deployments, and security exposures.
 - Operators lack visibility into agent readiness, dependencies, and trust posture when launching missions.
 - Mission planners need automated pairing of agents to tasks based on skills, capacity, compliance, and resource costs.
 
 **Goals**
+
 - T0: Registry MVP with CRUD APIs, capability taxonomy, and MC UI slice for browse/search.
 - T1: Dynamic discovery pipeline with signed capability manifests, heartbeat health scoring, and audit trail.
 - T2: Skill-matching engine with weighted scoring model, policy filters, and explainability artifacts consumable by MC and orchestration flows.
@@ -26,18 +28,21 @@ Labels: track:mc, area:autonomy, area:agents
 ## Capability Registry Architecture
 
 ### Service Topology
+
 - **Registry Service (Node/TypeScript)** exposed via GraphQL and REST surfaces behind the MC gateway; persists to Postgres (authoritative) and Redis (query cache).
 - **Capability Taxonomy Store** defines skill categories, proficiencies, compliance tags, hardware requirements; versioned via JSON schemas stored in S3-backed config service.
 - **Event Stream (Kafka)** publishes `agent.capability.updated`, `agent.discovery.received`, `agent.health.changed` topics for downstream consumers (orchestrator, analytics, security policy engine).
 - **MC UI Module** provides capability catalogue, skill filters, and agent roster views powered by GraphQL federated schema.
 
 ### Data Domains
+
 - Agent Identity: UUID, display name, owner team, contact, signing keys.
 - Capability Profile: skill id, taxonomy path, proficiency level (0-5), certifications, runtime features (GPU, tool access), cost metrics.
 - Operational State: heartbeat timestamp, health score, SLA tier, current workload, compliance posture.
 - Provenance & Audit: manifest hash, attestation chain, last validation, change history.
 
 ### Access Patterns
+
 - Registry read throughput dominated by MC dashboards and orchestrator filters; apply read-through caching with TTL per agent cluster.
 - Writes triggered by discovery events, manual overrides, or policy updates; use Postgres logical decoding to push change events.
 - Support time-travel queries (retain 90 days of snapshots) via bitemporal tables or append-only change log.
@@ -59,11 +64,13 @@ Labels: track:mc, area:autonomy, area:agents
 ## Skill Matching Engine
 
 ### Inputs
+
 - Mission request payload (intent tags, required skills, SLAs, cost ceiling).
 - Agent capability profiles with health, availability, and trust scores.
 - Policy constraints (jurisdiction, data sensitivity, tenant isolation).
 
 ### Matching Algorithm
+
 - Normalize mission skill requirements into taxonomy nodes and proficiency levels.
 - Compute base score = weighted cosine similarity between mission requirements vector and agent capability vector.
 - Apply modifiers:
@@ -75,6 +82,7 @@ Labels: track:mc, area:autonomy, area:agents
 - Persist match decisions for audit; include SHAP-style explanation for MC UI.
 
 ### Interfaces
+
 - GraphQL query `matchAgents(missionInput)` returning roster + rationale.
 - Event-based invocation `mission.assignment.requested` → skill matcher service processes and emits `mission.assignment.recommended`.
 - Optional streaming updates for long-running missions as agent states change.
