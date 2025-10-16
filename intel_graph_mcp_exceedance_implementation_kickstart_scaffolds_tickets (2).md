@@ -1503,21 +1503,17 @@ export async function launch(
 app.post('/jsonrpc', async (req, reply) => {
   const body = req.body as any;
   if (typeof body !== 'object')
-    return reply
-      .code(400)
-      .send({
-        jsonrpc: '2.0',
-        error: { code: -32700, message: 'Parse error' },
-        id: null,
-      });
+    return reply.code(400).send({
+      jsonrpc: '2.0',
+      error: { code: -32700, message: 'Parse error' },
+      id: null,
+    });
   if (body.jsonrpc !== '2.0' || !('method' in body))
-    return reply
-      .code(400)
-      .send({
-        jsonrpc: '2.0',
-        error: { code: -32600, message: 'Invalid Request' },
-        id: body.id ?? null,
-      });
+    return reply.code(400).send({
+      jsonrpc: '2.0',
+      error: { code: -32600, message: 'Invalid Request' },
+      id: body.id ?? null,
+    });
   if (
     body.method === 'ping' &&
     (body.params === undefined || typeof body.params === 'object')
@@ -1528,13 +1524,11 @@ app.post('/jsonrpc', async (req, reply) => {
       result: { ok: true },
     });
   }
-  return reply
-    .code(501)
-    .send({
-      jsonrpc: '2.0',
-      id: body.id ?? null,
-      error: { code: -32601, message: 'Method not found' },
-    });
+  return reply.code(501).send({
+    jsonrpc: '2.0',
+    id: body.id ?? null,
+    error: { code: -32601, message: 'Method not found' },
+  });
 });
 ```
 
