@@ -1,0 +1,76 @@
+{
+  "pipelines": [
+    {
+      "id": "pipeline:user_profile_enrichment",
+      "name": "user_profile_enrichment",
+      "owners": ["data-platform"],
+      "depends_on": ["dataset:user_profile_raw"],
+      "produces": ["dataset:user_profile_enriched", "feature:user_profile.region_score"],
+      "tests": [
+        {
+          "id": "tests::pipeline_user_profile_enrichment",
+          "description": "Integration tests for user_profile_enrichment DAG",
+          "handler": "run_pytest",
+          "args": ["tests/pipelines/test_user_profile_enrichment.py"]
+        }
+      ],
+      "backfills": [
+        {
+          "id": "backfill::pipeline_user_profile_enrichment",
+          "description": "Replay enrichment DAG for last 30 days",
+          "handler": "backfill_pipeline",
+          "args": ["pipeline_user_profile_enrichment"]
+        }
+      ],
+      "cache_invalidation": []
+    },
+    {
+      "id": "pipeline:session_engagement",
+      "name": "session_engagement",
+      "owners": ["retention-ml"],
+      "depends_on": ["dataset:session_events", "feature:user_profile.email_domain"],
+      "produces": ["feature:session.engagement_7d"],
+      "tests": [
+        {
+          "id": "tests::pipeline_session_engagement",
+          "description": "Data quality checks for engagement DAG",
+          "handler": "run_dbt",
+          "args": ["session_engagement"]
+        }
+      ],
+      "backfills": [
+        {
+          "id": "backfill::pipeline_session_engagement",
+          "description": "Backfill engagement window for trailing week",
+          "handler": "backfill_pipeline",
+          "args": ["pipeline_session_engagement"]
+        }
+      ],
+      "cache_invalidation": []
+    },
+    {
+      "id": "pipeline:session_spend",
+      "name": "session_spend",
+      "owners": ["finance-ml"],
+      "depends_on": ["dataset:session_events"],
+      "produces": ["feature:session.net_spend"],
+      "tests": [
+        {
+          "id": "tests::pipeline_session_spend",
+          "description": "Spend DAG validations",
+          "handler": "run_pytest",
+          "args": ["tests/pipelines/test_session_spend.py"]
+        }
+      ],
+      "backfills": [
+        {
+          "id": "backfill::pipeline_session_spend",
+          "description": "Rebuild spend aggregates",
+          "handler": "backfill_pipeline",
+          "args": ["pipeline_session_spend"]
+        }
+      ],
+      "cache_invalidation": []
+    }
+  ]
+}
