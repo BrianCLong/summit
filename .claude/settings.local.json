@@ -5,7 +5,8 @@
       "Bash(git -C /home/blong/Developer/summit status apps/web/package-lock.json)",
       "Bash(make:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(gh pr list:*)"
     ],
     "deny": [],
     "ask": []
